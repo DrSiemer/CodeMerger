@@ -1,7 +1,7 @@
 @echo off
 
 REM --- Configuration ---
-set VENV_DIR=cc-venv
+set VENV_DIR=cm-venv
 set START_SCRIPT=src.codemerger
 set SPEC_FILE=codemerger.spec
 set FLAG=%1
