@@ -8,10 +8,6 @@ data_files = [
     ('filetypes.json', '.')
 ]
 
-# Add config.json to the bundle only if it exists in the project root
-if os.path.exists('config.json'):
-    data_files.append(('config.json', '.'))
-
 a = Analysis(
     ['run.py'],
     pathex=[],
