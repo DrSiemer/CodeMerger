@@ -1,0 +1,11 @@
+# --- Application Constants ---
+
+from .paths import CONFIG_FILE_PATH, FILETYPES_CONFIG_PATH
+
+# Configuration file names
+CONFIG_FILE = CONFIG_FILE_PATH
+FILETYPES_CONFIG = FILETYPES_CONFIG_PATH
+
+# --- Limits and UI settings ---
+RECENT_DIRS_MAX = 5
+SUBTLE_HIGHLIGHT_COLOR = "#f0f0f0"

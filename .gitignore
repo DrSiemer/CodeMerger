@@ -1,0 +1,6 @@
+/cc-venv
+/build
+/dist
+/src/__pycache__
+2do.txt
+config.json
