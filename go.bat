@@ -32,6 +32,23 @@ if "%VIRTUAL_ENV%"=="" (
 )
 
 REM --- Command Handling ---
+
+REM Check for the 'cmd' flag to just open a command prompt
+if /I "%FLAG%"=="cmd" (
+    echo Virtual environment activated. You are now in a new command prompt.
+    cmd /k
+    exit /b
+)
+
+REM Update requirements.txt
+if /I "%FLAG%"=="f" (
+    echo.
+    echo --- Writing requirements.txt ---
+    pip freeze > requirements.txt
+    echo Done.
+    exit /b
+)
+
 REM Check for the 'build' flag (case-insensitive)
 if /I "%FLAG%"=="b" (
     echo.
@@ -44,13 +61,6 @@ if /I "%FLAG%"=="b" (
     echo.
     echo --- Build Complete! ---
     echo Executable is located in the 'dist' folder.
-    exit /b
-)
-
-REM Check for the 'cmd' flag to just open a command prompt
-if /I "%FLAG%"=="cmd" (
-    echo Virtual environment activated. You are now in a new command prompt.
-    cmd /k
     exit /b
 )
 
