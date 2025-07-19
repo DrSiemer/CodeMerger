@@ -26,7 +26,7 @@ class FiletypesManagerWindow(Toplevel):
 
         tree_frame = Frame(main_frame)
         tree_frame.pack(fill='both', expand=True, pady=(0, 10))
-        Label(tree_frame, text="Allowed Filetypes (double click to toggle active state)").pack(anchor='w')
+        Label(tree_frame, text="Allowed Filetypes (double click to toggle)").pack(anchor='w')
 
         self.tree = ttk.Treeview(tree_frame, show='tree')
         self.tree.pack(side='left', fill='both', expand=True)
@@ -132,7 +132,7 @@ class FiletypesManagerWindow(Toplevel):
         if saved_data != current_data:
             if messagebox.askyesno("Unsaved Changes", "You have unsaved changes. Save before closing?", parent=self):
                 self.save_and_close()
-                return # Prevent closing twice
+                return
 
         self.destroy()
         if self.on_close_callback:
