@@ -1,6 +1,0 @@
-[
-  ".txt", ".md", ".py", ".js", ".jsx", ".ts", ".tsx", ".html", ".htm",
-  ".css", ".scss", ".sass", ".less", ".php", ".java", ".c", ".h", ".cpp",
-  ".cs", ".go", ".rs", ".rb", ".xml", ".json", ".yaml", ".yml", ".sh",
-  ".bat", ".ps1", ".sql", ".r", ".swift", ".kt", ".kts", ".vue", ".spec"
-]

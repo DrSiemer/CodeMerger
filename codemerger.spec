@@ -5,7 +5,7 @@ import os
 # --- Prepare data files list ---
 data_files = [
     ('assets', 'assets'),
-    ('filetypes.json', '.')
+    ('default_filetypes.json', '.')
 ]
 
 a = Analysis(

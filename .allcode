@@ -6,9 +6,10 @@
     "src/constants.py",
     "src/paths.py",
     "src/file_manager.py",
+    "filetypes.json",
+    "src/filetypes_manager.py",
     "src/utils.py",
     "src/app_window.py",
-    "filetypes.json",
     "codemerger.spec",
     "go.bat"
   ],
