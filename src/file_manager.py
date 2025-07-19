@@ -73,8 +73,14 @@ class FileManagerWindow(Toplevel):
         move_buttons_frame = Frame(right_frame)
         move_buttons_frame.pack(fill='x', pady=5)
 
-        Button(move_buttons_frame, text="↑ Move Up", command=self.move_up).pack(side='left', expand=True)
-        Button(move_buttons_frame, text="↓ Move Down", command=self.move_down).pack(side='left', expand=True)
+        self.move_up_button = Button(move_buttons_frame, text="↑ Move Up", command=self.move_up, state='disabled')
+        self.move_up_button.pack(side='left', expand=True, padx=(0, 2))
+
+        self.remove_button = Button(move_buttons_frame, text="Remove", command=self.remove_selected, state='disabled')
+        self.remove_button.pack(side='left', expand=True, padx=2)
+
+        self.move_down_button = Button(move_buttons_frame, text="↓ Move Down", command=self.move_down, state='disabled')
+        self.move_down_button.pack(side='left', expand=True, padx=(2, 0))
 
         # --- Main Action Button ---
         Button(self, text="Save and Close", command=self.save_and_close).pack(pady=10)
@@ -91,6 +97,7 @@ class FileManagerWindow(Toplevel):
         self.path_to_item_id = {}
         self.populate_tree()
         self.update_listbox_from_data()
+        self.update_button_states()
 
     def load_allcode_config(self):
         self.ordered_selection = []
@@ -156,6 +163,7 @@ class FileManagerWindow(Toplevel):
         if self.tree.selection():
             self.merge_order_list.selection_clear(0, 'end')
             self.sync_highlights()
+        self.update_button_states()
 
     def on_list_selection_change(self, event):
         """When a listbox item is selected, deselect any tree item and sync highlights."""
@@ -163,6 +171,7 @@ class FileManagerWindow(Toplevel):
             if self.tree.selection():
                 self.tree.selection_set("")
             self.sync_highlights()
+        self.update_button_states()
 
     def sync_highlights(self):
         """Highlights the corresponding item in the other list when one is selected."""
@@ -226,6 +235,13 @@ class FileManagerWindow(Toplevel):
 
         self.tree.item(item_id, text=f"{check_char} {os.path.basename(path)}")
 
+    def update_button_states(self):
+        """Enables or disables the listbox action buttons based on selection."""
+        new_state = 'normal' if self.merge_order_list.curselection() else 'disabled'
+        self.move_up_button.config(state=new_state)
+        self.remove_button.config(state=new_state)
+        self.move_down_button.config(state=new_state)
+
     def toggle_selection_for_selected(self, event=None):
         """Adds or removes the selected file from the merge list."""
         selection = self.tree.selection()
@@ -245,6 +261,7 @@ class FileManagerWindow(Toplevel):
         self.update_checkbox_display(item_id)
         self.update_listbox_from_data()
         self.sync_highlights()
+        self.update_button_states()
         return "break" # Prevents further event processing
 
     def open_selected_file(self, event=None):
@@ -306,6 +323,7 @@ class FileManagerWindow(Toplevel):
             self.merge_order_list.insert(index - 1, path)
             self.merge_order_list.select_set(index - 1)
             self.sync_highlights()
+            self.update_button_states()
 
     def move_down(self):
         """Moves the selected item down in the merge order list."""
@@ -324,6 +342,28 @@ class FileManagerWindow(Toplevel):
             self.merge_order_list.insert(index + 1, path)
             self.merge_order_list.select_set(index + 1)
             self.sync_highlights()
+            self.update_button_states()
+
+    def remove_selected(self):
+        """Removes the selected file from the merge list."""
+        selection = self.merge_order_list.curselection()
+        if not selection:
+            return
+
+        index = selection[0]
+        path = self.ordered_selection.pop(index)
+
+        # Untick the checkbox in the treeview
+        if path in self.path_to_item_id:
+            item_id = self.path_to_item_id[path]
+            self.update_checkbox_display(item_id)
+
+        # Refresh the listbox - this will clear selection
+        self.update_listbox_from_data()
+
+        # Clear highlights and update buttons
+        self.sync_highlights()
+        self.update_button_states()
 
     def save_and_close(self):
         """Saves the selection and order to .allcode and closes the window."""
