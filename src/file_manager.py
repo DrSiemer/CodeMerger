@@ -43,7 +43,7 @@ class FileManagerWindow(Toplevel):
         right_frame.pack_propagate(False)
 
         # --- Available Files Tree (Left) ---
-        Label(left_frame, text="Available Files").pack(anchor='w')
+        Label(left_frame, text="Available Files (double click or enter to add/remove)").pack(anchor='w')
 
         tree_frame = Frame(left_frame)
         tree_frame.pack(fill='both', expand=True)
