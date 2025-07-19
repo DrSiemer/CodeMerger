@@ -54,6 +54,9 @@ class FileManagerWindow(Toplevel):
         tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
         tree_scroll.pack(side='right', fill='y')
         self.tree.config(yscrollcommand=tree_scroll.set)
+        
+        self.tree_action_button = Button(left_frame, text="Add to Merge List", command=self.toggle_selection_for_selected, state='disabled')
+        self.tree_action_button.pack(fill='x', pady=(5, 0))
 
         self.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR)
 
@@ -98,6 +101,7 @@ class FileManagerWindow(Toplevel):
         self.populate_tree()
         self.update_listbox_from_data()
         self.update_button_states()
+        self.update_tree_action_button_state()
 
     def load_allcode_config(self):
         self.ordered_selection = []
@@ -164,6 +168,7 @@ class FileManagerWindow(Toplevel):
             self.merge_order_list.selection_clear(0, 'end')
             self.sync_highlights()
         self.update_button_states()
+        self.update_tree_action_button_state()
 
     def on_list_selection_change(self, event):
         """When a listbox item is selected, deselect any tree item and sync highlights."""
@@ -172,6 +177,7 @@ class FileManagerWindow(Toplevel):
                 self.tree.selection_set("")
             self.sync_highlights()
         self.update_button_states()
+        self.update_tree_action_button_state()
 
     def sync_highlights(self):
         """Highlights the corresponding item in the other list when one is selected."""
@@ -242,6 +248,26 @@ class FileManagerWindow(Toplevel):
         self.remove_button.config(state=new_state)
         self.move_down_button.config(state=new_state)
 
+    def update_tree_action_button_state(self):
+        """Updates the state and text of the button under the treeview."""
+        selection = self.tree.selection()
+        if not selection:
+            self.tree_action_button.config(state='disabled', text="Add to Merge List")
+            return
+
+        item_id = selection[0]
+        item_info = self.item_map.get(item_id, {})
+
+        if item_info.get('type') != 'file':
+            self.tree_action_button.config(state='disabled', text="Add to Merge List")
+            return
+
+        self.tree_action_button.config(state='normal')
+        if item_info['path'] in self.ordered_selection:
+            self.tree_action_button.config(text="Remove from Merge List")
+        else:
+            self.tree_action_button.config(text="Add to Merge List")
+
     def toggle_selection_for_selected(self, event=None):
         """Adds or removes the selected file from the merge list."""
         selection = self.tree.selection()
@@ -262,6 +288,7 @@ class FileManagerWindow(Toplevel):
         self.update_listbox_from_data()
         self.sync_highlights()
         self.update_button_states()
+        self.update_tree_action_button_state()
         return "break" # Prevents further event processing
 
     def open_selected_file(self, event=None):
@@ -364,6 +391,7 @@ class FileManagerWindow(Toplevel):
         # Clear highlights and update buttons
         self.sync_highlights()
         self.update_button_states()
+        self.update_tree_action_button_state()
 
     def save_and_close(self):
         """Saves the selection and order to .allcode and closes the window."""
