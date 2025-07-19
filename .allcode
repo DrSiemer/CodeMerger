@@ -1,0 +1,18 @@
+{
+  "selected_files": [
+    "README.md",
+    "run.py",
+    "src/codemerger.py",
+    "src/constants.py",
+    "src/paths.py",
+    "src/file_manager.py",
+    "src/utils.py",
+    "src/app_window.py",
+    "filetypes.json",
+    "codemerger.spec",
+    "go.bat"
+  ],
+  "expanded_dirs": [
+    "src"
+  ]
+}
