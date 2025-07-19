@@ -1,75 +1,70 @@
 import os
 import json
 from pathlib import Path
-from .constants import CONFIG_FILE, FILETYPES_CONFIG, DEFAULT_FILETYPES_CONFIG
+from .constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG
 
-def _create_user_filetypes_from_default():
+def _create_and_get_default_config():
     """
-    Reads the bundled default filetypes config and writes it to the
-    user's persistent data directory. This is called on first run or
-    if the user's config is deleted or corrupted.
-    Returns the loaded data.
+    Creates a new config object from the default template, saves it to disk,
+    and returns it. This is the definitive first-run function.
     """
+    config = {'active_directory': '', 'recent_directories': [], 'filetypes': []}
     try:
-        with open(DEFAULT_FILETYPES_CONFIG, 'r') as f:
-            default_data = json.load(f)
-
-        # Save this default data as the new user config
-        save_filetypes(default_data)
-        return default_data
+        # Load the list of filetypes from the bundled template.
+        with open(DEFAULT_FILETYPES_CONFIG, 'r', encoding='utf-8') as f:
+            config['filetypes'] = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        # If the bundled default is missing or broken, return an empty list
-        # to prevent a crash.
-        return []
+        # Fallback in case the template is missing or corrupt.
+        pass
 
-
-def load_all_filetypes():
-    """
-    Loads the full list of filetype objects from the user's config file.
-    If the user's file doesn't exist, it's created from the bundled default.
-    """
-    if not os.path.exists(FILETYPES_CONFIG):
-        return _create_user_filetypes_from_default()
-
-    try:
-        with open(FILETYPES_CONFIG, 'r') as f:
-            data = json.load(f)
-            # Basic validation
-            if isinstance(data, list) and all("ext" in i and "active" in i for i in data):
-                return data
-            else:
-                # The file is malformed, so restore from default
-                return _create_user_filetypes_from_default()
-    except (json.JSONDecodeError, IOError):
-        # The file is corrupted or unreadable, restore from default
-        return _create_user_filetypes_from_default()
-
-
-def save_filetypes(filetypes_list):
-    """Saves the list of filetype objects, sorted alphabetically."""
-    sorted_list = sorted(filetypes_list, key=lambda item: item['ext'])
-    with open(FILETYPES_CONFIG, 'w') as f:
-        json.dump(sorted_list, f, indent=2)
-
-def load_active_file_extensions():
-    """Loads filetypes and returns a set of currently active extensions."""
-    all_types = load_all_filetypes()
-    return {item['ext'] for item in all_types if item.get('active', False)}
+    # Save the newly created config to disk before returning.
+    save_config(config)
+    return config
 
 def load_config():
-    """Loads the main application configuration from config.json."""
-    if not os.path.exists(CONFIG_FILE):
-        return {'active_directory': '', 'recent_directories': []}
+    """
+    Loads the main application configuration from config.json.
+    If the file is missing or corrupt, it's created from the default template.
+    """
     try:
-        with open(CONFIG_FILE, 'r') as f:
-            return json.load(f)
-    except (json.JSONDecodeError, IOError):
-        return {'active_directory': '', 'recent_directories': []}
+        # If config file doesn't exist, this will raise FileNotFoundError.
+        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+            # If file is empty, this will raise JSONDecodeError.
+            config = json.load(f)
+            # If file is valid but missing the key, handle that too.
+            if 'filetypes' not in config:
+                raise ValueError("Config is missing 'filetypes' key.")
+            return config
+    except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
+        # Any failure in reading the config results in creating a new one.
+        return _create_and_get_default_config()
 
 def save_config(config):
-    """Saves the application configuration to config.json."""
-    with open(CONFIG_FILE, 'w') as f:
+    """Saves the complete application configuration object to config.json."""
+    # Ensure filetypes are sorted alphabetically for consistency.
+    if 'filetypes' in config and isinstance(config.get('filetypes'), list):
+        config['filetypes'].sort(key=lambda item: item['ext'])
+
+    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2)
+
+def load_all_filetypes():
+    """Helper function to load just the filetypes list from the main config."""
+    config = load_config()
+    return config.get('filetypes', [])
+
+def save_filetypes(filetypes_list):
+    """
+    Loads the current config, updates the filetypes list, and saves it back.
+    """
+    config = load_config()
+    config['filetypes'] = filetypes_list
+    save_config(config)
+
+def load_active_file_extensions():
+    """Loads active filetypes from the config and returns them as a set."""
+    all_types = load_all_filetypes()
+    return {item['ext'] for item in all_types if item.get('active', False)}
 
 def parse_gitignore(base_dir):
     """Parses a .gitignore file and returns a list of patterns."""

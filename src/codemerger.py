@@ -1,9 +1,7 @@
 import json
 from tkinter import Tk, messagebox
-
 from .app_window import App
 from .utils import load_active_file_extensions
-from .constants import FILETYPES_CONFIG
 
 def main():
     try:
@@ -19,7 +17,7 @@ def main():
         messagebox.showerror(
             "Application Error",
             f"An unexpected error occurred on startup: {e}\n\n"
-            f"If the problem persists, try deleting config.json and filetypes.json."
+            f"If the problem persists, try deleting config.json."
         )
 
 if __name__ == '__main__':

@@ -26,11 +26,8 @@ def get_persistent_data_dir():
 BUNDLE_DIR = get_bundle_dir()
 PERSISTENT_DATA_DIR = get_persistent_data_dir()
 
-# Path to the config file for recent directories
+# Path to the config file
 CONFIG_FILE_PATH = os.path.join(PERSISTENT_DATA_DIR, 'config.json')
-
-# Path to the user's editable filetypes config
-FILETYPES_CONFIG_PATH = os.path.join(PERSISTENT_DATA_DIR, 'filetypes.json')
 
 # Path to the bundled default filetypes template
 DEFAULT_FILETYPES_CONFIG_PATH = os.path.join(BUNDLE_DIR, 'default_filetypes.json')
