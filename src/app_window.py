@@ -34,15 +34,13 @@ class App(Tk):
         active_dir_display.pack(anchor='w', fill='x', pady=(0, 10))
         # Main action buttons
         button_frame = Frame(main_frame, bg=self.app_bg_color)
-        button_frame.pack(fill='x', pady=10)
+        button_frame.pack(fill='x', pady=5)
         Button(button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=5)
         Button(button_frame, text="Manage Files", command=self.manage_files).pack(side='left', expand=True, fill='x', padx=5)
         Button(button_frame, text="Copy Merged", command=self.copy_merged_code).pack(side='left', expand=True, fill='x', padx=5)
-
-        # --- 2. ADD THE CONFIG BUTTON ---
         # A new frame at the bottom to hold the less noticeable button
         config_frame = Frame(main_frame, bg=self.app_bg_color)
-        config_frame.pack(fill='x', pady=(10,0), expand=True, side='bottom')
+        config_frame.pack(fill='x', side='bottom', pady=(5, 0))
         config_button = Button(
             config_frame,
             text="Manage Filetypes",
@@ -51,18 +49,15 @@ class App(Tk):
             fg='gray'
         )
         config_button.pack(side='right')
-
         # Status bar
         self.status_var = StringVar(value="Ready")
         status_bar = Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w')
         status_bar.pack(side='bottom', fill='x')
 
-    # --- 3. ADD THE METHOD TO OPEN THE MANAGER ---
     def open_filetypes_manager(self):
         """Opens the filetype management window and sets a callback."""
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
 
-    # --- 4. ADD THE CALLBACK METHOD ---
     def reload_active_extensions(self):
         """
         Reloads the list of active file extensions from the config file.
