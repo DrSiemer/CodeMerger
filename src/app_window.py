@@ -121,13 +121,12 @@ class App(Tk):
                     skipped_files.append(path)
                     continue
                 with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
-                    lines = (line.rstrip() for line in code_file)
-                    cleaned_lines = [line for line in lines if line]
-                    content = '\n'.join(cleaned_lines)
+                    content = code_file.read()
                 output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
-            final_content = '\n\n\n'.join(output_blocks)
 
+            final_content = '\n\n\n'.join(output_blocks)
             pyperclip.copy(final_content)
+
             status_message = "Merged code copied to clipboard."
             if skipped_files:
                 status_message += f" Skipped {len(skipped_files)} missing file(s)."
