@@ -1,5 +1,6 @@
 import os
 import json
+import pyperclip
 from tkinter import Tk, Toplevel, Frame, Label, Button, StringVar, messagebox, filedialog
 from .utils import load_config, save_config, load_active_file_extensions
 from .file_manager import FileManagerWindow
@@ -55,19 +56,13 @@ class App(Tk):
         status_bar.pack(side='bottom', fill='x')
 
     def open_filetypes_manager(self):
-        """Opens the filetype management window and sets a callback."""
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
 
     def reload_active_extensions(self):
-        """
-        Reloads the list of active file extensions from the config file.
-        This is called after the filetype manager is closed.
-        """
         self.file_extensions = load_active_file_extensions()
         self.status_var.set("Filetype configuration updated.")
 
     def update_active_dir(self, new_dir):
-        """Sets the new active directory and updates the configuration."""
         if not new_dir:
             return
         self.active_dir.set(new_dir)
@@ -81,7 +76,6 @@ class App(Tk):
         self.status_var.set(f"Active directory changed to: {os.path.basename(new_dir)}")
 
     def open_change_directory_dialog(self):
-        """Opens a dialog to select a new or recent directory."""
         dialog = Toplevel(self)
         dialog.title("Select Directory")
         dialog.transient(self)
@@ -132,9 +126,8 @@ class App(Tk):
                     content = '\n'.join(cleaned_lines)
                 output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
             final_content = '\n\n\n'.join(output_blocks)
-            self.clipboard_clear()
-            self.clipboard_append(final_content)
-            self.update()
+
+            pyperclip.copy(final_content)
             status_message = "Merged code copied to clipboard."
             if skipped_files:
                 status_message += f" Skipped {len(skipped_files)} missing file(s)."
@@ -144,7 +137,6 @@ class App(Tk):
             self.status_var.set(f"Error during merging: {e}")
 
     def manage_files(self):
-        """Opens the file manager window for the active directory."""
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
             messagebox.showerror("Error", "Please select a valid directory first.")
