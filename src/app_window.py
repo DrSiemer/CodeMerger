@@ -99,16 +99,33 @@ class App(Tk):
 
     def update_button_states(self, *args):
         """
-        Updates button states based on whether the active_dir StringVar holds a valid path.
+        Updates button states based on whether the active_dir holds a valid path
+        and whether there are files selected for merging.
         """
         is_dir_active = os.path.isdir(self.active_dir.get())
-        new_state = 'normal' if is_dir_active else 'disabled'
+        manage_files_state = 'normal' if is_dir_active else 'disabled'
+        copy_merged_state = 'disabled'  # Default to disabled
+
+        if is_dir_active:
+            allcode_path = os.path.join(self.active_dir.get(), '.allcode')
+            if os.path.isfile(allcode_path):
+                try:
+                    # An empty .allcode file is possible, json.load will fail.
+                    if os.path.getsize(allcode_path) > 0:
+                        with open(allcode_path, 'r', encoding='utf-8') as f:
+                            data = json.load(f)
+                            # Check if the list of selected files exists and is not empty
+                            if data.get('selected_files'):
+                                copy_merged_state = 'normal'
+                except (json.JSONDecodeError, IOError):
+                    # File is corrupt or unreadable, keep button disabled
+                    pass
 
         # Check if buttons exist before configuring them
         if hasattr(self, 'manage_files_button'):
-            self.manage_files_button.config(state=new_state)
+            self.manage_files_button.config(state=manage_files_state)
         if hasattr(self, 'copy_merged_button'):
-            self.copy_merged_button.config(state=new_state)
+            self.copy_merged_button.config(state=copy_merged_state)
 
     def on_settings_closed(self):
         """Callback for when the settings window is saved and closed."""
@@ -220,4 +237,6 @@ class App(Tk):
         if not os.path.isdir(base_dir):
             messagebox.showerror("Error", "Please select a valid directory first.")
             return
-        FileManagerWindow(self, base_dir, self.status_var, self.file_extensions, self.default_editor)
+        fm_window = FileManagerWindow(self, base_dir, self.status_var, self.file_extensions, self.default_editor)
+        self.wait_window(fm_window)
+        self.update_button_states()
