@@ -13,18 +13,33 @@ class App(Tk):
         super().__init__()
         self.file_extensions = file_extensions
         self.app_bg_color = '#FFFFFF'
+
         # --- Window Setup ---
         self.title("CodeMerger")
         self.iconbitmap(ICON_PATH)
         self.geometry("500x200")
         self.configure(bg=self.app_bg_color)
-        # --- Load Configuration ---
+
+        # --- Load Configuration & Validate Active Directory ---
         self.config = load_config()
-        self.active_dir = StringVar(value=self.config.get('active_directory', 'No directory selected.'))
+        active_dir_path = self.config.get('active_directory', '')
+
+        # Check for existence of the active directory on boot. Reset if not found.
+        if active_dir_path and not os.path.isdir(active_dir_path):
+            self.config['active_directory'] = ''
+            save_config(self.config)
+            active_dir_path = ''
+
+        self.active_dir = StringVar()
+        self.active_dir.trace_add('write', self.update_button_states)
+        self.set_active_dir_display(active_dir_path) # Set initial display value
+
         self.recent_dirs = self.config.get('recent_directories', [])
+
         # --- UI Layout ---
         main_frame = Frame(self, padx=15, pady=15, bg=self.app_bg_color)
         main_frame.pack(fill='both', expand=True)
+
         # Active directory display
         dir_label = Label(main_frame, text="Active Directory:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color)
         dir_label.pack(anchor='w')
@@ -33,12 +48,18 @@ class App(Tk):
             wraplength=450, justify='left', bg=self.app_bg_color
         )
         active_dir_display.pack(anchor='w', fill='x', pady=(0, 10))
+
         # Main action buttons
         button_frame = Frame(main_frame, bg=self.app_bg_color)
         button_frame.pack(fill='x', pady=5)
         Button(button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=5)
-        Button(button_frame, text="Manage Files", command=self.manage_files).pack(side='left', expand=True, fill='x', padx=5)
-        Button(button_frame, text="Copy Merged", command=self.copy_merged_code).pack(side='left', expand=True, fill='x', padx=5)
+
+        self.manage_files_button = Button(button_frame, text="Manage Files", command=self.manage_files)
+        self.manage_files_button.pack(side='left', expand=True, fill='x', padx=5)
+
+        self.copy_merged_button = Button(button_frame, text="Copy Merged", command=self.copy_merged_code)
+        self.copy_merged_button.pack(side='left', expand=True, fill='x', padx=5)
+
         # A new frame at the bottom to hold the less noticeable button
         config_frame = Frame(main_frame, bg=self.app_bg_color)
         config_frame.pack(fill='x', side='bottom', pady=(5, 0))
@@ -50,10 +71,34 @@ class App(Tk):
             fg='gray'
         )
         config_button.pack(side='right')
+
         # Status bar
         self.status_var = StringVar(value="Ready")
         status_bar = Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w')
         status_bar.pack(side='bottom', fill='x')
+
+        # Set initial button states based on initial active_dir value
+        self.update_button_states()
+
+    def set_active_dir_display(self, path):
+        """Sets the display string for the active directory's StringVar."""
+        if path and os.path.isdir(path):
+            self.active_dir.set(path)
+        else:
+            self.active_dir.set("No directory selected.")
+
+    def update_button_states(self, *args):
+        """
+        Updates button states based on whether the active_dir StringVar holds a valid path.
+        """
+        is_dir_active = os.path.isdir(self.active_dir.get())
+        new_state = 'normal' if is_dir_active else 'disabled'
+
+        # Check if buttons exist before configuring them
+        if hasattr(self, 'manage_files_button'):
+            self.manage_files_button.config(state=new_state)
+        if hasattr(self, 'copy_merged_button'):
+            self.copy_merged_button.config(state=new_state)
 
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
@@ -63,19 +108,31 @@ class App(Tk):
         self.status_var.set("Filetype configuration updated.")
 
     def update_active_dir(self, new_dir):
-        if not new_dir:
+        # A blank new_dir can be passed from the browse dialog if cancelled.
+        if not new_dir or not os.path.isdir(new_dir):
             return
-        self.active_dir.set(new_dir)
+
+        # Update config first
+        self.config['active_directory'] = new_dir
         if new_dir in self.recent_dirs:
             self.recent_dirs.remove(new_dir)
         self.recent_dirs.insert(0, new_dir)
         self.recent_dirs = self.recent_dirs[:RECENT_DIRS_MAX]
-        self.config['active_directory'] = new_dir
         self.config['recent_directories'] = self.recent_dirs
         save_config(self.config)
+
+        # Then update UI. The trace on active_dir will handle button states.
+        self.set_active_dir_display(new_dir)
         self.status_var.set(f"Active directory changed to: {os.path.basename(new_dir)}")
 
     def open_change_directory_dialog(self):
+        # First, validate recent directories and update the config if any are removed.
+        initial_count = len(self.recent_dirs)
+        self.recent_dirs = [d for d in self.recent_dirs if os.path.isdir(d)]
+        if len(self.recent_dirs) != initial_count:
+            self.config['recent_directories'] = self.recent_dirs
+            save_config(self.config)
+
         dialog = Toplevel(self)
         dialog.title("Select Directory")
         dialog.transient(self)
@@ -85,12 +142,15 @@ class App(Tk):
         dialog_width = max(400, min(int(screen_width * 0.5), 800))
         dialog.geometry(f"{dialog_width}x250")
         Label(dialog, text="Select a recent directory or browse for a new one.", padx=10, pady=10, bg=self.app_bg_color).pack()
+
         def select_and_close(path):
             self.update_active_dir(path)
             dialog.destroy()
+
         for path in self.recent_dirs:
             btn = Button(dialog, text=path, command=lambda p=path: select_and_close(p))
             btn.pack(fill='x', padx=10, pady=2)
+
         browse_btn = Button(dialog, text="Browse for Directory...", command=lambda: select_and_close(filedialog.askdirectory(title="Select Project Directory")))
         browse_btn.pack(pady=10)
 
