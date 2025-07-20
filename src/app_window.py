@@ -5,6 +5,7 @@ from tkinter import Tk, Toplevel, Frame, Label, Button, StringVar, messagebox, f
 from .utils import load_config, save_config, load_active_file_extensions
 from .file_manager import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
+from .settings_window import SettingsWindow
 from .constants import RECENT_DIRS_MAX
 from .paths import ICON_PATH
 
@@ -22,6 +23,7 @@ class App(Tk):
 
         # --- Load Configuration & Validate Active Directory ---
         self.config = load_config()
+        self.default_editor = self.config.get('default_editor', '')
         active_dir_path = self.config.get('active_directory', '')
 
         # Check for existence of the active directory on boot. Reset if not found.
@@ -63,6 +65,14 @@ class App(Tk):
         # A new frame at the bottom to hold the less noticeable button
         config_frame = Frame(main_frame, bg=self.app_bg_color)
         config_frame.pack(fill='x', side='bottom', pady=(5, 0))
+        settings_button = Button(
+            config_frame,
+            text="Settings",
+            command=self.open_settings_window,
+            relief='flat',
+            fg='gray'
+        )
+        settings_button.pack(side='left')
         config_button = Button(
             config_frame,
             text="Manage Filetypes",
@@ -99,6 +109,16 @@ class App(Tk):
             self.manage_files_button.config(state=new_state)
         if hasattr(self, 'copy_merged_button'):
             self.copy_merged_button.config(state=new_state)
+
+    def on_settings_closed(self):
+        """Callback for when the settings window is saved and closed."""
+        self.config = load_config()
+        self.default_editor = self.config.get('default_editor', '')
+        self.status_var.set("Settings updated.")
+
+    def open_settings_window(self):
+        """Opens the main settings management window."""
+        SettingsWindow(self, on_close_callback=self.on_settings_closed)
 
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
@@ -200,4 +220,4 @@ class App(Tk):
         if not os.path.isdir(base_dir):
             messagebox.showerror("Error", "Please select a valid directory first.")
             return
-        FileManagerWindow(self, base_dir, self.status_var, self.file_extensions)
+        FileManagerWindow(self, base_dir, self.status_var, self.file_extensions, self.default_editor)

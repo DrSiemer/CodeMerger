@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import subprocess
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox, ttk
 
@@ -9,12 +10,13 @@ from .constants import SUBTLE_HIGHLIGHT_COLOR
 
 # --- File Manager Window Class ---
 class FileManagerWindow(Toplevel):
-    def __init__(self, parent, base_dir, status_var, file_extensions):
+    def __init__(self, parent, base_dir, status_var, file_extensions, default_editor):
         super().__init__(parent)
 
         self.base_dir = base_dir
         self.status_var = status_var
         self.file_extensions = file_extensions
+        self.default_editor = default_editor
 
         self.title(f"Manage files for: {os.path.basename(self.base_dir)}")
         self.geometry("850x700")
@@ -301,7 +303,7 @@ class FileManagerWindow(Toplevel):
         return "break"
 
     def open_selected_file(self, event=None):
-        """Opens the selected file in the system's default editor."""
+        """Opens the selected file using the configured default editor or the system's default."""
 
         # This block prevents a double-click in an empty listbox area from opening a file.
         if event:
@@ -328,14 +330,20 @@ class FileManagerWindow(Toplevel):
             return "break"
 
         try:
-            os.startfile(full_path)
+            # If a default editor is configured and exists, use it.
+            if self.default_editor and os.path.isfile(self.default_editor):
+                subprocess.Popen([self.default_editor, full_path])
+            else:
+                # Otherwise, fall back to the OS default action.
+                os.startfile(full_path)
         except AttributeError:
             # os.startfile is Windows-specific. Provide a fallback for other OS.
-            messagebox.showinfo(
-                "Unsupported Action",
-                "Opening files is only supported on Windows.",
-                parent=self
-            )
+            if not self.default_editor or not os.path.isfile(self.default_editor):
+                 messagebox.showinfo(
+                    "Unsupported Action",
+                    "Opening files with the system default is only supported on Windows.\nPlease configure a default editor in Settings.",
+                    parent=self
+                )
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {e}", parent=self)
 
