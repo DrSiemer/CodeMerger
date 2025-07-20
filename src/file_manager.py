@@ -32,48 +32,40 @@ class FileManagerWindow(Toplevel):
         main_frame = Frame(self)
         main_frame.pack(fill='both', expand=True, padx=10, pady=10)
 
-        # --- Create two main columns that will hold the content and buttons ---
-        left_column = Frame(main_frame)
-        left_column.pack(side='left', fill='both', expand=True, padx=(0, 5))
+        # Configure the grid columns to have equal weight, allowing them to expand
+        main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_columnconfigure(2, weight=1)
+        # Configure the main content row to expand vertically
+        main_frame.grid_rowconfigure(1, weight=1)
 
-        right_column = Frame(main_frame)
-        right_column.pack(side='left', fill='both', expand=True, padx=(5, 0))
+        # --- Column 0 & 1: Available Files Tree and its Scrollbar ---
+        Label(main_frame, text="Available Files (double click or enter to add/remove)").grid(row=0, column=0, columnspan=2, sticky='w')
 
-        # --- Available Files Tree (Left Column) ---
-        Label(left_column, text="Available Files (double click or enter to add/remove)").pack(anchor='w')
+        self.tree = ttk.Treeview(main_frame, show='tree')
+        self.tree.grid(row=1, column=0, sticky='nsew')
 
-        # This frame holds the tree and its scrollbar and will expand vertically
-        tree_frame = Frame(left_column)
-        tree_frame.pack(fill='both', expand=True)
-
-        self.tree = ttk.Treeview(tree_frame, show='tree')
-        self.tree.pack(side='left', fill='both', expand=True)
-        tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
-        tree_scroll.pack(side='right', fill='y')
+        tree_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=self.tree.yview)
+        tree_scroll.grid(row=1, column=1, sticky='ns')
         self.tree.config(yscrollcommand=tree_scroll.set)
 
-        # The button for the left column, packed at the bottom of the column
-        self.tree_action_button = Button(left_column, text="Add to Merge List", command=self.toggle_selection_for_selected, state='disabled')
-        self.tree_action_button.pack(fill='x', pady=(5, 0))
+        self.tree_action_button = Button(main_frame, text="Add to Merge List", command=self.toggle_selection_for_selected, state='disabled')
+        self.tree_action_button.grid(row=2, column=0, sticky='ew', pady=(5, 0))
 
         self.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR)
 
-        # --- Merge Order List (Right Column) ---
-        Label(right_column, text="Merge Order (Top to Bottom)").pack(anchor='w')
+        # --- Column 2 & 3: Merge Order List and its Scrollbar ---
+        Label(main_frame, text="Merge Order (Top to Bottom)").grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
 
-        # This frame holds the list and its scrollbar and will expand vertically
-        list_frame = Frame(right_column)
-        list_frame.pack(fill='both', expand=True)
+        self.merge_order_list = Listbox(main_frame, activestyle='none')
+        self.merge_order_list.grid(row=1, column=2, sticky='nsew', padx=(10, 0))
 
-        self.merge_order_list = Listbox(list_frame, activestyle='none')
-        self.merge_order_list.pack(side='left', fill='both', expand=True)
-        list_scroll = ttk.Scrollbar(list_frame, orient='vertical', command=self.merge_order_list.yview)
-        list_scroll.pack(side='right', fill='y')
+        list_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=self.merge_order_list.yview)
+        list_scroll.grid(row=1, column=3, sticky='ns')
         self.merge_order_list.config(yscrollcommand=list_scroll.set)
 
-        # This frame holds the three buttons for the right column
-        move_buttons_frame = Frame(right_column)
-        move_buttons_frame.pack(fill='x', pady=(5, 0))
+        # Frame to hold the three buttons, placed in the correct grid cell
+        move_buttons_frame = Frame(main_frame)
+        move_buttons_frame.grid(row=2, column=2, sticky='ew', pady=(5, 0), padx=(10, 0))
 
         self.move_up_button = Button(move_buttons_frame, text="↑ Move Up", command=self.move_up, state='disabled')
         self.move_up_button.pack(side='left', expand=True, fill='x', padx=(0, 2))
