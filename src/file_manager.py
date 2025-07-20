@@ -1,8 +1,8 @@
 import os
 import json
 import time
-from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox
-from tkinter import ttk
+import tkinter as tk
+from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox, ttk
 
 from .utils import parse_gitignore, is_ignored
 from .constants import SUBTLE_HIGHLIGHT_COLOR
@@ -23,6 +23,7 @@ class FileManagerWindow(Toplevel):
 
         # Used to differentiate single and double clicks on the tree
         self.last_tree_click_time = 0
+        self.last_clicked_item_id = None
 
         self.allcode_path = os.path.join(self.base_dir, '.allcode')
         self.load_allcode_config()
@@ -86,6 +87,9 @@ class FileManagerWindow(Toplevel):
         self.merge_order_list.bind('<<ListboxSelect>>', self.on_list_selection_change)
         self.merge_order_list.bind('<Double-1>', self.open_selected_file)
 
+        # Bind clicks on empty areas of the Treeview
+        self.tree.bind("<Button-1>", self.handle_tree_deselection_click, add='+')
+
         # --- Initial Population ---
         self.item_map = {}
         self.path_to_item_id = {}
@@ -93,6 +97,11 @@ class FileManagerWindow(Toplevel):
         self.update_listbox_from_data()
         self.update_button_states()
         self.update_tree_action_button_state()
+
+    def handle_tree_deselection_click(self, event):
+        """Deselects a tree item if a click occurs in an empty area."""
+        if not self.tree.identify_row(event.y) and self.tree.selection():
+            self.tree.selection_set("")
 
     def load_allcode_config(self):
         self.ordered_selection = []
@@ -211,15 +220,24 @@ class FileManagerWindow(Toplevel):
             self.tree.item(item_id, tags=('file',))
 
     def handle_tree_click(self, event):
-        """Detects a double-click on the treeview to toggle file selection."""
+        """Detects a double-click on the same treeview item to toggle file selection."""
+        item_id = self.tree.identify_row(event.y)
         current_time = time.time()
         time_diff = current_time - self.last_tree_click_time
-        self.last_tree_click_time = current_time
 
-        # A simple time-based double-click detection
-        if time_diff < 0.4:
+        # A double-click is a click on the same item within a short time frame.
+        if time_diff < 0.4 and item_id and item_id == self.last_clicked_item_id:
+            # This is a valid double-click, toggle the selection
             self.toggle_selection_for_selected()
-            self.last_tree_click_time = 0 # Reset timer to prevent triple-clicks
+            
+            # Reset state to prevent a third quick click from also being a double-click
+            self.last_tree_click_time = 0
+            self.last_clicked_item_id = None
+        else:
+            # This is a single click, or a click on a different item.
+            # Record it as a potential first click of a double-click.
+            self.last_tree_click_time = current_time
+            self.last_clicked_item_id = item_id
 
     def update_checkbox_display(self, item_id):
         """Updates the text of a tree item to show a checked or unchecked box."""
@@ -337,7 +355,7 @@ class FileManagerWindow(Toplevel):
             self.ordered_selection.insert(index - 1, path)
 
             # Rearrange in the UI list
-            self.merge_order_list.delete(index)
+            self.merge_order_list.delete(index) # Do NOT replace this with self.update_listbox_from_data()! Do NOT remove this comment!
             self.merge_order_list.insert(index - 1, path)
             self.merge_order_list.select_set(index - 1)
             self.sync_highlights()
@@ -356,7 +374,7 @@ class FileManagerWindow(Toplevel):
             self.ordered_selection.insert(index + 1, path)
 
             # Rearrange in the UI list
-            self.merge_order_list.delete(index)
+            self.merge_order_list.delete(index) # Do NOT replace this with self.update_listbox_from_data()! Do NOT remove this comment!
             self.merge_order_list.insert(index + 1, path)
             self.merge_order_list.select_set(index + 1)
             self.sync_highlights()
