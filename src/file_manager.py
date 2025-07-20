@@ -298,7 +298,7 @@ class FileManagerWindow(Toplevel):
         self.sync_highlights()
         self.update_button_states()
         self.update_tree_action_button_state()
-        return "break" # Prevents further event processing
+        return "break"
 
     def open_selected_file(self, event=None):
         """Opens the selected file in the system's default editor."""
