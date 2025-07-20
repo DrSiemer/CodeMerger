@@ -229,7 +229,7 @@ class FileManagerWindow(Toplevel):
         if time_diff < 0.4 and item_id and item_id == self.last_clicked_item_id:
             # This is a valid double-click, toggle the selection
             self.toggle_selection_for_selected()
-            
+
             # Reset state to prevent a third quick click from also being a double-click
             self.last_tree_click_time = 0
             self.last_clicked_item_id = None
@@ -302,9 +302,19 @@ class FileManagerWindow(Toplevel):
 
     def open_selected_file(self, event=None):
         """Opens the selected file in the system's default editor."""
+
+        # This block prevents a double-click in an empty listbox area from opening a file.
+        if event:
+            clicked_index = self.merge_order_list.nearest(event.y)
+            if clicked_index == -1:
+                return "break"
+            bbox = self.merge_order_list.bbox(clicked_index)
+            if not bbox or event.y < bbox[1] or event.y > bbox[1] + bbox[3]:
+                return "break"
+
         selection = self.merge_order_list.curselection()
         if not selection:
-            return
+            return "break"
 
         relative_path = self.merge_order_list.get(selection[0])
         full_path = os.path.join(self.base_dir, relative_path)
@@ -315,7 +325,7 @@ class FileManagerWindow(Toplevel):
                 f"The file '{relative_path}' could not be found.",
                 parent=self
             )
-            return
+            return "break"
 
         try:
             os.startfile(full_path)
@@ -328,6 +338,8 @@ class FileManagerWindow(Toplevel):
             )
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {e}", parent=self)
+
+        return "break"
 
     def update_listbox_from_data(self):
         """Refreshes the merge order listbox with the current selection."""
