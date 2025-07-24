@@ -144,6 +144,14 @@ class App(Tk):
         self.file_extensions = load_active_file_extensions()
         self.status_var.set("Filetype configuration updated.")
 
+    def remove_recent_directory(self, path_to_remove):
+        """Removes a directory from the recent list and saves the config."""
+        if path_to_remove in self.recent_dirs:
+            self.recent_dirs.remove(path_to_remove)
+            self.config['recent_directories'] = self.recent_dirs
+            save_config(self.config)
+            self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent directories.")
+
     def update_active_dir(self, new_dir):
         # A blank new_dir can be passed from the browse dialog if cancelled.
         if not new_dir or not os.path.isdir(new_dir):
@@ -177,16 +185,30 @@ class App(Tk):
         dialog.configure(bg=self.app_bg_color)
         screen_width = self.winfo_screenwidth()
         dialog_width = max(400, min(int(screen_width * 0.5), 800))
-        dialog.geometry(f"{dialog_width}x250")
+        dialog.geometry(f"{dialog_width}x280")
         Label(dialog, text="Select a recent directory or browse for a new one.", padx=10, pady=10, bg=self.app_bg_color).pack()
 
         def select_and_close(path):
             self.update_active_dir(path)
             dialog.destroy()
 
+        def remove_and_destroy_widget(path_to_remove, widget_to_destroy):
+            """Removes the directory from config and the widget from the dialog."""
+            self.remove_recent_directory(path_to_remove)
+            widget_to_destroy.destroy()
+
+        recent_dirs_frame = Frame(dialog, bg=self.app_bg_color)
+        recent_dirs_frame.pack(fill='x', expand=False, pady=5)
+
         for path in self.recent_dirs:
-            btn = Button(dialog, text=path, command=lambda p=path: select_and_close(p))
-            btn.pack(fill='x', padx=10, pady=2)
+            entry_frame = Frame(recent_dirs_frame, bg=self.app_bg_color)
+            entry_frame.pack(fill='x', padx=10, pady=2)
+
+            btn = Button(entry_frame, text=path, command=lambda p=path: select_and_close(p), anchor='w', justify='left')
+            btn.pack(side='left', expand=True, fill='x')
+
+            remove_btn = Button(entry_frame, text="X", command=lambda p=path, w=entry_frame: remove_and_destroy_widget(p, w), width=3)
+            remove_btn.pack(side='left', padx=(5, 0))
 
         browse_btn = Button(dialog, text="Browse for Directory...", command=lambda: select_and_close(filedialog.askdirectory(title="Select Project Directory")))
         browse_btn.pack(pady=10)
