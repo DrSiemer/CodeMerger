@@ -18,7 +18,7 @@ class App(Tk):
         # --- Window Setup ---
         self.title("CodeMerger")
         self.iconbitmap(ICON_PATH)
-        self.geometry("500x200")
+        self.geometry("500x250")
         self.configure(bg=self.app_bg_color)
 
         # --- Load Configuration & Validate Active Directory ---
@@ -42,29 +42,31 @@ class App(Tk):
         main_frame = Frame(self, padx=15, pady=15, bg=self.app_bg_color)
         main_frame.pack(fill='both', expand=True)
 
+        # --- Top Section ---
+        top_frame = Frame(main_frame, bg=self.app_bg_color)
+        top_frame.pack(side='top', fill='x')
+
         # Active directory display
-        dir_label = Label(main_frame, text="Active Directory:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color)
+        dir_label = Label(top_frame, text="Active Directory:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color)
         dir_label.pack(anchor='w')
         active_dir_display = Label(
-            main_frame, textvariable=self.active_dir, fg="blue",
+            top_frame, textvariable=self.active_dir, fg="blue",
             wraplength=450, justify='left', bg=self.app_bg_color
         )
         active_dir_display.pack(anchor='w', fill='x', pady=(0, 10))
 
-        # Main action buttons
-        button_frame = Frame(main_frame, bg=self.app_bg_color)
-        button_frame.pack(fill='x', pady=5)
-        Button(button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=5)
+        # Top action buttons
+        top_button_frame = Frame(top_frame, bg=self.app_bg_color)
+        top_button_frame.pack(fill='x', pady=5)
+        Button(top_button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=(0, 5))
 
-        self.manage_files_button = Button(button_frame, text="Manage Files", command=self.manage_files)
-        self.manage_files_button.pack(side='left', expand=True, fill='x', padx=5)
+        self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
+        self.manage_files_button.pack(side='left', expand=True, fill='x', padx=(5, 0))
 
-        self.copy_merged_button = Button(button_frame, text="Copy Merged", command=self.copy_merged_code)
-        self.copy_merged_button.pack(side='left', expand=True, fill='x', padx=5)
 
-        # A new frame at the bottom to hold the less noticeable button
+        # --- Bottom Config Frame ---
         config_frame = Frame(main_frame, bg=self.app_bg_color)
-        config_frame.pack(fill='x', side='bottom', pady=(5, 0))
+        config_frame.pack(side='bottom', fill='x', pady=(5, 0))
         settings_button = Button(
             config_frame,
             text="Settings",
@@ -81,6 +83,19 @@ class App(Tk):
             fg='gray'
         )
         config_button.pack(side='right')
+
+        # --- Central "Copy Merged" Button ---
+        copy_button_frame = Frame(main_frame, bg=self.app_bg_color, pady=10)
+        copy_button_frame.pack(fill='both', expand=True)
+
+        self.copy_merged_button = Button(
+            copy_button_frame,
+            text="Copy Merged",
+            command=self.copy_merged_code,
+            font=('Helvetica', 16, 'bold'),
+            pady=10
+        )
+        self.copy_merged_button.pack(expand=True, fill='x')
 
         # Status bar
         self.status_var = StringVar(value="Ready")
