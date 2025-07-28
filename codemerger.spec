@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 import os
+import sys
 
 # --- Prepare data files list ---
 data_files = [
@@ -42,5 +43,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets\\icon.ico',
+    icon='assets/icon.icns' if sys.platform == 'darwin' else 'assets/icon.ico',
 )

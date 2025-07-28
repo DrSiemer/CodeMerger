@@ -1,5 +1,6 @@
 import sys
 import os
+from pathlib import Path
 
 def get_bundle_dir():
     """
@@ -14,19 +15,24 @@ def get_bundle_dir():
 def get_persistent_data_dir():
     """
     Gets the directory for storing persistent data (e.g., config files).
-    - If running as a bundled executable, this is a dedicated 'CodeMerger'
-      folder within the user's AppData directory.
-    - If running as a script, this is the project root.
+    This is OS-aware for bundled executables.
     """
     if getattr(sys, 'frozen', False):  # Running as a bundled executable
-        # Use the AppData folder for persistent configuration.
-        app_data_path = os.getenv('APPDATA')
-        if app_data_path:
-            config_dir = os.path.join(app_data_path, 'CodeMerger')
-            os.makedirs(config_dir, exist_ok=True)
-            return config_dir
-        # Fallback to the executable's directory if APPDATA is somehow not set
-        return os.path.dirname(sys.executable)
+        if sys.platform == "win32":
+            # Use the AppData folder for persistent configuration on Windows.
+            app_data_path = os.getenv('APPDATA')
+            if app_data_path:
+                config_dir = os.path.join(app_data_path, 'CodeMerger')
+            else: # Fallback
+                config_dir = os.path.dirname(sys.executable)
+        elif sys.platform == "darwin":
+            # Use Application Support directory on macOS.
+            config_dir = os.path.join(str(Path.home()), 'Library', 'Application Support', 'CodeMerger')
+        else: # Linux and other Unix-like systems
+            config_dir = os.path.join(str(Path.home()), '.config', 'CodeMerger')
+
+        os.makedirs(config_dir, exist_ok=True)
+        return config_dir
     else: # Running as a script in a development environment
         return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 

@@ -330,20 +330,23 @@ class FileManagerWindow(Toplevel):
             return "break"
 
         try:
-            # If a default editor is configured and exists, use it.
             if self.default_editor and os.path.isfile(self.default_editor):
                 subprocess.Popen([self.default_editor, full_path])
             else:
-                # Otherwise, fall back to the OS default action.
-                os.startfile(full_path)
-        except AttributeError:
-            # os.startfile is Windows-specific. Provide a fallback for other OS.
-            if not self.default_editor or not os.path.isfile(self.default_editor):
-                 messagebox.showinfo(
-                    "Unsupported Action",
-                    "Opening files with the system default is only supported on Windows.\nPlease configure a default editor in Settings.",
-                    parent=self
-                )
+                # Fall back to the OS default action.
+                if sys.platform == "win32":
+                    os.startfile(full_path)
+                elif sys.platform == "darwin": # macOS
+                    subprocess.call(['open', full_path])
+                else: # linux
+                    subprocess.call(['xdg-open', full_path])
+        except (AttributeError, FileNotFoundError):
+            # AttributeError for os.startfile, FileNotFoundError for open/xdg-open
+            messagebox.showinfo(
+                "Unsupported Action",
+                "Could not open file with the system default.\nPlease configure a default editor in Settings.",
+                parent=self
+            )
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {e}", parent=self)
 

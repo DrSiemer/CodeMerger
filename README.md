@@ -24,8 +24,13 @@ Download the latest (portable) release [here](https://github.com/DrSiemer/codeme
 
 ## Development
 
-- Run `go` to start
-- Run `go b` to build executable
+- Run `go` to start (`./go.sh` on a Mac)
+- Run `go b` to build executable (`./go.sh b` on a Mac)
+
+### Mac
+
+- Untested!
+- Make `go.sh` executable with `chmod +x go.sh`
 
 ### Planned features
 
