@@ -72,10 +72,10 @@ class App(Tk):
         config_frame.pack(side='bottom', fill='x', pady=(5, 0))
         settings_button = Button(config_frame, text="Settings", command=self.open_settings_window, relief='flat', fg='gray')
         settings_button.pack(side='left')
-        self.pin_button_toggle = Button(config_frame, text="Pin Button", command=self.toggle_pin_button, relief='flat', fg='gray')
-        self.pin_button_toggle.pack(side='left', padx=10)
         config_button = Button(config_frame, text="Manage Filetypes", command=self.open_filetypes_manager, relief='flat', fg='gray')
-        config_button.pack(side='right')
+        config_button.pack(side='left', padx=10)
+        self.pin_button_toggle = Button(config_frame, text="Pin Button", command=self.toggle_pin_button, relief='flat', fg='gray')
+        self.pin_button_toggle.pack(side='right')
 
         # --- Central "Copy Merged" Button ---
         copy_button_frame = Frame(main_frame, bg=self.app_bg_color, pady=10)
