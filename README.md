@@ -4,6 +4,10 @@ A simple app for developers that prefer to stay in control and want to avoid wor
 
 I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts/new_chat), because at this time it offers a large context length for free.
 
+## Download
+
+Download the latest (portable) release [here](https://github.com/DrSiemer/codemerger/releases)
+
 ## Usage
 
 - First select a working directory
@@ -11,7 +15,7 @@ I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts
 - Add the files you want to manage
     - Once added, you can open a file by double clicking it in the Merge Order window
 - Click "Copy merged" to merge all the selected files into a single string in your clipboard
-- Activate a small "always in front" copy merged button by clicking "Pin Button"
+- Activate a small "always in front" copy button by clicking "Pin Button"
 
 ### Settings
 
@@ -22,10 +26,6 @@ I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts
 
 - Run `go` to start
 - Run `go b` to build executable
-
-## Download
-
-Download the latest (portable) release [here](https://github.com/DrSiemer/codemerger/releases)
 
 ## Planned features
 
