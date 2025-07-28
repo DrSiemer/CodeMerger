@@ -9,7 +9,7 @@ from .file_manager import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
 from .constants import RECENT_DIRS_MAX
-from .paths import ICON_PATH, PIN_BUTTON_ICON_PATH, PIN_BUTTON_ACTIVE_ICON_PATH
+from .paths import ICON_PATH, PIN_BUTTON_ICON_PATH, PIN_BUTTON_ACTIVE_ICON_PATH, PIN_BUTTON_CLOSE_ICON_PATH
 from .pin_button import PinButton
 
 class App(Tk):
@@ -20,7 +20,6 @@ class App(Tk):
 
         # --- PinButton State ---
         self.pin_button_window = None
-        self.is_pin_button_pinned = False
         self.pin_button_last_x = None
         self.pin_button_last_y = None
         self.load_pin_button_images()
@@ -98,15 +97,16 @@ class App(Tk):
             self.pin_image_up = ImageTk.PhotoImage(up_img_src)
             down_img_src = Image.open(PIN_BUTTON_ACTIVE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
             self.pin_image_down = ImageTk.PhotoImage(down_img_src)
-        except Exception as e:
-            messagebox.showerror("Asset Error", f"Could not load button graphics: {e}")
+            close_img_src = Image.open(PIN_BUTTON_CLOSE_ICON_PATH)
+            self.pin_close_image = ImageTk.PhotoImage(close_img_src)
+        except Exception:
             self.pin_image_up = None
             self.pin_image_down = None
+            self.pin_close_image = None
 
     def on_app_close(self):
         """Safely destroys child windows before closing the main app."""
         if self.pin_button_window and self.pin_button_window.winfo_exists():
-            self.pin_button_window.on_close_callback = None
             self.pin_button_window.destroy()
         self.destroy()
 
@@ -145,56 +145,40 @@ class App(Tk):
         if hasattr(self, 'copy_merged_button'):
             self.copy_merged_button.config(state=copy_merged_state)
 
-    def update_pin_button_toggle_style(self):
-        """Updates the pin button's text color based on its active state."""
-        if self.pin_button_toggle.winfo_exists():
-            if self.is_pin_button_pinned:
-                self.pin_button_toggle.config(fg='black')
-            else:
-                self.pin_button_toggle.config(fg='gray')
-
-    def on_pin_button_close(self):
-        """Callback from the pin button's close event (if it ever has one)."""
-        if self.is_pin_button_pinned:
-            self.is_pin_button_pinned = False
-            self.update_pin_button_toggle_style()
-
     def toggle_pin_button(self):
-        """Shows or hides the floating pin button."""
-        self.is_pin_button_pinned = not self.is_pin_button_pinned
-        self.update_pin_button_toggle_style()
+        """Replaces the main window with the pin button, or vice-versa."""
+        # Pin button is active. Close it and show main window.
+        if self.pin_button_window and self.pin_button_window.winfo_exists():
+            self.pin_button_last_x = self.pin_button_window.winfo_x()
+            self.pin_button_last_y = self.pin_button_window.winfo_y()
+            self.pin_button_window.destroy()
+            self.pin_button_window = None
+            self.show_and_raise()
+        # Main window is active. Hide it and show pin button.
+        else:
+            if not self.pin_image_up or not self.pin_close_image:
+                messagebox.showerror("Asset Error", "Could not load pin button graphics.")
+                return
 
-        if self.is_pin_button_pinned:
-            if not self.pin_button_window or not self.pin_button_window.winfo_exists():
-                if not self.pin_image_up: # Don't open if images failed to load
-                    self.is_pin_button_pinned = False
-                    self.update_pin_button_toggle_style()
-                    return
-                self.pin_button_window = PinButton(
-                    self,
-                    on_close_callback=self.on_pin_button_close,
-                    image_up=self.pin_image_up,
-                    image_down=self.pin_image_down
-                )
+            main_x = self.winfo_x()
+            main_y = self.winfo_y()
+            self.withdraw()
 
-            # Use saved position if it exists, otherwise place it next to main window
+            self.pin_button_window = PinButton(
+                self,
+                image_up=self.pin_image_up,
+                image_down=self.pin_image_down,
+                image_close=self.pin_close_image
+            )
+
+            # Place the pin window using last known position or main window's position
             if self.pin_button_last_x is not None and self.pin_button_last_y is not None:
                 self.pin_button_window.geometry(f"+{self.pin_button_last_x}+{self.pin_button_last_y}")
             else:
-                self.update_idletasks()
-                main_x = self.winfo_x()
-                main_y = self.winfo_y()
-                main_w = self.winfo_width()
-                self.pin_button_window.geometry(f"+{main_x + main_w}+{main_y}")
+                self.pin_button_window.geometry(f"+{main_x}+{main_y}")
 
             self.pin_button_window.deiconify()
             self.pin_button_window.lift()
-        else:
-            if self.pin_button_window and self.pin_button_window.winfo_exists():
-                # Save position before hiding
-                self.pin_button_last_x = self.pin_button_window.winfo_x()
-                self.pin_button_last_y = self.pin_button_window.winfo_y()
-                self.pin_button_window.withdraw()
 
     def on_settings_closed(self):
         self.config = load_config()
