@@ -9,8 +9,8 @@ from .file_manager import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
 from .constants import RECENT_DIRS_MAX
-from .paths import ICON_PATH, PIN_BUTTON_ICON_PATH, PIN_BUTTON_ACTIVE_ICON_PATH, PIN_BUTTON_CLOSE_ICON_PATH
-from .pin_button import PinButton
+from .paths import ICON_PATH, COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH
+from .compact_mode import CompactMode
 
 class App(Tk):
     def __init__(self, file_extensions, app_version=""):
@@ -18,12 +18,12 @@ class App(Tk):
         self.file_extensions = file_extensions
         self.app_bg_color = '#FFFFFF'
 
-        # --- PinButton State ---
-        self.in_pin_mode = False
-        self.pin_button_window = None
-        self.pin_button_last_x = None
-        self.pin_button_last_y = None
-        self.load_pin_button_images()
+        # --- Compact Mode State ---
+        self.in_compact_mode = False
+        self.compact_mode_window = None
+        self.compact_mode_last_x = None
+        self.compact_mode_last_y = None
+        self.load_compact_mode_images()
 
         # --- Window Setup ---
         self.title(f"CodeMerger [ {app_version} ]")
@@ -75,8 +75,8 @@ class App(Tk):
         settings_button.pack(side='left')
         config_button = Button(config_frame, text="Manage Filetypes", command=self.open_filetypes_manager, relief='flat', fg='gray')
         config_button.pack(side='left', padx=10)
-        self.pin_button_toggle = Button(config_frame, text="Pin Button", command=self.toggle_pin_button, relief='flat', fg='gray')
-        self.pin_button_toggle.pack(side='right')
+        self.compact_mode_toggle = Button(config_frame, text="Compact Mode", command=self.toggle_compact_mode, relief='flat', fg='gray')
+        self.compact_mode_toggle.pack(side='right')
 
         # --- Central "Copy Merged" Button ---
         copy_button_frame = Frame(main_frame, bg=self.app_bg_color, pady=10)
@@ -91,35 +91,35 @@ class App(Tk):
 
         self.update_button_states()
 
-    def load_pin_button_images(self):
-        """Loads and prepares the pin button graphics."""
+    def load_compact_mode_images(self):
+        """Loads and prepares the compact mode graphics."""
         try:
             button_size = (64, 64)
-            up_img_src = Image.open(PIN_BUTTON_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
-            self.pin_image_up = ImageTk.PhotoImage(up_img_src)
-            down_img_src = Image.open(PIN_BUTTON_ACTIVE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
-            self.pin_image_down = ImageTk.PhotoImage(down_img_src)
-            close_img_src = Image.open(PIN_BUTTON_CLOSE_ICON_PATH)
-            self.pin_close_image = ImageTk.PhotoImage(close_img_src)
+            up_img_src = Image.open(COMPACT_MODE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
+            self.compact_mode_image_up = ImageTk.PhotoImage(up_img_src)
+            down_img_src = Image.open(COMPACT_MODE_ACTIVE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
+            self.compact_mode_image_down = ImageTk.PhotoImage(down_img_src)
+            close_img_src = Image.open(COMPACT_MODE_CLOSE_ICON_PATH)
+            self.compact_mode_close_image = ImageTk.PhotoImage(close_img_src)
         except Exception:
-            self.pin_image_up = None
-            self.pin_image_down = None
-            self.pin_close_image = None
+            self.compact_mode_image_up = None
+            self.compact_mode_image_down = None
+            self.compact_mode_close_image = None
 
     def on_app_close(self):
         """Safely destroys child windows before closing the main app."""
-        if self.pin_button_window and self.pin_button_window.winfo_exists():
-            self.pin_button_window.destroy()
+        if self.compact_mode_window and self.compact_mode_window.winfo_exists():
+            self.compact_mode_window.destroy()
         self.destroy()
 
     def on_main_window_restored(self, event=None):
         """
         Called when the main window is restored (e.g., from the taskbar).
-        If this happens while in pin mode, it means the user wants the main
-        window back, so we should exit pin mode.
+        If this happens while in compact mode, it means the user wants the main
+        window back, so we should exit compact mode.
         """
-        if self.in_pin_mode:
-            self.toggle_pin_button()
+        if self.in_compact_mode:
+            self.toggle_compact_mode()
 
     def show_and_raise(self):
         """De-minimizes, raises, and focuses the main window."""
@@ -157,43 +157,43 @@ class App(Tk):
         if hasattr(self, 'copy_merged_button'):
             self.copy_merged_button.config(state=copy_merged_state)
 
-    def toggle_pin_button(self):
-        """Switches the application state between main view and pin button view."""
-        # Exit pin mode
-        if self.in_pin_mode:
-            self.in_pin_mode = False
-            # Cleanly destroy the pin button window if it exists
-            if self.pin_button_window and self.pin_button_window.winfo_exists():
-                self.pin_button_last_x = self.pin_button_window.winfo_x()
-                self.pin_button_last_y = self.pin_button_window.winfo_y()
-                self.pin_button_window.destroy()
-                self.pin_button_window = None
+    def toggle_compact_mode(self):
+        """Switches the application state between main view and compact mode."""
+        # Exit compact mode
+        if self.in_compact_mode:
+            self.in_compact_mode = False
+            # Cleanly destroy the compact mode window if it exists
+            if self.compact_mode_window and self.compact_mode_window.winfo_exists():
+                self.compact_mode_last_x = self.compact_mode_window.winfo_x()
+                self.compact_mode_last_y = self.compact_mode_window.winfo_y()
+                self.compact_mode_window.destroy()
+                self.compact_mode_window = None
             # Restore the main window
             self.show_and_raise()
-        # Enter pin mode
+        # Enter compact mode
         else:
-            if not self.pin_image_up or not self.pin_close_image:
-                messagebox.showerror("Asset Error", "Could not load pin button graphics.")
+            if not self.compact_mode_image_up or not self.compact_mode_close_image:
+                messagebox.showerror("Asset Error", "Could not load compact mode graphics.")
                 return
 
-            self.in_pin_mode = True
+            self.in_compact_mode = True
 
-            # Save main window's position for when we create the pin button
+            # Save main window's position for when we create the compact mode widget
             main_x = self.winfo_x()
             main_y = self.winfo_y()
 
-            # Create the pin button window
-            self.pin_button_window = PinButton(
+            # Create the compact mode window
+            self.compact_mode_window = CompactMode(
                 self,
-                image_up=self.pin_image_up,
-                image_down=self.pin_image_down,
-                image_close=self.pin_close_image
+                image_up=self.compact_mode_image_up,
+                image_down=self.compact_mode_image_down,
+                image_close=self.compact_mode_close_image
             )
             # Position it at its last known location, or where the main window was
-            if self.pin_button_last_x is not None and self.pin_button_last_y is not None:
-                self.pin_button_window.geometry(f"+{self.pin_button_last_x}+{self.pin_button_last_y}")
+            if self.compact_mode_last_x is not None and self.compact_mode_last_y is not None:
+                self.compact_mode_window.geometry(f"+{self.compact_mode_last_x}+{self.compact_mode_last_y}")
             else:
-                self.pin_button_window.geometry(f"+{main_x}+{main_y}")
+                self.compact_mode_window.geometry(f"+{main_x}+{main_y}")
 
             # Minimize the main window to the taskbar
             self.iconify()

@@ -1,10 +1,10 @@
 import tkinter as tk
-from .constants import PINBUTTON_BG_COLOR
+from .constants import COMPACT_MODE_BG_COLOR
 
-class PinButton(tk.Toplevel):
+class CompactMode(tk.Toplevel):
     """
     A frameless, always-on-top, draggable window that acts as a button.
-    It replaces the main window.
+    It provides a compact, always-on-top interface while the main window is hidden.
     It features a move bar for dragging, a close button, and the main copy button.
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
@@ -17,7 +17,7 @@ class PinButton(tk.Toplevel):
         self.image_close = image_close
 
         # --- Style and Layout Constants ---
-        BAR_AND_BORDER_COLOR = PINBUTTON_BG_COLOR
+        BAR_AND_BORDER_COLOR = COMPACT_MODE_BG_COLOR
         BORDER_WIDTH = 1
         MOVE_BAR_HEIGHT = 14
 
@@ -80,7 +80,7 @@ class PinButton(tk.Toplevel):
 
     def close_window(self, event=None):
         """Signals the parent app to close this window and show the main one."""
-        self.parent.toggle_pin_button()
+        self.parent.toggle_compact_mode()
 
     def on_press_drag(self, event):
         """Records the initial click position on the move bar."""

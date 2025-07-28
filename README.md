@@ -15,7 +15,7 @@ Download the latest (portable) release [here](https://github.com/DrSiemer/codeme
 - Add the files you want to manage
     - Once added, you can open a file by double clicking it in the Merge Order window
 - Click "Copy merged" to merge all the selected files into a single string in your clipboard
-- Click "Pin Button" to replace the main window with a small, always-on-top copy button. Double-click its move bar or use its close button to return to the main window.
+- Click "Compact Mode" to switch to a small, always-on-top copy button. This is useful for keeping the copy functionality handy while you work. Double-click the move bar or use the close button to return to the full view.
 
 ### Settings
 
