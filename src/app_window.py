@@ -10,13 +10,13 @@ from .constants import RECENT_DIRS_MAX
 from .paths import ICON_PATH
 
 class App(Tk):
-    def __init__(self, file_extensions):
+    def __init__(self, file_extensions, app_version=""):
         super().__init__()
         self.file_extensions = file_extensions
         self.app_bg_color = '#FFFFFF'
 
         # --- Window Setup ---
-        self.title("CodeMerger")
+        self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
         self.geometry("500x250")
         self.configure(bg=self.app_bg_color)

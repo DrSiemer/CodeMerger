@@ -1,7 +1,7 @@
 import os
 import json
 from pathlib import Path
-from .constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG
+from .constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE
 
 def _create_and_get_default_config():
     """
@@ -101,3 +101,26 @@ def is_ignored(path, base_dir, gitignore_patterns):
     except ValueError:
         return False
     return False
+
+def load_app_version():
+    """
+    Reads the version from version.txt and returns it as a formatted string.
+    Returns a default string if the file is not found or is malformed.
+    """
+    try:
+        version_data = {}
+        with open(VERSION_FILE, 'r', encoding='utf-8') as f:
+            for line in f:
+                if '=' in line:
+                    key, value = line.strip().split('=', 1)
+                    version_data[key.strip().lower()] = value.strip()
+
+        major = version_data.get('major', '?')
+        minor = version_data.get('minor', '?')
+        revision = version_data.get('revision', '?')
+
+        return f"v{major}.{minor}.{revision}"
+
+    except (FileNotFoundError, IndexError):
+        # Handle case where file doesn't exist or line split fails
+        return "v?.?.?"
