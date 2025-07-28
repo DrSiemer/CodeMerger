@@ -1,6 +1,7 @@
 import os
 import json
 import pyperclip
+import time
 from tkinter import Tk, Toplevel, Frame, Label, Button, StringVar, messagebox, filedialog, TclError
 from PIL import Image, ImageTk
 
@@ -20,9 +21,11 @@ class App(Tk):
 
         # --- Compact Mode State ---
         self.in_compact_mode = False
+        self.is_animating = False
         self.compact_mode_window = None
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
+        self.main_window_geom = None
         self.load_compact_mode_images()
 
         # --- Window Setup ---
@@ -114,11 +117,11 @@ class App(Tk):
 
     def on_main_window_restored(self, event=None):
         """
-        Called when the main window is restored (e.g., from the taskbar).
-        If this happens while in compact mode, it means the user wants the main
-        window back, so we should exit compact mode.
+        Called when the main window is restored. If this happens while in compact
+        mode, it means the user wants the main window back, so we exit compact mode.
+        The animation flag prevents this from firing during the exit animation itself.
         """
-        if self.in_compact_mode:
+        if self.in_compact_mode and not self.is_animating:
             self.toggle_compact_mode()
 
     def show_and_raise(self):
@@ -157,20 +160,85 @@ class App(Tk):
         if hasattr(self, 'copy_merged_button'):
             self.copy_merged_button.config(state=copy_merged_state)
 
+    def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
+        """Helper method to animate the main window's geometry and alpha."""
+        self.is_animating = True
+        elapsed = time.time() - start_time
+        progress = min(1.0, elapsed / duration)
+
+        # Interpolate geometry and alpha
+        start_x, start_y, start_w, start_h = start_geom
+        end_x, end_y, end_w, end_h = end_geom
+
+        curr_x = int(start_x + (end_x - start_x) * progress)
+        curr_y = int(start_y + (end_y - start_y) * progress)
+        curr_w = int(start_w + (end_w - start_w) * progress)
+        curr_h = int(start_h + (end_h - start_h) * progress)
+
+        # Fade out when shrinking, fade in when expanding
+        alpha = 1.0 - progress if is_shrinking else progress
+        if not is_shrinking and alpha == 0.0: alpha = 0.01
+
+        self.geometry(f"{max(1, curr_w)}x{max(1, curr_h)}+{curr_x}+{curr_y}")
+        try:
+            self.attributes("-alpha", alpha)
+        except TclError:
+            pass
+
+        if progress < 1.0:
+            self.after(15, self._animate_window, start_time, duration, start_geom, end_geom, is_shrinking)
+        else:
+            self.is_animating = False
+            if is_shrinking:
+                self.withdraw()
+                self.attributes("-alpha", 1.0)
+                if self.compact_mode_window and self.compact_mode_window.winfo_exists():
+                    self.compact_mode_window.deiconify()  # Show the widget
+            else:
+                self.geometry(f"{end_geom[2]}x{end_geom[3]}+{end_geom[0]}+{end_geom[1]}")
+                self.attributes("-alpha", 1.0)
+                if self.compact_mode_window and self.compact_mode_window.winfo_exists():
+                    self.compact_mode_window.destroy()
+                self.compact_mode_window = None
+
     def toggle_compact_mode(self):
-        """Switches the application state between main view and compact mode."""
-        # Exit compact mode
+        """Switches the application state between main view and compact mode with animation."""
+        if self.is_animating:
+            return
+
+        animation_duration = 0.25
+
+        # --- Exit compact mode: Animate from widget to full window ---
         if self.in_compact_mode:
             self.in_compact_mode = False
-            # Cleanly destroy the compact mode window if it exists
-            if self.compact_mode_window and self.compact_mode_window.winfo_exists():
-                self.compact_mode_last_x = self.compact_mode_window.winfo_x()
-                self.compact_mode_last_y = self.compact_mode_window.winfo_y()
-                self.compact_mode_window.destroy()
-                self.compact_mode_window = None
-            # Restore the main window
-            self.show_and_raise()
-        # Enter compact mode
+            if not self.compact_mode_window or not self.compact_mode_window.winfo_exists():
+                self.show_and_raise()
+                return
+
+            # Store compact window's final position for next time
+            self.compact_mode_last_x = self.compact_mode_window.winfo_x()
+            self.compact_mode_last_y = self.compact_mode_window.winfo_y()
+
+            # Start geometry is the compact widget's geometry
+            start_geom = (
+                self.compact_mode_window.winfo_x(),
+                self.compact_mode_window.winfo_y(),
+                self.compact_mode_window.winfo_width(),
+                self.compact_mode_window.winfo_height(),
+            )
+
+            # End geometry is the main window's stored original geometry
+            end_geom = self.main_window_geom
+
+            # Hide compact widget, then show main window (at start position) to begin animation
+            self.compact_mode_window.withdraw()
+            self.deiconify()
+            self.attributes("-alpha", 0.01)
+            self.geometry(f"{start_geom[2]}x{start_geom[3]}+{start_geom[0]}+{start_geom[1]}")
+
+            self._animate_window(time.time(), animation_duration, start_geom, end_geom, is_shrinking=False)
+
+        # --- Enter compact mode: Animate from full window to widget ---
         else:
             if not self.compact_mode_image_up or not self.compact_mode_close_image:
                 messagebox.showerror("Asset Error", "Could not load compact mode graphics.")
@@ -178,25 +246,49 @@ class App(Tk):
 
             self.in_compact_mode = True
 
-            # Save main window's position for when we create the compact mode widget
-            main_x = self.winfo_x()
-            main_y = self.winfo_y()
+            # Store main window's current geometry to animate from and return to
+            self.main_window_geom = (self.winfo_x(), self.winfo_y(), self.winfo_width(), self.winfo_height())
 
-            # Create the compact mode window
+            # Create the compact mode window, but keep it hidden for now
             self.compact_mode_window = CompactMode(
                 self,
                 image_up=self.compact_mode_image_up,
                 image_down=self.compact_mode_image_down,
                 image_close=self.compact_mode_close_image
             )
-            # Position it at its last known location, or where the main window was
-            if self.compact_mode_last_x is not None and self.compact_mode_last_y is not None:
-                self.compact_mode_window.geometry(f"+{self.compact_mode_last_x}+{self.compact_mode_last_y}")
-            else:
-                self.compact_mode_window.geometry(f"+{main_x}+{main_y}")
+            self.compact_mode_window.withdraw()
+            self.compact_mode_window.update_idletasks()
 
-            # Minimize the main window to the taskbar
-            self.iconify()
+            widget_w = self.compact_mode_window.winfo_reqwidth()
+            widget_h = self.compact_mode_window.winfo_reqheight()
+
+            # Determine target X, Y for the compact widget
+            if self.compact_mode_last_x is not None and self.compact_mode_last_y is not None:
+                target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
+            else:
+                # First time: Calculate a smart default position that is on-screen.
+                screen_w = self.winfo_screenwidth()
+                screen_h = self.winfo_screenheight()
+                main_x, main_y, main_w, _ = self.main_window_geom
+
+                # Ideal position: top-right of the main window, offset slightly
+                ideal_x = main_x + main_w - widget_w - 20
+                ideal_y = main_y + 20
+
+                # Clamp the position to be within screen bounds, leaving a small margin
+                margin = 10
+                target_x = max(margin, min(ideal_x, screen_w - widget_w - margin))
+                target_y = max(margin, min(ideal_y, screen_h - widget_h - margin))
+
+            # This is the single source of truth for the animation's destination.
+            start_geom = self.main_window_geom
+            end_geom = (target_x, target_y, widget_w, widget_h)
+
+            # Tell the widget where to appear *after* the animation finishes.
+            self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
+
+            # Start the animation using the definitive end_geom.
+            self._animate_window(time.time(), animation_duration, start_geom, end_geom, is_shrinking=True)
 
     def on_settings_closed(self):
         self.config = load_config()
