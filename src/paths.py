@@ -37,3 +37,7 @@ ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 
 # Path to the version file
 VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'version.txt')
+
+# Path to the pin button graphics
+PIN_BUTTON_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'pinbutton.png')
+PIN_BUTTON_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'pinbutton_active.png')
