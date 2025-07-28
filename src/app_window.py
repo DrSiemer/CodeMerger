@@ -19,6 +19,7 @@ class App(Tk):
         self.app_bg_color = '#FFFFFF'
 
         # --- PinButton State ---
+        self.in_pin_mode = False
         self.pin_button_window = None
         self.pin_button_last_x = None
         self.pin_button_last_y = None
@@ -31,6 +32,7 @@ class App(Tk):
         self.configure(bg=self.app_bg_color)
 
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)
+        self.bind("<Map>", self.on_main_window_restored)
 
         # --- Load Configuration & Validate Active Directory ---
         self.config = load_config()
@@ -110,10 +112,20 @@ class App(Tk):
             self.pin_button_window.destroy()
         self.destroy()
 
+    def on_main_window_restored(self, event=None):
+        """
+        Called when the main window is restored (e.g., from the taskbar).
+        If this happens while in pin mode, it means the user wants the main
+        window back, so we should exit pin mode.
+        """
+        if self.in_pin_mode:
+            self.toggle_pin_button()
+
     def show_and_raise(self):
-        """De-minimizes and raises the main window."""
+        """De-minimizes, raises, and focuses the main window."""
         self.deiconify()
         self.lift()
+        self.focus_force()
 
     def set_active_dir_display(self, path):
         """Sets the display string for the active directory's StringVar."""
@@ -146,39 +158,45 @@ class App(Tk):
             self.copy_merged_button.config(state=copy_merged_state)
 
     def toggle_pin_button(self):
-        """Replaces the main window with the pin button, or vice-versa."""
-        # Pin button is active. Close it and show main window.
-        if self.pin_button_window and self.pin_button_window.winfo_exists():
-            self.pin_button_last_x = self.pin_button_window.winfo_x()
-            self.pin_button_last_y = self.pin_button_window.winfo_y()
-            self.pin_button_window.destroy()
-            self.pin_button_window = None
+        """Switches the application state between main view and pin button view."""
+        # Exit pin mode
+        if self.in_pin_mode:
+            self.in_pin_mode = False
+            # Cleanly destroy the pin button window if it exists
+            if self.pin_button_window and self.pin_button_window.winfo_exists():
+                self.pin_button_last_x = self.pin_button_window.winfo_x()
+                self.pin_button_last_y = self.pin_button_window.winfo_y()
+                self.pin_button_window.destroy()
+                self.pin_button_window = None
+            # Restore the main window
             self.show_and_raise()
-        # Main window is active. Hide it and show pin button.
+        # Enter pin mode
         else:
             if not self.pin_image_up or not self.pin_close_image:
                 messagebox.showerror("Asset Error", "Could not load pin button graphics.")
                 return
 
+            self.in_pin_mode = True
+
+            # Save main window's position for when we create the pin button
             main_x = self.winfo_x()
             main_y = self.winfo_y()
-            self.withdraw()
 
+            # Create the pin button window
             self.pin_button_window = PinButton(
                 self,
                 image_up=self.pin_image_up,
                 image_down=self.pin_image_down,
                 image_close=self.pin_close_image
             )
-
-            # Place the pin window using last known position or main window's position
+            # Position it at its last known location, or where the main window was
             if self.pin_button_last_x is not None and self.pin_button_last_y is not None:
                 self.pin_button_window.geometry(f"+{self.pin_button_last_x}+{self.pin_button_last_y}")
             else:
                 self.pin_button_window.geometry(f"+{main_x}+{main_y}")
 
-            self.pin_button_window.deiconify()
-            self.pin_button_window.lift()
+            # Minimize the main window to the taskbar
+            self.iconify()
 
     def on_settings_closed(self):
         self.config = load_config()
