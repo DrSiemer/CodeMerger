@@ -27,7 +27,7 @@ Download the latest (portable) release [here](https://github.com/DrSiemer/codeme
 - Run `go` to start
 - Run `go b` to build executable
 
-## Planned features
+### Planned features
 
 - Installer
 - Actual design
