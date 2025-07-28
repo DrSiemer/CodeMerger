@@ -11,9 +11,11 @@
     "src/filetypes_manager.py",
     "src/utils.py",
     "src/app_window.py",
-    "src/pin_button.py",
+    "src/compact_mode.py",
     "codemerger.spec",
-    "go.bat"
+    "go.bat",
+    "go.sh",
+    "requirements.txt"
   ],
   "expanded_dirs": [
     "src"
