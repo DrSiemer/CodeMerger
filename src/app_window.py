@@ -326,37 +326,71 @@ class App(Tk):
         self.status_var.set(f"Active directory changed to: {os.path.basename(new_dir)}")
 
     def open_change_directory_dialog(self):
+        # Prune non-existent directories first
         initial_count = len(self.recent_dirs)
         self.recent_dirs = [d for d in self.recent_dirs if os.path.isdir(d)]
         if len(self.recent_dirs) != initial_count:
             self.config['recent_directories'] = self.recent_dirs
             save_config(self.config)
+
         dialog = Toplevel(self)
         dialog.title("Select Directory")
         dialog.transient(self)
         dialog.grab_set()
         dialog.configure(bg=self.app_bg_color)
+
         screen_width = self.winfo_screenwidth()
         dialog_width = max(400, min(int(screen_width * 0.5), 800))
-        dialog.geometry(f"{dialog_width}x280")
-        Label(dialog, text="Select a recent directory or browse for a new one.", padx=10, pady=10, bg=self.app_bg_color).pack()
+
+        # Determine initial message and height based on whether recent directories exist
+        if self.recent_dirs:
+            message = "Select a recent directory or browse for a new one."
+            dialog_height = 280
+        else:
+            message = "Browse for a directory to get started."
+            dialog_height = 120
+
+        dialog.geometry(f"{dialog_width}x{dialog_height}")
+        info_label = Label(dialog, text=message, padx=10, pady=10, bg=self.app_bg_color)
+        info_label.pack(pady=(0, 5))
+
         def select_and_close(path):
+            """Final action: update active dir and close the selection dialog."""
             self.update_active_dir(path)
             dialog.destroy()
-        def remove_and_destroy_widget(path_to_remove, widget_to_destroy):
+
+        def browse_for_new_dir():
+            """Opens file dialog and processes the result, handling cancellation."""
+            new_path = filedialog.askdirectory(title="Select Project Directory", parent=dialog)
+            if new_path:  # Only proceed if a directory was actually selected
+                select_and_close(new_path)
+
+        # Create a frame for recent directories; it will be shown or hidden as needed.
+        recent_dirs_frame = Frame(dialog, bg=self.app_bg_color)
+
+        def remove_and_update_dialog(path_to_remove, widget_to_destroy):
+            """Removes a recent directory and dynamically updates the dialog's UI."""
             self.remove_recent_directory(path_to_remove)
             widget_to_destroy.destroy()
-        recent_dirs_frame = Frame(dialog, bg=self.app_bg_color)
-        recent_dirs_frame.pack(fill='x', expand=False, pady=5)
-        for path in self.recent_dirs:
-            entry_frame = Frame(recent_dirs_frame, bg=self.app_bg_color)
-            entry_frame.pack(fill='x', padx=10, pady=2)
-            btn = Button(entry_frame, text=path, command=lambda p=path: select_and_close(p), anchor='w', justify='left')
-            btn.pack(side='left', expand=True, fill='x')
-            remove_btn = Button(entry_frame, text="X", command=lambda p=path, w=entry_frame: remove_and_destroy_widget(p, w), width=3)
-            remove_btn.pack(side='left', padx=(5, 0))
-        browse_btn = Button(dialog, text="Browse for Directory...", command=lambda: select_and_close(filedialog.askdirectory(title="Select Project Directory")))
-        browse_btn.pack(pady=10)
+            if not self.recent_dirs:
+                info_label.config(text="Browse for a directory to get started.")
+                dialog.geometry(f"{dialog_width}x120")
+                recent_dirs_frame.pack_forget()  # Hide the frame for a clean layout
+
+        # Populate Recent Directories List (if any)
+        if self.recent_dirs:
+            recent_dirs_frame.pack(fill='x', expand=False, pady=5)
+            for path in self.recent_dirs:
+                entry_frame = Frame(recent_dirs_frame, bg=self.app_bg_color)
+                entry_frame.pack(fill='x', padx=10, pady=2)
+                btn = Button(entry_frame, text=path, command=lambda p=path: select_and_close(p), anchor='w', justify='left')
+                btn.pack(side='left', expand=True, fill='x')
+                remove_btn = Button(entry_frame, text="X", command=lambda p=path, w=entry_frame: remove_and_update_dialog(p, w), width=3)
+                remove_btn.pack(side='left', padx=(5, 0))
+
+        # Browse Button
+        browse_btn = Button(dialog, text="Browse for Directory...", command=browse_for_new_dir)
+        browse_btn.pack(pady=10, padx=10)
 
     def copy_merged_code(self):
         """Merges selected files and copies the result to the clipboard."""

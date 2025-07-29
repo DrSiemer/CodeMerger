@@ -24,6 +24,7 @@ Download the latest (portable) release [here](https://github.com/DrSiemer/codeme
 
 ## Development
 
+- Make sure you have Python installed (and added to your PATH)
 - Run `go` to start (`./go.sh` on a Mac)
 - Run `go b` to build executable (`./go.sh b` on a Mac)
 
