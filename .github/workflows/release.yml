@@ -68,8 +68,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install gettext for x64 Python
-        run: brew install gettext
+      - name: Install gettext for x64 Python environment
+        run: arch -x86_64 brew install gettext
 
       - name: Set up Python for x64 architecture (Rosetta)
         uses: actions/setup-python@v5
