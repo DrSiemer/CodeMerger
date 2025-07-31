@@ -63,7 +63,7 @@ jobs:
   # Build for macOS
   build-mac:
     needs: validate-tag
-    runs-on: macos-12
+    runs-on: macos-13
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
