@@ -9,12 +9,18 @@ data_files = [
     ('default_filetypes.json', '.')
 ]
 
+# Define the icon path based on the operating system
+icon_path = 'assets/icon.icns' if sys.platform == 'darwin' else 'assets/icon.ico'
+
 a = Analysis(
     ['run.py'],
     pathex=[],
     binaries=[],
     datas=data_files,
-    hiddenimports=[],
+    hiddenimports=[
+        'pyperclip.pyobjc_clipboard',
+        'PIL.ImageTk'
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -43,5 +49,17 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='assets/icon.icns' if sys.platform == 'darwin' else 'assets/icon.ico',
+    icon=icon_path
 )
+
+# macOS .app bundle
+if sys.platform == 'darwin':
+    app = BUNDLE(
+        exe,
+        name='CodeMerger.app',
+        icon=icon_path,
+        bundle_identifier='nl.2shine.codemerger',
+        info_plist={
+            'NSHighResolutionCapable': 'True'
+        }
+    )
