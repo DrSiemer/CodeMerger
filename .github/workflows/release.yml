@@ -39,8 +39,8 @@ jobs:
 
           echo "Tag validation successful: $TAG is on the master branch."
 
-  # Build for Windows
   build-windows:
+    name: Build for Windows
     needs: validate-tag
     runs-on: windows-latest
     steps:
@@ -60,38 +60,92 @@ jobs:
           name: CodeMerger-windows-exe
           path: dist/CodeMerger.exe
 
-  # Build for macOS
-  build-mac:
+  build-mac-intel:
+    name: Build for macOS (Intel)
+    needs: validate-tag
+    runs-on: macos-13
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build with PyInstaller
+        run: pyinstaller codemerger.spec
+      - name: Upload Intel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeMerger-mac-intel-app
+          path: dist/CodeMerger.app
+
+  build-mac-arm:
+    name: Build for macOS (ARM)
     needs: validate-tag
     runs-on: macos-14
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install gettext for x64 Python environment
-        run: arch -x86_64 brew install gettext
-
-      - name: Set up Python for x64 architecture (Rosetta)
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          architecture: 'x64'
-
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Build with PyInstaller
         run: pyinstaller codemerger.spec
-      - name: Compress .app into a .zip file
-        run: zip -r dist/CodeMerger-macOS.zip dist/CodeMerger.app
-      - name: Upload macOS artifact
+      - name: Upload ARM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeMerger-mac-arm-app
+          path: dist/CodeMerger.app
+
+  package-mac-universal:
+    name: Package Universal macOS App
+    needs: [build-mac-intel, build-mac-arm]
+    runs-on: macos-14
+    steps:
+      - name: Download Intel artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: CodeMerger-mac-intel-app
+          path: ./intel
+      - name: Download ARM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: CodeMerger-mac-arm-app
+          path: ./arm
+      - name: Create Universal Binary and Zip
+        run: |
+          mkdir -p dist
+
+          INTEL_EXEC="intel/CodeMerger.app/Contents/MacOS/CodeMerger"
+          ARM_EXEC="arm/CodeMerger.app/Contents/MacOS/CodeMerger"
+          FINAL_APP_PATH="dist/CodeMerger.app"
+
+          echo "Using ARM .app as the template..."
+          cp -R arm/CodeMerger.app "${FINAL_APP_PATH}"
+
+          echo "Combining binaries with lipo..."
+          lipo -create "${INTEL_EXEC}" "${ARM_EXEC}" -output "${FINAL_APP_PATH}/Contents/MacOS/CodeMerger"
+
+          echo "Verifying the new universal binary..."
+          lipo -info "${FINAL_APP_PATH}/Contents/MacOS/CodeMerger"
+
+          echo "Zipping the universal app..."
+          (cd dist && zip -r CodeMerger-macOS.zip CodeMerger.app)
+
+      - name: Upload Universal macOS artifact
         uses: actions/upload-artifact@v4
         with:
           name: CodeMerger-macOS-zip
           path: dist/CodeMerger-macOS.zip
 
-  # Create the GitHub Release (runs after both build jobs have succeeded)
   create-release:
-    needs: [build-windows, build-mac]
+    name: Create GitHub Release
+    needs: [build-windows, package-mac-universal]
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -33,19 +33,6 @@ Ignore the Windows Defender SmartScreen block if you get it (click "More info" >
 - Run `go` to start
 - Run `go b` to build executable
 
-### Mac
-
-To build a universal binary:
-
-- Make `go.sh` executable with `chmod +x go.sh`
-- Run `./go.sh b` to build the application
-
-To create a universal binary, you must be building on a Mac and your Python installation itself needs to be `universal2`. You can check your Python interpreter with the following command:
-
-```bash
-lipo -info "$(which python3)"
-```
-
 ### Planned features
 
 - Installer
