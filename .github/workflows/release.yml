@@ -78,7 +78,7 @@ jobs:
       - name: Upload Intel artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CodeMerger-mac-intel-app
+          name: CodeMerger-mac-intel-contents
           path: dist/CodeMerger.app
 
   build-mac-arm:
@@ -99,7 +99,7 @@ jobs:
       - name: Upload ARM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: CodeMerger-mac-arm-app
+          name: CodeMerger-mac-arm-contents
           path: dist/CodeMerger.app
 
   package-mac-universal:
@@ -107,28 +107,30 @@ jobs:
     needs: [build-mac-intel, build-mac-arm]
     runs-on: macos-14
     steps:
-      - name: Download Intel artifact
+      - name: Download Intel artifact contents
         uses: actions/download-artifact@v4
         with:
-          name: CodeMerger-mac-intel-app
-          path: ./intel
-      - name: Download ARM artifact
+          name: CodeMerger-mac-intel-contents
+          path: ./intel-contents
+      - name: Download ARM artifact contents
         uses: actions/download-artifact@v4
         with:
-          name: CodeMerger-mac-arm-app
-          path: ./arm
+          name: CodeMerger-mac-arm-contents
+          path: ./arm-contents
+
       - name: Create Universal Binary and Zip
         run: |
-          mkdir -p dist
-
-          INTEL_EXEC="intel/CodeMerger.app/Contents/MacOS/CodeMerger"
-          ARM_EXEC="arm/CodeMerger.app/Contents/MacOS/CodeMerger"
           FINAL_APP_PATH="dist/CodeMerger.app"
+          INTEL_EXEC="intel-contents/Contents/MacOS/CodeMerger"
+          ARM_EXEC="arm-contents/Contents/MacOS/CodeMerger"
 
-          echo "Using ARM .app as the template..."
-          cp -R arm/CodeMerger.app "${FINAL_APP_PATH}"
+          echo "Creating the final .app bundle structure..."
+          mkdir -p "${FINAL_APP_PATH}"
 
-          echo "Combining binaries with lipo..."
+          echo "Using ARM artifact contents as the template..."
+          cp -R arm-contents/. "${FINAL_APP_PATH}/"
+
+          echo "Combining Intel and ARM executables with lipo..."
           lipo -create "${INTEL_EXEC}" "${ARM_EXEC}" -output "${FINAL_APP_PATH}/Contents/MacOS/CodeMerger"
 
           echo "Verifying the new universal binary..."
