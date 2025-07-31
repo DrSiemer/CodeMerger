@@ -7,8 +7,35 @@ on:
       - 'v*'
 
 jobs:
+  validate-tag:
+    name: Validate Release Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag is on the master branch
+        run: |
+          TAG="${{ github.ref_name }}"
+          echo "Validating tag: $TAG"
+
+          # Get the commit hash the tag points to
+          TAG_COMMIT_HASH=$(git rev-parse "$TAG")
+
+          # Check if that commit is an ancestor of the master branch.
+          if ! git branch -r --contains "$TAG_COMMIT_HASH" | grep -q "origin/master"; then
+            echo "::error::Tag $TAG points to a commit that is not on the 'master' branch."
+            echo "Please tag a commit that has been merged into master."
+            exit 1
+          fi
+
+          echo "Tag validation successful: $TAG is on the master branch."
+
   # Build for Windows
   build-windows:
+    needs: validate-tag
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -33,6 +60,7 @@ jobs:
 
   # Build for macOS
   build-mac:
+    needs: validate-tag
     runs-on: macos-latest
     steps:
       - name: Checkout repository
