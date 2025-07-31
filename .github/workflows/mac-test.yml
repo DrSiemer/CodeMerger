@@ -1,0 +1,39 @@
+name: Test on macOS
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Create virtual environment
+        run: |
+          python3 -m venv cm-venv
+          source cm-venv/bin/activate
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run main script
+        run: |
+          source cm-venv/bin/activate
+          python3 -m src.codemerger
+
+      - name: Build with PyInstaller (if spec exists)
+        if: hashFiles('codemerger.spec') != ''
+        run: |
+          source cm-venv/bin/activate
+          rm -rf dist build
+          pyinstaller codemerger.spec
