@@ -63,15 +63,21 @@ jobs:
   # Build for macOS
   build-mac:
     needs: validate-tag
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Set up Python
+
+      - name: Install gettext for x64 Python
+        run: brew install gettext
+
+      - name: Set up Python for x64 architecture (Rosetta)
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Install dependencies
+          architecture: 'x64'
+
+      - name: Install Python dependencies
         run: pip install -r requirements.txt
       - name: Build with PyInstaller
         run: pyinstaller codemerger.spec
