@@ -1,4 +1,4 @@
-name: Test on macOS
+name: Build on macOS
 
 on:
   push:
@@ -19,21 +19,22 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Create virtual environment
+      - name: Install dependencies
         run: |
           python3 -m venv cm-venv
           source cm-venv/bin/activate
           pip install --upgrade pip
+          # This will now correctly install pyobjc on macOS
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run main script
+      - name: Build with PyInstaller
         run: |
           source cm-venv/bin/activate
-          python3 -m src.codemerger
-
-      - name: Build with PyInstaller (if spec exists)
-        if: hashFiles('codemerger.spec') != ''
-        run: |
-          source cm-venv/bin/activate
-          rm -rf dist build
           pyinstaller codemerger.spec
+
+      - name: Upload macOS Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeMerger-macOS
+          path: dist/CodeMerger.app
+          if-no-files-found: error

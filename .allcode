@@ -15,9 +15,12 @@
     "codemerger.spec",
     "go.bat",
     "go.sh",
-    "requirements.txt"
+    "requirements.txt",
+    ".github/workflows/mac-test.yml"
   ],
   "expanded_dirs": [
+    ".github",
+    ".github/workflows",
     "src"
   ]
 }
