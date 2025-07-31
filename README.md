@@ -6,9 +6,12 @@ I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts
 
 ## Download
 
-Download the latest (portable) release [here](https://github.com/DrSiemer/codemerger/releases).
+Download the latest release [here](https://github.com/DrSiemer/codemerger/releases).
 
-Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"); all this app does is bundle text with a convenient UI.
+- **Windows**: The download is a portable executable
+- **macOS**: The build is a **universal binary**, which runs natively on both Apple Silicon (M1/M2/M3) and Intel-based Macs
+
+Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"); the app is safe, all it does is bundle text with a convenient UI.
 
 ## Usage
 
@@ -27,13 +30,21 @@ Ignore the Windows Defender SmartScreen block if you get it (click "More info" >
 ## Development
 
 - Make sure you have Python installed (and added to your PATH)
-- Run `go` to start (`./go.sh` on a Mac)
-- Run `go b` to build executable (`./go.sh b` on a Mac)
+- Run `go` to start
+- Run `go b` to build executable
 
 ### Mac
 
-- Untested!
+To build a universal binary:
+
 - Make `go.sh` executable with `chmod +x go.sh`
+- Run `./go.sh b` to build the application
+
+To create a universal binary, you must be building on a Mac and your Python installation itself needs to be `universal2`. You can check your Python interpreter with the following command:
+
+```bash
+lipo -info "$(which python3)"
+```
 
 ### Planned features
 

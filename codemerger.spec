@@ -12,6 +12,9 @@ data_files = [
 # Define the icon path based on the operating system
 icon_path = 'assets/icon.icns' if sys.platform == 'darwin' else 'assets/icon.ico'
 
+# For macOS, create a universal binary that runs on both Intel (x86_64) and Apple Silicon (arm64)
+target_arch_value = 'universal2' if sys.platform == 'darwin' else None
+
 a = Analysis(
     ['run.py'],
     pathex=[],
@@ -46,7 +49,7 @@ exe = EXE(
     console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
-    target_arch=None,
+    target_arch=target_arch_value,
     codesign_identity=None,
     entitlements_file=None,
     icon=icon_path
