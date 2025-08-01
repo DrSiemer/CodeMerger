@@ -112,6 +112,7 @@ jobs:
         with:
           name: CodeMerger-mac-intel-contents
           path: ./intel-contents
+
       - name: Download ARM artifact contents
         uses: actions/download-artifact@v4
         with:
@@ -121,19 +122,40 @@ jobs:
       - name: Create Universal Binary and Zip
         run: |
           FINAL_APP_PATH="dist/CodeMerger.app"
-          INTEL_EXEC="intel-contents/Contents/MacOS/CodeMerger"
-          ARM_EXEC="arm-contents/Contents/MacOS/CodeMerger"
+          INTEL_APP_PATH="intel-contents"
+          ARM_APP_PATH="arm-contents"
 
-          echo "Creating the final .app bundle structure..."
-          mkdir -p "${FINAL_APP_PATH}"
+          echo "Creating the final .app bundle structure from the ARM build..."
+          mkdir -p dist
+          cp -R "${ARM_APP_PATH}" "${FINAL_APP_PATH}"
 
-          echo "Using ARM artifact contents as the template..."
-          cp -R arm-contents/. "${FINAL_APP_PATH}/"
+          echo "Ensuring standard macOS application directories exist..."
+          mkdir -p "${FINAL_APP_PATH}/Contents/Extensions"
+          mkdir -p "${FINAL_APP_PATH}/Contents/Plugins"
 
-          echo "Combining Intel and ARM executables with lipo..."
-          lipo -create "${INTEL_EXEC}" "${ARM_EXEC}" -output "${FINAL_APP_PATH}/Contents/MacOS/CodeMerger"
+          echo "Finding and combining all architecture-specific binaries..."
+          # Find all Mach-O files (executables and libraries) in the Intel build.
+          # Then, for each one, create a universal binary with its ARM counterpart.
+          find "${INTEL_APP_PATH}/Contents" -type f -exec sh -c 'file -b "{}" | grep -q "Mach-O"' \; -print | while read INTEL_FILE; do
+            # Determine the relative path to find the corresponding files in other builds
+            REL_PATH="${INTEL_FILE#${INTEL_APP_PATH}/}"
+            ARM_FILE="${ARM_APP_PATH}/${REL_PATH}"
+            FINAL_FILE="${FINAL_APP_PATH}/${REL_PATH}"
 
-          echo "Verifying the new universal binary..."
+            if [ -f "${ARM_FILE}" ]; then
+              echo "Creating universal binary for: ${REL_PATH}"
+              # Use lipo to merge the Intel and ARM files into a single universal file
+              lipo -create "${INTEL_FILE}" "${ARM_FILE}" -output "${FINAL_FILE}"
+              # Set execute permissions on the final file if either of the source files had it
+              if [ -x "${INTEL_FILE}" ] || [ -x "${ARM_FILE}" ]; then
+                chmod +x "${FINAL_FILE}"
+              fi
+            else
+              echo "::warning:: No corresponding ARM file found for ${REL_PATH}. It will remain ARM-only."
+            fi
+          done
+
+          echo "Verifying the main universal binary..."
           lipo -info "${FINAL_APP_PATH}/Contents/MacOS/CodeMerger"
 
           echo "Zipping the universal app..."
