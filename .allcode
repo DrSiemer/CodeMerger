@@ -14,9 +14,8 @@
     "src/compact_mode.py",
     "codemerger.spec",
     "go.bat",
-    "go.sh",
     "requirements.txt",
-    ".github/workflows/mac-test.yml"
+    ".github/workflows/release.yml"
   ],
   "expanded_dirs": [
     ".github",

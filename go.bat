@@ -1,69 +1,143 @@
 @echo off
+setlocal
 
-REM --- Configuration ---
+REM Configuration
 set VENV_DIR=cm-venv
 set START_SCRIPT=src.codemerger
 set SPEC_FILE=codemerger.spec
 set FLAG=%1
 
-REM --- Environment Setup ---
+REM Environment Setup
 REM Check if the virtual environment is already active
 if "%VIRTUAL_ENV%"=="" (
     REM Check if the virtual environment directory exists
     if not exist "%VENV_DIR%\Scripts\activate" (
         echo Virtual environment not found. Creating a new one...
         python -m venv %VENV_DIR%
-
-        REM Activate the virtual environment
         call %VENV_DIR%\Scripts\activate
-
-        REM Install required packages from requirements.txt
         if exist requirements.txt (
             echo Installing required packages...
             pip install -r requirements.txt
-        ) else (
-            echo requirements.txt not found. Skipping package installation.
         )
     ) else (
-        REM Activate the virtual environment if it already exists
         echo Activating virtual environment...
         call %VENV_DIR%\Scripts\activate
     )
 )
 
-REM --- Command Handling ---
+REM Main Command Router
+if /I "%FLAG%"=="" goto :DefaultAction
+if /I "%FLAG%"=="cmd" goto :OpenCmd
+if /I "%FLAG%"=="f" goto :FreezeReqs
+if /I "%FLAG%"=="b" goto :BuildApp
+if /I "%FLAG%"=="r" goto :HandleRelease
+echo Unrecognized command: %FLAG%
+goto :eof
 
-REM Check for the 'cmd' flag to just open a command prompt
-if /I "%FLAG%"=="cmd" (
+
+:DefaultAction
+    echo Starting CodeMerger application...
+    python -m %START_SCRIPT%
+    goto :eof
+
+:OpenCmd
     echo Virtual environment activated. You are now in a new command prompt.
     cmd /k
-    exit /b
-)
+    goto :eof
 
-REM Update requirements.txt
-if /I "%FLAG%"=="f" (
+:FreezeReqs
     echo.
-    echo --- Writing requirements.txt ---
+    echo Writing requirements.txt
     pip freeze > requirements.txt
     echo Done.
-    exit /b
-)
+    goto :eof
 
-REM Check for the 'build' flag (case-insensitive)
-if /I "%FLAG%"=="b" (
+:BuildApp
     echo.
-    echo --- Starting PyInstaller Build ---
+    echo Starting PyInstaller Build
     echo Deleting old build folders...
-    rmdir /s /q dist
-    rmdir /s /q build
+    rmdir /s /q dist 2>nul
+    rmdir /s /q build 2>nul
     echo Running PyInstaller with %SPEC_FILE%...
     pyinstaller %SPEC_FILE%
     echo.
-    echo --- Build Complete! ---
+    echo Build Complete!
     echo Executable is located in the 'dist' folder.
-    exit /b
-)
+    goto :eof
 
-REM --- Default Action: Run the Python Script ---
-echo Starting CodeMerger application...
-python -m %START_SCRIPT%
+:HandleRelease
+    setlocal enabledelayedexpansion
+    echo.
+    echo Re-triggering GitHub Release Action
+
+    REM Parse the release comment from the command line
+    shift /1
+    set "COMMENT="
+    :ArgLoop
+    if "%~1"=="" goto EndArgLoop
+    if not defined COMMENT (
+        set "COMMENT=%~1"
+    ) else (
+        set "COMMENT=!COMMENT! %~1"
+    )
+    shift /1
+    goto ArgLoop
+    :EndArgLoop
+
+    if not defined COMMENT set "COMMENT=Re-triggering release build"
+    echo Release comment: !COMMENT!
+
+    REM Read version from file (Key=Value format)
+    if not exist "assets\version.txt" (
+        echo ERROR: assets\version.txt not found.
+        goto :eof
+    )
+    set "MAJOR_VER="
+    set "MINOR_VER="
+    set "REVISION_VER="
+    for /f "tokens=1,2 delims==" %%a in (assets\version.txt) do (
+        if /i "%%a"=="Major" set "MAJOR_VER=%%b"
+        if /i "%%a"=="Minor" set "MINOR_VER=%%b"
+        if /i "%%a"=="Revision" set "REVISION_VER=%%b"
+    )
+    if not defined MAJOR_VER ( echo ERROR: "Major" version not found in version.txt. & goto :eof )
+    if not defined MINOR_VER ( echo ERROR: "Minor" version not found in version.txt. & goto :eof )
+    if not defined REVISION_VER ( echo ERROR: "Revision" version not found in version.txt. & goto :eof )
+
+    set "VERSION=!MAJOR_VER!.!MINOR_VER!.!REVISION_VER!"
+    set "VERSION_TAG=v!VERSION!"
+    echo Found version tag: !VERSION_TAG!
+
+    REM Perform Git operations
+    echo Checking for existing remote tag...
+    git ls-remote --tags origin refs/tags/!VERSION_TAG! | findstr "refs/tags/!VERSION_TAG!" > nul
+    if %errorlevel% equ 0 (
+        echo Deleting remote tag !VERSION_TAG!...
+        git push origin --delete !VERSION_TAG!
+    ) else (
+        echo Remote tag !VERSION_TAG! does not exist. Skipping deletion.
+    )
+
+    echo Checking for existing local tag...
+    git rev-parse "!VERSION_TAG!" >nul 2>nul
+    if %errorlevel% equ 0 (
+        echo Deleting local tag !VERSION_TAG!...
+        git tag -d !VERSION_TAG!
+    )
+
+    REM Recreate and annotate the tag
+    echo Recreating annotated tag !VERSION_TAG!...
+    git tag -a "!VERSION_TAG!" -m "!COMMENT!"
+    if %errorlevel% neq 0 (
+        echo FATAL: Failed to create tag. Aborting.
+        endlocal
+        goto :eof
+    )
+
+    REM Push the new tag to remote
+    echo Pushing new tag !VERSION_TAG! to origin...
+    git push origin !VERSION_TAG!
+    echo.
+    echo Release Action Triggered!
+    endlocal
+    goto :eof
