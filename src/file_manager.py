@@ -106,21 +106,44 @@ class FileManagerWindow(Toplevel):
             self.tree.selection_set("")
 
     def load_allcode_config(self):
-        self.ordered_selection = []
-        self.expanded_dirs = set()
+        """
+        Loads the .allcode config, and crucially, cleans out any references
+        to files that no longer exist on the filesystem.
+        """
+        data = {}
+        try:
+            # First, try to read the file if it exists.
+            if os.path.isfile(self.allcode_path):
+                with open(self.allcode_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            # If the file is corrupt or unreadable, start with an empty config.
+            data = {}
 
-        if not os.path.isfile(self.allcode_path):
-            return
+        original_selection = data.get('selected_files', [])
+        self.expanded_dirs = set(data.get('expanded_dirs', []))
 
-        with open(self.allcode_path, 'r', encoding='utf-8') as f:
+        # Filter out files that no longer exist on disk.
+        cleaned_selection = [
+            f for f in original_selection
+            if os.path.isfile(os.path.join(self.base_dir, f))
+        ]
+
+        # If we removed any missing files, notify the user and update the .allcode file.
+        if len(cleaned_selection) < len(original_selection):
+            self.status_var.set("Cleaned missing files from .allcode")
+            data_to_save = {
+                "selected_files": cleaned_selection,
+                "expanded_dirs": sorted(list(self.expanded_dirs)),
+            }
             try:
-                data = json.load(f)
-                self.ordered_selection = data.get('selected_files', [])
-                self.expanded_dirs = set(data.get('expanded_dirs', []))
-            except json.JSONDecodeError:
-                # Handle corrupted .allcode file
-                self.ordered_selection = []
-                self.expanded_dirs = set()
+                with open(self.allcode_path, 'w', encoding='utf-8') as f_write:
+                    json.dump(data_to_save, f_write, indent=2)
+            except IOError as e:
+                # Handle cases where the file might be read-only.
+                self.status_var.set(f"Could not auto-clean .allcode (read-only?): {e}")
+
+        self.ordered_selection = cleaned_selection
 
     def populate_tree(self):
         def _has_relevant_files(path):
