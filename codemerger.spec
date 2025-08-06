@@ -13,7 +13,8 @@ a = Analysis(
     binaries=[],
     datas=data_files,
     hiddenimports=[
-        'PIL.ImageTk'
+        'PIL.ImageTk',
+        'tiktoken_ext.openai_public'
     ],
     hookspath=[],
     hooksconfig={},

@@ -5,6 +5,7 @@ import time
 import subprocess
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox, ttk
+import tiktoken
 
 from .utils import parse_gitignore, is_ignored
 from .constants import SUBTLE_HIGHLIGHT_COLOR
@@ -26,6 +27,7 @@ class FileManagerWindow(Toplevel):
         # Used to differentiate single and double clicks on the tree
         self.last_tree_click_time = 0
         self.last_clicked_item_id = None
+        self._recalculate_job = None
 
         self.allcode_path = os.path.join(self.base_dir, '.allcode')
         self.load_allcode_config()
@@ -48,7 +50,8 @@ class FileManagerWindow(Toplevel):
         self.tree_action_button.grid(row=2, column=0, sticky='ew', pady=(5, 0))
         self.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR)
 
-        Label(main_frame, text="Merge Order (Top to Bottom)").grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
+        self.merge_order_title_label = Label(main_frame, text="Merge Order")
+        self.merge_order_title_label.grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
         self.merge_order_list = Listbox(main_frame, activestyle='none')
         self.merge_order_list.grid(row=1, column=2, sticky='nsew', padx=(10, 0))
         list_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=self.merge_order_list.yview)
@@ -79,6 +82,7 @@ class FileManagerWindow(Toplevel):
         self.update_listbox_from_data()
         self.update_button_states()
         self.update_tree_action_button_state()
+        self.trigger_recalculation()
 
     def handle_tree_deselection_click(self, event):
         """Deselects a tree item if a click occurs in an empty area."""
@@ -101,7 +105,7 @@ class FileManagerWindow(Toplevel):
         original_selection = data.get('selected_files', [])
         self.expanded_dirs = set(data.get('expanded_dirs', []))
 
-        # Filter out files that no longer exist on disk.
+        # Filter out files that no longer exist on disk
         cleaned_selection = [
             f for f in original_selection
             if os.path.isfile(os.path.join(self.base_dir, f))
@@ -116,7 +120,7 @@ class FileManagerWindow(Toplevel):
                 with open(self.allcode_path, 'w', encoding='utf-8') as f_write:
                     json.dump(data_to_save, f_write, indent=2)
             except IOError as e:
-                # Handle cases where the file might be read-only.
+                # Handle cases where the file might be read-only
                 self.status_var.set(f"Could not auto-clean .allcode (read-only?): {e}")
 
         self.ordered_selection = cleaned_selection
@@ -224,15 +228,62 @@ class FileManagerWindow(Toplevel):
         current_time = time.time()
         time_diff = current_time - self.last_tree_click_time
 
-        # A double-click is a click on the same item within a short time frame.
+        # A double-click is a click on the same item within a short time frame
         if time_diff < 0.4 and item_id and item_id == self.last_clicked_item_id:
             self.toggle_selection_for_selected()
             self.last_tree_click_time = 0
             self.last_clicked_item_id = None
         else:
-            # Record this as a potential first click of a double-click.
+            # Record this as a potential first click of a double-click
             self.last_tree_click_time = current_time
             self.last_clicked_item_id = item_id
+
+    def trigger_recalculation(self):
+        """Schedules a token count recalculation, debouncing rapid calls."""
+        if self._recalculate_job:
+            self.after_cancel(self._recalculate_job)
+        # A small delay to batch rapid changes and keep the UI responsive
+        self._recalculate_job = self.after(250, self.recalculate_token_count)
+
+    def recalculate_token_count(self):
+        """
+        Reads all selected files, concatenates their content, counts the tokens,
+        and updates the UI label. This is run via `trigger_recalculation`.
+        """
+        self._recalculate_job = None # The job is now running, so clear the ID
+        num_files = len(self.ordered_selection)
+        file_text = "files" if num_files != 1 else "file"
+
+        if not num_files:
+            title = f"Merge Order (0 {file_text} selected, 0 tokens)"
+            self.merge_order_title_label.config(text=title)
+            return
+
+        all_content = []
+        for rel_path in self.ordered_selection:
+            full_path = os.path.join(self.base_dir, rel_path)
+            try:
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    all_content.append(f.read())
+            except FileNotFoundError:
+                # File might have been deleted, just skip it
+                continue
+
+        full_text = "\n".join(all_content)
+
+        try:
+            # cl100k_base is the encoding for gpt-4, gpt-3.5-turbo, and text-embedding-ada-002
+            encoding = tiktoken.get_encoding("cl100k_base")
+            # Using disallowed_special=() to count all tokens without errors
+            total_tokens = len(encoding.encode(full_text, disallowed_special=()))
+            # Format tokens with a dot for thousands, as per the example
+            formatted_tokens = f"{total_tokens:,}".replace(',', '.')
+            title = f"Merge Order ({num_files} {file_text} selected, {formatted_tokens} tokens)"
+        except Exception:
+            # If tiktoken fails, display an error in the label
+            title = f"Merge Order ({num_files} {file_text} selected, token count error)"
+
+        self.merge_order_title_label.config(text=title)
 
     def update_checkbox_display(self, item_id):
         """Updates the text of a tree item to show a checked or unchecked box."""
@@ -286,6 +337,7 @@ class FileManagerWindow(Toplevel):
 
         self.update_checkbox_display(item_id)
         self.update_listbox_from_data()
+        self.trigger_recalculation()
         self.sync_highlights()
         self.update_button_states()
         self.update_tree_action_button_state()
@@ -293,7 +345,7 @@ class FileManagerWindow(Toplevel):
 
     def open_selected_file(self, event=None):
         """Opens the selected file using the configured default editor or the system's default."""
-        # This block prevents a double-click in an empty listbox area from opening a file.
+        # This block prevents a double-click in an empty listbox area from opening a file
         if event:
             clicked_index = self.merge_order_list.nearest(event.y)
             if clicked_index == -1: return "break"
@@ -313,7 +365,7 @@ class FileManagerWindow(Toplevel):
             if self.default_editor and os.path.isfile(self.default_editor):
                 subprocess.Popen([self.default_editor, full_path])
             else:
-                # Fall back to the OS default action.
+                # Fall back to the OS default action
                 if sys.platform == "win32":
                     os.startfile(full_path)
                 elif sys.platform == "darwin": # macOS
@@ -344,10 +396,11 @@ class FileManagerWindow(Toplevel):
         if index > 0:
             path = self.ordered_selection.pop(index)
             self.ordered_selection.insert(index - 1, path)
-            # This manual UI update is critical for performance and to preserve selection state.
+            # This manual UI update is critical for performance and to preserve selection state
             self.merge_order_list.delete(index)
             self.merge_order_list.insert(index - 1, path)
             self.merge_order_list.select_set(index - 1)
+            self.trigger_recalculation()
             self.sync_highlights()
             self.update_button_states()
 
@@ -360,10 +413,11 @@ class FileManagerWindow(Toplevel):
         if index < len(self.ordered_selection) - 1:
             path = self.ordered_selection.pop(index)
             self.ordered_selection.insert(index + 1, path)
-            # This manual UI update is critical for performance and to preserve selection state.
+            # This manual UI update is critical for performance and to preserve selection state
             self.merge_order_list.delete(index)
             self.merge_order_list.insert(index + 1, path)
             self.merge_order_list.select_set(index + 1)
+            self.trigger_recalculation()
             self.sync_highlights()
             self.update_button_states()
 
@@ -380,6 +434,7 @@ class FileManagerWindow(Toplevel):
             self.update_checkbox_display(item_id)
 
         self.update_listbox_from_data()
+        self.trigger_recalculation()
         self.sync_highlights()
         self.update_button_states()
         self.update_tree_action_button_state()
