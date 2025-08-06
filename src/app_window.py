@@ -2,7 +2,7 @@ import os
 import json
 import pyperclip
 import time
-from tkinter import Tk, Toplevel, Frame, Label, Button, StringVar, messagebox, filedialog, TclError
+from tkinter import Tk, Toplevel, Frame, Label, Button, StringVar, messagebox, TclError
 from PIL import Image, ImageTk
 
 from .utils import load_config, save_config, load_active_file_extensions
@@ -10,6 +10,8 @@ from .file_manager import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
+from .merger import generate_output_string
+from .directory_dialog import DirectoryDialog
 from .constants import RECENT_DIRS_MAX
 from .paths import ICON_PATH, COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH
 from .compact_mode import CompactMode
@@ -150,7 +152,7 @@ class App(Tk):
         if path and os.path.isdir(path):
             self.active_dir.set(path)
         else:
-            self.active_dir.set("No directory selected.")
+            self.active_dir.set("No directory selected")
 
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file"""
@@ -279,7 +281,7 @@ class App(Tk):
         # Enter compact mode: Animate from full window to widget
         else:
             if not self.compact_mode_image_up or not self.compact_mode_close_image:
-                messagebox.showerror("Asset Error", "Could not load compact mode graphics.")
+                messagebox.showerror("Asset Error", "Could not load compact mode graphics")
                 return
 
             self.in_compact_mode = True
@@ -331,7 +333,7 @@ class App(Tk):
     def on_settings_closed(self):
         self.config = load_config()
         self.default_editor = self.config.get('default_editor', '')
-        self.status_var.set("Settings updated.")
+        self.status_var.set("Settings updated")
 
     def open_settings_window(self):
         SettingsWindow(self, on_close_callback=self.on_settings_closed)
@@ -339,7 +341,7 @@ class App(Tk):
     def open_wrapper_text_window(self):
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid directory first.")
+            messagebox.showerror("Error", "Please select a valid directory first")
             return
         wt_window = WrapperTextWindow(self, base_dir, self.status_var, on_close_callback=self.update_button_states)
         self.wait_window(wt_window)
@@ -349,14 +351,14 @@ class App(Tk):
 
     def reload_active_extensions(self):
         self.file_extensions = load_active_file_extensions()
-        self.status_var.set("Filetype configuration updated.")
+        self.status_var.set("Filetype configuration updated")
 
     def remove_recent_directory(self, path_to_remove):
         if path_to_remove in self.recent_dirs:
             self.recent_dirs.remove(path_to_remove)
             self.config['recent_directories'] = self.recent_dirs
             save_config(self.config)
-            self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent directories.")
+            self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent directories")
 
     def update_active_dir(self, new_dir):
         if not new_dir or not os.path.isdir(new_dir):
@@ -379,131 +381,36 @@ class App(Tk):
             self.config['recent_directories'] = self.recent_dirs
             save_config(self.config)
 
-        dialog = Toplevel(self)
-        dialog.title("Select Directory")
-        dialog.transient(self)
-        dialog.grab_set()
-        dialog.configure(bg=self.app_bg_color)
-
-        screen_width = self.winfo_screenwidth()
-        dialog_width = max(400, min(int(screen_width * 0.5), 800))
-
-        # Determine initial message and height based on whether recent directories exist
-        if self.recent_dirs:
-            message = "Select a recent directory or browse for a new one."
-            dialog_height = 280
-        else:
-            message = "Browse for a directory to get started."
-            dialog_height = 120
-
-        dialog.geometry(f"{dialog_width}x{dialog_height}")
-        info_label = Label(dialog, text=message, padx=10, pady=10, bg=self.app_bg_color)
-        info_label.pack(pady=(0, 5))
-
-        def select_and_close(path):
-            """Final action: update active dir and close the selection dialog"""
-            self.update_active_dir(path)
-            dialog.destroy()
-
-        def browse_for_new_dir():
-            """Opens file dialog and processes the result, handling cancellation"""
-            new_path = filedialog.askdirectory(title="Select Project Directory", parent=dialog)
-            if new_path:  # Only proceed if a directory was actually selected
-                select_and_close(new_path)
-
-        # Create a frame for recent directories; it will be shown or hidden as needed
-        recent_dirs_frame = Frame(dialog, bg=self.app_bg_color)
-
-        def remove_and_update_dialog(path_to_remove, widget_to_destroy):
-            """Removes a recent directory and dynamically updates the dialog's UI"""
-            self.remove_recent_directory(path_to_remove)
-            widget_to_destroy.destroy()
-            if not self.recent_dirs:
-                info_label.config(text="Browse for a directory to get started.")
-                dialog.geometry(f"{dialog_width}x120")
-                recent_dirs_frame.pack_forget()  # Hide the frame for a clean layout
-
-        # Populate Recent Directories List (if any)
-        if self.recent_dirs:
-            recent_dirs_frame.pack(fill='x', expand=False, pady=5)
-            for path in self.recent_dirs:
-                entry_frame = Frame(recent_dirs_frame, bg=self.app_bg_color)
-                entry_frame.pack(fill='x', padx=10, pady=2)
-                btn = Button(entry_frame, text=path, command=lambda p=path: select_and_close(p), anchor='w', justify='left')
-                btn.pack(side='left', expand=True, fill='x')
-                remove_btn = Button(entry_frame, text="X", command=lambda p=path, w=entry_frame: remove_and_update_dialog(p, w), width=3)
-                remove_btn.pack(side='left', padx=(5, 0))
-
-        # Browse Button
-        browse_btn = Button(dialog, text="Browse for Directory...", command=browse_for_new_dir)
-        browse_btn.pack(pady=10, padx=10)
+        DirectoryDialog(
+            parent=self,
+            app_bg_color=self.app_bg_color,
+            recent_dirs=self.recent_dirs,
+            on_select_callback=self.update_active_dir,
+            on_remove_callback=self.remove_recent_directory
+        )
 
     def _perform_copy(self, use_wrapper: bool):
         """
-        Core logic for merging files and copying to clipboard.
-        Can operate in 'merged' or 'wrapped' mode
+        Coordinates the file merging process and copies the result to the clipboard
         """
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid directory first.")
-            self.status_var.set("Error: Invalid directory.")
-            return
-
-        config_path = os.path.join(base_dir, '.allcode')
-        if not os.path.isfile(config_path):
-            messagebox.showerror("Error", f"No .allcode file found in {base_dir}")
-            self.status_var.set("Error: .allcode file not found.")
+            messagebox.showerror("Error", "Please select a valid directory first")
+            self.status_var.set("Error: Invalid directory")
             return
 
         try:
-            with open(config_path, 'r', encoding='utf-8-sig') as f:
-                data = json.load(f)
-
-            final_ordered_list = data.get('selected_files', [])
-            if not final_ordered_list:
-                self.status_var.set("No files selected to copy.")
-                return
-
-            output_blocks = []
-            skipped_files = []
-            for path in final_ordered_list:
-                full_path = os.path.join(base_dir, path)
-                if not os.path.isfile(full_path):
-                    skipped_files.append(path)
-                    continue
-                with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as code_file:
-                    content = code_file.read()
-                output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
-
-            merged_code = '\n\n\n'.join(output_blocks)
-
-            if use_wrapper:
-                intro_text = data.get('intro_text', '').strip()
-                outro_text = data.get('outro_text', '').strip()
-                merged_code_with_header = f"Here's all the relevant code:\n\n{merged_code}"
-
-                final_parts = []
-                if intro_text:
-                    final_parts.append(intro_text)
-                final_parts.append(merged_code_with_header)
-                if outro_text:
-                    final_parts.append(outro_text)
-
-                final_content = '\n\n\n'.join(final_parts)
-                status_message = "Wrapped code copied to clipboard."
-            else:
-                final_content = f"Here's all the most recent code:\n\n{merged_code}"
-                status_message = "Merged code copied to clipboard."
-
-            pyperclip.copy(final_content)
-
-            if skipped_files:
-                status_message += f" Skipped {len(skipped_files)} missing file(s)."
+            final_content, status_message = generate_output_string(base_dir, use_wrapper)
+            if final_content is not None:
+                pyperclip.copy(final_content)
             self.status_var.set(status_message)
 
+        except FileNotFoundError:
+            messagebox.showerror("Error", f"No .allcode file found in {base_dir}")
+            self.status_var.set("Error: .allcode file not found")
         except (json.JSONDecodeError, IOError) as e:
             messagebox.showerror("Error", f"Could not read .allcode file. Is it empty or corrupt?\n\nDetails: {e}")
-            self.status_var.set("Error: Could not read .allcode file.")
+            self.status_var.set("Error: Could not read .allcode file")
         except Exception as e:
             messagebox.showerror("Merging Error", f"An error occurred: {e}")
             self.status_var.set(f"Error during merging: {e}")
@@ -519,7 +426,7 @@ class App(Tk):
     def manage_files(self):
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid directory first.")
+            messagebox.showerror("Error", "Please select a valid directory first")
             return
         fm_window = FileManagerWindow(self, base_dir, self.status_var, self.file_extensions, self.default_editor)
         self.wait_window(fm_window)
