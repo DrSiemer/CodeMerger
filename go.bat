@@ -67,6 +67,28 @@ goto :eof
     echo.
     echo Handling Release Tag
 
+    REM Check if on master branch
+    set "CURRENT_BRANCH="
+    for /f "tokens=*" %%b in ('git branch --show-current 2^>nul') do set "CURRENT_BRANCH=%%b"
+
+    if not defined CURRENT_BRANCH (
+        echo ERROR: Could not determine the current git branch.
+        echo Make sure this is a valid git repository. Aborting.
+        endlocal
+        goto :eof
+    )
+
+    if /I not "!CURRENT_BRANCH!"=="master" (
+        echo.
+        echo WARNING: You are not on the 'master' branch.
+        echo Current branch is '!CURRENT_BRANCH!'.
+        echo Releases should only be made from the 'master' branch.
+        echo.
+        echo Aborting release process.
+        endlocal
+        goto :eof
+    )
+
     REM Get optional release comment
     shift /1
     set "COMMENT="
