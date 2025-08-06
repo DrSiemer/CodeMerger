@@ -69,7 +69,18 @@ class FileManagerWindow(Toplevel):
         self.move_down_button = Button(move_buttons_frame, text="↓ Move Down", command=self.move_down, state='disabled')
         self.move_down_button.pack(side='left', expand=True, fill='x', padx=(2, 0))
 
-        Button(self, text="Save and Close", command=self.save_and_close).pack(pady=10)
+        # --- Bulk Action Buttons ---
+        bulk_action_frame = Frame(main_frame)
+        bulk_action_frame.grid(row=3, column=0, columnspan=4, sticky='ew', pady=(20, 0))
+
+        self.select_all_button = Button(bulk_action_frame, text="Select all", command=self.select_all_files)
+        self.select_all_button.pack(side='left')
+
+        self.remove_all_button = Button(bulk_action_frame, text="Remove all", command=self.remove_all_files)
+        self.remove_all_button.pack(side='right')
+
+        self.save_and_close_button = Button(bulk_action_frame, text="Save and Close", command=self.save_and_close)
+        self.save_and_close_button.pack()
 
         self.tree.bind('<Button-1>', self.handle_tree_click)
         self.tree.bind('<Return>', self.toggle_selection_for_selected) # For accessibility
@@ -472,6 +483,68 @@ class FileManagerWindow(Toplevel):
         self.sync_highlights()
         self.update_button_states()
         self.update_tree_action_button_state()
+
+    def select_all_files(self):
+        """Adds all unselected files from the tree to the merge list, in tree order."""
+        all_tree_files = []
+
+        def _traverse(parent_id):
+            for item_id in self.tree.get_children(parent_id):
+                item_info = self.item_map.get(item_id, {})
+                if item_info.get('type') == 'file':
+                    all_tree_files.append(item_info['path'])
+                elif item_info.get('type') == 'dir':
+                    _traverse(item_id)
+
+        _traverse('')
+
+        added_count = 0
+        current_selection_set = set(self.ordered_selection)
+
+        for path in all_tree_files:
+            if path not in current_selection_set:
+                self.ordered_selection.append(path)
+                item_id = self.path_to_item_id.get(path)
+                if item_id:
+                    self.update_checkbox_display(item_id)
+                added_count += 1
+
+        if added_count > 0:
+            self.update_listbox_from_data()
+            self.trigger_recalculation()
+            self.update_tree_action_button_state()
+            self.status_var.set(f"Added {added_count} file(s) to the merge list")
+        else:
+            self.status_var.set("No new files to add")
+
+    def remove_all_files(self):
+        """Removes all files from the merge list after a confirmation."""
+        if not self.ordered_selection:
+            self.status_var.set("Merge list is already empty")
+            return
+
+        if not messagebox.askyesno(
+            "Confirm Removal",
+            "Are you sure you want to remove all files from the merge list?",
+            parent=self
+        ):
+            return
+
+        paths_to_update = list(self.ordered_selection)
+        removed_count = len(paths_to_update)
+        self.ordered_selection.clear()
+
+        for path in paths_to_update:
+            if path in self.path_to_item_id:
+                item_id = self.path_to_item_id[path]
+                self.update_checkbox_display(item_id)
+
+        self.update_listbox_from_data()
+        self.trigger_recalculation()
+        self.sync_highlights()
+        self.update_button_states()
+        self.update_tree_action_button_state()
+        self.status_var.set(f"Removed {removed_count} file(s) from the merge list")
 
     def save_and_close(self):
         """Saves the selection and order to .allcode and closes the window."""
