@@ -1,5 +1,6 @@
 import os
 import json
+import tiktoken
 
 def generate_output_string(base_dir, use_wrapper):
     """
@@ -52,3 +53,32 @@ def generate_output_string(base_dir, use_wrapper):
         status_message += f". Skipped {len(skipped_files)} missing file(s)"
 
     return final_content, status_message
+
+def recalculate_token_count(base_dir, selected_files):
+    """
+    Reads selected files, concatenates their content, and counts the tokens
+    """
+    if not selected_files:
+        return 0
+
+    all_content = []
+    for rel_path in selected_files:
+        full_path = os.path.join(base_dir, rel_path)
+        try:
+            with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
+                all_content.append(f.read())
+        except FileNotFoundError:
+            # File might have been deleted, just skip it
+            continue
+
+    full_text = "\n".join(all_content)
+
+    try:
+        # cl100k_base is the encoding for gpt-4, gpt-3.5-turbo, and text-embedding-ada-002
+        encoding = tiktoken.get_encoding("cl100k_base")
+        # Using disallowed_special=() to count all tokens without errors
+        total_tokens = len(encoding.encode(full_text, disallowed_special=()))
+        return total_tokens
+    except Exception:
+        # If tiktoken fails for any reason, return -1 to indicate an error
+        return -1

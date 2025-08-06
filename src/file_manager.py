@@ -1,14 +1,15 @@
 import os
-import json
 import sys
 import time
 import subprocess
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox, ttk
-import tiktoken
 
-from .utils import parse_gitignore, is_ignored
+from .utils import parse_gitignore
 from .constants import SUBTLE_HIGHLIGHT_COLOR
+from .project_config import ProjectConfig
+from .file_tree_builder import build_file_tree_data
+from .merger import recalculate_token_count
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, base_dir, status_var, file_extensions, default_editor):
@@ -28,11 +29,15 @@ class FileManagerWindow(Toplevel):
         self.last_tree_click_time = 0
         self.last_clicked_item_id = None
         self._recalculate_job = None
-        self.cached_token_data = None
         self.current_total_tokens = 0
 
-        self.allcode_path = os.path.join(self.base_dir, '.allcode')
-        self.load_allcode_config()
+        self.project_config = ProjectConfig(self.base_dir)
+        files_were_cleaned = self.project_config.load()
+        if files_were_cleaned:
+            self.status_var.set("Cleaned missing files from .allcode")
+
+        self.ordered_selection = self.project_config.selected_files
+        self.expanded_dirs = self.project_config.expanded_dirs
         self.gitignore_patterns = parse_gitignore(self.base_dir)
 
         main_frame = Frame(self)
@@ -95,21 +100,22 @@ class FileManagerWindow(Toplevel):
         self.update_listbox_from_data()
         self.update_button_states()
         self.update_tree_action_button_state()
-        self._update_title_from_cache()
-        self.trigger_recalculation()
+        self._update_title(self.project_config.total_tokens)
+        if files_were_cleaned:
+            self.trigger_recalculation()
 
-    def _update_title_from_cache(self):
-        """Updates the title with cached token data if available"""
-        if not self.cached_token_data:
-            return
-
-        num_files = self.cached_token_data['files']
-        total_tokens = self.cached_token_data['tokens']
+    def _update_title(self, total_tokens):
+        """Updates the title with the provided token count"""
         self.current_total_tokens = total_tokens
-
+        num_files = len(self.ordered_selection)
         file_text = "files" if num_files != 1 else "file"
-        formatted_tokens = f"{total_tokens:,}".replace(',', '.')
-        title = f"Merge Order ({num_files} {file_text} selected, {formatted_tokens} tokens)"
+
+        if total_tokens >= 0:
+            formatted_tokens = f"{total_tokens:,}".replace(',', '.')
+            title = f"Merge Order ({num_files} {file_text} selected, {formatted_tokens} tokens)"
+        else:
+            title = f"Merge Order ({num_files} {file_text} selected, token count error)"
+
         self.merge_order_title_label.config(text=title)
 
     def handle_tree_deselection_click(self, event):
@@ -117,97 +123,26 @@ class FileManagerWindow(Toplevel):
         if not self.tree.identify_row(event.y) and self.tree.selection():
             self.tree.selection_set("")
 
-    def load_allcode_config(self):
-        """
-        Loads the .allcode config, and crucially, cleans out any references
-        to files that no longer exist on the filesystem
-        """
-        data = {}
-        try:
-            if os.path.isfile(self.allcode_path):
-                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
-                    data = json.load(f)
-        except (json.JSONDecodeError, IOError):
-            data = {}
-
-        original_selection = data.get('selected_files', [])
-        self.expanded_dirs = set(data.get('expanded_dirs', []))
-
-        # Filter out files that no longer exist on disk
-        cleaned_selection = [
-            f for f in original_selection
-            if os.path.isfile(os.path.join(self.base_dir, f))
-        ]
-
-        if len(cleaned_selection) < len(original_selection):
-            self.status_var.set("Cleaned missing files from .allcode")
-            self.cached_token_data = None
-
-            # Rebuild the dictionary to control key order and omit invalid token count
-            data_to_save = {
-                "expanded_dirs": sorted(list(self.expanded_dirs)),
-                "selected_files": cleaned_selection,
-                "intro_text": data.get('intro_text', ''),
-                "outro_text": data.get('outro_text', '')
-            }
-
-            try:
-                with open(self.allcode_path, 'w', encoding='utf-8') as f_write:
-                    json.dump(data_to_save, f_write, indent=2)
-            except IOError as e:
-                self.status_var.set(f"Could not auto-clean .allcode (read-only?): {e}")
-        else:
-            # The file list is intact, so the cached token count is trustworthy
-            cached_tokens = data.get('total_tokens')
-            if isinstance(cached_tokens, int):
-                self.cached_token_data = {
-                    'tokens': cached_tokens,
-                    'files': len(cleaned_selection)
-                }
-
-        self.ordered_selection = cleaned_selection
-
     def populate_tree(self):
-        def _has_relevant_files(path):
-            """Recursively checks if a directory contains any files matching the extension list"""
-            for entry in os.scandir(path):
-                if is_ignored(entry.path, self.base_dir, self.gitignore_patterns) or entry.name == 'allcode.txt':
-                    continue
-                if entry.is_dir():
-                    if _has_relevant_files(entry.path):
-                        return True
-                elif entry.is_file() and os.path.splitext(entry.name)[1].lower() in self.file_extensions:
-                    return True
-            return False
+        """Populates the treeview using data from the file_tree_builder"""
+        tree_data = build_file_tree_data(self.base_dir, self.file_extensions, self.gitignore_patterns)
 
-        def _walk_dir(parent_id, path):
-            """Walks a directory and adds its contents to the treeview"""
-            try:
-                # Sort entries to show folders first, then files, all alphabetically
-                entries = sorted(os.scandir(path), key=lambda e: (e.is_file(), e.name.lower()))
-            except OSError:
-                return
-
-            for entry in entries:
-                if is_ignored(entry.path, self.base_dir, self.gitignore_patterns) or entry.name == 'allcode.txt':
-                    continue
-
-                rel_path = os.path.relpath(entry.path, self.base_dir).replace('\\', '/')
-
-                if entry.is_dir():
-                    if _has_relevant_files(entry.path):
-                        is_open = rel_path in self.expanded_dirs
-                        dir_id = self.tree.insert(parent_id, 'end', text=entry.name, open=is_open)
-                        self.item_map[dir_id] = {'path': rel_path, 'type': 'dir'}
-                        self.path_to_item_id[rel_path] = dir_id
-                        _walk_dir(dir_id, entry.path)
-                elif entry.is_file() and os.path.splitext(entry.name)[1].lower() in self.file_extensions:
-                    item_id = self.tree.insert(parent_id, 'end', text=f" {entry.name}", tags=('file',))
-                    self.item_map[item_id] = {'path': rel_path, 'type': 'file'}
-                    self.path_to_item_id[rel_path] = item_id
+        def _insert_nodes(parent_id, nodes):
+            for node in nodes:
+                if node['type'] == 'dir':
+                    is_open = node['path'] in self.expanded_dirs
+                    dir_id = self.tree.insert(parent_id, 'end', text=node['name'], open=is_open)
+                    self.item_map[dir_id] = {'path': node['path'], 'type': 'dir'}
+                    self.path_to_item_id[node['path']] = dir_id
+                    _insert_nodes(dir_id, node.get('children', []))
+                elif node['type'] == 'file':
+                    item_id = self.tree.insert(parent_id, 'end', text=f" {node['name']}", tags=('file',))
+                    self.item_map[item_id] = {'path': node['path'], 'type': 'file'}
+                    self.path_to_item_id[node['path']] = item_id
                     self.update_checkbox_display(item_id)
 
-        _walk_dir('', self.base_dir)
+        _insert_nodes('', tree_data)
+
 
     def on_tree_selection_change(self, event):
         """When a tree item is selected, deselect any listbox item and sync highlights"""
@@ -285,50 +220,13 @@ class FileManagerWindow(Toplevel):
         if self._recalculate_job:
             self.after_cancel(self._recalculate_job)
         # A small delay to batch rapid changes and keep the UI responsive
-        self._recalculate_job = self.after(250, self.recalculate_token_count)
+        self._recalculate_job = self.after(250, self.run_token_recalculation)
 
-    def recalculate_token_count(self):
-        """
-        Reads all selected files, concatenates their content, counts the tokens,
-        and updates the UI label. This is run via `trigger_recalculation`
-        """
+    def run_token_recalculation(self):
+        """Calls the merger module to count tokens and updates the UI"""
         self._recalculate_job = None # The job is now running, so clear the ID
-        num_files = len(self.ordered_selection)
-        file_text = "files" if num_files != 1 else "file"
-        total_tokens = 0
-
-        if not num_files:
-            title = f"Merge Order (0 {file_text} selected, 0 tokens)"
-            self.current_total_tokens = 0
-            self.merge_order_title_label.config(text=title)
-            return
-
-        all_content = []
-        for rel_path in self.ordered_selection:
-            full_path = os.path.join(self.base_dir, rel_path)
-            try:
-                with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
-                    all_content.append(f.read())
-            except FileNotFoundError:
-                # File might have been deleted, just skip it
-                continue
-
-        full_text = "\n".join(all_content)
-
-        try:
-            # cl100k_base is the encoding for gpt-4, gpt-3.5-turbo, and text-embedding-ada-002
-            encoding = tiktoken.get_encoding("cl100k_base")
-            # Using disallowed_special=() to count all tokens without errors
-            total_tokens = len(encoding.encode(full_text, disallowed_special=()))
-            # Format tokens with a dot for thousands, as per the example
-            formatted_tokens = f"{total_tokens:,}".replace(',', '.')
-            title = f"Merge Order ({num_files} {file_text} selected, {formatted_tokens} tokens)"
-        except Exception:
-            # If tiktoken fails, display an error in the label
-            title = f"Merge Order ({num_files} {file_text} selected, token count error)"
-
-        self.current_total_tokens = total_tokens
-        self.merge_order_title_label.config(text=title)
+        total_tokens = recalculate_token_count(self.base_dir, self.ordered_selection)
+        self._update_title(total_tokens)
 
     def update_checkbox_display(self, item_id):
         """Updates the text of a tree item to show a checked or unchecked box"""
@@ -403,7 +301,7 @@ class FileManagerWindow(Toplevel):
         relative_path = self.merge_order_list.get(selection[0])
         full_path = os.path.join(self.base_dir, relative_path)
         if not os.path.isfile(full_path):
-            messagebox.showwarning("File Not Found", f"The file '{relative_path}' could not be found.", parent=self)
+            messagebox.showwarning("File Not Found", f"The file '{relative_path}' could not be found", parent=self)
             return "break"
 
         try:
@@ -418,7 +316,7 @@ class FileManagerWindow(Toplevel):
                 else: # linux
                     subprocess.call(['xdg-open', full_path])
         except (AttributeError, FileNotFoundError):
-            messagebox.showinfo("Unsupported Action", "Could not open file with the system default.\nPlease configure a default editor in Settings.", parent=self)
+            messagebox.showinfo("Unsupported Action", "Could not open file with the system default\nPlease configure a default editor in Settings", parent=self)
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {e}", parent=self)
         return "break"
@@ -548,29 +446,15 @@ class FileManagerWindow(Toplevel):
 
     def save_and_close(self):
         """Saves the selection and order to .allcode and closes the window"""
-        existing_data = {}
-        try:
-            if os.path.isfile(self.allcode_path):
-                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
-                    existing_data = json.load(f)
-        except (json.JSONDecodeError, IOError):
-            pass # Overwrite if corrupt
-
-        expanded_dirs = sorted([
+        expanded_dirs = [
             info['path'] for item_id, info in self.item_map.items()
             if info.get('type') == 'dir' and self.tree.item(item_id, 'open')
-        ])
+        ]
 
-        # Build the dictionary in the desired order
-        final_data = {
-            "expanded_dirs": expanded_dirs,
-            "selected_files": self.ordered_selection,
-            "total_tokens": self.current_total_tokens,
-            "intro_text": existing_data.get('intro_text', ''),
-            "outro_text": existing_data.get('outro_text', '')
-        }
-
-        with open(self.allcode_path, 'w', encoding='utf-8') as f:
-            json.dump(final_data, f, indent=2)
+        self.project_config.save(
+            self.ordered_selection,
+            set(expanded_dirs),
+            self.current_total_tokens
+        )
         self.status_var.set("File selection and order saved to .allcode")
         self.destroy()
