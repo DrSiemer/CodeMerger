@@ -51,7 +51,6 @@ class App(Tk):
 
         self.active_dir = StringVar()
         self.active_dir.trace_add('write', self.update_button_states)
-        self.set_active_dir_display(active_dir_path)
 
         self.recent_dirs = self.config.get('recent_directories', [])
 
@@ -107,7 +106,8 @@ class App(Tk):
         status_bar = Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w')
         status_bar.pack(side='bottom', fill='x')
 
-        self.update_button_states()
+        # Set the active directory
+        self.set_active_dir_display(active_dir_path)
 
     def load_compact_mode_images(self):
         """Loads and prepares the compact mode graphics."""
@@ -157,6 +157,7 @@ class App(Tk):
         is_dir_active = os.path.isdir(self.active_dir.get())
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
         copy_buttons_state = 'disabled'
+        has_wrapper_text = False
 
         if hasattr(self, 'manage_files_button'):
             self.manage_files_button.config(state=dir_dependent_state)
@@ -172,6 +173,11 @@ class App(Tk):
                             data = json.load(f)
                             if data.get('selected_files'):
                                 copy_buttons_state = 'normal'
+                            # Check for wrapper text
+                            intro = data.get('intro_text', '').strip()
+                            outro = data.get('outro_text', '').strip()
+                            if intro or outro:
+                                has_wrapper_text = True
                 except (json.JSONDecodeError, IOError):
                     pass
 
@@ -179,6 +185,18 @@ class App(Tk):
             self.copy_merged_button.config(state=copy_buttons_state)
         if hasattr(self, 'copy_wrapped_button'):
             self.copy_wrapped_button.config(state=copy_buttons_state)
+
+        # Update button layout based on wrapper text
+        self.copy_wrapped_button.pack_forget()
+        self.copy_merged_button.pack_forget()
+
+        if has_wrapper_text:
+            # Show "Copy Wrapped" and adjust "Copy Merged" to original layout
+            self.copy_wrapped_button.pack(side='left', padx=(0, 5))
+            self.copy_merged_button.pack(side='left', expand=True, fill='x', padx=(5, 0))
+        else:
+            # Hide "Copy Wrapped" and make "Copy Merged" full-width
+            self.copy_merged_button.pack(expand=True, fill='x')
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
         """Helper method to animate the main window's geometry and alpha."""
@@ -323,7 +341,7 @@ class App(Tk):
         if not os.path.isdir(base_dir):
             messagebox.showerror("Error", "Please select a valid directory first.")
             return
-        wt_window = WrapperTextWindow(self, base_dir, self.status_var)
+        wt_window = WrapperTextWindow(self, base_dir, self.status_var, on_close_callback=self.update_button_states)
         self.wait_window(wt_window)
 
     def open_filetypes_manager(self):
