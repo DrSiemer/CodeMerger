@@ -65,6 +65,22 @@ class CompactMode(tk.Toplevel):
             pady=(0, BORDER_WIDTH)
         )
 
+        # --- Tiny "Copy Wrapped" Button ---
+        self.wrapped_button = tk.Button(
+            border_frame,
+            text="W",
+            font=('Helvetica', 8, 'bold'),
+            bg="white",
+            fg="black",
+            bd=1,
+            relief="solid",
+            cursor="hand2",
+            command=self.copy_wrapped
+        )
+        # Place the button in the bottom-right corner, on top of the main button area
+        self.wrapped_button.place(relx=1.0, rely=1.0, x=-2, y=-2, anchor='se', width=18, height=18)
+
+
         # --- Bindings ---
         # Drag functionality is bound to the move bar
         self.move_bar.bind("<ButtonPress-1>", self.on_press_drag)
@@ -81,6 +97,12 @@ class CompactMode(tk.Toplevel):
     def close_window(self, event=None):
         """Signals the parent app to close this window and show the main one."""
         self.parent.toggle_compact_mode()
+
+    def copy_wrapped(self):
+        """Triggers the parent's copy_wrapped_code function with visual feedback."""
+        self.wrapped_button.config(relief="sunken")
+        self.parent.copy_wrapped_code()
+        self.after(100, lambda: self.wrapped_button.config(relief="solid"))
 
     def on_press_drag(self, event):
         """Records the initial click position on the move bar."""
