@@ -99,7 +99,7 @@ class FileManagerWindow(Toplevel):
         self.trigger_recalculation()
 
     def _update_title_from_cache(self):
-        """Updates the title with cached token data if available."""
+        """Updates the title with cached token data if available"""
         if not self.cached_token_data:
             return
 
@@ -113,19 +113,19 @@ class FileManagerWindow(Toplevel):
         self.merge_order_title_label.config(text=title)
 
     def handle_tree_deselection_click(self, event):
-        """Deselects a tree item if a click occurs in an empty area."""
+        """Deselects a tree item if a click occurs in an empty area"""
         if not self.tree.identify_row(event.y) and self.tree.selection():
             self.tree.selection_set("")
 
     def load_allcode_config(self):
         """
         Loads the .allcode config, and crucially, cleans out any references
-        to files that no longer exist on the filesystem.
+        to files that no longer exist on the filesystem
         """
         data = {}
         try:
             if os.path.isfile(self.allcode_path):
-                with open(self.allcode_path, 'r', encoding='utf-8') as f:
+                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     data = json.load(f)
         except (json.JSONDecodeError, IOError):
             data = {}
@@ -169,7 +169,7 @@ class FileManagerWindow(Toplevel):
 
     def populate_tree(self):
         def _has_relevant_files(path):
-            """Recursively checks if a directory contains any files matching the extension list."""
+            """Recursively checks if a directory contains any files matching the extension list"""
             for entry in os.scandir(path):
                 if is_ignored(entry.path, self.base_dir, self.gitignore_patterns) or entry.name == 'allcode.txt':
                     continue
@@ -181,7 +181,7 @@ class FileManagerWindow(Toplevel):
             return False
 
         def _walk_dir(parent_id, path):
-            """Walks a directory and adds its contents to the treeview."""
+            """Walks a directory and adds its contents to the treeview"""
             try:
                 # Sort entries to show folders first, then files, all alphabetically
                 entries = sorted(os.scandir(path), key=lambda e: (e.is_file(), e.name.lower()))
@@ -210,7 +210,7 @@ class FileManagerWindow(Toplevel):
         _walk_dir('', self.base_dir)
 
     def on_tree_selection_change(self, event):
-        """When a tree item is selected, deselect any listbox item and sync highlights."""
+        """When a tree item is selected, deselect any listbox item and sync highlights"""
         if self.tree.selection():
             self.merge_order_list.selection_clear(0, 'end')
             self.sync_highlights()
@@ -218,7 +218,7 @@ class FileManagerWindow(Toplevel):
         self.update_tree_action_button_state()
 
     def on_list_selection_change(self, event):
-        """When a listbox item is selected, deselect any tree item and sync highlights."""
+        """When a listbox item is selected, deselect any tree item and sync highlights"""
         if self.merge_order_list.curselection():
             if self.tree.selection():
                 self.tree.selection_set("")
@@ -227,7 +227,7 @@ class FileManagerWindow(Toplevel):
         self.update_tree_action_button_state()
 
     def sync_highlights(self):
-        """Highlights the corresponding item in the other list when one is selected."""
+        """Highlights the corresponding item in the other list when one is selected"""
         self.clear_all_subtle_highlights()
 
         selected_path = None
@@ -257,7 +257,7 @@ class FileManagerWindow(Toplevel):
                 self.tree.see(item_id) # Ensure the item is visible
 
     def clear_all_subtle_highlights(self):
-        """Removes all custom background highlights from both lists."""
+        """Removes all custom background highlights from both lists"""
         for i in range(self.merge_order_list.size()):
             self.merge_order_list.itemconfig(i, {'bg': 'white'})
 
@@ -265,7 +265,7 @@ class FileManagerWindow(Toplevel):
             self.tree.item(item_id, tags=('file',))
 
     def handle_tree_click(self, event):
-        """Detects a double-click on the same treeview item to toggle file selection."""
+        """Detects a double-click on the same treeview item to toggle file selection"""
         item_id = self.tree.identify_row(event.y)
         current_time = time.time()
         time_diff = current_time - self.last_tree_click_time
@@ -281,7 +281,7 @@ class FileManagerWindow(Toplevel):
             self.last_clicked_item_id = item_id
 
     def trigger_recalculation(self):
-        """Schedules a token count recalculation, debouncing rapid calls."""
+        """Schedules a token count recalculation, debouncing rapid calls"""
         if self._recalculate_job:
             self.after_cancel(self._recalculate_job)
         # A small delay to batch rapid changes and keep the UI responsive
@@ -290,7 +290,7 @@ class FileManagerWindow(Toplevel):
     def recalculate_token_count(self):
         """
         Reads all selected files, concatenates their content, counts the tokens,
-        and updates the UI label. This is run via `trigger_recalculation`.
+        and updates the UI label. This is run via `trigger_recalculation`
         """
         self._recalculate_job = None # The job is now running, so clear the ID
         num_files = len(self.ordered_selection)
@@ -307,7 +307,7 @@ class FileManagerWindow(Toplevel):
         for rel_path in self.ordered_selection:
             full_path = os.path.join(self.base_dir, rel_path)
             try:
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                     all_content.append(f.read())
             except FileNotFoundError:
                 # File might have been deleted, just skip it
@@ -331,7 +331,7 @@ class FileManagerWindow(Toplevel):
         self.merge_order_title_label.config(text=title)
 
     def update_checkbox_display(self, item_id):
-        """Updates the text of a tree item to show a checked or unchecked box."""
+        """Updates the text of a tree item to show a checked or unchecked box"""
         if self.item_map.get(item_id, {}).get('type') != 'file':
             return
 
@@ -341,14 +341,14 @@ class FileManagerWindow(Toplevel):
         self.tree.item(item_id, text=f"{check_char} {os.path.basename(path)}")
 
     def update_button_states(self):
-        """Enables or disables the listbox action buttons based on selection."""
+        """Enables or disables the listbox action buttons based on selection"""
         new_state = 'normal' if self.merge_order_list.curselection() else 'disabled'
         self.move_up_button.config(state=new_state)
         self.remove_button.config(state=new_state)
         self.move_down_button.config(state=new_state)
 
     def update_tree_action_button_state(self):
-        """Updates the state and text of the button under the treeview."""
+        """Updates the state and text of the button under the treeview"""
         selection = self.tree.selection()
         if not selection:
             self.tree_action_button.config(state='disabled', text="Add to Merge List")
@@ -367,7 +367,7 @@ class FileManagerWindow(Toplevel):
             self.tree_action_button.config(text="Add to Merge List")
 
     def toggle_selection_for_selected(self, event=None):
-        """Adds or removes the selected file from the merge list."""
+        """Adds or removes the selected file from the merge list"""
         selection = self.tree.selection()
         if not selection: return
 
@@ -389,7 +389,7 @@ class FileManagerWindow(Toplevel):
         return "break"
 
     def open_selected_file(self, event=None):
-        """Opens the selected file using the configured default editor or the system's default."""
+        """Opens the selected file using the configured default editor or the system's default"""
         # This block prevents a double-click in an empty listbox area from opening a file
         if event:
             clicked_index = self.merge_order_list.nearest(event.y)
@@ -424,7 +424,7 @@ class FileManagerWindow(Toplevel):
         return "break"
 
     def update_listbox_from_data(self):
-        """Refreshes the merge order listbox with the current selection."""
+        """Refreshes the merge order listbox with the current selection"""
         selection = self.merge_order_list.curselection()
         self.merge_order_list.delete(0, 'end')
         for path in self.ordered_selection:
@@ -433,7 +433,7 @@ class FileManagerWindow(Toplevel):
             self.merge_order_list.select_set(selection[0])
 
     def move_up(self):
-        """Moves the selected item up in the merge order list."""
+        """Moves the selected item up in the merge order list"""
         selection = self.merge_order_list.curselection()
         if not selection: return
 
@@ -450,7 +450,7 @@ class FileManagerWindow(Toplevel):
             self.update_button_states()
 
     def move_down(self):
-        """Moves the selected item down in the merge order list."""
+        """Moves the selected item down in the merge order list"""
         selection = self.merge_order_list.curselection()
         if not selection: return
 
@@ -467,7 +467,7 @@ class FileManagerWindow(Toplevel):
             self.update_button_states()
 
     def remove_selected(self):
-        """Removes the selected file from the merge list."""
+        """Removes the selected file from the merge list"""
         selection = self.merge_order_list.curselection()
         if not selection: return
 
@@ -485,7 +485,7 @@ class FileManagerWindow(Toplevel):
         self.update_tree_action_button_state()
 
     def select_all_files(self):
-        """Adds all unselected files from the tree to the merge list, in tree order."""
+        """Adds all unselected files from the tree to the merge list, in tree order"""
         all_tree_files = []
 
         def _traverse(parent_id):
@@ -518,7 +518,7 @@ class FileManagerWindow(Toplevel):
             self.status_var.set("No new files to add")
 
     def remove_all_files(self):
-        """Removes all files from the merge list after a confirmation."""
+        """Removes all files from the merge list after a confirmation"""
         if not self.ordered_selection:
             self.status_var.set("Merge list is already empty")
             return
@@ -547,11 +547,11 @@ class FileManagerWindow(Toplevel):
         self.status_var.set(f"Removed {removed_count} file(s) from the merge list")
 
     def save_and_close(self):
-        """Saves the selection and order to .allcode and closes the window."""
+        """Saves the selection and order to .allcode and closes the window"""
         existing_data = {}
         try:
             if os.path.isfile(self.allcode_path):
-                with open(self.allcode_path, 'r', encoding='utf-8') as f:
+                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     existing_data = json.load(f)
         except (json.JSONDecodeError, IOError):
             pass # Overwrite if corrupt

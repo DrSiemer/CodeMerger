@@ -43,7 +43,7 @@ class App(Tk):
         self.default_editor = self.config.get('default_editor', '')
         active_dir_path = self.config.get('active_directory', '')
 
-        # Check for existence of the active directory on boot. Reset if not found.
+        # Check for existence of the active directory on boot. Reset if not found
         if active_dir_path and not os.path.isdir(active_dir_path):
             self.config['active_directory'] = ''
             save_config(self.config)
@@ -110,7 +110,7 @@ class App(Tk):
         self.set_active_dir_display(active_dir_path)
 
     def load_compact_mode_images(self):
-        """Loads and prepares the compact mode graphics."""
+        """Loads and prepares the compact mode graphics"""
         try:
             button_size = (64, 64)
             up_img_src = Image.open(COMPACT_MODE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
@@ -125,7 +125,7 @@ class App(Tk):
             self.compact_mode_close_image = None
 
     def on_app_close(self):
-        """Safely destroys child windows before closing the main app."""
+        """Safely destroys child windows before closing the main app"""
         if self.compact_mode_window and self.compact_mode_window.winfo_exists():
             self.compact_mode_window.destroy()
         self.destroy()
@@ -134,26 +134,26 @@ class App(Tk):
         """
         Called when the main window is restored. If this happens while in compact
         mode, it means the user wants the main window back, so we exit compact mode.
-        The animation flag prevents this from firing during the exit animation itself.
+        The animation flag prevents this from firing during the exit animation itself
         """
         if self.in_compact_mode and not self.is_animating:
             self.toggle_compact_mode()
 
     def show_and_raise(self):
-        """De-minimizes, raises, and focuses the main window."""
+        """De-minimizes, raises, and focuses the main window"""
         self.deiconify()
         self.lift()
         self.focus_force()
 
     def set_active_dir_display(self, path):
-        """Sets the display string for the active directory's StringVar."""
+        """Sets the display string for the active directory's StringVar"""
         if path and os.path.isdir(path):
             self.active_dir.set(path)
         else:
             self.active_dir.set("No directory selected.")
 
     def update_button_states(self, *args):
-        """Updates button states based on the active directory and .allcode file."""
+        """Updates button states based on the active directory and .allcode file"""
         is_dir_active = os.path.isdir(self.active_dir.get())
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
         copy_buttons_state = 'disabled'
@@ -169,7 +169,7 @@ class App(Tk):
             if os.path.isfile(allcode_path):
                 try:
                     if os.path.getsize(allcode_path) > 0:
-                        with open(allcode_path, 'r', encoding='utf-8') as f:
+                        with open(allcode_path, 'r', encoding='utf-8-sig') as f:
                             data = json.load(f)
                             if data.get('selected_files'):
                                 copy_buttons_state = 'normal'
@@ -199,7 +199,7 @@ class App(Tk):
             self.copy_merged_button.pack(expand=True, fill='x')
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
-        """Helper method to animate the main window's geometry and alpha."""
+        """Helper method to animate the main window's geometry and alpha"""
         self.is_animating = True
         elapsed = time.time() - start_time
         progress = min(1.0, elapsed / duration)
@@ -240,7 +240,7 @@ class App(Tk):
                 self.compact_mode_window = None
 
     def toggle_compact_mode(self):
-        """Switches the application state between main view and compact mode with animation."""
+        """Switches the application state between main view and compact mode with animation"""
         if self.is_animating:
             return
 
@@ -304,7 +304,7 @@ class App(Tk):
             if self.compact_mode_last_x is not None and self.compact_mode_last_y is not None:
                 target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
             else:
-                # First time: Calculate a smart default position that is on-screen.
+                # First time: Calculate a smart default position that is on-screen
                 screen_w = self.winfo_screenwidth()
                 screen_h = self.winfo_screenheight()
                 main_x, main_y, main_w, _ = self.main_window_geom
@@ -318,14 +318,14 @@ class App(Tk):
                 target_x = max(margin, min(ideal_x, screen_w - widget_w - margin))
                 target_y = max(margin, min(ideal_y, screen_h - widget_h - margin))
 
-            # This is the single source of truth for the animation's destination.
+            # This is the single source of truth for the animation's destination
             start_geom = self.main_window_geom
             end_geom = (target_x, target_y, widget_w, widget_h)
 
-            # Tell the widget where to appear *after* the animation finishes.
+            # Tell the widget where to appear *after* the animation finishes
             self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
 
-            # Start the animation using the definitive end_geom.
+            # Start the animation using the definitive end_geom
             self._animate_window(time.time(), animation_duration, start_geom, end_geom, is_shrinking=True)
 
     def on_settings_closed(self):
@@ -401,21 +401,21 @@ class App(Tk):
         info_label.pack(pady=(0, 5))
 
         def select_and_close(path):
-            """Final action: update active dir and close the selection dialog."""
+            """Final action: update active dir and close the selection dialog"""
             self.update_active_dir(path)
             dialog.destroy()
 
         def browse_for_new_dir():
-            """Opens file dialog and processes the result, handling cancellation."""
+            """Opens file dialog and processes the result, handling cancellation"""
             new_path = filedialog.askdirectory(title="Select Project Directory", parent=dialog)
             if new_path:  # Only proceed if a directory was actually selected
                 select_and_close(new_path)
 
-        # Create a frame for recent directories; it will be shown or hidden as needed.
+        # Create a frame for recent directories; it will be shown or hidden as needed
         recent_dirs_frame = Frame(dialog, bg=self.app_bg_color)
 
         def remove_and_update_dialog(path_to_remove, widget_to_destroy):
-            """Removes a recent directory and dynamically updates the dialog's UI."""
+            """Removes a recent directory and dynamically updates the dialog's UI"""
             self.remove_recent_directory(path_to_remove)
             widget_to_destroy.destroy()
             if not self.recent_dirs:
@@ -441,7 +441,7 @@ class App(Tk):
     def _perform_copy(self, use_wrapper: bool):
         """
         Core logic for merging files and copying to clipboard.
-        Can operate in 'merged' or 'wrapped' mode.
+        Can operate in 'merged' or 'wrapped' mode
         """
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
@@ -456,7 +456,7 @@ class App(Tk):
             return
 
         try:
-            with open(config_path, 'r', encoding='utf-8') as f:
+            with open(config_path, 'r', encoding='utf-8-sig') as f:
                 data = json.load(f)
 
             final_ordered_list = data.get('selected_files', [])
@@ -471,7 +471,7 @@ class App(Tk):
                 if not os.path.isfile(full_path):
                     skipped_files.append(path)
                     continue
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
+                with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as code_file:
                     content = code_file.read()
                 output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
 
@@ -509,11 +509,11 @@ class App(Tk):
             self.status_var.set(f"Error during merging: {e}")
 
     def copy_merged_code(self):
-        """Merges selected files (without wrapper text) and copies the result to the clipboard."""
+        """Merges selected files (without wrapper text) and copies the result to the clipboard"""
         self._perform_copy(use_wrapper=False)
 
     def copy_wrapped_code(self):
-        """Merges selected files with wrapper text and copies the result to the clipboard."""
+        """Merges selected files with wrapper text and copies the result to the clipboard"""
         self._perform_copy(use_wrapper=True)
 
     def manage_files(self):

@@ -70,10 +70,10 @@ class WrapperTextWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.destroy)
 
     def _load_project_data(self):
-        """Loads data from the .allcode file, creating it if it doesn't exist."""
+        """Loads data from the .allcode file, creating it if it doesn't exist"""
         if os.path.isfile(self.allcode_path):
             try:
-                with open(self.allcode_path, 'r', encoding='utf-8') as f:
+                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     # Handle empty file case
                     content = f.read()
                     if not content:
@@ -84,7 +84,7 @@ class WrapperTextWindow(Toplevel):
         return {} # Return empty if it doesn't exist
 
     def save_and_close(self):
-        """Saves the intro/outro text to the .allcode file and closes the window."""
+        """Saves the intro/outro text to the .allcode file and closes the window"""
         # Build the dictionary in the desired order to control the JSON output
         final_data = {
             "expanded_dirs": self.project_data.get('expanded_dirs', []),
