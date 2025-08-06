@@ -35,6 +35,7 @@ jobs:
 
   # Build for Windows
   build-windows:
+    name: Build for Windows
     needs: validate-tag
     runs-on: windows-latest
     steps:
@@ -56,6 +57,7 @@ jobs:
 
   # Create the GitHub Release (runs after the Windows build job has succeeded)
   create-release:
+    name: Create a new release
     needs: [build-windows]
     runs-on: ubuntu-latest
     permissions:
