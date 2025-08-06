@@ -20,23 +20,17 @@ jobs:
         run: |
           TAG="${{ github.ref_name }}"
           echo "Validating tag: $TAG"
-
-          # Get the commit hash the tag points to
           TAG_COMMIT_HASH=$(git rev-parse "$TAG")
-
-          # Check if that commit is an ancestor of the master branch.
           if ! git branch -r --contains "$TAG_COMMIT_HASH" | grep -q "origin/master"; then
             echo "::error::Tag $TAG points to a commit that is not on the 'master' branch."
             echo ""
             echo "To fix this, delete the incorrect tag and create a new one on a commit in 'master'."
-            echo "Run the following commands in your local terminal:"
             echo ""
             echo "  git push --delete origin $TAG"
             echo "  git tag -d $TAG"
             echo ""
             exit 1
           fi
-
           echo "Tag validation successful: $TAG is on the master branch."
 
   # Build for Windows
@@ -60,32 +54,9 @@ jobs:
           name: CodeMerger-windows-exe
           path: dist/CodeMerger.exe
 
-  # Build for macOS
-  build-mac:
-    needs: validate-tag
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Build with PyInstaller
-        run: pyinstaller codemerger.spec
-      - name: Compress .app into a .zip file
-        run: zip -r dist/CodeMerger-macOS.zip dist/CodeMerger.app
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: CodeMerger-macOS-zip
-          path: dist/CodeMerger-macOS.zip
-
-  # Create the GitHub Release (runs after both build jobs have succeeded)
+  # Create the GitHub Release (runs after the Windows build job has succeeded)
   create-release:
-    needs: [build-windows, build-mac]
+    needs: [build-windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -102,4 +73,4 @@ jobs:
           prerelease: false
           files: |
             artifacts/CodeMerger-windows-exe/CodeMerger.exe
-            artifacts/CodeMerger-macOS-zip/CodeMerger-macOS.zip
+            # The macOS artifact line has been removed.
