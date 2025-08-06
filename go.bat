@@ -8,9 +8,7 @@ set SPEC_FILE=codemerger.spec
 set FLAG=%1
 
 REM Environment Setup
-REM Check if the virtual environment is already active
 if "%VIRTUAL_ENV%"=="" (
-    REM Check if the virtual environment directory exists
     if not exist "%VENV_DIR%\Scripts\activate" (
         echo Virtual environment not found. Creating a new one...
         python -m venv %VENV_DIR%
@@ -33,7 +31,6 @@ if /I "%FLAG%"=="b" goto :BuildApp
 if /I "%FLAG%"=="r" goto :HandleRelease
 echo Unrecognized command: %FLAG%
 goto :eof
-
 
 :DefaultAction
     echo Starting CodeMerger application...
@@ -68,9 +65,9 @@ goto :eof
 :HandleRelease
     setlocal enabledelayedexpansion
     echo.
-    echo Re-triggering GitHub Release Action
+    echo Handling Release Tag
 
-    REM Parse the release comment from the command line
+    REM Get optional release comment
     shift /1
     set "COMMENT="
     :ArgLoop
@@ -84,10 +81,7 @@ goto :eof
     goto ArgLoop
     :EndArgLoop
 
-    if not defined COMMENT set "COMMENT=Re-triggering release build"
-    echo Release comment: !COMMENT!
-
-    REM Read version from file (Key=Value format)
+    REM Get version
     if not exist "assets\version.txt" (
         echo ERROR: assets\version.txt not found.
         goto :eof
@@ -108,25 +102,33 @@ goto :eof
     set "VERSION_TAG=v!VERSION!"
     echo Found version tag: !VERSION_TAG!
 
-    REM Perform Git operations
-    echo Checking for existing remote tag...
+    REM Clean up existing tags
+    set "IS_RETRIGGER=0"
     git ls-remote --tags origin refs/tags/!VERSION_TAG! | findstr "refs/tags/!VERSION_TAG!" > nul
     if %errorlevel% equ 0 (
         echo Deleting remote tag !VERSION_TAG!...
         git push origin --delete !VERSION_TAG!
-    ) else (
-        echo Remote tag !VERSION_TAG! does not exist. Skipping deletion.
+        set "IS_RETRIGGER=1"
     )
-
-    echo Checking for existing local tag...
     git rev-parse "!VERSION_TAG!" >nul 2>nul
     if %errorlevel% equ 0 (
         echo Deleting local tag !VERSION_TAG!...
         git tag -d !VERSION_TAG!
+        set "IS_RETRIGGER=1"
     )
 
-    REM Recreate and annotate the tag
-    echo Recreating annotated tag !VERSION_TAG!...
+    REM Default comment if user did not provide one
+    if not defined COMMENT (
+        if "!IS_RETRIGGER!"=="1" (
+            set "COMMENT=Re-triggering release build for !VERSION_TAG!"
+        ) else (
+            set "COMMENT=Initial release for !VERSION_TAG!"
+        )
+    )
+    echo Release comment: !COMMENT!
+
+    REM Create and push tag
+    echo Creating annotated tag !VERSION_TAG!...
     git tag -a "!VERSION_TAG!" -m "!COMMENT!"
     if %errorlevel% neq 0 (
         echo FATAL: Failed to create tag. Aborting.
@@ -134,7 +136,6 @@ goto :eof
         goto :eof
     )
 
-    REM Push the new tag to remote
     echo Pushing new tag !VERSION_TAG! to origin...
     git push origin !VERSION_TAG!
     echo.
