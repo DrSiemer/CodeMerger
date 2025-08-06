@@ -20,7 +20,7 @@ class App(Tk):
         self.file_extensions = file_extensions
         self.app_bg_color = '#FFFFFF'
 
-        # --- Compact Mode State ---
+        # Compact Mode State
         self.in_compact_mode = False
         self.is_animating = False
         self.compact_mode_window = None
@@ -29,7 +29,7 @@ class App(Tk):
         self.main_window_geom = None
         self.load_compact_mode_images()
 
-        # --- Window Setup ---
+        # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
         self.geometry("500x250")
@@ -38,7 +38,7 @@ class App(Tk):
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)
         self.bind("<Map>", self.on_main_window_restored)
 
-        # --- Load Configuration & Validate Active Directory ---
+        # Load Configuration & Validate Active Directory
         self.config = load_config()
         self.default_editor = self.config.get('default_editor', '')
         active_dir_path = self.config.get('active_directory', '')
@@ -55,11 +55,11 @@ class App(Tk):
 
         self.recent_dirs = self.config.get('recent_directories', [])
 
-        # --- UI Layout ---
+        # UI Layout
         main_frame = Frame(self, padx=15, pady=15, bg=self.app_bg_color)
         main_frame.pack(fill='both', expand=True)
 
-        # --- Top Section ---
+        # Top Section
         top_frame = Frame(main_frame, bg=self.app_bg_color)
         top_frame.pack(side='top', fill='x')
         dir_label = Label(top_frame, text="Active Directory:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color)
@@ -68,13 +68,14 @@ class App(Tk):
         active_dir_display.pack(anchor='w', fill='x', pady=(0, 10))
         top_button_frame = Frame(top_frame, bg=self.app_bg_color)
         top_button_frame.pack(fill='x', pady=5)
-        Button(top_button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=(0, 2))
-        self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
-        self.manage_files_button.pack(side='left', expand=True, fill='x', padx=(3, 2))
         self.wrapper_text_button = Button(top_button_frame, text="Wrapper Text", command=self.open_wrapper_text_window)
-        self.wrapper_text_button.pack(side='left', expand=True, fill='x', padx=(3, 0))
+        self.wrapper_text_button.pack(side='right', padx=(3, 0))
+        self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
+        self.manage_files_button.pack(side='right', expand=True, fill='x')
+        Button(top_button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='right', expand=True, fill='x', padx=(0, 3))
 
-        # --- Bottom Config Frame ---
+
+        # Bottom Config Frame
         config_frame = Frame(main_frame, bg=self.app_bg_color)
         config_frame.pack(side='bottom', fill='x', pady=(5, 0))
         settings_button = Button(config_frame, text="Settings", command=self.open_settings_window, relief='flat', fg='gray')
@@ -84,13 +85,24 @@ class App(Tk):
         self.compact_mode_toggle = Button(config_frame, text="Compact Mode", command=self.toggle_compact_mode, relief='flat', fg='gray')
         self.compact_mode_toggle.pack(side='right')
 
-        # --- Central "Copy Merged" Button ---
-        copy_button_frame = Frame(main_frame, bg=self.app_bg_color, pady=10)
-        copy_button_frame.pack(fill='both', expand=True)
-        self.copy_merged_button = Button(copy_button_frame, text="Copy Merged", command=self.copy_merged_code, font=('Helvetica', 16, 'bold'), pady=10)
-        self.copy_merged_button.pack(expand=True, fill='x')
+        # Central Copy Buttons
+        copy_button_frame = Frame(main_frame, bg=self.app_bg_color)
+        copy_button_frame.pack(fill='both', expand=True, pady=10)
 
-        # --- Status bar ---
+        copy_button_frame.grid_rowconfigure(0, weight=1)
+        copy_button_frame.grid_columnconfigure(0, weight=1)
+
+        button_row = Frame(copy_button_frame, bg=self.app_bg_color)
+        button_row.grid(row=0, column=0, sticky='ew')
+
+        self.copy_wrapped_button = Button(button_row, text="Copy Wrapped", command=self.copy_wrapped_code, font=('Helvetica', 14, 'bold'), pady=5)
+        self.copy_wrapped_button.pack(side='right', padx=(3, 0))
+
+        self.copy_merged_button = Button(button_row, text="Copy Merged", command=self.copy_merged_code, font=('Helvetica', 14, 'bold'), pady=5)
+        self.copy_merged_button.pack(side='left', expand=True, fill='x')
+
+
+        # Status bar
         self.status_var = StringVar(value="Ready")
         status_bar = Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w')
         status_bar.pack(side='bottom', fill='x')
@@ -144,7 +156,7 @@ class App(Tk):
         """Updates button states based on the active directory and .allcode file."""
         is_dir_active = os.path.isdir(self.active_dir.get())
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
-        copy_merged_state = 'disabled'
+        copy_buttons_state = 'disabled'
 
         if hasattr(self, 'manage_files_button'):
             self.manage_files_button.config(state=dir_dependent_state)
@@ -159,12 +171,14 @@ class App(Tk):
                         with open(allcode_path, 'r', encoding='utf-8') as f:
                             data = json.load(f)
                             if data.get('selected_files'):
-                                copy_merged_state = 'normal'
+                                copy_buttons_state = 'normal'
                 except (json.JSONDecodeError, IOError):
                     pass
 
         if hasattr(self, 'copy_merged_button'):
-            self.copy_merged_button.config(state=copy_merged_state)
+            self.copy_merged_button.config(state=copy_buttons_state)
+        if hasattr(self, 'copy_wrapped_button'):
+            self.copy_wrapped_button.config(state=copy_buttons_state)
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
         """Helper method to animate the main window's geometry and alpha."""
@@ -214,7 +228,7 @@ class App(Tk):
 
         animation_duration = 0.25
 
-        # --- Exit compact mode: Animate from widget to full window ---
+        # Exit compact mode: Animate from widget to full window
         if self.in_compact_mode:
             self.in_compact_mode = False
             if not self.compact_mode_window or not self.compact_mode_window.winfo_exists():
@@ -244,7 +258,7 @@ class App(Tk):
 
             self._animate_window(time.time(), animation_duration, start_geom, end_geom, is_shrinking=False)
 
-        # --- Enter compact mode: Animate from full window to widget ---
+        # Enter compact mode: Animate from full window to widget
         else:
             if not self.compact_mode_image_up or not self.compact_mode_close_image:
                 messagebox.showerror("Asset Error", "Could not load compact mode graphics.")
@@ -407,7 +421,53 @@ class App(Tk):
         browse_btn.pack(pady=10, padx=10)
 
     def copy_merged_code(self):
-        """Merges selected files and copies the result to the clipboard."""
+        """Merges selected files (without wrapper text) and copies the result to the clipboard."""
+        base_dir = self.active_dir.get()
+        if not os.path.isdir(base_dir):
+            messagebox.showerror("Error", "Please select a valid directory first.")
+            self.status_var.set("Error: Invalid directory.")
+            return
+        config_path = os.path.join(base_dir, '.allcode')
+        if not os.path.isfile(config_path):
+            messagebox.showerror("Error", f"No .allcode file found in {base_dir}")
+            self.status_var.set("Error: .allcode file not found.")
+            return
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+
+            final_ordered_list = data.get('selected_files', [])
+
+            if not final_ordered_list:
+                self.status_var.set("No files selected to copy.")
+                return
+
+            output_blocks = []
+            skipped_files = []
+            for path in final_ordered_list:
+                full_path = os.path.join(base_dir, path)
+                if not os.path.isfile(full_path):
+                    skipped_files.append(path)
+                    continue
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
+                    content = code_file.read()
+                output_blocks.append(f'{path}\n```\n{content}\n```')
+
+            merged_code = '\n\n\n'.join(output_blocks)
+            final_content = f"Here's all the most recent code:\n\n{merged_code}"
+
+            pyperclip.copy(final_content)
+
+            status_message = "Merged code copied to clipboard."
+            if skipped_files:
+                status_message += f" Skipped {len(skipped_files)} missing file(s)."
+            self.status_var.set(status_message)
+        except Exception as e:
+            messagebox.showerror("Merging Error", f"An error occurred: {e}")
+            self.status_var.set(f"Error during merging: {e}")
+
+    def copy_wrapped_code(self):
+        """Merges selected files with wrapper text and copies the result to the clipboard."""
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
             messagebox.showerror("Error", "Please select a valid directory first.")
@@ -439,7 +499,7 @@ class App(Tk):
                     continue
                 with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
                     content = code_file.read()
-                output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
+                output_blocks.append(f'{path}\n```\n{content}\n```')
 
             merged_code = '\n\n\n'.join(output_blocks)
             merged_code_with_header = f"Here's all the relevant code:\n\n{merged_code}"
@@ -456,7 +516,7 @@ class App(Tk):
             final_content = '\n\n\n'.join(final_parts)
             pyperclip.copy(final_content)
 
-            status_message = "Merged code copied to clipboard."
+            status_message = "Wrapped code copied to clipboard."
             if skipped_files:
                 status_message += f" Skipped {len(skipped_files)} missing file(s)."
             self.status_var.set(status_message)
