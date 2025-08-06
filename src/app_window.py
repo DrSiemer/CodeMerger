@@ -420,24 +420,28 @@ class App(Tk):
         browse_btn = Button(dialog, text="Browse for Directory...", command=browse_for_new_dir)
         browse_btn.pack(pady=10, padx=10)
 
-    def copy_merged_code(self):
-        """Merges selected files (without wrapper text) and copies the result to the clipboard."""
+    def _perform_copy(self, use_wrapper: bool):
+        """
+        Core logic for merging files and copying to clipboard.
+        Can operate in 'merged' or 'wrapped' mode.
+        """
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
             messagebox.showerror("Error", "Please select a valid directory first.")
             self.status_var.set("Error: Invalid directory.")
             return
+
         config_path = os.path.join(base_dir, '.allcode')
         if not os.path.isfile(config_path):
             messagebox.showerror("Error", f"No .allcode file found in {base_dir}")
             self.status_var.set("Error: .allcode file not found.")
             return
+
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
             final_ordered_list = data.get('selected_files', [])
-
             if not final_ordered_list:
                 self.status_var.set("No files selected to copy.")
                 return
@@ -451,78 +455,48 @@ class App(Tk):
                     continue
                 with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
                     content = code_file.read()
-                output_blocks.append(f'{path}\n```\n{content}\n```')
+                output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
 
             merged_code = '\n\n\n'.join(output_blocks)
-            final_content = f"Here's all the most recent code:\n\n{merged_code}"
+
+            if use_wrapper:
+                intro_text = data.get('intro_text', '').strip()
+                outro_text = data.get('outro_text', '').strip()
+                merged_code_with_header = f"Here's all the relevant code:\n\n{merged_code}"
+
+                final_parts = []
+                if intro_text:
+                    final_parts.append(intro_text)
+                final_parts.append(merged_code_with_header)
+                if outro_text:
+                    final_parts.append(outro_text)
+
+                final_content = '\n\n\n'.join(final_parts)
+                status_message = "Wrapped code copied to clipboard."
+            else:
+                final_content = f"Here's all the most recent code:\n\n{merged_code}"
+                status_message = "Merged code copied to clipboard."
 
             pyperclip.copy(final_content)
 
-            status_message = "Merged code copied to clipboard."
             if skipped_files:
                 status_message += f" Skipped {len(skipped_files)} missing file(s)."
             self.status_var.set(status_message)
+
+        except (json.JSONDecodeError, IOError) as e:
+            messagebox.showerror("Error", f"Could not read .allcode file. Is it empty or corrupt?\n\nDetails: {e}")
+            self.status_var.set("Error: Could not read .allcode file.")
         except Exception as e:
             messagebox.showerror("Merging Error", f"An error occurred: {e}")
             self.status_var.set(f"Error during merging: {e}")
+
+    def copy_merged_code(self):
+        """Merges selected files (without wrapper text) and copies the result to the clipboard."""
+        self._perform_copy(use_wrapper=False)
 
     def copy_wrapped_code(self):
         """Merges selected files with wrapper text and copies the result to the clipboard."""
-        base_dir = self.active_dir.get()
-        if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid directory first.")
-            self.status_var.set("Error: Invalid directory.")
-            return
-        config_path = os.path.join(base_dir, '.allcode')
-        if not os.path.isfile(config_path):
-            messagebox.showerror("Error", f"No .allcode file found in {base_dir}")
-            self.status_var.set("Error: .allcode file not found.")
-            return
-        try:
-            with open(config_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-
-            intro_text = data.get('intro_text', '').strip()
-            outro_text = data.get('outro_text', '').strip()
-            final_ordered_list = data.get('selected_files', [])
-
-            if not final_ordered_list:
-                self.status_var.set("No files selected to copy.")
-                return
-
-            output_blocks = []
-            skipped_files = []
-            for path in final_ordered_list:
-                full_path = os.path.join(base_dir, path)
-                if not os.path.isfile(full_path):
-                    skipped_files.append(path)
-                    continue
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
-                    content = code_file.read()
-                output_blocks.append(f'{path}\n```\n{content}\n```')
-
-            merged_code = '\n\n\n'.join(output_blocks)
-            merged_code_with_header = f"Here's all the relevant code:\n\n{merged_code}"
-
-            final_parts = []
-            if intro_text:
-                final_parts.append(intro_text)
-
-            final_parts.append(merged_code_with_header)
-
-            if outro_text:
-                final_parts.append(outro_text)
-
-            final_content = '\n\n\n'.join(final_parts)
-            pyperclip.copy(final_content)
-
-            status_message = "Wrapped code copied to clipboard."
-            if skipped_files:
-                status_message += f" Skipped {len(skipped_files)} missing file(s)."
-            self.status_var.set(status_message)
-        except Exception as e:
-            messagebox.showerror("Merging Error", f"An error occurred: {e}")
-            self.status_var.set(f"Error during merging: {e}")
+        self._perform_copy(use_wrapper=True)
 
     def manage_files(self):
         base_dir = self.active_dir.get()
