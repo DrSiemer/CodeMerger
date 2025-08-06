@@ -109,10 +109,9 @@ class FileManagerWindow(Toplevel):
 
         if len(cleaned_selection) < len(original_selection):
             self.status_var.set("Cleaned missing files from .allcode")
-            data_to_save = {
-                "selected_files": cleaned_selection,
-                "expanded_dirs": sorted(list(self.expanded_dirs)),
-            }
+            data_to_save = data.copy()
+            data_to_save["selected_files"] = cleaned_selection
+            data_to_save["expanded_dirs"] = sorted(list(self.expanded_dirs))
             try:
                 with open(self.allcode_path, 'w', encoding='utf-8') as f_write:
                     json.dump(data_to_save, f_write, indent=2)
@@ -387,15 +386,23 @@ class FileManagerWindow(Toplevel):
 
     def save_and_close(self):
         """Saves the selection and order to .allcode and closes the window."""
+        project_data = {}
+        try:
+            if os.path.isfile(self.allcode_path):
+                with open(self.allcode_path, 'r', encoding='utf-8') as f:
+                    project_data = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass # Overwrite if corrupt
+
         expanded_dirs = sorted([
             info['path'] for item_id, info in self.item_map.items()
             if info.get('type') == 'dir' and self.tree.item(item_id, 'open')
         ])
-        data_to_save = {
-            "selected_files": self.ordered_selection,
-            "expanded_dirs": expanded_dirs,
-        }
+
+        project_data["selected_files"] = self.ordered_selection
+        project_data["expanded_dirs"] = expanded_dirs
+
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
-            json.dump(data_to_save, f, indent=2)
+            json.dump(project_data, f, indent=2)
         self.status_var.set("File selection and order saved to .allcode")
         self.destroy()

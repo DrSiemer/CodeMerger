@@ -4,14 +4,13 @@ A simple app for developers that prefer to stay in control and want to avoid wor
 
 I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts/new_chat), because at this time it offers a large context length for free.
 
+
 ## Download
 
 Download the latest release [here](https://github.com/DrSiemer/codemerger/releases).
 
-- **Windows**: The download is a portable executable
-- **macOS**: The build is a **universal binary**, which runs natively on both Apple Silicon (M1/M2/M3) and Intel-based Macs
+The download is a portable executable for Windows. Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"). The app is safe; all it does is bundle text with a convenient UI.
 
-Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"); the app is safe, all it does is bundle text with a convenient UI.
 
 ## Usage
 
@@ -22,10 +21,12 @@ Ignore the Windows Defender SmartScreen block if you get it (click "More info" >
 - Click "Compact Mode" to switch to a small, always-on-top copy button. This is useful for keeping the copy functionality handy while you work.
     - Double-click the move bar or use the close button to return to the full view
 
+
 ### Settings
 
 - Select your preferred editor in the settings (none means default will be used)
 - To manage indexed filetypes, click "Manage Filetypes" from the main window
+
 
 ## Development
 
@@ -36,6 +37,7 @@ Ignore the Windows Defender SmartScreen block if you get it (click "More info" >
     - Update `/assets/version.txt` if you want a new release
     - You can add a comment to the release like this: `go r "Comment"`
     - The release will be a draft, you'll need to finalize it on github.com
+
 
 ### Planned features
 

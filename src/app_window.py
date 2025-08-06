@@ -9,6 +9,7 @@ from .utils import load_config, save_config, load_active_file_extensions
 from .file_manager import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
+from .wrapper_text_window import WrapperTextWindow
 from .constants import RECENT_DIRS_MAX
 from .paths import ICON_PATH, COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH
 from .compact_mode import CompactMode
@@ -67,9 +68,11 @@ class App(Tk):
         active_dir_display.pack(anchor='w', fill='x', pady=(0, 10))
         top_button_frame = Frame(top_frame, bg=self.app_bg_color)
         top_button_frame.pack(fill='x', pady=5)
-        Button(top_button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=(0, 5))
+        Button(top_button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='left', expand=True, fill='x', padx=(0, 2))
         self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
-        self.manage_files_button.pack(side='left', expand=True, fill='x', padx=(5, 0))
+        self.manage_files_button.pack(side='left', expand=True, fill='x', padx=(3, 2))
+        self.wrapper_text_button = Button(top_button_frame, text="Wrapper Text", command=self.open_wrapper_text_window)
+        self.wrapper_text_button.pack(side='left', expand=True, fill='x', padx=(3, 0))
 
         # --- Bottom Config Frame ---
         config_frame = Frame(main_frame, bg=self.app_bg_color)
@@ -140,8 +143,13 @@ class App(Tk):
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file."""
         is_dir_active = os.path.isdir(self.active_dir.get())
-        manage_files_state = 'normal' if is_dir_active else 'disabled'
+        dir_dependent_state = 'normal' if is_dir_active else 'disabled'
         copy_merged_state = 'disabled'
+
+        if hasattr(self, 'manage_files_button'):
+            self.manage_files_button.config(state=dir_dependent_state)
+        if hasattr(self, 'wrapper_text_button'):
+            self.wrapper_text_button.config(state=dir_dependent_state)
 
         if is_dir_active:
             allcode_path = os.path.join(self.active_dir.get(), '.allcode')
@@ -155,8 +163,6 @@ class App(Tk):
                 except (json.JSONDecodeError, IOError):
                     pass
 
-        if hasattr(self, 'manage_files_button'):
-            self.manage_files_button.config(state=manage_files_state)
         if hasattr(self, 'copy_merged_button'):
             self.copy_merged_button.config(state=copy_merged_state)
 
@@ -298,6 +304,14 @@ class App(Tk):
     def open_settings_window(self):
         SettingsWindow(self, on_close_callback=self.on_settings_closed)
 
+    def open_wrapper_text_window(self):
+        base_dir = self.active_dir.get()
+        if not os.path.isdir(base_dir):
+            messagebox.showerror("Error", "Please select a valid directory first.")
+            return
+        wt_window = WrapperTextWindow(self, base_dir, self.status_var)
+        self.wait_window(wt_window)
+
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
 
@@ -407,10 +421,15 @@ class App(Tk):
         try:
             with open(config_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+
+            intro_text = data.get('intro_text', '').strip()
+            outro_text = data.get('outro_text', '').strip()
             final_ordered_list = data.get('selected_files', [])
+
             if not final_ordered_list:
                 self.status_var.set("No files selected to copy.")
                 return
+
             output_blocks = []
             skipped_files = []
             for path in final_ordered_list:
@@ -421,8 +440,22 @@ class App(Tk):
                 with open(full_path, 'r', encoding='utf-8', errors='ignore') as code_file:
                     content = code_file.read()
                 output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
-            final_content = '\n\n\n'.join(output_blocks)
+
+            merged_code = '\n\n\n'.join(output_blocks)
+            merged_code_with_header = f"Here's all the relevant code:\n\n{merged_code}"
+
+            final_parts = []
+            if intro_text:
+                final_parts.append(intro_text)
+
+            final_parts.append(merged_code_with_header)
+
+            if outro_text:
+                final_parts.append(outro_text)
+
+            final_content = '\n\n\n'.join(final_parts)
             pyperclip.copy(final_content)
+
             status_message = "Merged code copied to clipboard."
             if skipped_files:
                 status_message += f" Skipped {len(skipped_files)} missing file(s)."
