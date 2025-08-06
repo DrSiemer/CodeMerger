@@ -85,18 +85,18 @@ class WrapperTextWindow(Toplevel):
 
     def save_and_close(self):
         """Saves the intro/outro text to the .allcode file and closes the window."""
-        self.project_data['intro_text'] = self.intro_text.get('1.0', 'end-1c').strip()
-        self.project_data['outro_text'] = self.outro_text.get('1.0', 'end-1c').strip()
-
-        # Ensure other keys exist to avoid creating an incomplete file
-        if 'selected_files' not in self.project_data:
-            self.project_data['selected_files'] = []
-        if 'expanded_dirs' not in self.project_data:
-            self.project_data['expanded_dirs'] = []
+        # Build the dictionary in the desired order to control the JSON output
+        final_data = {
+            "expanded_dirs": self.project_data.get('expanded_dirs', []),
+            "selected_files": self.project_data.get('selected_files', []),
+            "total_tokens": self.project_data.get('total_tokens', 0),
+            "intro_text": self.intro_text.get('1.0', 'end-1c').strip(),
+            "outro_text": self.outro_text.get('1.0', 'end-1c').strip()
+        }
 
         try:
             with open(self.allcode_path, 'w', encoding='utf-8') as f:
-                json.dump(self.project_data, f, indent=2)
+                json.dump(final_data, f, indent=2)
             self.status_var.set("Wrapper text saved successfully.")
         except IOError as e:
             self.status_var.set(f"Error saving wrapper text: {e}")

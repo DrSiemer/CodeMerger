@@ -28,6 +28,8 @@ class FileManagerWindow(Toplevel):
         self.last_tree_click_time = 0
         self.last_clicked_item_id = None
         self._recalculate_job = None
+        self.cached_token_data = None
+        self.current_total_tokens = 0
 
         self.allcode_path = os.path.join(self.base_dir, '.allcode')
         self.load_allcode_config()
@@ -82,7 +84,22 @@ class FileManagerWindow(Toplevel):
         self.update_listbox_from_data()
         self.update_button_states()
         self.update_tree_action_button_state()
+        self._update_title_from_cache()
         self.trigger_recalculation()
+
+    def _update_title_from_cache(self):
+        """Updates the title with cached token data if available."""
+        if not self.cached_token_data:
+            return
+
+        num_files = self.cached_token_data['files']
+        total_tokens = self.cached_token_data['tokens']
+        self.current_total_tokens = total_tokens
+
+        file_text = "files" if num_files != 1 else "file"
+        formatted_tokens = f"{total_tokens:,}".replace(',', '.')
+        title = f"Merge Order ({num_files} {file_text} selected, {formatted_tokens} tokens)"
+        self.merge_order_title_label.config(text=title)
 
     def handle_tree_deselection_click(self, event):
         """Deselects a tree item if a click occurs in an empty area."""
@@ -113,15 +130,29 @@ class FileManagerWindow(Toplevel):
 
         if len(cleaned_selection) < len(original_selection):
             self.status_var.set("Cleaned missing files from .allcode")
-            data_to_save = data.copy()
-            data_to_save["selected_files"] = cleaned_selection
-            data_to_save["expanded_dirs"] = sorted(list(self.expanded_dirs))
+            self.cached_token_data = None
+
+            # Rebuild the dictionary to control key order and omit invalid token count
+            data_to_save = {
+                "expanded_dirs": sorted(list(self.expanded_dirs)),
+                "selected_files": cleaned_selection,
+                "intro_text": data.get('intro_text', ''),
+                "outro_text": data.get('outro_text', '')
+            }
+
             try:
                 with open(self.allcode_path, 'w', encoding='utf-8') as f_write:
                     json.dump(data_to_save, f_write, indent=2)
             except IOError as e:
-                # Handle cases where the file might be read-only
                 self.status_var.set(f"Could not auto-clean .allcode (read-only?): {e}")
+        else:
+            # The file list is intact, so the cached token count is trustworthy
+            cached_tokens = data.get('total_tokens')
+            if isinstance(cached_tokens, int):
+                self.cached_token_data = {
+                    'tokens': cached_tokens,
+                    'files': len(cleaned_selection)
+                }
 
         self.ordered_selection = cleaned_selection
 
@@ -253,9 +284,11 @@ class FileManagerWindow(Toplevel):
         self._recalculate_job = None # The job is now running, so clear the ID
         num_files = len(self.ordered_selection)
         file_text = "files" if num_files != 1 else "file"
+        total_tokens = 0
 
         if not num_files:
             title = f"Merge Order (0 {file_text} selected, 0 tokens)"
+            self.current_total_tokens = 0
             self.merge_order_title_label.config(text=title)
             return
 
@@ -283,6 +316,7 @@ class FileManagerWindow(Toplevel):
             # If tiktoken fails, display an error in the label
             title = f"Merge Order ({num_files} {file_text} selected, token count error)"
 
+        self.current_total_tokens = total_tokens
         self.merge_order_title_label.config(text=title)
 
     def update_checkbox_display(self, item_id):
@@ -441,11 +475,11 @@ class FileManagerWindow(Toplevel):
 
     def save_and_close(self):
         """Saves the selection and order to .allcode and closes the window."""
-        project_data = {}
+        existing_data = {}
         try:
             if os.path.isfile(self.allcode_path):
                 with open(self.allcode_path, 'r', encoding='utf-8') as f:
-                    project_data = json.load(f)
+                    existing_data = json.load(f)
         except (json.JSONDecodeError, IOError):
             pass # Overwrite if corrupt
 
@@ -454,10 +488,16 @@ class FileManagerWindow(Toplevel):
             if info.get('type') == 'dir' and self.tree.item(item_id, 'open')
         ])
 
-        project_data["selected_files"] = self.ordered_selection
-        project_data["expanded_dirs"] = expanded_dirs
+        # Build the dictionary in the desired order
+        final_data = {
+            "expanded_dirs": expanded_dirs,
+            "selected_files": self.ordered_selection,
+            "total_tokens": self.current_total_tokens,
+            "intro_text": existing_data.get('intro_text', ''),
+            "outro_text": existing_data.get('outro_text', '')
+        }
 
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
-            json.dump(project_data, f, indent=2)
+            json.dump(final_data, f, indent=2)
         self.status_var.set("File selection and order saved to .allcode")
         self.destroy()

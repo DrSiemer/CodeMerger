@@ -1,4 +1,9 @@
 {
+  "expanded_dirs": [
+    ".github",
+    ".github/workflows",
+    "src"
+  ],
   "selected_files": [
     "README.md",
     "run.py",
@@ -18,11 +23,7 @@
     "requirements.txt",
     ".github/workflows/release.yml"
   ],
-  "expanded_dirs": [
-    ".github",
-    ".github/workflows",
-    "src"
-  ],
+  "total_tokens": 18291,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION",
   "outro_text": "Do NOT:\n- remove my original comments\n- return diff files\n- use a step count, <summary> tags, triple dashes in comments\n- end comments with dots (unless you are using multiple sentences)\n- copy my filename/path format in your answer\n\nMake sure empty lines are actually empty: avoid generating lines of spaces or tabs."
 }
