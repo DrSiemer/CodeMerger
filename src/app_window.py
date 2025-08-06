@@ -96,10 +96,10 @@ class App(Tk):
         button_row.grid(row=0, column=0, sticky='ew')
 
         self.copy_wrapped_button = Button(button_row, text="Copy Wrapped", command=self.copy_wrapped_code, font=('Helvetica', 14, 'bold'), pady=5)
-        self.copy_wrapped_button.pack(side='right', padx=(3, 0))
+        self.copy_wrapped_button.pack(side='left', padx=(0, 5))
 
         self.copy_merged_button = Button(button_row, text="Copy Merged", command=self.copy_merged_code, font=('Helvetica', 14, 'bold'), pady=5)
-        self.copy_merged_button.pack(side='left', expand=True, fill='x')
+        self.copy_merged_button.pack(side='left', expand=True, fill='x', padx=(5, 0))
 
 
         # Status bar
