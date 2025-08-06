@@ -9,9 +9,10 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, image_up=None, image_down=None, image_close=None):
+    def __init__(self, parent, close_callback, image_up=None, image_down=None, image_close=None):
         super().__init__(parent)
         self.parent = parent
+        self.close_callback = close_callback
         self.image_up = image_up
         self.image_down = image_down
         self.image_close = image_close
@@ -96,7 +97,8 @@ class CompactMode(tk.Toplevel):
 
     def close_window(self, event=None):
         """Signals the parent app to close this window and show the main one."""
-        self.parent.toggle_compact_mode()
+        if self.close_callback:
+            self.close_callback()
 
     def copy_wrapped(self):
         """Triggers the parent's copy_wrapped_code function with visual feedback."""

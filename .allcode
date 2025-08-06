@@ -13,12 +13,16 @@
     "src/settings_window.py",
     "src/filetypes_manager.py",
     "src/file_manager.py",
+    "src/file_tree_handler.py",
+    "src/selection_list_handler.py",
     "src/project_config.py",
     "src/file_tree_builder.py",
     "default_filetypes.json",
     "src/wrapper_text_window.py",
     "src/utils.py",
     "src/app_window.py",
+    "src/view_manager.py",
+    "src/app_state.py",
     "src/directory_dialog.py",
     "src/merger.py",
     "src/compact_mode.py",
@@ -27,7 +31,7 @@
     "requirements.txt",
     ".github/workflows/release.yml"
   ],
-  "total_tokens": 20278,
+  "total_tokens": 20444,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION",
   "outro_text": "Do NOT:\n- remove my original comments\n- return diff files\n- use a step count, <summary> tags, triple dashes in comments\n- end comments with dots (unless you are using multiple sentences)\n- copy my filename/path format in your answer\n\nMake sure empty lines are actually empty: avoid generating lines of spaces or tabs."
 }
