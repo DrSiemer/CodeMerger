@@ -1,7 +1,7 @@
 import os
 from tkinter import Toplevel, Frame, Label, Button, Entry, filedialog, StringVar
-from .utils import load_config, save_config
-from .paths import ICON_PATH
+from ..core.utils import load_config, save_config
+from ..core.paths import ICON_PATH
 
 class SettingsWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):

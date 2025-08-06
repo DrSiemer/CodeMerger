@@ -2,8 +2,8 @@ import tkinter as tk
 import time
 import re
 from tkinter import Toplevel, Frame, Label, Button, Entry, messagebox, ttk
-from .utils import load_all_filetypes, save_filetypes
-from .paths import ICON_PATH
+from ..core.utils import load_all_filetypes, save_filetypes
+from ..core.paths import ICON_PATH
 
 class FiletypesManagerWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):

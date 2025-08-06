@@ -1,11 +1,11 @@
 import os
 from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox, ttk
 
-from .utils import parse_gitignore
-from .constants import SUBTLE_HIGHLIGHT_COLOR
-from .project_config import ProjectConfig
+from ...core.utils import parse_gitignore
+from ...constants import SUBTLE_HIGHLIGHT_COLOR
+from ...core.project_config import ProjectConfig
 from .file_tree_builder import build_file_tree_data
-from .merger import recalculate_token_count
+from ...core.merger import recalculate_token_count
 from .file_tree_handler import FileTreeHandler
 from .selection_list_handler import SelectionListHandler
 

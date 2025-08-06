@@ -1,7 +1,7 @@
 import os
 import json
 from pathlib import Path
-from .constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE
+from ..constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE
 
 def _create_and_get_default_config():
     """

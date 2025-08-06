@@ -1,7 +1,7 @@
 import json
 from tkinter import Tk, messagebox
-from .app_window import App
-from .utils import load_active_file_extensions, load_app_version
+from .ui.app_window import App
+from .core.utils import load_active_file_extensions, load_app_version
 
 def main():
     try:

@@ -1,7 +1,7 @@
 import os
 import json
 from tkinter import Toplevel, Frame, Label, Button, Text, Scrollbar
-from .paths import ICON_PATH
+from ..core.paths import ICON_PATH
 
 class WrapperTextWindow(Toplevel):
     def __init__(self, parent, base_dir, status_var, on_close_callback=None):

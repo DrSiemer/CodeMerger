@@ -1,5 +1,5 @@
 import tkinter as tk
-from .constants import COMPACT_MODE_BG_COLOR
+from ..constants import COMPACT_MODE_BG_COLOR
 
 class CompactMode(tk.Toplevel):
     """

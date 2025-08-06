@@ -1,5 +1,5 @@
 # --- Application Constants ---
-from .paths import CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
+from .core.paths import CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
 
 # Configuration file names
 CONFIG_FILE = CONFIG_FILE_PATH

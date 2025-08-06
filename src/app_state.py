@@ -1,5 +1,5 @@
 import os
-from .utils import load_config, save_config
+from .core.utils import load_config, save_config
 from .constants import RECENT_DIRS_MAX
 
 class AppState:

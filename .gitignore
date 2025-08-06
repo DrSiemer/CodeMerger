@@ -2,6 +2,9 @@
 /build
 /dist
 /src/__pycache__
+/src/core/__pycache__
+/src/ui/__pycache__
+/src/ui/file_manager/__pycache__
 2do.txt
 config.json
 filetypes.json

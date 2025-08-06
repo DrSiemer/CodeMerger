@@ -1,5 +1,5 @@
 import os
-from .utils import is_ignored
+from ...core.utils import is_ignored
 
 def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
     """

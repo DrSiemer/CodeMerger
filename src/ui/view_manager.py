@@ -2,7 +2,7 @@ import time
 from tkinter import messagebox, TclError
 from PIL import Image, ImageTk
 from .compact_mode import CompactMode
-from .paths import COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH
+from ..core.paths import COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH
 
 class ViewManager:
     """

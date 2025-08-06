@@ -10,7 +10,7 @@ def get_bundle_dir():
     """
     if hasattr(sys, '_MEIPASS'):
         return sys._MEIPASS
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 def get_persistent_data_dir():
     """
@@ -34,7 +34,7 @@ def get_persistent_data_dir():
         os.makedirs(config_dir, exist_ok=True)
         return config_dir
     else: # Running as a script in a development environment
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # --- Define Application Paths ---
 BUNDLE_DIR = get_bundle_dir()

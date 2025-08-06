@@ -3,16 +3,16 @@ import json
 import pyperclip
 from tkinter import Tk, Frame, Label, Button, StringVar, messagebox
 
-from .app_state import AppState
+from ..app_state import AppState
 from .view_manager import ViewManager
-from .file_manager import FileManagerWindow
+from .file_manager.file_manager_window import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
-from .merger import generate_output_string
+from ..core.merger import generate_output_string
 from .directory_dialog import DirectoryDialog
-from .utils import load_active_file_extensions
-from .paths import ICON_PATH
+from ..core.utils import load_active_file_extensions
+from ..core.paths import ICON_PATH
 
 class App(Tk):
     def __init__(self, file_extensions, app_version=""):
