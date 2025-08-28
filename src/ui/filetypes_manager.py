@@ -98,15 +98,13 @@ class FiletypesManagerWindow(Toplevel):
     def add_new_filetype(self):
         new_ext = self.add_entry.get().strip().lower()
         if not new_ext:
-            messagebox.showwarning("Input Error", "Extension cannot be empty.", parent=self)
+            messagebox.showwarning("Input Error", "Extension or filename cannot be empty.", parent=self)
             return
         if re.search(r'[\\/*?:"<>|]', new_ext):
-            messagebox.showwarning("Invalid Characters", "File extensions cannot contain \\ / * ? : \" < > |", parent=self)
+            messagebox.showwarning("Invalid Characters", "Extensions or filenames cannot contain \\ / * ? : \" < > |", parent=self)
             return
-        if not new_ext.startswith('.'):
-            new_ext = '.' + new_ext
         if any(item['ext'] == new_ext for item in self.filetypes_data):
-            messagebox.showwarning("Duplicate", f"The extension '{new_ext}' already exists.", parent=self)
+            messagebox.showwarning("Duplicate", f"The entry '{new_ext}' already exists.", parent=self)
             return
         self.filetypes_data.append({"ext": new_ext, "active": True})
         self.add_entry.delete(0, 'end')

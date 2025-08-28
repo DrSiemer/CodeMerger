@@ -1,6 +1,7 @@
 [
   { "ext": ".bat", "active": true },
   { "ext": ".c", "active": true },
+  { "ext": ".conf", "active": true },
   { "ext": ".cpp", "active": true },
   { "ext": ".css", "active": true },
   { "ext": ".cs", "active": true },
@@ -35,5 +36,6 @@
   { "ext": ".vue", "active": true },
   { "ext": ".xml", "active": true },
   { "ext": ".yaml", "active": true },
-  { "ext": ".yml", "active": true }
+  { "ext": ".yml", "active": true },
+  { "ext": "caddyfile", "active": true }
 ]

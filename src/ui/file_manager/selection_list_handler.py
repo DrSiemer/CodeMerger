@@ -25,7 +25,7 @@ class SelectionListHandler:
         self.listbox.bind('<Double-1>', self.open_selected_file)
 
     def set_initial_selection(self, selection_list):
-        self.ordered_selection = selection_list
+        self.ordered_selection = list(selection_list)
         self.update_listbox_from_data()
 
     def update_listbox_from_data(self):
@@ -82,6 +82,7 @@ class SelectionListHandler:
             self.update_listbox_from_data()
             self.listbox.select_set(0)
             self.listbox.activate(0)
+            self.listbox.see(0)
             self.on_change()
 
     def move_up(self):
@@ -94,6 +95,7 @@ class SelectionListHandler:
             self.update_listbox_from_data()
             self.listbox.select_set(index - 1)
             self.listbox.activate(index - 1)
+            self.listbox.see(index - 1)
             self.on_change()
 
     def move_down(self):
@@ -106,6 +108,7 @@ class SelectionListHandler:
             self.update_listbox_from_data()
             self.listbox.select_set(index + 1)
             self.listbox.activate(index + 1)
+            self.listbox.see(index + 1)
             self.on_change()
 
     def move_to_bottom(self):
@@ -119,6 +122,7 @@ class SelectionListHandler:
             self.update_listbox_from_data()
             self.listbox.select_set(new_index)
             self.listbox.activate(new_index)
+            self.listbox.see(new_index)
             self.on_change()
 
     def remove_selected(self):

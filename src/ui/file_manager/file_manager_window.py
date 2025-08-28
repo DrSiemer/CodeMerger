@@ -31,6 +31,8 @@ class FileManagerWindow(Toplevel):
         if files_were_cleaned:
             self.status_var.set("Cleaned missing files from .allcode")
 
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         self.gitignore_patterns = parse_gitignore(self.base_dir)
 
         # Build UI and then create handlers
@@ -239,6 +241,35 @@ class FileManagerWindow(Toplevel):
             removed_count = len(self.selection_handler.ordered_selection)
             self.selection_handler.remove_all_files()
             self.status_var.set(f"Removed {removed_count} file(s) from the merge list")
+
+    def _is_state_changed(self):
+        """Compares current state to the last saved state"""
+        # Compare list of selected files (order matters)
+        if self.selection_handler.ordered_selection != self.project_config.selected_files:
+            return True
+
+        # Compare set of expanded directories
+        current_expanded_dirs = set(self.tree_handler.get_expanded_dirs())
+        if current_expanded_dirs != self.project_config.expanded_dirs:
+            return True
+
+        return False
+
+    def on_closing(self):
+        """Handles the window close event, checking for unsaved changes"""
+        if self._is_state_changed():
+            response = messagebox.askyesnocancel(
+                "Unsaved Changes",
+                "You have unsaved changes. Do you want to save them before closing?",
+                parent=self
+            )
+            if response is True:  # Yes, save
+                self.save_and_close()
+            elif response is False:  # No, discard
+                self.destroy()
+            # On Cancel (response is None), do nothing
+        else:
+            self.destroy() # No changes, just close
 
     def save_and_close(self):
         expanded_dirs = self.tree_handler.get_expanded_dirs()

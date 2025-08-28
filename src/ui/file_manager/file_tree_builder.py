@@ -6,6 +6,9 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
     Scans the file system respecting .gitignore and returns a data structure
     representing the relevant files and directories for the tree view
     """
+    extensions = {ext for ext in file_extensions if ext.startswith('.')}
+    exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
+
     def _has_relevant_files(path):
         """Recursively checks if a directory contains any files matching the extension list"""
         for entry in os.scandir(path):
@@ -14,8 +17,11 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
             if entry.is_dir():
                 if _has_relevant_files(entry.path):
                     return True
-            elif entry.is_file() and os.path.splitext(entry.name)[1].lower() in file_extensions:
-                return True
+            elif entry.is_file():
+                file_name_lower = entry.name.lower()
+                file_ext = os.path.splitext(file_name_lower)[1]
+                if file_ext in extensions or file_name_lower in exact_filenames:
+                    return True
         return False
 
     def _build_nodes(current_path):
@@ -42,13 +48,16 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
                         'children': _build_nodes(entry.path)
                     }
                     nodes.append(node)
-            elif entry.is_file() and os.path.splitext(entry.name)[1].lower() in file_extensions:
-                node = {
-                    'name': entry.name,
-                    'path': rel_path,
-                    'type': 'file'
-                }
-                nodes.append(node)
+            elif entry.is_file():
+                file_name_lower = entry.name.lower()
+                file_ext = os.path.splitext(file_name_lower)[1]
+                if file_ext in extensions or file_name_lower in exact_filenames:
+                    node = {
+                        'name': entry.name,
+                        'path': rel_path,
+                        'type': 'file'
+                    }
+                    nodes.append(node)
         return nodes
 
     return _build_nodes(base_dir)
