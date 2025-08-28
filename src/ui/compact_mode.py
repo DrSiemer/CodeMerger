@@ -9,13 +9,15 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, image_up=None, image_down=None, image_close=None):
+    def __init__(self, parent, close_callback, project_name, image_up=None, image_down=None, image_close=None):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
+        self.project_name = project_name
         self.image_up = image_up
         self.image_down = image_down
         self.image_close = image_close
+        self.tooltip_window = None
 
         # --- Style and Layout Constants ---
         BAR_AND_BORDER_COLOR = COMPACT_MODE_BG_COLOR
@@ -94,6 +96,34 @@ class CompactMode(tk.Toplevel):
         # Click functionality is bound ONLY to the button image
         self.button_label.bind("<ButtonPress-1>", self.on_press_click)
         self.button_label.bind("<ButtonRelease-1>", self.on_release_click)
+
+        # Tooltip functionality
+        self.bind("<Enter>", self.show_tooltip)
+        self.bind("<Leave>", self.hide_tooltip)
+
+    def show_tooltip(self, event=None):
+        if self.tooltip_window or not self.project_name:
+            return
+        x = self.winfo_rootx() + self.winfo_width() // 2
+        y = self.winfo_rooty() + self.winfo_height() + 5
+
+        self.tooltip_window = tk.Toplevel(self)
+        self.tooltip_window.wm_overrideredirect(True)
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(self.tooltip_window, text=self.project_name, justify='left',
+                      background="#ffffe0", relief='solid', borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=1)
+        # Center tooltip below the widget
+        self.tooltip_window.update_idletasks()
+        new_x = x - (self.tooltip_window.winfo_width() // 2)
+        self.tooltip_window.wm_geometry(f"+{new_x}+{y}")
+
+
+    def hide_tooltip(self, event=None):
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+        self.tooltip_window = None
 
     def close_window(self, event=None):
         """Signals the parent app to close this window and show the main one."""

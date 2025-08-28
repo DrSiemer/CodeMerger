@@ -1,4 +1,5 @@
 import time
+import os
 from tkinter import messagebox, TclError
 from PIL import Image, ImageTk
 from .compact_mode import CompactMode
@@ -112,9 +113,13 @@ class ViewManager:
             self.in_compact_mode = True
             self.main_window_geom = (self.main_window.winfo_x(), self.main_window.winfo_y(), self.main_window.winfo_width(), self.main_window.winfo_height())
 
+            active_dir = self.main_window.active_dir.get()
+            project_name = os.path.basename(active_dir) if active_dir and "No project" not in active_dir else ""
+
             self.compact_mode_window = CompactMode(
                 parent=self.main_window,
                 close_callback=self.toggle_compact_mode,
+                project_name=project_name,
                 image_up=self.compact_mode_image_up,
                 image_down=self.compact_mode_image_down,
                 image_close=self.compact_mode_close_image

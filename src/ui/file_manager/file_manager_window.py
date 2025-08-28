@@ -73,12 +73,17 @@ class FileManagerWindow(Toplevel):
 
         move_buttons_frame = Frame(main_frame)
         move_buttons_frame.grid(row=2, column=2, sticky='ew', pady=(5, 0), padx=(10, 0))
-        self.move_up_button = Button(move_buttons_frame, text="↑ Move Up", state='disabled')
+        self.move_to_top_button = Button(move_buttons_frame, text="↑↑ Top", state='disabled')
+        self.move_to_top_button.pack(side='left', padx=(0, 2))
+        self.move_up_button = Button(move_buttons_frame, text="↑ Up", state='disabled')
         self.move_up_button.pack(side='left', expand=True, fill='x', padx=(0, 2))
         self.remove_button = Button(move_buttons_frame, text="Remove", state='disabled')
         self.remove_button.pack(side='left', expand=True, fill='x', padx=2)
-        self.move_down_button = Button(move_buttons_frame, text="↓ Move Down", state='disabled')
+        self.move_down_button = Button(move_buttons_frame, text="↓ Down", state='disabled')
         self.move_down_button.pack(side='left', expand=True, fill='x', padx=(2, 0))
+        self.move_to_bottom_button = Button(move_buttons_frame, text="↓↓ Bottom", state='disabled')
+        self.move_to_bottom_button.pack(side='right', padx=(2, 0))
+
 
         bulk_action_frame = Frame(main_frame)
         bulk_action_frame.grid(row=3, column=0, columnspan=4, sticky='ew', pady=(20, 0))
@@ -91,7 +96,13 @@ class FileManagerWindow(Toplevel):
         self.item_map = {}
         self.path_to_item_id = {}
 
-        listbox_buttons = {'up': self.move_up_button, 'remove': self.remove_button, 'down': self.move_down_button}
+        listbox_buttons = {
+            'top': self.move_to_top_button,
+            'up': self.move_up_button,
+            'remove': self.remove_button,
+            'down': self.move_down_button,
+            'bottom': self.move_to_bottom_button
+        }
         self.selection_handler = SelectionListHandler(self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor, self.on_selection_list_changed)
 
         self.tree_handler = FileTreeHandler(
@@ -104,8 +115,10 @@ class FileManagerWindow(Toplevel):
             on_toggle_callback=self.on_file_toggled
         )
         self.tree_action_button.config(command=self.tree_handler.toggle_selection_for_selected)
+        self.move_to_top_button.config(command=self.selection_handler.move_to_top)
         self.move_up_button.config(command=self.selection_handler.move_up)
         self.move_down_button.config(command=self.selection_handler.move_down)
+        self.move_to_bottom_button.config(command=self.selection_handler.move_to_bottom)
         self.remove_button.config(command=self.selection_handler.remove_selected)
 
     def populate_tree(self):

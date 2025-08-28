@@ -3,6 +3,7 @@
     ".github",
     ".github/workflows",
     "src",
+    "src/core",
     "src/ui",
     "src/ui/file_manager"
   ],
@@ -33,7 +34,7 @@
     "requirements.txt",
     ".github/workflows/release.yml"
   ],
-  "total_tokens": 20470,
+  "total_tokens": 21241,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION",
   "outro_text": "Do NOT:\n- remove my original comments\n- return diff files\n- use a step count, <summary> tags, triple dashes in comments\n- end comments with dots (unless you are using multiple sentences)\n- copy my filename/path format in your answer\n\nMake sure empty lines are actually empty: avoid generating lines of spaces or tabs."
 }

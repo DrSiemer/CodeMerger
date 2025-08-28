@@ -11,9 +11,11 @@ class SelectionListHandler:
     def __init__(self, parent, listbox_widget, buttons, base_dir, default_editor, on_change_callback):
         self.parent = parent
         self.listbox = listbox_widget
+        self.move_to_top_button = buttons['top']
         self.move_up_button = buttons['up']
         self.remove_button = buttons['remove']
         self.move_down_button = buttons['down']
+        self.move_to_bottom_button = buttons['bottom']
         self.base_dir = base_dir
         self.default_editor = default_editor
         self.on_change = on_change_callback # Callback to notify coordinator of changes
@@ -40,9 +42,12 @@ class SelectionListHandler:
     def update_button_states(self):
         """Enables or disables the listbox action buttons based on selection"""
         new_state = 'normal' if self.listbox.curselection() else 'disabled'
+        self.move_to_top_button.config(state=new_state)
         self.move_up_button.config(state=new_state)
         self.remove_button.config(state=new_state)
         self.move_down_button.config(state=new_state)
+        self.move_to_bottom_button.config(state=new_state)
+
 
     def toggle_file(self, path):
         """Adds or removes a file from the selection"""
@@ -67,6 +72,18 @@ class SelectionListHandler:
         self.update_listbox_from_data()
         self.on_change()
 
+    def move_to_top(self):
+        selection = self.listbox.curselection()
+        if not selection: return
+        index = selection[0]
+        if index > 0:
+            path = self.ordered_selection.pop(index)
+            self.ordered_selection.insert(0, path)
+            self.update_listbox_from_data()
+            self.listbox.select_set(0)
+            self.listbox.activate(0)
+            self.on_change()
+
     def move_up(self):
         selection = self.listbox.curselection()
         if not selection: return
@@ -89,6 +106,19 @@ class SelectionListHandler:
             self.update_listbox_from_data()
             self.listbox.select_set(index + 1)
             self.listbox.activate(index + 1)
+            self.on_change()
+
+    def move_to_bottom(self):
+        selection = self.listbox.curselection()
+        if not selection: return
+        index = selection[0]
+        if index < len(self.ordered_selection) - 1:
+            path = self.ordered_selection.pop(index)
+            self.ordered_selection.append(path)
+            new_index = len(self.ordered_selection) - 1
+            self.update_listbox_from_data()
+            self.listbox.select_set(new_index)
+            self.listbox.activate(new_index)
             self.on_change()
 
     def remove_selected(self):

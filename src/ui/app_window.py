@@ -46,7 +46,7 @@ class App(Tk):
 
         top_frame = Frame(main_frame, bg=self.app_bg_color)
         top_frame.pack(side='top', fill='x')
-        Label(top_frame, text="Active Directory:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color).pack(anchor='w')
+        Label(top_frame, text="Active Project:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color).pack(anchor='w')
         Label(top_frame, textvariable=self.active_dir, fg="blue", wraplength=450, justify='left', bg=self.app_bg_color).pack(anchor='w', fill='x', pady=(0, 10))
         top_button_frame = Frame(top_frame, bg=self.app_bg_color)
         top_button_frame.pack(fill='x', pady=5)
@@ -54,7 +54,7 @@ class App(Tk):
         self.wrapper_text_button.pack(side='right', padx=(3, 0))
         self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
         self.manage_files_button.pack(side='right', expand=True, fill='x')
-        Button(top_button_frame, text="Select Directory", command=self.open_change_directory_dialog).pack(side='right', expand=True, fill='x', padx=(0, 3))
+        Button(top_button_frame, text="Select project", command=self.open_change_directory_dialog).pack(side='right', expand=True, fill='x', padx=(0, 3))
 
         config_frame = Frame(main_frame, bg=self.app_bg_color)
         config_frame.pack(side='bottom', fill='x', pady=(5, 0))
@@ -93,7 +93,7 @@ class App(Tk):
         if path and os.path.isdir(path):
             self.active_dir.set(path)
         else:
-            self.active_dir.set("No directory selected")
+            self.active_dir.set("No project selected")
 
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file"""
@@ -139,18 +139,18 @@ class App(Tk):
     def on_directory_selected(self, new_dir):
         if self.state.update_active_dir(new_dir):
             self.set_active_dir_display(new_dir)
-            self.status_var.set(f"Active directory changed to: {os.path.basename(new_dir)}")
+            self.status_var.set(f"Active project changed to: {os.path.basename(new_dir)}")
 
     def on_recent_removed(self, path_to_remove):
-        self.state.remove_recent_directory(path_to_remove)
-        self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent directories")
+        self.state.remove_recent_project(path_to_remove)
+        self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent projects")
 
     def open_settings_window(self):
         SettingsWindow(self, on_close_callback=self.on_settings_closed)
 
     def open_wrapper_text_window(self):
         if not os.path.isdir(self.active_dir.get()):
-            messagebox.showerror("Error", "Please select a valid directory first")
+            messagebox.showerror("Error", "Please select a valid project folder first")
             return
         wt_window = WrapperTextWindow(self, self.active_dir.get(), self.status_var, on_close_callback=self.update_button_states)
         self.wait_window(wt_window)
@@ -163,11 +163,11 @@ class App(Tk):
         self.status_var.set("Filetype configuration updated")
 
     def open_change_directory_dialog(self):
-        self.state._prune_recent_dirs()
+        self.state._prune_recent_projects()
         DirectoryDialog(
             parent=self,
             app_bg_color=self.app_bg_color,
-            recent_dirs=self.state.recent_dirs,
+            recent_projects=self.state.recent_projects,
             on_select_callback=self.on_directory_selected,
             on_remove_callback=self.on_recent_removed
         )
@@ -175,8 +175,8 @@ class App(Tk):
     def _perform_copy(self, use_wrapper: bool):
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid directory first")
-            self.status_var.set("Error: Invalid directory")
+            messagebox.showerror("Error", "Please select a valid project folder first")
+            self.status_var.set("Error: Invalid project folder")
             return
 
         try:
@@ -203,7 +203,7 @@ class App(Tk):
     def manage_files(self):
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid directory first")
+            messagebox.showerror("Error", "Please select a valid project folder first")
             return
         fm_window = FileManagerWindow(self, base_dir, self.status_var, self.file_extensions, self.state.default_editor)
         self.wait_window(fm_window)

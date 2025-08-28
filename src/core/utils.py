@@ -8,7 +8,7 @@ def _create_and_get_default_config():
     Creates a new config object from the default template, saves it to disk,
     and returns it. This is the definitive first-run function
     """
-    config = {'active_directory': '', 'recent_directories': [], 'filetypes': [], 'default_editor': ''}
+    config = {'active_directory': '', 'recent_projects': [], 'filetypes': [], 'default_editor': ''}
     try:
         # Load the list of filetypes from the bundled template
         with open(DEFAULT_FILETYPES_CONFIG, 'r', encoding='utf-8-sig') as f:
@@ -36,6 +36,8 @@ def load_config():
                 raise ValueError("Config is missing 'filetypes' key.")
             if 'default_editor' not in config:
                 config['default_editor'] = '' # Add missing key for backward compatibility
+            if 'recent_directories' in config: # Backward compatibility
+                config['recent_projects'] = config.pop('recent_directories')
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one
@@ -86,15 +88,20 @@ def is_ignored(path, base_dir, gitignore_patterns):
         base_path = Path(base_dir)
         target_path = Path(path)
         relative_path = target_path.relative_to(base_path)
+        relative_path_str = relative_path.as_posix()
+
         for p in gitignore_patterns:
+            # A pattern ending in a slash is for matching directories
             if p.endswith('/'):
-                if not target_path.is_dir():
-                    continue
-                if relative_path.match(p.rstrip('/')) or relative_path.match('*/' + p.rstrip('/')):
+                dir_pattern = p.rstrip('/')
+                # Check if path is the directory itself or is inside that directory
+                if relative_path_str == dir_pattern or relative_path_str.startswith(dir_pattern + '/'):
                     return True
+            # A pattern starting with a slash is anchored to the project root
             elif p.startswith('/'):
                 if relative_path.match(p.lstrip('/')):
                     return True
+            # Other patterns match anywhere
             else:
                 if relative_path.match(p) or relative_path.match('*/' + p):
                     return True

@@ -1,6 +1,6 @@
 import os
 from .core.utils import load_config, save_config
-from .constants import RECENT_DIRS_MAX
+from .constants import RECENT_PROJECTS_MAX
 
 class AppState:
     """
@@ -9,11 +9,11 @@ class AppState:
     def __init__(self):
         self.config = load_config()
         self.active_directory = self.config.get('active_directory', '')
-        self.recent_dirs = self.config.get('recent_directories', [])
+        self.recent_projects = self.config.get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
 
         self._validate_active_dir()
-        self._prune_recent_dirs()
+        self._prune_recent_projects()
 
     def _validate_active_dir(self):
         """Checks for existence of the active directory. Resets if not found"""
@@ -22,12 +22,12 @@ class AppState:
             self.config['active_directory'] = ''
             self._save()
 
-    def _prune_recent_dirs(self):
+    def _prune_recent_projects(self):
         """Removes non-existent directories from the recent list"""
-        initial_count = len(self.recent_dirs)
-        self.recent_dirs = [d for d in self.recent_dirs if os.path.isdir(d)]
-        if len(self.recent_dirs) != initial_count:
-            self.config['recent_directories'] = self.recent_dirs
+        initial_count = len(self.recent_projects)
+        self.recent_projects = [d for d in self.recent_projects if os.path.isdir(d)]
+        if len(self.recent_projects) != initial_count:
+            self.config['recent_projects'] = self.recent_projects
             self._save()
 
     def _save(self):
@@ -47,18 +47,18 @@ class AppState:
         self.active_directory = new_dir
         self.config['active_directory'] = new_dir
 
-        if new_dir in self.recent_dirs:
-            self.recent_dirs.remove(new_dir)
-        self.recent_dirs.insert(0, new_dir)
-        self.recent_dirs = self.recent_dirs[:RECENT_DIRS_MAX]
-        self.config['recent_directories'] = self.recent_dirs
+        if new_dir in self.recent_projects:
+            self.recent_projects.remove(new_dir)
+        self.recent_projects.insert(0, new_dir)
+        self.recent_projects = self.recent_projects[:RECENT_PROJECTS_MAX]
+        self.config['recent_projects'] = self.recent_projects
 
         self._save()
         return True
 
-    def remove_recent_directory(self, path_to_remove):
+    def remove_recent_project(self, path_to_remove):
         """Removes a directory from the recent list"""
-        if path_to_remove in self.recent_dirs:
-            self.recent_dirs.remove(path_to_remove)
-            self.config['recent_directories'] = self.recent_dirs
+        if path_to_remove in self.recent_projects:
+            self.recent_projects.remove(path_to_remove)
+            self.config['recent_projects'] = self.recent_projects
             self._save()
