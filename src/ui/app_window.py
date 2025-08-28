@@ -1,7 +1,7 @@
 import os
 import json
 import pyperclip
-from tkinter import Tk, Frame, Label, Button, StringVar, messagebox
+from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser
 
 from ..app_state import AppState
 from .view_manager import ViewManager
@@ -13,12 +13,16 @@ from ..core.merger import generate_output_string
 from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions
 from ..core.paths import ICON_PATH
+from ..core.project_config import ProjectConfig
+from ..constants import COMPACT_MODE_BG_COLOR
 
 class App(Tk):
     def __init__(self, file_extensions, app_version=""):
         super().__init__()
         self.file_extensions = file_extensions
         self.app_bg_color = '#FFFFFF'
+        self.project_config = None
+        self.project_color = COMPACT_MODE_BG_COLOR
 
         self.state = AppState()
         self.view_manager = ViewManager(self)
@@ -50,6 +54,12 @@ class App(Tk):
         Label(top_frame, textvariable=self.active_dir, fg="blue", wraplength=450, justify='left', bg=self.app_bg_color).pack(anchor='w', fill='x', pady=(0, 10))
         top_button_frame = Frame(top_frame, bg=self.app_bg_color)
         top_button_frame.pack(fill='x', pady=5)
+
+        self.color_swatch = Frame(top_button_frame, width=28, height=28, relief='sunken', borderwidth=1, cursor="hand2")
+        self.color_swatch.pack(side='right', padx=(3, 0))
+        self.color_swatch.pack_propagate(False) # Prevent shrinking
+        self.color_swatch.bind("<Button-1>", self.open_color_chooser)
+
         self.wrapper_text_button = Button(top_button_frame, text="Wrapper Text", command=self.open_wrapper_text_window)
         self.wrapper_text_button.pack(side='right', padx=(3, 0))
         self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
@@ -89,11 +99,17 @@ class App(Tk):
         self.focus_force()
 
     def set_active_dir_display(self, path):
-        """Sets the display string for the active directory's StringVar"""
+        """Sets the display string for the active directory and loads its config"""
         if path and os.path.isdir(path):
             self.active_dir.set(path)
+            self.project_config = ProjectConfig(path)
+            self.project_config.load()
+            self.project_color = self.project_config.project_color
         else:
             self.active_dir.set("No project selected")
+            self.project_config = None
+            self.project_color = COMPACT_MODE_BG_COLOR
+        self.update_button_states() # Explicitly call update after changing dir
 
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file"""
@@ -104,22 +120,15 @@ class App(Tk):
 
         self.manage_files_button.config(state=dir_dependent_state)
         self.wrapper_text_button.config(state=dir_dependent_state)
+        self.color_swatch.config(bg=self.project_color if is_dir_active else "#f0f0f0")
 
-        if is_dir_active:
-            allcode_path = os.path.join(self.active_dir.get(), '.allcode')
-            if os.path.isfile(allcode_path):
-                try:
-                    if os.path.getsize(allcode_path) > 0:
-                        with open(allcode_path, 'r', encoding='utf-8-sig') as f:
-                            data = json.load(f)
-                            if data.get('selected_files'):
-                                copy_buttons_state = 'normal'
-                            intro = data.get('intro_text', '').strip()
-                            outro = data.get('outro_text', '').strip()
-                            if intro or outro:
-                                has_wrapper_text = True
-                except (json.JSONDecodeError, IOError):
-                    pass
+        if is_dir_active and self.project_config:
+            if self.project_config.selected_files:
+                copy_buttons_state = 'normal'
+            intro = self.project_config.intro_text.strip()
+            outro = self.project_config.outro_text.strip()
+            if intro or outro:
+                has_wrapper_text = True
 
         self.copy_merged_button.config(state=copy_buttons_state)
         self.copy_wrapped_button.config(state=copy_buttons_state)
@@ -145,14 +154,24 @@ class App(Tk):
         self.state.remove_recent_project(path_to_remove)
         self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent projects")
 
+    def open_color_chooser(self, event=None):
+        if not self.project_config: return
+        # Ask for color, returns (rgb_tuple, hex_string)
+        color_code = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
+        if color_code and color_code[1]: # Check if a color was chosen
+            self.project_color = color_code[1]
+            self.project_config.project_color = self.project_color
+            self.project_config.save()
+            self.update_button_states()
+
     def open_settings_window(self):
         SettingsWindow(self, on_close_callback=self.on_settings_closed)
 
     def open_wrapper_text_window(self):
-        if not os.path.isdir(self.active_dir.get()):
+        if not self.project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        wt_window = WrapperTextWindow(self, self.active_dir.get(), self.status_var, on_close_callback=self.update_button_states)
+        wt_window = WrapperTextWindow(self, self.project_config, self.status_var, on_close_callback=self.update_button_states)
         self.wait_window(wt_window)
 
     def open_filetypes_manager(self):
@@ -201,10 +220,9 @@ class App(Tk):
         self._perform_copy(use_wrapper=True)
 
     def manage_files(self):
-        base_dir = self.active_dir.get()
-        if not os.path.isdir(base_dir):
+        if not self.project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        fm_window = FileManagerWindow(self, base_dir, self.status_var, self.file_extensions, self.state.default_editor)
+        fm_window = FileManagerWindow(self, self.project_config, self.status_var, self.file_extensions, self.state.default_editor)
         self.wait_window(fm_window)
         self.update_button_states()

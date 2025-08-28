@@ -122,7 +122,8 @@ class ViewManager:
                 project_name=project_name,
                 image_up=self.compact_mode_image_up,
                 image_down=self.compact_mode_image_down,
-                image_close=self.compact_mode_close_image
+                image_close=self.compact_mode_close_image,
+                instance_color=self.main_window.project_color
             )
             self.compact_mode_window.withdraw()
             self.compact_mode_window.update_idletasks()

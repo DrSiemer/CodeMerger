@@ -10,10 +10,11 @@ from .file_tree_handler import FileTreeHandler
 from .selection_list_handler import SelectionListHandler
 
 class FileManagerWindow(Toplevel):
-    def __init__(self, parent, base_dir, status_var, file_extensions, default_editor):
+    def __init__(self, parent, project_config, status_var, file_extensions, default_editor):
         super().__init__(parent)
 
-        self.base_dir = base_dir
+        self.project_config = project_config
+        self.base_dir = self.project_config.base_dir
         self.status_var = status_var
         self.file_extensions = file_extensions
         self.default_editor = default_editor
@@ -24,9 +25,8 @@ class FileManagerWindow(Toplevel):
         self.grab_set()
 
         self._recalculate_job = None
-        self.current_total_tokens = 0
+        self.current_total_tokens = self.project_config.total_tokens
 
-        self.project_config = ProjectConfig(self.base_dir)
         files_were_cleaned = self.project_config.load()
         if files_were_cleaned:
             self.status_var.set("Cleaned missing files from .allcode")
@@ -272,7 +272,9 @@ class FileManagerWindow(Toplevel):
             self.destroy() # No changes, just close
 
     def save_and_close(self):
-        expanded_dirs = self.tree_handler.get_expanded_dirs()
-        self.project_config.save(self.selection_handler.ordered_selection, set(expanded_dirs), self.current_total_tokens)
+        self.project_config.selected_files = self.selection_handler.ordered_selection
+        self.project_config.expanded_dirs = set(self.tree_handler.get_expanded_dirs())
+        self.project_config.total_tokens = self.current_total_tokens
+        self.project_config.save()
         self.status_var.set("File selection and order saved to .allcode")
         self.destroy()

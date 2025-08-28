@@ -1,5 +1,21 @@
 import os
 import json
+import random
+import colorsys
+from ..constants import COMPACT_MODE_BG_COLOR
+
+def _generate_random_color():
+    """
+    Generates a random, visually pleasing hex color string.
+    The color is generated in the HSV space with controlled saturation and
+    value to avoid overly bright or dark colors, then converted to RGB and hex.
+    """
+    hue = random.random()
+    saturation = random.uniform(0.5, 0.7)
+    value = random.uniform(0.6, 0.8)
+    r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
+    r_int, g_int, b_int = int(r * 255), int(g * 255), int(b * 255)
+    return f"#{r_int:02x}{g_int:02x}{b_int:02x}"
 
 class ProjectConfig:
     """
@@ -13,6 +29,7 @@ class ProjectConfig:
         self.total_tokens = 0
         self.intro_text = ''
         self.outro_text = ''
+        self.project_color = COMPACT_MODE_BG_COLOR
 
     def load(self):
         """
@@ -21,6 +38,7 @@ class ProjectConfig:
         the file list was modified during the cleaning process
         """
         data = {}
+        config_was_updated = False
         try:
             if os.path.isfile(self.allcode_path):
                 with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
@@ -35,6 +53,12 @@ class ProjectConfig:
         self.expanded_dirs = set(data.get('expanded_dirs', []))
         original_selection = data.get('selected_files', [])
 
+        if 'project_color' not in data:
+            self.project_color = _generate_random_color()
+            config_was_updated = True
+        else:
+            self.project_color = data.get('project_color', COMPACT_MODE_BG_COLOR)
+
         # Filter out files that no longer exist on disk
         cleaned_selection = [
             f for f in original_selection
@@ -46,22 +70,21 @@ class ProjectConfig:
 
         if files_were_cleaned:
             self.total_tokens = 0 # Invalidate token count if files are missing
-            # Auto-save the cleaned config
-            self.save(self.selected_files, self.expanded_dirs, self.total_tokens)
+            config_was_updated = True
         else:
             # The file list is intact, so the cached token count is trustworthy
             self.total_tokens = data.get('total_tokens', 0)
 
+        if config_was_updated:
+            self.save()
+
         return files_were_cleaned
 
-    def save(self, selected_files, expanded_dirs, total_tokens):
+    def save(self):
         """Saves the configuration to the .allcode file"""
-        self.selected_files = selected_files
-        self.expanded_dirs = expanded_dirs
-        self.total_tokens = total_tokens
-
         # Build the dictionary in the desired order to control the JSON output
         final_data = {
+            "project_color": self.project_color,
             "expanded_dirs": sorted(list(self.expanded_dirs)),
             "selected_files": self.selected_files,
             "total_tokens": self.total_tokens,

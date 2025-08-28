@@ -9,7 +9,7 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, project_name, image_up=None, image_down=None, image_close=None):
+    def __init__(self, parent, close_callback, project_name, image_up=None, image_down=None, image_close=None, instance_color=COMPACT_MODE_BG_COLOR):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
@@ -20,7 +20,7 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window = None
 
         # --- Style and Layout Constants ---
-        BAR_AND_BORDER_COLOR = COMPACT_MODE_BG_COLOR
+        BAR_AND_BORDER_COLOR = instance_color # Use the passed-in color
         BORDER_WIDTH = 1
         MOVE_BAR_HEIGHT = 14
 

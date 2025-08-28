@@ -4,14 +4,11 @@ from tkinter import Toplevel, Frame, Label, Button, Text, Scrollbar
 from ..core.paths import ICON_PATH
 
 class WrapperTextWindow(Toplevel):
-    def __init__(self, parent, base_dir, status_var, on_close_callback=None):
+    def __init__(self, parent, project_config, status_var, on_close_callback=None):
         super().__init__(parent)
-        self.base_dir = base_dir
+        self.project_config = project_config
         self.status_var = status_var
         self.on_close_callback = on_close_callback
-
-        self.allcode_path = os.path.join(self.base_dir, '.allcode')
-        self.project_data = self._load_project_data()
 
         # --- Window Setup ---
         self.title("Set Wrapper Text")
@@ -64,39 +61,18 @@ class WrapperTextWindow(Toplevel):
         self.outro_text.pack(side='left', fill='both', expand=True)
 
         # --- Populate Text Fields ---
-        self.intro_text.insert('1.0', self.project_data.get('intro_text', ''))
-        self.outro_text.insert('1.0', self.project_data.get('outro_text', ''))
+        self.intro_text.insert('1.0', self.project_config.intro_text)
+        self.outro_text.insert('1.0', self.project_config.outro_text)
 
         self.protocol("WM_DELETE_WINDOW", self.destroy)
 
-    def _load_project_data(self):
-        """Loads data from the .allcode file, creating it if it doesn't exist"""
-        if os.path.isfile(self.allcode_path):
-            try:
-                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
-                    # Handle empty file case
-                    content = f.read()
-                    if not content:
-                        return {}
-                    return json.loads(content)
-            except (json.JSONDecodeError, IOError):
-                return {} # Return empty if corrupt or unreadable
-        return {} # Return empty if it doesn't exist
-
     def save_and_close(self):
         """Saves the intro/outro text to the .allcode file and closes the window"""
-        # Build the dictionary in the desired order to control the JSON output
-        final_data = {
-            "expanded_dirs": self.project_data.get('expanded_dirs', []),
-            "selected_files": self.project_data.get('selected_files', []),
-            "total_tokens": self.project_data.get('total_tokens', 0),
-            "intro_text": self.intro_text.get('1.0', 'end-1c').strip(),
-            "outro_text": self.outro_text.get('1.0', 'end-1c').strip()
-        }
+        self.project_config.intro_text = self.intro_text.get('1.0', 'end-1c').strip()
+        self.project_config.outro_text = self.outro_text.get('1.0', 'end-1c').strip()
 
         try:
-            with open(self.allcode_path, 'w', encoding='utf-8') as f:
-                json.dump(final_data, f, indent=2)
+            self.project_config.save()
             self.status_var.set("Wrapper text saved successfully.")
         except IOError as e:
             self.status_var.set(f"Error saving wrapper text: {e}")
