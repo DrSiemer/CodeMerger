@@ -57,6 +57,10 @@ class DirectoryDialog(Toplevel):
         pc.load()
         display_text = pc.project_name
 
+        color_swatch = Frame(entry_frame, width=20, height=20, bg=pc.project_color, relief='sunken', borderwidth=1)
+        color_swatch.pack(side='left', padx=(0, 5))
+        color_swatch.pack_propagate(False) # Prevent shrinking
+
         btn = Button(entry_frame, text=display_text, command=lambda p=path: self.select_and_close(p), anchor='w', justify='left')
         btn.pack(side='left', expand=True, fill='x')
 
