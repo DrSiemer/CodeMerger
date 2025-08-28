@@ -1,7 +1,7 @@
 import os
 import json
 import pyperclip
-from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser
+from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser, simpledialog
 
 from ..app_state import AppState
 from .view_manager import ViewManager
@@ -37,6 +37,7 @@ class App(Tk):
         self.bind("<Map>", self.view_manager.on_main_window_restored)
 
         self.active_dir = StringVar()
+        self.project_title_var = StringVar()
         self.active_dir.trace_add('write', self.update_button_states)
 
         self.build_ui()
@@ -50,15 +51,21 @@ class App(Tk):
 
         top_frame = Frame(main_frame, bg=self.app_bg_color)
         top_frame.pack(side='top', fill='x')
-        Label(top_frame, text="Active Project:", font=('Helvetica', 10, 'bold'), bg=self.app_bg_color).pack(anchor='w')
-        Label(top_frame, textvariable=self.active_dir, fg="blue", wraplength=450, justify='left', bg=self.app_bg_color).pack(anchor='w', fill='x', pady=(0, 10))
-        top_button_frame = Frame(top_frame, bg=self.app_bg_color)
-        top_button_frame.pack(fill='x', pady=5)
 
-        self.color_swatch = Frame(top_button_frame, width=28, height=28, relief='sunken', borderwidth=1, cursor="hand2")
-        self.color_swatch.pack(side='right', padx=(3, 0))
+        title_line_frame = Frame(top_frame, bg=self.app_bg_color)
+        title_line_frame.pack(fill='x', pady=(2, 10))
+
+        self.color_swatch = Frame(title_line_frame, width=28, height=28, relief='sunken', borderwidth=1, cursor="hand2")
+        self.color_swatch.pack(side='left', padx=(0, 10))
         self.color_swatch.pack_propagate(False) # Prevent shrinking
         self.color_swatch.bind("<Button-1>", self.open_color_chooser)
+
+        title_label = Label(title_line_frame, textvariable=self.project_title_var, font=('Helvetica', 18, 'bold'), bg=self.app_bg_color, anchor='w', cursor="hand2", wraplength=450, justify='left')
+        title_label.pack(side='left', anchor='w')
+        title_label.bind("<Button-1>", self.edit_project_title)
+
+        top_button_frame = Frame(top_frame, bg=self.app_bg_color)
+        top_button_frame.pack(fill='x', pady=5)
 
         self.wrapper_text_button = Button(top_button_frame, text="Wrapper Text", command=self.open_wrapper_text_window)
         self.wrapper_text_button.pack(side='right', padx=(3, 0))
@@ -70,7 +77,8 @@ class App(Tk):
         config_frame.pack(side='bottom', fill='x', pady=(5, 0))
         Button(config_frame, text="Settings", command=self.open_settings_window, relief='flat', fg='gray').pack(side='left')
         Button(config_frame, text="Manage Filetypes", command=self.open_filetypes_manager, relief='flat', fg='gray').pack(side='left', padx=10)
-        Button(config_frame, text="Compact Mode", command=self.view_manager.toggle_compact_mode, relief='flat', fg='gray').pack(side='right')
+        self.compact_mode_button = Button(config_frame, text="Compact Mode", command=self.view_manager.toggle_compact_mode)
+        self.compact_mode_button.pack(side='right')
 
         copy_button_frame = Frame(main_frame, bg=self.app_bg_color)
         copy_button_frame.pack(fill='both', expand=True, pady=10)
@@ -85,6 +93,25 @@ class App(Tk):
 
         self.status_var = StringVar(value="Ready")
         Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w').pack(side='bottom', fill='x')
+
+    def edit_project_title(self, event=None):
+        if not self.project_config:
+            return
+
+        current_name = self.project_config.project_name
+        new_name = simpledialog.askstring(
+            "Edit Project Title",
+            "Enter the new title for the project:",
+            initialvalue=current_name,
+            parent=self
+        )
+
+        if new_name and new_name.strip() and new_name.strip() != current_name:
+            new_name = new_name.strip()
+            self.project_title_var.set(new_name)
+            self.project_config.project_name = new_name
+            self.project_config.save()
+            self.status_var.set(f"Project title changed to '{new_name}'")
 
     def on_app_close(self):
         """Safely destroys child windows before closing the main app"""
@@ -104,9 +131,11 @@ class App(Tk):
             self.active_dir.set(path)
             self.project_config = ProjectConfig(path)
             self.project_config.load()
+            self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
         else:
             self.active_dir.set("No project selected")
+            self.project_title_var.set("Select a project folder using the button below")
             self.project_config = None
             self.project_color = COMPACT_MODE_BG_COLOR
         self.update_button_states() # Explicitly call update after changing dir
@@ -120,6 +149,7 @@ class App(Tk):
 
         self.manage_files_button.config(state=dir_dependent_state)
         self.wrapper_text_button.config(state=dir_dependent_state)
+        self.compact_mode_button.config(state=dir_dependent_state)
         self.color_swatch.config(bg=self.project_color if is_dir_active else "#f0f0f0")
 
         if is_dir_active and self.project_config:

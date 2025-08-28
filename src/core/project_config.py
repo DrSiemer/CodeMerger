@@ -24,6 +24,7 @@ class ProjectConfig:
     def __init__(self, base_dir):
         self.base_dir = base_dir
         self.allcode_path = os.path.join(self.base_dir, '.allcode')
+        self.project_name = os.path.basename(self.base_dir)
         self.selected_files = []
         self.expanded_dirs = set()
         self.total_tokens = 0
@@ -48,11 +49,14 @@ class ProjectConfig:
         except (json.JSONDecodeError, IOError):
             pass # Treat corrupt/unreadable files as empty
 
+        self.project_name = data.get('project_name', os.path.basename(self.base_dir))
         self.intro_text = data.get('intro_text', '')
         self.outro_text = data.get('outro_text', '')
         self.expanded_dirs = set(data.get('expanded_dirs', []))
         original_selection = data.get('selected_files', [])
 
+        if 'project_name' not in data:
+            config_was_updated = True
         if 'project_color' not in data:
             self.project_color = _generate_random_color()
             config_was_updated = True
@@ -84,6 +88,7 @@ class ProjectConfig:
         """Saves the configuration to the .allcode file"""
         # Build the dictionary in the desired order to control the JSON output
         final_data = {
+            "project_name": self.project_name,
             "project_color": self.project_color,
             "expanded_dirs": sorted(list(self.expanded_dirs)),
             "selected_files": self.selected_files,

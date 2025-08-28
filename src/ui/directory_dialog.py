@@ -1,5 +1,6 @@
 import os
 from tkinter import Toplevel, Frame, Label, Button, filedialog
+from ..core.project_config import ProjectConfig
 
 class DirectoryDialog(Toplevel):
     """
@@ -12,6 +13,7 @@ class DirectoryDialog(Toplevel):
         self.recent_projects = recent_projects
         self.on_select_callback = on_select_callback
         self.on_remove_callback = on_remove_callback
+        self.tooltip = None
 
         self.title("Select project")
         self.transient(parent)
@@ -19,7 +21,7 @@ class DirectoryDialog(Toplevel):
         self.configure(bg=self.app_bg_color)
 
         screen_width = self.winfo_screenwidth()
-        self.dialog_width = max(400, min(int(screen_width * 0.5), 800))
+        self.dialog_width = max(350, 250)
 
         # Determine initial message and height based on whether recent projects exist
         if self.recent_projects:
@@ -50,10 +52,42 @@ class DirectoryDialog(Toplevel):
         """Creates a single row in the recent projects list"""
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
         entry_frame.pack(fill='x', padx=10, pady=2)
-        btn = Button(entry_frame, text=path, command=lambda p=path: self.select_and_close(p), anchor='w', justify='left')
+
+        pc = ProjectConfig(path)
+        pc.load()
+        display_text = pc.project_name
+
+        btn = Button(entry_frame, text=display_text, command=lambda p=path: self.select_and_close(p), anchor='w', justify='left')
         btn.pack(side='left', expand=True, fill='x')
+
+        btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
+        btn.bind("<Leave>", self.hide_path_tooltip)
+
         remove_btn = Button(entry_frame, text="Del", command=lambda p=path, w=entry_frame: self.remove_and_update_dialog(p, w), width=4)
         remove_btn.pack(side='left', padx=(5, 0))
+
+    def show_path_tooltip(self, event, path):
+        """Displays a tooltip with the full path of the project"""
+        if self.tooltip:
+            self.tooltip.destroy()
+
+        x = event.widget.winfo_rootx()
+        y = event.widget.winfo_rooty() + event.widget.winfo_height() + 1
+
+        self.tooltip = Toplevel(self)
+        self.tooltip.wm_overrideredirect(True)
+        self.tooltip.wm_geometry(f"+{x}+{y}")
+
+        label = Label(self.tooltip, text=path, justify='left',
+                      background="#ffffe0", relief='solid', borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=2, ipady=1)
+
+    def hide_path_tooltip(self, event):
+        """Hides the path tooltip"""
+        if self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
 
     def select_and_close(self, path):
         """Final action: update active dir and close the selection dialog"""
