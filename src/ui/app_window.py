@@ -197,7 +197,13 @@ class App(Tk):
         self.manage_files_button.config(state=dir_dependent_state)
         self.wrapper_text_button.config(state=dir_dependent_state)
         self.compact_mode_button.config(state=dir_dependent_state)
-        self.color_swatch.config(bg=self.project_color if is_dir_active else "#f0f0f0")
+
+        if is_dir_active:
+            self.color_swatch.config(bg=self.project_color)
+            if not self.color_swatch.winfo_manager():
+                self.color_swatch.pack(side='left', padx=(0, 10), before=self.title_label)
+        else:
+            self.color_swatch.pack_forget()
 
         if not is_dir_active:
             self.edit_icon_label.place_forget()
