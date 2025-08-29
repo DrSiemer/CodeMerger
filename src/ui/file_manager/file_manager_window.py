@@ -67,7 +67,7 @@ class FileManagerWindow(Toplevel):
 
         self.merge_order_title_label = Label(main_frame, text="Merge Order")
         self.merge_order_title_label.grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
-        self.merge_order_list = Listbox(main_frame, activestyle='none')
+        self.merge_order_list = Listbox(main_frame, activestyle='none', selectmode='extended')
         self.merge_order_list.grid(row=1, column=2, sticky='nsew', padx=(10, 0))
         list_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=self.merge_order_list.yview)
         list_scroll.grid(row=1, column=3, sticky='ns')

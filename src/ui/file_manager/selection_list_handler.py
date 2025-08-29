@@ -73,63 +73,91 @@ class SelectionListHandler:
         self.on_change()
 
     def move_to_top(self):
-        selection = self.listbox.curselection()
-        if not selection: return
-        index = selection[0]
-        if index > 0:
-            path = self.ordered_selection.pop(index)
-            self.ordered_selection.insert(0, path)
-            self.update_listbox_from_data()
-            self.listbox.select_set(0)
-            self.listbox.activate(0)
-            self.listbox.see(0)
-            self.on_change()
+        selection_indices = self.listbox.curselection()
+        if not selection_indices or selection_indices[0] == 0:
+            return
+
+        moved_paths = [self.ordered_selection[i] for i in selection_indices]
+        for index in sorted(selection_indices, reverse=True):
+            self.ordered_selection.pop(index)
+
+        self.ordered_selection = moved_paths + self.ordered_selection
+
+        self.update_listbox_from_data()
+        self.listbox.selection_set(0, len(moved_paths) - 1)
+        self.listbox.activate(0)
+        self.listbox.see(0)
+        self.on_change()
 
     def move_up(self):
-        selection = self.listbox.curselection()
-        if not selection: return
-        index = selection[0]
-        if index > 0:
-            path = self.ordered_selection.pop(index)
-            self.ordered_selection.insert(index - 1, path)
-            self.update_listbox_from_data()
-            self.listbox.select_set(index - 1)
-            self.listbox.activate(index - 1)
-            self.listbox.see(index - 1)
-            self.on_change()
+        selection_indices = self.listbox.curselection()
+        if not selection_indices or selection_indices[0] == 0:
+            return
+
+        moved_paths = [self.ordered_selection[i] for i in selection_indices]
+        for index in sorted(selection_indices, reverse=True):
+            self.ordered_selection.pop(index)
+
+        new_start_index = selection_indices[0] - 1
+        for i, path in enumerate(moved_paths):
+            self.ordered_selection.insert(new_start_index + i, path)
+
+        self.update_listbox_from_data()
+
+        self.listbox.selection_set(new_start_index, new_start_index + len(moved_paths) - 1)
+        self.listbox.activate(new_start_index)
+        self.listbox.see(new_start_index)
+        self.on_change()
 
     def move_down(self):
-        selection = self.listbox.curselection()
-        if not selection: return
-        index = selection[0]
-        if index < len(self.ordered_selection) - 1:
-            path = self.ordered_selection.pop(index)
-            self.ordered_selection.insert(index + 1, path)
-            self.update_listbox_from_data()
-            self.listbox.select_set(index + 1)
-            self.listbox.activate(index + 1)
-            self.listbox.see(index + 1)
-            self.on_change()
+        selection_indices = self.listbox.curselection()
+        if not selection_indices or selection_indices[-1] >= len(self.ordered_selection) - 1:
+            return
+
+        moved_paths = [self.ordered_selection[i] for i in selection_indices]
+        for index in sorted(selection_indices, reverse=True):
+            self.ordered_selection.pop(index)
+
+        new_start_index = selection_indices[0] + 1
+        for i, path in enumerate(moved_paths):
+            self.ordered_selection.insert(new_start_index + i, path)
+
+        self.update_listbox_from_data()
+        self.listbox.selection_set(new_start_index, new_start_index + len(moved_paths) - 1)
+        self.listbox.activate(new_start_index)
+        self.listbox.see(new_start_index)
+        self.on_change()
 
     def move_to_bottom(self):
-        selection = self.listbox.curselection()
-        if not selection: return
-        index = selection[0]
-        if index < len(self.ordered_selection) - 1:
-            path = self.ordered_selection.pop(index)
-            self.ordered_selection.append(path)
-            new_index = len(self.ordered_selection) - 1
-            self.update_listbox_from_data()
-            self.listbox.select_set(new_index)
-            self.listbox.activate(new_index)
-            self.listbox.see(new_index)
-            self.on_change()
+        selection_indices = self.listbox.curselection()
+        if not selection_indices or selection_indices[-1] >= len(self.ordered_selection) - 1:
+            return
+
+        moved_paths = [self.ordered_selection[i] for i in selection_indices]
+        for index in sorted(selection_indices, reverse=True):
+            self.ordered_selection.pop(index)
+
+        new_start_index = len(self.ordered_selection)
+        self.ordered_selection.extend(moved_paths)
+
+        self.update_listbox_from_data()
+
+        self.listbox.selection_set(new_start_index, len(self.ordered_selection) - 1)
+        self.listbox.activate(new_start_index)
+        self.listbox.see(new_start_index)
+        self.on_change()
 
     def remove_selected(self):
-        selection = self.listbox.curselection()
-        if not selection: return
-        path_to_remove = self.ordered_selection[selection[0]]
-        self.toggle_file(path_to_remove) # This will remove it and trigger callbacks
+        selection_indices = self.listbox.curselection()
+        if not selection_indices:
+            return
+
+        # Remove from data model by iterating backwards to avoid index shifting issues
+        for index in sorted(selection_indices, reverse=True):
+            self.ordered_selection.pop(index)
+
+        self.update_listbox_from_data()
+        self.on_change()
 
     def open_selected_file(self, event=None):
         if event:
