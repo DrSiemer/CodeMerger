@@ -81,5 +81,4 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/CodeMerger-windows-build/dist/CodeMerger.exe
             artifacts/CodeMerger-windows-build/dist-installer/CodeMerger_Setup.exe
