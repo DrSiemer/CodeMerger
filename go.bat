@@ -49,17 +49,65 @@ goto :eof
     echo Done.
     goto :eof
 
+:GetVersion
+    if not exist "assets\version.txt" (
+        echo ERROR: assets\version.txt not found.
+        exit /b 1
+    )
+    set "MAJOR_VER="
+    set "MINOR_VER="
+    set "REVISION_VER="
+    for /f "tokens=1,2 delims==" %%a in (assets\version.txt) do (
+        if /i "%%a"=="Major" set "MAJOR_VER=%%b"
+        if /i "%%a"=="Minor" set "MINOR_VER=%%b"
+        if /i "%%a"=="Revision" set "REVISION_VER=%%b"
+    )
+    if not defined MAJOR_VER ( echo ERROR: "Major" version not found in version.txt. & exit /b 1 )
+    if not defined MINOR_VER ( echo ERROR: "Minor" version not found in version.txt. & exit /b 1 )
+    if not defined REVISION_VER ( echo ERROR: "Revision" version not found in version.txt. & exit /b 1 )
+    set "VERSION=%MAJOR_VER%.%MINOR_VER%.%REVISION_VER%"
+    exit /b 0
+
 :BuildApp
+    setlocal enabledelayedexpansion
     echo.
-    echo Starting PyInstaller Build
+    echo Starting Build Process
     echo Deleting old build folders...
     rmdir /s /q dist 2>nul
     rmdir /s /q build 2>nul
+    rmdir /s /q dist-installer 2>nul
     echo Running PyInstaller with %SPEC_FILE%...
     pyinstaller %SPEC_FILE%
+    if !errorlevel! neq 0 (
+        echo.
+        echo FATAL: PyInstaller build failed.
+        endlocal
+        goto :eof
+    )
+
+    REM --- Installer Creation ---
+    call :GetVersion
+    if !errorlevel! neq 0 ( endlocal & goto :eof )
+
+    set "INNO_SETUP_PATH="
+    if exist "%ProgramFiles(x86)%\Inno Setup 6\iscc.exe" set "INNO_SETUP_PATH=%ProgramFiles(x86)%\Inno Setup 6\iscc.exe"
+    if not defined INNO_SETUP_PATH if exist "%ProgramFiles%\Inno Setup 6\iscc.exe" set "INNO_SETUP_PATH=%ProgramFiles%\Inno Setup 6\iscc.exe"
+
+    if not defined INNO_SETUP_PATH (
+        echo.
+        echo WARNING: Inno Setup not found. Skipping installer creation.
+        echo To build an installer, download and install Inno Setup from jrsoftware.org
+    ) else (
+        echo Compiling installer with Inno Setup for v!VERSION!...
+        "!INNO_SETUP_PATH!" /DMyAppVersion=v!VERSION! setup.iss
+    )
+    REM --- End Installer Creation ---
+
     echo.
     echo Build Complete!
     echo Executable is located in the 'dist' folder.
+    if defined INNO_SETUP_PATH echo Installer is located in the 'dist-installer' folder.
+    endlocal
     goto :eof
 
 :HandleRelease
@@ -104,36 +152,22 @@ goto :eof
     :EndArgLoop
 
     REM Get version
-    if not exist "assets\version.txt" (
-        echo ERROR: assets\version.txt not found.
-        goto :eof
-    )
-    set "MAJOR_VER="
-    set "MINOR_VER="
-    set "REVISION_VER="
-    for /f "tokens=1,2 delims==" %%a in (assets\version.txt) do (
-        if /i "%%a"=="Major" set "MAJOR_VER=%%b"
-        if /i "%%a"=="Minor" set "MINOR_VER=%%b"
-        if /i "%%a"=="Revision" set "REVISION_VER=%%b"
-    )
-    if not defined MAJOR_VER ( echo ERROR: "Major" version not found in version.txt. & goto :eof )
-    if not defined MINOR_VER ( echo ERROR: "Minor" version not found in version.txt. & goto :eof )
-    if not defined REVISION_VER ( echo ERROR: "Revision" version not found in version.txt. & goto :eof )
+    call :GetVersion
+    if !errorlevel! neq 0 ( endlocal & goto :eof )
 
-    set "VERSION=!MAJOR_VER!.!MINOR_VER!.!REVISION_VER!"
     set "VERSION_TAG=v!VERSION!"
     echo Found version tag: !VERSION_TAG!
 
     REM Clean up existing tags
     set "IS_RETRIGGER=0"
     git ls-remote --tags origin refs/tags/!VERSION_TAG! | findstr "refs/tags/!VERSION_TAG!" > nul
-    if %errorlevel% equ 0 (
+    if %errorlevel! equ 0 (
         echo Deleting remote tag !VERSION_TAG!...
         git push origin --delete !VERSION_TAG!
         set "IS_RETRIGGER=1"
     )
     git rev-parse "!VERSION_TAG!" >nul 2>nul
-    if %errorlevel% equ 0 (
+    if %errorlevel! equ 0 (
         echo Deleting local tag !VERSION_TAG!...
         git tag -d !VERSION_TAG!
         set "IS_RETRIGGER=1"
@@ -152,7 +186,7 @@ goto :eof
     REM Create and push tag
     echo Creating annotated tag !VERSION_TAG!...
     git tag -a "!VERSION_TAG!" -m "!COMMENT!"
-    if %errorlevel% neq 0 (
+    if %errorlevel! neq 0 (
         echo FATAL: Failed to create tag. Aborting.
         endlocal
         goto :eof

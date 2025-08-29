@@ -10,6 +10,7 @@
   { "ext": ".html", "active": true },
   { "ext": ".htm", "active": true },
   { "ext": ".ino", "active": true },
+  { "ext": ".iss", "active": true },
   { "ext": ".java", "active": true },
   { "ext": ".js", "active": true },
   { "ext": ".jsx", "active": true },

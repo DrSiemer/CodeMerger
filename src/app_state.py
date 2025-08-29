@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from .core.utils import load_config, save_config
 from .constants import RECENT_PROJECTS_MAX
 
@@ -12,6 +13,8 @@ class AppState:
         self.recent_projects = self.config.get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
+        self.check_for_updates = self.config.get('check_for_updates', True)
+        self.last_update_check = self.config.get('last_update_check', None)
 
         self._validate_active_dir()
         self._prune_recent_projects()
@@ -40,6 +43,15 @@ class AppState:
         self.config = load_config()
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
+        self.check_for_updates = self.config.get('check_for_updates', True)
+        self.last_update_check = self.config.get('last_update_check', None)
+
+    def update_last_check_date(self):
+        """Updates the timestamp for the last update check to today"""
+        now_iso = datetime.now().isoformat()
+        self.last_update_check = now_iso
+        self.config['last_update_check'] = now_iso
+        self._save()
 
     def update_active_dir(self, new_dir):
         """Sets a new active directory and updates the recent list"""

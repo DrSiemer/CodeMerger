@@ -1,6 +1,7 @@
 /cm-venv
 /build
 /dist
+/dist-installer
 /src/__pycache__
 /src/core/__pycache__
 /src/ui/__pycache__

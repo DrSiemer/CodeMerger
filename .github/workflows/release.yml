@@ -49,13 +49,23 @@ jobs:
         run: pip install -r requirements.txt
       - name: Build with PyInstaller
         run: pyinstaller codemerger.spec
-      - name: Upload Windows artifact
+      - name: Set up Inno Setup
+        uses: crazy-max/ghaction-setup-inno@v2
+        with:
+          version: '6.2.2'
+      - name: Compile Installer
+        run: |
+          iscc.exe /DMyAppVersion=${{ github.ref_name }} setup.iss
+        shell: cmd
+      - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: CodeMerger-windows-exe
-          path: dist/CodeMerger.exe
+          name: CodeMerger-windows-build
+          path: |
+            dist/CodeMerger.exe
+            dist-installer/CodeMerger_Setup.exe
 
-  # Create the GitHub Release (runs after the Windows build job has succeeded)
+  # Create the GitHub Release
   create-release:
     name: Create a new release
     needs: [build-windows]
@@ -74,5 +84,5 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/CodeMerger-windows-exe/CodeMerger.exe
-            # The macOS artifact line has been removed.
+            artifacts/CodeMerger-windows-build/CodeMerger.exe
+            artifacts/CodeMerger-windows-build/CodeMerger_Setup.exe

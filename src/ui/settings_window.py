@@ -12,6 +12,7 @@ class SettingsWindow(Toplevel):
         config = load_config()
         self.editor_path = StringVar(value=config.get('default_editor', ''))
         self.scan_for_secrets = BooleanVar(value=config.get('scan_for_secrets', False))
+        self.check_for_updates = BooleanVar(value=config.get('check_for_updates', True))
 
         # --- Window Setup ---
         self.title("Settings")
@@ -42,15 +43,25 @@ class SettingsWindow(Toplevel):
         self.clear_button = Button(editor_entry_frame, text="Clear", command=self.clear_editor)
         self.clear_button.pack(side='left')
 
+        # --- Other Settings Frame ---
+        other_settings_frame = Frame(main_frame)
+        other_settings_frame.pack(fill='x', pady=15)
+
         # --- Secret Scanning Setting ---
-        scan_frame = Frame(main_frame)
-        scan_frame.pack(fill='x', pady=15)
         self.scan_checkbox = ttk.Checkbutton(
-            scan_frame,
+            other_settings_frame,
             text="Scan for secrets on copy (slower)",
             variable=self.scan_for_secrets
         )
         self.scan_checkbox.pack(anchor='w')
+
+        # --- Update Check Setting ---
+        self.update_checkbox = ttk.Checkbutton(
+            other_settings_frame,
+            text="Automatically check for updates daily",
+            variable=self.check_for_updates
+        )
+        self.update_checkbox.pack(anchor='w', pady=(5,0))
 
 
         # --- Action Buttons ---
@@ -88,6 +99,7 @@ class SettingsWindow(Toplevel):
         config = load_config()
         config['default_editor'] = self.editor_path.get()
         config['scan_for_secrets'] = self.scan_for_secrets.get()
+        config['check_for_updates'] = self.check_for_updates.get()
         save_config(config)
 
         if self.on_close_callback:
