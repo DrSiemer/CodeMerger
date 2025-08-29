@@ -32,6 +32,7 @@ class CompactMode(tk.Toplevel):
         # --- Internal State for Dragging ---
         self._offset_x = 0
         self._offset_y = 0
+        self._is_dragging = False
 
         # --- Move Bar (for dragging and double-click) ---
         self.move_bar = tk.Frame(
@@ -88,6 +89,7 @@ class CompactMode(tk.Toplevel):
         # Drag functionality is bound to the move bar
         self.move_bar.bind("<ButtonPress-1>", self.on_press_drag)
         self.move_bar.bind("<B1-Motion>", self.on_drag)
+        self.move_bar.bind("<ButtonRelease-1>", self.on_release_drag)
 
         # Close functionality is bound to the move bar (double-click) and close button (single-click)
         self.move_bar.bind("<Double-Button-1>", self.close_window)
@@ -98,11 +100,13 @@ class CompactMode(tk.Toplevel):
         self.button_label.bind("<ButtonRelease-1>", self.on_release_click)
 
         # Tooltip functionality
-        self.bind("<Enter>", self.show_tooltip)
-        self.bind("<Leave>", self.hide_tooltip)
+        self.button_label.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy {self.project_name} code"))
+        self.button_label.bind("<Leave>", self.hide_tooltip)
+        self.wrapped_button.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy wrapped {self.project_name} code"))
+        self.wrapped_button.bind("<Leave>", self.hide_tooltip)
 
-    def show_tooltip(self, event=None):
-        if self.tooltip_window or not self.project_name:
+    def show_tooltip(self, event=None, text=""):
+        if self._is_dragging or self.tooltip_window or not text:
             return
         x = self.winfo_rootx() + self.winfo_width() // 2
         y = self.winfo_rooty() + self.winfo_height() + 5
@@ -110,7 +114,7 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window = tk.Toplevel(self)
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(self.tooltip_window, text=self.project_name, justify='left',
+        label = tk.Label(self.tooltip_window, text=text, justify='left',
                       background="#ffffe0", relief='solid', borderwidth=1,
                       font=("tahoma", "8", "normal"))
         label.pack(ipadx=1)
@@ -138,6 +142,8 @@ class CompactMode(tk.Toplevel):
 
     def on_press_drag(self, event):
         """Records the initial click position on the move bar."""
+        self._is_dragging = True
+        self.hide_tooltip()
         self._offset_x = event.x
         self._offset_y = event.y
 
@@ -146,6 +152,10 @@ class CompactMode(tk.Toplevel):
         x = self.winfo_pointerx() - self._offset_x
         y = self.winfo_pointery() - self._offset_y
         self.geometry(f"+{x}+{y}")
+
+    def on_release_drag(self, event):
+        """Resets the dragging state when the mouse is released."""
+        self._is_dragging = False
 
     def on_press_click(self, event):
         """Changes the button image to its 'pressed' state."""
