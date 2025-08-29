@@ -2,6 +2,51 @@ import os
 import json
 import tiktoken
 
+# A mapping of file extensions to Markdown language identifiers for syntax highlighting
+LANGUAGE_MAP = {
+    '.bat': 'batch',
+    '.c': 'c',
+    '.conf': 'ini',
+    '.cpp': 'cpp',
+    '.cs': 'csharp',
+    '.css': 'css',
+    '.go': 'go',
+    '.h': 'c',
+    '.html': 'html',
+    '.htm': 'html',
+    '.java': 'java',
+    '.js': 'javascript',
+    '.jsx': 'jsx',
+    '.json': 'json',
+    '.kt': 'kotlin',
+    '.kts': 'kotlin',
+    '.less': 'less',
+    '.md': 'markdown',
+    '.php': 'php',
+    '.ps1': 'powershell',
+    '.py': 'python',
+    '.r': 'r',
+    '.rb': 'ruby',
+    '.rs': 'rust',
+    '.sass': 'sass',
+    '.scss': 'scss',
+    '.sh': 'shell',
+    '.sql': 'sql',
+    '.swift': 'swift',
+    '.ts': 'typescript',
+    '.tsx': 'tsx',
+    '.txt': 'text',
+    '.vue': 'vue',
+    '.xml': 'xml',
+    '.yaml': 'yaml',
+    '.yml': 'yaml'
+}
+
+def get_language_from_path(path):
+    """Gets a markdown language identifier from a file path based on its extension"""
+    _, ext = os.path.splitext(path)
+    return LANGUAGE_MAP.get(ext.lower(), '') # Return empty string for unknown extensions
+
 def generate_output_string(base_dir, use_wrapper):
     """
     Core logic for merging files
@@ -27,27 +72,30 @@ def generate_output_string(base_dir, use_wrapper):
             continue
         with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as code_file:
             content = code_file.read()
-        output_blocks.append(f'--- {path} ---\n```\n{content}\n```')
 
-    merged_code = '\n\n\n'.join(output_blocks)
+        language = get_language_from_path(path)
+        # Format each file as a standard Markdown section with a fenced code block
+        output_blocks.append(f"## `{path}`\n\n```{language}\n{content}\n```")
+
+    merged_code = '\n\n'.join(output_blocks)
 
     if use_wrapper:
+        project_title = data.get('project_name', os.path.basename(base_dir))
         intro_text = data.get('intro_text', '').strip()
         outro_text = data.get('outro_text', '').strip()
-        merged_code_with_header = f"Here's all the relevant code:\n\n{merged_code}"
 
-        final_parts = []
+        final_parts = [f"# {project_title}"]
         if intro_text:
             final_parts.append(intro_text)
-        final_parts.append(merged_code_with_header)
+        final_parts.append(merged_code)
         if outro_text:
             final_parts.append(outro_text)
 
-        final_content = '\n\n\n'.join(final_parts)
-        status_message = "Wrapped code copied to clipboard"
+        final_content = '\n\n'.join(final_parts)
+        status_message = "Wrapped code copied as Markdown"
     else:
-        final_content = f"Here's all the most recent code:\n\n{merged_code}"
-        status_message = "Merged code copied to clipboard"
+        final_content = merged_code
+        status_message = "Merged code copied as Markdown"
 
     if skipped_files:
         status_message += f". Skipped {len(skipped_files)} missing file(s)"
