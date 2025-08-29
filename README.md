@@ -65,9 +65,8 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Update `/assets/version.txt` if you want a new release
     - You can add a comment to the release like this: `go r "Comment"`
     - The release will be a draft, you'll need to finalize it on github.com
-
+- Config once installed can be found in `%APPDATA%\CodeMerger`
 
 ### Planned features
 
-- Installer
-- Actual design
+- Design
