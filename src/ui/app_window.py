@@ -17,11 +17,13 @@ from ..core.paths import ICON_PATH, EDIT_ICON_PATH
 from ..core.project_config import ProjectConfig
 from ..constants import COMPACT_MODE_BG_COLOR
 from ..core.secret_scanner import scan_for_secrets
+from ..core.updater import Updater
 
 class App(Tk):
     def __init__(self, file_extensions, app_version=""):
         super().__init__()
         self.file_extensions = file_extensions
+        self.app_version = app_version
         self.app_bg_color = '#FFFFFF'
         self.project_config = None
         self.project_color = COMPACT_MODE_BG_COLOR
@@ -31,6 +33,7 @@ class App(Tk):
 
         self.state = AppState()
         self.view_manager = ViewManager(self)
+        self.updater = Updater(self, self.state, self.app_version)
 
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
@@ -50,6 +53,9 @@ class App(Tk):
         self.build_ui()
 
         self.set_active_dir_display(self.state.active_directory)
+
+        # Perform update check
+        self.after(1500, self.updater.check_for_updates)
 
     def load_images(self):
         try:
