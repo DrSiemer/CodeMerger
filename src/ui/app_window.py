@@ -74,7 +74,7 @@ class App(Tk):
         self.color_swatch.pack_propagate(False) # Prevent shrinking
         self.color_swatch.bind("<Button-1>", self.open_color_chooser)
 
-        self.title_label = Label(title_line_frame, textvariable=self.project_title_var, font=('Helvetica', 18, 'bold'), bg=self.app_bg_color, anchor='w', cursor="hand2", wraplength=450, justify='left')
+        self.title_label = Label(title_line_frame, textvariable=self.project_title_var, font=('Helvetica', 12), bg=self.app_bg_color, anchor='w', cursor="hand2", wraplength=450, justify='left')
         self.title_label.pack(side='left', anchor='w')
         self.title_label.bind("<Button-1>", self.edit_project_title)
 
@@ -172,11 +172,13 @@ class App(Tk):
             self.project_config.load()
             self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
+            self.title_label.config(font=('Helvetica', 18, 'bold'))
         else:
             self.active_dir.set("No project selected")
             self.project_title_var.set("Select a project folder using the button below")
             self.project_config = None
             self.project_color = COMPACT_MODE_BG_COLOR
+            self.title_label.config(font=('Helvetica', 12))
         self.update_button_states() # Explicitly call update after changing dir
 
     def update_button_states(self, *args):
