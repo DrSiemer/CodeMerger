@@ -137,6 +137,28 @@ goto :eof
         goto :eof
     )
 
+    REM Get version
+    call :GetVersion
+    if !errorlevel! neq 0 ( endlocal & goto :eof )
+
+    set "VERSION_TAG=v!VERSION!"
+    echo Found version tag: !VERSION_TAG!
+
+    REM --- Forcefully clean up any existing tags with the same name ---
+    echo Checking for existing tags to determine release comment...
+    set "IS_RETRIGGER=0"
+    REM Check if tag exists locally OR remotely to set the flag
+    git rev-parse "!VERSION_TAG!" >nul 2>nul
+    if %errorlevel% equ 0 set "IS_RETRIGGER=1"
+    git ls-remote --tags origin refs/tags/!VERSION_TAG! | findstr "refs/tags/!VERSION_TAG!" > nul
+    if %errorlevel% equ 0 set "IS_RETRIGGER=1"
+
+    REM Now, unconditionally delete remote and local tags, ignoring errors
+    echo Cleaning up old tags...
+    git push origin --delete !VERSION_TAG! >nul 2>nul
+    git tag -d !VERSION_TAG! >nul 2>nul
+    echo Cleanup complete.
+
     REM Get optional release comment
     shift /1
     set "COMMENT="
@@ -151,28 +173,6 @@ goto :eof
     goto ArgLoop
     :EndArgLoop
 
-    REM Get version
-    call :GetVersion
-    if !errorlevel! neq 0 ( endlocal & goto :eof )
-
-    set "VERSION_TAG=v!VERSION!"
-    echo Found version tag: !VERSION_TAG!
-
-    REM Clean up existing tags
-    set "IS_RETRIGGER=0"
-    git ls-remote --tags origin refs/tags/!VERSION_TAG! | findstr "refs/tags/!VERSION_TAG!" > nul
-    if %errorlevel! equ 0 (
-        echo Deleting remote tag !VERSION_TAG!...
-        git push origin --delete !VERSION_TAG!
-        set "IS_RETRIGGER=1"
-    )
-    git rev-parse "!VERSION_TAG!" >nul 2>nul
-    if %errorlevel! equ 0 (
-        echo Deleting local tag !VERSION_TAG!...
-        git tag -d !VERSION_TAG!
-        set "IS_RETRIGGER=1"
-    )
-
     REM Default comment if user did not provide one
     if not defined COMMENT (
         if "!IS_RETRIGGER!"=="1" (
@@ -186,7 +186,7 @@ goto :eof
     REM Create and push tag
     echo Creating annotated tag !VERSION_TAG!...
     git tag -a "!VERSION_TAG!" -m "!COMMENT!"
-    if %errorlevel! neq 0 (
+    if %errorlevel% neq 0 (
         echo FATAL: Failed to create tag. Aborting.
         endlocal
         goto :eof
