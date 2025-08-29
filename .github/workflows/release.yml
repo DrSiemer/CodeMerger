@@ -49,14 +49,11 @@ jobs:
         run: pip install -r requirements.txt
       - name: Build with PyInstaller
         run: pyinstaller codemerger.spec
-      - name: Set up Inno Setup
-        uses: crazy-max/ghaction-setup-inno@v2
+      - name: Compile Inno Setup installer
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
-          version: '6.2.2'
-      - name: Compile Installer
-        run: |
-          iscc.exe /DMyAppVersion=${{ github.ref_name }} setup.iss
-        shell: cmd
+          path: setup.iss
+          options: '/dMyAppVersion="${{ github.ref_name }}"'
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
