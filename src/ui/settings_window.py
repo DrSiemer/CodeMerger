@@ -1,5 +1,5 @@
 import os
-from tkinter import Toplevel, Frame, Label, Button, Entry, filedialog, StringVar
+from tkinter import Toplevel, Frame, Label, Button, Entry, filedialog, StringVar, BooleanVar, ttk
 from ..core.utils import load_config, save_config
 from ..core.paths import ICON_PATH
 
@@ -11,11 +11,12 @@ class SettingsWindow(Toplevel):
 
         config = load_config()
         self.editor_path = StringVar(value=config.get('default_editor', ''))
+        self.scan_for_secrets = BooleanVar(value=config.get('scan_for_secrets', False))
 
         # --- Window Setup ---
         self.title("Settings")
         self.iconbitmap(ICON_PATH)
-        self.geometry("600x200")
+        self.geometry("600x250")
         self.transient(parent)
         self.grab_set()
 
@@ -40,6 +41,17 @@ class SettingsWindow(Toplevel):
 
         self.clear_button = Button(editor_entry_frame, text="Clear", command=self.clear_editor)
         self.clear_button.pack(side='left')
+
+        # --- Secret Scanning Setting ---
+        scan_frame = Frame(main_frame)
+        scan_frame.pack(fill='x', pady=15)
+        self.scan_checkbox = ttk.Checkbutton(
+            scan_frame,
+            text="Scan for secrets on copy (slower)",
+            variable=self.scan_for_secrets
+        )
+        self.scan_checkbox.pack(anchor='w')
+
 
         # --- Action Buttons ---
         button_frame = Frame(main_frame)
@@ -75,6 +87,7 @@ class SettingsWindow(Toplevel):
         """Saves the configuration and then closes the window."""
         config = load_config()
         config['default_editor'] = self.editor_path.get()
+        config['scan_for_secrets'] = self.scan_for_secrets.get()
         save_config(config)
 
         if self.on_close_callback:

@@ -11,6 +11,7 @@ class AppState:
         self.active_directory = self.config.get('active_directory', '')
         self.recent_projects = self.config.get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
+        self.scan_for_secrets = self.config.get('scan_for_secrets', False)
 
         self._validate_active_dir()
         self._prune_recent_projects()
@@ -38,6 +39,7 @@ class AppState:
         """Reloads the configuration from disk, e.g., after settings change"""
         self.config = load_config()
         self.default_editor = self.config.get('default_editor', '')
+        self.scan_for_secrets = self.config.get('scan_for_secrets', False)
 
     def update_active_dir(self, new_dir):
         """Sets a new active directory and updates the recent list"""

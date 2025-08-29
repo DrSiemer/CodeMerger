@@ -14,7 +14,8 @@ a = Analysis(
     datas=data_files,
     hiddenimports=[
         'PIL.ImageTk',
-        'tiktoken_ext.openai_public'
+        'tiktoken_ext.openai_public',
+        'detect_secrets.plugins'
     ],
     hookspath=[],
     hooksconfig={},

@@ -16,6 +16,7 @@ from ..core.utils import load_active_file_extensions
 from ..core.paths import ICON_PATH, EDIT_ICON_PATH
 from ..core.project_config import ProjectConfig
 from ..constants import COMPACT_MODE_BG_COLOR
+from ..core.secret_scanner import scan_for_secrets
 
 class App(Tk):
     def __init__(self, file_extensions, app_version=""):
@@ -265,23 +266,46 @@ class App(Tk):
     def _perform_copy(self, use_wrapper: bool):
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid project folder first")
+            messagebox.showerror("Error", "Please select a valid project folder first", parent=self)
             self.status_var.set("Error: Invalid project folder")
             return
 
         try:
+            files_to_copy = self.project_config.selected_files
+            if not files_to_copy:
+                self.status_var.set("No files selected to copy.")
+                return
+
+            # --- Scan for secrets BEFORE merging (if enabled) ---
+            if self.state.scan_for_secrets:
+                report = scan_for_secrets(base_dir, files_to_copy)
+                if report:
+                    warning_message = (
+                        "Warning: Potential secrets were detected in your selection.\n\n"
+                        f"{report}\n\n"
+                        "Do you still want to copy this content to your clipboard?"
+                    )
+                    proceed = messagebox.askyesno("Secrets Detected", warning_message, parent=self)
+                    if not proceed:
+                        self.status_var.set("Copy cancelled due to potential secrets.")
+                        return
+
+            # --- If scan passes or user agrees, proceed to copy ---
             final_content, status_message = generate_output_string(base_dir, use_wrapper)
             if final_content is not None:
                 pyperclip.copy(final_content)
-            self.status_var.set(status_message)
+                self.status_var.set(status_message)
+            else:
+                self.status_var.set(status_message or "Error: Could not generate content.")
+
         except FileNotFoundError:
-            messagebox.showerror("Error", f"No .allcode file found in {base_dir}")
+            messagebox.showerror("Error", f"No .allcode file found in {base_dir}", parent=self)
             self.status_var.set("Error: .allcode file not found")
         except (json.JSONDecodeError, IOError) as e:
-            messagebox.showerror("Error", f"Could not read .allcode file. Is it empty or corrupt?\n\nDetails: {e}")
+            messagebox.showerror("Error", f"Could not read .allcode file. Is it empty or corrupt?\n\nDetails: {e}", parent=self)
             self.status_var.set("Error: Could not read .allcode file")
         except Exception as e:
-            messagebox.showerror("Merging Error", f"An error occurred: {e}")
+            messagebox.showerror("Merging Error", f"An error occurred: {e}", parent=self)
             self.status_var.set(f"Error during merging: {e}")
 
     def copy_merged_code(self):

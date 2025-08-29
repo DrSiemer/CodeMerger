@@ -8,7 +8,13 @@ def _create_and_get_default_config():
     Creates a new config object from the default template, saves it to disk,
     and returns it. This is the definitive first-run function
     """
-    config = {'active_directory': '', 'recent_projects': [], 'filetypes': [], 'default_editor': ''}
+    config = {
+        'active_directory': '',
+        'recent_projects': [],
+        'filetypes': [],
+        'default_editor': '',
+        'scan_for_secrets': False
+    }
     try:
         # Load the list of filetypes from the bundled template
         with open(DEFAULT_FILETYPES_CONFIG, 'r', encoding='utf-8-sig') as f:
@@ -38,6 +44,8 @@ def load_config():
                 config['default_editor'] = '' # Add missing key for backward compatibility
             if 'recent_directories' in config: # Backward compatibility
                 config['recent_projects'] = config.pop('recent_directories')
+            if 'scan_for_secrets' not in config:
+                config['scan_for_secrets'] = False # Add missing key for backward compatibility
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one
