@@ -2,6 +2,7 @@ import os
 import json
 import pyperclip
 from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser, simpledialog
+from PIL import Image, ImageTk
 
 from ..app_state import AppState
 from .view_manager import ViewManager
@@ -12,7 +13,7 @@ from .wrapper_text_window import WrapperTextWindow
 from ..core.merger import generate_output_string
 from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions
-from ..core.paths import ICON_PATH
+from ..core.paths import ICON_PATH, EDIT_ICON_PATH
 from ..core.project_config import ProjectConfig
 from ..constants import COMPACT_MODE_BG_COLOR
 
@@ -23,6 +24,9 @@ class App(Tk):
         self.app_bg_color = '#FFFFFF'
         self.project_config = None
         self.project_color = COMPACT_MODE_BG_COLOR
+        self.edit_icon = None
+        self._hide_edit_icon_job = None
+        self.title_label = None
 
         self.state = AppState()
         self.view_manager = ViewManager(self)
@@ -32,6 +36,8 @@ class App(Tk):
         self.iconbitmap(ICON_PATH)
         self.geometry("500x250")
         self.configure(bg=self.app_bg_color)
+
+        self.load_images()
 
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
@@ -43,6 +49,13 @@ class App(Tk):
         self.build_ui()
 
         self.set_active_dir_display(self.state.active_directory)
+
+    def load_images(self):
+        try:
+            edit_img_src = Image.open(EDIT_ICON_PATH)
+            self.edit_icon = ImageTk.PhotoImage(edit_img_src)
+        except Exception:
+            self.edit_icon = None
 
     def build_ui(self):
         """Creates and packs all the UI widgets"""
@@ -60,9 +73,19 @@ class App(Tk):
         self.color_swatch.pack_propagate(False) # Prevent shrinking
         self.color_swatch.bind("<Button-1>", self.open_color_chooser)
 
-        title_label = Label(title_line_frame, textvariable=self.project_title_var, font=('Helvetica', 18, 'bold'), bg=self.app_bg_color, anchor='w', cursor="hand2", wraplength=450, justify='left')
-        title_label.pack(side='left', anchor='w')
-        title_label.bind("<Button-1>", self.edit_project_title)
+        self.title_label = Label(title_line_frame, textvariable=self.project_title_var, font=('Helvetica', 18, 'bold'), bg=self.app_bg_color, anchor='w', cursor="hand2", wraplength=450, justify='left')
+        self.title_label.pack(side='left', anchor='w')
+        self.title_label.bind("<Button-1>", self.edit_project_title)
+
+        self.edit_icon_label = Label(title_line_frame, image=self.edit_icon, bg=self.app_bg_color, cursor="hand2")
+        if self.edit_icon:
+            self.edit_icon_label.bind("<Button-1>", self.edit_project_title)
+
+        # Bind hover events
+        self.title_label.bind("<Enter>", self.on_title_area_enter)
+        self.title_label.bind("<Leave>", self.on_title_area_leave)
+        self.edit_icon_label.bind("<Enter>", self.on_title_area_enter)
+        self.edit_icon_label.bind("<Leave>", self.on_title_area_leave)
 
         top_button_frame = Frame(top_frame, bg=self.app_bg_color)
         top_button_frame.pack(fill='x', pady=5)
@@ -93,6 +116,21 @@ class App(Tk):
 
         self.status_var = StringVar(value="Ready")
         Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w').pack(side='bottom', fill='x')
+
+    def on_title_area_enter(self, event=None):
+        if self._hide_edit_icon_job:
+            self.after_cancel(self._hide_edit_icon_job)
+            self._hide_edit_icon_job = None
+
+        if self.project_config and self.edit_icon:
+            self.update_idletasks()
+            x = self.title_label.winfo_x() + self.title_label.winfo_width() + 5
+            icon_height = self.edit_icon.height()
+            y = self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (icon_height // 2) - 10
+            self.edit_icon_label.place(x=x, y=y)
+
+    def on_title_area_leave(self, event=None):
+        self._hide_edit_icon_job = self.after(50, self.edit_icon_label.place_forget)
 
     def edit_project_title(self, event=None):
         if not self.project_config:
@@ -151,6 +189,9 @@ class App(Tk):
         self.wrapper_text_button.config(state=dir_dependent_state)
         self.compact_mode_button.config(state=dir_dependent_state)
         self.color_swatch.config(bg=self.project_color if is_dir_active else "#f0f0f0")
+
+        if not is_dir_active:
+            self.edit_icon_label.place_forget()
 
         if is_dir_active and self.project_config:
             if self.project_config.selected_files:

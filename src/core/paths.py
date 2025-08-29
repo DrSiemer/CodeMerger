@@ -49,6 +49,9 @@ DEFAULT_FILETYPES_CONFIG_PATH = os.path.join(BUNDLE_DIR, 'default_filetypes.json
 # Path to the application icon
 ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 
+# Path to the edit icon
+EDIT_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'edit.png')
+
 # Path to the version file
 VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'version.txt')
 
