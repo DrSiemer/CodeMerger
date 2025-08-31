@@ -15,18 +15,19 @@ from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions
 from ..core.paths import ICON_PATH, EDIT_ICON_PATH
 from ..core.project_config import ProjectConfig
-from ..constants import COMPACT_MODE_BG_COLOR
+from .. import constants as c # Import constants
 from ..core.secret_scanner import scan_for_secrets
 from ..core.updater import Updater
+from .custom_widgets import RoundedButton
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
         self.file_extensions = file_extensions
         self.app_version = app_version
-        self.app_bg_color = '#FFFFFF'
+        self.app_bg_color = c.DARK_BG
         self.project_config = None
-        self.project_color = COMPACT_MODE_BG_COLOR
+        self.project_color = c.COMPACT_MODE_BG_COLOR
         self.edit_icon = None
         self._hide_edit_icon_job = None
         self.title_label = None
@@ -38,7 +39,7 @@ class App(Tk):
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
-        self.geometry("500x250")
+        self.geometry("800x550")
         self.configure(bg=self.app_bg_color)
 
         self.load_images()
@@ -70,64 +71,89 @@ class App(Tk):
             self.edit_icon = None
 
     def build_ui(self):
-        """Creates and packs all the UI widgets"""
-        main_frame = Frame(self, padx=15, pady=15, bg=self.app_bg_color)
-        main_frame.pack(fill='both', expand=True)
+        """Creates and places all the UI widgets based on the new dark theme design"""
+        # --- Style Definitions ---
+        font_family = "Segoe UI"
+        font_normal = (font_family, 15)
+        font_large_bold = (font_family, 24, 'bold')
+        font_button = (font_family, 16)
 
-        top_frame = Frame(main_frame, bg=self.app_bg_color)
-        top_frame.pack(side='top', fill='x')
+        # --- Window Grid Configuration ---
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
 
-        title_line_frame = Frame(top_frame, bg=self.app_bg_color)
-        title_line_frame.pack(fill='x', pady=(2, 10))
+        # --- Top Bar (Row 0) ---
+        top_bar = Frame(self, bg=c.TOP_BAR_BG, padx=20, pady=10)
+        top_bar.grid(row=0, column=0, sticky='ew')
 
-        self.color_swatch = Frame(title_line_frame, width=28, height=28, relief='sunken', borderwidth=1, cursor="hand2")
-        self.color_swatch.pack(side='left', padx=(0, 10))
-        self.color_swatch.pack_propagate(False) # Prevent shrinking
+        self.color_swatch = Frame(top_bar, width=48, height=48, cursor="hand2")
+        self.color_swatch.pack(side='left', padx=(0, 15))
+        self.color_swatch.pack_propagate(False)
         self.color_swatch.bind("<Button-1>", self.open_color_chooser)
+        self.color_swatch.config(bg=c.TOP_BAR_BG)
 
-        self.title_label = Label(title_line_frame, textvariable=self.project_title_var, font=('Helvetica', 12), bg=self.app_bg_color, anchor='w', cursor="hand2", wraplength=450, justify='left')
-        self.title_label.pack(side='left', anchor='w')
+        self.title_label = Label(top_bar, textvariable=self.project_title_var, font=font_large_bold, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
+        self.title_label.pack(side='left')
         self.title_label.bind("<Button-1>", self.edit_project_title)
-
-        self.edit_icon_label = Label(title_line_frame, image=self.edit_icon, bg=self.app_bg_color, cursor="hand2")
-        if self.edit_icon:
-            self.edit_icon_label.bind("<Button-1>", self.edit_project_title)
-
-        # Bind hover events
         self.title_label.bind("<Enter>", self.on_title_area_enter)
         self.title_label.bind("<Leave>", self.on_title_area_leave)
-        self.edit_icon_label.bind("<Enter>", self.on_title_area_enter)
-        self.edit_icon_label.bind("<Leave>", self.on_title_area_leave)
 
-        top_button_frame = Frame(top_frame, bg=self.app_bg_color)
-        top_button_frame.pack(fill='x', pady=5)
+        self.edit_icon_label = Label(top_bar, image=self.edit_icon, bg=c.TOP_BAR_BG, cursor="hand2")
+        if self.edit_icon:
+            self.edit_icon_label.bind("<Button-1>", self.edit_project_title)
+            self.edit_icon_label.bind("<Enter>", self.on_title_area_enter)
+            self.edit_icon_label.bind("<Leave>", self.on_title_area_leave)
 
-        self.wrapper_text_button = Button(top_button_frame, text="Wrapper Text", command=self.open_wrapper_text_window)
-        self.wrapper_text_button.pack(side='right', padx=(3, 0))
-        self.manage_files_button = Button(top_button_frame, text="Manage Files", command=self.manage_files)
-        self.manage_files_button.pack(side='right', expand=True, fill='x')
-        Button(top_button_frame, text="Select project", command=self.open_change_directory_dialog).pack(side='right', expand=True, fill='x', padx=(0, 3))
+        # --- Top-Level Buttons (Row 1) ---
+        top_buttons_container = Frame(self, bg=c.DARK_BG, padx=20)
+        top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(20, 0))
+        top_buttons_container.columnconfigure(1, weight=1)
 
-        config_frame = Frame(main_frame, bg=self.app_bg_color)
-        config_frame.pack(side='bottom', fill='x', pady=(5, 0))
-        Button(config_frame, text="Settings", command=self.open_settings_window, relief='flat', fg='gray').pack(side='left')
-        Button(config_frame, text="Manage Filetypes", command=self.open_filetypes_manager, relief='flat', fg='gray').pack(side='left', padx=10)
-        self.compact_mode_button = Button(config_frame, text="Compact Mode", command=self.view_manager.toggle_compact_mode)
-        self.compact_mode_button.pack(side='right')
+        left_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
+        left_buttons.grid(row=0, column=0, sticky='w')
+        
+        RoundedButton(left_buttons, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.open_change_directory_dialog).pack(side='left')
+        self.manage_files_button = RoundedButton(left_buttons, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.manage_files)
+        self.manage_files_button.pack(side='left', padx=(10, 0))
 
-        copy_button_frame = Frame(main_frame, bg=self.app_bg_color)
-        copy_button_frame.pack(fill='both', expand=True, pady=10)
-        copy_button_frame.grid_rowconfigure(0, weight=1)
-        copy_button_frame.grid_columnconfigure(0, weight=1)
-        button_row = Frame(copy_button_frame, bg=self.app_bg_color)
-        button_row.grid(row=0, column=0, sticky='ew')
-        self.copy_wrapped_button = Button(button_row, text="Copy Wrapped", command=self.copy_wrapped_code, font=('Helvetica', 14, 'bold'), pady=5)
-        self.copy_wrapped_button.pack(side='left', padx=(0, 5))
-        self.copy_merged_button = Button(button_row, text="Copy Merged", command=self.copy_merged_code, font=('Helvetica', 14, 'bold'), pady=5)
-        self.copy_merged_button.pack(side='left', expand=True, fill='x', padx=(5, 0))
+        right_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
+        right_buttons.grid(row=0, column=2, sticky='e')
+        self.compact_mode_button = RoundedButton(right_buttons, text="Compact Mode", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.view_manager.toggle_compact_mode)
+        self.compact_mode_button.pack()
 
+        # --- Center "Wrapper & Output" Box (Row 2) ---
+        center_frame = Frame(self, bg=c.DARK_BG)
+        center_frame.grid(row=2, column=0, sticky='nsew', pady=10)
+
+        wrapper_box = Frame(center_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
+        wrapper_box.place(relx=0.5, rely=0.5, anchor='center')
+
+        Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=5).pack(pady=(10, 15))
+
+        button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
+        button_grid_frame.pack(pady=(5, 20), padx=30)
+        button_grid_frame.columnconfigure(0, weight=1)
+        button_grid_frame.columnconfigure(1, weight=1)
+
+        copy_button_height = 60
+        self.copy_wrapped_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.copy_wrapped_code)
+        
+        define_wrapper_width = self.copy_wrapped_button.width
+        self.wrapper_text_button = RoundedButton(button_grid_frame, text="Define Wrapper Text", height=40, width=define_wrapper_width, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
+        
+        self.copy_merged_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
+
+        self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
+
+        # --- Bottom-Left Buttons (Row 3) ---
+        bottom_frame = Frame(self, bg=c.DARK_BG, padx=20)
+        bottom_frame.grid(row=3, column=0, sticky='sw', pady=15)
+        RoundedButton(bottom_frame, text="Manage Filetypes", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_filetypes_manager).pack(side='left')
+        RoundedButton(bottom_frame, text="Settings", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_settings_window).pack(side='left', padx=(10, 0))
+
+        # --- Status Bar (Row 4) ---
         self.status_var = StringVar(value="Ready")
-        Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w').pack(side='bottom', fill='x')
+        Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w', bg=c.STATUS_BG, fg=c.STATUS_FG, font=(font_family, 10)).grid(row=4, column=0, sticky='ew')
 
     def on_title_area_enter(self, event=None):
         if self._hide_edit_icon_job:
@@ -135,11 +161,11 @@ class App(Tk):
             self._hide_edit_icon_job = None
 
         if self.project_config and self.edit_icon:
-            self.update_idletasks()
-            x = self.title_label.winfo_x() + self.title_label.winfo_width() + 5
-            icon_height = self.edit_icon.height()
-            y = self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (icon_height // 2) - 10
-            self.edit_icon_label.place(x=x, y=y)
+            self.edit_icon_label.place(
+                in_=self.title_label.master,
+                x=self.title_label.winfo_x() + self.title_label.winfo_width() + 5,
+                y=self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (self.edit_icon.height() // 2)
+            )
 
     def on_title_area_leave(self, event=None):
         self._hide_edit_icon_job = self.after(50, self.edit_icon_label.place_forget)
@@ -177,20 +203,27 @@ class App(Tk):
 
     def set_active_dir_display(self, path):
         """Sets the display string for the active directory and loads its config"""
+        font_family = "Segoe UI"
+        font_large_bold = (font_family, 24, 'bold')
         if path and os.path.isdir(path):
             self.active_dir.set(path)
             self.project_config = ProjectConfig(path)
-            self.project_config.load()
+            files_were_cleaned = self.project_config.load()
+            if files_were_cleaned:
+                self.status_var.set(f"Active project: {os.path.basename(path)} - Cleaned missing files.")
+            else:
+                self.status_var.set(f"Active project: {os.path.basename(path)} - Wrapper text loaded.")
             self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
-            self.title_label.config(font=('Helvetica', 18, 'bold'))
+            self.title_label.config(font=font_large_bold)
         else:
             self.active_dir.set("No project selected")
-            self.project_title_var.set("Select a project folder using the button below")
+            self.project_title_var.set("CodeMerger")
             self.project_config = None
-            self.project_color = COMPACT_MODE_BG_COLOR
-            self.title_label.config(font=('Helvetica', 12))
-        self.update_button_states() # Explicitly call update after changing dir
+            self.project_color = c.COMPACT_MODE_BG_COLOR
+            self.title_label.config(font=font_large_bold)
+            self.status_var.set("No active project.")
+        self.update_button_states()
 
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file"""
@@ -199,16 +232,17 @@ class App(Tk):
         copy_buttons_state = 'disabled'
         has_wrapper_text = False
 
-        self.manage_files_button.config(state=dir_dependent_state)
-        self.wrapper_text_button.config(state=dir_dependent_state)
-        self.compact_mode_button.config(state=dir_dependent_state)
+        self.manage_files_button.set_state(dir_dependent_state)
+        self.wrapper_text_button.set_state(dir_dependent_state)
+        self.compact_mode_button.set_state(dir_dependent_state)
 
         if is_dir_active:
             self.color_swatch.config(bg=self.project_color)
-            if not self.color_swatch.winfo_manager():
-                self.color_swatch.pack(side='left', padx=(0, 10), before=self.title_label)
+            if not self.color_swatch.winfo_ismapped():
+                 self.color_swatch.pack(side='left', padx=(0, 15), before=self.title_label)
         else:
-            self.color_swatch.pack_forget()
+             if self.color_swatch.winfo_ismapped():
+                self.color_swatch.pack_forget()
 
         if not is_dir_active:
             self.edit_icon_label.place_forget()
@@ -221,16 +255,20 @@ class App(Tk):
             if intro or outro:
                 has_wrapper_text = True
 
-        self.copy_merged_button.config(state=copy_buttons_state)
-        self.copy_wrapped_button.config(state=copy_buttons_state)
+        self.copy_merged_button.set_state(copy_buttons_state)
+        self.copy_wrapped_button.set_state(copy_buttons_state)
 
-        self.copy_wrapped_button.pack_forget()
-        self.copy_merged_button.pack_forget()
+        self.copy_wrapped_button.grid_remove()
+        self.copy_merged_button.grid_remove()
+        self.wrapper_text_button.grid_remove()
+
         if has_wrapper_text:
-            self.copy_wrapped_button.pack(side='left', padx=(0, 5))
-            self.copy_merged_button.pack(side='left', expand=True, fill='x', padx=(5, 0))
+            self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
+            self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, 5))
+            self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(5, 0))
         else:
-            self.copy_merged_button.pack(expand=True, fill='x')
+            self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5))
+            self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew')
 
     def on_settings_closed(self):
         self.state.reload()
@@ -239,7 +277,6 @@ class App(Tk):
     def on_directory_selected(self, new_dir):
         if self.state.update_active_dir(new_dir):
             self.set_active_dir_display(new_dir)
-            self.status_var.set(f"Active project changed to: {os.path.basename(new_dir)}")
 
     def on_recent_removed(self, path_to_remove):
         self.state.remove_recent_project(path_to_remove)
@@ -247,9 +284,8 @@ class App(Tk):
 
     def open_color_chooser(self, event=None):
         if not self.project_config: return
-        # Ask for color, returns (rgb_tuple, hex_string)
         color_code = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if color_code and color_code[1]: # Check if a color was chosen
+        if color_code and color_code[1]:
             self.project_color = color_code[1]
             self.project_config.project_color = self.project_color
             self.project_config.save()
@@ -295,7 +331,6 @@ class App(Tk):
                 self.status_var.set("No files selected to copy.")
                 return
 
-            # --- Scan for secrets BEFORE merging (if enabled) ---
             if self.state.scan_for_secrets:
                 report = scan_for_secrets(base_dir, files_to_copy)
                 if report:
@@ -309,7 +344,6 @@ class App(Tk):
                         self.status_var.set("Copy cancelled due to potential secrets.")
                         return
 
-            # --- If scan passes or user agrees, proceed to copy ---
             final_content, status_message = generate_output_string(base_dir, use_wrapper)
             if final_content is not None:
                 pyperclip.copy(final_content)
@@ -339,4 +373,4 @@ class App(Tk):
             return
         fm_window = FileManagerWindow(self, self.project_config, self.status_var, self.file_extensions, self.state.default_editor)
         self.wait_window(fm_window)
-        self.update_button_states()
+        self.set_active_dir_display(self.active_dir.get())
