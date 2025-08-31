@@ -39,7 +39,7 @@ class App(Tk):
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
-        self.geometry("800x550")
+        self.geometry("800x400")
         self.configure(bg=self.app_bg_color)
 
         self.load_images()
@@ -74,7 +74,7 @@ class App(Tk):
         """Creates and places all the UI widgets based on the new dark theme design"""
         # --- Style Definitions ---
         font_family = "Segoe UI"
-        font_normal = (font_family, 15)
+        font_normal = (font_family, 12)
         font_large_bold = (font_family, 24, 'bold')
         font_button = (font_family, 16)
 
@@ -83,7 +83,7 @@ class App(Tk):
         self.rowconfigure(2, weight=1)
 
         # --- Top Bar (Row 0) ---
-        top_bar = Frame(self, bg=c.TOP_BAR_BG, padx=20, pady=10)
+        top_bar = Frame(self, bg=c.TOP_BAR_BG, padx=20, pady=15)
         top_bar.grid(row=0, column=0, sticky='ew')
 
         self.color_swatch = Frame(top_bar, width=48, height=48, cursor="hand2")
@@ -111,7 +111,7 @@ class App(Tk):
 
         left_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
         left_buttons.grid(row=0, column=0, sticky='w')
-        
+
         RoundedButton(left_buttons, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.open_change_directory_dialog).pack(side='left')
         self.manage_files_button = RoundedButton(left_buttons, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.manage_files)
         self.manage_files_button.pack(side='left', padx=(10, 0))
@@ -123,12 +123,12 @@ class App(Tk):
 
         # --- Center "Wrapper & Output" Box (Row 2) ---
         center_frame = Frame(self, bg=c.DARK_BG)
-        center_frame.grid(row=2, column=0, sticky='nsew', pady=10)
+        center_frame.grid(row=2, column=0, sticky='nsew', pady=0)
 
         wrapper_box = Frame(center_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-        wrapper_box.place(relx=0.5, rely=0.5, anchor='center')
+        wrapper_box.place(relx=0.5, rely=0.55, anchor='center')
 
-        Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=5).pack(pady=(10, 15))
+        Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=2).pack(pady=(10, 5))
 
         button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
         button_grid_frame.pack(pady=(5, 20), padx=30)
@@ -136,11 +136,11 @@ class App(Tk):
         button_grid_frame.columnconfigure(1, weight=1)
 
         copy_button_height = 60
-        self.copy_wrapped_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.copy_wrapped_code)
-        
+        self.copy_wrapped_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, width=180, command=self.copy_wrapped_code)
+
         define_wrapper_width = self.copy_wrapped_button.width
-        self.wrapper_text_button = RoundedButton(button_grid_frame, text="Define Wrapper Text", height=40, width=define_wrapper_width, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
-        
+        self.wrapper_text_button = RoundedButton(button_grid_frame, text="Define Wrapper Text", height=30, width=define_wrapper_width, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
+
         self.copy_merged_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
 
         self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
