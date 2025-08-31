@@ -62,6 +62,36 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 var
   g_DeleteConfigData: Boolean; // Global variable for the uninstaller's choice
 
+function IsAppRunning(const FileName: string): Boolean;
+var
+  FSWbemLocator: Variant;
+  FWMIService: Variant;
+  FWbemObjectSet: Variant;
+begin
+  Result := False;
+  try
+    FSWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
+    FWMIService := FSWbemLocator.ConnectServer('.', 'root\cimv2', '', '');
+    FWbemObjectSet := FWMIService.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
+    Result := (FWbemObjectSet.Count > 0);
+  except
+    // Handle exceptions if WMI is not available
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  if IsAppRunning('{#MyAppExeName}') then
+  begin
+    MsgBox('CodeMerger is currently running. Please close all instances of the application before proceeding with the installation.', mbError, MB_OK);
+    Result := False;
+  end
+  else
+  begin
+    Result := True;
+  end;
+end;
+
 // --- INSTALLER LOGIC ---
 procedure CurStepChanged(CurStep: TSetupStep);
 var
