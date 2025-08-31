@@ -14,7 +14,6 @@ def _create_and_get_default_config():
         'filetypes': [],
         'default_editor': '',
         'scan_for_secrets': False,
-        'check_for_updates': True,
         'last_update_check': None
     }
     try:
@@ -48,11 +47,10 @@ def load_config():
                 config['recent_projects'] = config.pop('recent_directories')
             if 'scan_for_secrets' not in config:
                 config['scan_for_secrets'] = False # Add missing key for backward compatibility
-            # Add update check settings for backward compatibility
-            if 'check_for_updates' not in config:
-                config['check_for_updates'] = True
             if 'last_update_check' not in config:
                 config['last_update_check'] = None
+            if 'check_for_updates' in config:
+                del config['check_for_updates'] # Clean up old key if present
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one

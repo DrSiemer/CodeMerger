@@ -12,7 +12,6 @@
 AppId={{C6E2D2F0-2E3F-4B8A-9A0D-1B2C3D4E5F6A}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-; Override the default name+version format, and just use the name
 AppVerName={#MyAppName}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
@@ -26,9 +25,8 @@ OutputDir=.\dist-installer
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
-; Use a custom icon for the installer itself
+PrivilegesRequired=admin
 SetupIconFile=assets\install.ico
-; Set the icon for the uninstaller in Add/Remove Programs
 UninstallDisplayIcon={app}\uninstall.ico
 
 [Languages]
@@ -36,31 +34,63 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "checkforupdates"; Description: "Enable automatic update checks"; GroupDescription: "Updates:"; Flags: checkedonce
-Name: "addcontextmenu"; Description: "Add 'Open in CodeMerger' to folder context menu"; GroupDescription: "Integration:"; Flags: unchecked
+Name: "checkforupdates"; Description: "Enable automatic update checks"; GroupDescription: "Updates:"; Flags: checkedonce; Check: IsCheckForUpdatesEnabled
+Name: "addcontextmenu"; Description: "Add 'Open in CodeMerger' to folder context menu"; GroupDescription: "Integration:"; Flags: checkedonce; Check: IsContextMenuEnabled
 
 [Files]
 Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-; Bundle the uninstall icon with the application files
 Source: "assets\uninstall.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-; Add an uninstaller shortcut to the Start Menu folder
-Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"; IconFilename: "{app}\uninstall.ico"
+Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{commonprograms}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"; IconFilename: "{app}\uninstall.ico"
 
 [Registry]
-Root: HKCR; Subkey: "Directory\shell\{#MyAppName}"; ValueType: string; ValueName: ""; ValueData: "Open in CodeMerger"; Flags: uninsdeletekey; Tasks: addcontextmenu
-Root: HKCR; Subkey: "Directory\shell\{#MyAppName}"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\{#MyAppExeName},0"; Tasks: addcontextmenu
-Root: HKCR; Subkey: "Directory\shell\{#MyAppName}\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: addcontextmenu
+; Write the installer choices to HKEY_LOCAL_MACHINE, the correct place for system-wide defaults.
+Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueType: dword; ValueName: "AutomaticUpdates"; ValueData: "{code:GetCheckForUpdatesValue}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: ""; ValueData: "Open in CodeMerger"; Flags: uninsdeletekey; Tasks: addcontextmenu
+Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\{#MyAppExeName},0"; Tasks: addcontextmenu
+Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: addcontextmenu
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
 var
-  g_DeleteConfigData: Boolean; // Global variable for the uninstaller's choice
+  g_DeleteConfigData: Boolean;
+
+// --- Check Functions to Read Current State from HKLM ---
+
+function IsCheckForUpdatesEnabled(): Boolean;
+var
+  Value: Cardinal;
+begin
+  // Reads the system-wide default from HKLM.
+  // If the value doesn't exist, default to True (checked), respecting 'checkedonce'.
+  if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
+    Result := True
+  else
+    Result := (Value = 1);
+end;
+
+function IsContextMenuEnabled(): Boolean;
+begin
+  // Checks if the system-wide context menu key exists in HKLM.
+  Result := RegKeyExists(HKLM, 'Software\Classes\Directory\shell\{#MyAppName}');
+end;
+
+// --- Helper Function for Writing Values ---
+
+function GetCheckForUpdatesValue(Param: String): String;
+begin
+  if WizardIsTaskSelected('checkforupdates') then
+    Result := '1'
+  else
+    Result := '0';
+end;
+
+// --- Standard Installer/Uninstaller Logic ---
 
 function IsAppRunning(const FileName: string): Boolean;
 var
@@ -72,7 +102,7 @@ begin
   try
     FSWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
     FWMIService := FSWbemLocator.ConnectServer('.', 'root\cimv2', '', '');
-    FWbemObjectSet := FWMIService.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
+    FWbemObjectSet := FSWbemLocator.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
     Result := (FWbemObjectSet.Count > 0);
   except
     // Handle exceptions if WMI is not available
@@ -83,7 +113,7 @@ function InitializeSetup(): Boolean;
 begin
   if IsAppRunning('{#MyAppExeName}') then
   begin
-    MsgBox('CodeMerger is currently running. Please close all instances of the application before proceeding with the installation.', mbError, MB_OK);
+    MsgBox('CodeMerger is currently running. Please close all instances before proceeding.', mbError, MB_OK);
     Result := False;
   end
   else
@@ -92,83 +122,29 @@ begin
   end;
 end;
 
-// --- INSTALLER LOGIC ---
-procedure CurStepChanged(CurStep: TSetupStep);
-var
-  ConfigDir: string;
-  ConfigPath: string;
-  ConfigJson: TStringList;
-  UpdateCheckValue: string;
-begin
-  // This code runs after all files are installed
-  if CurStep = ssPostInstall then
-  begin
-    // Determine the path for the config file
-    ConfigDir := ExpandConstant('{userappdata}\CodeMerger');
-    ConfigPath := ConfigDir + '\config.json';
-
-    // Only create a default config file if one doesn't already exist.
-    // This preserves user settings during an upgrade or reinstall.
-    if not FileExists(ConfigPath) then
-    begin
-      // Ensure the configuration directory exists
-      if not DirExists(ConfigDir) then
-      begin
-        CreateDir(ConfigDir);
-      end;
-
-      // Set the value based on the user's selection in the installer
-      if WizardIsTaskSelected('checkforupdates') then
-      begin
-        UpdateCheckValue := 'true';
-      end
-      else
-      begin
-        UpdateCheckValue := 'false';
-      end;
-
-      // Create a minimal JSON file. The application will populate the rest of the
-      // settings on its first run, respecting this user choice.
-      ConfigJson := TStringList.Create;
-      try
-        ConfigJson.Add('{');
-        ConfigJson.Add('  "check_for_updates": ' + UpdateCheckValue);
-        ConfigJson.Add('}');
-        ConfigJson.SaveToFile(ConfigPath);
-      finally
-        ConfigJson.Free;
-      end;
-    end;
-  end;
-end;
-
-// --- UNINSTALLER LOGIC ---
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   ConfigDir: string;
+  AppRegistryKey: string;
 begin
-  // This step runs right after the user confirms the uninstallation,
-  // but before any files are deleted. This is the correct time to ask.
   if CurUninstallStep = usUninstall then
   begin
     if MsgBox('Do you want to remove all your CodeMerger settings and project data?', mbConfirmation, MB_YESNO) = IDYES then
-    begin
-      g_DeleteConfigData := True;
-    end else
-    begin
+      g_DeleteConfigData := True
+    else
       g_DeleteConfigData := False;
-    end;
   end;
 
-  // This runs after the main application files have been uninstalled
   if CurUninstallStep = usPostUninstall then
   begin
-    // Check if the user agreed to delete their data
     if g_DeleteConfigData then
     begin
       ConfigDir := ExpandConstant('{userappdata}\CodeMerger');
-      // Delete the entire CodeMerger folder from AppData
       DelTree(ConfigDir, True, True, True);
+
+      AppRegistryKey := 'Software\CodeMerger';
+      if RegKeyExists(HKCU, AppRegistryKey) then
+        RegDeleteKeyIncludingSubkeys(HKCU, AppRegistryKey);
     end;
   end;
 end;

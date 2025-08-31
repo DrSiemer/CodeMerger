@@ -1,6 +1,7 @@
 import os
 from tkinter import Toplevel, Frame, Label, Button, Entry, filedialog, StringVar, BooleanVar, ttk
 from ..core.utils import load_config, save_config
+from ..core.registry import get_setting, save_setting
 from ..core.paths import ICON_PATH
 
 class SettingsWindow(Toplevel):
@@ -12,7 +13,7 @@ class SettingsWindow(Toplevel):
         config = load_config()
         self.editor_path = StringVar(value=config.get('default_editor', ''))
         self.scan_for_secrets = BooleanVar(value=config.get('scan_for_secrets', False))
-        self.check_for_updates = BooleanVar(value=config.get('check_for_updates', True))
+        self.check_for_updates = BooleanVar(value=get_setting('AutomaticUpdates', True))
 
         # --- Window Setup ---
         self.title("Settings")
@@ -63,7 +64,6 @@ class SettingsWindow(Toplevel):
         )
         self.update_checkbox.pack(anchor='w', pady=(5,0))
 
-
         # --- Action Buttons ---
         button_frame = Frame(main_frame)
         button_frame.pack(side='bottom', fill='x', pady=(20, 0))
@@ -99,8 +99,8 @@ class SettingsWindow(Toplevel):
         config = load_config()
         config['default_editor'] = self.editor_path.get()
         config['scan_for_secrets'] = self.scan_for_secrets.get()
-        config['check_for_updates'] = self.check_for_updates.get()
         save_config(config)
+        save_setting('AutomaticUpdates', self.check_for_updates.get())
 
         if self.on_close_callback:
             self.on_close_callback()
