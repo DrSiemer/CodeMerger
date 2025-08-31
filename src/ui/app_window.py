@@ -20,7 +20,7 @@ from ..core.secret_scanner import scan_for_secrets
 from ..core.updater import Updater
 
 class App(Tk):
-    def __init__(self, file_extensions, app_version=""):
+    def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
         self.file_extensions = file_extensions
         self.app_version = app_version
@@ -52,7 +52,12 @@ class App(Tk):
 
         self.build_ui()
 
-        self.set_active_dir_display(self.state.active_directory)
+        # --- Project Loading Logic ---
+        if initial_project_path and os.path.isdir(initial_project_path):
+            self.state.update_active_dir(initial_project_path)
+            self.set_active_dir_display(initial_project_path)
+        else:
+            self.set_active_dir_display(self.state.active_directory)
 
         # Perform update check
         self.after(1500, self.updater.check_for_updates)

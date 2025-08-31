@@ -53,7 +53,7 @@ ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 EDIT_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'edit.png')
 
 # Path to the version file
-VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'version.txt')
+VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'version.txt')
 
 # Path to the compact mode graphics
 COMPACT_MODE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode.png')

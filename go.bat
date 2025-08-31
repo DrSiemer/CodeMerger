@@ -50,14 +50,14 @@ goto :eof
     goto :eof
 
 :GetVersion
-    if not exist "assets\version.txt" (
-        echo ERROR: assets\version.txt not found.
+    if not exist "version.txt" (
+        echo ERROR: version.txt not found.
         exit /b 1
     )
     set "MAJOR_VER="
     set "MINOR_VER="
     set "REVISION_VER="
-    for /f "tokens=1,2 delims==" %%a in (assets\version.txt) do (
+    for /f "tokens=1,2 delims==" %%a in (version.txt) do (
         if /i "%%a"=="Major" set "MAJOR_VER=%%b"
         if /i "%%a"=="Minor" set "MINOR_VER=%%b"
         if /i "%%a"=="Revision" set "REVISION_VER=%%b"
