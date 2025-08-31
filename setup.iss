@@ -34,8 +34,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "checkforupdates"; Description: "Enable automatic update checks"; GroupDescription: "Updates:"; Flags: checkedonce; Check: IsCheckForUpdatesEnabled
-Name: "addcontextmenu"; Description: "Add 'Open in CodeMerger' to folder context menu"; GroupDescription: "Integration:"; Flags: checkedonce; Check: IsContextMenuEnabled
+Name: "checkforupdates"; Description: "Enable automatic update checks"; GroupDescription: "Updates:"
+Name: "addcontextmenu"; Description: "Add 'Open in CodeMerger' to folder context menu"; GroupDescription: "Integration:"
 
 [Files]
 Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
@@ -47,7 +47,7 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Name: "{commonprograms}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"; IconFilename: "{app}\uninstall.ico"
 
 [Registry]
-; Write the installer choices to HKEY_LOCAL_MACHINE, the correct place for system-wide defaults.
+; Write the installer choices to HKEY_LOCAL_MACHINE, the correct place for system-wide defaults
 Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueType: dword; ValueName: "AutomaticUpdates"; ValueData: "{code:GetCheckForUpdatesValue}"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: ""; ValueData: "Open in CodeMerger"; Flags: uninsdeletekey; Tasks: addcontextmenu
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\{#MyAppExeName},0"; Tasks: addcontextmenu
@@ -60,28 +60,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 var
   g_DeleteConfigData: Boolean;
 
-// --- Check Functions to Read Current State from HKLM ---
-
-function IsCheckForUpdatesEnabled(): Boolean;
-var
-  Value: Cardinal;
-begin
-  // Reads the system-wide default from HKLM.
-  // If the value doesn't exist, default to True (checked), respecting 'checkedonce'.
-  if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
-    Result := True
-  else
-    Result := (Value = 1);
-end;
-
-function IsContextMenuEnabled(): Boolean;
-begin
-  // Checks if the system-wide context menu key exists in HKLM.
-  Result := RegKeyExists(HKLM, 'Software\Classes\Directory\shell\{#MyAppName}');
-end;
-
 // --- Helper Function for Writing Values ---
-
 function GetCheckForUpdatesValue(Param: String): String;
 begin
   if WizardIsTaskSelected('checkforupdates') then
@@ -119,6 +98,34 @@ begin
   else
   begin
     Result := True;
+  end;
+end;
+
+procedure InitializeWizard();
+var
+  Value: Cardinal;
+  UpdatesEnabled: Boolean;
+  ContextMenuEnabled: Boolean;
+  I: Integer;
+begin
+  // Read the state from HKLM before the old uninstaller has a chance to run (to preserve settings during an upgrade)
+  if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
+    UpdatesEnabled := True // Default to TRUE for a fresh install
+  else
+    UpdatesEnabled := (Value = 1);
+
+  ContextMenuEnabled := RegKeyExists(HKLM, 'Software\Classes\Directory\shell\{#MyAppName}');
+
+  for I := 0 to WizardForm.TasksList.Items.Count - 1 do
+  begin
+    if WizardForm.TasksList.Name[I] = 'checkforupdates' then
+    begin
+      WizardForm.TasksList.Checked[I] := UpdatesEnabled;
+    end;
+    if WizardForm.TasksList.Name[I] = 'addcontextmenu' then
+    begin
+      WizardForm.TasksList.Checked[I] := ContextMenuEnabled;
+    end;
   end;
 end;
 
