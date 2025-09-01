@@ -99,36 +99,56 @@ class RoundedButton(tk.Canvas):
         return f"#{r:02x}{g:02x}{b:02x}"
 
     def _draw(self, color):
-        """Draws the anti-aliased button shape and text using Pillow."""
+        """Draws the anti-aliased button shape and text using Pillow with supersampling."""
         self.delete("all")
 
-        img = Image.new('RGBA', (self.width, self.height), (0, 0, 0, 0))
+        scale = 4  # Use 4x supersampling for smooth edges
+        scaled_width = self.width * scale
+        scaled_height = self.height * scale
+        scaled_radius = self.radius * scale
+
+        # Create a high-resolution image to draw on
+        img = Image.new('RGBA', (scaled_width, scaled_height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 
         if self.hollow:
-            # For hollow buttons, `color` is the fill, with a border based on the text color
             border_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
+            scaled_border_width = 1 * scale
+            # Inset the drawing area by half the border width to keep the outline fully visible
+            inset = scaled_border_width / 2
             draw.rounded_rectangle(
-                (0, 0, self.width - 1, self.height - 1),
-                radius=self.radius,
+                (inset, inset, scaled_width - inset, scaled_height - inset),
+                radius=scaled_radius,
                 fill=color,
                 outline=border_color,
-                width=1
+                width=scaled_border_width
             )
             text_fill_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
         else:
-            # For solid buttons, `color` is for the background fill
-            draw.rounded_rectangle((0, 0, self.width, self.height), radius=self.radius, fill=color)
+            # For solid buttons, draw to the full extent of the scaled image
+            draw.rounded_rectangle((0, 0, scaled_width, scaled_height), radius=scaled_radius, fill=color)
             text_fill_color = self.fg_color
 
-        text_bbox = self.pil_font.getbbox(self.text)
-        text_width = text_bbox[2] - text_bbox[0]
-        text_height = text_bbox[3] - text_bbox[1] - 2
+        # Prepare a scaled version of the font for high-resolution text rendering
+        original_font_size = self.tk_font_tuple[1]
+        scaled_font = get_pil_font((self.tk_font_tuple[0], original_font_size * scale))
 
-        text_x = (self.width - text_width) / 2
-        text_y = (self.height - text_height) / 2 - text_bbox[1]
+        # Calculate the center point, adding a small negative offset to nudge the text up
+        center_x = scaled_width / 2
+        # A small negative offset brings the text up slightly
+        center_y = (scaled_height / 2) - (0.5 * scale)
 
-        draw.text((text_x, text_y), self.text, font=self.pil_font, fill=text_fill_color)
+        # Use the "middle middle" anchor for simple and accurate centering
+        draw.text(
+            (center_x, center_y),
+            self.text,
+            font=scaled_font,
+            fill=text_fill_color,
+            anchor="mm"
+        )
+
+        # Scale the high-resolution image down to the final size with a high-quality filter
+        img = img.resize((self.width, self.height), Image.Resampling.LANCZOS)
 
         self._button_image = ImageTk.PhotoImage(img)
         self.create_image(0, 0, anchor='nw', image=self._button_image)
