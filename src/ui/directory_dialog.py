@@ -28,17 +28,15 @@ class DirectoryDialog(Toplevel):
         self.transient(parent)
         self.grab_set()
         self.configure(bg=self.app_bg_color)
+        self.resizable(False, False)
 
         self.dialog_width = 450
 
         if self.recent_projects:
             message = "Select a recent project or browse for a new one"
-            dialog_height = 320
         else:
             message = "Browse for a project folder to get started"
-            dialog_height = 150
 
-        self.geometry(f"{self.dialog_width}x{dialog_height}")
         self.info_label = Label(self, text=message, padx=20, pady=10, bg=self.app_bg_color, fg=c.TEXT_COLOR, font=font_normal)
         self.info_label.pack(pady=(5, 10), anchor='w')
 
@@ -58,6 +56,11 @@ class DirectoryDialog(Toplevel):
             font=font_button
         )
         browse_btn.pack(pady=20, padx=20)
+
+        # Update the window to fit the content
+        self.update_idletasks()
+        required_height = self.winfo_reqheight()
+        self.geometry(f"{self.dialog_width}x{required_height}")
 
     def create_recent_dir_entry(self, path, font):
         """Creates a single row in the recent projects list"""
@@ -140,7 +143,12 @@ class DirectoryDialog(Toplevel):
         # This function handles the UI update
         widget_to_destroy.destroy()
 
-        if not self.recent_projects:
+        # Check if the recent projects list is now empty
+        if not self.recent_dirs_frame.winfo_children():
             self.info_label.config(text="Browse for a project folder to get started")
-            self.geometry(f"{self.dialog_width}x150")
             self.recent_dirs_frame.pack_forget()
+
+        # Update the window to fit the new content size
+        self.update_idletasks()
+        required_height = self.winfo_reqheight()
+        self.geometry(f"{self.dialog_width}x{required_height}")
