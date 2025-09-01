@@ -108,7 +108,7 @@ class ProjectConfig:
             "total_tokens": self.total_tokens,
             "intro_text": self.intro_text,
             "outro_text": self.outro_text,
-            "known_files": self.known_files
+            "known_files": sorted(list(set(self.known_files)))
         }
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
             json.dump(final_data, f, indent=2)
