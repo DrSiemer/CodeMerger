@@ -240,7 +240,6 @@ class App(Tk):
             self.project_config = None
             self.project_color = c.COMPACT_MODE_BG_COLOR
             self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
-            self.status_var.set("No active project.")
         self.update_button_states()
 
     def update_button_states(self, *args):
