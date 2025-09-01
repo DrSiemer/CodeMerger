@@ -92,7 +92,6 @@ class App(Tk):
         top_bar.grid(row=0, column=0, sticky='ew')
 
         self.color_swatch = Frame(top_bar, width=48, height=48, cursor="hand2")
-        self.color_swatch.pack(side='left', padx=(0, 15))
         self.color_swatch.pack_propagate(False)
         self.color_swatch.bind("<Button-1>", self.open_color_chooser)
         self.color_swatch.config(bg=c.TOP_BAR_BG)
@@ -133,22 +132,22 @@ class App(Tk):
         wrapper_box = Frame(center_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
         wrapper_box.place(relx=0.5, rely=0.55, anchor='center')
 
-        Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=2).pack(pady=(10, 5))
+        self.wrapper_box_title = Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=2)
 
-        button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
-        button_grid_frame.pack(pady=(5, 18), padx=30)
-        button_grid_frame.columnconfigure(0, weight=1)
-        button_grid_frame.columnconfigure(1, weight=1)
+        # This label is shown when no project is selected
+        self.no_project_label = Label(wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
+
+        self.button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
+        self.button_grid_frame.columnconfigure(0, weight=1)
+        self.button_grid_frame.columnconfigure(1, weight=1)
 
         copy_button_height = 60
-        self.copy_wrapped_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, width=180, command=self.copy_wrapped_code)
+        self.copy_wrapped_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, width=180, command=self.copy_wrapped_code)
 
         define_wrapper_width = self.copy_wrapped_button.width
-        self.wrapper_text_button = RoundedButton(button_grid_frame, text="Define Wrapper Text", height=30, width=define_wrapper_width, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
+        self.wrapper_text_button = RoundedButton(self.button_grid_frame, text="Define Wrapper Text", height=30, width=define_wrapper_width, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
 
-        self.copy_merged_button = RoundedButton(button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
-
-        self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
+        self.copy_merged_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
 
         # --- Bottom Bar (Row 3) ---
         bottom_bar = Frame(self, bg=c.DARK_BG)
@@ -234,13 +233,13 @@ class App(Tk):
                 self.status_var.set(f"Active project: {os.path.basename(path)} - Wrapper text loaded.")
             self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
-            self.title_label.config(font=font_large_bold)
+            self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
         else:
             self.active_dir.set("No project selected")
-            self.project_title_var.set("CodeMerger")
+            self.project_title_var.set("(no active project)")
             self.project_config = None
             self.project_color = c.COMPACT_MODE_BG_COLOR
-            self.title_label.config(font=font_large_bold)
+            self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
             self.status_var.set("No active project.")
         self.update_button_states()
 
@@ -248,13 +247,12 @@ class App(Tk):
         """Updates button states based on the active directory and .allcode file"""
         is_dir_active = os.path.isdir(self.active_dir.get())
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
-        copy_buttons_state = 'disabled'
-        has_wrapper_text = False
 
+        # --- Top Level Buttons ---
         self.manage_files_button.set_state(dir_dependent_state)
-        self.wrapper_text_button.set_state(dir_dependent_state)
         self.compact_mode_button.set_state(dir_dependent_state)
 
+        # --- Color Swatch & Edit Icon ---
         if is_dir_active:
             self.color_swatch.config(bg=self.project_color)
             if not self.color_swatch.winfo_ismapped():
@@ -262,32 +260,53 @@ class App(Tk):
         else:
              if self.color_swatch.winfo_ismapped():
                 self.color_swatch.pack_forget()
+             self.edit_icon_label.place_forget()
 
+        # --- Central Wrapper & Output Box ---
         if not is_dir_active:
-            self.edit_icon_label.place_forget()
-
-        if is_dir_active and self.project_config:
-            if self.project_config.selected_files:
-                copy_buttons_state = 'normal'
-            intro = self.project_config.intro_text.strip()
-            outro = self.project_config.outro_text.strip()
-            if intro or outro:
-                has_wrapper_text = True
-
-        self.copy_merged_button.set_state(copy_buttons_state)
-        self.copy_wrapped_button.set_state(copy_buttons_state)
-
-        self.copy_wrapped_button.grid_remove()
-        self.copy_merged_button.grid_remove()
-        self.wrapper_text_button.grid_remove()
-
-        if has_wrapper_text:
-            self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
-            self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, 5))
-            self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(5, 0))
+            # Show "select project" message and hide buttons/title
+            self.wrapper_box_title.pack_forget()
+            self.button_grid_frame.pack_forget()
+            self.no_project_label.pack(pady=(20, 30), padx=30)
+            # Ensure wrapper and copy buttons are disabled
+            self.wrapper_text_button.set_state('disabled')
+            self.copy_merged_button.set_state('disabled')
+            self.copy_wrapped_button.set_state('disabled')
         else:
-            self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5))
-            self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew')
+            # Show buttons/title and hide "select project" message
+            self.no_project_label.pack_forget()
+            self.wrapper_box_title.pack(pady=(10, 5))
+            self.button_grid_frame.pack(pady=(5, 18), padx=30)
+
+            # Configure button states and layout within the frame
+            self.wrapper_text_button.set_state('normal')
+
+            copy_buttons_state = 'disabled'
+            has_wrapper_text = False
+
+            if self.project_config:
+                if self.project_config.selected_files:
+                    copy_buttons_state = 'normal'
+                intro = self.project_config.intro_text.strip()
+                outro = self.project_config.outro_text.strip()
+                if intro or outro:
+                    has_wrapper_text = True
+
+            self.copy_merged_button.set_state(copy_buttons_state)
+            self.copy_wrapped_button.set_state(copy_buttons_state)
+
+            # Grid logic
+            self.copy_wrapped_button.grid_remove()
+            self.copy_merged_button.grid_remove()
+            self.wrapper_text_button.grid_remove()
+
+            if has_wrapper_text:
+                self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
+                self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, 5))
+                self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(5, 0))
+            else:
+                self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5))
+                self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew')
 
     def on_settings_closed(self):
         self.state.reload()
