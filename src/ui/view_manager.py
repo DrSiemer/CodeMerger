@@ -24,13 +24,18 @@ class ViewManager:
         """Loads and prepares the compact mode graphics"""
         try:
             button_size = (64, 64)
-            up_img_src = Image.open(COMPACT_MODE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
-            self.compact_mode_image_up = ImageTk.PhotoImage(up_img_src)
-            down_img_src = Image.open(COMPACT_MODE_ACTIVE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
-            self.compact_mode_image_down = ImageTk.PhotoImage(down_img_src)
+            # Load images as PIL objects first and store them
+            self.compact_mode_pil_up = Image.open(COMPACT_MODE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
+            self.compact_mode_pil_down = Image.open(COMPACT_MODE_ACTIVE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
             close_img_src = Image.open(COMPACT_MODE_CLOSE_ICON_PATH)
+
+            # Create the PhotoImage objects for Tkinter
+            self.compact_mode_image_up = ImageTk.PhotoImage(self.compact_mode_pil_up)
+            self.compact_mode_image_down = ImageTk.PhotoImage(self.compact_mode_pil_down)
             self.compact_mode_close_image = ImageTk.PhotoImage(close_img_src)
         except Exception:
+            self.compact_mode_pil_up = None
+            self.compact_mode_pil_down = None
             self.compact_mode_image_up = None
             self.compact_mode_image_down = None
             self.compact_mode_close_image = None
@@ -127,11 +132,15 @@ class ViewManager:
                 parent=self.main_window,
                 close_callback=self.toggle_compact_mode,
                 project_name=project_name,
-                image_up=self.compact_mode_image_up,
-                image_down=self.compact_mode_image_down,
+                image_up_pil=self.compact_mode_pil_up,
+                image_down_pil=self.compact_mode_pil_down,
+                image_up_tk=self.compact_mode_image_up,
+                image_down_tk=self.compact_mode_image_down,
                 image_close=self.compact_mode_close_image,
                 instance_color=self.main_window.project_color
             )
+            # Manually trigger a UI update to show initial warning state if needed
+            self.main_window._update_warning_ui()
             self.compact_mode_window.withdraw()
             self.compact_mode_window.update_idletasks()
             widget_w, widget_h = self.compact_mode_window.winfo_reqwidth(), self.compact_mode_window.winfo_reqheight()

@@ -11,18 +11,27 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, project_name, image_up=None, image_down=None, image_close=None, instance_color=c.COMPACT_MODE_BG_COLOR):
+    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
         self.project_name = project_name
-        self.image_up = image_up
-        self.image_down = image_down
+
+        # Store original images (both PIL for composing and Tk for displaying)
+        self.image_up_pil = image_up_pil
+        self.image_down_pil = image_down_pil
+        self.image_up_tk_orig = image_up_tk
+        self.image_down_tk_orig = image_down_tk
+
         self.image_close = image_close
         self.tooltip_window = None
         self.instance_color = instance_color
-        self.new_files_icon_image = None
+        self.new_files_pil_img = None
         self.is_showing_warning = False
+
+        # Generated images for the warning state
+        self.image_up_tk_warning = None
+        self.image_down_tk_warning = None
 
         # --- Style and Layout Constants ---
         BAR_AND_BORDER_COLOR = self.instance_color # Use the passed-in color
@@ -40,21 +49,11 @@ class CompactMode(tk.Toplevel):
         self._is_dragging = False
 
         # --- Move Bar (for dragging and double-click) ---
-        self.move_bar = tk.Frame(
-            self,
-            height=MOVE_BAR_HEIGHT,
-            bg=BAR_AND_BORDER_COLOR,
-            cursor="fleur"
-        )
+        self.move_bar = tk.Frame(self, height=MOVE_BAR_HEIGHT, bg=BAR_AND_BORDER_COLOR, cursor="fleur")
         self.move_bar.pack(fill='x', side='top')
 
         # --- Close Button ---
-        self.close_button = tk.Label(
-            self.move_bar,
-            image=self.image_close,
-            bg=BAR_AND_BORDER_COLOR,
-            cursor="hand2"
-        )
+        self.close_button = tk.Label(self.move_bar, image=self.image_close, bg=BAR_AND_BORDER_COLOR, cursor="hand2")
         self.close_button.pack(side='right', padx=(0, 1))
 
 
@@ -63,80 +62,65 @@ class CompactMode(tk.Toplevel):
         border_frame.pack(side='bottom', fill='both', expand=True)
 
         # --- Button (for clicking) ---
-        self.button_label = tk.Label(
-            border_frame,
-            image=self.image_up,
-            bd=0,
-            bg='white'
-        )
-        self.button_label.pack(
-            padx=(BORDER_WIDTH, BORDER_WIDTH),
-            pady=(0, BORDER_WIDTH)
-        )
+        self.button_label = tk.Label(border_frame, image=self.image_up_tk_orig, bd=0, bg='white')
+        self.button_label.pack(padx=(BORDER_WIDTH, BORDER_WIDTH), pady=(0, BORDER_WIDTH))
 
         # --- Tiny "Copy Wrapped" Button ---
         self.wrapped_button = tk.Button(
-            border_frame,
-            text="W",
-            font=('Segoe UI', 8, 'bold'),
-            bg="#FFFFFF",
-            fg="#000000",
-            activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
-            activeforeground="#FFFFFF",
-            bd=0,
-            relief="flat",
-            cursor="hand2",
-            command=self.copy_wrapped
+            border_frame, text="W", font=('Segoe UI', 8, 'bold'),
+            bg="#FFFFFF", fg="#000000", activebackground=c.SUBTLE_HIGHLIGHT_COLOR, activeforeground="#FFFFFF",
+            bd=0, relief="flat", cursor="hand2", command=self.copy_wrapped
         )
-        # Place the button in the bottom-right corner, on top of the main button area
         self.wrapped_button.place(relx=1.0, rely=1.0, x=-2, y=-2, anchor='se', width=18, height=18)
 
-        # --- Load and place new files icon ---
+        # --- Load new files icon (PIL only) ---
         try:
-            new_files_img = Image.open(NEW_FILES_ICON_PATH).resize((28, 28), Image.Resampling.LANCZOS)
-            self.new_files_icon_image = ImageTk.PhotoImage(new_files_img)
+            self.new_files_pil_img = Image.open(NEW_FILES_ICON_PATH).resize((28, 28), Image.Resampling.LANCZOS)
         except Exception:
-            self.new_files_icon_image = None
-        # Place the icon inside the border_frame so it appears on top of the main button
-        self.new_files_icon_label = tk.Label(border_frame, image=self.new_files_icon_image, bg='white', bd=0)
-
+            self.new_files_pil_img = None
 
         # --- Bindings ---
-        # Drag functionality is bound to the move bar
         self.move_bar.bind("<ButtonPress-1>", self.on_press_drag)
         self.move_bar.bind("<B1-Motion>", self.on_drag)
         self.move_bar.bind("<ButtonRelease-1>", self.on_release_drag)
-
-        # Close functionality is bound to the move bar (double-click) and close button (single-click)
         self.move_bar.bind("<Double-Button-1>", self.close_window)
         self.close_button.bind("<Button-1>", self.close_window)
-
-        # Click functionality is bound ONLY to the button image
         self.button_label.bind("<ButtonPress-1>", self.on_press_click)
         self.button_label.bind("<ButtonRelease-1>", self.on_release_click)
-
-        # Tooltip functionality
         self.button_label.bind("<Enter>", self.show_tooltip)
         self.button_label.bind("<Leave>", self.hide_tooltip)
         self.wrapped_button.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy wrapped {self.project_name} code"))
         self.wrapped_button.bind("<Leave>", self.hide_tooltip)
 
-        # Make icon non-interactive but pass events to the parent button
-        self.new_files_icon_label.bind("<Enter>", self.show_tooltip)
-        self.new_files_icon_label.bind("<Leave>", self.hide_tooltip)
-        self.new_files_icon_label.bind("<ButtonPress-1>", self.on_press_click)
-        self.new_files_icon_label.bind("<ButtonRelease-1>", self.on_release_click)
+    def _create_warning_images(self):
+        """Composites the warning icon onto the button images."""
+        if not self.new_files_pil_img or not self.image_up_pil or not self.image_down_pil:
+            return
 
+        # Create "up" state with warning
+        up_composite = self.image_up_pil.copy()
+        up_composite.paste(self.new_files_pil_img, (4, 4), self.new_files_pil_img)
+        self.image_up_tk_warning = ImageTk.PhotoImage(up_composite)
+
+        # Create "down" state with warning
+        down_composite = self.image_down_pil.copy()
+        down_composite.paste(self.new_files_pil_img, (4, 4), self.new_files_pil_img)
+        self.image_down_tk_warning = ImageTk.PhotoImage(down_composite)
 
     def show_warning(self, file_count, project_name):
         self.is_showing_warning = True
-        self.project_name = project_name # Ensure project name is up-to-date
-        self.new_files_icon_label.place(x=4, y=4)
+        self.project_name = project_name
+
+        if not self.image_up_tk_warning:
+            self._create_warning_images()
+
+        if self.image_up_tk_warning:
+            self.button_label.config(image=self.image_up_tk_warning)
 
     def hide_warning(self, project_name):
         self.is_showing_warning = False
-        self.project_name = project_name # Ensure project name is up-to-date
-        self.new_files_icon_label.place_forget()
+        self.project_name = project_name
+        self.button_label.config(image=self.image_up_tk_orig)
 
     def show_tooltip(self, event=None, text=""):
         if self._is_dragging or self.tooltip_window:
@@ -205,12 +189,16 @@ class CompactMode(tk.Toplevel):
 
     def on_press_click(self, event):
         """Changes the button image to its 'pressed' state."""
-        if self.image_down:
-            self.button_label.config(image=self.image_down)
+        if self.is_showing_warning and self.image_down_tk_warning:
+            self.button_label.config(image=self.image_down_tk_warning)
+        else:
+            self.button_label.config(image=self.image_down_tk_orig)
 
     def on_release_click(self, event):
         """Restores the button image and triggers the copy action."""
-        if self.image_up:
-            self.button_label.config(image=self.image_up)
-        # Trigger the main app's copy function. Does NOT change focus.
+        if self.is_showing_warning and self.image_up_tk_warning:
+            self.button_label.config(image=self.image_up_tk_warning)
+        else:
+            self.button_label.config(image=self.image_up_tk_orig)
+
         self.parent.copy_merged_code()
