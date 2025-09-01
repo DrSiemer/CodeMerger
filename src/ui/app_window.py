@@ -132,7 +132,7 @@ class App(Tk):
         Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=2).pack(pady=(10, 5))
 
         button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
-        button_grid_frame.pack(pady=(5, 20), padx=30)
+        button_grid_frame.pack(pady=(5, 18), padx=30)
         button_grid_frame.columnconfigure(0, weight=1)
         button_grid_frame.columnconfigure(1, weight=1)
 
@@ -147,8 +147,8 @@ class App(Tk):
         self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
 
         # --- Bottom Bar (Row 3) ---
-        bottom_bar = Frame(self, bg=c.DARK_BG, pady=10)
-        bottom_bar.grid(row=3, column=0, sticky='ew')
+        bottom_bar = Frame(self, bg=c.DARK_BG)
+        bottom_bar.grid(row=3, column=0, sticky='ew', pady=(20, 10))
         bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
         bottom_buttons_container.pack(side='left', padx=20)
 
@@ -157,7 +157,18 @@ class App(Tk):
 
         # --- Status Bar (Row 4) ---
         self.status_var = StringVar(value="Ready")
-        Label(self, textvariable=self.status_var, bd=1, relief='sunken', anchor='w', bg=c.STATUS_BG, fg=c.STATUS_FG, font=(font_family, 10)).grid(row=4, column=0, sticky='ew')
+        status_bar = Label(
+            self,
+            textvariable=self.status_var,
+            relief='flat',
+            anchor='w',
+            bg=c.STATUS_BG,
+            fg=c.STATUS_FG,
+            font=(font_family, 9),
+            padx=20,
+            pady=4
+        )
+        status_bar.grid(row=4, column=0, sticky='ew')
 
     def on_title_area_enter(self, event=None):
         if self._hide_edit_icon_job:
