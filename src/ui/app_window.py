@@ -107,7 +107,7 @@ class App(Tk):
 
         # --- Top-Level Buttons (Row 1) ---
         top_buttons_container = Frame(self, bg=c.DARK_BG, padx=20)
-        top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(20, 0))
+        top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
         top_buttons_container.columnconfigure(1, weight=1)
 
         left_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
@@ -148,7 +148,7 @@ class App(Tk):
 
         # --- Bottom Bar (Row 3) ---
         bottom_bar = Frame(self, bg=c.DARK_BG)
-        bottom_bar.grid(row=3, column=0, sticky='ew', pady=(20, 10))
+        bottom_bar.grid(row=3, column=0, sticky='ew', pady=(20, 15))
         bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
         bottom_buttons_container.pack(side='left', padx=20)
 
