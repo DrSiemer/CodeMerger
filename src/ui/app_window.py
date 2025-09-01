@@ -138,15 +138,13 @@ class App(Tk):
         self.no_project_label = Label(wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
 
         self.button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
-        self.button_grid_frame.columnconfigure(0, weight=1)
-        self.button_grid_frame.columnconfigure(1, weight=1)
+        # Configure the grid columns to have equal weight. This is the key to alignment.
+        self.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
+        self.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
 
         copy_button_height = 60
-        self.copy_wrapped_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, width=180, command=self.copy_wrapped_code)
-
-        define_wrapper_width = self.copy_wrapped_button.width
-        self.wrapper_text_button = RoundedButton(self.button_grid_frame, text="Define Wrapper Text", height=30, width=define_wrapper_width, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
-
+        self.copy_wrapped_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.copy_wrapped_code)
+        self.wrapper_text_button = RoundedButton(self.button_grid_frame, text="Define Wrapper Texts", height=30, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
         self.copy_merged_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
 
         # --- Bottom Bar (Row 3) ---
@@ -227,10 +225,11 @@ class App(Tk):
             self.active_dir.set(path)
             self.project_config = ProjectConfig(path)
             files_were_cleaned = self.project_config.load()
+            project_display_name = self.project_config.project_name
             if files_were_cleaned:
-                self.status_var.set(f"Active project: {os.path.basename(path)} - Cleaned missing files.")
+                self.status_var.set(f"Active project: {project_display_name} - Cleaned missing files.")
             else:
-                self.status_var.set(f"Active project: {os.path.basename(path)} - Wrapper text loaded.")
+                self.status_var.set(f"Active project: {project_display_name} - Wrapper text loaded.")
             self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
             self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
@@ -294,18 +293,21 @@ class App(Tk):
             self.copy_merged_button.set_state(copy_buttons_state)
             self.copy_wrapped_button.set_state(copy_buttons_state)
 
-            # Grid logic
+            # Clear any previous grid configurations before applying a new one
             self.copy_wrapped_button.grid_remove()
             self.copy_merged_button.grid_remove()
             self.wrapper_text_button.grid_remove()
-
+            
             if has_wrapper_text:
-                self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
-                self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, 5))
-                self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(5, 0))
+                gap = 5
+                # THREE-BUTTON LAYOUT
+                self.wrapper_text_button.grid(row=0, column=0, columnspan=1, sticky='ew', pady=(0, 5), padx=(0, gap))
+                self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
+                self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
             else:
-                self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5))
-                self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew')
+                # TWO-BUTTON LAYOUT: Explicitly set padx=0 to avoid carrying over old padding
+                self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5), padx=0)
+                self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew', padx=0)
 
     def on_settings_closed(self):
         self.state.reload()

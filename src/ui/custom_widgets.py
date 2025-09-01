@@ -92,12 +92,24 @@ class RoundedButton(tk.Canvas):
             self.click_color = self._adjust_brightness(self.base_color, -0.2)
             self.disabled_color = '#9E9E9E'
 
+        self._last_draw_width = 0
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
         self.bind("<Button-1>", self._on_click)
         self.bind("<ButtonRelease-1>", self._on_release)
+        self.bind("<Configure>", self._on_resize)
 
         self._draw(self.base_color)
+
+    def _on_resize(self, event=None):
+        """
+        Redraws the button if its allocated size has changed.
+        This makes the button responsive to layout managers like grid with `sticky`.
+        """
+        if self.winfo_width() != self._last_draw_width:
+            # Redraw with the correct color for the current state
+            color = self.base_color if self.is_enabled else self.disabled_color
+            self._draw(color)
 
     def _adjust_brightness(self, hex_color, factor):
         """Adjusts the brightness of a hex color."""
@@ -115,8 +127,16 @@ class RoundedButton(tk.Canvas):
         """Draws the anti-aliased button shape and text/image using Pillow with supersampling."""
         self.delete("all")
 
+        # Use the actual current width of the canvas widget for drawing.
+        # This makes the button fill the space allocated by the layout manager.
+        draw_width = self.winfo_width()
+        if draw_width <= 1: # On first draw, widget may not have a size yet
+            draw_width = self.width
+        self._last_draw_width = draw_width
+
+
         scale = 4  # Use 4x supersampling for smooth edges
-        scaled_width = self.width * scale
+        scaled_width = draw_width * scale
         scaled_height = self.height * scale
         scaled_radius = self.radius * scale
 
@@ -160,7 +180,7 @@ class RoundedButton(tk.Canvas):
             )
 
         # Scale the high-resolution image down to the final size with a high-quality filter
-        img = img.resize((self.width, self.height), Image.Resampling.LANCZOS)
+        img = img.resize((draw_width, self.height), Image.Resampling.LANCZOS)
 
         self._button_image = ImageTk.PhotoImage(img)
         self.create_image(0, 0, anchor='nw', image=self._button_image)
@@ -198,14 +218,20 @@ class RoundedButton(tk.Canvas):
     def config(self, **kwargs):
         """Allows configuration of button properties like a standard widget."""
         text_changed = 'text' in kwargs
+        width_changed = 'width' in kwargs
+
         if text_changed:
             self.text = kwargs.pop('text')
+
+        if width_changed:
+            self.width = kwargs.pop('width')
+            super().config(width=self.width)
 
         # The 'state' key is the primary driver of redraws
         if 'state' in kwargs:
             self.set_state(kwargs.pop('state'))
-        # If only the text changed, we need to force a redraw with the correct current color
-        elif text_changed:
+        # If only the text or width changed, we need to force a redraw with the correct current color
+        elif text_changed or width_changed:
             color = self.base_color if self.is_enabled else self.disabled_color
             self._draw(color)
 
