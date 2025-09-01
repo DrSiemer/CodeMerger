@@ -52,6 +52,7 @@
     "go.bat",
     "requirements.txt",
     "run.py",
+    "setup.iss",
     "src/__init__.py",
     "src/app_state.py",
     "src/codemerger.py",
