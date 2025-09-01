@@ -43,5 +43,5 @@
   ],
   "total_tokens": 31128,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION",
-  "outro_text": "Do NOT:\n- remove my original comments\n- return diff files\n- use a step count, <summary> tags, triple dashes in comments\n- end comments with dots (unless you are using multiple sentences)\n- copy my filename/path format in your answer\n- append three backticks without breaking for a new line\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- don't present your code proposals as \"final\" or \"defintive\"; they usually are not"
+  "outro_text": "Make sure empty lines are actually empty: avoid generating lines of spaces or tabs.\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use a step count, <summary> tags, triple dashes in comments\n- end comments with dots (unless you are using multiple sentences)\n- copy my filename/path format in your answer\n- append three backticks without breaking for a new line\n- present your code proposals as \"final\" or \"defintive\"; they usually are not"
 }
