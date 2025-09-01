@@ -91,10 +91,11 @@ def generate_output_string(base_dir, use_wrapper):
         if outro_text:
             final_parts.append(outro_text)
 
-        final_content = '\n\n'.join(final_parts)
+        final_content = '\n\n'.join(final_parts) + '\n'
         status_message = "Wrapped code copied as Markdown"
     else:
-        final_content = merged_code
+        default_prefix = "Here is the most recent code, please use this when making changes:\n\n"
+        final_content = default_prefix + merged_code
         status_message = "Merged code copied as Markdown"
 
     if skipped_files:
