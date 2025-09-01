@@ -12,7 +12,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
     def _has_relevant_files(path):
         """Recursively checks if a directory contains any files matching the extension list"""
         for entry in os.scandir(path):
-            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == 'allcode.txt':
+            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == '.allcode':
                 continue
             if entry.is_dir():
                 if _has_relevant_files(entry.path):
@@ -34,7 +34,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
             return []
 
         for entry in entries:
-            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == 'allcode.txt':
+            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == '.allcode':
                 continue
 
             rel_path = os.path.relpath(entry.path, base_dir).replace('\\', '/')
