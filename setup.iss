@@ -81,7 +81,7 @@ begin
   try
     FSWbemLocator := CreateOleObject('WbemScripting.SWbemLocator');
     FWMIService := FSWbemLocator.ConnectServer('.', 'root\cimv2', '', '');
-    FWbemObjectSet := FSWbemLocator.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
+    FWbemObjectSet := FWMIService.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
     Result := (FWbemObjectSet.Count > 0);
   except
     // Handle exceptions if WMI is not available
@@ -108,6 +108,7 @@ var
   ContextMenuEnabled: Boolean;
   I: Integer;
 begin
+  WizardForm.BringToFront;
   // Read the state from HKLM before the old uninstaller has a chance to run (to preserve settings during an upgrade)
   if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
     UpdatesEnabled := True // Default to TRUE for a fresh install
