@@ -3,6 +3,7 @@ from tkinter import font as tkFont
 from PIL import Image, ImageDraw, ImageTk, ImageFont
 import os
 import sys
+from .. import constants as c
 
 # --- Robust Font Finding Logic ---
 WINDOWS_FONT_MAP = {
@@ -37,8 +38,9 @@ def get_pil_font(font_tuple):
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, text, command, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6):
+    def __init__(self, parent, text, command, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False):
         self.tk_font_tuple = font if font else tkFont.nametofont("TkDefaultFont")
+        self.hollow = hollow
 
         # Use the robust font loader
         self.pil_font = get_pil_font(self.tk_font_tuple)
@@ -61,18 +63,28 @@ class RoundedButton(tk.Canvas):
         self.text = text
         self.original_bg_color = bg
         self.original_fg_color = fg
-
         self.fg_color = self.original_fg_color
-        self.hover_color = self._adjust_brightness(self.original_bg_color, -0.1)
-        self.click_color = self._adjust_brightness(self.original_bg_color, -0.2)
-        self.disabled_color = '#9E9E9E'
+
+        if self.hollow:
+            # For hollow buttons, the look is a specific fill with fg text
+            self.base_color = c.TOP_BAR_BG # This is the main fill color
+            self.hover_color = self._adjust_brightness(self.base_color, 0.2)
+            self.click_color = self._adjust_brightness(self.base_color, 0.4)
+            self.disabled_color = self._adjust_brightness(c.TOP_BAR_BG, -0.1)
+            self.disabled_text_color = '#757575'
+        else:
+            # For solid buttons, colors are based on the background
+            self.base_color = self.original_bg_color
+            self.hover_color = self._adjust_brightness(self.base_color, -0.1)
+            self.click_color = self._adjust_brightness(self.base_color, -0.2)
+            self.disabled_color = '#9E9E9E'
 
         self.bind("<Enter>", self._on_enter)
         self.bind("<Leave>", self._on_leave)
         self.bind("<Button-1>", self._on_click)
         self.bind("<ButtonRelease-1>", self._on_release)
 
-        self._draw(self.original_bg_color)
+        self._draw(self.base_color)
 
     def _adjust_brightness(self, hex_color, factor):
         """Adjusts the brightness of a hex color."""
@@ -93,7 +105,21 @@ class RoundedButton(tk.Canvas):
         img = Image.new('RGBA', (self.width, self.height), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 
-        draw.rounded_rectangle((0, 0, self.width, self.height), radius=self.radius, fill=color)
+        if self.hollow:
+            # For hollow buttons, `color` is the fill, with a border based on the text color
+            border_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
+            draw.rounded_rectangle(
+                (0, 0, self.width - 1, self.height - 1),
+                radius=self.radius,
+                fill=color,
+                outline=border_color,
+                width=1
+            )
+            text_fill_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
+        else:
+            # For solid buttons, `color` is for the background fill
+            draw.rounded_rectangle((0, 0, self.width, self.height), radius=self.radius, fill=color)
+            text_fill_color = self.fg_color
 
         text_bbox = self.pil_font.getbbox(self.text)
         text_width = text_bbox[2] - text_bbox[0]
@@ -102,7 +128,7 @@ class RoundedButton(tk.Canvas):
         text_x = (self.width - text_width) / 2
         text_y = (self.height - text_height) / 2 - text_bbox[1]
 
-        draw.text((text_x, text_y), self.text, font=self.pil_font, fill=self.fg_color)
+        draw.text((text_x, text_y), self.text, font=self.pil_font, fill=text_fill_color)
 
         self._button_image = ImageTk.PhotoImage(img)
         self.create_image(0, 0, anchor='nw', image=self._button_image)
@@ -113,7 +139,7 @@ class RoundedButton(tk.Canvas):
 
     def _on_leave(self, event):
         if self.is_enabled:
-            self._draw(self.original_bg_color)
+            self._draw(self.base_color)
 
     def _on_click(self, event):
         if self.is_enabled:
@@ -129,12 +155,13 @@ class RoundedButton(tk.Canvas):
         """Sets the state of the button ('normal' or 'disabled')."""
         if state == 'disabled':
             self.is_enabled = False
-            self.fg_color = '#757575'
+            if not self.hollow:
+                self.fg_color = '#757575' # Special for solid disabled
             self._draw(self.disabled_color)
         else: # 'normal'
             self.is_enabled = True
-            self.fg_color = self.original_fg_color
-            self._draw(self.original_bg_color)
+            self.fg_color = self.original_fg_color # Reset text color
+            self._draw(self.base_color)
 
     def config(self, **kwargs):
         """Allows configuration of button properties like a standard widget."""

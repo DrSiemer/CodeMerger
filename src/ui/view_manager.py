@@ -113,8 +113,10 @@ class ViewManager:
             self.in_compact_mode = True
             self.main_window_geom = (self.main_window.winfo_x(), self.main_window.winfo_y(), self.main_window.winfo_width(), self.main_window.winfo_height())
 
-            active_dir = self.main_window.active_dir.get()
-            project_name = os.path.basename(active_dir) if active_dir and "No project" not in active_dir else ""
+            if self.main_window.project_config:
+                project_name = self.main_window.project_config.project_name
+            else:
+                project_name = "CodeMerger"
 
             self.compact_mode_window = CompactMode(
                 parent=self.main_window,

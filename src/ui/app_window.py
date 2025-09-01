@@ -40,6 +40,7 @@ class App(Tk):
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
         self.geometry("800x400")
+        self.minsize(800, 400)
         self.configure(bg=self.app_bg_color)
 
         self.load_images()
@@ -145,11 +146,14 @@ class App(Tk):
 
         self.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5))
 
-        # --- Bottom-Left Buttons (Row 3) ---
-        bottom_frame = Frame(self, bg=c.DARK_BG, padx=20)
-        bottom_frame.grid(row=3, column=0, sticky='sw', pady=15)
-        RoundedButton(bottom_frame, text="Manage Filetypes", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_filetypes_manager).pack(side='left')
-        RoundedButton(bottom_frame, text="Settings", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_settings_window).pack(side='left', padx=(10, 0))
+        # --- Bottom Bar (Row 3) ---
+        bottom_bar = Frame(self, bg=c.DARK_BG, pady=10)
+        bottom_bar.grid(row=3, column=0, sticky='ew')
+        bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
+        bottom_buttons_container.pack(side='left', padx=20)
+
+        RoundedButton(bottom_buttons_container, text="Manage Filetypes", font=font_button, fg=c.TEXT_COLOR, command=self.open_filetypes_manager, hollow=True).pack(side='left')
+        RoundedButton(bottom_buttons_container, text="Settings", font=font_button, fg=c.TEXT_COLOR, command=self.open_settings_window, hollow=True).pack(side='left', padx=(10, 0))
 
         # --- Status Bar (Row 4) ---
         self.status_var = StringVar(value="Ready")
