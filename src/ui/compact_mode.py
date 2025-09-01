@@ -1,5 +1,7 @@
 import tkinter as tk
 from .. import constants as c
+from ..core.paths import NEW_FILES_ICON_PATH
+from PIL import Image, ImageTk
 
 class CompactMode(tk.Toplevel):
     """
@@ -19,6 +21,8 @@ class CompactMode(tk.Toplevel):
         self.image_close = image_close
         self.tooltip_window = None
         self.instance_color = instance_color
+        self.new_files_icon_image = None
+        self.is_showing_warning = False
 
         # --- Style and Layout Constants ---
         BAR_AND_BORDER_COLOR = self.instance_color # Use the passed-in color
@@ -87,6 +91,15 @@ class CompactMode(tk.Toplevel):
         # Place the button in the bottom-right corner, on top of the main button area
         self.wrapped_button.place(relx=1.0, rely=1.0, x=-2, y=-2, anchor='se', width=18, height=18)
 
+        # --- Load and place new files icon ---
+        try:
+            new_files_img = Image.open(NEW_FILES_ICON_PATH).resize((28, 28), Image.Resampling.LANCZOS)
+            self.new_files_icon_image = ImageTk.PhotoImage(new_files_img)
+        except Exception:
+            self.new_files_icon_image = None
+        # Place the icon inside the border_frame so it appears on top of the main button
+        self.new_files_icon_label = tk.Label(border_frame, image=self.new_files_icon_image, bg='white', bd=0)
+
 
         # --- Bindings ---
         # Drag functionality is bound to the move bar
@@ -103,21 +116,50 @@ class CompactMode(tk.Toplevel):
         self.button_label.bind("<ButtonRelease-1>", self.on_release_click)
 
         # Tooltip functionality
-        self.button_label.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy {self.project_name} code"))
+        self.button_label.bind("<Enter>", self.show_tooltip)
         self.button_label.bind("<Leave>", self.hide_tooltip)
         self.wrapped_button.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy wrapped {self.project_name} code"))
         self.wrapped_button.bind("<Leave>", self.hide_tooltip)
 
+        # Make icon non-interactive but pass events to the parent button
+        self.new_files_icon_label.bind("<Enter>", self.show_tooltip)
+        self.new_files_icon_label.bind("<Leave>", self.hide_tooltip)
+        self.new_files_icon_label.bind("<ButtonPress-1>", self.on_press_click)
+        self.new_files_icon_label.bind("<ButtonRelease-1>", self.on_release_click)
+
+
+    def show_warning(self, file_count, project_name):
+        self.is_showing_warning = True
+        self.project_name = project_name # Ensure project name is up-to-date
+        self.new_files_icon_label.place(x=4, y=4)
+
+    def hide_warning(self, project_name):
+        self.is_showing_warning = False
+        self.project_name = project_name # Ensure project name is up-to-date
+        self.new_files_icon_label.place_forget()
+
     def show_tooltip(self, event=None, text=""):
-        if self._is_dragging or self.tooltip_window or not text:
+        if self._is_dragging or self.tooltip_window:
             return
+
+        base_message = text or f"Copy {self.project_name} code"
+        text_to_show = base_message
+
+        if self.is_showing_warning:
+            count = len(self.parent._newly_detected_files)
+            file_str = "file" if count == 1 else "files"
+            warning_part = f" - {count} new {file_str} found!"
+            text_to_show += warning_part
+
+        if not text_to_show: return
+
         x = self.winfo_rootx() + self.winfo_width() // 2
         y = self.winfo_rooty() + self.winfo_height() + 5
 
         self.tooltip_window = tk.Toplevel(self)
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(self.tooltip_window, text=text, justify='left',
+        label = tk.Label(self.tooltip_window, text=text_to_show, justify='left',
                       background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
                       font=("tahoma", "8", "normal"))
         label.pack(ipadx=4, ipady=2)

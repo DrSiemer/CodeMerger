@@ -13,7 +13,7 @@ from ... import constants as c
 
 
 class FileManagerWindow(Toplevel):
-    def __init__(self, parent, project_config, status_var, file_extensions, default_editor):
+    def __init__(self, parent, project_config, status_var, file_extensions, default_editor, newly_detected_files=None):
         super().__init__(parent)
 
         self.project_config = project_config
@@ -21,6 +21,7 @@ class FileManagerWindow(Toplevel):
         self.status_var = status_var
         self.file_extensions = file_extensions
         self.default_editor = default_editor
+        self.newly_detected_files = newly_detected_files or []
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.geometry("850x700")
@@ -84,6 +85,7 @@ class FileManagerWindow(Toplevel):
         self.tree_action_button.grid(row=2, column=0, sticky='w', pady=(10, 0))
         self.tree_action_button.set_state('disabled')
         self.tree.tag_configure('subtle_highlight', background=c.SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
+        self.tree.tag_configure('new_file_highlight', foreground="#40C040") # Bright Green
 
         title_frame = Frame(main_frame, bg=c.DARK_BG)
         title_frame.grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
@@ -165,7 +167,10 @@ class FileManagerWindow(Toplevel):
                     self.path_to_item_id[node['path']] = dir_id
                     _insert_nodes(dir_id, node.get('children', []))
                 elif node['type'] == 'file':
-                    item_id = self.tree.insert(parent_id, 'end', text=f" {node['name']}", tags=('file',))
+                    tags = ('file',)
+                    if node['path'] in self.newly_detected_files:
+                        tags += ('new_file_highlight',)
+                    item_id = self.tree.insert(parent_id, 'end', text=f" {node['name']}", tags=tags)
                     self.item_map[item_id] = {'path': node['path'], 'type': 'file'}
                     self.path_to_item_id[node['path']] = item_id
                     self.tree_handler.update_checkbox_display(item_id)
@@ -304,6 +309,7 @@ class FileManagerWindow(Toplevel):
         self.project_config.selected_files = self.selection_handler.ordered_selection
         self.project_config.expanded_dirs = set(self.tree_handler.get_expanded_dirs())
         self.project_config.total_tokens = self.current_total_tokens
+        self.project_config.known_files = list(set(self.project_config.known_files + self.selection_handler.ordered_selection))
         self.project_config.save()
         self.status_var.set("File selection and order saved to .allcode")
         self.destroy()

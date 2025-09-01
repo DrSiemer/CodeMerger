@@ -14,7 +14,9 @@ def _create_and_get_default_config():
         'filetypes': [],
         'default_editor': '',
         'scan_for_secrets': False,
-        'last_update_check': None
+        'last_update_check': None,
+        'enable_new_file_check': True,
+        'new_file_check_interval': 5
     }
     try:
         # Load the list of filetypes from the bundled template
@@ -51,6 +53,10 @@ def load_config():
                 config['last_update_check'] = None
             if 'check_for_updates' in config:
                 del config['check_for_updates'] # Clean up old key if present
+            if 'enable_new_file_check' not in config:
+                config['enable_new_file_check'] = True
+            if 'new_file_check_interval' not in config:
+                config['new_file_check_interval'] = 5
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one

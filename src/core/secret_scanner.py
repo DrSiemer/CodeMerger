@@ -59,7 +59,7 @@ def scan_for_secrets(base_dir, files_to_scan):
             if lines and 0 < secret.line_number <= len(lines):
                 line_content = lines[secret.line_number - 1].strip()
                 report_line += f"\n  > {line_content}"
-            
+
             report_lines.append(report_line)
 
     if not report_lines:

@@ -26,6 +26,7 @@ class ProjectConfig:
         self.allcode_path = os.path.join(self.base_dir, '.allcode')
         self.project_name = os.path.basename(self.base_dir)
         self.selected_files = []
+        self.known_files = []
         self.expanded_dirs = set()
         self.total_tokens = 0
         self.intro_text = ''
@@ -54,6 +55,7 @@ class ProjectConfig:
         self.outro_text = data.get('outro_text', '')
         self.expanded_dirs = set(data.get('expanded_dirs', []))
         original_selection = data.get('selected_files', [])
+        original_known_files = data.get('known_files', [])
 
         if 'project_name' not in data:
             config_was_updated = True
@@ -63,14 +65,22 @@ class ProjectConfig:
         else:
             self.project_color = data.get('project_color', COMPACT_MODE_BG_COLOR)
 
-        # Filter out files that no longer exist on disk
+        # Filter out files that no longer exist on disk from both lists
         cleaned_selection = [
             f for f in original_selection
             if os.path.isfile(os.path.join(self.base_dir, f))
         ]
         self.selected_files = cleaned_selection
 
+        cleaned_known_files = [
+            f for f in original_known_files
+            if os.path.isfile(os.path.join(self.base_dir, f))
+        ]
+        self.known_files = cleaned_known_files
+
         files_were_cleaned = len(cleaned_selection) < len(original_selection)
+        known_files_were_cleaned = len(cleaned_known_files) < len(original_known_files)
+
 
         if files_were_cleaned:
             self.total_tokens = 0 # Invalidate token count if files are missing
@@ -78,6 +88,9 @@ class ProjectConfig:
         else:
             # The file list is intact, so the cached token count is trustworthy
             self.total_tokens = data.get('total_tokens', 0)
+
+        if known_files_were_cleaned:
+            config_was_updated = True
 
         if config_was_updated:
             self.save()
@@ -94,7 +107,8 @@ class ProjectConfig:
             "selected_files": self.selected_files,
             "total_tokens": self.total_tokens,
             "intro_text": self.intro_text,
-            "outro_text": self.outro_text
+            "outro_text": self.outro_text,
+            "known_files": self.known_files
         }
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
             json.dump(final_data, f, indent=2)
