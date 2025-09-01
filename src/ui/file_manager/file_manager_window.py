@@ -22,7 +22,7 @@ class FileManagerWindow(Toplevel):
         self.file_extensions = file_extensions
         self.default_editor = default_editor
 
-        self.title(f"Manage files for: {os.path.basename(self.base_dir)}")
+        self.title(f"Manage files for: {self.project_config.project_name}")
         self.geometry("850x700")
         self.transient(parent)
         self.grab_set()
