@@ -72,6 +72,7 @@ class FiletypesManagerWindow(Toplevel):
         self.tree.bind('<Button-1>', self.handle_tree_click)
         self.tree.bind('<<TreeviewSelect>>', self.on_tree_selection_change)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.bind('<Escape>', lambda e: self.on_closing())
 
         self.populate_tree()
 

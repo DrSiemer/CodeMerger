@@ -37,6 +37,7 @@ class FileManagerWindow(Toplevel):
             self.status_var.set("Cleaned missing files from .allcode")
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.bind('<Escape>', lambda e: self.on_closing())
 
         self.gitignore_patterns = parse_gitignore(self.base_dir)
 

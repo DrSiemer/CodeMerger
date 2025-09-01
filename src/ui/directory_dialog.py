@@ -61,6 +61,7 @@ class DirectoryDialog(Toplevel):
         self.update_idletasks()
         required_height = self.winfo_reqheight()
         self.geometry(f"{self.dialog_width}x{required_height}")
+        self.bind('<Escape>', lambda e: self.destroy())
 
     def create_recent_dir_entry(self, path, font):
         """Creates a single row in the recent projects list"""

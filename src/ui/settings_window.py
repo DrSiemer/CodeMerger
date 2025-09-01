@@ -134,6 +134,7 @@ class SettingsWindow(Toplevel):
 
         # --- Bindings ---
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.bind('<Escape>', lambda e: self.on_closing())
 
     def toggle_interval_selector(self):
         """Enables or disables the interval dropdown based on the checkbox state."""

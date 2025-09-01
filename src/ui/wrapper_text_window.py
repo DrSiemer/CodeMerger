@@ -80,6 +80,7 @@ class WrapperTextWindow(Toplevel):
         self.outro_text.insert('1.0', self.project_config.outro_text)
 
         self.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.bind('<Escape>', lambda e: self.destroy())
 
     def save_and_close(self):
         """Saves the intro/outro text to the .allcode file and closes the window"""
