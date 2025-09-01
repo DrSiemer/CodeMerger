@@ -6,6 +6,9 @@ CONFIG_FILE = CONFIG_FILE_PATH
 DEFAULT_FILETYPES_CONFIG = DEFAULT_FILETYPES_CONFIG_PATH
 VERSION_FILE = VERSION_FILE_PATH
 
+# Default prompt for the "Copy Merged" action
+DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n\n"
+
 # --- Limits and UI settings ---
 RECENT_PROJECTS_MAX = 10
 SUBTLE_HIGHLIGHT_COLOR = "#555555"

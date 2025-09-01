@@ -15,7 +15,7 @@ from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions, parse_gitignore
 from ..core.paths import ICON_PATH, EDIT_ICON_PATH, TRASH_ICON_PATH, NEW_FILES_ICON_PATH
 from ..core.project_config import ProjectConfig
-from .. import constants as c # Import constants
+from .. import constants as c
 from ..core.secret_scanner import scan_for_secrets
 from ..core.updater import Updater
 from .custom_widgets import RoundedButton
@@ -313,8 +313,8 @@ class App(Tk):
             if self.project_config:
                 if self.project_config.selected_files:
                     copy_buttons_state = 'normal'
-                intro = self.project_config.intro_text.strip()
-                outro = self.project_config.outro_text.strip()
+                intro = self.project_config.intro_text
+                outro = self.project_config.outro_text
                 if intro or outro:
                     has_wrapper_text = True
 
@@ -489,7 +489,7 @@ class App(Tk):
                         self.status_var.set("Copy cancelled due to potential secrets.")
                         return
 
-            final_content, status_message = generate_output_string(base_dir, use_wrapper)
+            final_content, status_message = generate_output_string(base_dir, use_wrapper, self.state.copy_merged_prompt)
             if final_content is not None:
                 pyperclip.copy(final_content)
                 self.status_var.set(status_message)

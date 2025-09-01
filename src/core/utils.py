@@ -1,7 +1,7 @@
 import os
 import json
 from pathlib import Path
-from ..constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE
+from ..constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE, DEFAULT_COPY_MERGED_PROMPT
 
 def _create_and_get_default_config():
     """
@@ -16,7 +16,8 @@ def _create_and_get_default_config():
         'scan_for_secrets': False,
         'last_update_check': None,
         'enable_new_file_check': True,
-        'new_file_check_interval': 5
+        'new_file_check_interval': 5,
+        'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT
     }
     try:
         # Load the list of filetypes from the bundled template
@@ -57,6 +58,8 @@ def load_config():
                 config['enable_new_file_check'] = True
             if 'new_file_check_interval' not in config:
                 config['new_file_check_interval'] = 5
+            if 'copy_merged_prompt' not in config:
+                config['copy_merged_prompt'] = DEFAULT_COPY_MERGED_PROMPT
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one

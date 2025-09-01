@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 from .core.utils import load_config, save_config
-from .constants import RECENT_PROJECTS_MAX
+from .constants import RECENT_PROJECTS_MAX, DEFAULT_COPY_MERGED_PROMPT
 from .core.registry import get_setting
 
 class AppState:
@@ -14,6 +14,7 @@ class AppState:
         self.recent_projects = self.config.get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
+        self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)
 
@@ -44,6 +45,7 @@ class AppState:
         self.config = load_config()
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
+        self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
         # Reload from registry as well
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)

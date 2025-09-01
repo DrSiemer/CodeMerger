@@ -47,7 +47,7 @@ def get_language_from_path(path):
     _, ext = os.path.splitext(path)
     return LANGUAGE_MAP.get(ext.lower(), '') # Return empty string for unknown extensions
 
-def generate_output_string(base_dir, use_wrapper):
+def generate_output_string(base_dir, use_wrapper, copy_merged_prompt):
     """
     Core logic for merging files
     Reads the .allcode file, processes files, and returns the final string and a status message
@@ -81,8 +81,8 @@ def generate_output_string(base_dir, use_wrapper):
 
     if use_wrapper:
         project_title = data.get('project_name', os.path.basename(base_dir))
-        intro_text = data.get('intro_text', '').strip()
-        outro_text = data.get('outro_text', '').strip()
+        intro_text = data.get('intro_text', '')
+        outro_text = data.get('outro_text', '')
 
         final_parts = [f"# {project_title}"]
         if intro_text:
@@ -94,8 +94,10 @@ def generate_output_string(base_dir, use_wrapper):
         final_content = '\n\n'.join(final_parts) + '\n'
         status_message = "Wrapped code copied as Markdown"
     else:
-        default_prefix = "Here is the most recent code, please use this when making changes:\n\n"
-        final_content = default_prefix + merged_code
+        if copy_merged_prompt:
+            final_content = copy_merged_prompt + "\n\n" + merged_code
+        else:
+            final_content = merged_code
         status_message = "Merged code copied as Markdown"
 
     if skipped_files:

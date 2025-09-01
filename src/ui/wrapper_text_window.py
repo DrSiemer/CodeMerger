@@ -85,8 +85,8 @@ class WrapperTextWindow(Toplevel):
 
     def save_and_close(self):
         """Saves the intro/outro text to the .allcode file and closes the window"""
-        self.project_config.intro_text = self.intro_text.get('1.0', 'end-1c').strip()
-        self.project_config.outro_text = self.outro_text.get('1.0', 'end-1c').strip()
+        self.project_config.intro_text = self.intro_text.get('1.0', 'end-1c')
+        self.project_config.outro_text = self.outro_text.get('1.0', 'end-1c')
 
         try:
             self.project_config.save()
