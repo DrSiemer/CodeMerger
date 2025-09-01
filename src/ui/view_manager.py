@@ -78,6 +78,8 @@ class ViewManager:
             else:
                 self.main_window.geometry(f"{end_geom[2]}x{end_geom[3]}+{end_geom[0]}+{end_geom[1]}")
                 self.main_window.attributes("-alpha", 1.0)
+                # Restore the minsize constraint after expanding
+                self.main_window.minsize(800, 400)
                 if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                     self.compact_mode_window.destroy()
                 self.compact_mode_window = None
@@ -112,6 +114,9 @@ class ViewManager:
 
             self.in_compact_mode = True
             self.main_window_geom = (self.main_window.winfo_x(), self.main_window.winfo_y(), self.main_window.winfo_width(), self.main_window.winfo_height())
+
+            # Temporarily remove minsize constraint for shrinking animation
+            self.main_window.minsize(1, 1)
 
             if self.main_window.project_config:
                 project_name = self.main_window.project_config.project_name

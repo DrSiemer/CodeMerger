@@ -38,18 +38,31 @@ def get_pil_font(font_tuple):
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, text, command, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False):
-        self.tk_font_tuple = font if font else tkFont.nametofont("TkDefaultFont")
+    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False):
+        if font:
+            # If a tuple like ("Segoe UI", 12) is passed, use it directly
+            self.tk_font_tuple = font
+        else:
+            # If font is None, get the default font and extract its properties
+            default_font = tkFont.nametofont("TkDefaultFont")
+            self.tk_font_tuple = (default_font.actual("family"), default_font.actual("size"))
+
         self.hollow = hollow
+        self.image = image # Store the Pillow image object
 
         # Use the robust font loader
         self.pil_font = get_pil_font(self.tk_font_tuple)
 
-        # Calculate width using the actual Pillow font object
+        # Calculate width if not provided
         if width is None:
-            text_box = self.pil_font.getbbox(text)
-            text_width = text_box[2] - text_box[0]
-            self.width = text_width + 40 # Add horizontal padding
+            if text:
+                text_box = self.pil_font.getbbox(text)
+                text_width = text_box[2] - text_box[0]
+                self.width = text_width + 40 # Add horizontal padding
+            elif image:
+                self.width = image.width + 20 # Add horizontal padding for image
+            else:
+                self.width = 40 # Default width if no content
         else:
             self.width = width
 
@@ -99,7 +112,7 @@ class RoundedButton(tk.Canvas):
         return f"#{r:02x}{g:02x}{b:02x}"
 
     def _draw(self, color):
-        """Draws the anti-aliased button shape and text using Pillow with supersampling."""
+        """Draws the anti-aliased button shape and text/image using Pillow with supersampling."""
         self.delete("all")
 
         scale = 4  # Use 4x supersampling for smooth edges
@@ -114,7 +127,6 @@ class RoundedButton(tk.Canvas):
         if self.hollow:
             border_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
             scaled_border_width = 1 * scale
-            # Inset the drawing area by half the border width to keep the outline fully visible
             inset = scaled_border_width / 2
             draw.rounded_rectangle(
                 (inset, inset, scaled_width - inset, scaled_height - inset),
@@ -125,27 +137,27 @@ class RoundedButton(tk.Canvas):
             )
             text_fill_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
         else:
-            # For solid buttons, draw to the full extent of the scaled image
             draw.rounded_rectangle((0, 0, scaled_width, scaled_height), radius=scaled_radius, fill=color)
             text_fill_color = self.fg_color
 
-        # Prepare a scaled version of the font for high-resolution text rendering
-        original_font_size = self.tk_font_tuple[1]
-        scaled_font = get_pil_font((self.tk_font_tuple[0], original_font_size * scale))
-
-        # Calculate the center point, adding a small negative offset to nudge the text up
-        center_x = scaled_width / 2
-        # A small negative offset brings the text up slightly
-        center_y = (scaled_height / 2) - (0.5 * scale)
-
-        # Use the "middle middle" anchor for simple and accurate centering
-        draw.text(
-            (center_x, center_y),
-            self.text,
-            font=scaled_font,
-            fill=text_fill_color,
-            anchor="mm"
-        )
+        # --- Draw Content: either text or an image ---
+        if self.image:
+            scaled_image = self.image.resize((self.image.width * scale, self.image.height * scale), Image.Resampling.LANCZOS)
+            paste_x = (scaled_width - scaled_image.width) // 2
+            paste_y = (scaled_height - scaled_image.height) // 2
+            img.paste(scaled_image, (paste_x, paste_y), scaled_image)
+        elif self.text:
+            original_font_size = self.tk_font_tuple[1]
+            scaled_font = get_pil_font((self.tk_font_tuple[0], original_font_size * scale))
+            center_x = scaled_width / 2
+            center_y = (scaled_height / 2) - (0.5 * scale)
+            draw.text(
+                (center_x, center_y),
+                self.text,
+                font=scaled_font,
+                fill=text_fill_color,
+                anchor="mm"
+            )
 
         # Scale the high-resolution image down to the final size with a high-quality filter
         img = img.resize((self.width, self.height), Image.Resampling.LANCZOS)
@@ -185,6 +197,18 @@ class RoundedButton(tk.Canvas):
 
     def config(self, **kwargs):
         """Allows configuration of button properties like a standard widget."""
+        text_changed = 'text' in kwargs
+        if text_changed:
+            self.text = kwargs.pop('text')
+
+        # The 'state' key is the primary driver of redraws
         if 'state' in kwargs:
-            self.set_state(kwargs['state'])
-        super().config(**kwargs)
+            self.set_state(kwargs.pop('state'))
+        # If only the text changed, we need to force a redraw with the correct current color
+        elif text_changed:
+            color = self.base_color if self.is_enabled else self.disabled_color
+            self._draw(color)
+
+        # Pass any remaining, non-handled kwargs to the parent canvas
+        if kwargs:
+            super().config(**kwargs)

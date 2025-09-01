@@ -52,6 +52,9 @@ ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 # Path to the edit icon
 EDIT_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'edit.png')
 
+# Path to the trash icon
+TRASH_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'trash.png')
+
 # Path to the version file
 VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'version.txt')
 

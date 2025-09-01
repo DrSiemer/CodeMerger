@@ -1,9 +1,12 @@
 import tkinter as tk
 import time
 import re
-from tkinter import Toplevel, Frame, Label, Button, Entry, messagebox, ttk
+from tkinter import Toplevel, Frame, Label, Entry, messagebox, ttk
 from ..core.utils import load_all_filetypes, save_filetypes
 from ..core.paths import ICON_PATH
+from .custom_widgets import RoundedButton
+from .. import constants as c
+
 
 class FiletypesManagerWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):
@@ -13,43 +16,57 @@ class FiletypesManagerWindow(Toplevel):
         self.filetypes_data = load_all_filetypes()
         self.last_tree_click_time = 0
 
+        # --- Style Definitions ---
+        font_family = "Segoe UI"
+        font_normal = (font_family, 12)
+        font_button = (font_family, 16)
+
         # --- Window Setup ---
         self.title("Manage Filetypes")
         self.iconbitmap(ICON_PATH)
         self.geometry("450x550")
         self.transient(parent)
         self.grab_set()
+        self.configure(bg=c.DARK_BG)
 
         # --- UI Layout ---
-        main_frame = Frame(self, padx=10, pady=10)
+        main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
         main_frame.pack(fill='both', expand=True)
 
-        tree_frame = Frame(main_frame)
+        tree_frame = Frame(main_frame, bg=c.DARK_BG)
         tree_frame.pack(fill='both', expand=True, pady=(0, 10))
-        Label(tree_frame, text="Allowed Filetypes (double click to toggle)").pack(anchor='w')
+        Label(tree_frame, text="Allowed Filetypes (double click to toggle)", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(anchor='w', pady=(0,5))
 
-        self.tree = ttk.Treeview(tree_frame, show='tree')
+        # --- Treeview Styling ---
+        style = ttk.Style()
+        style.theme_use('default')
+        style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=font_normal, rowheight=25)
+        style.map("Treeview", background=[('selected', c.BTN_BLUE)], foreground=[('selected', c.BTN_BLUE_TEXT)])
+        style.configure("Treeview.Heading", font=(font_family, 12, 'bold')) # Not used here, but good practice
+
+        self.tree = ttk.Treeview(tree_frame, show='tree', selectmode='browse')
         self.tree.pack(side='left', fill='both', expand=True)
         tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
         tree_scroll.pack(side='right', fill='y')
         self.tree.config(yscrollcommand=tree_scroll.set)
 
         # --- Add/Delete Buttons ---
-        list_button_frame = Frame(main_frame)
+        list_button_frame = Frame(main_frame, bg=c.DARK_BG)
         list_button_frame.pack(fill='x', pady=5)
-        self.delete_button = Button(list_button_frame, text="Delete Selected", command=self.delete_selected_filetype, state='disabled')
+        self.delete_button = RoundedButton(list_button_frame, text="Delete Selected", command=self.delete_selected_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
         self.delete_button.pack(side='right')
+        self.delete_button.set_state('disabled') # Start disabled
 
         # --- Add New Filetype ---
-        add_frame = Frame(main_frame)
-        add_frame.pack(fill='x', pady=5)
-        Label(add_frame, text="Add new:").pack(side='left', padx=(0, 5))
-        self.add_entry = Entry(add_frame)
-        self.add_entry.pack(side='left', expand=True, fill='x')
-        Button(add_frame, text="Add", command=self.add_new_filetype).pack(side='left', padx=(5, 0))
+        add_frame = Frame(main_frame, bg=c.DARK_BG)
+        add_frame.pack(fill='x', pady=10)
+        Label(add_frame, text="Add new:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left', padx=(0, 5))
+        self.add_entry = Entry(add_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=font_normal)
+        self.add_entry.pack(side='left', expand=True, fill='x', ipady=4)
+        RoundedButton(add_frame, text="Add", command=self.add_new_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='left', padx=(10, 0))
 
         # --- Main Action Button ---
-        Button(self, text="Save and Close", command=self.save_and_close).pack(pady=10)
+        RoundedButton(self, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=font_button).pack(pady=10)
 
         # --- Bindings ---
         self.tree.bind('<Button-1>', self.handle_tree_click)
@@ -74,7 +91,8 @@ class FiletypesManagerWindow(Toplevel):
                 pass
 
     def on_tree_selection_change(self, event=None):
-        self.delete_button['state'] = 'normal' if self.tree.selection() else 'disabled'
+        state = 'normal' if self.tree.selection() else 'disabled'
+        self.delete_button.set_state(state)
 
     def handle_tree_click(self, event):
         current_time = time.time()

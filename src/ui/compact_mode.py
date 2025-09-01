@@ -1,5 +1,5 @@
 import tkinter as tk
-from ..constants import COMPACT_MODE_BG_COLOR
+from .. import constants as c
 
 class CompactMode(tk.Toplevel):
     """
@@ -9,7 +9,7 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, project_name, image_up=None, image_down=None, image_close=None, instance_color=COMPACT_MODE_BG_COLOR):
+    def __init__(self, parent, close_callback, project_name, image_up=None, image_down=None, image_close=None, instance_color=c.COMPACT_MODE_BG_COLOR):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
@@ -18,9 +18,10 @@ class CompactMode(tk.Toplevel):
         self.image_down = image_down
         self.image_close = image_close
         self.tooltip_window = None
+        self.instance_color = instance_color
 
         # --- Style and Layout Constants ---
-        BAR_AND_BORDER_COLOR = instance_color # Use the passed-in color
+        BAR_AND_BORDER_COLOR = self.instance_color # Use the passed-in color
         BORDER_WIDTH = 1
         MOVE_BAR_HEIGHT = 14
 
@@ -73,11 +74,13 @@ class CompactMode(tk.Toplevel):
         self.wrapped_button = tk.Button(
             border_frame,
             text="W",
-            font=('Helvetica', 8, 'bold'),
-            bg="white",
-            fg="black",
-            bd=1,
-            relief="solid",
+            font=('Segoe UI', 8, 'bold'),
+            bg="#FFFFFF",
+            fg="#000000",
+            activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
+            activeforeground="#FFFFFF",
+            bd=0,
+            relief="flat",
             cursor="hand2",
             command=self.copy_wrapped
         )
@@ -115,9 +118,9 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window.wm_overrideredirect(True)
         self.tooltip_window.wm_geometry(f"+{x}+{y}")
         label = tk.Label(self.tooltip_window, text=text, justify='left',
-                      background="#ffffe0", relief='solid', borderwidth=1,
+                      background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
                       font=("tahoma", "8", "normal"))
-        label.pack(ipadx=1)
+        label.pack(ipadx=4, ipady=2)
         # Center tooltip below the widget
         self.tooltip_window.update_idletasks()
         new_x = x - (self.tooltip_window.winfo_width() // 2)
@@ -136,9 +139,10 @@ class CompactMode(tk.Toplevel):
 
     def copy_wrapped(self):
         """Triggers the parent's copy_wrapped_code function with visual feedback."""
-        self.wrapped_button.config(relief="sunken")
+        original_bg = self.wrapped_button.cget('bg')
+        self.wrapped_button.config(bg=c.SUBTLE_HIGHLIGHT_COLOR)
         self.parent.copy_wrapped_code()
-        self.after(100, lambda: self.wrapped_button.config(relief="solid"))
+        self.after(150, lambda: self.wrapped_button.config(bg=original_bg))
 
     def on_press_drag(self, event):
         """Records the initial click position on the move bar."""

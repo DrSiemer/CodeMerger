@@ -1,75 +1,102 @@
 import os
-from tkinter import Toplevel, Frame, Label, Button, filedialog
+import tkinter as tk
+from tkinter import Toplevel, Frame, Label, filedialog
 from ..core.project_config import ProjectConfig
+from .custom_widgets import RoundedButton
+from .. import constants as c
 
 class DirectoryDialog(Toplevel):
     """
     A dialog window for selecting a recent or new project directory
     """
-    def __init__(self, parent, app_bg_color, recent_projects, on_select_callback, on_remove_callback):
+    def __init__(self, parent, app_bg_color, recent_projects, on_select_callback, on_remove_callback, trash_icon_image=None):
         super().__init__(parent)
         self.parent = parent
-        self.app_bg_color = app_bg_color
+        self.app_bg_color = app_bg_color # This is c.DARK_BG
         self.recent_projects = recent_projects
         self.on_select_callback = on_select_callback
         self.on_remove_callback = on_remove_callback
+        self.trash_icon_image = trash_icon_image
         self.tooltip = None
 
         # --- Style Definitions ---
-        text_color = '#FFFFFF'
-        btn_bg = '#CCCCCC'
-        btn_fg = '#333333'
+        font_family = "Segoe UI"
+        font_normal = (font_family, 12)
+        font_button = (font_family, 16)
 
         self.title("Select project")
         self.transient(parent)
         self.grab_set()
         self.configure(bg=self.app_bg_color)
 
-        screen_width = self.winfo_screenwidth()
-        self.dialog_width = max(350, 250)
+        self.dialog_width = 450
 
         if self.recent_projects:
             message = "Select a recent project or browse for a new one"
-            dialog_height = 280
+            dialog_height = 320
         else:
             message = "Browse for a project folder to get started"
-            dialog_height = 120
+            dialog_height = 150
 
         self.geometry(f"{self.dialog_width}x{dialog_height}")
-        self.info_label = Label(self, text=message, padx=10, pady=10, bg=self.app_bg_color, fg=text_color, font=('Helvetica', 9))
-        self.info_label.pack(pady=(0, 5))
+        self.info_label = Label(self, text=message, padx=20, pady=10, bg=self.app_bg_color, fg=c.TEXT_COLOR, font=font_normal)
+        self.info_label.pack(pady=(5, 10), anchor='w')
 
         self.recent_dirs_frame = Frame(self, bg=self.app_bg_color)
 
         if self.recent_projects:
             self.recent_dirs_frame.pack(fill='x', expand=False, pady=5)
             for path in self.recent_projects:
-                self.create_recent_dir_entry(path, btn_bg, btn_fg)
+                self.create_recent_dir_entry(path, font_button)
 
-        browse_btn = Button(self, text="Select Project folder...", command=self.browse_for_new_dir, bg=btn_bg, fg=btn_fg, relief='flat', padx=10)
-        browse_btn.pack(pady=10, padx=10)
+        browse_btn = RoundedButton(
+            self,
+            text="Select Project folder...",
+            command=self.browse_for_new_dir,
+            bg=c.BTN_BLUE,
+            fg=c.BTN_BLUE_TEXT,
+            font=font_button
+        )
+        browse_btn.pack(pady=20, padx=20)
 
-    def create_recent_dir_entry(self, path, btn_bg, btn_fg):
+    def create_recent_dir_entry(self, path, font):
         """Creates a single row in the recent projects list"""
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
-        entry_frame.pack(fill='x', padx=10, pady=2)
+        entry_frame.pack(fill='x', padx=20, pady=3)
 
         pc = ProjectConfig(path)
         pc.load()
         display_text = pc.project_name
 
-        color_swatch = Frame(entry_frame, width=20, height=20, bg=pc.project_color, relief='sunken', borderwidth=1)
-        color_swatch.pack(side='left', padx=(0, 5))
+        color_swatch = Frame(entry_frame, width=28, height=28, bg=pc.project_color, relief='flat')
+        color_swatch.pack(side='left', padx=(0, 10))
         color_swatch.pack_propagate(False)
 
-        btn = Button(entry_frame, text=display_text, command=lambda p=path: self.select_and_close(p), anchor='w', justify='left', bg=btn_bg, fg=btn_fg, relief='flat', font=('Helvetica', 9))
+        btn = RoundedButton(
+            entry_frame,
+            text=display_text,
+            command=lambda p=path: self.select_and_close(p),
+            bg=c.BTN_GRAY_BG,
+            fg=c.BTN_GRAY_TEXT,
+            font=font,
+            height=32
+        )
         btn.pack(side='left', expand=True, fill='x')
 
         btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
         btn.bind("<Leave>", self.hide_path_tooltip)
 
-        remove_btn = Button(entry_frame, text="Del", command=lambda p=path, w=entry_frame: self.remove_and_update_dialog(p, w), width=4, bg=btn_bg, fg=btn_fg, relief='flat', font=('Helvetica', 8))
-        remove_btn.pack(side='left', padx=(5, 0))
+        if self.trash_icon_image:
+            remove_btn = RoundedButton(
+                parent=entry_frame,
+                command=lambda p=path, w=entry_frame: self.remove_and_update_dialog(p, w),
+                image=self.trash_icon_image,
+                bg=c.BTN_GRAY_BG,
+                width=32,
+                height=32
+            )
+            remove_btn.pack(side='left', padx=(10, 0))
+
 
     def show_path_tooltip(self, event, path):
         """Displays a tooltip with the full path of the project"""
@@ -84,8 +111,8 @@ class DirectoryDialog(Toplevel):
         self.tooltip.wm_geometry(f"+{x}+{y}")
 
         label = Label(self.tooltip, text=path, justify='left',
-                      background="#ffffe0", relief='solid', borderwidth=1,
-                      font=("tahoma", "8", "normal"))
+                      background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
+                      font=("tahoma", "8", "normal"), padx=4, pady=2)
         label.pack(ipadx=2, ipady=1)
 
     def hide_path_tooltip(self, event):
@@ -108,13 +135,12 @@ class DirectoryDialog(Toplevel):
 
     def remove_and_update_dialog(self, path_to_remove, widget_to_destroy):
         """Removes a recent directory and dynamically updates the dialog's UI"""
+        # The callback handles the data model modification in AppState
         self.on_remove_callback(path_to_remove)
+        # This function handles the UI update
         widget_to_destroy.destroy()
-
-        # Update the list in place to check if it's empty
-        self.recent_projects.remove(path_to_remove)
 
         if not self.recent_projects:
             self.info_label.config(text="Browse for a project folder to get started")
-            self.geometry(f"{self.dialog_width}x120")
+            self.geometry(f"{self.dialog_width}x150")
             self.recent_dirs_frame.pack_forget()

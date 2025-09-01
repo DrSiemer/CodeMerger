@@ -1,5 +1,5 @@
 import os
-from tkinter import Toplevel, Frame, Label, Button, Listbox, messagebox, ttk
+from tkinter import Toplevel, Frame, Label, Listbox, messagebox, ttk
 
 from ...core.utils import parse_gitignore
 from ...constants import SUBTLE_HIGHLIGHT_COLOR
@@ -8,6 +8,9 @@ from .file_tree_builder import build_file_tree_data
 from ...core.merger import recalculate_token_count
 from .file_tree_handler import FileTreeHandler
 from .selection_list_handler import SelectionListHandler
+from ..custom_widgets import RoundedButton
+from ... import constants as c
+
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor):
@@ -23,6 +26,7 @@ class FileManagerWindow(Toplevel):
         self.geometry("850x700")
         self.transient(parent)
         self.grab_set()
+        self.configure(bg=c.DARK_BG)
 
         self._recalculate_job = None
         self.current_total_tokens = self.project_config.total_tokens
@@ -49,49 +53,74 @@ class FileManagerWindow(Toplevel):
 
     def build_ui(self):
         """Creates and packs all the UI widgets"""
-        main_frame = Frame(self)
+        font_family = "Segoe UI"
+        font_normal = (font_family, 12)
+        font_button = (font_family, 14) # Slightly smaller for more buttons
+
+        main_frame = Frame(self, bg=c.DARK_BG)
         main_frame.pack(fill='both', expand=True, padx=10, pady=10)
         main_frame.grid_columnconfigure(0, weight=1)
         main_frame.grid_columnconfigure(2, weight=1)
         main_frame.grid_rowconfigure(1, weight=1)
 
-        Label(main_frame, text="Available Files (double click or enter to add/remove)").grid(row=0, column=0, columnspan=2, sticky='w')
+        available_files_title_frame = Frame(main_frame, bg=c.DARK_BG)
+        available_files_title_frame.grid(row=0, column=0, columnspan=2, sticky='w')
+        Label(available_files_title_frame, text="Available Files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left')
+        Label(available_files_title_frame, text="(double click or enter to add/remove)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal).pack(side='left')
+
+
+        # --- Treeview Styling ---
+        style = ttk.Style()
+        style.theme_use('default')
+        style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=font_normal, rowheight=25)
+        style.map("Treeview", background=[('selected', c.BTN_BLUE)], foreground=[('selected', c.BTN_BLUE_TEXT)])
+
         self.tree = ttk.Treeview(main_frame, show='tree')
         self.tree.grid(row=1, column=0, sticky='nsew')
         tree_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=self.tree.yview)
         tree_scroll.grid(row=1, column=1, sticky='ns')
         self.tree.config(yscrollcommand=tree_scroll.set)
-        self.tree_action_button = Button(main_frame, text="Add to Merge List", state='disabled')
-        self.tree_action_button.grid(row=2, column=0, sticky='ew', pady=(5, 0))
-        self.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR)
+        self.tree_action_button = RoundedButton(main_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, width=220)
+        self.tree_action_button.grid(row=2, column=0, sticky='w', pady=(10, 0))
+        self.tree_action_button.set_state('disabled')
+        self.tree.tag_configure('subtle_highlight', background=c.SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
 
-        self.merge_order_title_label = Label(main_frame, text="Merge Order")
-        self.merge_order_title_label.grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
-        self.merge_order_list = Listbox(main_frame, activestyle='none', selectmode='extended')
+        title_frame = Frame(main_frame, bg=c.DARK_BG)
+        title_frame.grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
+        Label(title_frame, text="Merge Order", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left')
+        self.merge_order_details_label = Label(title_frame, text="", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
+        self.merge_order_details_label.pack(side='left')
+
+        self.merge_order_list = Listbox(main_frame, activestyle='none', selectmode='extended', bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
+                                        selectbackground=c.BTN_BLUE, selectforeground=c.BTN_BLUE_TEXT, relief='flat', borderwidth=0,
+                                        highlightthickness=0, font=font_normal)
         self.merge_order_list.grid(row=1, column=2, sticky='nsew', padx=(10, 0))
         list_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=self.merge_order_list.yview)
         list_scroll.grid(row=1, column=3, sticky='ns')
         self.merge_order_list.config(yscrollcommand=list_scroll.set)
 
-        move_buttons_frame = Frame(main_frame)
-        move_buttons_frame.grid(row=2, column=2, sticky='ew', pady=(5, 0), padx=(10, 0))
-        self.move_to_top_button = Button(move_buttons_frame, text="↑↑ Top", state='disabled')
+        move_buttons_frame = Frame(main_frame, bg=c.DARK_BG)
+        move_buttons_frame.grid(row=2, column=2, sticky='w', pady=(10, 0), padx=(10, 0))
+        self.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
         self.move_to_top_button.pack(side='left', padx=(0, 2))
-        self.move_up_button = Button(move_buttons_frame, text="↑ Up", state='disabled')
-        self.move_up_button.pack(side='left', expand=True, fill='x', padx=(0, 2))
-        self.remove_button = Button(move_buttons_frame, text="Remove", state='disabled')
-        self.remove_button.pack(side='left', expand=True, fill='x', padx=2)
-        self.move_down_button = Button(move_buttons_frame, text="↓ Down", state='disabled')
-        self.move_down_button.pack(side='left', expand=True, fill='x', padx=(2, 0))
-        self.move_to_bottom_button = Button(move_buttons_frame, text="↓↓ Bottom", state='disabled')
-        self.move_to_bottom_button.pack(side='right', padx=(2, 0))
+        self.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+        self.move_up_button.pack(side='left', padx=(0, 2))
+        self.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+        self.remove_button.pack(side='left', padx=2)
+        self.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+        self.move_down_button.pack(side='left', padx=(2, 0))
+        self.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+        self.move_to_bottom_button.pack(side='left', padx=(2, 0))
 
+        # Disable all move buttons initially
+        for btn in [self.move_to_top_button, self.move_up_button, self.remove_button, self.move_down_button, self.move_to_bottom_button]:
+            btn.set_state('disabled')
 
-        bulk_action_frame = Frame(main_frame)
+        bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
         bulk_action_frame.grid(row=3, column=0, columnspan=4, sticky='ew', pady=(20, 0))
-        Button(bulk_action_frame, text="Select all", command=self.select_all_files).pack(side='left')
-        Button(bulk_action_frame, text="Remove all", command=self.remove_all_files).pack(side='right')
-        Button(bulk_action_frame, text="Save and Close", command=self.save_and_close).pack()
+        RoundedButton(bulk_action_frame, text="Select all", command=self.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='left')
+        RoundedButton(bulk_action_frame, text="Remove all", command=self.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='right')
+        RoundedButton(bulk_action_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 16), width=240).pack()
 
     def create_handlers(self):
         """Instantiates and connects the UI handlers"""
@@ -116,12 +145,12 @@ class FileManagerWindow(Toplevel):
             is_selected_callback=lambda path: path in self.selection_handler.ordered_selection,
             on_toggle_callback=self.on_file_toggled
         )
-        self.tree_action_button.config(command=self.tree_handler.toggle_selection_for_selected)
-        self.move_to_top_button.config(command=self.selection_handler.move_to_top)
-        self.move_up_button.config(command=self.selection_handler.move_up)
-        self.move_down_button.config(command=self.selection_handler.move_down)
-        self.move_to_bottom_button.config(command=self.selection_handler.move_to_bottom)
-        self.remove_button.config(command=self.selection_handler.remove_selected)
+        self.tree_action_button.command = self.tree_handler.toggle_selection_for_selected
+        self.move_to_top_button.command = self.selection_handler.move_to_top
+        self.move_up_button.command = self.selection_handler.move_up
+        self.move_down_button.command = self.selection_handler.move_down
+        self.move_to_bottom_button.command = self.selection_handler.move_to_bottom
+        self.remove_button.command = self.selection_handler.remove_selected
 
     def populate_tree(self):
         """Populates the treeview using data from the file_tree_builder"""
@@ -178,7 +207,7 @@ class FileManagerWindow(Toplevel):
     def sync_highlights(self):
         # Clear existing highlights from both lists
         for i in range(self.selection_handler.listbox.size()):
-            self.selection_handler.listbox.itemconfig(i, {'bg': 'white'})
+            self.selection_handler.listbox.itemconfig(i, {'bg': c.TEXT_INPUT_BG, 'fg': c.TEXT_COLOR})
         for item_id in self.tree.tag_has('subtle_highlight'):
             self.tree.item(item_id, tags=('file',))
 
@@ -196,7 +225,7 @@ class FileManagerWindow(Toplevel):
         if self.tree.selection():
             try:
                 list_index = self.selection_handler.ordered_selection.index(selected_path)
-                self.selection_handler.listbox.itemconfig(list_index, {'bg': SUBTLE_HIGHLIGHT_COLOR})
+                self.selection_handler.listbox.itemconfig(list_index, {'bg': c.SUBTLE_HIGHLIGHT_COLOR, 'fg': c.TEXT_COLOR})
             except ValueError: pass
         elif self.merge_order_list.curselection():
             if selected_path in self.path_to_item_id:
@@ -219,10 +248,10 @@ class FileManagerWindow(Toplevel):
         file_text = "files" if num_files != 1 else "file"
         if total_tokens >= 0:
             formatted_tokens = f"{total_tokens:,}".replace(',', '.')
-            title = f"Merge Order ({num_files} {file_text} selected, {formatted_tokens} tokens)"
+            details_text = f"({num_files} {file_text} selected, {formatted_tokens} tokens)"
         else:
-            title = f"Merge Order ({num_files} {file_text} selected, token count error)"
-        self.merge_order_title_label.config(text=title)
+            details_text = f"({num_files} {file_text} selected, token count error)"
+        self.merge_order_details_label.config(text=details_text)
 
     def select_all_files(self):
         all_paths = self.tree_handler.get_all_file_paths_in_tree_order()

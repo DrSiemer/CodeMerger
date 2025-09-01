@@ -13,7 +13,7 @@ from .wrapper_text_window import WrapperTextWindow
 from ..core.merger import generate_output_string
 from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions
-from ..core.paths import ICON_PATH, EDIT_ICON_PATH
+from ..core.paths import ICON_PATH, EDIT_ICON_PATH, TRASH_ICON_PATH
 from ..core.project_config import ProjectConfig
 from .. import constants as c # Import constants
 from ..core.secret_scanner import scan_for_secrets
@@ -29,6 +29,7 @@ class App(Tk):
         self.project_config = None
         self.project_color = c.COMPACT_MODE_BG_COLOR
         self.edit_icon = None
+        self.trash_icon_image = None
         self._hide_edit_icon_job = None
         self.title_label = None
 
@@ -68,8 +69,11 @@ class App(Tk):
         try:
             edit_img_src = Image.open(EDIT_ICON_PATH)
             self.edit_icon = ImageTk.PhotoImage(edit_img_src)
+            # Load the trash icon as a Pillow Image object for the custom button
+            self.trash_icon_image = Image.open(TRASH_ICON_PATH).resize((18, 18), Image.Resampling.LANCZOS)
         except Exception:
             self.edit_icon = None
+            self.trash_icon_image = None
 
     def build_ui(self):
         """Creates and places all the UI widgets based on the new dark theme design"""
@@ -330,7 +334,8 @@ class App(Tk):
             app_bg_color=self.app_bg_color,
             recent_projects=self.state.recent_projects,
             on_select_callback=self.on_directory_selected,
-            on_remove_callback=self.on_recent_removed
+            on_remove_callback=self.on_recent_removed,
+            trash_icon_image=self.trash_icon_image
         )
 
     def _perform_copy(self, use_wrapper: bool):
