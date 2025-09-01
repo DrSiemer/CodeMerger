@@ -298,8 +298,10 @@ class App(Tk):
             self.set_active_dir_display(new_dir)
 
     def on_recent_removed(self, path_to_remove):
-        self.state.remove_recent_project(path_to_remove)
+        cleared_active = self.state.remove_recent_project(path_to_remove)
         self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent projects")
+        if cleared_active:
+            self.set_active_dir_display(None)
 
     def open_color_chooser(self, event=None):
         if not self.project_config: return

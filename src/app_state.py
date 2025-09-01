@@ -73,8 +73,21 @@ class AppState:
         return True
 
     def remove_recent_project(self, path_to_remove):
-        """Removes a directory from the recent list"""
+        """
+        Removes a directory from the recent list. If the removed path is also
+        the active directory, the active directory is cleared.
+        Returns True if the active directory was cleared, False otherwise.
+        """
+        cleared_active = False
         if path_to_remove in self.recent_projects:
             self.recent_projects.remove(path_to_remove)
             self.config['recent_projects'] = self.recent_projects
+
+            if path_to_remove == self.active_directory:
+                self.active_directory = ''
+                self.config['active_directory'] = ''
+                cleared_active = True
+
             self._save()
+
+        return cleared_active
