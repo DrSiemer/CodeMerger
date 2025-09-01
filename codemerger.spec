@@ -2,7 +2,8 @@
 
 data_files = [
     ('assets', 'assets'),
-    ('default_filetypes.json', '.')
+    ('default_filetypes.json', '.'),
+    ('version.txt', '.')
 ]
 
 icon_path = 'assets/icon.ico'
