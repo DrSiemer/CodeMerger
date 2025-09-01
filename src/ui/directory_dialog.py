@@ -27,6 +27,7 @@ class DirectoryDialog(Toplevel):
         self.title("Select project")
         self.transient(parent)
         self.grab_set()
+        self.focus_force()
         self.configure(bg=self.app_bg_color)
         self.resizable(False, False)
 

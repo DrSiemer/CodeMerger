@@ -27,6 +27,7 @@ class FileManagerWindow(Toplevel):
         self.geometry("850x700")
         self.transient(parent)
         self.grab_set()
+        self.focus_force()
         self.configure(bg=c.DARK_BG)
 
         self._recalculate_job = None

@@ -17,6 +17,7 @@ class WrapperTextWindow(Toplevel):
         self.geometry("700x500")
         self.transient(parent)
         self.grab_set()
+        self.focus_force()
         self.configure(bg=c.DARK_BG)
 
         # --- UI Layout ---

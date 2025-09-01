@@ -31,6 +31,7 @@ class SettingsWindow(Toplevel):
         self.geometry("600x400")
         self.transient(parent)
         self.grab_set()
+        self.focus_force()
         self.configure(bg=c.DARK_BG)
 
         # --- UI Layout ---

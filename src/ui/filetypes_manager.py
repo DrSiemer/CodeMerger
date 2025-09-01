@@ -27,6 +27,7 @@ class FiletypesManagerWindow(Toplevel):
         self.geometry("450x550")
         self.transient(parent)
         self.grab_set()
+        self.focus_force()
         self.configure(bg=c.DARK_BG)
 
         # --- UI Layout ---
