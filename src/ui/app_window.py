@@ -227,9 +227,9 @@ class App(Tk):
             files_were_cleaned = self.project_config.load()
             project_display_name = self.project_config.project_name
             if files_were_cleaned:
-                self.status_var.set(f"Active project: {project_display_name} - Cleaned missing files.")
+                self.status_var.set(f"Activated project: {project_display_name} - Cleaned missing files.")
             else:
-                self.status_var.set(f"Active project: {project_display_name} - Wrapper text loaded.")
+                self.status_var.set(f"Activated project: {project_display_name}.")
             self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
             self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
