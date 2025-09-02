@@ -22,10 +22,11 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 ## Features
 
 - **Project-Based Settings**: Saves all your file selections, merge order, and window state in a local `.allcode` file for each project
-- **`.gitignore` Aware**: The file browser automatically hides files and folders listed in your `.gitignore` file.
-- **New File Detection**: Automatically scans your project for new files that match your filetype settings and alerts you with a visual indicator. New files are highlighted in the file manager for easy review.
+- **`.gitignore` Aware**: The file browser automatically hides files and folders listed in your `.gitignore` file
+- **New File Detection**: Automatically scans your project for new files that match your filetype settings and alerts you with a visual indicator. New files are highlighted in the file manager for easy review
 - **Token Counting**: Calculates the total token count of your selected files to help you stay within an LLM's context limit
-- **Customizable Wrapper Text**: Add custom text (like prompts or instructions) before and after the merged code block
+- **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Merged" button. You can also set application-wide default intro and outro texts for the wrapper feature
+- **Customizable Wrapper Text**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
 - **Drag & Drop Reordering**: Easily reorder the files in your merge list to control the final output structure
 - **Compact Mode**: A small, always-on-top, draggable window for quick copy-pasting while you work
 - **Recent Projects**: Quickly switch between your recent project folders
@@ -40,7 +41,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **Select a project**
     - Click "Select project" to browse for a folder or choose one from your recent projects list
 - **Manage Files**
-    - A warning icon will appear in the top bar if new files are detected in your project. Click this or the "Manage Files" button to open the file manager.
+    - A warning icon will appear in the top bar if new files are detected in your project. Click this or the "Manage Files" button to open the file manager
     - In the "Manage Files" window, a tree of available files is shown on the left
         - Newly detected files are highlighted in green for easy identification
         - Files listed in `.gitignore` are automatically hidden
@@ -51,10 +52,11 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Double-click a file in either list to open it in your default or configured editor
     - Click "Save and Close" to save your selection to `.allcode`
 - **Add Wrapper Text**
-    - Click "Wrapper Text" to add an introduction or conclusion that will be wrapped around the merged code block
+    - Click "Wrapper Text" to add a project-specific introduction or conclusion that will be wrapped around the merged code block
+    - You can click the "Load Defaults" icon in this window to populate the fields with your predefined default prompts from the Settings
 - **Copy Code**
-    - Click "Copy Merged" to merge only the selected files into a single string in your clipboard
-    - If you added wrapper text, a "Copy Wrapped" button will appear to include your intro/outro text
+    - Click "Copy Merged" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM
+    - If you added wrapper text, a "Copy Wrapped" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation
 - **Compact Mode**
     - Click "Compact Mode" to switch to a small, always-on-top copy button
     - The button is colored with your project's assigned color and shows the project name on hover
@@ -65,8 +67,13 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 
 ### Settings
 
-- Select your preferred editor in the settings (none means default will be used)
-- Configure the automatic check for new files (enable/disable and set the check interval)
+- **Application Updates**: Enable or disable the automatic daily check for new versions
+- **File System Monitoring**: Configure the automatic check for new files (enable/disable and set the check interval)
+- **Secret Scanning**: Enable a check for potential secrets (API keys, etc) that runs before copying code to the clipboard
+- **Prompts**:
+    - **"Copy Merged" Prompt**: Set the default text that is automatically prepended when you click "Copy Merged"
+    - **Default Intro/Outro Prompts**: Define reusable, application-wide default texts for the wrapper feature. These can be quickly loaded into any project's specific wrapper text
+- **Default Editor**: Select your preferred editor for opening files from the file manager (leaving it blank uses the system default)
 - To manage indexed filetypes, click "Manage Filetypes" from the main window
 
 
