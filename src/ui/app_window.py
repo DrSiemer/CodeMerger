@@ -45,8 +45,8 @@ class App(Tk):
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
-        self.geometry("800x400")
-        self.minsize(800, 400)
+        self.geometry("800x405")
+        self.minsize(800, 405)
         self.configure(bg=self.app_bg_color)
 
         self.load_images()
