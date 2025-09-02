@@ -2,7 +2,21 @@
 
 A simple app for developers that prefer to stay in control and want to avoid working in AI powered IDE's. It allows you to define which files should be merged into a single string, so you can easily paste all relevant code into an LLM. Settings for a folder are stored in a .allcode file that can be committed with your project.
 
+
+![Main application window](./dev/screenshot_01.png)
+
+
 I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts/new_chat), because there you currently get a very large context length with high rate limits for free.
+
+
+## Download
+
+Download the latest release [here](https://github.com/DrSiemer/codemerger/releases).
+
+The download is a portable executable for Windows. Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"). The app is safe; all it does is bundle text with a convenient UI.
+
+
+![Compact always-in-front mode](./dev/screenshot_02.png)
 
 
 ## Features
@@ -18,11 +32,7 @@ I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts
 - **Project Colors**: Assign a unique color to each project for easy identification in compact mode
 
 
-## Download
-
-Download the latest release [here](https://github.com/DrSiemer/codemerger/releases).
-
-The download is a portable executable for Windows. Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"). The app is safe; all it does is bundle text with a convenient UI.
+![File management](./dev/screenshot_03.png)
 
 
 ## Usage
@@ -70,4 +80,4 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Update `/version.txt` if you want to create a new release
     - You can add a comment to the release like this: `go r "Comment"`
     - The release will be a draft, you'll need to finalize it on github.com
-- Config once installed can be found in `%APPDATA%\CodeMerger`
+- When the app is installed, config can be found in `%APPDATA%\CodeMerger`
