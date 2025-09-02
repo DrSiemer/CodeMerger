@@ -11,7 +11,6 @@ from .selection_list_handler import SelectionListHandler
 from ..custom_widgets import RoundedButton
 from ... import constants as c
 
-
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, newly_detected_files=None):
         super().__init__(parent)
@@ -70,7 +69,6 @@ class FileManagerWindow(Toplevel):
         available_files_title_frame.grid(row=0, column=0, columnspan=2, sticky='w')
         Label(available_files_title_frame, text="Available Files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left')
         Label(available_files_title_frame, text="(double click or enter to add/remove)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal).pack(side='left')
-
 
         # --- Treeview Styling ---
         style = ttk.Style()

@@ -130,7 +130,6 @@ class App(Tk):
         self.new_files_label.bind("<Button-1>", lambda e: self.manage_files())
         self.new_files_tooltip = ToolTip(self.new_files_label, text="")
 
-
         # --- Top-Level Buttons (Row 1) ---
         top_buttons_container = Frame(self, bg=c.DARK_BG, padx=20)
         top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
@@ -248,13 +247,27 @@ class App(Tk):
         font_large_bold = (font_family, 24, 'bold')
         if path and os.path.isdir(path):
             self.active_dir.set(path)
+
+            is_new_project = not os.path.isfile(os.path.join(path, '.allcode'))
+
             self.project_config = ProjectConfig(path)
             files_were_cleaned = self.project_config.load()
             project_display_name = self.project_config.project_name
-            if files_were_cleaned:
+
+            if is_new_project:
+                all_project_files = get_all_matching_files(
+                    base_dir=self.project_config.base_dir,
+                    file_extensions=self.file_extensions,
+                    gitignore_patterns=parse_gitignore(self.project_config.base_dir)
+                )
+                self.project_config.known_files = all_project_files
+                self.project_config.save()
+                self.status_var.set(f"Initialized new project: {project_display_name}.")
+            elif files_were_cleaned:
                 self.status_var.set(f"Activated project: {project_display_name} - Cleaned missing files.")
             else:
                 self.status_var.set(f"Activated project: {project_display_name}.")
+
             self.project_title_var.set(self.project_config.project_name)
             self.project_color = self.project_config.project_color
             self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
