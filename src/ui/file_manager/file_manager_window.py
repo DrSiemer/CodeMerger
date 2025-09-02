@@ -102,17 +102,24 @@ class FileManagerWindow(Toplevel):
         self.merge_order_list.config(yscrollcommand=list_scroll.set)
 
         move_buttons_frame = Frame(main_frame, bg=c.DARK_BG)
-        move_buttons_frame.grid(row=2, column=2, sticky='w', pady=(10, 0), padx=(10, 0))
+        move_buttons_frame.grid(row=2, column=2, sticky='ew', pady=(10, 0), padx=(10, 0))
+        # Configure grid columns to have equal weight, forcing buttons to the same size
+        move_buttons_frame.grid_columnconfigure(0, weight=1, uniform="group1")
+        move_buttons_frame.grid_columnconfigure(1, weight=1, uniform="group1")
+        move_buttons_frame.grid_columnconfigure(2, weight=1, uniform="group1")
+        move_buttons_frame.grid_columnconfigure(3, weight=1, uniform="group1")
+        move_buttons_frame.grid_columnconfigure(4, weight=1, uniform="group1")
+        
         self.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
-        self.move_to_top_button.pack(side='left', padx=(0, 2))
+        self.move_to_top_button.grid(row=0, column=0, sticky='ew', padx=(0, 2))
         self.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
-        self.move_up_button.pack(side='left', padx=(0, 2))
+        self.move_up_button.grid(row=0, column=1, sticky='ew', padx=(2, 2))
         self.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=font_button, hollow=True)
-        self.remove_button.pack(side='left', padx=2)
+        self.remove_button.grid(row=0, column=2, sticky='ew', padx=2)
         self.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
-        self.move_down_button.pack(side='left', padx=(2, 0))
+        self.move_down_button.grid(row=0, column=3, sticky='ew', padx=(2, 2))
         self.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
-        self.move_to_bottom_button.pack(side='left', padx=(2, 0))
+        self.move_to_bottom_button.grid(row=0, column=4, sticky='ew', padx=(2, 0))
 
         # Disable all move buttons initially
         for btn in [self.move_to_top_button, self.move_up_button, self.remove_button, self.move_down_button, self.move_to_bottom_button]:
