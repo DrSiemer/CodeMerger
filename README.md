@@ -32,7 +32,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **Project Colors**: Assign a unique color to each project for easy identification in compact mode
 
 
-![File management](./dev/screenshot_03.png)
+![File management](./dev/screenshot_03.png?v=2)
 
 
 ## Usage
