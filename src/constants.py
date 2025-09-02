@@ -6,11 +6,19 @@ CONFIG_FILE = CONFIG_FILE_PATH
 DEFAULT_FILETYPES_CONFIG = DEFAULT_FILETYPES_CONFIG_PATH
 VERSION_FILE = VERSION_FILE_PATH
 
+# Windows Registry path
+REGISTRY_KEY_PATH = r"Software\CodeMerger"
+
 # Default prompt for the "Copy Merged" action
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"
 
+# Default prompts for the wrapper text feature
+DEFAULT_INTRO_PROMPT = 'Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n'
+DEFAULT_OUTRO_PROMPT = 'DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- return diff files\n- append three backticks without breaking for a new line first\n- use step count in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something "final" or "definitive"; it usually isn\'t\n- use double newlines between code\n'
+
 # --- Limits and UI settings ---
 RECENT_PROJECTS_MAX = 10
+MAX_SECRET_SCAN_REPORT_LINES = 10 # Max lines to show in the secret scan warning
 SUBTLE_HIGHLIGHT_COLOR = "#555555"
 COMPACT_MODE_BG_COLOR = "#6f6f6f"
 

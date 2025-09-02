@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, Entry, filedialog, StringVar, BooleanVar, ttk, Text
-from ..core.utils import load_config, save_config, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT
+from ..core.utils import load_config, save_config
 from ..core.registry import get_setting, save_setting
 from ..core.paths import ICON_PATH
 from .custom_widgets import RoundedButton
@@ -96,8 +96,8 @@ class SettingsWindow(Toplevel):
         self.scan_checkbox.pack(anchor='w')
 
         self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT)
-        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''), DEFAULT_INTRO_PROMPT)
-        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''), DEFAULT_OUTRO_PROMPT)
+        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT)
+        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''), c.DEFAULT_OUTRO_PROMPT)
 
         Label(self.scrollable_frame, text="Default Editor", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
         editor_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)

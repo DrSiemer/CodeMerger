@@ -1,8 +1,6 @@
 import winreg
 import sys
-
-# The main registry key for the application
-REGISTRY_KEY_PATH = r"Software\CodeMerger"
+from ..constants import REGISTRY_KEY_PATH
 
 def get_setting(name, default_value):
     """
