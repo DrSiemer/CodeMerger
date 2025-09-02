@@ -109,7 +109,7 @@ class FileManagerWindow(Toplevel):
         self.move_to_top_button.pack(side='left', padx=(0, 2))
         self.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
         self.move_up_button.pack(side='left', padx=(0, 2))
-        self.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+        self.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=font_button, hollow=True)
         self.remove_button.pack(side='left', padx=2)
         self.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
         self.move_down_button.pack(side='left', padx=(2, 0))
