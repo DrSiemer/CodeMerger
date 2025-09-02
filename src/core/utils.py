@@ -17,7 +17,9 @@ def _create_and_get_default_config():
         'last_update_check': None,
         'enable_new_file_check': True,
         'new_file_check_interval': 5,
-        'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT
+        'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT,
+        'default_intro_prompt': 'INTRO',
+        'default_outro_prompt': 'OUTRO'
     }
     try:
         # Load the list of filetypes from the bundled template
@@ -60,6 +62,10 @@ def load_config():
                 config['new_file_check_interval'] = 5
             if 'copy_merged_prompt' not in config:
                 config['copy_merged_prompt'] = DEFAULT_COPY_MERGED_PROMPT
+            if 'default_intro_prompt' not in config:
+                config['default_intro_prompt'] = 'INTRO'
+            if 'default_outro_prompt' not in config:
+                config['default_outro_prompt'] = 'OUTRO'
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one
