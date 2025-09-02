@@ -83,8 +83,7 @@ class ViewManager:
             else:
                 self.main_window.geometry(f"{end_geom[2]}x{end_geom[3]}+{end_geom[0]}+{end_geom[1]}")
                 self.main_window.attributes("-alpha", 1.0)
-                # Restore the minsize constraint after expanding
-                self.main_window.minsize(800, 400)
+                self.main_window.minsize(500, 405)
                 if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                     self.compact_mode_window.destroy()
                 self.compact_mode_window = None
