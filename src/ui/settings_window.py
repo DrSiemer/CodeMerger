@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, Entry, filedialog, StringVar, BooleanVar, ttk, Text
-from ..core.utils import load_config, save_config
+from ..core.utils import load_config, save_config, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT
 from ..core.registry import get_setting, save_setting
 from ..core.paths import ICON_PATH
 from .custom_widgets import RoundedButton
@@ -95,9 +95,9 @@ class SettingsWindow(Toplevel):
         self.scan_checkbox = ttk.Checkbutton(secrets_frame, text="Scan for secrets on copy (slower)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
         self.scan_checkbox.pack(anchor='w')
 
-        self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''))
-        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''))
-        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''))
+        self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT)
+        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''), DEFAULT_INTRO_PROMPT)
+        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''), DEFAULT_OUTRO_PROMPT)
 
         Label(self.scrollable_frame, text="Default Editor", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
         editor_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
@@ -141,20 +141,42 @@ class SettingsWindow(Toplevel):
             if self.scrollbar.winfo_ismapped():
                 self.scrollbar.grid_remove()
 
-    def _create_collapsible_text_section(self, parent, title, initial_text):
+    def _create_collapsible_text_section(self, parent, title, initial_text, default_text):
         section_frame = Frame(parent, bg=c.DARK_BG)
         section_frame.pack(fill='x', expand=True, pady=(15, 0))
-        header_frame = Frame(section_frame, bg=c.DARK_BG, cursor="hand2")
+
+        header_frame = Frame(section_frame, bg=c.DARK_BG)
         header_frame.pack(fill='x', expand=True)
-        icon_label = Label(header_frame, text="▶", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR)
-        icon_label.pack(side='left', padx=(0, 5))
-        Label(header_frame, text=title, font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+
         body_frame = Frame(section_frame, bg=c.DARK_BG)
         text_frame = Frame(body_frame, bd=1, relief='sunken')
         text_frame.pack(fill='x', expand=True, padx=(22, 0))
         text_widget = Text(text_frame, wrap='word', undo=True, height=4, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0, font=self.font_normal)
         text_widget.pack(fill='x', expand=True, ipady=4, ipadx=4)
         text_widget.insert('1.0', initial_text)
+
+        icon_label = Label(header_frame, text="▶", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
+        icon_label.pack(side='left', padx=(0, 5))
+
+        title_label = Label(header_frame, text=title, font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
+        title_label.pack(side='left')
+
+        def do_reset():
+            text_widget.delete('1.0', 'end')
+            text_widget.insert('1.0', default_text)
+
+        reset_button = RoundedButton(
+            header_frame,
+            text="Reset",
+            command=do_reset,
+            bg=c.BTN_GRAY_BG,
+            fg=c.BTN_GRAY_TEXT,
+            font=(self.font_family, 9),
+            height=22,
+            radius=4
+        )
+        reset_button.pack(side='right', padx=(5, 0))
+
         is_expanded = BooleanVar(value=False)
         def toggle_section(event=None):
             is_expanded.set(not is_expanded.get())
@@ -165,8 +187,10 @@ class SettingsWindow(Toplevel):
                 body_frame.pack_forget()
                 icon_label.config(text="▶")
             self.after(5, self._on_frame_configure)
-        header_frame.bind("<Button-1>", toggle_section)
+
         icon_label.bind("<Button-1>", toggle_section)
+        title_label.bind("<Button-1>", toggle_section)
+
         return text_widget
 
     def toggle_interval_selector(self):

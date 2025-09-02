@@ -3,6 +3,10 @@ import json
 from pathlib import Path
 from ..constants import CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE, DEFAULT_COPY_MERGED_PROMPT
 
+# --- Default Prompt Constants ---
+DEFAULT_INTRO_PROMPT = 'Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n'
+DEFAULT_OUTRO_PROMPT = 'DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- return diff files\n- append three backticks without breaking for a new line first\n- use step count in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something "final" or "definitive"; it usually isn\'t\n- use double newlines between code\n'
+
 def _create_and_get_default_config():
     """
     Creates a new config object from the default template, saves it to disk,
@@ -18,8 +22,8 @@ def _create_and_get_default_config():
         'enable_new_file_check': True,
         'new_file_check_interval': 5,
         'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT,
-        'default_intro_prompt': 'INTRO',
-        'default_outro_prompt': 'OUTRO'
+        'default_intro_prompt': DEFAULT_INTRO_PROMPT,
+        'default_outro_prompt': DEFAULT_OUTRO_PROMPT
     }
     try:
         # Load the list of filetypes from the bundled template
@@ -63,9 +67,9 @@ def load_config():
             if 'copy_merged_prompt' not in config:
                 config['copy_merged_prompt'] = DEFAULT_COPY_MERGED_PROMPT
             if 'default_intro_prompt' not in config:
-                config['default_intro_prompt'] = 'INTRO'
+                config['default_intro_prompt'] = DEFAULT_INTRO_PROMPT
             if 'default_outro_prompt' not in config:
-                config['default_outro_prompt'] = 'OUTRO'
+                config['default_outro_prompt'] = DEFAULT_OUTRO_PROMPT
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one

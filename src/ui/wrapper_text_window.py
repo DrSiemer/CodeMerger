@@ -36,7 +36,11 @@ class WrapperTextWindow(Toplevel):
         button_frame.pack(side='bottom', fill='x', pady=(10, 0))
 
         # --- Place "Load Defaults" icon on the left side of the button bar ---
-        if self.defaults_icon:
+        config = load_config()
+        default_intro = config.get('default_intro_prompt', '').strip()
+        default_outro = config.get('default_outro_prompt', '').strip()
+
+        if self.defaults_icon and (default_intro or default_outro):
             self.defaults_button = Label(button_frame, image=self.defaults_icon, bg=c.DARK_BG, cursor="hand2")
             # Anchor the PhotoImage reference to the widget to prevent garbage collection
             self.defaults_button.image = self.defaults_icon
@@ -117,7 +121,6 @@ class WrapperTextWindow(Toplevel):
         self.intro_text.insert('1.0', default_intro)
 
         self.outro_text.delete('1.0', 'end')
-        # FIX: Corrected the typo '1.m' to '1.0'
         self.outro_text.insert('1.0', default_outro)
 
     def save_and_close(self):
