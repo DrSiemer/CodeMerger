@@ -123,10 +123,14 @@ class ViewManager:
             # Temporarily remove minsize constraint for shrinking animation
             self.main_window.minsize(1, 1)
 
+            project_name = "CodeMerger"
+            has_wrapper_text = False
             if self.main_window.project_config:
                 project_name = self.main_window.project_config.project_name
-            else:
-                project_name = "CodeMerger"
+                intro = self.main_window.project_config.intro_text
+                outro = self.main_window.project_config.outro_text
+                if intro or outro:
+                    has_wrapper_text = True
 
             self.compact_mode_window = CompactMode(
                 parent=self.main_window,
@@ -137,7 +141,8 @@ class ViewManager:
                 image_up_tk=self.compact_mode_image_up,
                 image_down_tk=self.compact_mode_image_down,
                 image_close=self.compact_mode_close_image,
-                instance_color=self.main_window.project_color
+                instance_color=self.main_window.project_color,
+                show_wrapped_button=has_wrapper_text
             )
             # Manually trigger a UI update to show initial warning state if needed
             self.main_window._update_warning_ui()

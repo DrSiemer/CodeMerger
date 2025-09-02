@@ -11,7 +11,7 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR):
+    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR, show_wrapped_button=False):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
@@ -56,7 +56,6 @@ class CompactMode(tk.Toplevel):
         self.close_button = tk.Label(self.move_bar, image=self.image_close, bg=BAR_AND_BORDER_COLOR, cursor="hand2")
         self.close_button.pack(side='right', padx=(0, 1))
 
-
         # --- Border Frame ---
         border_frame = tk.Frame(self, bg=BAR_AND_BORDER_COLOR)
         border_frame.pack(side='bottom', fill='both', expand=True)
@@ -71,7 +70,8 @@ class CompactMode(tk.Toplevel):
             bg="#FFFFFF", fg="#000000", activebackground=c.SUBTLE_HIGHLIGHT_COLOR, activeforeground="#FFFFFF",
             bd=0, relief="flat", cursor="hand2", command=self.copy_wrapped
         )
-        self.wrapped_button.place(relx=1.0, rely=1.0, x=-2, y=-2, anchor='se', width=18, height=18)
+        if show_wrapped_button:
+            self.wrapped_button.place(relx=1.0, rely=1.0, x=-2, y=-2, anchor='se', width=18, height=18)
 
         # --- Load new files icon (PIL only) ---
         try:
@@ -89,8 +89,10 @@ class CompactMode(tk.Toplevel):
         self.button_label.bind("<ButtonRelease-1>", self.on_release_click)
         self.button_label.bind("<Enter>", self.show_tooltip)
         self.button_label.bind("<Leave>", self.hide_tooltip)
-        self.wrapped_button.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy wrapped {self.project_name} code"))
-        self.wrapped_button.bind("<Leave>", self.hide_tooltip)
+
+        if show_wrapped_button:
+            self.wrapped_button.bind("<Enter>", lambda e: self.show_tooltip(text=f"Copy wrapped {self.project_name} code"))
+            self.wrapped_button.bind("<Leave>", self.hide_tooltip)
 
     def _create_warning_images(self):
         """Composites the warning icon onto the button images."""
@@ -151,7 +153,6 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window.update_idletasks()
         new_x = x - (self.tooltip_window.winfo_width() // 2)
         self.tooltip_window.wm_geometry(f"+{new_x}+{y}")
-
 
     def hide_tooltip(self, event=None):
         if self.tooltip_window:
