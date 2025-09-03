@@ -38,6 +38,7 @@ class App(Tk):
         self._new_file_check_job = None
         self._newly_detected_files = []
         self.title_label = None
+        self.window_geometries = {}
 
         self.state = AppState()
         self.view_manager = ViewManager(self)

@@ -15,7 +15,8 @@ from ...core.paths import ICON_PATH
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, newly_detected_files=None):
         super().__init__(parent)
-
+        self.withdraw()
+        self.parent = parent
         self.project_config = project_config
         self.base_dir = self.project_config.base_dir
         self.status_var = status_var
@@ -54,6 +55,30 @@ class FileManagerWindow(Toplevel):
         self._update_title(self.project_config.total_tokens)
         if files_were_cleaned:
             self.trigger_recalculation()
+
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        self.update_idletasks()
+        window_name = self.__class__.__name__
+
+        if window_name in self.parent.window_geometries:
+            self.geometry(self.parent.window_geometries[window_name])
+        else:
+            parent_x = self.parent.winfo_rootx()
+            parent_y = self.parent.winfo_rooty()
+            parent_w = self.parent.winfo_width()
+            parent_h = self.parent.winfo_height()
+            win_w = self.winfo_width()
+            win_h = self.winfo_height()
+            x = parent_x + (parent_w - win_w) // 2
+            y = parent_y + (parent_h - win_h) // 2
+            self.geometry(f'+{x}+{y}')
+
+    def _close_and_save_geometry(self):
+        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        self.destroy()
 
     def build_ui(self):
         """Creates and packs all the UI widgets"""
@@ -309,10 +334,10 @@ class FileManagerWindow(Toplevel):
             if response is True:  # Yes, save
                 self.save_and_close()
             elif response is False:  # No, discard
-                self.destroy()
+                self._close_and_save_geometry()
             # On Cancel (response is None), do nothing
         else:
-            self.destroy() # No changes, just close
+            self._close_and_save_geometry()
 
     def save_and_close(self):
         self.project_config.selected_files = self.selection_handler.ordered_selection
@@ -321,4 +346,4 @@ class FileManagerWindow(Toplevel):
         self.project_config.known_files = list(set(self.project_config.known_files + self.selection_handler.ordered_selection))
         self.project_config.save()
         self.status_var.set("File selection and order saved to .allcode")
-        self.destroy()
+        self._close_and_save_geometry()

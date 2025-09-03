@@ -10,6 +10,8 @@ from .tooltip import ToolTip
 class WrapperTextWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, on_close_callback=None):
         super().__init__(parent)
+        self.withdraw()
+        self.parent = parent
         self.project_config = project_config
         self.status_var = status_var
         self.on_close_callback = on_close_callback
@@ -102,8 +104,32 @@ class WrapperTextWindow(Toplevel):
         self.intro_text.insert('1.0', self.project_config.intro_text)
         self.outro_text.insert('1.0', self.project_config.outro_text)
 
-        self.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.bind('<Escape>', lambda e: self.destroy())
+        self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
+        self.bind('<Escape>', lambda e: self._close_and_save_geometry())
+
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        self.update_idletasks()
+        window_name = self.__class__.__name__
+
+        if window_name in self.parent.window_geometries:
+            self.geometry(self.parent.window_geometries[window_name])
+        else:
+            parent_x = self.parent.winfo_rootx()
+            parent_y = self.parent.winfo_rooty()
+            parent_w = self.parent.winfo_width()
+            parent_h = self.parent.winfo_height()
+            win_w = self.winfo_width()
+            win_h = self.winfo_height()
+            x = parent_x + (parent_w - win_w) // 2
+            y = parent_y + (parent_h - win_h) // 2
+            self.geometry(f'+{x}+{y}')
+
+    def _close_and_save_geometry(self):
+        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        self.destroy()
 
     def load_images(self):
         try:
@@ -137,4 +163,4 @@ class WrapperTextWindow(Toplevel):
         if self.on_close_callback:
             self.on_close_callback()
 
-        self.destroy()
+        self._close_and_save_geometry()

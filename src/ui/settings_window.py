@@ -10,6 +10,7 @@ from .. import constants as c
 class SettingsWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):
         super().__init__(parent)
+        self.withdraw()
         self.parent = parent
         self.on_close_callback = on_close_callback
 
@@ -119,6 +120,30 @@ class SettingsWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind('<Escape>', lambda e: self.on_closing())
 
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        self.update_idletasks()
+        window_name = self.__class__.__name__
+
+        if window_name in self.parent.window_geometries:
+            self.geometry(self.parent.window_geometries[window_name])
+        else:
+            parent_x = self.parent.winfo_rootx()
+            parent_y = self.parent.winfo_rooty()
+            parent_w = self.parent.winfo_width()
+            parent_h = self.parent.winfo_height()
+            win_w = self.winfo_width()
+            win_h = self.winfo_height()
+            x = parent_x + (parent_w - win_w) // 2
+            y = parent_y + (parent_h - win_h) // 2
+            self.geometry(f'+{x}+{y}')
+
+    def _close_and_save_geometry(self):
+        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        self.destroy()
+
     def _on_frame_configure(self, event=None):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self._manage_scrollbar()
@@ -208,7 +233,7 @@ class SettingsWindow(Toplevel):
         self.editor_path.set('')
 
     def on_closing(self):
-        self.destroy()
+        self._close_and_save_geometry()
 
     def save_and_close(self):
         config = load_config()
@@ -226,4 +251,4 @@ class SettingsWindow(Toplevel):
         save_setting('AutomaticUpdates', self.check_for_updates.get())
         if self.on_close_callback:
             self.on_close_callback()
-        self.destroy()
+        self._close_and_save_geometry()

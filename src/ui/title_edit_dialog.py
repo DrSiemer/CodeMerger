@@ -6,6 +6,8 @@ from ..core.paths import ICON_PATH
 class TitleEditDialog(Toplevel):
     def __init__(self, parent, title, prompt, initialvalue="", max_length=None):
         super().__init__(parent)
+        self.parent = parent
+        self.withdraw()
         self.transient(parent)
         self.grab_set()
         self.title(title)
@@ -49,17 +51,28 @@ class TitleEditDialog(Toplevel):
         self.geometry(f"400x{required_height}")
         self.resizable(False, False)
 
-        # Center window relative to parent
-        self.update_idletasks()
-        parent_x = parent.winfo_rootx()
-        parent_y = parent.winfo_rooty()
-        parent_w = parent.winfo_width()
-        parent_h = parent.winfo_height()
-        dialog_w = self.winfo_width()
-        dialog_h = self.winfo_height()
-        self.geometry(f"+{parent_x + (parent_w - dialog_w) // 2}+{parent_y + (parent_h - dialog_h) // 2}")
-
+        self._position_window()
+        self.deiconify()
         self.wait_window(self)
+
+    def _position_window(self):
+        self.update_idletasks()
+        window_name = self.__class__.__name__
+
+        if window_name in self.parent.window_geometries:
+            self.geometry(self.parent.window_geometries[window_name])
+        else:
+            parent_x = self.parent.winfo_rootx()
+            parent_y = self.parent.winfo_rooty()
+            parent_w = self.parent.winfo_width()
+            parent_h = self.parent.winfo_height()
+            dialog_w = self.winfo_width()
+            dialog_h = self.winfo_height()
+            self.geometry(f"+{parent_x + (parent_w - dialog_w) // 2}+{parent_y + (parent_h - dialog_h) // 2}")
+
+    def _close_and_save_geometry(self):
+        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        self.destroy()
 
     def _validate_length(self, *args):
         value = self.entry_var.get()
@@ -68,8 +81,8 @@ class TitleEditDialog(Toplevel):
 
     def on_ok(self, event=None):
         self.result = self.entry_var.get()
-        self.destroy()
+        self._close_and_save_geometry()
 
     def on_cancel(self, event=None):
         self.result = None
-        self.destroy()
+        self._close_and_save_geometry()

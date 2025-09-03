@@ -7,10 +7,10 @@ from ..core.paths import ICON_PATH
 from .custom_widgets import RoundedButton
 from .. import constants as c
 
-
 class FiletypesManagerWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):
         super().__init__(parent)
+        self.withdraw()
         self.parent = parent
         self.on_close_callback = on_close_callback
         self.filetypes_data = load_all_filetypes()
@@ -76,6 +76,30 @@ class FiletypesManagerWindow(Toplevel):
         self.bind('<Escape>', lambda e: self.on_closing())
 
         self.populate_tree()
+
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        self.update_idletasks()
+        window_name = self.__class__.__name__
+
+        if window_name in self.parent.window_geometries:
+            self.geometry(self.parent.window_geometries[window_name])
+        else:
+            parent_x = self.parent.winfo_rootx()
+            parent_y = self.parent.winfo_rooty()
+            parent_w = self.parent.winfo_width()
+            parent_h = self.parent.winfo_height()
+            win_w = self.winfo_width()
+            win_h = self.winfo_height()
+            x = parent_x + (parent_w - win_w) // 2
+            y = parent_y + (parent_h - win_h) // 2
+            self.geometry(f'+{x}+{y}')
+
+    def _close_and_save_geometry(self):
+        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        self.destroy()
 
     def populate_tree(self):
         selection = self.tree.selection()
@@ -152,13 +176,13 @@ class FiletypesManagerWindow(Toplevel):
                 self.save_and_close()
                 return
 
-        self.destroy()
         if self.on_close_callback:
             self.on_close_callback()
+        self._close_and_save_geometry()
 
     def save_and_close(self):
         """Saves the configuration and then closes the window."""
         save_filetypes(self.filetypes_data)
-        self.destroy()
         if self.on_close_callback:
             self.on_close_callback()
+        self._close_and_save_geometry()

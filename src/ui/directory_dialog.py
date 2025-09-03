@@ -12,6 +12,7 @@ class DirectoryDialog(Toplevel):
     """
     def __init__(self, parent, app_bg_color, recent_projects, on_select_callback, on_remove_callback, trash_icon_image=None):
         super().__init__(parent)
+        self.withdraw()
         self.parent = parent
         self.app_bg_color = app_bg_color # This is c.DARK_BG
         self.recent_projects = recent_projects
@@ -60,11 +61,34 @@ class DirectoryDialog(Toplevel):
         )
         browse_btn.pack(pady=20, padx=20)
 
-        # Update the window to fit the content
+        self.bind('<Escape>', lambda e: self._close_and_save_geometry())
+
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
         self.update_idletasks()
+        window_name = self.__class__.__name__
+
         required_height = self.winfo_reqheight()
         self.geometry(f"{self.dialog_width}x{required_height}")
-        self.bind('<Escape>', lambda e: self.destroy())
+
+        if window_name in self.parent.window_geometries:
+            self.geometry(self.parent.window_geometries[window_name])
+        else:
+            parent_x = self.parent.winfo_rootx()
+            parent_y = self.parent.winfo_rooty()
+            parent_w = self.parent.winfo_width()
+            parent_h = self.parent.winfo_height()
+            win_w = self.winfo_width()
+            win_h = self.winfo_height()
+            x = parent_x + (parent_w - win_w) // 2
+            y = parent_y + (parent_h - win_h) // 2
+            self.geometry(f'+{x}+{y}')
+
+    def _close_and_save_geometry(self):
+        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        self.destroy()
 
     def create_recent_dir_entry(self, path, font):
         """Creates a single row in the recent projects list"""
@@ -132,7 +156,7 @@ class DirectoryDialog(Toplevel):
         """Final action: update active dir and close the selection dialog"""
         if self.on_select_callback:
             self.on_select_callback(path)
-        self.destroy()
+        self._close_and_save_geometry()
 
     def browse_for_new_dir(self):
         """Opens file dialog and processes the result, handling cancellation"""
