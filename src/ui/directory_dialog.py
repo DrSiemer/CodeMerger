@@ -6,12 +6,13 @@ from .custom_widgets import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import position_window, save_window_geometry
+from .assets import assets
 
 class DirectoryDialog(Toplevel):
     """
     A dialog window for selecting a recent or new project directory
     """
-    def __init__(self, parent, app_bg_color, recent_projects, on_select_callback, on_remove_callback, trash_icon_image=None):
+    def __init__(self, parent, app_bg_color, recent_projects, on_select_callback, on_remove_callback):
         super().__init__(parent)
         self.withdraw()
         self.parent = parent
@@ -19,7 +20,6 @@ class DirectoryDialog(Toplevel):
         self.recent_projects = recent_projects
         self.on_select_callback = on_select_callback
         self.on_remove_callback = on_remove_callback
-        self.trash_icon_image = trash_icon_image
         self.tooltip = None
 
         # --- Style Definitions ---
@@ -104,11 +104,11 @@ class DirectoryDialog(Toplevel):
         btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
         btn.bind("<Leave>", self.hide_path_tooltip)
 
-        if self.trash_icon_image:
+        if assets.trash_icon_image:
             remove_btn = RoundedButton(
                 parent=entry_frame,
                 command=lambda p=path, w=entry_frame: self.remove_and_update_dialog(p, w),
-                image=self.trash_icon_image,
+                image=assets.trash_icon_image,
                 bg=c.BTN_GRAY_BG,
                 width=32,
                 height=32

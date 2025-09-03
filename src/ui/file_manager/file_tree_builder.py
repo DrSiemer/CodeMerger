@@ -1,35 +1,6 @@
 import os
 from ...core.utils import is_ignored
 
-def get_all_matching_files(base_dir, file_extensions, gitignore_patterns):
-    """
-    Scans the file system and returns a flat list of all matching file paths,
-    respecting .gitignore. Optimized for speed, returning just a list of strings
-    """
-    extensions = {ext for ext in file_extensions if ext.startswith('.')}
-    exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
-    matching_files = []
-
-    def _scan_dir(current_path):
-        try:
-            for entry in os.scandir(current_path):
-                if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == '.allcode':
-                    continue
-
-                if entry.is_dir():
-                    _scan_dir(entry.path)
-                elif entry.is_file():
-                    file_name_lower = entry.name.lower()
-                    file_ext = os.path.splitext(file_name_lower)[1]
-                    if file_ext in extensions or file_name_lower in exact_filenames:
-                        rel_path = os.path.relpath(entry.path, base_dir).replace('\\', '/')
-                        matching_files.append(rel_path)
-        except OSError:
-            pass # Ignore permission errors etc
-
-    _scan_dir(base_dir)
-    return matching_files
-
 def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
     """
     Scans the file system respecting .gitignore and returns a data structure
@@ -40,17 +11,20 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns):
 
     def _has_relevant_files(path):
         """Recursively checks if a directory contains any files matching the extension list"""
-        for entry in os.scandir(path):
-            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == '.allcode':
-                continue
-            if entry.is_dir():
-                if _has_relevant_files(entry.path):
-                    return True
-            elif entry.is_file():
-                file_name_lower = entry.name.lower()
-                file_ext = os.path.splitext(file_name_lower)[1]
-                if file_ext in extensions or file_name_lower in exact_filenames:
-                    return True
+        try:
+            for entry in os.scandir(path):
+                if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == '.allcode':
+                    continue
+                if entry.is_dir():
+                    if _has_relevant_files(entry.path):
+                        return True
+                elif entry.is_file():
+                    file_name_lower = entry.name.lower()
+                    file_ext = os.path.splitext(file_name_lower)[1]
+                    if file_ext in extensions or file_name_lower in exact_filenames:
+                        return True
+        except OSError:
+            return False
         return False
 
     def _build_nodes(current_path):

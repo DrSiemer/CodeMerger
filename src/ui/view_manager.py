@@ -1,9 +1,8 @@
 import time
 import os
 from tkinter import messagebox, TclError
-from PIL import Image, ImageTk
 from .compact_mode import CompactMode
-from ..core.paths import COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH
+from .assets import assets
 
 class ViewManager:
     """
@@ -18,27 +17,6 @@ class ViewManager:
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
         self.main_window_geom = None
-        self.load_compact_mode_images()
-
-    def load_compact_mode_images(self):
-        """Loads and prepares the compact mode graphics"""
-        try:
-            button_size = (64, 64)
-            # Load images as PIL objects first and store them
-            self.compact_mode_pil_up = Image.open(COMPACT_MODE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
-            self.compact_mode_pil_down = Image.open(COMPACT_MODE_ACTIVE_ICON_PATH).resize(button_size, Image.Resampling.LANCZOS)
-            close_img_src = Image.open(COMPACT_MODE_CLOSE_ICON_PATH)
-
-            # Create the PhotoImage objects for Tkinter
-            self.compact_mode_image_up = ImageTk.PhotoImage(self.compact_mode_pil_up)
-            self.compact_mode_image_down = ImageTk.PhotoImage(self.compact_mode_pil_down)
-            self.compact_mode_close_image = ImageTk.PhotoImage(close_img_src)
-        except Exception:
-            self.compact_mode_pil_up = None
-            self.compact_mode_pil_down = None
-            self.compact_mode_image_up = None
-            self.compact_mode_image_down = None
-            self.compact_mode_close_image = None
 
     def on_main_window_restored(self, event=None):
         """
@@ -112,7 +90,7 @@ class ViewManager:
             self.main_window.geometry(f"{start_geom[2]}x{start_geom[3]}+{start_geom[0]}+{start_geom[1]}")
             self._animate_window(time.time(), animation_duration, start_geom, end_geom, is_shrinking=False)
         else:
-            if not self.compact_mode_image_up or not self.compact_mode_close_image:
+            if not assets.compact_mode_image_up or not assets.compact_mode_close_image:
                 messagebox.showerror("Asset Error", "Could not load compact mode graphics")
                 return
 
@@ -124,10 +102,12 @@ class ViewManager:
 
             project_name = "CodeMerger"
             has_wrapper_text = False
-            if self.main_window.project_config:
-                project_name = self.main_window.project_config.project_name
-                intro = self.main_window.project_config.intro_text
-                outro = self.main_window.project_config.outro_text
+            project_config = self.main_window.project_manager.get_current_project()
+
+            if project_config:
+                project_name = project_config.project_name
+                intro = project_config.intro_text
+                outro = project_config.outro_text
                 if intro or outro:
                     has_wrapper_text = True
 
@@ -135,16 +115,16 @@ class ViewManager:
                 parent=self.main_window,
                 close_callback=self.toggle_compact_mode,
                 project_name=project_name,
-                image_up_pil=self.compact_mode_pil_up,
-                image_down_pil=self.compact_mode_pil_down,
-                image_up_tk=self.compact_mode_image_up,
-                image_down_tk=self.compact_mode_image_down,
-                image_close=self.compact_mode_close_image,
+                image_up_pil=assets.compact_mode_pil_up,
+                image_down_pil=assets.compact_mode_pil_down,
+                image_up_tk=assets.compact_mode_image_up,
+                image_down_tk=assets.compact_mode_image_down,
+                image_close=assets.compact_mode_close_image,
                 instance_color=self.main_window.project_color,
                 show_wrapped_button=has_wrapper_text
             )
             # Manually trigger a UI update to show initial warning state if needed
-            self.main_window._update_warning_ui()
+            self.main_window.file_monitor._update_warning_ui()
             self.compact_mode_window.withdraw()
             self.compact_mode_window.update_idletasks()
             widget_w, widget_h = self.compact_mode_window.winfo_reqwidth(), self.compact_mode_window.winfo_reqheight()

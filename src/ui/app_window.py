@@ -1,6 +1,5 @@
 import os
 import json
-import pyperclip
 from tkinter import Tk, StringVar, messagebox, colorchooser
 from PIL import Image, ImageTk
 
@@ -10,35 +9,34 @@ from .file_manager.file_manager_window import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
-from ..core.merger import generate_output_string
 from .directory_dialog import DirectoryDialog
-from ..core.utils import load_active_file_extensions, parse_gitignore
-from ..core.paths import ICON_PATH, EDIT_ICON_PATH, TRASH_ICON_PATH, NEW_FILES_ICON_PATH
-from ..core.project_config import ProjectConfig
+from ..core.utils import load_active_file_extensions
+from ..core.paths import ICON_PATH
 from .. import constants as c
-from ..core.secret_scanner import scan_for_secrets
 from ..core.updater import Updater
 from .ui_builder import setup_ui
 from .file_monitor import FileMonitor
 from .title_edit_dialog import TitleEditDialog
+from ..core.project_manager import ProjectManager
+from ..core.clipboard import copy_project_to_clipboard
+from .assets import assets
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
+        assets.load_tk_images() # [FIX] Load Tkinter images now that the root window exists
+
         self.file_extensions = file_extensions
         self.app_version = app_version
         self.app_bg_color = c.DARK_BG
-        self.project_config = None
         self.project_color = c.COMPACT_MODE_BG_COLOR
-        self.edit_icon = None
-        self.trash_icon_image = None
-        self.new_files_icon = None
         self._hide_edit_icon_job = None
         self.window_geometries = {}
 
         self.state = AppState()
         self.view_manager = ViewManager(self)
         self.updater = Updater(self, self.state, self.app_version)
+        self.project_manager = ProjectManager(lambda: self.file_extensions)
         self.file_monitor = FileMonitor(self)
 
         # Window Setup
@@ -47,8 +45,6 @@ class App(Tk):
         self.geometry("700x405")
         self.minsize(500, 405)
         self.configure(bg=self.app_bg_color)
-
-        self.load_images()
 
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
@@ -71,38 +67,27 @@ class App(Tk):
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
 
-    def load_images(self):
-        try:
-            edit_img_src = Image.open(EDIT_ICON_PATH)
-            self.edit_icon = ImageTk.PhotoImage(edit_img_src)
-            self.trash_icon_image = Image.open(TRASH_ICON_PATH).resize((18, 18), Image.Resampling.LANCZOS)
-            new_files_img = Image.open(NEW_FILES_ICON_PATH).resize((24, 24), Image.Resampling.LANCZOS)
-            self.new_files_icon = ImageTk.PhotoImage(new_files_img)
-        except Exception:
-            self.edit_icon = None
-            self.trash_icon_image = None
-            self.new_files_icon = None
-
     def on_title_area_enter(self, event=None):
         if self._hide_edit_icon_job:
             self.after_cancel(self._hide_edit_icon_job)
             self._hide_edit_icon_job = None
 
-        if self.project_config and self.edit_icon:
+        if self.project_manager.get_current_project() and assets.edit_icon:
             self.edit_icon_label.place(
                 in_=self.title_label.master,
                 x=self.title_label.winfo_x() + self.title_label.winfo_width() + 5,
-                y=self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (self.edit_icon.height() // 2)
+                y=self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (assets.edit_icon.height() // 2)
             )
 
     def on_title_area_leave(self, event=None):
         self._hide_edit_icon_job = self.after(50, self.edit_icon_label.place_forget)
 
     def edit_project_title(self, event=None):
-        if not self.project_config:
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
             return
 
-        current_name = self.project_config.project_name
+        current_name = project_config.project_name
         dialog = TitleEditDialog(
             parent=self,
             title="Edit Project Title",
@@ -115,8 +100,8 @@ class App(Tk):
         if new_name is not None and new_name.strip() and new_name.strip() != current_name:
             new_name = new_name.strip()
             self.project_title_var.set(new_name)
-            self.project_config.project_name = new_name
-            self.project_config.save()
+            project_config.project_name = new_name
+            project_config.save()
             self.status_var.set(f"Project title changed to '{new_name}'")
 
     def on_app_close(self):
@@ -136,35 +121,18 @@ class App(Tk):
         """Sets the display string for the active directory and loads its config"""
         font_family = "Segoe UI"
         font_large_bold = (font_family, 24, 'bold')
-        if path and os.path.isdir(path):
+
+        project_config, status_message = self.project_manager.load_project(path)
+        self.status_var.set(status_message)
+
+        if project_config:
             self.active_dir.set(path)
-            is_new_project = not os.path.isfile(os.path.join(path, '.allcode'))
-
-            self.project_config = ProjectConfig(path)
-            files_were_cleaned = self.project_config.load()
-            project_display_name = self.project_config.project_name
-
-            if is_new_project:
-                all_project_files = get_all_matching_files(
-                    base_dir=self.project_config.base_dir,
-                    file_extensions=self.file_extensions,
-                    gitignore_patterns=parse_gitignore(self.project_config.base_dir)
-                )
-                self.project_config.known_files = all_project_files
-                self.project_config.save()
-                self.status_var.set(f"Initialized new project: {project_display_name}.")
-            elif files_were_cleaned:
-                self.status_var.set(f"Activated project: {project_display_name} - Cleaned missing files.")
-            else:
-                self.status_var.set(f"Activated project: {project_display_name}.")
-
-            self.project_title_var.set(self.project_config.project_name)
-            self.project_color = self.project_config.project_color
+            self.project_title_var.set(project_config.project_name)
+            self.project_color = project_config.project_color
             self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
         else:
             self.active_dir.set("No project selected")
             self.project_title_var.set("(no active project)")
-            self.project_config = None
             self.project_color = c.COMPACT_MODE_BG_COLOR
             self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
 
@@ -175,6 +143,7 @@ class App(Tk):
         """Updates button states based on the active directory and .allcode file"""
         is_dir_active = os.path.isdir(self.active_dir.get())
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
+        project_config = self.project_manager.get_current_project()
 
         if is_dir_active:
             self.select_project_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
@@ -209,11 +178,11 @@ class App(Tk):
             copy_buttons_state = 'disabled'
             has_wrapper_text = False
 
-            if self.project_config:
-                if self.project_config.selected_files:
+            if project_config:
+                if project_config.selected_files:
                     copy_buttons_state = 'normal'
-                intro = self.project_config.intro_text
-                outro = self.project_config.outro_text
+                intro = project_config.intro_text
+                outro = project_config.outro_text
                 if intro or outro:
                     has_wrapper_text = True
 
@@ -249,22 +218,24 @@ class App(Tk):
             self.set_active_dir_display(None)
 
     def open_color_chooser(self, event=None):
-        if not self.project_config: return
+        project_config = self.project_manager.get_current_project()
+        if not project_config: return
         color_code = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
         if color_code and color_code[1]:
             self.project_color = color_code[1]
-            self.project_config.project_color = self.project_color
-            self.project_config.save()
+            project_config.project_color = self.project_color
+            project_config.save()
             self.update_button_states()
 
     def open_settings_window(self):
         SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)
 
     def open_wrapper_text_window(self):
-        if not self.project_config:
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        wt_window = WrapperTextWindow(self, self.project_config, self.status_var, on_close_callback=self.update_button_states)
+        wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.update_button_states)
         self.wait_window(wt_window)
 
     def open_filetypes_manager(self):
@@ -282,8 +253,7 @@ class App(Tk):
             app_bg_color=self.app_bg_color,
             recent_projects=self.state.recent_projects,
             on_select_callback=self.on_directory_selected,
-            on_remove_callback=self.on_recent_removed,
-            trash_icon_image=self.trash_icon_image
+            on_remove_callback=self.on_recent_removed
         )
 
     def _perform_copy(self, use_wrapper: bool):
@@ -293,41 +263,20 @@ class App(Tk):
             self.status_var.set("Error: Invalid project folder")
             return
 
-        try:
-            files_to_copy = self.project_config.selected_files
-            if not files_to_copy:
-                self.status_var.set("No files selected to copy.")
-                return
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            self.status_var.set("Error: No active project.")
+            return
 
-            if self.state.scan_for_secrets:
-                report = scan_for_secrets(base_dir, files_to_copy)
-                if report:
-                    warning_message = (
-                        "Warning: Potential secrets were detected in your selection.\n\n"
-                        f"{report}\n\n"
-                        "Do you still want to copy this content to your clipboard?"
-                    )
-                    proceed = messagebox.askyesno("Secrets Detected", warning_message, parent=self)
-                    if not proceed:
-                        self.status_var.set("Copy cancelled due to potential secrets.")
-                        return
-
-            final_content, status_message = generate_output_string(base_dir, use_wrapper, self.state.copy_merged_prompt)
-            if final_content is not None:
-                pyperclip.copy(final_content)
-                self.status_var.set(status_message)
-            else:
-                self.status_var.set(status_message or "Error: Could not generate content.")
-
-        except FileNotFoundError:
-            messagebox.showerror("Error", f"No .allcode file found in {base_dir}", parent=self)
-            self.status_var.set("Error: .allcode file not found")
-        except (json.JSONDecodeError, IOError) as e:
-            messagebox.showerror("Error", f"Could not read .allcode file. Is it empty or corrupt?\n\nDetails: {e}", parent=self)
-            self.status_var.set("Error: Could not read .allcode file")
-        except Exception as e:
-            messagebox.showerror("Merging Error", f"An error occurred: {e}", parent=self)
-            self.status_var.set(f"Error during merging: {e}")
+        status_message = copy_project_to_clipboard(
+            parent=self,
+            base_dir=base_dir,
+            project_config=project_config,
+            use_wrapper=use_wrapper,
+            copy_merged_prompt=self.state.copy_merged_prompt,
+            scan_secrets_enabled=self.state.scan_for_secrets
+        )
+        self.status_var.set(status_message)
 
     def copy_merged_code(self):
         self._perform_copy(use_wrapper=False)
@@ -336,7 +285,8 @@ class App(Tk):
         self._perform_copy(use_wrapper=True)
 
     def manage_files(self):
-        if not self.project_config:
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
 
@@ -344,7 +294,7 @@ class App(Tk):
 
         fm_window = FileManagerWindow(
             self,
-            self.project_config,
+            project_config,
             self.status_var,
             self.file_extensions,
             self.state.default_editor,

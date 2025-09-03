@@ -2,6 +2,7 @@ from tkinter import Frame, Label
 from .. import constants as c
 from .custom_widgets import RoundedButton
 from .tooltip import ToolTip
+from .assets import assets
 
 def setup_ui(app):
     """Creates and places all the UI widgets for the main application window"""
@@ -35,8 +36,8 @@ def setup_ui(app):
     app.title_label.bind("<Enter>", app.on_title_area_enter)
     app.title_label.bind("<Leave>", app.on_title_area_leave)
 
-    app.edit_icon_label = Label(left_frame, image=app.edit_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    if app.edit_icon:
+    app.edit_icon_label = Label(left_frame, image=assets.edit_icon, bg=c.TOP_BAR_BG, cursor="hand2")
+    if assets.edit_icon:
         app.edit_icon_label.bind("<Button-1>", app.edit_project_title)
         app.edit_icon_label.bind("<Enter>", app.on_title_area_enter)
         app.edit_icon_label.bind("<Leave>", app.on_title_area_leave)
@@ -46,7 +47,7 @@ def setup_ui(app):
     right_frame.grid(row=0, column=2, sticky='e')
 
     # New files warning icon
-    app.new_files_label = Label(right_frame, image=app.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
+    app.new_files_label = Label(right_frame, image=assets.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
     app.new_files_label.bind("<Button-1>", lambda e: app.manage_files())
     app.new_files_tooltip = ToolTip(app.new_files_label, text="")
 

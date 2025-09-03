@@ -1,6 +1,6 @@
 import os
 from ..core.utils import parse_gitignore
-from ..ui.file_manager.file_tree_builder import get_all_matching_files
+from ..core.file_scanner import get_all_matching_files
 from .. import constants as c
 
 class FileMonitor:
@@ -19,7 +19,7 @@ class FileMonitor:
         self.newly_detected_files = []
         self._update_warning_ui()
 
-        is_dir_active = self.app.project_config is not None
+        is_dir_active = self.app.project_manager.get_current_project() is not None
         if self.app.state.config.get('enable_new_file_check', True) and is_dir_active:
             interval_sec = self.app.state.config.get('new_file_check_interval', 5)
             self._schedule_next_check(interval_sec * 1000)
@@ -36,24 +36,25 @@ class FileMonitor:
 
     def perform_new_file_check(self):
         """Scans for new and deleted files and updates the state accordingly."""
-        if not self.app.project_config:
+        project_config = self.app.project_manager.get_current_project()
+        if not project_config:
             self.stop()
             return
 
         all_project_files = get_all_matching_files(
-            base_dir=self.app.project_config.base_dir,
+            base_dir=project_config.base_dir,
             file_extensions=self.app.file_extensions,
-            gitignore_patterns=parse_gitignore(self.app.project_config.base_dir)
+            gitignore_patterns=parse_gitignore(project_config.base_dir)
         )
 
         current_set = set(all_project_files)
-        known_set = set(self.app.project_config.known_files)
+        known_set = set(project_config.known_files)
 
         # --- Check for and handle deleted files ---
         deleted_files = list(known_set - current_set)
         if deleted_files:
-            self.app.project_config.known_files = [f for f in self.app.project_config.known_files if f not in deleted_files]
-            self.app.project_config.save()
+            project_config.known_files = [f for f in project_config.known_files if f not in deleted_files]
+            project_config.save()
 
         # --- Check for new files ---
         new_files = list(current_set - known_set)
@@ -71,11 +72,12 @@ class FileMonitor:
         list and UI warning. This is called when opening the FileManager.
         """
         files_to_highlight = self.newly_detected_files[:]
-        if files_to_highlight:
+        project_config = self.app.project_manager.get_current_project()
+        if files_to_highlight and project_config:
             # Add the new files to the project's known list immediately
-            self.app.project_config.known_files.extend(files_to_highlight)
-            self.app.project_config.known_files = sorted(list(set(self.app.project_config.known_files)))
-            self.app.project_config.save()
+            project_config.known_files.extend(files_to_highlight)
+            project_config.known_files = sorted(list(set(project_config.known_files)))
+            project_config.save()
 
             # Reset the internal state and UI
             self.newly_detected_files = []
@@ -86,7 +88,8 @@ class FileMonitor:
     def _update_warning_ui(self):
         """Shows or hides the new file warning icon and updates tooltips."""
         file_count = len(self.newly_detected_files)
-        project_name = self.app.project_config.project_name if self.app.project_config else ""
+        project_config = self.app.project_manager.get_current_project()
+        project_name = project_config.project_name if project_config else ""
 
         if file_count > 0:
             file_str_verb = "file was" if file_count == 1 else "files were"
