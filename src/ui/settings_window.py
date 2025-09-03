@@ -9,10 +9,11 @@ from .. import constants as c
 from .window_utils import position_window, save_window_geometry
 
 class SettingsWindow(Toplevel):
-    def __init__(self, parent, on_close_callback=None):
+    def __init__(self, parent, updater, on_close_callback=None):
         super().__init__(parent)
         self.withdraw()
         self.parent = parent
+        self.updater = updater
         self.on_close_callback = on_close_callback
 
         config = load_config()
@@ -74,8 +75,22 @@ class SettingsWindow(Toplevel):
         Label(self.scrollable_frame, text="Application Updates", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         updates_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
         updates_frame.pack(fill='x', expand=True, pady=(0, 15))
+
+        self.check_now_button = RoundedButton(
+            updates_frame,
+            text="Check Now",
+            command=self.run_manual_update_check,
+            bg=c.BTN_GRAY_BG,
+            fg=c.BTN_GRAY_TEXT,
+            font=(self.font_family, 9),
+            height=22,
+            radius=4
+        )
+        self.check_now_button.pack(side='right', padx=(10, 0))
+
         self.update_checkbox = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
-        self.update_checkbox.pack(anchor='w')
+        self.update_checkbox.pack(side='left')
+
 
         Label(self.scrollable_frame, text="File System Monitoring", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         file_system_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
@@ -204,6 +219,10 @@ class SettingsWindow(Toplevel):
         title_label.bind("<Button-1>", toggle_section)
 
         return text_widget
+
+    def run_manual_update_check(self):
+        """Triggers the manual update check in the updater module."""
+        self.updater.check_for_updates_manual()
 
     def toggle_interval_selector(self):
         new_state = 'normal' if self.enable_new_file_check.get() else 'disabled'

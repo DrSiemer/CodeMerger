@@ -467,7 +467,7 @@ class App(Tk):
             self.update_button_states()
 
     def open_settings_window(self):
-        SettingsWindow(self, on_close_callback=self.on_settings_closed)
+        SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)
 
     def open_wrapper_text_window(self):
         if not self.project_config:
