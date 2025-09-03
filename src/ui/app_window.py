@@ -169,8 +169,8 @@ class App(Tk):
         self.wrapper_text_button = RoundedButton(self.button_grid_frame, text="Define Wrapper Texts", height=30, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
         self.copy_merged_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
 
-        ToolTip(self.copy_wrapped_button, "Copy all included code with custom intro + outro (use this to start new conversations)", delay=500)
-        ToolTip(self.copy_merged_button, "Copy all included code with custom intro (use this to update an LLM of your code changes)", delay=500)
+        ToolTip(self.copy_wrapped_button, "Copy all included code with custom intro + outro\n(use this to start new conversations)", delay=500)
+        ToolTip(self.copy_merged_button, "Copy all included code with custom intro\n(use this to update an LLM of your code changes)", delay=500)
 
         # --- Bottom Bar (Row 3) ---
         bottom_bar = Frame(self, bg=c.DARK_BG)
