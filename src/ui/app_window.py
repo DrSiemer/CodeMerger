@@ -20,6 +20,7 @@ from .title_edit_dialog import TitleEditDialog
 from ..core.project_manager import ProjectManager
 from ..core.clipboard import copy_project_to_clipboard
 from .assets import assets
+from .button_state_manager import ButtonStateManager
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -38,6 +39,7 @@ class App(Tk):
         self.updater = Updater(self, self.state, self.app_version)
         self.project_manager = ProjectManager(lambda: self.file_extensions)
         self.file_monitor = FileMonitor(self)
+        self.button_manager = ButtonStateManager(self)
 
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
@@ -53,7 +55,7 @@ class App(Tk):
         self.active_dir = StringVar()
         self.project_title_var = StringVar()
         self.status_var = StringVar(value="Ready")
-        self.active_dir.trace_add('write', self.update_button_states)
+        self.active_dir.trace_add('write', self.button_manager.update_button_states)
 
         setup_ui(self)
 
@@ -137,70 +139,7 @@ class App(Tk):
             self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
 
         self.file_monitor.start()
-        self.update_button_states()
-
-    def update_button_states(self, *args):
-        """Updates button states based on the active directory and .allcode file"""
-        is_dir_active = os.path.isdir(self.active_dir.get())
-        dir_dependent_state = 'normal' if is_dir_active else 'disabled'
-        project_config = self.project_manager.get_current_project()
-
-        if is_dir_active:
-            self.select_project_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-        else:
-            self.select_project_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-
-        self.manage_files_button.set_state(dir_dependent_state)
-        self.compact_mode_button.set_state(dir_dependent_state)
-
-        if is_dir_active:
-            self.color_swatch.config(bg=self.project_color)
-            if not self.color_swatch.winfo_ismapped():
-                 self.color_swatch.pack(side='left', padx=(0, 15), before=self.title_label)
-        else:
-             if self.color_swatch.winfo_ismapped():
-                self.color_swatch.pack_forget()
-             self.edit_icon_label.place_forget()
-
-        if not is_dir_active:
-            self.wrapper_box_title.pack_forget()
-            self.button_grid_frame.pack_forget()
-            self.no_project_label.pack(pady=(20, 30), padx=30)
-            self.wrapper_text_button.set_state('disabled')
-            self.copy_merged_button.set_state('disabled')
-            self.copy_wrapped_button.set_state('disabled')
-        else:
-            self.no_project_label.pack_forget()
-            self.wrapper_box_title.pack(pady=(10, 5))
-            self.button_grid_frame.pack(pady=(5, 18), padx=30)
-            self.wrapper_text_button.set_state('normal')
-
-            copy_buttons_state = 'disabled'
-            has_wrapper_text = False
-
-            if project_config:
-                if project_config.selected_files:
-                    copy_buttons_state = 'normal'
-                intro = project_config.intro_text
-                outro = project_config.outro_text
-                if intro or outro:
-                    has_wrapper_text = True
-
-            self.copy_merged_button.set_state(copy_buttons_state)
-            self.copy_wrapped_button.set_state(copy_buttons_state)
-
-            self.copy_wrapped_button.grid_remove()
-            self.copy_merged_button.grid_remove()
-            self.wrapper_text_button.grid_remove()
-
-            if has_wrapper_text:
-                gap = 5
-                self.wrapper_text_button.grid(row=0, column=0, columnspan=1, sticky='ew', pady=(0, 5), padx=(0, gap))
-                self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
-                self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
-            else:
-                self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5), padx=0)
-                self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew', padx=0)
+        self.button_manager.update_button_states()
 
     def on_settings_closed(self):
         self.state.reload()
@@ -225,7 +164,7 @@ class App(Tk):
             self.project_color = color_code[1]
             project_config.project_color = self.project_color
             project_config.save()
-            self.update_button_states()
+            self.button_manager.update_button_states()
 
     def open_settings_window(self):
         SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)
@@ -235,7 +174,7 @@ class App(Tk):
         if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.update_button_states)
+        wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
         self.wait_window(wt_window)
 
     def open_filetypes_manager(self):

@@ -22,6 +22,7 @@
     "src/core/secret_scanner.py",
     "src/ui/ui_builder.py",
     "src/ui/view_manager.py",
+    "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
     "src/ui/file_monitor.py",
     "src/ui/file_manager/file_manager_window.py",
@@ -50,8 +51,8 @@
     "setup.iss",
     ".github/workflows/release.yml"
   ],
-  "total_tokens": 43302,
-  "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n\n",
+  "total_tokens": 43401,
+  "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX], [MODIFIED]). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
     ".github/workflows/release.yml",
@@ -78,6 +79,7 @@
     "src/core/utils.py",
     "src/ui/app_window.py",
     "src/ui/assets.py",
+    "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
     "src/ui/custom_widgets.py",
     "src/ui/directory_dialog.py",
