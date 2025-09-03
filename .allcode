@@ -23,6 +23,7 @@
     "src/core/updater.py",
     "src/core/utils.py",
     "src/ui/app_window.py",
+    "src/ui/window_utils.py",
     "src/ui/view_manager.py",
     "src/ui/custom_widgets.py",
     "src/ui/title_edit_dialog.py",
@@ -43,7 +44,7 @@
     ".github/workflows/release.yml",
     "src/ui/tooltip.py"
   ],
-  "total_tokens": 41526,
+  "total_tokens": 42216,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- return diff files\n- append three backticks without breaking for a new line first\n- use step count in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code",
   "known_files": [
@@ -79,6 +80,7 @@
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",
     "src/ui/view_manager.py",
+    "src/ui/window_utils.py",
     "src/ui/wrapper_text_window.py",
     "version.txt"
   ]

@@ -11,6 +11,7 @@ from .selection_list_handler import SelectionListHandler
 from ..custom_widgets import RoundedButton
 from ... import constants as c
 from ...core.paths import ICON_PATH
+from ..window_utils import position_window, save_window_geometry
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, newly_detected_files=None):
@@ -26,7 +27,8 @@ class FileManagerWindow(Toplevel):
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
-        self.geometry("850x700")
+        self.geometry("1000x700")
+        self.minsize(600, 200)
         self.transient(parent)
         self.grab_set()
         self.focus_force()
@@ -60,24 +62,10 @@ class FileManagerWindow(Toplevel):
         self.deiconify()
 
     def _position_window(self):
-        self.update_idletasks()
-        window_name = self.__class__.__name__
-
-        if window_name in self.parent.window_geometries:
-            self.geometry(self.parent.window_geometries[window_name])
-        else:
-            parent_x = self.parent.winfo_rootx()
-            parent_y = self.parent.winfo_rooty()
-            parent_w = self.parent.winfo_width()
-            parent_h = self.parent.winfo_height()
-            win_w = self.winfo_width()
-            win_h = self.winfo_height()
-            x = parent_x + (parent_w - win_w) // 2
-            y = parent_y + (parent_h - win_h) // 2
-            self.geometry(f'+{x}+{y}')
+        position_window(self)
 
     def _close_and_save_geometry(self):
-        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        save_window_geometry(self)
         self.destroy()
 
     def build_ui(self):
@@ -136,7 +124,7 @@ class FileManagerWindow(Toplevel):
         move_buttons_frame.grid_columnconfigure(2, weight=1, uniform="group1")
         move_buttons_frame.grid_columnconfigure(3, weight=1, uniform="group1")
         move_buttons_frame.grid_columnconfigure(4, weight=1, uniform="group1")
-        
+
         self.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
         self.move_to_top_button.grid(row=0, column=0, sticky='ew', padx=(0, 2))
         self.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)

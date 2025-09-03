@@ -2,6 +2,7 @@ from tkinter import Toplevel, Frame, Label, Entry, StringVar
 from .custom_widgets import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
+from .window_utils import position_window, save_window_geometry
 
 class TitleEditDialog(Toplevel):
     def __init__(self, parent, title, prompt, initialvalue="", max_length=None):
@@ -56,22 +57,10 @@ class TitleEditDialog(Toplevel):
         self.wait_window(self)
 
     def _position_window(self):
-        self.update_idletasks()
-        window_name = self.__class__.__name__
-
-        if window_name in self.parent.window_geometries:
-            self.geometry(self.parent.window_geometries[window_name])
-        else:
-            parent_x = self.parent.winfo_rootx()
-            parent_y = self.parent.winfo_rooty()
-            parent_w = self.parent.winfo_width()
-            parent_h = self.parent.winfo_height()
-            dialog_w = self.winfo_width()
-            dialog_h = self.winfo_height()
-            self.geometry(f"+{parent_x + (parent_w - dialog_w) // 2}+{parent_y + (parent_h - dialog_h) // 2}")
+        position_window(self)
 
     def _close_and_save_geometry(self):
-        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        save_window_geometry(self)
         self.destroy()
 
     def _validate_length(self, *args):

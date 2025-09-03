@@ -6,6 +6,7 @@ from .custom_widgets import RoundedButton
 from .. import constants as c
 from ..core.utils import load_config
 from .tooltip import ToolTip
+from .window_utils import position_window, save_window_geometry
 
 class WrapperTextWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, on_close_callback=None):
@@ -111,24 +112,10 @@ class WrapperTextWindow(Toplevel):
         self.deiconify()
 
     def _position_window(self):
-        self.update_idletasks()
-        window_name = self.__class__.__name__
-
-        if window_name in self.parent.window_geometries:
-            self.geometry(self.parent.window_geometries[window_name])
-        else:
-            parent_x = self.parent.winfo_rootx()
-            parent_y = self.parent.winfo_rooty()
-            parent_w = self.parent.winfo_width()
-            parent_h = self.parent.winfo_height()
-            win_w = self.winfo_width()
-            win_h = self.winfo_height()
-            x = parent_x + (parent_w - win_w) // 2
-            y = parent_y + (parent_h - win_h) // 2
-            self.geometry(f'+{x}+{y}')
+        position_window(self)
 
     def _close_and_save_geometry(self):
-        self.parent.window_geometries[self.__class__.__name__] = self.geometry()
+        save_window_geometry(self)
         self.destroy()
 
     def load_images(self):
