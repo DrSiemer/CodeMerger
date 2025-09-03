@@ -443,8 +443,12 @@ class App(Tk):
             tooltip_text = f"{file_count} new {file_str_verb} added to the project"
             self.new_files_tooltip.text = tooltip_text
             self.new_files_label.pack(side='right', padx=(10, 0))
+            # New file(s) detected, make the button blue
+            self.manage_files_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
             self.new_files_label.pack_forget()
+            # No new files, revert the button to gray
+            self.manage_files_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
 
         if self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
             if file_count > 0:
