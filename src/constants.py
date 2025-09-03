@@ -18,7 +18,8 @@ DEFAULT_OUTRO_PROMPT = 'DO:\n- always return full code, unless a change is VERY 
 
 # --- Limits and UI settings ---
 RECENT_PROJECTS_MAX = 10
-MAX_SECRET_SCAN_REPORT_LINES = 10 # Max lines to show in the secret scan warning
+PROJECT_TITLE_MAX_LENGTH = 64
+MAX_SECRET_SCAN_REPORT_LINES = 10
 SUBTLE_HIGHLIGHT_COLOR = "#555555"
 COMPACT_MODE_BG_COLOR = "#6f6f6f"
 

@@ -4,6 +4,7 @@ from tkinter import Toplevel, Frame, Label, filedialog
 from ..core.project_config import ProjectConfig
 from .custom_widgets import RoundedButton
 from .. import constants as c
+from ..core.paths import ICON_PATH
 
 class DirectoryDialog(Toplevel):
     """
@@ -25,6 +26,7 @@ class DirectoryDialog(Toplevel):
         font_button = (font_family, 16)
 
         self.title("Select project")
+        self.iconbitmap(ICON_PATH)
         self.transient(parent)
         self.grab_set()
         self.focus_force()

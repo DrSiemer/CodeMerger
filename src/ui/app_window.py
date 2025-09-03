@@ -1,7 +1,7 @@
 import os
 import json
 import pyperclip
-from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser, simpledialog
+from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser
 from PIL import Image, ImageTk
 
 from ..app_state import AppState
@@ -21,6 +21,7 @@ from ..core.updater import Updater
 from .custom_widgets import RoundedButton
 from ..ui.file_manager.file_tree_builder import get_all_matching_files
 from .tooltip import ToolTip
+from .title_edit_dialog import TitleEditDialog
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -138,7 +139,8 @@ class App(Tk):
         left_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
         left_buttons.grid(row=0, column=0, sticky='w')
 
-        RoundedButton(left_buttons, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.open_change_directory_dialog).pack(side='left')
+        self.select_project_button = RoundedButton(left_buttons, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.open_change_directory_dialog)
+        self.select_project_button.pack(side='left')
         self.manage_files_button = RoundedButton(left_buttons, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.manage_files)
         self.manage_files_button.pack(side='left', padx=(10, 0))
 
@@ -216,14 +218,16 @@ class App(Tk):
             return
 
         current_name = self.project_config.project_name
-        new_name = simpledialog.askstring(
-            "Edit Project Title",
-            "Enter the new title for the project:",
+        dialog = TitleEditDialog(
+            parent=self,
+            title="Edit Project Title",
+            prompt="Enter the new title for the project:",
             initialvalue=current_name,
-            parent=self
+            max_length=c.PROJECT_TITLE_MAX_LENGTH
         )
+        new_name = dialog.result
 
-        if new_name and new_name.strip() and new_name.strip() != current_name:
+        if new_name is not None and new_name.strip() and new_name.strip() != current_name:
             new_name = new_name.strip()
             self.project_title_var.set(new_name)
             self.project_config.project_name = new_name
@@ -289,6 +293,14 @@ class App(Tk):
         """Updates button states based on the active directory and .allcode file"""
         is_dir_active = os.path.isdir(self.active_dir.get())
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
+
+        # --- Update "Select Project" button color ---
+        if is_dir_active:
+            # Project is active, make it gray
+            self.select_project_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+        else:
+            # No project, make it blue
+            self.select_project_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
         # --- Top Level Buttons ---
         self.manage_files_button.set_state(dir_dependent_state)

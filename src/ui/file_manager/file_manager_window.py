@@ -10,6 +10,7 @@ from .file_tree_handler import FileTreeHandler
 from .selection_list_handler import SelectionListHandler
 from ..custom_widgets import RoundedButton
 from ... import constants as c
+from ...core.paths import ICON_PATH
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, newly_detected_files=None):
@@ -23,6 +24,7 @@ class FileManagerWindow(Toplevel):
         self.newly_detected_files = newly_detected_files or []
 
         self.title(f"Manage files for: {self.project_config.project_name}")
+        self.iconbitmap(ICON_PATH)
         self.geometry("850x700")
         self.transient(parent)
         self.grab_set()
