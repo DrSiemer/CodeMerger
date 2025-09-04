@@ -1,19 +1,21 @@
 import os
 from tkinter import Toplevel, Frame, Label, Text, Scrollbar
-from PIL import Image, ImageTk
-from ..core.paths import ICON_PATH, DEFAULTS_ICON_PATH
+from ..core.paths import ICON_PATH
 from .custom_widgets import RoundedButton
 from .. import constants as c
 from ..core.utils import load_config
 from .tooltip import ToolTip
+from .window_utils import position_window, save_window_geometry
+from .assets import assets
 
 class WrapperTextWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, on_close_callback=None):
         super().__init__(parent)
+        self.withdraw()
+        self.parent = parent
         self.project_config = project_config
         self.status_var = status_var
         self.on_close_callback = on_close_callback
-        self.defaults_icon = None
 
         # --- Window Setup ---
         self.title("Set Wrapper Text")
@@ -24,9 +26,6 @@ class WrapperTextWindow(Toplevel):
         self.focus_force()
         self.configure(bg=c.DARK_BG)
 
-        # Load images first to make the icon available
-        self.load_images()
-
         # --- UI Layout ---
         main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
         main_frame.pack(fill='both', expand=True)
@@ -36,10 +35,13 @@ class WrapperTextWindow(Toplevel):
         button_frame.pack(side='bottom', fill='x', pady=(10, 0))
 
         # --- Place "Load Defaults" icon on the left side of the button bar ---
-        if self.defaults_icon:
-            self.defaults_button = Label(button_frame, image=self.defaults_icon, bg=c.DARK_BG, cursor="hand2")
-            # Anchor the PhotoImage reference to the widget to prevent garbage collection
-            self.defaults_button.image = self.defaults_icon
+        config = load_config()
+        default_intro = config.get('default_intro_prompt', '').strip()
+        default_outro = config.get('default_outro_prompt', '').strip()
+
+        if assets.defaults_icon and (default_intro or default_outro):
+            self.defaults_button = Label(button_frame, image=assets.defaults_icon, bg=c.DARK_BG, cursor="hand2")
+            self.defaults_button.image = assets.defaults_icon
             self.defaults_button.pack(side='left', padx=(0, 10), anchor='w')
             self.defaults_button.bind("<Button-1>", self.populate_from_defaults)
             ToolTip(self.defaults_button, "Populate fields with default prompts from Settings")
@@ -98,15 +100,18 @@ class WrapperTextWindow(Toplevel):
         self.intro_text.insert('1.0', self.project_config.intro_text)
         self.outro_text.insert('1.0', self.project_config.outro_text)
 
-        self.protocol("WM_DELETE_WINDOW", self.destroy)
-        self.bind('<Escape>', lambda e: self.destroy())
+        self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
+        self.bind('<Escape>', lambda e: self._close_and_save_geometry())
 
-    def load_images(self):
-        try:
-            defaults_img = Image.open(DEFAULTS_ICON_PATH).resize((24, 24), Image.Resampling.LANCZOS)
-            self.defaults_icon = ImageTk.PhotoImage(defaults_img)
-        except Exception:
-            self.defaults_icon = None
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        position_window(self)
+
+    def _close_and_save_geometry(self):
+        save_window_geometry(self)
+        self.destroy()
 
     def populate_from_defaults(self, event=None):
         config = load_config()
@@ -117,7 +122,6 @@ class WrapperTextWindow(Toplevel):
         self.intro_text.insert('1.0', default_intro)
 
         self.outro_text.delete('1.0', 'end')
-        # FIX: Corrected the typo '1.m' to '1.0'
         self.outro_text.insert('1.0', default_outro)
 
     def save_and_close(self):
@@ -134,4 +138,4 @@ class WrapperTextWindow(Toplevel):
         if self.on_close_callback:
             self.on_close_callback()
 
-        self.destroy()
+        self._close_and_save_geometry()

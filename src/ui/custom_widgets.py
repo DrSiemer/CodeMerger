@@ -71,6 +71,11 @@ class RoundedButton(tk.Canvas):
         self.command = command
         self.is_enabled = True
 
+        # Increase the canvas size for hollow buttons to compensate for the border
+        if self.hollow:
+            self.width += 2
+            self.height += 2
+
         super().__init__(parent, width=self.width, height=self.height, bg=parent.cget('bg'), bd=0, highlightthickness=0)
 
         self.text = text
@@ -82,7 +87,7 @@ class RoundedButton(tk.Canvas):
             # For hollow buttons, the look is a specific fill with fg text
             self.base_color = c.TOP_BAR_BG # This is the main fill color
             self.hover_color = self._adjust_brightness(self.base_color, 0.2)
-            self.click_color = self._adjust_brightness(self.base_color, 0.4)
+            self.click_color = self.base_color # Use base color for click to avoid flicker
             self.disabled_color = self._adjust_brightness(c.TOP_BAR_BG, -0.1)
             self.disabled_text_color = '#757575'
         else:
@@ -147,6 +152,7 @@ class RoundedButton(tk.Canvas):
         if self.hollow:
             border_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
             scaled_border_width = 1 * scale
+            # Inset by half the border width to draw a clean border
             inset = scaled_border_width / 2
             draw.rounded_rectangle(
                 (inset, inset, scaled_width - inset, scaled_height - inset),
@@ -219,19 +225,33 @@ class RoundedButton(tk.Canvas):
         """Allows configuration of button properties like a standard widget."""
         text_changed = 'text' in kwargs
         width_changed = 'width' in kwargs
+        bg_changed = 'bg' in kwargs
+        fg_changed = 'fg' in kwargs
 
         if text_changed:
             self.text = kwargs.pop('text')
 
         if width_changed:
             self.width = kwargs.pop('width')
+            if self.hollow: self.width += 2 # Re-apply compensation if width is changed
             super().config(width=self.width)
+
+        if bg_changed:
+            self.original_bg_color = kwargs.pop('bg')
+            if not self.hollow:
+                self.base_color = self.original_bg_color
+                self.hover_color = self._adjust_brightness(self.base_color, -0.1)
+                self.click_color = self._adjust_brightness(self.base_color, -0.2)
+
+        if fg_changed:
+            self.original_fg_color = kwargs.pop('fg')
+            self.fg_color = self.original_fg_color
 
         # The 'state' key is the primary driver of redraws
         if 'state' in kwargs:
             self.set_state(kwargs.pop('state'))
-        # If only the text or width changed, we need to force a redraw with the correct current color
-        elif text_changed or width_changed:
+        # If any property changed that affects visuals, we need to force a redraw
+        elif text_changed or width_changed or bg_changed or fg_changed:
             color = self.base_color if self.is_enabled else self.disabled_color
             self._draw(color)
 

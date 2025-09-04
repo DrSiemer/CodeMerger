@@ -6,11 +6,14 @@ from ..core.registry import get_setting, save_setting
 from ..core.paths import ICON_PATH
 from .custom_widgets import RoundedButton
 from .. import constants as c
+from .window_utils import position_window, save_window_geometry
 
 class SettingsWindow(Toplevel):
-    def __init__(self, parent, on_close_callback=None):
+    def __init__(self, parent, updater, on_close_callback=None):
         super().__init__(parent)
+        self.withdraw()
         self.parent = parent
+        self.updater = updater
         self.on_close_callback = on_close_callback
 
         config = load_config()
@@ -72,8 +75,22 @@ class SettingsWindow(Toplevel):
         Label(self.scrollable_frame, text="Application Updates", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         updates_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
         updates_frame.pack(fill='x', expand=True, pady=(0, 15))
+
+        self.check_now_button = RoundedButton(
+            updates_frame,
+            text="Check Now",
+            command=self.run_manual_update_check,
+            bg=c.BTN_GRAY_BG,
+            fg=c.BTN_GRAY_TEXT,
+            font=(self.font_family, 9),
+            height=22,
+            radius=4
+        )
+        self.check_now_button.pack(side='right', padx=(10, 0))
+
         self.update_checkbox = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
-        self.update_checkbox.pack(anchor='w')
+        self.update_checkbox.pack(side='left')
+
 
         Label(self.scrollable_frame, text="File System Monitoring", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         file_system_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
@@ -95,9 +112,9 @@ class SettingsWindow(Toplevel):
         self.scan_checkbox = ttk.Checkbutton(secrets_frame, text="Scan for secrets on copy (slower)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
         self.scan_checkbox.pack(anchor='w')
 
-        self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''))
-        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''))
-        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''))
+        self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT)
+        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT)
+        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''), c.DEFAULT_OUTRO_PROMPT)
 
         Label(self.scrollable_frame, text="Default Editor", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
         editor_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
@@ -118,6 +135,16 @@ class SettingsWindow(Toplevel):
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind('<Escape>', lambda e: self.on_closing())
+
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        position_window(self)
+
+    def _close_and_save_geometry(self):
+        save_window_geometry(self)
+        self.destroy()
 
     def _on_frame_configure(self, event=None):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -141,20 +168,42 @@ class SettingsWindow(Toplevel):
             if self.scrollbar.winfo_ismapped():
                 self.scrollbar.grid_remove()
 
-    def _create_collapsible_text_section(self, parent, title, initial_text):
+    def _create_collapsible_text_section(self, parent, title, initial_text, default_text):
         section_frame = Frame(parent, bg=c.DARK_BG)
         section_frame.pack(fill='x', expand=True, pady=(15, 0))
-        header_frame = Frame(section_frame, bg=c.DARK_BG, cursor="hand2")
+
+        header_frame = Frame(section_frame, bg=c.DARK_BG)
         header_frame.pack(fill='x', expand=True)
-        icon_label = Label(header_frame, text="▶", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR)
-        icon_label.pack(side='left', padx=(0, 5))
-        Label(header_frame, text=title, font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+
         body_frame = Frame(section_frame, bg=c.DARK_BG)
         text_frame = Frame(body_frame, bd=1, relief='sunken')
         text_frame.pack(fill='x', expand=True, padx=(22, 0))
         text_widget = Text(text_frame, wrap='word', undo=True, height=4, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0, font=self.font_normal)
         text_widget.pack(fill='x', expand=True, ipady=4, ipadx=4)
         text_widget.insert('1.0', initial_text)
+
+        icon_label = Label(header_frame, text="▶", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
+        icon_label.pack(side='left', padx=(0, 5))
+
+        title_label = Label(header_frame, text=title, font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
+        title_label.pack(side='left')
+
+        def do_reset():
+            text_widget.delete('1.0', 'end')
+            text_widget.insert('1.0', default_text)
+
+        reset_button = RoundedButton(
+            header_frame,
+            text="Reset",
+            command=do_reset,
+            bg=c.BTN_GRAY_BG,
+            fg=c.BTN_GRAY_TEXT,
+            font=(self.font_family, 9),
+            height=22,
+            radius=4
+        )
+        reset_button.pack(side='right', padx=(5, 0))
+
         is_expanded = BooleanVar(value=False)
         def toggle_section(event=None):
             is_expanded.set(not is_expanded.get())
@@ -165,9 +214,15 @@ class SettingsWindow(Toplevel):
                 body_frame.pack_forget()
                 icon_label.config(text="▶")
             self.after(5, self._on_frame_configure)
-        header_frame.bind("<Button-1>", toggle_section)
+
         icon_label.bind("<Button-1>", toggle_section)
+        title_label.bind("<Button-1>", toggle_section)
+
         return text_widget
+
+    def run_manual_update_check(self):
+        """Triggers the manual update check in the updater module."""
+        self.updater.check_for_updates_manual()
 
     def toggle_interval_selector(self):
         new_state = 'normal' if self.enable_new_file_check.get() else 'disabled'
@@ -184,7 +239,7 @@ class SettingsWindow(Toplevel):
         self.editor_path.set('')
 
     def on_closing(self):
-        self.destroy()
+        self._close_and_save_geometry()
 
     def save_and_close(self):
         config = load_config()
@@ -202,4 +257,4 @@ class SettingsWindow(Toplevel):
         save_setting('AutomaticUpdates', self.check_for_updates.get())
         if self.on_close_callback:
             self.on_close_callback()
-        self.destroy()
+        self._close_and_save_geometry()

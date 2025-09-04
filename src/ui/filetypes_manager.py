@@ -6,11 +6,12 @@ from ..core.utils import load_all_filetypes, save_filetypes
 from ..core.paths import ICON_PATH
 from .custom_widgets import RoundedButton
 from .. import constants as c
-
+from .window_utils import position_window, save_window_geometry
 
 class FiletypesManagerWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):
         super().__init__(parent)
+        self.withdraw()
         self.parent = parent
         self.on_close_callback = on_close_callback
         self.filetypes_data = load_all_filetypes()
@@ -76,6 +77,16 @@ class FiletypesManagerWindow(Toplevel):
         self.bind('<Escape>', lambda e: self.on_closing())
 
         self.populate_tree()
+
+        self._position_window()
+        self.deiconify()
+
+    def _position_window(self):
+        position_window(self)
+
+    def _close_and_save_geometry(self):
+        save_window_geometry(self)
+        self.destroy()
 
     def populate_tree(self):
         selection = self.tree.selection()
@@ -152,13 +163,13 @@ class FiletypesManagerWindow(Toplevel):
                 self.save_and_close()
                 return
 
-        self.destroy()
         if self.on_close_callback:
             self.on_close_callback()
+        self._close_and_save_geometry()
 
     def save_and_close(self):
         """Saves the configuration and then closes the window."""
         save_filetypes(self.filetypes_data)
-        self.destroy()
         if self.on_close_callback:
             self.on_close_callback()
+        self._close_and_save_geometry()

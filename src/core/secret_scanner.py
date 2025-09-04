@@ -1,6 +1,7 @@
 import os
 from detect_secrets.core.secrets_collection import SecretsCollection
 from detect_secrets.settings import transient_settings
+from ..constants import MAX_SECRET_SCAN_REPORT_LINES
 
 def scan_for_secrets(base_dir, files_to_scan):
     """
@@ -66,9 +67,8 @@ def scan_for_secrets(base_dir, files_to_scan):
         return None
 
     # Limit the report to a reasonable number of lines to avoid a giant messagebox
-    MAX_LINES_IN_REPORT = 10
-    report_string = "\n".join(report_lines[:MAX_LINES_IN_REPORT])
-    if len(report_lines) > MAX_LINES_IN_REPORT:
-        report_string += f"\n... and {len(report_lines) - MAX_LINES_IN_REPORT} more."
+    report_string = "\n".join(report_lines[:MAX_SECRET_SCAN_REPORT_LINES])
+    if len(report_lines) > MAX_SECRET_SCAN_REPORT_LINES:
+        report_string += f"\n... and {len(report_lines) - MAX_SECRET_SCAN_REPORT_LINES} more."
 
     return report_string

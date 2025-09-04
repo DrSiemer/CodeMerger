@@ -67,6 +67,46 @@ class Updater:
             print("  Updating last check date to now.")
             self.state.update_last_check_date()
 
+    def check_for_updates_manual(self):
+        """
+        Performs a user-initiated update check and provides direct feedback.
+        """
+        try:
+            with request.urlopen(self.repo_url) as response:
+                if response.status == 200:
+                    data = json.loads(response.read().decode())
+                    latest_version_tag = data.get('tag_name', 'v0.0.0')
+
+                    latest_version = latest_version_tag.lstrip('v').strip()
+                    current_version_normalized = self.current_version.lstrip('v').strip()
+
+                    if self._is_newer(latest_version, current_version_normalized):
+                        self._notify_user(data)
+                    else:
+                        messagebox.showinfo(
+                            "Up to Date",
+                            f"You are running the latest version of CodeMerger ({self.current_version}).",
+                            parent=self.parent
+                        )
+                else:
+                    messagebox.showerror(
+                        "Update Check Failed",
+                        f"Could not check for updates. Server returned status {response.status}.",
+                        parent=self.parent
+                    )
+        except error.URLError as e:
+            messagebox.showerror(
+                "Update Check Failed",
+                f"Could not check for updates. Please check your internet connection.\n\nDetails: {e.reason}",
+                parent=self.parent
+            )
+        except Exception as e:
+            messagebox.showerror(
+                "Update Check Failed",
+                f"An unexpected error occurred while checking for updates.\n\nDetails: {e}",
+                parent=self.parent
+            )
+
     def _is_newer(self, latest_str, current_str):
         """
         Compares two version strings (e.g., '1.2.3') and returns True if

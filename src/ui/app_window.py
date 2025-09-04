@@ -1,7 +1,6 @@
 import os
 import json
-import pyperclip
-from tkinter import Tk, Frame, Label, Button, StringVar, messagebox, colorchooser, simpledialog
+from tkinter import Tk, StringVar, messagebox, colorchooser
 from PIL import Image, ImageTk
 
 from ..app_state import AppState
@@ -10,55 +9,55 @@ from .file_manager.file_manager_window import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
-from ..core.merger import generate_output_string
 from .directory_dialog import DirectoryDialog
-from ..core.utils import load_active_file_extensions, parse_gitignore
-from ..core.paths import ICON_PATH, EDIT_ICON_PATH, TRASH_ICON_PATH, NEW_FILES_ICON_PATH
-from ..core.project_config import ProjectConfig
+from ..core.utils import load_active_file_extensions
+from ..core.paths import ICON_PATH
 from .. import constants as c
-from ..core.secret_scanner import scan_for_secrets
 from ..core.updater import Updater
-from .custom_widgets import RoundedButton
-from ..ui.file_manager.file_tree_builder import get_all_matching_files
-from .tooltip import ToolTip
+from .ui_builder import setup_ui
+from .file_monitor import FileMonitor
+from .title_edit_dialog import TitleEditDialog
+from ..core.project_manager import ProjectManager
+from ..core.clipboard import copy_project_to_clipboard
+from .assets import assets
+from .button_state_manager import ButtonStateManager
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
+        assets.load_tk_images() # [FIX] Load Tkinter images now that the root window exists
+
         self.file_extensions = file_extensions
         self.app_version = app_version
         self.app_bg_color = c.DARK_BG
-        self.project_config = None
         self.project_color = c.COMPACT_MODE_BG_COLOR
-        self.edit_icon = None
-        self.trash_icon_image = None
-        self.new_files_icon = None
         self._hide_edit_icon_job = None
-        self._new_file_check_job = None
-        self._newly_detected_files = []
-        self.title_label = None
+        self.window_geometries = {}
 
         self.state = AppState()
         self.view_manager = ViewManager(self)
         self.updater = Updater(self, self.state, self.app_version)
+        self.project_manager = ProjectManager(lambda: self.file_extensions)
+        self.file_monitor = FileMonitor(self)
+        self.button_manager = ButtonStateManager(self)
 
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
-        self.geometry("800x400")
-        self.minsize(800, 400)
+        self.geometry("700x405")
+        self.minsize(500, 405)
         self.configure(bg=self.app_bg_color)
-
-        self.load_images()
 
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
 
+        # Initialize StringVar members before UI build
         self.active_dir = StringVar()
         self.project_title_var = StringVar()
-        self.active_dir.trace_add('write', self.update_button_states)
+        self.status_var = StringVar(value="Ready")
+        self.active_dir.trace_add('write', self.button_manager.update_button_states)
 
-        self.build_ui()
+        setup_ui(self)
 
         # --- Project Loading Logic ---
         if initial_project_path and os.path.isdir(initial_project_path):
@@ -70,170 +69,46 @@ class App(Tk):
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
 
-    def load_images(self):
-        try:
-            edit_img_src = Image.open(EDIT_ICON_PATH)
-            self.edit_icon = ImageTk.PhotoImage(edit_img_src)
-            # Load the trash icon as a Pillow Image object for the custom button
-            self.trash_icon_image = Image.open(TRASH_ICON_PATH).resize((18, 18), Image.Resampling.LANCZOS)
-            new_files_img = Image.open(NEW_FILES_ICON_PATH).resize((24, 24), Image.Resampling.LANCZOS)
-            self.new_files_icon = ImageTk.PhotoImage(new_files_img)
-        except Exception:
-            self.edit_icon = None
-            self.trash_icon_image = None
-            self.new_files_icon = None
-
-    def build_ui(self):
-        """Creates and places all the UI widgets based on the new dark theme design"""
-        # --- Style Definitions ---
-        font_family = "Segoe UI"
-        font_normal = (font_family, 12)
-        font_large_bold = (font_family, 24, 'bold')
-        font_button = (font_family, 16)
-
-        # --- Window Grid Configuration ---
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(2, weight=1)
-
-        # --- Top Bar (Row 0) ---
-        top_bar = Frame(self, bg=c.TOP_BAR_BG, padx=20, pady=15)
-        top_bar.grid(row=0, column=0, sticky='ew')
-        top_bar.columnconfigure(1, weight=1) # Make the center area expand
-
-        # Left-aligned items
-        left_frame = Frame(top_bar, bg=c.TOP_BAR_BG)
-        left_frame.grid(row=0, column=0, sticky='w')
-
-        self.color_swatch = Frame(left_frame, width=48, height=48, cursor="hand2")
-        self.color_swatch.pack_propagate(False)
-        self.color_swatch.bind("<Button-1>", self.open_color_chooser)
-        self.color_swatch.config(bg=c.TOP_BAR_BG)
-
-        self.title_label = Label(left_frame, textvariable=self.project_title_var, font=font_large_bold, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
-        self.title_label.pack(side='left')
-        self.title_label.bind("<Button-1>", self.edit_project_title)
-        self.title_label.bind("<Enter>", self.on_title_area_enter)
-        self.title_label.bind("<Leave>", self.on_title_area_leave)
-
-        self.edit_icon_label = Label(left_frame, image=self.edit_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-        if self.edit_icon:
-            self.edit_icon_label.bind("<Button-1>", self.edit_project_title)
-            self.edit_icon_label.bind("<Enter>", self.on_title_area_enter)
-            self.edit_icon_label.bind("<Leave>", self.on_title_area_leave)
-
-        # Right-aligned items
-        right_frame = Frame(top_bar, bg=c.TOP_BAR_BG)
-        right_frame.grid(row=0, column=2, sticky='e')
-
-        # New files warning icon
-        self.new_files_label = Label(right_frame, image=self.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-        self.new_files_label.bind("<Button-1>", lambda e: self.manage_files())
-        self.new_files_tooltip = ToolTip(self.new_files_label, text="")
-
-        # --- Top-Level Buttons (Row 1) ---
-        top_buttons_container = Frame(self, bg=c.DARK_BG, padx=20)
-        top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
-        top_buttons_container.columnconfigure(1, weight=1)
-
-        left_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
-        left_buttons.grid(row=0, column=0, sticky='w')
-
-        RoundedButton(left_buttons, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.open_change_directory_dialog).pack(side='left')
-        self.manage_files_button = RoundedButton(left_buttons, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.manage_files)
-        self.manage_files_button.pack(side='left', padx=(10, 0))
-
-        right_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
-        right_buttons.grid(row=0, column=2, sticky='e')
-        self.compact_mode_button = RoundedButton(right_buttons, text="Compact Mode", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.view_manager.toggle_compact_mode)
-        self.compact_mode_button.pack()
-
-        # --- Center "Wrapper & Output" Box (Row 2) ---
-        center_frame = Frame(self, bg=c.DARK_BG)
-        center_frame.grid(row=2, column=0, sticky='nsew', pady=0)
-
-        wrapper_box = Frame(center_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-        wrapper_box.place(relx=0.5, rely=0.55, anchor='center')
-
-        self.wrapper_box_title = Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal, pady=2)
-
-        # This label is shown when no project is selected
-        self.no_project_label = Label(wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
-
-        self.button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
-        # Configure the grid columns to have equal weight. This is the key to alignment.
-        self.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
-        self.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
-
-        copy_button_height = 60
-        self.copy_wrapped_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=self.copy_wrapped_code)
-        self.wrapper_text_button = RoundedButton(self.button_grid_frame, text="Define Wrapper Texts", height=30, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.open_wrapper_text_window)
-        self.copy_merged_button = RoundedButton(self.button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=self.copy_merged_code)
-
-        ToolTip(self.copy_wrapped_button, "Copy all included code with custom intro + outro (use this to start new conversations)", delay=500)
-        ToolTip(self.copy_merged_button, "Copy all included code with custom intro (use this to update an LLM of your code changes)", delay=500)
-
-        # --- Bottom Bar (Row 3) ---
-        bottom_bar = Frame(self, bg=c.DARK_BG)
-        bottom_bar.grid(row=3, column=0, sticky='ew', pady=(20, 15))
-        bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
-        bottom_buttons_container.pack(side='left', padx=20)
-
-        RoundedButton(bottom_buttons_container, text="Manage Filetypes", font=font_button, fg=c.TEXT_COLOR, command=self.open_filetypes_manager, hollow=True).pack(side='left')
-        RoundedButton(bottom_buttons_container, text="Settings", font=font_button, fg=c.TEXT_COLOR, command=self.open_settings_window, hollow=True).pack(side='left', padx=(10, 0))
-
-        # --- Status Bar (Row 4) ---
-        self.status_var = StringVar(value="Ready")
-        status_bar = Label(
-            self,
-            textvariable=self.status_var,
-            relief='flat',
-            anchor='w',
-            bg=c.STATUS_BG,
-            fg=c.STATUS_FG,
-            font=(font_family, 9),
-            padx=20,
-            pady=4
-        )
-        status_bar.grid(row=4, column=0, sticky='ew')
-
     def on_title_area_enter(self, event=None):
         if self._hide_edit_icon_job:
             self.after_cancel(self._hide_edit_icon_job)
             self._hide_edit_icon_job = None
 
-        if self.project_config and self.edit_icon:
+        if self.project_manager.get_current_project() and assets.edit_icon:
             self.edit_icon_label.place(
                 in_=self.title_label.master,
                 x=self.title_label.winfo_x() + self.title_label.winfo_width() + 5,
-                y=self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (self.edit_icon.height() // 2)
+                y=self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (assets.edit_icon.height() // 2)
             )
 
     def on_title_area_leave(self, event=None):
         self._hide_edit_icon_job = self.after(50, self.edit_icon_label.place_forget)
 
     def edit_project_title(self, event=None):
-        if not self.project_config:
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
             return
 
-        current_name = self.project_config.project_name
-        new_name = simpledialog.askstring(
-            "Edit Project Title",
-            "Enter the new title for the project:",
+        current_name = project_config.project_name
+        dialog = TitleEditDialog(
+            parent=self,
+            title="Edit Project Title",
+            prompt="Enter the new title for the project:",
             initialvalue=current_name,
-            parent=self
+            max_length=c.PROJECT_TITLE_MAX_LENGTH
         )
+        new_name = dialog.result
 
-        if new_name and new_name.strip() and new_name.strip() != current_name:
+        if new_name is not None and new_name.strip() and new_name.strip() != current_name:
             new_name = new_name.strip()
             self.project_title_var.set(new_name)
-            self.project_config.project_name = new_name
-            self.project_config.save()
+            project_config.project_name = new_name
+            project_config.save()
             self.status_var.set(f"Project title changed to '{new_name}'")
 
     def on_app_close(self):
         """Safely destroys child windows before closing the main app"""
-        if self._new_file_check_job:
-            self.after_cancel(self._new_file_check_job)
+        self.file_monitor.stop()
         if self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
             self.view_manager.compact_mode_window.destroy()
         self.destroy()
@@ -248,115 +123,27 @@ class App(Tk):
         """Sets the display string for the active directory and loads its config"""
         font_family = "Segoe UI"
         font_large_bold = (font_family, 24, 'bold')
-        if path and os.path.isdir(path):
+
+        project_config, status_message = self.project_manager.load_project(path)
+        self.status_var.set(status_message)
+
+        if project_config:
             self.active_dir.set(path)
-
-            is_new_project = not os.path.isfile(os.path.join(path, '.allcode'))
-
-            self.project_config = ProjectConfig(path)
-            files_were_cleaned = self.project_config.load()
-            project_display_name = self.project_config.project_name
-
-            if is_new_project:
-                all_project_files = get_all_matching_files(
-                    base_dir=self.project_config.base_dir,
-                    file_extensions=self.file_extensions,
-                    gitignore_patterns=parse_gitignore(self.project_config.base_dir)
-                )
-                self.project_config.known_files = all_project_files
-                self.project_config.save()
-                self.status_var.set(f"Initialized new project: {project_display_name}.")
-            elif files_were_cleaned:
-                self.status_var.set(f"Activated project: {project_display_name} - Cleaned missing files.")
-            else:
-                self.status_var.set(f"Activated project: {project_display_name}.")
-
-            self.project_title_var.set(self.project_config.project_name)
-            self.project_color = self.project_config.project_color
+            self.project_title_var.set(project_config.project_name)
+            self.project_color = project_config.project_color
             self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
         else:
             self.active_dir.set("No project selected")
             self.project_title_var.set("(no active project)")
-            self.project_config = None
             self.project_color = c.COMPACT_MODE_BG_COLOR
             self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
 
-        # Stop any previous file checkers and start a new one for the current project
-        self.start_new_file_checker()
-        self.update_button_states()
-
-    def update_button_states(self, *args):
-        """Updates button states based on the active directory and .allcode file"""
-        is_dir_active = os.path.isdir(self.active_dir.get())
-        dir_dependent_state = 'normal' if is_dir_active else 'disabled'
-
-        # --- Top Level Buttons ---
-        self.manage_files_button.set_state(dir_dependent_state)
-        self.compact_mode_button.set_state(dir_dependent_state)
-
-        # --- Color Swatch & Edit Icon ---
-        if is_dir_active:
-            self.color_swatch.config(bg=self.project_color)
-            if not self.color_swatch.winfo_ismapped():
-                 self.color_swatch.pack(side='left', padx=(0, 15), before=self.title_label)
-        else:
-             if self.color_swatch.winfo_ismapped():
-                self.color_swatch.pack_forget()
-             self.edit_icon_label.place_forget()
-
-        # --- Central Wrapper & Output Box ---
-        if not is_dir_active:
-            # Show "select project" message and hide buttons/title
-            self.wrapper_box_title.pack_forget()
-            self.button_grid_frame.pack_forget()
-            self.no_project_label.pack(pady=(20, 30), padx=30)
-            # Ensure wrapper and copy buttons are disabled
-            self.wrapper_text_button.set_state('disabled')
-            self.copy_merged_button.set_state('disabled')
-            self.copy_wrapped_button.set_state('disabled')
-        else:
-            # Show buttons/title and hide "select project" message
-            self.no_project_label.pack_forget()
-            self.wrapper_box_title.pack(pady=(10, 5))
-            self.button_grid_frame.pack(pady=(5, 18), padx=30)
-
-            # Configure button states and layout within the frame
-            self.wrapper_text_button.set_state('normal')
-
-            copy_buttons_state = 'disabled'
-            has_wrapper_text = False
-
-            if self.project_config:
-                if self.project_config.selected_files:
-                    copy_buttons_state = 'normal'
-                intro = self.project_config.intro_text
-                outro = self.project_config.outro_text
-                if intro or outro:
-                    has_wrapper_text = True
-
-            self.copy_merged_button.set_state(copy_buttons_state)
-            self.copy_wrapped_button.set_state(copy_buttons_state)
-
-            # Clear any previous grid configurations before applying a new one
-            self.copy_wrapped_button.grid_remove()
-            self.copy_merged_button.grid_remove()
-            self.wrapper_text_button.grid_remove()
-
-            if has_wrapper_text:
-                gap = 5
-                # THREE-BUTTON LAYOUT
-                self.wrapper_text_button.grid(row=0, column=0, columnspan=1, sticky='ew', pady=(0, 5), padx=(0, gap))
-                self.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
-                self.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
-            else:
-                # TWO-BUTTON LAYOUT: Explicitly set padx=0 to avoid carrying over old padding
-                self.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5), padx=0)
-                self.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew', padx=0)
+        self.file_monitor.start()
+        self.button_manager.update_button_states()
 
     def on_settings_closed(self):
         self.state.reload()
-        # The file checker might need to be restarted with new settings
-        self.start_new_file_checker()
+        self.file_monitor.start()
         self.status_var.set("Settings updated")
 
     def on_directory_selected(self, new_dir):
@@ -369,94 +156,25 @@ class App(Tk):
         if cleared_active:
             self.set_active_dir_display(None)
 
-    def start_new_file_checker(self):
-        """Starts or restarts the periodic check for new files based on current settings."""
-        if self._new_file_check_job:
-            self.after_cancel(self._new_file_check_job)
-            self._new_file_check_job = None
-
-        # Clear any old warnings
-        self._newly_detected_files = []
-        self._update_warning_ui()
-
-        is_dir_active = self.project_config is not None
-        if self.state.config.get('enable_new_file_check', True) and is_dir_active:
-            interval_sec = self.state.config.get('new_file_check_interval', 5)
-            self._schedule_next_check(interval_sec * 1000)
-
-    def _schedule_next_check(self, interval_ms):
-        self._new_file_check_job = self.after(interval_ms, self.perform_new_file_check)
-
-    def perform_new_file_check(self):
-        """Scans for new and deleted files and updates the state accordingly."""
-        if not self.project_config:
-            return
-
-        all_project_files = get_all_matching_files(
-            base_dir=self.project_config.base_dir,
-            file_extensions=self.file_extensions,
-            gitignore_patterns=parse_gitignore(self.project_config.base_dir)
-        )
-
-        current_set = set(all_project_files)
-        known_set = set(self.project_config.known_files)
-
-        # --- Check for and handle deleted files ---
-        deleted_files = list(known_set - current_set)
-        if deleted_files:
-            # Update the in-memory list first
-            self.project_config.known_files = [f for f in self.project_config.known_files if f not in deleted_files]
-            # Persist the change to the .allcode file
-            self.project_config.save()
-
-        # --- Check for new files ---
-        new_files = list(current_set - known_set)
-        if sorted(new_files) != sorted(self._newly_detected_files):
-            self._newly_detected_files = new_files
-            self._update_warning_ui()
-
-        interval_sec = self.state.config.get('new_file_check_interval', 5)
-        self._schedule_next_check(interval_sec * 1000)
-
-    def _update_warning_ui(self):
-        """Shows or hides the new file warning icon and updates tooltips."""
-        file_count = len(self._newly_detected_files)
-        project_name = self.project_config.project_name if self.project_config else ""
-
-        if file_count > 0:
-            if file_count == 1:
-                file_str_verb = "file was"
-            else:
-                file_str_verb = "files were"
-            tooltip_text = f"{file_count} new {file_str_verb} added to the project"
-            self.new_files_tooltip.text = tooltip_text
-            self.new_files_label.pack(side='right', padx=(10, 0))
-        else:
-            self.new_files_label.pack_forget()
-
-        if self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
-            if file_count > 0:
-                self.view_manager.compact_mode_window.show_warning(file_count, project_name)
-            else:
-                self.view_manager.compact_mode_window.hide_warning(project_name)
-
     def open_color_chooser(self, event=None):
-        if not self.project_config: return
+        project_config = self.project_manager.get_current_project()
+        if not project_config: return
         color_code = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
         if color_code and color_code[1]:
             self.project_color = color_code[1]
-            self.project_config.project_color = self.project_color
-            self.project_config.save()
-            self.update_button_states()
+            project_config.project_color = self.project_color
+            project_config.save()
+            self.button_manager.update_button_states()
 
     def open_settings_window(self):
-        SettingsWindow(self, on_close_callback=self.on_settings_closed)
+        SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)
 
     def open_wrapper_text_window(self):
-        if not self.project_config:
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        wt_window = WrapperTextWindow(self, self.project_config, self.status_var, on_close_callback=self.update_button_states)
+        wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
         self.wait_window(wt_window)
 
     def open_filetypes_manager(self):
@@ -465,8 +183,7 @@ class App(Tk):
     def reload_active_extensions(self):
         self.file_extensions = load_active_file_extensions()
         self.status_var.set("Filetype configuration updated")
-        # Restart checker in case file extensions changed
-        self.start_new_file_checker()
+        self.file_monitor.start()
 
     def open_change_directory_dialog(self):
         self.state._prune_recent_projects()
@@ -475,8 +192,7 @@ class App(Tk):
             app_bg_color=self.app_bg_color,
             recent_projects=self.state.recent_projects,
             on_select_callback=self.on_directory_selected,
-            on_remove_callback=self.on_recent_removed,
-            trash_icon_image=self.trash_icon_image
+            on_remove_callback=self.on_recent_removed
         )
 
     def _perform_copy(self, use_wrapper: bool):
@@ -486,41 +202,20 @@ class App(Tk):
             self.status_var.set("Error: Invalid project folder")
             return
 
-        try:
-            files_to_copy = self.project_config.selected_files
-            if not files_to_copy:
-                self.status_var.set("No files selected to copy.")
-                return
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            self.status_var.set("Error: No active project.")
+            return
 
-            if self.state.scan_for_secrets:
-                report = scan_for_secrets(base_dir, files_to_copy)
-                if report:
-                    warning_message = (
-                        "Warning: Potential secrets were detected in your selection.\n\n"
-                        f"{report}\n\n"
-                        "Do you still want to copy this content to your clipboard?"
-                    )
-                    proceed = messagebox.askyesno("Secrets Detected", warning_message, parent=self)
-                    if not proceed:
-                        self.status_var.set("Copy cancelled due to potential secrets.")
-                        return
-
-            final_content, status_message = generate_output_string(base_dir, use_wrapper, self.state.copy_merged_prompt)
-            if final_content is not None:
-                pyperclip.copy(final_content)
-                self.status_var.set(status_message)
-            else:
-                self.status_var.set(status_message or "Error: Could not generate content.")
-
-        except FileNotFoundError:
-            messagebox.showerror("Error", f"No .allcode file found in {base_dir}", parent=self)
-            self.status_var.set("Error: .allcode file not found")
-        except (json.JSONDecodeError, IOError) as e:
-            messagebox.showerror("Error", f"Could not read .allcode file. Is it empty or corrupt?\n\nDetails: {e}", parent=self)
-            self.status_var.set("Error: Could not read .allcode file")
-        except Exception as e:
-            messagebox.showerror("Merging Error", f"An error occurred: {e}", parent=self)
-            self.status_var.set(f"Error during merging: {e}")
+        status_message = copy_project_to_clipboard(
+            parent=self,
+            base_dir=base_dir,
+            project_config=project_config,
+            use_wrapper=use_wrapper,
+            copy_merged_prompt=self.state.copy_merged_prompt,
+            scan_secrets_enabled=self.state.scan_for_secrets
+        )
+        self.status_var.set(status_message)
 
     def copy_merged_code(self):
         self._perform_copy(use_wrapper=False)
@@ -529,23 +224,16 @@ class App(Tk):
         self._perform_copy(use_wrapper=True)
 
     def manage_files(self):
-        if not self.project_config:
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
 
-        files_to_highlight = self._newly_detected_files[:]
-
-        if files_to_highlight:
-            self.project_config.known_files.extend(files_to_highlight)
-            self.project_config.known_files = sorted(list(set(self.project_config.known_files)))
-            self.project_config.save()
-
-        self._newly_detected_files = []
-        self._update_warning_ui()
+        files_to_highlight = self.file_monitor.get_newly_detected_files_and_reset()
 
         fm_window = FileManagerWindow(
             self,
-            self.project_config,
+            project_config,
             self.status_var,
             self.file_extensions,
             self.state.default_editor,
