@@ -132,7 +132,7 @@ class CompactMode(tk.Toplevel):
         text_to_show = base_message
 
         if self.is_showing_warning:
-            count = len(self.parent._newly_detected_files)
+            count = len(self.parent.file_monitor.newly_detected_files)
             file_str = "file" if count == 1 else "files"
             warning_part = f" - {count} new {file_str} found!"
             text_to_show += warning_part
