@@ -7,7 +7,6 @@ from ..core.paths import (
 class AppAssets:
     """A central class to load and hold all application image assets."""
     def __init__(self):
-        # --- Stage 1: Load all images as PIL objects (safe to do at import time) ---
         self.edit_icon_pil = self._load_image(EDIT_ICON_PATH)
         self.trash_icon_pil = self._load_image(TRASH_ICON_PATH, (18, 18))
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
@@ -18,10 +17,8 @@ class AppAssets:
         self.compact_mode_pil_down = self._load_image(COMPACT_MODE_ACTIVE_ICON_PATH, button_size)
         self.compact_mode_close_pil = self._load_image(COMPACT_MODE_CLOSE_ICON_PATH)
 
-        # --- Stage 2: Initialize Tkinter PhotoImage variables to None ---
-        # These will be populated later by calling load_tk_images()
         self.edit_icon = None
-        self.trash_icon_image = self.trash_icon_pil # This one is used as a PIL image directly, so it's fine
+        self.trash_icon_image = self.trash_icon_pil 
         self.new_files_icon = None
         self.defaults_icon = None
         self.compact_mode_image_up = None
@@ -30,7 +27,6 @@ class AppAssets:
 
     def load_tk_images(self):
         """
-        --- Stage 2 Execution ---
         Converts the loaded PIL images into Tkinter PhotoImage objects.
         This method MUST be called after the Tk() root window has been created.
         """
@@ -49,7 +45,6 @@ class AppAssets:
                 img = img.resize(resize, Image.Resampling.LANCZOS)
             return img
         except Exception:
-            # Return a small placeholder if an image fails to load
             return Image.new('RGB', resize if resize else (16, 16), 'red')
 
     def _pil_to_photoimage(self, pil_image):
@@ -57,6 +52,4 @@ class AppAssets:
             return ImageTk.PhotoImage(pil_image)
         return None
 
-# Create a single, global instance of the assets to be imported by UI modules
-# This is now safe because it only loads PIL images initially.
 assets = AppAssets()

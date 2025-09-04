@@ -24,16 +24,14 @@ class Updater:
 
         last_check_str = self.state.last_update_check
         if not last_check_str:
-            return True # Never checked before
+            return True 
 
         try:
-            # Compare dates, not datetimes, to trigger once per day
             last_check_date = datetime.fromisoformat(last_check_str).date()
             current_date = datetime.now().date()
             should_check = current_date > last_check_date
             return should_check
         except (ValueError, TypeError) as e:
-            # If the date is malformed, it's safer to check
             return True
 
     def check_for_updates(self):
@@ -50,7 +48,6 @@ class Updater:
                     data = json.loads(response.read().decode())
                     latest_version_tag = data.get('tag_name', 'v0.0.0')
 
-                    # Normalize versions by removing the 'v' prefix for comparison
                     latest_version = latest_version_tag.lstrip('v').strip()
                     current_version_normalized = self.current_version.lstrip('v').strip()
 
@@ -59,11 +56,9 @@ class Updater:
                     else:
                         print("  You are on the latest version.")
         except Exception as e:
-            # This will catch network errors etc.
             print(f"  Updater Error: An exception was caught during the network check: {e}")
             pass
         finally:
-            # Always update the last check date, even if the check fails
             print("  Updating last check date to now.")
             self.state.update_last_check_date()
 
@@ -113,7 +108,6 @@ class Updater:
         the latest is newer than the current.
         """
         try:
-            # This handles versions like '1.2.3' correctly
             latest_parts = tuple(map(int, latest_str.split('.')))
             current_parts = tuple(map(int, current_str.split('.')))
             is_newer = latest_parts > current_parts

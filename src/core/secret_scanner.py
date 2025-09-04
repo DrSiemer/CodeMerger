@@ -9,8 +9,6 @@ def scan_for_secrets(base_dir, files_to_scan):
     if any are found, otherwise returns None.
     """
     secrets = SecretsCollection()
-    # Explicitly configure and enable all default plugins to ensure they run
-    # in the packaged environment.
     with transient_settings({
         'plugins_used': [
             {'name': 'ArtifactoryDetector'}, {'name': 'AWSKeyDetector'},
@@ -39,7 +37,6 @@ def scan_for_secrets(base_dir, files_to_scan):
         return None
 
     report_lines = []
-    # The collection's .data attribute is a dict we can safely iterate over
     for filename, file_secrets in secrets.data.items():
         if not file_secrets:
             continue
@@ -49,14 +46,12 @@ def scan_for_secrets(base_dir, files_to_scan):
             with open(filename, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
         except Exception:
-            pass # File might be unreadable, but we can still report the finding
+            pass 
 
         for secret in file_secrets:
-            # Use the relative path for cleaner display
             rel_filename = os.path.relpath(secret.filename, base_dir).replace('\\', '/')
             report_line = f"- {rel_filename}:{secret.line_number} ({secret.type})"
 
-            # Get the line content for context
             if lines and 0 < secret.line_number <= len(lines):
                 line_content = lines[secret.line_number - 1].strip()
                 report_line += f"\n  > {line_content}"
@@ -66,7 +61,6 @@ def scan_for_secrets(base_dir, files_to_scan):
     if not report_lines:
         return None
 
-    # Limit the report to a reasonable number of lines to avoid a giant messagebox
     report_string = "\n".join(report_lines[:MAX_SECRET_SCAN_REPORT_LINES])
     if len(report_lines) > MAX_SECRET_SCAN_REPORT_LINES:
         report_string += f"\n... and {len(report_lines) - MAX_SECRET_SCAN_REPORT_LINES} more."
