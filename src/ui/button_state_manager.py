@@ -27,13 +27,14 @@ class ButtonStateManager:
         app.compact_mode_button.set_state(dir_dependent_state)
 
         if is_dir_active:
+            app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))
             app.color_swatch.config(bg=app.project_color)
             if not app.color_swatch.winfo_ismapped():
-                 app.color_swatch.pack(side='left', padx=(0, 15), before=app.title_label)
+                 app.color_swatch.pack(side='left', padx=(0, 15), before=app.title_container)
         else:
+             app.folder_icon_label.grid_forget()
              if app.color_swatch.winfo_ismapped():
                 app.color_swatch.pack_forget()
-             app.edit_icon_label.place_forget()
 
         if not is_dir_active:
             app.wrapper_box_title.pack_forget()

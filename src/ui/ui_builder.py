@@ -29,27 +29,32 @@ def setup_ui(app):
     app.color_swatch.pack_propagate(False)
     app.color_swatch.bind("<Button-1>", app.open_color_chooser)
     app.color_swatch.config(bg=c.TOP_BAR_BG)
+    ToolTip(app.color_swatch, "Click to change the project color", delay=500)
 
-    app.title_label = Label(left_frame, textvariable=app.project_title_var, font=font_large_bold, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
+    app.title_container = Frame(left_frame, bg=c.TOP_BAR_BG, cursor="hand2")
+    app.title_container.pack(side='left')
+
+    app.title_label = Label(app.title_container, textvariable=app.project_title_var, font=font_large_bold, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
     app.title_label.pack(side='left')
     app.title_label.bind("<Button-1>", app.edit_project_title)
-    app.title_label.bind("<Enter>", app.on_title_area_enter)
-    app.title_label.bind("<Leave>", app.on_title_area_leave)
-
-    app.edit_icon_label = Label(left_frame, image=assets.edit_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    if assets.edit_icon:
-        app.edit_icon_label.bind("<Button-1>", app.edit_project_title)
-        app.edit_icon_label.bind("<Enter>", app.on_title_area_enter)
-        app.edit_icon_label.bind("<Leave>", app.on_title_area_leave)
+    app.title_container.bind("<Button-1>", app.edit_project_title)
+    ToolTip(app.title_container, "Click to update the project title", delay=500)
 
     # Right-aligned items
     right_frame = Frame(top_bar, bg=c.TOP_BAR_BG)
     right_frame.grid(row=0, column=2, sticky='e')
+    right_frame.grid_rowconfigure(0, weight=1) # Center items vertically in the row
 
     # New files warning icon
     app.new_files_label = Label(right_frame, image=assets.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
     app.new_files_label.bind("<Button-1>", lambda e: app.manage_files())
     app.new_files_tooltip = ToolTip(app.new_files_label, text="")
+
+    # Open folder icon
+    app.folder_icon_label = Label(right_frame, image=assets.folder_icon, bg=c.TOP_BAR_BG, cursor="hand2")
+    app.folder_icon_label.bind("<Button-1>", app.open_project_folder)
+    ToolTip(app.folder_icon_label, "Open project folder", delay=500)
+
 
     # --- Top-Level Buttons (Row 1) ---
     top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20)

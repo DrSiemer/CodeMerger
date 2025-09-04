@@ -12,8 +12,8 @@ class ToolTip:
         self.tooltip_window = None
         self.delay = delay
         self._show_job = None
-        self.widget.bind("<Enter>", self.on_enter)
-        self.widget.bind("<Leave>", self.on_leave)
+        self.widget.bind("<Enter>", self.on_enter, add='+')
+        self.widget.bind("<Leave>", self.on_leave, add='+')
 
     def on_enter(self, event=None):
         self.schedule_show()

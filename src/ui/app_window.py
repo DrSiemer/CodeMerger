@@ -1,5 +1,7 @@
 import os
 import json
+import sys
+import subprocess
 from tkinter import Tk, StringVar, messagebox, colorchooser
 from PIL import Image, ImageTk
 
@@ -25,13 +27,13 @@ from .button_state_manager import ButtonStateManager
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
+        self.withdraw() # Hide window during setup to prevent flicker
         assets.load_tk_images() # [FIX] Load Tkinter images now that the root window exists
 
         self.file_extensions = file_extensions
         self.app_version = app_version
         self.app_bg_color = c.DARK_BG
         self.project_color = c.COMPACT_MODE_BG_COLOR
-        self._hide_edit_icon_job = None
         self.window_geometries = {}
 
         self.state = AppState()
@@ -68,21 +70,7 @@ class App(Tk):
 
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
-
-    def on_title_area_enter(self, event=None):
-        if self._hide_edit_icon_job:
-            self.after_cancel(self._hide_edit_icon_job)
-            self._hide_edit_icon_job = None
-
-        if self.project_manager.get_current_project() and assets.edit_icon:
-            self.edit_icon_label.place(
-                in_=self.title_label.master,
-                x=self.title_label.winfo_x() + self.title_label.winfo_width() + 5,
-                y=self.title_label.winfo_y() + (self.title_label.winfo_height() // 2) - (assets.edit_icon.height() // 2)
-            )
-
-    def on_title_area_leave(self, event=None):
-        self._hide_edit_icon_job = self.after(50, self.edit_icon_label.place_forget)
+        self.deiconify() # Show window now that it's fully configured
 
     def edit_project_title(self, event=None):
         project_config = self.project_manager.get_current_project()
@@ -159,12 +147,29 @@ class App(Tk):
     def open_color_chooser(self, event=None):
         project_config = self.project_manager.get_current_project()
         if not project_config: return
-        color_code = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if color_code and color_code[1]:
-            self.project_color = color_code[1]
+        # askcolor returns a tuple ((r,g,b), '#rrggbb') or (None, None) on cancel
+        result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
+        # The hex color string is in result[1]. Check if it's a valid string.
+        if result and result[1]:
+            self.project_color = result[1]
             project_config.project_color = self.project_color
             project_config.save()
             self.button_manager.update_button_states()
+
+    def open_project_folder(self, event=None):
+        project_path = self.active_dir.get()
+        if project_path and os.path.isdir(project_path):
+            try:
+                if sys.platform == "win32":
+                    os.startfile(project_path)
+                elif sys.platform == "darwin":
+                    subprocess.Popen(["open", project_path])
+                else:
+                    subprocess.Popen(["xdg-open", project_path])
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not open folder: {e}", parent=self)
+        else:
+            self.status_var.set("No active project folder to open.")
 
     def open_settings_window(self):
         SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)

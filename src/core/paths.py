@@ -50,8 +50,8 @@ ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 # Path to the new files warning icon
 NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
 
-# Path to the edit icon
-EDIT_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'edit.png')
+# Path to the folder icon
+FOLDER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder.png')
 
 # Path to the trash icon
 TRASH_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'trash.png')

@@ -95,10 +95,10 @@ class FileMonitor:
             file_str_verb = "file was" if file_count == 1 else "files were"
             tooltip_text = f"{file_count} new {file_str_verb} added to the project"
             self.app.new_files_tooltip.text = tooltip_text
-            self.app.new_files_label.pack(side='right', padx=(10, 0))
+            self.app.new_files_label.grid(row=0, column=0, sticky='e', padx=(10, 0))
             self.app.manage_files_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
-            self.app.new_files_label.pack_forget()
+            self.app.new_files_label.grid_forget()
             self.app.manage_files_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
 
         if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():

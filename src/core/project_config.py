@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import re
 import colorsys
 from ..constants import COMPACT_MODE_BG_COLOR
 
@@ -46,7 +47,11 @@ class ProjectConfig:
                 with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     content = f.read()
                     if content:
-                        data = json.loads(content)
+                        # Find the start of the JSON object and parse from there
+                        json_start_index = content.find('{')
+                        if json_start_index != -1:
+                            json_content = content[json_start_index:]
+                            data = json.loads(json_content)
         except (json.JSONDecodeError, IOError):
             pass # Treat corrupt/unreadable files as empty
 
@@ -59,11 +64,14 @@ class ProjectConfig:
 
         if 'project_name' not in data:
             config_was_updated = True
-        if 'project_color' not in data:
+
+        color_value = data.get('project_color')
+        # Validate color value; if missing, invalid, or not a hex string, generate a new one
+        if not color_value or not isinstance(color_value, str) or not re.match(r'^#[0-9a-fA-F]{6}$', color_value):
             self.project_color = _generate_random_color()
             config_was_updated = True
         else:
-            self.project_color = data.get('project_color', COMPACT_MODE_BG_COLOR)
+            self.project_color = color_value
 
         # Filter out files that no longer exist on disk from both lists
         cleaned_selection = [
@@ -111,4 +119,5 @@ class ProjectConfig:
             "known_files": sorted(list(set(self.known_files)))
         }
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
+            f.write("# For information about this file, see: https://github.com/DrSiemer/CodeMerger/\n")
             json.dump(final_data, f, indent=2)
