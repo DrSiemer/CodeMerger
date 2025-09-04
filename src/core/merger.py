@@ -1,65 +1,19 @@
 import os
 import json
 import tiktoken
-
-# A mapping of file extensions to Markdown language identifiers for syntax highlighting
-LANGUAGE_MAP = {
-    '.bat': 'batch',
-    '.c': 'c',
-    '.conf': 'ini',
-    '.cpp': 'cpp',
-    '.cs': 'csharp',
-    '.css': 'css',
-    '.go': 'go',
-    '.h': 'c',
-    '.html': 'html',
-    '.htm': 'html',
-    '.java': 'java',
-    '.js': 'javascript',
-    '.jsx': 'jsx',
-    '.json': 'json',
-    '.kt': 'kotlin',
-    '.kts': 'kotlin',
-    '.less': 'less',
-    '.md': 'markdown',
-    '.php': 'php',
-    '.ps1': 'powershell',
-    '.py': 'python',
-    '.r': 'r',
-    '.rb': 'ruby',
-    '.rs': 'rust',
-    '.sass': 'sass',
-    '.scss': 'scss',
-    '.sh': 'shell',
-    '.sql': 'sql',
-    '.swift': 'swift',
-    '.ts': 'typescript',
-    '.tsx': 'tsx',
-    '.txt': 'text',
-    '.vue': 'vue',
-    '.xml': 'xml',
-    '.yaml': 'yaml',
-    '.yml': 'yaml'
-}
+from .. import constants as c
 
 def get_language_from_path(path):
     """Gets a markdown language identifier from a file path based on its extension"""
     _, ext = os.path.splitext(path)
-    return LANGUAGE_MAP.get(ext.lower(), '') # Return empty string for unknown extensions
+    return c.LANGUAGE_MAP.get(ext.lower(), '') # Return empty string for unknown extensions
 
-def generate_output_string(base_dir, use_wrapper, copy_merged_prompt):
+def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
     """
     Core logic for merging files
     Reads the .allcode file, processes files, and returns the final string and a status message
     """
-    config_path = os.path.join(base_dir, '.allcode')
-    if not os.path.isfile(config_path):
-        raise FileNotFoundError(f"No .allcode file found in {base_dir}")
-
-    with open(config_path, 'r', encoding='utf-8-sig') as f:
-        data = json.load(f)
-
-    final_ordered_list = data.get('selected_files', [])
+    final_ordered_list = project_config.selected_files
     if not final_ordered_list:
         return None, "No files selected to copy"
 
@@ -80,9 +34,9 @@ def generate_output_string(base_dir, use_wrapper, copy_merged_prompt):
     merged_code = '\n\n'.join(output_blocks)
 
     if use_wrapper:
-        project_title = data.get('project_name', os.path.basename(base_dir))
-        intro_text = data.get('intro_text', '')
-        outro_text = data.get('outro_text', '')
+        project_title = project_config.project_name
+        intro_text = project_config.intro_text
+        outro_text = project_config.outro_text
 
         final_parts = [f"# {project_title}"]
         if intro_text:

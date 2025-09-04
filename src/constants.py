@@ -34,3 +34,43 @@ WRAPPER_BORDER = '#555555'
 STATUS_BG = '#3A3A3A'
 STATUS_FG = '#D3D3D3'
 SUBTLE_HIGHLIGHT_COLOR = "#555555"
+
+# --- Data Mappings ---
+LANGUAGE_MAP = {
+    '.bat': 'batch',
+    '.c': 'c',
+    '.conf': 'ini',
+    '.cpp': 'cpp',
+    '.cs': 'csharp',
+    '.css': 'css',
+    '.go': 'go',
+    '.h': 'c',
+    '.html': 'html',
+    '.htm': 'html',
+    '.java': 'java',
+    '.js': 'javascript',
+    '.jsx': 'jsx',
+    '.json': 'json',
+    '.kt': 'kotlin',
+    '.kts': 'kotlin',
+    '.less': 'less',
+    '.md': 'markdown',
+    '.php': 'php',
+    '.ps1': 'powershell',
+    '.py': 'python',
+    '.r': 'r',
+    '.rb': 'ruby',
+    '.rs': 'rust',
+    '.sass': 'sass',
+    '.scss': 'scss',
+    '.sh': 'shell',
+    '.sql': 'sql',
+    '.swift': 'swift',
+    '.ts': 'typescript',
+    '.tsx': 'tsx',
+    '.txt': 'text',
+    '.vue': 'vue',
+    '.xml': 'xml',
+    '.yaml': 'yaml',
+    '.yml': 'yaml'
+}

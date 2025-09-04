@@ -47,11 +47,14 @@ class ProjectConfig:
                 with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     content = f.read()
                     if content:
-                        # Find the start of the JSON object and parse from there
-                        json_start_index = content.find('{')
-                        if json_start_index != -1:
-                            json_content = content[json_start_index:]
-                            data = json.loads(json_content)
+                        try:
+                            data = json.loads(content)
+                        except json.JSONDecodeError:
+                            json_start_index = content.find('{')
+                            if json_start_index != -1:
+                                json_content = content[json_start_index:]
+                                data = json.loads(json_content)
+                                config_was_updated = True
         except (json.JSONDecodeError, IOError):
             pass # Treat corrupt/unreadable files as empty
 
@@ -109,6 +112,7 @@ class ProjectConfig:
         """Saves the configuration to the .allcode file"""
         # Build the dictionary in the desired order to control the JSON output
         final_data = {
+            "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
             "project_name": self.project_name,
             "project_color": self.project_color,
             "expanded_dirs": sorted(list(self.expanded_dirs)),
@@ -119,5 +123,4 @@ class ProjectConfig:
             "known_files": sorted(list(set(self.known_files)))
         }
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
-            f.write("# For information about this file, see: https://github.com/DrSiemer/CodeMerger/\n")
             json.dump(final_data, f, indent=2)
