@@ -19,6 +19,7 @@
   { "ext": ".kts", "active": true },
   { "ext": ".less", "active": true },
   { "ext": ".md", "active": true },
+  { "ext": ".mjs", "active": true },
   { "ext": ".php", "active": true },
   { "ext": ".ps1", "active": true },
   { "ext": ".py", "active": true },
