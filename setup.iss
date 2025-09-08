@@ -57,9 +57,11 @@ Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}\command"; Val
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
+const
+  AppGuid = '{C06CFB28-1B8E-4B3B-A107-5A5C9FC92CA1}';
+
 var
   g_DeleteConfigData: Boolean;
-  MyAppVersion: string;
 
 // --- Helper Function for Writing Values ---
 function GetCheckForUpdatesValue(Param: String): String;
@@ -105,26 +107,15 @@ begin
   Parts2 := SplitString(V2, '.');
   Count1 := GetArrayLength(Parts1);
   Count2 := GetArrayLength(Parts2);
-  if Count1 > Count2 then
-    Count := Count1
-  else
-    Count := Count2;
-
+  if Count1 > Count2 then Count := Count1 else Count := Count2;
+  
   for I := 0 to Count-1 do
   begin
-    if I < Count1 then
-      N1 := StrToIntDef(Parts1[I],0)
-    else
-      N1 := 0;
-    if I < Count2 then
-      N2 := StrToIntDef(Parts2[I],0)
-    else
-      N2 := 0;
+    if I < Count1 then N1 := StrToIntDef(Parts1[I],0) else N1 := 0;
+    if I < Count2 then N2 := StrToIntDef(Parts2[I],0) else N2 := 0;
 
-    if N1 < N2 then
-      begin Result := -1; exit; end
-    else if N1 > N2 then
-      begin Result := 1; exit; end;
+    if N1 < N2 then begin Result := -1; exit; end
+    else if N1 > N2 then begin Result := 1; exit; end;
   end;
   Result := 0;
 end;
@@ -135,23 +126,19 @@ var
   S: String;
 begin
   Result := '';
-
-  // 64-bit normal key
   if RegQueryStringValue(HKLM,
-    'Software\Microsoft\Windows\CurrentVersion\Uninstall\{C06CFB28-1B8E-4B3B-A107-5A5C9FC92CA1}_is1',
+    'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
     'DisplayVersion', S) then
   begin
     Result := S;
     exit;
   end;
 
-  // 32-bit fallback
   if RegQueryStringValue(HKLM,
-    'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{C06CFB28-1B8E-4B3B-A107-5A5C9FC92CA1}_is1',
+    'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
     'DisplayVersion', S) then
   begin
     Result := S;
-    exit;
   end;
 end;
 
@@ -169,6 +156,7 @@ begin
     FWbemObjectSet := FWMIService.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
     Result := (FWbemObjectSet.Count > 0);
   except
+    // Ignore WMI errors
   end;
 end;
 
@@ -179,9 +167,7 @@ var
   Compare: Integer;
   Msg: String;
 begin
-  MyAppVersion := '{#MyAppVersion}';
-
-  Log('Installer version (internal): ' + MyAppVersion);
+  Log('Installer version (internal): {#MyAppVersion}');
   InstalledVer := GetInstalledVersion();
   if InstalledVer <> '' then
     Log('Detected installed version: ' + InstalledVer)
@@ -190,11 +176,11 @@ begin
 
   if InstalledVer <> '' then
   begin
-    Compare := VersionCompare(MyAppVersion, InstalledVer);
+    Compare := VersionCompare('{#MyAppVersion}', InstalledVer);
     if Compare = 0 then
-      Msg := 'You are about to install the same version (' + InstalledVer + '). Do you want to proceed?'
+      Msg := 'You are about to install the same version (' + InstalledVer + '). Proceed?'
     else if Compare < 0 then
-      Msg := 'You are about to install an older version (' + MyAppVersion + ' < ' + InstalledVer + '). Proceed?'
+      Msg := 'You are about to install an older version (' + '{#MyAppVersion}' + ' < ' + InstalledVer + '). Proceed?'
     else
       Msg := 'A previous version (' + InstalledVer + ') is installed. Continue with this upgrade?';
 
