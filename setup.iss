@@ -1,8 +1,6 @@
 ; Inno Setup script for CodeMerger
 ; This script is used by the GitHub Action to build the installer.
 
-#include "version.iss"
-
 #define MyAppName "CodeMerger"
 #define MyAppPublisher "M Nugteren/2Shine"
 #define MyAppURL "https://github.com/DrSiemer/codemerger"
@@ -167,7 +165,7 @@ var
   Compare: Integer;
   Msg: String;
 begin
-  Log('Installer version (internal): {#MyAppVersion}');
+  Log('Installer version (from command line): {#MyAppVersion}');
   InstalledVer := GetInstalledVersion();
   if InstalledVer <> '' then
     Log('Detected installed version: ' + InstalledVer)
@@ -177,17 +175,18 @@ begin
   if InstalledVer <> '' then
   begin
     Compare := VersionCompare('{#MyAppVersion}', InstalledVer);
-    if Compare = 0 then
-      Msg := 'You are about to install the same version (' + InstalledVer + '). Proceed?'
-    else if Compare < 0 then
-      Msg := 'You are about to install an older version (' + '{#MyAppVersion}' + ' < ' + InstalledVer + '). Proceed?'
-    else
-      Msg := 'A previous version (' + InstalledVer + ') is installed. Continue with this upgrade?';
-
-    if MsgBox(Msg, mbConfirmation, MB_YESNO) = IDNO then
+    if Compare <= 0 then
     begin
-      Result := False;
-      exit;
+      if Compare = 0 then
+        Msg := 'You are about to install the same version (v' + InstalledVer + '). Proceed?'
+      else // Compare < 0
+        Msg := 'You are about to install an older version (v' + '{#MyAppVersion}' + ' < v' + InstalledVer + '). Proceed?';
+
+      if MsgBox(Msg, mbConfirmation, MB_YESNO) = IDNO then
+      begin
+        Result := False;
+        exit;
+      end;
     end;
   end;
 
@@ -208,7 +207,7 @@ var
   ContextMenuEnabled: Boolean;
   I: Integer;
 begin
-  WizardForm.Caption := ExpandConstant('{#MyAppName} {#MyAppVersion} Setup');
+  WizardForm.Caption := ExpandConstant('{#MyAppName} v{#MyAppVersion} Setup');
   WizardForm.BringToFront;
   if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
     UpdatesEnabled := True

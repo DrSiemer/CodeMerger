@@ -132,9 +132,7 @@ goto :eof
     )
 
     echo Compiling installer with Inno Setup for v!VERSION!...
-    (echo #define MyAppVersion "!VERSION!") > version.iss
-    "!INNO_SETUP_PATH!" setup.iss
-    del version.iss
+    "!INNO_SETUP_PATH!" setup.iss /dMyAppVersion="!VERSION!"
 
     if !errorlevel! neq 0 (
         echo.
