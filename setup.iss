@@ -10,7 +10,7 @@
 #define MyAppSetupName "CodeMerger_Setup"
 
 [Setup]
-AppId={{C6E2D2F0-2E3F-4B8A-9A0D-1B2C3D4E5F6A}}
+AppId={{C06CFB28-1B8E-4B3B-A107-5A5C9FC92CA1}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName}
@@ -48,7 +48,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Name: "{commonprograms}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"; IconFilename: "{app}\uninstall.ico"
 
 [Registry]
-; Write the installer choices to HKEY_LOCAL_MACHINE, the correct place for system-wide defaults
 Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueType: dword; ValueName: "AutomaticUpdates"; ValueData: "{code:GetCheckForUpdatesValue}"; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: ""; ValueData: "Open in CodeMerger"; Flags: uninsdeletekey; Tasks: addcontextmenu
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\{#MyAppExeName},0"; Tasks: addcontextmenu
@@ -60,6 +59,7 @@ Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChang
 [Code]
 var
   g_DeleteConfigData: Boolean;
+  MyAppVersion: string;
 
 // --- Helper Function for Writing Values ---
 function GetCheckForUpdatesValue(Param: String): String;
@@ -70,8 +70,92 @@ begin
     Result := '0';
 end;
 
-// --- Standard Installer/Uninstaller Logic ---
+// --- Split string helper ---
+function SplitString(const S, Delimiter: string): TArrayOfString;
+var
+  P: Integer;
+  Temp: string;
+begin
+  SetArrayLength(Result, 0);
+  Temp := S;
+  repeat
+    P := Pos(Delimiter, Temp);
+    if P > 0 then
+    begin
+      SetArrayLength(Result, GetArrayLength(Result)+1);
+      Result[GetArrayLength(Result)-1] := Copy(Temp, 1, P-1);
+      Temp := Copy(Temp, P + Length(Delimiter), MaxInt);
+    end
+    else
+    begin
+      SetArrayLength(Result, GetArrayLength(Result)+1);
+      Result[GetArrayLength(Result)-1] := Temp;
+      Temp := '';
+    end;
+  until Temp = '';
+end;
 
+// --- Compare versions (returns -1,0,1) ---
+function VersionCompare(V1, V2: String): Integer;
+var
+  Parts1, Parts2: TArrayOfString;
+  I, N1, N2, Count1, Count2, Count: Integer;
+begin
+  Parts1 := SplitString(V1, '.');
+  Parts2 := SplitString(V2, '.');
+  Count1 := GetArrayLength(Parts1);
+  Count2 := GetArrayLength(Parts2);
+  if Count1 > Count2 then
+    Count := Count1
+  else
+    Count := Count2;
+
+  for I := 0 to Count-1 do
+  begin
+    if I < Count1 then
+      N1 := StrToIntDef(Parts1[I],0)
+    else
+      N1 := 0;
+    if I < Count2 then
+      N2 := StrToIntDef(Parts2[I],0)
+    else
+      N2 := 0;
+
+    if N1 < N2 then
+      begin Result := -1; exit; end
+    else if N1 > N2 then
+      begin Result := 1; exit; end;
+  end;
+  Result := 0;
+end;
+
+// --- Detect installed version ---
+function GetInstalledVersion(): String;
+var
+  S: String;
+begin
+  Result := '';
+
+  // 64-bit normal key
+  if RegQueryStringValue(HKLM,
+    'Software\Microsoft\Windows\CurrentVersion\Uninstall\{C06CFB28-1B8E-4B3B-A107-5A5C9FC92CA1}_is1',
+    'DisplayVersion', S) then
+  begin
+    Result := S;
+    exit;
+  end;
+
+  // 32-bit fallback
+  if RegQueryStringValue(HKLM,
+    'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{C06CFB28-1B8E-4B3B-A107-5A5C9FC92CA1}_is1',
+    'DisplayVersion', S) then
+  begin
+    Result := S;
+    exit;
+  end;
+end;
+
+// --- Check if app is running ---
 function IsAppRunning(const FileName: string): Boolean;
 var
   FSWbemLocator: Variant;
@@ -85,23 +169,52 @@ begin
     FWbemObjectSet := FWMIService.ExecQuery('SELECT Name FROM Win32_Process WHERE Name = "' + FileName + '"');
     Result := (FWbemObjectSet.Count > 0);
   except
-    // Handle exceptions if WMI is not available
   end;
 end;
 
+// --- Installer initialization ---
 function InitializeSetup(): Boolean;
+var
+  InstalledVer: String;
+  Compare: Integer;
+  Msg: String;
 begin
+  MyAppVersion := '{#MyAppVersion}';
+
+  Log('Installer version (internal): ' + MyAppVersion);
+  InstalledVer := GetInstalledVersion();
+  if InstalledVer <> '' then
+    Log('Detected installed version: ' + InstalledVer)
+  else
+    Log('No installed version found.');
+
+  if InstalledVer <> '' then
+  begin
+    Compare := VersionCompare(MyAppVersion, InstalledVer);
+    if Compare = 0 then
+      Msg := 'You are about to install the same version (' + InstalledVer + '). Do you want to proceed?'
+    else if Compare < 0 then
+      Msg := 'You are about to install an older version (' + MyAppVersion + ' < ' + InstalledVer + '). Proceed?'
+    else
+      Msg := 'A previous version (' + InstalledVer + ') is installed. Continue with this upgrade?';
+
+    if MsgBox(Msg, mbConfirmation, MB_YESNO) = IDNO then
+    begin
+      Result := False;
+      exit;
+    end;
+  end;
+
   if IsAppRunning('{#MyAppExeName}') then
   begin
     MsgBox('CodeMerger is currently running. Please close all instances before proceeding.', mbError, MB_OK);
     Result := False;
   end
   else
-  begin
     Result := True;
-  end;
 end;
 
+// --- Wizard initialization ---
 procedure InitializeWizard();
 var
   Value: Cardinal;
@@ -111,9 +224,8 @@ var
 begin
   WizardForm.Caption := ExpandConstant('{#MyAppName} {#MyAppVersion} Setup');
   WizardForm.BringToFront;
-  // Read the state from HKLM before the old uninstaller has a chance to run (to preserve settings during an upgrade)
   if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
-    UpdatesEnabled := True // Default to TRUE for a fresh install
+    UpdatesEnabled := True
   else
     UpdatesEnabled := (Value = 1);
 
@@ -122,16 +234,13 @@ begin
   for I := 0 to WizardForm.TasksList.Items.Count - 1 do
   begin
     if WizardForm.TasksList.Name[I] = 'checkforupdates' then
-    begin
       WizardForm.TasksList.Checked[I] := UpdatesEnabled;
-    end;
     if WizardForm.TasksList.Name[I] = 'addcontextmenu' then
-    begin
       WizardForm.TasksList.Checked[I] := ContextMenuEnabled;
-    end;
   end;
 end;
 
+// --- Uninstall steps ---
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   ConfigDir: string;
