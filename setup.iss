@@ -230,7 +230,7 @@ end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   ConfigDir: string;
-  AppRegistryKey: string;
+  HKCUKey, HKLMKey, ShellKey: string;
 begin
   if CurUninstallStep = usUninstall then
   begin
@@ -242,14 +242,34 @@ begin
 
   if CurUninstallStep = usPostUninstall then
   begin
+    // Delete per-user config data
     if g_DeleteConfigData then
     begin
       ConfigDir := ExpandConstant('{userappdata}\CodeMerger');
-      DelTree(ConfigDir, True, True, True);
+      if DirExists(ConfigDir) then
+        DelTree(ConfigDir, True, True, True);
 
-      AppRegistryKey := 'Software\CodeMerger';
-      if RegKeyExists(HKCU, AppRegistryKey) then
-        RegDeleteKeyIncludingSubkeys(HKCU, AppRegistryKey);
+      HKCUKey := 'Software\CodeMerger';
+      if RegKeyExists(HKCU, HKCUKey) then
+        RegDeleteKeyIncludingSubkeys(HKCU, HKCUKey);
     end;
+
+    // Delete system-wide HKLM keys safely
+    HKLMKey := 'Software\CodeMerger';
+    if RegKeyExists(HKLM, HKLMKey) then
+      RegDeleteKeyIncludingSubkeys(HKLM, HKLMKey);
+
+    ShellKey := 'Software\Classes\Directory\shell\CodeMerger';
+    if RegKeyExists(HKLM, ShellKey) then
+      RegDeleteKeyIncludingSubkeys(HKLM, ShellKey);
+
+    // Delete uninstall information
+    HKLMKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1';
+    if RegKeyExists(HKLM, HKLMKey) then
+      RegDeleteKeyIncludingSubkeys(HKLM, HKLMKey);
+
+    HKLMKey := 'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1';
+    if RegKeyExists(HKLM, HKLMKey) then
+      RegDeleteKeyIncludingSubkeys(HKLM, HKLMKey);
   end;
 end;
