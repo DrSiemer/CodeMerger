@@ -52,6 +52,18 @@ class CompactMode(tk.Toplevel):
         self.move_bar = tk.Frame(self, height=MOVE_BAR_HEIGHT, bg=BAR_AND_BORDER_COLOR, cursor="fleur")
         self.move_bar.pack(fill='x', side='top')
 
+        # Add project title abbreviation
+        no_space_title = project_name.replace(' ', '')
+        title_abbr = no_space_title[:5]
+        self.title_label = tk.Label(
+            self.move_bar,
+            text=title_abbr,
+            bg=BAR_AND_BORDER_COLOR,
+            fg=c.TEXT_COLOR,
+            font=('Segoe UI', 8)
+        )
+        self.title_label.pack(side='left', padx=(4, 0))
+
         # --- Close Button ---
         self.close_button = tk.Label(self.move_bar, image=self.image_close, bg=BAR_AND_BORDER_COLOR, cursor="hand2")
         self.close_button.pack(side='right', padx=(0, 1))
@@ -84,6 +96,10 @@ class CompactMode(tk.Toplevel):
         self.move_bar.bind("<B1-Motion>", self.on_drag)
         self.move_bar.bind("<ButtonRelease-1>", self.on_release_drag)
         self.move_bar.bind("<Double-Button-1>", self.close_window)
+        self.title_label.bind("<ButtonPress-1>", self.on_press_drag)
+        self.title_label.bind("<B1-Motion>", self.on_drag)
+        self.title_label.bind("<ButtonRelease-1>", self.on_release_drag)
+        self.title_label.bind("<Double-Button-1>", self.close_window)
         self.close_button.bind("<Button-1>", self.close_window)
         self.button_label.bind("<ButtonPress-1>", self.on_press_click)
         self.button_label.bind("<ButtonRelease-1>", self.on_release_click)
