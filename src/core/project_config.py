@@ -94,7 +94,10 @@ class ProjectConfig:
         known_files_were_cleaned = len(cleaned_known_files) < len(original_known_files)
 
         if files_were_cleaned:
-            self.total_tokens = recalculate_token_count(self.base_dir, self.selected_files)
+            if len(self.selected_files) > 100:
+                self.total_tokens = 0
+            else:
+                self.total_tokens = recalculate_token_count(self.base_dir, self.selected_files)
             config_was_updated = True
         else:
             # The file list is intact, so the cached token count is trustworthy
