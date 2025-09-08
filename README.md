@@ -87,4 +87,5 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Update `/version.txt` if you want to create a new release
     - You can add a comment to the release like this: `go r "Comment"`
     - The release will be a draft, you'll need to finalize it on github.com
+- Run the Inno Setup with a log like this: `CodeMerger_Setup.exe /LOG="setup.log"`
 - When the app is installed, config can be found in `%APPDATA%\CodeMerger`
