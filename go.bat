@@ -99,7 +99,9 @@ goto :eof
         echo To build an installer, download and install Inno Setup from jrsoftware.org
     ) else (
         echo Compiling installer with Inno Setup for v!VERSION!...
-        "!INNO_SETUP_PATH!" /DMyAppVersion=v!VERSION! setup.iss
+        (echo #define MyAppVersion "v!VERSION!") > version.iss
+        "!INNO_SETUP_PATH!" setup.iss
+        del version.iss
     )
     REM --- End Installer Creation ---
 

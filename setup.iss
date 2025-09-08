@@ -1,8 +1,9 @@
 ; Inno Setup script for CodeMerger
 ; This script is used by the GitHub Action to build the installer.
 
+#include "version.iss"
+
 #define MyAppName "CodeMerger"
-#define MyAppVersion "1.0.0" ; This will be replaced by the build process
 #define MyAppPublisher "Your Name/Company"
 #define MyAppURL "https://github.com/DrSiemer/codemerger"
 #define MyAppExeName "CodeMerger.exe"
@@ -108,6 +109,7 @@ var
   ContextMenuEnabled: Boolean;
   I: Integer;
 begin
+  WizardForm.Caption := ExpandConstant('{#MyAppName} {#MyAppVersion} Setup');
   WizardForm.BringToFront;
   // Read the state from HKLM before the old uninstaller has a chance to run (to preserve settings during an upgrade)
   if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
