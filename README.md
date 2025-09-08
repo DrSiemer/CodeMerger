@@ -82,7 +82,8 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - Make sure you have [Python](https://www.python.org/downloads/) installed (and added to your PATH)
 - Make sure you have [Inno Setup](https://jrsoftware.org/isdl.php) installed
 - Run `go` to start
-- Run `go b` to build executable
+- Run `go b` to build executable and installer
+- Run `go bi` to build the installer only (requires a prior successful build)
 - Run `go r` to push or update a release on Github using Actions
     - Update `/version.txt` if you want to create a new release
     - You can add a comment to the release like this: `go r "Comment"`

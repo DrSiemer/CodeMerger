@@ -28,6 +28,7 @@ if /I "%FLAG%"=="" goto :DefaultAction
 if /I "%FLAG%"=="cmd" goto :OpenCmd
 if /I "%FLAG%"=="f" goto :FreezeReqs
 if /I "%FLAG%"=="b" goto :BuildApp
+if /I "%FLAG%"=="bi" goto :BuildInstallerOnly
 if /I "%FLAG%"=="r" goto :HandleRelease
 echo Unrecognized command: %FLAG%
 goto :eof
@@ -69,23 +70,52 @@ goto :eof
     exit /b 0
 
 :BuildApp
-    setlocal enabledelayedexpansion
+    setlocal
     echo.
-    echo Starting Build Process
+    echo Starting Full Build Process
     echo Deleting old build folders...
     rmdir /s /q dist 2>nul
     rmdir /s /q build 2>nul
     rmdir /s /q dist-installer 2>nul
     echo Running PyInstaller with %SPEC_FILE%...
     pyinstaller %SPEC_FILE%
-    if !errorlevel! neq 0 (
+    if %errorlevel% neq 0 (
         echo.
         echo FATAL: PyInstaller build failed.
         endlocal
         goto :eof
     )
+    echo Executable build complete! Found in 'dist' folder.
 
-    REM --- Installer Creation ---
+    call :BuildInstaller
+    if %errorlevel% neq 0 (
+        echo Installer build failed. See warnings above.
+    )
+
+    echo.
+    echo Full Build Finished.
+    endlocal
+    goto :eof
+
+:BuildInstallerOnly
+    call :BuildInstaller
+    goto :eof
+
+:BuildInstaller
+    setlocal enabledelayedexpansion
+    echo.
+    echo Starting Installer Build Process
+
+    if not exist "dist" (
+        echo ERROR: 'dist' folder not found.
+        echo Please run the full build ^('go b'^) first to create the application executable.
+        endlocal
+        exit /b 1
+    )
+
+    echo Deleting old installer folder...
+    rmdir /s /q dist-installer 2>nul
+
     call :GetVersion
     if !errorlevel! neq 0 ( endlocal & goto :eof )
 
@@ -97,18 +127,24 @@ goto :eof
         echo.
         echo WARNING: Inno Setup not found. Skipping installer creation.
         echo To build an installer, download and install Inno Setup from jrsoftware.org
-    ) else (
-        echo Compiling installer with Inno Setup for v!VERSION!...
-        (echo #define MyAppVersion "v!VERSION!") > version.iss
-        "!INNO_SETUP_PATH!" setup.iss
-        del version.iss
+        endlocal
+        exit /b 1
     )
-    REM --- End Installer Creation ---
+
+    echo Compiling installer with Inno Setup for v!VERSION!...
+    (echo #define MyAppVersion "v!VERSION!") > version.iss
+    "!INNO_SETUP_PATH!" setup.iss
+    del version.iss
+
+    if !errorlevel! neq 0 (
+        echo.
+        echo FATAL: Inno Setup build failed.
+        endlocal
+        exit /b 1
+    )
 
     echo.
-    echo Build Complete!
-    echo Executable is located in the 'dist' folder.
-    if defined INNO_SETUP_PATH echo Installer is located in the 'dist-installer' folder.
+    echo Installer Build Complete! Found in 'dist-installer' folder.
     endlocal
     goto :eof
 
