@@ -49,6 +49,7 @@ class FileMonitor:
 
         current_set = set(all_project_files)
         known_set = set(project_config.known_files)
+        selected_set = set(project_config.selected_files)
 
         # --- Check for and handle deleted files ---
         deleted_files = list(known_set - current_set)
@@ -57,7 +58,7 @@ class FileMonitor:
             project_config.save()
 
         # --- Check for new files ---
-        new_files = list(current_set - known_set)
+        new_files = list(current_set - known_set.union(selected_set))
         if sorted(new_files) != sorted(self.newly_detected_files):
             self.newly_detected_files = new_files
             self._update_warning_ui()
