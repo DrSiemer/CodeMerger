@@ -8,11 +8,14 @@ Assume I have full project context. Do not explain obvious code, file structures
 - **Log Exceptions & Decisions:** Note *why* a solution is unusual (e.g., "Workaround for library bug X," "Chose Y library for performance reasons").
 - **Log Corrections:** If I correct your behavior, add a note so you don't repeat the mistake.
 - **Consolidate Comments:** You may move verbose comments from the source code into this log to improve code readability.
+- **Merge Updates:** When updating an existing note, merge new information with the old. Do not remove valid existing details.
+- **Be Concise:** Focus on the technical implementation and its direct technical reason.
 
 **DO NOT:**
 
 - **Do not write summaries** of the project, architecture, or individual file functions.
 - **Do not explain basic concepts** or write long paragraphs.
+- **Do not explain user-facing benefits.** Stick to the "how" and "why" of the code itself.
 
 ---
 
@@ -40,7 +43,7 @@ Assume I have full project context. Do not explain obvious code, file structures
 - `src/ui/custom_widgets.py`: The `RoundedButton` is drawn using Pillow with 4x supersampling for anti-aliasing. Font selection is OS-aware to find `segoeui.ttf` on Windows for better rendering. It redraws on the `<Configure>` event to support responsive layouts (e.g., `sticky='ew'`).
 - `src/ui/file_manager/file_manager_window.py`: Token recalculation is debounced using `after(250, ...)` to prevent performance issues when rapidly adding or removing many files from the selection.
 - `src/ui/file_manager/file_tree_handler.py`: Double-click is detected manually using `time.time()` because the standard `<Double-Button-1>` event behavior was inconsistent across different widget states and focus conditions.
-- `src/ui/file_monitor.py`: Uses `app.after()` for periodic file checks instead of a separate thread to ensure thread safety with Tkinter UI updates.
+- `src/ui/file_monitor.py`: The `start()` method triggers an immediate file scan upon project activation and uses `app.after()` for periodic file checks.
 - `src/ui/view_manager.py`: Implements a custom animation (`_animate_window`) for the main-to-compact mode transition, animating both geometry and alpha attributes to avoid a jarring visual switch.
 - `go.bat`: The `go r` release command automatically cleans up existing local and remote git tags matching the new version. This allows re-triggering a release build on GitHub Actions without manual git intervention.
 - `setup.iss`: The Inno Setup script reads existing registry settings during `InitializeWizard` to preserve user choices (like "Enable automatic updates") when upgrading. The uninstaller explicitly asks the user if they want to remove their configuration data in `%APPDATA%`.
