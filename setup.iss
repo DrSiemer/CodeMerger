@@ -50,6 +50,7 @@ Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueType: dword; ValueName: "Autom
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: ""; ValueData: "Open in CodeMerger"; Flags: uninsdeletekey; Tasks: addcontextmenu
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\{#MyAppExeName},0"; Tasks: addcontextmenu
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: addcontextmenu
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\" + AppGuid + "_is1"; ValueType: string; ValueName: "DisplayVersion"; ValueData: "{code:GetCleanAppVersion}"; Flags: uninsdeletekeyifempty
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
@@ -60,6 +61,13 @@ const
 
 var
   g_DeleteConfigData: Boolean;
+  g_CleanedAppVersion: String;
+
+// --- Helper function to provide the cleaned version string ---
+function GetCleanAppVersion(Param: String): String;
+begin
+  Result := g_CleanedAppVersion;
+end;
 
 // --- Helper Function for Writing Values ---
 function GetCheckForUpdatesValue(Param: String): String;
@@ -165,16 +173,23 @@ var
   Compare: Integer;
   Msg: String;
 begin
-  NewVer := ExpandConstant('{#MyAppVersion}');
-
-  // Strip the leading 'v' if it exists (for Github Action)
-  if (Length(NewVer) > 0) and (NewVer[1] = 'v') then
-    Delete(NewVer, 1, 1);
+  // Clean the installer version string and store it in a global variable
+  g_CleanedAppVersion := ExpandConstant('{#MyAppVersion}');
+  if (Length(g_CleanedAppVersion) > 0) and (g_CleanedAppVersion[1] = 'v') then
+    Delete(g_CleanedAppVersion, 1, 1);
+  NewVer := g_CleanedAppVersion;
 
   Log('Installer version (cleaned): ' + NewVer);
   InstalledVer := GetInstalledVersion();
+
   if InstalledVer <> '' then
-    Log('Detected installed version: ' + InstalledVer)
+  begin
+    Log('Detected installed version from registry: ' + InstalledVer);
+    // Also clean the installed version string for a consistent comparison
+    if (Length(InstalledVer) > 0) and (InstalledVer[1] = 'v') then
+      Delete(InstalledVer, 1, 1);
+    Log('Cleaned installed version for comparison: ' + InstalledVer)
+  end
   else
     Log('No installed version found.');
 
@@ -184,7 +199,7 @@ begin
     if Compare <= 0 then
     begin
       if Compare = 0 then
-        Msg := 'You are about to install the same version (v' + InstalledVer + '). Proceed?'
+        Msg := 'You are about to install the same version (v' + NewVer + '). Proceed?'
       else // Compare < 0
         Msg := 'You are about to install an older version (v' + NewVer + ' < v' + InstalledVer + '). Proceed?';
 
@@ -213,7 +228,7 @@ var
   ContextMenuEnabled: Boolean;
   I: Integer;
 begin
-  WizardForm.Caption := ExpandConstant('{#MyAppName} v{#MyAppVersion} Setup');
+  WizardForm.Caption := ExpandConstant('{#MyAppName} v' + g_CleanedAppVersion + ' Setup');
   WizardForm.BringToFront;
   if not RegQueryDwordValue(HKLM, 'Software\CodeMerger', 'AutomaticUpdates', Value) then
     UpdatesEnabled := True
