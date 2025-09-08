@@ -106,7 +106,7 @@ begin
   Count1 := GetArrayLength(Parts1);
   Count2 := GetArrayLength(Parts2);
   if Count1 > Count2 then Count := Count1 else Count := Count2;
-  
+
   for I := 0 to Count-1 do
   begin
     if I < Count1 then N1 := StrToIntDef(Parts1[I],0) else N1 := 0;
@@ -122,36 +122,22 @@ end;
 function GetInstalledVersion(): String;
 var
   S: String;
-  IsDigit: Boolean;
 begin
   Result := '';
   if RegQueryStringValue(HKLM,
     'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
     'DisplayVersion', S) then
   begin
-    // Value found, proceed to clean it
-  end
-  else if RegQueryStringValue(HKLM,
-    'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
-    'DisplayVersion', S) then
-  begin
-    // Value found, proceed to clean it
-  end
-  else
-  begin
-    // No installed version found in registry
+    Result := S;
     exit;
   end;
 
-  while Length(S) > 0 do
+  if RegQueryStringValue(HKLM,
+    'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
+    'DisplayVersion', S) then
   begin
-    IsDigit := (S[1] >= '0') and (S[1] <= '9');
-    if IsDigit then
-      break
-    else
-      Delete(S, 1, 1);
+    Result := S;
   end;
-  Result := S;
 end;
 
 // --- Check if app is running ---
@@ -180,8 +166,12 @@ var
   Msg: String;
 begin
   NewVer := ExpandConstant('{#MyAppVersion}');
-  Log('Installer version (from command line): ' + NewVer);
 
+  // Strip the leading 'v' if it exists (for Github Action)
+  if (Length(NewVer) > 0) and (NewVer[1] = 'v') then
+    Delete(NewVer, 1, 1);
+
+  Log('Installer version (cleaned): ' + NewVer);
   InstalledVer := GetInstalledVersion();
   if InstalledVer <> '' then
     Log('Detected installed version: ' + InstalledVer)
