@@ -25,7 +25,8 @@ class FileMonitor:
 
         is_dir_active = self.app.project_manager.get_current_project() is not None
         if self.app.state.config.get('enable_new_file_check', True) and is_dir_active:
-            self.perform_new_file_check()
+            # Perform the first check immediately, then schedule subsequent checks
+            self.app.after(100, self.perform_new_file_check)
 
     def stop(self):
         """Stops the currently running file check job."""
@@ -63,28 +64,24 @@ class FileMonitor:
 
         current_set = set(all_project_files)
         known_set = set(project_config.known_files)
-        selected_set = set(project_config.selected_files)
 
         # --- Check for and handle deleted files ---
-        deleted_from_known = known_set - current_set
-        deleted_from_selected = selected_set - current_set
+        deleted_files = known_set - current_set
+        if deleted_files:
+            project_config.known_files = list(known_set - deleted_files)
+            # Also remove them from the selection list if they were there
+            original_selection_count = len(project_config.selected_files)
+            project_config.selected_files = [f for f in project_config.selected_files if f not in deleted_files]
+            
+            # If the selection changed, invalidate the token count
+            if len(project_config.selected_files) != original_selection_count:
+                project_config.total_tokens = 0
 
-        if deleted_from_known or deleted_from_selected:
-            # Update known_files (remove deleted from known)
-            project_config.known_files = [f for f in project_config.known_files if f not in deleted_from_known]
-
-            # Update selected_files (remove deleted from selected)
-            project_config.selected_files = [f for f in project_config.selected_files if f not in deleted_from_selected]
-
-            project_config.total_tokens = recalculate_token_count(project_config.base_dir, project_config.selected_files)
             project_config.save()
-            missing_count = len(deleted_from_known.union(deleted_from_selected))
-            self.app.status_var.set(f"Cleaned {missing_count} missing file(s) from '{project_config.project_name}'.")
+            self.app.status_var.set(f"Cleaned {len(deleted_files)} missing file(s) from '{project_config.project_name}'.")
 
         # --- Check for new files ---
-        # New files are those present on disk (current_set) but not in known_files AND not already selected
-        new_files = list(current_set - known_set.union(selected_set))
-        # Sort for consistent comparison, even if the order of detection changes
+        new_files = list(current_set - known_set)
         if sorted(new_files) != sorted(self.newly_detected_files):
             self.newly_detected_files = new_files
             self._update_warning_ui()
@@ -102,8 +99,7 @@ class FileMonitor:
         project_config = self.app.project_manager.get_current_project()
         if files_to_highlight and project_config:
             # Add the new files to the project's known list immediately
-            # This also adds them to the selected files (for the file manager logic)
-            # and prevents them from being detected as "new" again until changed.
+            # This prevents them from being detected as "new" again.
             project_config.known_files.extend(files_to_highlight)
             project_config.known_files = sorted(list(set(project_config.known_files)))
             project_config.save()
@@ -122,7 +118,7 @@ class FileMonitor:
 
         if file_count > 0:
             file_str_verb = "file was" if file_count == 1 else "files were"
-            tooltip_text = f"{file_count} new {file_str_verb} added to the project"
+            tooltip_text = f"{file_count} new {file_str_verb} found in the project"
             self.app.new_files_tooltip.text = tooltip_text
             if not self.app.new_files_label.winfo_ismapped():
                 self.app.new_files_label.grid(row=0, column=0, sticky='e', padx=(10, 0))
