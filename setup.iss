@@ -4,7 +4,7 @@
 #include "version.iss"
 
 #define MyAppName "CodeMerger"
-#define MyAppPublisher "Your Name/Company"
+#define MyAppPublisher "M Nugteren/2Shine"
 #define MyAppURL "https://github.com/DrSiemer/codemerger"
 #define MyAppExeName "CodeMerger.exe"
 #define MyAppSetupName "CodeMerger_Setup"
