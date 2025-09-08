@@ -139,8 +139,7 @@ def is_ignored(path, base_dir, gitignore_data):
     is_ignored_flag = False
     for gitignore_dir, patterns in gitignore_data:
         try:
-            relative_path = target_path.relative_to(gitignore_dir)
-            relative_path_str = relative_path.as_posix()
+            relative_path_str = target_path.relative_to(gitignore_dir).as_posix()
         except ValueError:
             continue # Path is not under this .gitignore's control
 
@@ -149,23 +148,27 @@ def is_ignored(path, base_dir, gitignore_data):
             if is_negated:
                 p = p[1:]
 
-            is_anchored = p.startswith('/')
-            if is_anchored:
-                p = p.lstrip('/')
+            is_dir_only = p.endswith('/')
+            if is_dir_only:
+                p = p.rstrip('/')
 
-            match = False
-            if not is_anchored and '/' not in p:
-                # Pattern is a glob like '*.log' or a name like 'build'
-                # It can match the filename or any directory component.
-                if fnmatch.fnmatch(relative_path.name, p) or any(fnmatch.fnmatch(part, p) for part in relative_path.parts):
-                    match = True
+            current_match = False
+            # Patterns without slashes match any path component.
+            if '/' not in p:
+                if any(fnmatch.fnmatch(part, p) for part in Path(relative_path_str).parts):
+                    current_match = True
+            # Patterns with slashes are matched against the full relative path.
             else:
-                # Pattern is a path like 'src/logs' or '/build'.
-                # It must match the path relative to the .gitignore file.
-                if fnmatch.fnmatch(relative_path_str, p) or fnmatch.fnmatch(relative_path_str, p + '/*'):
-                    match = True
+                if fnmatch.fnmatch(relative_path_str, p):
+                    current_match = True
 
-            if match:
+            if current_match:
+                # For directory-only patterns, ensure we're matching a directory
+                # or a file within that directory.
+                if is_dir_only and not (relative_path_str == p or relative_path_str.startswith(p + '/')):
+                    current_match = False
+
+            if current_match:
                 if is_negated:
                     is_ignored_flag = False
                 else:
