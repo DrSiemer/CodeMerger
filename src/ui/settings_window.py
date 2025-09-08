@@ -154,6 +154,17 @@ class SettingsWindow(Toplevel):
         self.canvas.itemconfig(self.canvas_window, width=event.width)
 
     def _on_mousewheel(self, event):
+        widget_under_cursor = self.winfo_containing(event.x_root, event.y_root)
+
+        # Do not scroll the main canvas if the cursor is over a Text widget
+        w = widget_under_cursor
+        while w is not None:
+            if isinstance(w, Text):
+                return
+            if w == self:
+                break
+            w = w.master
+
         if self.scrollbar.winfo_ismapped():
             self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
 
