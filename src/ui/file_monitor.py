@@ -13,16 +13,18 @@ class FileMonitor:
         self.newly_detected_files = []
 
     def start(self):
-        """Starts or restarts the periodic check for new files based on current settings."""
+        """
+        Starts or restarts the periodic check for new files based on current settings.
+        Immediately performs a scan after starting.
+        """
         self.stop() # Ensure any existing job is cancelled before starting a new one
 
         self.newly_detected_files = []
-        self._update_warning_ui()
+        self._update_warning_ui() # Clear any old warning state immediately
 
         is_dir_active = self.app.project_manager.get_current_project() is not None
         if self.app.state.config.get('enable_new_file_check', True) and is_dir_active:
-            interval_sec = self.app.state.config.get('new_file_check_interval', 5)
-            self._schedule_next_check(interval_sec * 1000)
+            self.perform_new_file_check()
 
     def stop(self):
         """Stops the currently running file check job."""
@@ -35,16 +37,27 @@ class FileMonitor:
         self._check_job = self.app.after(interval_ms, self.perform_new_file_check)
 
     def perform_new_file_check(self):
-        """Scans for new and deleted files and updates the state accordingly."""
+        """
+        Scans for new and deleted files and updates the state accordingly.
+        Also schedules the next check.
+        """
         project_config = self.app.project_manager.get_current_project()
         if not project_config:
             self.stop()
             return
 
+        base_dir = project_config.base_dir
+
+        if not os.path.isdir(base_dir):
+            self.stop()
+            self.app.status_var.set(f"Project directory '{os.path.basename(base_dir)}' no longer exists. Monitoring stopped.")
+            self.app.set_active_dir_display(None)
+            return
+
         all_project_files = get_all_matching_files(
-            base_dir=project_config.base_dir,
+            base_dir=base_dir,
             file_extensions=self.app.file_extensions,
-            gitignore_patterns=parse_gitignore(project_config.base_dir)
+            gitignore_patterns=parse_gitignore(base_dir)
         )
 
         current_set = set(all_project_files)
@@ -52,13 +65,26 @@ class FileMonitor:
         selected_set = set(project_config.selected_files)
 
         # --- Check for and handle deleted files ---
-        deleted_files = list(known_set - current_set)
-        if deleted_files:
-            project_config.known_files = [f for f in project_config.known_files if f not in deleted_files]
+        deleted_from_known = known_set - current_set
+        deleted_from_selected = selected_set - current_set
+
+        if deleted_from_known or deleted_from_selected:
+            # Update known_files (remove deleted from known)
+            project_config.known_files = [f for f in project_config.known_files if f not in deleted_from_known]
+
+            # Update selected_files (remove deleted from selected)
+            # This is important for token count and actual copy operations
+            project_config.selected_files = [f for f in project_config.selected_files if f not in deleted_from_selected]
+
+            project_config.total_tokens = 0 # Invalidate token count if files are missing
             project_config.save()
+            missing_count = len(deleted_from_known.union(deleted_from_selected))
+            self.app.status_var.set(f"Cleaned {missing_count} missing file(s) from '{project_config.project_name}'.")
 
         # --- Check for new files ---
+        # New files are those present on disk (current_set) but not in known_files AND not already selected
         new_files = list(current_set - known_set.union(selected_set))
+        # Sort for consistent comparison, even if the order of detection changes
         if sorted(new_files) != sorted(self.newly_detected_files):
             self.newly_detected_files = new_files
             self._update_warning_ui()
@@ -76,6 +102,8 @@ class FileMonitor:
         project_config = self.app.project_manager.get_current_project()
         if files_to_highlight and project_config:
             # Add the new files to the project's known list immediately
+            # This also adds them to the selected files (for the file manager logic)
+            # and prevents them from being detected as "new" again until changed.
             project_config.known_files.extend(files_to_highlight)
             project_config.known_files = sorted(list(set(project_config.known_files)))
             project_config.save()
@@ -96,7 +124,8 @@ class FileMonitor:
             file_str_verb = "file was" if file_count == 1 else "files were"
             tooltip_text = f"{file_count} new {file_str_verb} added to the project"
             self.app.new_files_tooltip.text = tooltip_text
-            self.app.new_files_label.grid(row=0, column=0, sticky='e', padx=(10, 0))
+            if not self.app.new_files_label.winfo_ismapped():
+                self.app.new_files_label.grid(row=0, column=0, sticky='e', padx=(10, 0))
             self.app.manage_files_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
             self.app.new_files_label.grid_forget()
