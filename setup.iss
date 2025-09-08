@@ -50,7 +50,6 @@ Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueType: dword; ValueName: "Autom
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: ""; ValueData: "Open in CodeMerger"; Flags: uninsdeletekey; Tasks: addcontextmenu
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\{#MyAppExeName},0"; Tasks: addcontextmenu
 Root: HKLM; Subkey: "Software\Classes\Directory\shell\{#MyAppName}\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""; Tasks: addcontextmenu
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\" + AppGuid + "_is1"; ValueType: string; ValueName: "DisplayVersion"; ValueData: "{code:GetCleanAppVersion}"; Flags: uninsdeletekeyifempty
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
@@ -62,12 +61,6 @@ const
 var
   g_DeleteConfigData: Boolean;
   g_CleanedAppVersion: String;
-
-// --- Helper function to provide the cleaned version string ---
-function GetCleanAppVersion(Param: String): String;
-begin
-  Result := g_CleanedAppVersion;
-end;
 
 // --- Helper Function for Writing Values ---
 function GetCheckForUpdatesValue(Param: String): String;
@@ -245,6 +238,19 @@ begin
       WizardForm.TasksList.Checked[I] := ContextMenuEnabled;
   end;
 end;
+
+// Set the DisplayVersion after install
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  UninstallKey: string;
+begin
+  if CurStep = ssPostInstall then
+  begin
+    UninstallKey := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1';
+    RegWriteStringValue(HKLM, UninstallKey, 'DisplayVersion', g_CleanedAppVersion);
+  end;
+end;
+
 
 // --- Uninstall steps ---
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
