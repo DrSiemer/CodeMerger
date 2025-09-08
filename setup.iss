@@ -122,22 +122,36 @@ end;
 function GetInstalledVersion(): String;
 var
   S: String;
+  IsDigit: Boolean;
 begin
   Result := '';
   if RegQueryStringValue(HKLM,
     'Software\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
     'DisplayVersion', S) then
   begin
-    Result := S;
-    exit;
-  end;
-
-  if RegQueryStringValue(HKLM,
+    // Value found, proceed to clean it
+  end
+  else if RegQueryStringValue(HKLM,
     'Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\' + AppGuid + '_is1',
     'DisplayVersion', S) then
   begin
-    Result := S;
+    // Value found, proceed to clean it
+  end
+  else
+  begin
+    // No installed version found in registry
+    exit;
   end;
+
+  while Length(S) > 0 do
+  begin
+    IsDigit := (S[1] >= '0') and (S[1] <= '9');
+    if IsDigit then
+      break
+    else
+      Delete(S, 1, 1);
+  end;
+  Result := S;
 end;
 
 // --- Check if app is running ---
@@ -161,11 +175,13 @@ end;
 // --- Installer initialization ---
 function InitializeSetup(): Boolean;
 var
-  InstalledVer: String;
+  InstalledVer, NewVer: String;
   Compare: Integer;
   Msg: String;
 begin
-  Log('Installer version (from command line): {#MyAppVersion}');
+  NewVer := ExpandConstant('{#MyAppVersion}');
+  Log('Installer version (from command line): ' + NewVer);
+
   InstalledVer := GetInstalledVersion();
   if InstalledVer <> '' then
     Log('Detected installed version: ' + InstalledVer)
@@ -174,13 +190,13 @@ begin
 
   if InstalledVer <> '' then
   begin
-    Compare := VersionCompare('{#MyAppVersion}', InstalledVer);
+    Compare := VersionCompare(NewVer, InstalledVer);
     if Compare <= 0 then
     begin
       if Compare = 0 then
         Msg := 'You are about to install the same version (v' + InstalledVer + '). Proceed?'
       else // Compare < 0
-        Msg := 'You are about to install an older version (v' + '{#MyAppVersion}' + ' < v' + InstalledVer + '). Proceed?';
+        Msg := 'You are about to install an older version (v' + NewVer + ' < v' + InstalledVer + '). Proceed?';
 
       if MsgBox(Msg, mbConfirmation, MB_YESNO) = IDNO then
       begin
