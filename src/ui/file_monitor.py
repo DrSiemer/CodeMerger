@@ -2,6 +2,7 @@ import os
 from ..core.utils import parse_gitignore
 from ..core.file_scanner import get_all_matching_files
 from .. import constants as c
+from ..core.merger import recalculate_token_count
 
 class FileMonitor:
     """
@@ -73,10 +74,9 @@ class FileMonitor:
             project_config.known_files = [f for f in project_config.known_files if f not in deleted_from_known]
 
             # Update selected_files (remove deleted from selected)
-            # This is important for token count and actual copy operations
             project_config.selected_files = [f for f in project_config.selected_files if f not in deleted_from_selected]
 
-            project_config.total_tokens = 0 # Invalidate token count if files are missing
+            project_config.total_tokens = recalculate_token_count(project_config.base_dir, project_config.selected_files)
             project_config.save()
             missing_count = len(deleted_from_known.union(deleted_from_selected))
             self.app.status_var.set(f"Cleaned {missing_count} missing file(s) from '{project_config.project_name}'.")

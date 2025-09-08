@@ -4,6 +4,7 @@ import random
 import re
 import colorsys
 from ..constants import COMPACT_MODE_BG_COLOR
+from .merger import recalculate_token_count
 
 def _generate_random_color():
     """
@@ -92,9 +93,8 @@ class ProjectConfig:
         files_were_cleaned = len(cleaned_selection) < len(original_selection)
         known_files_were_cleaned = len(cleaned_known_files) < len(original_known_files)
 
-
         if files_were_cleaned:
-            self.total_tokens = 0 # Invalidate token count if files are missing
+            self.total_tokens = recalculate_token_count(self.base_dir, self.selected_files)
             config_was_updated = True
         else:
             # The file list is intact, so the cached token count is trustworthy
