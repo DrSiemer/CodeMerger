@@ -1,5 +1,6 @@
 import os
 import json
+import fnmatch
 from pathlib import Path
 from ..constants import (
     CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE,
@@ -102,43 +103,76 @@ def load_active_file_extensions():
     return {item['ext'] for item in all_types if item.get('active', False)}
 
 def parse_gitignore(base_dir):
-    """Parses a .gitignore file and returns a list of patterns"""
-    gitignore_path = os.path.join(base_dir, '.gitignore')
-    patterns = []
-    if os.path.isfile(gitignore_path):
-        with open(gitignore_path, 'r', encoding='utf-8-sig') as f:
-            patterns = [
-                line.strip() for line in f
-                if line.strip() and not line.strip().startswith('#')
-            ]
-    return patterns
+    """
+    Parses all .gitignore files from the base directory downwards.
+    Returns a list of tuples, where each tuple contains the Path object for the
+    .gitignore's directory and a list of its patterns.
+    """
+    gitignore_data = []
+    for root, dirs, files in os.walk(base_dir, topdown=True):
+        if '.git' in dirs:
+            dirs.remove('.git')
 
-def is_ignored(path, base_dir, gitignore_patterns):
-    """Checks if a given path should be ignored based on .gitignore patterns"""
-    try:
-        base_path = Path(base_dir)
-        target_path = Path(path)
-        relative_path = target_path.relative_to(base_path)
-        relative_path_str = relative_path.as_posix()
+        if '.gitignore' in files:
+            gitignore_path = os.path.join(root, '.gitignore')
+            try:
+                with open(gitignore_path, 'r', encoding='utf-8-sig') as f:
+                    patterns = [
+                        line.strip() for line in f
+                        if line.strip() and not line.strip().startswith('#')
+                    ]
+                    if patterns:
+                        gitignore_data.append((Path(root), patterns))
+            except (IOError, OSError):
+                pass
+    return gitignore_data
 
-        for p in gitignore_patterns:
-            # A pattern ending in a slash is for matching directories
-            if p.endswith('/'):
-                dir_pattern = p.rstrip('/')
-                # Check if path is the directory itself or is inside that directory
-                if relative_path_str == dir_pattern or relative_path_str.startswith(dir_pattern + '/'):
-                    return True
-            # A pattern starting with a slash is anchored to the project root
-            elif p.startswith('/'):
-                if relative_path.match(p.lstrip('/')):
-                    return True
-            # Other patterns match anywhere
+def is_ignored(path, base_dir, gitignore_data):
+    """
+    Checks if a given path should be ignored based on all found .gitignore files,
+    respecting the location and rules of each file.
+    """
+    target_path = Path(path)
+    if '.git' in target_path.parts:
+        return True
+
+    is_ignored_flag = False
+    for gitignore_dir, patterns in gitignore_data:
+        try:
+            relative_path = target_path.relative_to(gitignore_dir)
+            relative_path_str = relative_path.as_posix()
+        except ValueError:
+            continue # Path is not under this .gitignore's control
+
+        for p in patterns:
+            is_negated = p.startswith('!')
+            if is_negated:
+                p = p[1:]
+
+            is_anchored = p.startswith('/')
+            if is_anchored:
+                p = p.lstrip('/')
+
+            match = False
+            if not is_anchored and '/' not in p:
+                # Pattern is a glob like '*.log' or a name like 'build'
+                # It can match the filename or any directory component.
+                if fnmatch.fnmatch(relative_path.name, p) or any(fnmatch.fnmatch(part, p) for part in relative_path.parts):
+                    match = True
             else:
-                if relative_path.match(p) or relative_path.match('*/' + p):
-                    return True
-    except ValueError:
-        return False
-    return False
+                # Pattern is a path like 'src/logs' or '/build'.
+                # It must match the path relative to the .gitignore file.
+                if fnmatch.fnmatch(relative_path_str, p) or fnmatch.fnmatch(relative_path_str, p + '/*'):
+                    match = True
+
+            if match:
+                if is_negated:
+                    is_ignored_flag = False
+                else:
+                    is_ignored_flag = True
+
+    return is_ignored_flag
+
 
 def load_app_version():
     """
