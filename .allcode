@@ -179,8 +179,8 @@
     },
     {
       "path": "src/ui/file_manager/selection_list_handler.py",
-      "mtime": 1757439272.4829414,
-      "hash": "f0cc441a18e9a0306fac33432382a3f1010577ae"
+      "mtime": 1757448144.124847,
+      "hash": "44ab42dc36f1539eb82e108257954bfc314b097e"
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
