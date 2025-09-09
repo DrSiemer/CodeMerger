@@ -8,7 +8,7 @@ class TwoColumnList(tk.Canvas):
     def __init__(self, parent, right_col_font, right_col_width, **kwargs):
         super().__init__(parent, bg=c.TEXT_INPUT_BG, highlightthickness=0, **kwargs)
         self.items = []
-        self.drawn_rows = {}
+        self.item_id_map = {}
         self.selected_indices = set()
         self.highlighted_indices = set()
         self.row_height = 25
@@ -27,14 +27,15 @@ class TwoColumnList(tk.Canvas):
         which is much smoother and avoids flicker.
         """
         width = self.winfo_width()
-        for i, ids in self.drawn_rows.items():
-            if i >= len(self.items): continue
+        for i, item in enumerate(self.items):
+            item_path = item.get('data')
+            if not item_path or item_path not in self.item_id_map: continue
+            ids = self.item_id_map[item_path]
+
             y = i * self.row_height
-            # Update background rectangle width
             self.coords(ids['bg'], 0, y, width, y + self.row_height)
-            # Update position of the right-aligned text
             self.coords(ids['right'], width - 5, y + self.row_height / 2)
-        # These are still needed to manage the scrollable area correctly on resize
+
         self._update_scrollregion()
         self._update_scrollbar_visibility()
 
@@ -99,8 +100,9 @@ class TwoColumnList(tk.Canvas):
         This is the key to flicker-free selection and highlighting.
         """
         for i, item in enumerate(self.items):
-            if i not in self.drawn_rows: continue
-            ids = self.drawn_rows[i]
+            item_path = item.get('data')
+            if not item_path or item_path not in self.item_id_map: continue
+            ids = self.item_id_map[item_path]
 
             bg_color = c.TEXT_INPUT_BG
             if i in self.selected_indices: bg_color = c.BTN_BLUE
@@ -116,33 +118,60 @@ class TwoColumnList(tk.Canvas):
     def set_items(self, items):
         """
         Performs a full redraw of the list. Called when the underlying data changes
-        (e.g., adding/removing/reordering files).
+        (e.g., adding/removing files).
         """
         selection_paths = {self.get_item_data(i) for i in self.curselection()}
 
         self.delete("all")
-        self.drawn_rows.clear()
+        self.item_id_map.clear()
         self.items = items
 
         width = self.winfo_width()
         if width <= 1: self.update_idletasks(); width = self.winfo_width()
 
-        # Create all canvas items once and store their IDs
         for i, item in enumerate(self.items):
             y = i * self.row_height
             bg_rect = self.create_rectangle(0, y, width, y + self.row_height, outline="")
             left_text = self.create_text(5, y + self.row_height / 2, anchor='w', text=item.get('left', ''), font=self.left_col_font)
             right_text = self.create_text(width - 5, y + self.row_height / 2, anchor='e', text=item.get('right', ''), font=self.right_col_font)
-            self.drawn_rows[i] = {'bg': bg_rect, 'left': left_text, 'right': right_text}
+            # Use the unique file path as the key
+            item_path = item.get('data')
+            if item_path:
+                self.item_id_map[item_path] = {'bg': bg_rect, 'left': left_text, 'right': right_text}
 
         self._update_scrollregion()
         self._update_scrollbar_visibility()
 
-        # Restore selection and apply initial styling
         new_selection = set()
         for i, item in enumerate(self.items):
             if item.get('data') in selection_paths: new_selection.add(i)
         self.selected_indices = new_selection
+        self._update_styles()
+
+    def reorder_and_update(self, new_display_items):
+        """
+        Moves and updates existing canvas items without a full redraw. This is
+        used for reordering operations to prevent flickering.
+        """
+        self.items = new_display_items
+        width = self.winfo_width()
+        for new_index, item_data in enumerate(self.items):
+            item_path = item_data.get('data')
+            if not item_path or item_path not in self.item_id_map:
+                continue
+
+            ids = self.item_id_map[item_path]
+            new_y = new_index * self.row_height
+
+            # Move existing items
+            self.coords(ids['bg'], 0, new_y, width, new_y + self.row_height)
+            self.coords(ids['left'], 5, new_y + self.row_height / 2)
+            self.coords(ids['right'], width - 5, new_y + self.row_height / 2)
+
+            # Update their content (e.g., line count color might change)
+            self.itemconfig(ids['left'], text=item_data.get('left', ''))
+            self.itemconfig(ids['right'], text=item_data.get('right', ''), fill=item_data.get('right_fg', c.TEXT_SUBTLE_COLOR))
+
         self._update_styles()
 
     def curselection(self):
@@ -153,7 +182,6 @@ class TwoColumnList(tk.Canvas):
         self._update_styles()
 
     def see(self, index):
-        """Scrolls the list to make the item at the given index visible."""
         if not (0 <= index < len(self.items)): return
         item_y_start = index * self.row_height
         item_y_end = item_y_start + self.row_height

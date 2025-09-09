@@ -29,9 +29,9 @@ class SelectionListHandler:
 
     def set_initial_selection(self, selection_list):
         self.ordered_selection = list(selection_list)
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=False)
 
-    def update_listbox_from_data(self):
+    def _update_list_display(self, is_reorder=False):
         """
         Refreshes the merge order list, handling line counts, coloring,
         and font styles based on user settings.
@@ -80,7 +80,11 @@ class SelectionListHandler:
                 'right_fg': right_col_color,
                 'data': path # Store original path for identification
             })
-        self.listbox.set_items(display_items)
+
+        if is_reorder:
+            self.listbox.reorder_and_update(display_items)
+        else:
+            self.listbox.set_items(display_items)
 
     def on_list_selection_change(self, event=None):
         """Callback for when the listbox selection changes"""
@@ -111,7 +115,7 @@ class SelectionListHandler:
             except OSError:
                 messagebox.showerror("Error", f"Could not access file: {path}", parent=self.parent)
                 return
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=False)
         self.on_change()
 
     def add_files(self, paths_to_add):
@@ -127,12 +131,12 @@ class SelectionListHandler:
                         self.ordered_selection.append(new_entry)
                 except OSError:
                     continue
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=False)
         self.on_change()
 
     def remove_all_files(self):
         self.ordered_selection.clear()
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=False)
         self.on_change()
 
     def move_to_top(self):
@@ -143,7 +147,7 @@ class SelectionListHandler:
             del self.ordered_selection[index]
         self.ordered_selection = moved_items + self.ordered_selection
         new_selection_indices = range(len(moved_items))
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=True)
         self.listbox.selection_set(new_selection_indices[0], new_selection_indices[-1])
         self.listbox.see(new_selection_indices[0])
         self.on_change()
@@ -170,7 +174,7 @@ class SelectionListHandler:
 
         # Update selection and view
         new_selection_indices = range(insert_index, insert_index + len(moved_items))
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=True)
         self.listbox.selection_set(new_selection_indices[0], new_selection_indices[-1])
         self.listbox.see(new_selection_indices[0])
         self.on_change()
@@ -197,7 +201,7 @@ class SelectionListHandler:
 
         # Update selection and view
         new_selection_indices = range(insert_index, insert_index + len(moved_items))
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=True)
         self.listbox.selection_set(new_selection_indices[0], new_selection_indices[-1])
         self.listbox.see(new_selection_indices[-1])
         self.on_change()
@@ -210,7 +214,7 @@ class SelectionListHandler:
             del self.ordered_selection[index]
         new_start_index = len(self.ordered_selection)
         self.ordered_selection.extend(moved_items)
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=True)
         self.listbox.selection_set(new_start_index, len(self.ordered_selection) - 1)
         self.listbox.see(len(self.ordered_selection) - 1)
         self.on_change()
@@ -221,7 +225,7 @@ class SelectionListHandler:
         # Remove from data model by iterating backwards
         for index in sorted(selection_indices, reverse=True):
             del self.ordered_selection[index]
-        self.update_listbox_from_data()
+        self._update_list_display(is_reorder=False)
         self.on_change()
 
     def open_selected_file(self, event=None):
