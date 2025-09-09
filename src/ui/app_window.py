@@ -147,11 +147,9 @@ class App(Tk):
     def open_color_chooser(self, event=None):
         project_config = self.project_manager.get_current_project()
         if not project_config: return
-        # askcolor returns a tuple ((r,g,b), '#rrggbb') or (None, None) on cancel
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        # The hex color string is in result. Check if it's a valid string.
-        if result and result:
-            self.project_color = result
+        if result and result[1]:
+            self.project_color = result[1]
             project_config.project_color = self.project_color
             project_config.save()
             self.button_manager.update_button_states()
