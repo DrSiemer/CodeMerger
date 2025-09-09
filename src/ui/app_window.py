@@ -27,8 +27,8 @@ from .button_state_manager import ButtonStateManager
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
-        self.withdraw() # Hide window during setup to prevent flicker
-        assets.load_tk_images() # [FIX] Load Tkinter images now that the root window exists
+        self.withdraw()
+        assets.load_tk_images()
 
         self.file_extensions = file_extensions
         self.app_version = app_version

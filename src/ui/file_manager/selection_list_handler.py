@@ -24,8 +24,12 @@ class SelectionListHandler:
         self.line_count_enabled = line_count_enabled
         self.line_count_threshold = line_count_threshold
         self.ordered_selection = []
+        self.tooltip_window = None
+        self.tooltip_job = None
         self.listbox.bind_event('<<ListSelectionChanged>>', self.on_list_selection_change)
         self.listbox.bind_event('<Double-1>', self.open_selected_file)
+        self.listbox.bind_event('<Motion>', self._schedule_tooltip)
+        self.listbox.bind_event('<Leave>', self._hide_tooltip)
 
     def set_initial_selection(self, selection_list):
         self.ordered_selection = list(selection_list)
@@ -250,3 +254,72 @@ class SelectionListHandler:
         except Exception as e:
             messagebox.showerror("Error", f"Could not open file: {e}", parent=self.parent)
         return "break"
+
+    def _schedule_tooltip(self, event):
+        """Schedules a tooltip to appear after a delay, cancelling any existing ones."""
+        # Hide any visible tooltip and cancel any pending show request.
+        self._hide_tooltip()
+        # Schedule a new tooltip to appear after the delay.
+        self.tooltip_job = self.listbox.after(500, lambda e=event: self._show_tooltip(e))
+
+    def _show_tooltip(self, event):
+        """Creates and displays the tooltip window."""
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
+
+        # Determine which list item is under the cursor
+        index = int(self.listbox.canvasy(event.y) // self.listbox.row_height)
+        if not (0 <= index < len(self.ordered_selection)):
+            return
+
+        item_info = self.ordered_selection[index]
+        path = item_info.get('path')
+        if not path:
+            return
+
+        # Decide which tooltip to show based on horizontal position
+        is_over_line_count_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
+        tooltip_text = None
+
+        if is_over_line_count_area and self.line_count_enabled:
+            # Re-check if a line count is actually VISIBLE for this item
+            line_count = -1
+            try:
+                with open(os.path.join(self.base_dir, path), 'r', encoding='utf-8', errors='ignore') as f:
+                    line_count = len(f.readlines())
+            except (IOError, OSError):
+                pass # line_count remains -1
+
+            # Tooltip should only show if the text is visible (i.e., over the threshold)
+            if line_count > self.line_count_threshold:
+                tooltip_text = f"{line_count} lines of text"
+
+        # If we are not showing the line count tooltip, fall back to the path tooltip
+        if tooltip_text is None:
+            tooltip_text = path.replace('/', os.sep)
+
+        # Now, create and display the tooltip window with the determined text
+        if not tooltip_text:
+            return
+
+        x = event.x_root + 15
+        y = event.y_root + 10
+        self.tooltip_window = Toplevel(self.parent)
+        self.tooltip_window.wm_overrideredirect(True)
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+
+        label = Label(self.tooltip_window, text=tooltip_text, justify='left',
+                      background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=4, ipady=2)
+
+    def _hide_tooltip(self, event=None):
+        """Cancels any pending tooltip job and destroys any visible tooltip window."""
+        if self.tooltip_job:
+            self.listbox.after_cancel(self.tooltip_job)
+            self.tooltip_job = None
+
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
