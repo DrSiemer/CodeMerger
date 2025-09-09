@@ -152,30 +152,54 @@ class SelectionListHandler:
         selection_indices = self.listbox.curselection()
         if not selection_indices or selection_indices[0] == 0:
             return
-        new_selection = []
-        for i in sorted(selection_indices):
-            target_index = i - 1
-            # Swap the item with the one above it
-            self.ordered_selection[i], self.ordered_selection[target_index] = self.ordered_selection[target_index], self.ordered_selection[i]
-            new_selection.append(target_index)
+
+        # Grouped move logic
+        moved_items = [self.ordered_selection[i] for i in selection_indices]
+
+        # Remove selected items by iterating backwards to preserve indices
+        for index in sorted(selection_indices, reverse=True):
+            del self.ordered_selection[index]
+
+        # Calculate the new insertion point. It's just before the original
+        # position of the first selected item.
+        insert_index = selection_indices[0] - 1
+
+        # Re-insert the block of moved items
+        for i, item in enumerate(moved_items):
+            self.ordered_selection.insert(insert_index + i, item)
+
+        # Update selection and view
+        new_selection_indices = range(insert_index, insert_index + len(moved_items))
         self.update_listbox_from_data()
-        self.listbox.selection_set(new_selection[0], new_selection[-1])
-        self.listbox.see(new_selection[0])
+        self.listbox.selection_set(new_selection_indices[0], new_selection_indices[-1])
+        self.listbox.see(new_selection_indices[0])
         self.on_change()
 
     def move_down(self):
         selection_indices = self.listbox.curselection()
         if not selection_indices or selection_indices[-1] >= len(self.ordered_selection) - 1:
             return
-        new_selection = []
-        # Iterate backwards to prevent index issues when moving multiple items
-        for i in sorted(selection_indices, reverse=True):
-            target_index = i + 1
-            self.ordered_selection[i], self.ordered_selection[target_index] = self.ordered_selection[target_index], self.ordered_selection[i]
-            new_selection.insert(0, target_index) # Insert at beginning to keep order
+
+        # Grouped move logic
+        moved_items = [self.ordered_selection[i] for i in selection_indices]
+
+        # Remove selected items by iterating backwards
+        for index in sorted(selection_indices, reverse=True):
+            del self.ordered_selection[index]
+
+        # Calculate the new insertion index. It's one position after the
+        # original start of the selection.
+        insert_index = selection_indices[0] + 1
+
+        # Re-insert the block of moved items
+        for i, item in enumerate(moved_items):
+            self.ordered_selection.insert(insert_index + i, item)
+
+        # Update selection and view
+        new_selection_indices = range(insert_index, insert_index + len(moved_items))
         self.update_listbox_from_data()
-        self.listbox.selection_set(new_selection[0], new_selection[-1])
-        self.listbox.see(new_selection[-1])
+        self.listbox.selection_set(new_selection_indices[0], new_selection_indices[-1])
+        self.listbox.see(new_selection_indices[-1])
         self.on_change()
 
     def move_to_bottom(self):
