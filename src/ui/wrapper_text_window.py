@@ -1,7 +1,7 @@
 import os
 from tkinter import Toplevel, Frame, Label, Text, Scrollbar
 from ..core.paths import ICON_PATH
-from .custom_widgets import RoundedButton
+from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.utils import load_config
 from .tooltip import ToolTip

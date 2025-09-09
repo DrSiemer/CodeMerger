@@ -8,7 +8,8 @@
     "src",
     "src/core",
     "src/ui",
-    "src/ui/file_manager"
+    "src/ui/file_manager",
+    "src/ui/widgets"
   ],
   "selected_files": [
     {
@@ -63,8 +64,23 @@
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1757015997.104703,
-      "hash": "13516aada7d622aae3c18dde2a59348e1158ca60"
+      "mtime": 1757435742.0600007,
+      "hash": "0a25592b5bf8f4e03ef3d1b0d3368d271a2b8d5d"
+    },
+    {
+      "path": "src/ui/font_utils.py",
+      "mtime": 1757435805.1224673,
+      "hash": "b2bd0d98f0f9a4ba9799c52d732d579391930665"
+    },
+    {
+      "path": "src/ui/widgets/rounded_button.py",
+      "mtime": 1757435787.7826102,
+      "hash": "3b07212beb54f3701d1ac58ded6721a59b007ccc"
+    },
+    {
+      "path": "src/ui/widgets/two_column_list.py",
+      "mtime": 1757435772.0748074,
+      "hash": "1f918187a5475844035e8805bb3a224815839d87"
     },
     {
       "path": "src/ui/view_manager.py",
@@ -93,8 +109,8 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1757433636.5997238,
-      "hash": "488ab916d96c3a08c2c2e9d0eb14f1e06d1b5025"
+      "mtime": 1757435647.7108965,
+      "hash": "c1e210ef17bdc97450c9028359d6e0f665f0a798"
     },
     {
       "path": "src/ui/file_manager/file_tree_builder.py",
@@ -113,33 +129,28 @@
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1757431309.24429,
-      "hash": "249cac411010f0cb37559401b46c8582ab778d46"
+      "mtime": 1757435733.5226285,
+      "hash": "d964c5eaa4274ce812539694f5ba54a52aaf8284"
     },
     {
       "path": "src/ui/wrapper_text_window.py",
-      "mtime": 1757015997.1217024,
-      "hash": "3921304afc0e3e756ed450b787f4da6198d6ba8e"
+      "mtime": 1757435707.3966725,
+      "hash": "d8af9bb62f0dc54ad9048f9b8317a1073cf85253"
     },
     {
       "path": "src/ui/directory_dialog.py",
-      "mtime": 1757015997.0857031,
-      "hash": "e055292e2b7ae08d382c1e0c4eaa9a3de8b3df8e"
+      "mtime": 1757435693.529563,
+      "hash": "f6d1ee2762cf18af45ed4d4628c8aaaad7becd99"
     },
     {
       "path": "src/ui/filetypes_manager.py",
-      "mtime": 1756932323.0480945,
-      "hash": "c8655232eeab8730a06d9e8edc307f5d21539dfd"
+      "mtime": 1757435678.4859643,
+      "hash": "af411a3541b1b70318e94821b12fec1d59f6a9d8"
     },
     {
       "path": "src/ui/title_edit_dialog.py",
-      "mtime": 1756932323.049093,
-      "hash": "de9dcfd7c2ed14a20f32dc921ff1db8aa7d2fcbd"
-    },
-    {
-      "path": "src/ui/custom_widgets.py",
-      "mtime": 1757434521.6932905,
-      "hash": "4698c0720ee3c280a6ec7d4b7b28603b57dbc2f5"
+      "mtime": 1757435663.1623414,
+      "hash": "03efbff4211b7eed921d9e6bfea7f6dc012be8a5"
     },
     {
       "path": "src/ui/assets.py",
@@ -222,7 +233,7 @@
       "hash": "c92c95e2453a6898cba63020bc9ad8686b47c768"
     }
   ],
-  "total_tokens": 45088,
+  "total_tokens": 50901,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -253,7 +264,6 @@
     "src/ui/assets.py",
     "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
-    "src/ui/custom_widgets.py",
     "src/ui/directory_dialog.py",
     "src/ui/file_manager/file_manager_window.py",
     "src/ui/file_manager/file_tree_builder.py",
@@ -262,11 +272,14 @@
     "src/ui/file_manager/ui_setup.py",
     "src/ui/file_monitor.py",
     "src/ui/filetypes_manager.py",
+    "src/ui/font_utils.py",
     "src/ui/settings_window.py",
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",
     "src/ui/ui_builder.py",
     "src/ui/view_manager.py",
+    "src/ui/widgets/rounded_button.py",
+    "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
     "src/ui/wrapper_text_window.py",
     "version.txt"

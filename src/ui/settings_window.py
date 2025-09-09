@@ -4,7 +4,7 @@ from tkinter import Toplevel, Frame, Label, Entry, filedialog, StringVar, Boolea
 from ..core.utils import load_config, save_config
 from ..core.registry import get_setting, save_setting
 from ..core.paths import ICON_PATH
-from .custom_widgets import RoundedButton
+from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from .window_utils import position_window, save_window_geometry
 
@@ -24,7 +24,6 @@ class SettingsWindow(Toplevel):
         self.new_file_check_interval = StringVar(value=str(config.get('new_file_check_interval', 5)))
         self.line_count_enabled = BooleanVar(value=config.get('line_count_enabled', c.LINE_COUNT_ENABLED_DEFAULT))
         self.line_count_threshold = StringVar(value=str(config.get('line_count_threshold', c.LINE_COUNT_THRESHOLD_DEFAULT)))
-
 
         # --- Style Definitions ---
         self.font_family = "Segoe UI"
@@ -93,7 +92,6 @@ class SettingsWindow(Toplevel):
 
         self.update_checkbox = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
         self.update_checkbox.pack(side='left')
-
 
         Label(self.scrollable_frame, text="File System Monitoring", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         file_system_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)

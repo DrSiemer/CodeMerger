@@ -4,7 +4,7 @@ import re
 from tkinter import Toplevel, Frame, Label, Entry, messagebox, ttk
 from ..core.utils import load_all_filetypes, save_filetypes
 from ..core.paths import ICON_PATH
-from .custom_widgets import RoundedButton
+from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from .window_utils import position_window, save_window_geometry
 

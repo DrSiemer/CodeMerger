@@ -2,7 +2,7 @@ import os
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, filedialog
 from ..core.project_config import ProjectConfig
-from .custom_widgets import RoundedButton
+from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import position_window, save_window_geometry
@@ -114,7 +114,6 @@ class DirectoryDialog(Toplevel):
                 height=32
             )
             remove_btn.pack(side='left', padx=(10, 0))
-
 
     def show_path_tooltip(self, event, path):
         """Displays a tooltip with the full path of the project"""

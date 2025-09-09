@@ -1,5 +1,5 @@
 from tkinter import Toplevel, Frame, Label, Entry, StringVar
-from .custom_widgets import RoundedButton
+from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import position_window, save_window_geometry
@@ -41,7 +41,6 @@ class TitleEditDialog(Toplevel):
 
         cancel_button = RoundedButton(right_buttons_frame, text="Cancel", command=self.on_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=("Segoe UI", 12), width=90, height=30)
         cancel_button.pack(side='right', padx=(0, 10))
-
 
         self.bind("<Return>", self.on_ok)
         self.bind("<Escape>", self.on_cancel)

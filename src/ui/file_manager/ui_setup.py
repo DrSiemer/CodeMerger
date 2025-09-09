@@ -1,5 +1,6 @@
 from tkinter import Frame, Label, ttk, font
-from ..custom_widgets import RoundedButton, TwoColumnList
+from ..widgets.rounded_button import RoundedButton
+from ..widgets.two_column_list import TwoColumnList
 from ... import constants as c
 from ...constants import SUBTLE_HIGHLIGHT_COLOR
 

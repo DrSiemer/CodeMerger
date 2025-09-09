@@ -1,6 +1,6 @@
 from tkinter import Frame, Label
 from .. import constants as c
-from .custom_widgets import RoundedButton
+from .widgets.rounded_button import RoundedButton
 from .tooltip import ToolTip
 from .assets import assets
 
