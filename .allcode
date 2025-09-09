@@ -149,8 +149,8 @@
     },
     {
       "path": "src/ui/widgets/two_column_list.py",
-      "mtime": 1757435772.0748074,
-      "hash": "1f918187a5475844035e8805bb3a224815839d87"
+      "mtime": 1757436315.0057547,
+      "hash": "05716153444ad0a0952e251d5c2184004f23de00"
     },
     {
       "path": "src/ui/button_state_manager.py",
@@ -233,7 +233,7 @@
       "hash": "df894876cd1afa4d1b666b8f7f2052a859cd66df"
     }
   ],
-  "total_tokens": 50901,
+  "total_tokens": 51049,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [

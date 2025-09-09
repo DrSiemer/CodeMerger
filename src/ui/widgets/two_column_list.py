@@ -15,6 +15,7 @@ class TwoColumnList(tk.Canvas):
         self.right_col_font = right_col_font
         self.right_col_width = right_col_width
         self.scrollbar = None
+        self.last_clicked_index = None
         self.bind("<ButtonPress-1>", self._on_click)
         self.bind("<MouseWheel>", self._on_mousewheel)
         self.bind("<Configure>", self._redraw)
@@ -53,30 +54,18 @@ class TwoColumnList(tk.Canvas):
         self.bind(sequence, func, add)
 
     def _on_mousewheel(self, event):
-        # [FIX] This is the robust, final logic for scrolling.
-        # It directly checks the scrollbar's state to prevent flicker at the limits.
 
-        # 1. If no scrollbar is linked or it's not visible (content fits), do nothing.
         if not self.scrollbar or not self.scrollbar.winfo_ismapped():
             return
 
-        # 2. Get the scrollbar's current position. It returns (top_fraction, bottom_fraction).
         start, end = self.scrollbar.get()
-
-        # 3. Determine scroll direction.
         delta = -1 * (event.delta // 120) if sys.platform == "win32" else event.delta
 
-        # 4. Check boundaries to prevent scrolling past the limits.
-        # If trying to scroll up (delta < 0) but we're already at the top (start == 0.0)...
         if delta < 0 and start <= 0.0:
-            return  # ...do nothing.
-
-        # If trying to scroll down (delta > 0) but we're already at the bottom (end == 1.0)...
+            return
         if delta > 0 and end >= 1.0:
-            return  # ...do nothing.
+            return
 
-        # 5. If all checks passed, it's safe to scroll. This will trigger the yview_scroll_wrapper,
-        # which correctly redraws the visible items.
         self.yview_scroll(delta, "units")
 
     def _on_click(self, event):
@@ -86,13 +75,28 @@ class TwoColumnList(tk.Canvas):
         if 0 <= clicked_index < len(self.items):
             is_shift = (event.state & 0x0001)
             is_ctrl = (event.state & 0x0004)
-            if not is_ctrl and not is_shift:
-                self.selected_indices = {clicked_index}
+
+            if is_shift and self.last_clicked_index is not None:
+                # Shift-click range selection
+                start = min(self.last_clicked_index, clicked_index)
+                end = max(self.last_clicked_index, clicked_index)
+                new_selection = set(range(start, end + 1))
+                if is_ctrl:
+                    # If Ctrl is also held, add the range to the existing selection
+                    self.selected_indices.update(new_selection)
+                else:
+                    # Otherwise, replace the selection with the new range
+                    self.selected_indices = new_selection
             elif is_ctrl:
                 if clicked_index in self.selected_indices:
                     self.selected_indices.remove(clicked_index)
                 else:
                     self.selected_indices.add(clicked_index)
+                self.last_clicked_index = clicked_index # Update anchor on ctrl-click
+            else: # Simple click
+                self.selected_indices = {clicked_index}
+                self.last_clicked_index = clicked_index # Set anchor on simple click
+
             self.event_generate("<<ListSelectionChanged>>")
             self._redraw()
 
