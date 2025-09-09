@@ -1,11 +1,21 @@
 import os
 import json
 import fnmatch
+import hashlib
 from pathlib import Path
 from ..constants import (
     CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE,
-    DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT
+    DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT,
+    LINE_COUNT_ENABLED_DEFAULT, LINE_COUNT_THRESHOLD_DEFAULT
 )
+
+def get_file_hash(full_path):
+    """Calculates the SHA1 hash of a file's content."""
+    try:
+        with open(full_path, 'rb') as f:
+            return hashlib.sha1(f.read()).hexdigest()
+    except (IOError, OSError):
+        return None
 
 def _create_and_get_default_config():
     """
@@ -23,7 +33,9 @@ def _create_and_get_default_config():
         'new_file_check_interval': 5,
         'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT,
         'default_intro_prompt': DEFAULT_INTRO_PROMPT,
-        'default_outro_prompt': DEFAULT_OUTRO_PROMPT
+        'default_outro_prompt': DEFAULT_OUTRO_PROMPT,
+        'line_count_enabled': LINE_COUNT_ENABLED_DEFAULT,
+        'line_count_threshold': LINE_COUNT_THRESHOLD_DEFAULT
     }
     try:
         # Load the list of filetypes from the bundled template
@@ -70,6 +82,10 @@ def load_config():
                 config['default_intro_prompt'] = DEFAULT_INTRO_PROMPT
             if 'default_outro_prompt' not in config:
                 config['default_outro_prompt'] = DEFAULT_OUTRO_PROMPT
+            if 'line_count_enabled' not in config:
+                config['line_count_enabled'] = LINE_COUNT_ENABLED_DEFAULT
+            if 'line_count_threshold' not in config:
+                config['line_count_threshold'] = LINE_COUNT_THRESHOLD_DEFAULT
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one

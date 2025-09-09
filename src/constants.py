@@ -10,6 +10,8 @@ REGISTRY_KEY_PATH = r"Software\CodeMerger" # Windows Registry path
 # --- Application Behavior ---
 RECENT_PROJECTS_MAX = 10
 MAX_SECRET_SCAN_REPORT_LINES = 10
+LINE_COUNT_ENABLED_DEFAULT = True
+LINE_COUNT_THRESHOLD_DEFAULT = 300
 
 # --- Default Content ---
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"
@@ -34,6 +36,9 @@ WRAPPER_BORDER = '#555555'
 STATUS_BG = '#3A3A3A'
 STATUS_FG = '#D3D3D3'
 SUBTLE_HIGHLIGHT_COLOR = "#555555"
+WARN = "#CF1818"
+ATTENTION = "#DE6808"
+NOTE = "#B77B06"
 
 # --- Data Mappings ---
 LANGUAGE_MAP = {

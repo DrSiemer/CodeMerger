@@ -3,8 +3,17 @@ import json
 import random
 import re
 import colorsys
+import hashlib
 from ..constants import COMPACT_MODE_BG_COLOR
 from .merger import recalculate_token_count
+
+def _get_file_hash(full_path):
+    """Calculates the SHA1 hash of a file's content."""
+    try:
+        with open(full_path, 'rb') as f:
+            return hashlib.sha1(f.read()).hexdigest()
+    except (IOError, OSError):
+        return None
 
 def _generate_random_color():
     """
@@ -77,20 +86,37 @@ class ProjectConfig:
         else:
             self.project_color = color_value
 
-        # Filter out files that no longer exist on disk from both lists
-        cleaned_selection = [
-            f for f in original_selection
-            if os.path.isfile(os.path.join(self.base_dir, f))
-        ]
+        # --- Process selected_files, handling both old and new formats ---
+        cleaned_selection = []
+        # Check if the list is not empty and the first item is a dictionary with 'path'
+        is_new_format = original_selection and isinstance(original_selection[0], dict) and 'path' in original_selection[0]
+
+        if not is_new_format:
+            # Old format (list of strings): convert to the new format
+            if original_selection: config_was_updated = True
+            for f_path in original_selection:
+                full_path = os.path.join(self.base_dir, f_path)
+                if os.path.isfile(full_path):
+                    try:
+                        mtime = os.path.getmtime(full_path)
+                        file_hash = _get_file_hash(full_path)
+                        cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash})
+                    except OSError:
+                        continue # Skip files that can't be accessed
+        else:
+            # New format (list of dicts): filter out non-existent files
+            cleaned_selection = [
+                f_info for f_info in original_selection
+                if os.path.isfile(os.path.join(self.base_dir, f_info['path']))
+            ]
         self.selected_files = cleaned_selection
+        files_were_cleaned = len(cleaned_selection) < len(original_selection)
 
         cleaned_known_files = [
             f for f in original_known_files
             if os.path.isfile(os.path.join(self.base_dir, f))
         ]
         self.known_files = cleaned_known_files
-
-        files_were_cleaned = len(cleaned_selection) < len(original_selection)
         known_files_were_cleaned = len(cleaned_known_files) < len(original_known_files)
 
         if files_were_cleaned:

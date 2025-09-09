@@ -10,9 +10,11 @@ def copy_project_to_clipboard(parent, base_dir, project_config, use_wrapper, cop
     and copying it to the clipboard. Returns a status message string.
     """
     try:
-        files_to_copy = project_config.selected_files
-        if not files_to_copy:
+        if not project_config.selected_files:
             return "No files selected to copy."
+
+        # Extract paths from the list of dictionaries
+        files_to_copy = [f['path'] for f in project_config.selected_files]
 
         if scan_secrets_enabled:
             report = scan_for_secrets(base_dir, files_to_copy)

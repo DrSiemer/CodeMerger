@@ -1,7 +1,8 @@
 import os
+import tkinter as tk
 from tkinter import Toplevel, messagebox
 
-from ...core.utils import parse_gitignore
+from ...core.utils import parse_gitignore, get_file_hash
 from .file_tree_builder import build_file_tree_data
 from ...core.merger import recalculate_token_count
 from .file_tree_handler import FileTreeHandler
@@ -12,7 +13,7 @@ from ...core.paths import ICON_PATH
 from ..window_utils import position_window, save_window_geometry
 
 class FileManagerWindow(Toplevel):
-    def __init__(self, parent, project_config, status_var, file_extensions, default_editor, newly_detected_files=None):
+    def __init__(self, parent, project_config, status_var, file_extensions, default_editor, app_state, newly_detected_files=None):
         super().__init__(parent)
         self.withdraw()
         self.parent = parent
@@ -21,6 +22,7 @@ class FileManagerWindow(Toplevel):
         self.status_var = status_var
         self.file_extensions = file_extensions
         self.default_editor = default_editor
+        self.app_state = app_state
         self.newly_detected_files = newly_detected_files or []
 
         self.title(f"Manage files for: {self.project_config.project_name}")
@@ -54,12 +56,47 @@ class FileManagerWindow(Toplevel):
         self.update_all_button_states()
         self._update_title(self.project_config.total_tokens)
 
+        # Check for modifications before showing the window
+        self._check_for_modifications_and_recalculate()
+
         # Recalculate if files were cleaned OR if the token count is zero despite having files
         if files_were_cleaned or (self.current_total_tokens == 0 and self.project_config.selected_files):
             self.trigger_recalculation()
 
         self._position_window()
         self.deiconify()
+
+    def _check_for_modifications_and_recalculate(self):
+        """
+        Checks for file modifications by comparing mtime and hash, then triggers
+        a token recalculation if any changes are found.
+        """
+        needs_recalc = False
+        needs_save = False
+        for file_info in self.project_config.selected_files:
+            path = file_info.get('path')
+            if not path: continue
+
+            full_path = os.path.join(self.base_dir, path)
+            try:
+                current_mtime = os.path.getmtime(full_path)
+                # Compare mtime first as it's a cheap check
+                if current_mtime != file_info.get('mtime'):
+                    current_hash = get_file_hash(full_path)
+                    # If hash is also different, the file has changed
+                    if current_hash is not None and current_hash != file_info.get('hash'):
+                        needs_recalc = True
+                        needs_save = True
+                        file_info['mtime'] = current_mtime
+                        file_info['hash'] = current_hash
+            except OSError:
+                continue # File might be inaccessible, handled by cleaning logic
+
+        if needs_save:
+            self.project_config.save()
+        if needs_recalc:
+            self.trigger_recalculation()
+            self.status_var.set("File changes detected, tokens recalculated.")
 
     def _position_window(self):
         position_window(self)
@@ -80,7 +117,12 @@ class FileManagerWindow(Toplevel):
             'down': self.move_down_button,
             'bottom': self.move_to_bottom_button
         }
-        self.selection_handler = SelectionListHandler(self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor, self.on_selection_list_changed)
+        self.selection_handler = SelectionListHandler(
+            self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor,
+            self.on_selection_list_changed,
+            line_count_enabled=self.app_state.config.get('line_count_enabled', c.LINE_COUNT_ENABLED_DEFAULT),
+            line_count_threshold=self.app_state.config.get('line_count_threshold', c.LINE_COUNT_THRESHOLD_DEFAULT)
+        )
 
         self.tree_handler = FileTreeHandler(
             parent=self,
@@ -88,7 +130,7 @@ class FileManagerWindow(Toplevel):
             action_button=self.tree_action_button,
             item_map=self.item_map,
             path_to_item_id=self.path_to_item_id,
-            is_selected_callback=lambda path: path in self.selection_handler.ordered_selection,
+            is_selected_callback=lambda path: path in [f['path'] for f in self.selection_handler.ordered_selection],
             on_toggle_callback=self.on_file_toggled
         )
         self.tree_action_button.command = self.tree_handler.toggle_selection_for_selected
@@ -132,19 +174,19 @@ class FileManagerWindow(Toplevel):
         self.tree_handler.update_checkbox_display(self.path_to_item_id.get(path))
         self.update_all_button_states()
         self.sync_highlights()
-        # The selection_handler's toggle_file already triggers recalculation
 
     def handle_tree_select(self, event):
         """Coordinates actions when the tree selection changes"""
-        if not self.tree.selection(): return # Event can fire on deselection
-        self.merge_order_list.selection_clear(0, 'end')
+        if not self.tree.selection(): return
+        self.merge_order_list.clear_selection()
         self.sync_highlights()
         self.update_all_button_states()
 
-    def handle_list_select(self, event):
+    def handle_merge_order_tree_select(self, event):
         """Coordinates actions when the listbox selection changes"""
-        if not self.merge_order_list.curselection(): return # Event can fire on deselection
-        self.tree.selection_set("")
+        if not self.merge_order_list.curselection(): return
+        if self.tree.selection():
+            self.tree.selection_remove(self.tree.selection())
         self.sync_highlights()
         self.update_all_button_states()
 
@@ -155,30 +197,33 @@ class FileManagerWindow(Toplevel):
 
     def sync_highlights(self):
         # Clear existing highlights from both lists
-        for i in range(self.selection_handler.listbox.size()):
-            self.selection_handler.listbox.itemconfig(i, {'bg': c.TEXT_INPUT_BG, 'fg': c.TEXT_COLOR})
         for item_id in self.tree.tag_has('subtle_highlight'):
             self.tree.item(item_id, tags=('file',))
+        self.merge_order_list.clear_highlights()
 
         selected_path = None
+        source_widget = None
+
         if self.tree.selection():
             item_id = self.tree.selection()[0]
             if self.item_map.get(item_id, {}).get('type') == 'file':
                 selected_path = self.item_map[item_id]['path']
+                source_widget = self.tree
         elif self.merge_order_list.curselection():
             selected_index = self.merge_order_list.curselection()[0]
-            if 0 <= selected_index < len(self.selection_handler.ordered_selection):
-                selected_path = self.selection_handler.ordered_selection[selected_index]
+            selected_path = self.merge_order_list.get_item_data(selected_index)
+            source_widget = self.merge_order_list
 
         if not selected_path: return
 
-        # Apply new highlight
-        if self.tree.selection():
+        # Apply new highlight to the *other* widget
+        if source_widget == self.tree:
             try:
-                list_index = self.selection_handler.ordered_selection.index(selected_path)
-                self.selection_handler.listbox.itemconfig(list_index, {'bg': c.SUBTLE_HIGHLIGHT_COLOR, 'fg': c.TEXT_COLOR})
-            except ValueError: pass
-        elif self.merge_order_list.curselection():
+                paths_only = [f['path'] for f in self.selection_handler.ordered_selection]
+                list_index = paths_only.index(selected_path)
+                self.merge_order_list.highlight_item(list_index)
+            except ValueError: pass # Item not in merge list
+        elif source_widget == self.merge_order_list:
             if selected_path in self.path_to_item_id:
                 item_id = self.path_to_item_id[selected_path]
                 self.tree.item(item_id, tags=('file', 'subtle_highlight'))
@@ -206,7 +251,8 @@ class FileManagerWindow(Toplevel):
 
     def select_all_files(self):
         all_paths = self.tree_handler.get_all_file_paths_in_tree_order()
-        paths_to_add = [p for p in all_paths if p not in self.selection_handler.ordered_selection]
+        current_selection_paths = {f['path'] for f in self.selection_handler.ordered_selection}
+        paths_to_add = [p for p in all_paths if p not in current_selection_paths]
         if paths_to_add:
             self.selection_handler.add_files(paths_to_add)
             self.status_var.set(f"Added {len(paths_to_add)} file(s) to the merge list")
@@ -224,11 +270,9 @@ class FileManagerWindow(Toplevel):
 
     def _is_state_changed(self):
         """Compares current state to the last saved state"""
-        # Compare list of selected files (order matters)
         if self.selection_handler.ordered_selection != self.project_config.selected_files:
             return True
 
-        # Compare set of expanded directories
         current_expanded_dirs = set(self.tree_handler.get_expanded_dirs())
         if current_expanded_dirs != self.project_config.expanded_dirs:
             return True
@@ -243,11 +287,10 @@ class FileManagerWindow(Toplevel):
                 "You have unsaved changes. Do you want to save them before closing?",
                 parent=self
             )
-            if response is True:  # Yes, save
+            if response is True:
                 self.save_and_close()
-            elif response is False:  # No, discard
+            elif response is False:
                 self._close_and_save_geometry()
-            # On Cancel (response is None), do nothing
         else:
             self._close_and_save_geometry()
 
@@ -255,7 +298,8 @@ class FileManagerWindow(Toplevel):
         self.project_config.selected_files = self.selection_handler.ordered_selection
         self.project_config.expanded_dirs = set(self.tree_handler.get_expanded_dirs())
         self.project_config.total_tokens = self.current_total_tokens
-        self.project_config.known_files = list(set(self.project_config.known_files + self.selection_handler.ordered_selection))
+        current_selection_paths = {f['path'] for f in self.selection_handler.ordered_selection}
+        self.project_config.known_files = list(set(self.project_config.known_files) | current_selection_paths)
         self.project_config.save()
         self.status_var.set("File selection and order saved to .allcode")
         self._close_and_save_geometry()

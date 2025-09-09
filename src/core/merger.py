@@ -13,9 +13,10 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
     Core logic for merging files
     Reads the .allcode file, processes files, and returns the final string and a status message
     """
-    final_ordered_list = project_config.selected_files
-    if not final_ordered_list:
+    if not project_config.selected_files:
         return None, "No files selected to copy"
+
+    final_ordered_list = [f['path'] for f in project_config.selected_files]
 
     output_blocks = []
     skipped_files = []
@@ -59,15 +60,16 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
     return final_content, status_message
 
-def recalculate_token_count(base_dir, selected_files):
+def recalculate_token_count(base_dir, selected_files_info):
     """
     Reads selected files, concatenates their content, and counts the tokens
     """
-    if not selected_files:
+    if not selected_files_info:
         return 0
 
     all_content = []
-    for rel_path in selected_files:
+    for file_info in selected_files_info:
+        rel_path = file_info['path']
         full_path = os.path.join(base_dir, rel_path)
         try:
             with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:

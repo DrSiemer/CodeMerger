@@ -1,5 +1,5 @@
-from tkinter import Frame, Label, Listbox, ttk
-from ..custom_widgets import RoundedButton
+from tkinter import Frame, Label, ttk, font
+from ..custom_widgets import RoundedButton, TwoColumnList
 from ... import constants as c
 from ...constants import SUBTLE_HIGHLIGHT_COLOR
 
@@ -8,6 +8,8 @@ def setup_file_manager_ui(window):
     font_family = "Segoe UI"
     font_normal = (font_family, 12)
     font_button = (font_family, 14)
+    # Define a smaller font for the line numbers
+    window.font_small = font.Font(family=font_family, size=9)
 
     main_frame = Frame(window, bg=c.DARK_BG)
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
@@ -43,13 +45,25 @@ def setup_file_manager_ui(window):
     window.merge_order_details_label = Label(title_frame, text="", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
     window.merge_order_details_label.pack(side='left')
 
-    window.merge_order_list = Listbox(main_frame, activestyle='none', selectmode='extended', bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
-                                    selectbackground=c.BTN_BLUE, selectforeground=c.BTN_BLUE_TEXT, relief='flat', borderwidth=0,
-                                    highlightthickness=0, font=font_normal)
-    window.merge_order_list.grid(row=1, column=2, sticky='nsew', padx=(10, 0))
-    list_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=window.merge_order_list.yview)
-    list_scroll.grid(row=1, column=3, sticky='ns')
+    # --- Merge Order List (Custom Widget) ---
+    list_frame = Frame(main_frame, bg=c.DARK_BG)
+    list_frame.grid(row=1, column=2, columnspan=2, sticky='nsew', padx=(10, 0))
+    list_frame.grid_rowconfigure(0, weight=1)
+    list_frame.grid_columnconfigure(0, weight=1)
+
+    window.merge_order_list = TwoColumnList(
+        list_frame,
+        right_col_font=window.font_small,
+        right_col_width=50
+    )
+    window.merge_order_list.grid(row=0, column=0, sticky='nsew')
+
+    list_scroll = ttk.Scrollbar(list_frame, orient='vertical', command=window.merge_order_list.yview)
+    # The scrollbar is gridded here, but its visibility will be managed by the TwoColumnList widget
+    list_scroll.grid(row=0, column=1, sticky='ns')
     window.merge_order_list.config(yscrollcommand=list_scroll.set)
+    # Link the scrollbar to the list widget for automatic hiding
+    window.merge_order_list.link_scrollbar(list_scroll)
 
     move_buttons_frame = Frame(main_frame, bg=c.DARK_BG)
     move_buttons_frame.grid(row=2, column=2, sticky='ew', pady=(10, 0), padx=(10, 0))

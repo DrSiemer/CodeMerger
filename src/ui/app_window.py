@@ -149,9 +149,9 @@ class App(Tk):
         if not project_config: return
         # askcolor returns a tuple ((r,g,b), '#rrggbb') or (None, None) on cancel
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        # The hex color string is in result[1]. Check if it's a valid string.
-        if result and result[1]:
-            self.project_color = result[1]
+        # The hex color string is in result. Check if it's a valid string.
+        if result and result:
+            self.project_color = result
             project_config.project_color = self.project_color
             project_config.save()
             self.button_manager.update_button_states()
@@ -242,6 +242,7 @@ class App(Tk):
             self.status_var,
             self.file_extensions,
             self.state.default_editor,
+            app_state=self.state,
             newly_detected_files=files_to_highlight
         )
         self.wait_window(fm_window)
