@@ -297,7 +297,10 @@ class SelectionListHandler:
 
         # If we are not showing the line count tooltip, fall back to the path tooltip
         if tooltip_text is None:
-            tooltip_text = path.replace('/', os.sep)
+            basename = os.path.basename(path)
+            full_path_display = path.replace('/', os.sep)
+            if basename != full_path_display:
+                tooltip_text = full_path_display
 
         # Now, create and display the tooltip window with the determined text
         if not tooltip_text:
