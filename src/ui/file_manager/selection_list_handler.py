@@ -1,7 +1,8 @@
 import os
 import sys
 import subprocess
-from tkinter import messagebox
+from tkinter import messagebox, Toplevel, Label
+from ... import constants as c
 
 class SelectionListHandler:
     """
@@ -20,9 +21,13 @@ class SelectionListHandler:
         self.default_editor = default_editor
         self.on_change = on_change_callback # Callback to notify coordinator of changes
         self.ordered_selection = []
+        self.tooltip_window = None
+        self._tooltip_job = None
 
         self.listbox.bind('<<ListboxSelect>>', self.on_list_selection_change)
         self.listbox.bind('<Double-1>', self.open_selected_file)
+        self.listbox.bind('<Motion>', self.schedule_tooltip)
+        self.listbox.bind('<Leave>', self.hide_tooltip)
 
     def set_initial_selection(self, selection_list):
         self.ordered_selection = list(selection_list)
@@ -32,11 +37,57 @@ class SelectionListHandler:
         """Refreshes the merge order listbox with the current data model"""
         self.listbox.delete(0, 'end')
         for path in self.ordered_selection:
-            self.listbox.insert('end', path)
+            self.listbox.insert('end', os.path.basename(path))
+
+    def schedule_tooltip(self, event):
+        """Schedules a tooltip to appear after a short delay."""
+        if self._tooltip_job:
+            self.parent.after_cancel(self._tooltip_job)
+            self._tooltip_job = None
+        
+        self.hide_tooltip()
+
+        current_index = self.listbox.nearest(event.y)
+        if current_index != -1:
+            bbox = self.listbox.bbox(current_index)
+            if bbox and bbox[1] <= event.y < bbox[1] + bbox[3]:
+                self._tooltip_job = self.parent.after(350, lambda idx=current_index: self.show_tooltip(idx))
+
+    def show_tooltip(self, index):
+        """Creates and displays the tooltip window."""
+        if self.tooltip_window or index >= len(self.ordered_selection):
+            return
+
+        full_path = self.ordered_selection[index]
+        if full_path == os.path.basename(full_path):
+            return
+
+        bbox = self.listbox.bbox(index)
+        if not bbox: return
+
+        x = self.listbox.winfo_rootx() + 5
+        y = self.listbox.winfo_rooty() + bbox[1] + bbox[3] + 2
+
+        self.tooltip_window = Toplevel(self.listbox)
+        self.tooltip_window.wm_overrideredirect(True)
+        self.tooltip_window.wm_geometry(f"+{x}+{y}")
+        label = Label(self.tooltip_window, text=full_path, justify='left',
+                      background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
+                      font=("tahoma", "8", "normal"))
+        label.pack(ipadx=4, ipady=2)
+
+    def hide_tooltip(self, event=None):
+        """Destroys the tooltip window and cancels any pending show job."""
+        if self._tooltip_job:
+            self.parent.after_cancel(self._tooltip_job)
+            self._tooltip_job = None
+        
+        if self.tooltip_window:
+            self.tooltip_window.destroy()
+            self.tooltip_window = None
 
     def on_list_selection_change(self, event=None):
         """Callback for when the listbox selection changes"""
-        # Pass the event to the parent coordinator
         self.parent.handle_list_select(event)
 
     def update_button_states(self):
@@ -169,7 +220,7 @@ class SelectionListHandler:
         selection = self.listbox.curselection()
         if not selection: return "break"
 
-        relative_path = self.listbox.get(selection[0])
+        relative_path = self.ordered_selection[selection[0]]
         full_path = os.path.join(self.base_dir, relative_path)
         if not os.path.isfile(full_path):
             messagebox.showwarning("File Not Found", f"The file '{relative_path}' could not be found", parent=self.parent)

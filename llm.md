@@ -34,6 +34,7 @@ Assume I have full project context. Do not explain obvious code, file structures
 ## Notes
 *(Append new notes below this line)*
 
+- Be careful makinng global visual changes. Component variations must be implemented via optional parameters, to avoid side effects in other parts of the UI.
 - `src/core/paths.py`: Distinguishes between `get_bundle_dir()` for read-only assets bundled with PyInstaller and `get_persistent_data_dir()` for user configuration (`%APPDATA%` on Windows), ensuring portability and correct data storage.
 - `src/core/registry.py`: Settings are read with a fallback system: it first checks for a user-specific setting in `HKEY_CURRENT_USER` and, if not found, falls back to the system-wide default in `HKEY_LOCAL_MACHINE` that is set by the installer.
 - `src/core/secret_scanner.py`: Uses `detect_secrets.settings.transient_settings` to explicitly define and enable all scanner plugins. This is necessary to ensure plugins are correctly loaded in a packaged PyInstaller environment where filesystem-based plugin discovery might fail.

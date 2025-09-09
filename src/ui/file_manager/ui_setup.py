@@ -7,11 +7,11 @@ def setup_file_manager_ui(window):
     """Creates and packs all the UI widgets for the FileManagerWindow"""
     font_family = "Segoe UI"
     font_normal = (font_family, 12)
-    font_button = (font_family, 14) # Slightly smaller for more buttons
+    font_button = (font_family, 14)
 
     main_frame = Frame(window, bg=c.DARK_BG)
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
-    main_frame.grid_columnconfigure(0, weight=1)
+    main_frame.grid_columnconfigure(0, weight=3)
     main_frame.grid_columnconfigure(2, weight=1)
     main_frame.grid_rowconfigure(1, weight=1)
 
@@ -60,15 +60,16 @@ def setup_file_manager_ui(window):
     move_buttons_frame.grid_columnconfigure(3, weight=1, uniform="group1")
     move_buttons_frame.grid_columnconfigure(4, weight=1, uniform="group1")
 
-    window.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+    narrow_padding = 20
+    window.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
     window.move_to_top_button.grid(row=0, column=0, sticky='ew', padx=(0, 2))
-    window.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+    window.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
     window.move_up_button.grid(row=0, column=1, sticky='ew', padx=(2, 2))
-    window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=font_button, hollow=True)
+    window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=font_button, hollow=True, h_padding=narrow_padding)
     window.remove_button.grid(row=0, column=2, sticky='ew', padx=2)
-    window.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+    window.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
     window.move_down_button.grid(row=0, column=3, sticky='ew', padx=(2, 2))
-    window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+    window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
     window.move_to_bottom_button.grid(row=0, column=4, sticky='ew', padx=(2, 0))
 
     # Disable all move buttons initially

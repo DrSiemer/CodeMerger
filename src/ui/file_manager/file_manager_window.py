@@ -53,7 +53,7 @@ class FileManagerWindow(Toplevel):
         self.populate_tree()
         self.update_all_button_states()
         self._update_title(self.project_config.total_tokens)
-        
+
         # Recalculate if files were cleaned OR if the token count is zero despite having files
         if files_were_cleaned or (self.current_total_tokens == 0 and self.project_config.selected_files):
             self.trigger_recalculation()
@@ -166,7 +166,9 @@ class FileManagerWindow(Toplevel):
             if self.item_map.get(item_id, {}).get('type') == 'file':
                 selected_path = self.item_map[item_id]['path']
         elif self.merge_order_list.curselection():
-            selected_path = self.merge_order_list.get(self.merge_order_list.curselection()[0])
+            selected_index = self.merge_order_list.curselection()[0]
+            if 0 <= selected_index < len(self.selection_handler.ordered_selection):
+                selected_path = self.selection_handler.ordered_selection[selected_index]
 
         if not selected_path: return
 

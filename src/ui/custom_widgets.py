@@ -55,7 +55,7 @@ def get_pil_font(font_tuple):
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False):
+    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, h_padding=None):
         if font:
             # If a tuple like ("Segoe UI", 12) is passed, use it directly
             self.tk_font_tuple = font
@@ -73,11 +73,13 @@ class RoundedButton(tk.Canvas):
         # Calculate width if not provided
         if width is None:
             if text:
+                padding = h_padding if h_padding is not None else 40
                 text_box = self.pil_font.getbbox(text)
                 text_width = text_box[2] - text_box[0]
-                self.width = text_width + 40 # Add horizontal padding
+                self.width = text_width + padding
             elif image:
-                self.width = image.width + 20 # Add horizontal padding for image
+                padding = h_padding if h_padding is not None else 20
+                self.width = image.width + padding
             else:
                 self.width = 40 # Default width if no content
         else:
