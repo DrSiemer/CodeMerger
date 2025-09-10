@@ -1,12 +1,3 @@
-# --- Application Constants ---
-from .core.paths import CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
-
-# --- Paths and Files ---
-CONFIG_FILE = CONFIG_FILE_PATH
-DEFAULT_FILETYPES_CONFIG = DEFAULT_FILETYPES_CONFIG_PATH
-VERSION_FILE = VERSION_FILE_PATH
-REGISTRY_KEY_PATH = r"Software\CodeMerger" # Windows Registry path
-
 # --- Application Behavior ---
 RECENT_PROJECTS_MAX = 10
 MAX_SECRET_SCAN_REPORT_LINES = 10

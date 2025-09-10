@@ -69,3 +69,7 @@ DEFAULTS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'defaults.png')
 
 # Path to the paths toggle icon
 PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')
+PATHS_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths_active.png')
+
+# Windows Registry path
+REGISTRY_KEY_PATH = r"Software\CodeMerger"

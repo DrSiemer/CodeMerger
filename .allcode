@@ -64,23 +64,23 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1757434964.9757712,
-      "hash": "ccf85704e58e7dbe97f1ea6fa4a405515c1ba8b4"
+      "mtime": 1757511397.5405934,
+      "hash": "b86a1e465fd02d5b64648795da42886297de9fa7"
     },
     {
       "path": "src/core/paths.py",
-      "mtime": 1757509094.756403,
-      "hash": "ae02f1199cb19665e4efcccef5e218c8aadaf65a"
+      "mtime": 1757511301.4169588,
+      "hash": "6cc58ff0fa670c0c69c52e5b0cc850bb8c9ba720"
     },
     {
       "path": "src/core/registry.py",
-      "mtime": 1756845685.833786,
-      "hash": "5380e9685e5401ea2fafa75d54ec8b1700580695"
+      "mtime": 1757511243.9063194,
+      "hash": "e2c3a1c68db148ce4e3a2414be5ee389b2c48ffe"
     },
     {
       "path": "src/core/utils.py",
-      "mtime": 1757431286.378275,
-      "hash": "6103f322bbf9a0b0157021492471b0dc8942f979"
+      "mtime": 1757511251.7964554,
+      "hash": "7e18878873666672cc112fe5cccc1308cf58f541"
     },
     {
       "path": "src/core/file_scanner.py",
@@ -124,8 +124,8 @@
     },
     {
       "path": "src/ui/assets.py",
-      "mtime": 1757509306.0777903,
-      "hash": "870f0f1d573e0237fc1b979a58aaa2b11909a73d"
+      "mtime": 1757511303.3135934,
+      "hash": "f7686b0d55c3ec3fd1c604f66ea863798e3bcf5c"
     },
     {
       "path": "src/ui/font_utils.py",
@@ -184,13 +184,13 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1757509339.8575003,
+      "mtime": 1757510680.789847,
       "hash": "0a0e5282f65a9d71032c27c6e2778a2d781b542c"
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1757509310.358329,
-      "hash": "d47b0b0354eb84e91ff256897c014f453f0f4fae"
+      "mtime": 1757511191.917146,
+      "hash": "71644495557c78363839158e736e68e3caa51537"
     },
     {
       "path": "src/ui/directory_dialog.py",

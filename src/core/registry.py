@@ -1,6 +1,6 @@
 import winreg
 import sys
-from ..constants import REGISTRY_KEY_PATH
+from ..core.paths import REGISTRY_KEY_PATH
 
 def get_setting(name, default_value):
     """
@@ -36,7 +36,6 @@ def get_setting(name, default_value):
         return default_value
     except Exception:
         return default_value
-
 
 def save_setting(name, value):
     """

@@ -3,8 +3,10 @@ import json
 import fnmatch
 import hashlib
 from pathlib import Path
+from ..core.paths import (
+    CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
+)
 from ..constants import (
-    CONFIG_FILE, DEFAULT_FILETYPES_CONFIG, VERSION_FILE,
     DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT,
     LINE_COUNT_ENABLED_DEFAULT, LINE_COUNT_THRESHOLD_DEFAULT
 )
@@ -39,7 +41,7 @@ def _create_and_get_default_config():
     }
     try:
         # Load the list of filetypes from the bundled template
-        with open(DEFAULT_FILETYPES_CONFIG, 'r', encoding='utf-8-sig') as f:
+        with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
             config['filetypes'] = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         # Fallback in case the template is missing or corrupt
@@ -56,7 +58,7 @@ def load_config():
     """
     try:
         # If config file doesn't exist, this will raise FileNotFoundError
-        with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
+        with open(CONFIG_FILE_PATH, 'r', encoding='utf-8-sig') as f:
             # If file is empty, this will raise JSONDecodeError
             config = json.load(f)
             # If file is valid but missing keys, handle that too
@@ -97,7 +99,7 @@ def save_config(config):
     if 'filetypes' in config and isinstance(config.get('filetypes'), list):
         config['filetypes'].sort(key=lambda item: item['ext'])
 
-    with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+    with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2)
 
 def load_all_filetypes():
@@ -205,7 +207,6 @@ def is_ignored(path, base_dir, gitignore_data):
                     is_ignored_flag = True
     return is_ignored_flag
 
-
 def load_app_version():
     """
     Reads the version from version.txt and returns it as a formatted string.
@@ -213,7 +214,7 @@ def load_app_version():
     """
     try:
         version_data = {}
-        with open(VERSION_FILE, 'r', encoding='utf-8-sig') as f:
+        with open(VERSION_FILE_PATH, 'r', encoding='utf-8-sig') as f:
             for line in f:
                 if '=' in line:
                     key, value = line.strip().split('=', 1)

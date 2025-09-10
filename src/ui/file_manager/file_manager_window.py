@@ -11,6 +11,7 @@ from .ui_setup import setup_file_manager_ui
 from ... import constants as c
 from ...core.paths import ICON_PATH
 from ..window_utils import position_window, save_window_geometry
+from ..assets import assets
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, app_state, newly_detected_files=None):
@@ -74,15 +75,17 @@ class FileManagerWindow(Toplevel):
         # Tell the selection list handler to update its view
         self.selection_handler.toggle_full_path_view()
 
-        # Update column weights
+        # Update column weights and button image
         if self.full_paths_visible:
             # Give merge order list more space
             self.tree.master.grid_columnconfigure(0, weight=1)
             self.tree.master.grid_columnconfigure(2, weight=2)
+            self.toggle_paths_button.config(image=assets.paths_icon_active)
         else:
             # Reset to equal space
             self.tree.master.grid_columnconfigure(0, weight=1)
             self.tree.master.grid_columnconfigure(2, weight=1)
+            self.toggle_paths_button.config(image=assets.paths_icon)
 
     def _check_for_modifications_and_recalculate(self):
         """
@@ -223,12 +226,12 @@ class FileManagerWindow(Toplevel):
         source_widget = None
 
         if self.tree.selection():
-            item_id = self.tree.selection()[0]
+            item_id = self.tree.selection()
             if self.item_map.get(item_id, {}).get('type') == 'file':
                 selected_path = self.item_map[item_id]['path']
                 source_widget = self.tree
         elif self.merge_order_list.curselection():
-            selected_index = self.merge_order_list.curselection()[0]
+            selected_index = self.merge_order_list.curselection()
             selected_path = self.merge_order_list.get_item_data(selected_index)
             source_widget = self.merge_order_list
 
