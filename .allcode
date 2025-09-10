@@ -184,8 +184,8 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1757435647.7108965,
-      "hash": "c1e210ef17bdc97450c9028359d6e0f665f0a798"
+      "mtime": 1757508772.6799712,
+      "hash": "9fa71145b91da3280e042d728d507a3f5172eef0"
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
@@ -229,11 +229,11 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1757439270.0185816,
-      "hash": "8bea8aa1ac0d6b7b519518a9bcad8aeeaa2a4f96"
+      "mtime": 1757451452.880785,
+      "hash": "a274debd24f12a9eb0cf6e5e98a5c3c2bcb6c921"
     }
   ],
-  "total_tokens": 51049,
+  "total_tokens": 51715,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [

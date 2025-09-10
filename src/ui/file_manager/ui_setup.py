@@ -14,7 +14,7 @@ def setup_file_manager_ui(window):
 
     main_frame = Frame(window, bg=c.DARK_BG)
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
-    main_frame.grid_columnconfigure(0, weight=3)
+    main_frame.grid_columnconfigure(0, weight=1)
     main_frame.grid_columnconfigure(2, weight=1)
     main_frame.grid_rowconfigure(1, weight=1)
 
