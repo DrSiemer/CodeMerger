@@ -66,3 +66,6 @@ COMPACT_MODE_CLOSE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode_c
 
 # Path to the defaults icon
 DEFAULTS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'defaults.png')
+
+# Path to the paths toggle icon
+PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')

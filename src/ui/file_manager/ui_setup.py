@@ -1,8 +1,10 @@
-from tkinter import Frame, Label, ttk, font
+from tkinter import Frame, Label, ttk, font, Button
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.two_column_list import TwoColumnList
 from ... import constants as c
 from ...constants import SUBTLE_HIGHLIGHT_COLOR
+from ..assets import assets
+from ..tooltip import ToolTip
 
 def setup_file_manager_ui(window):
     """Creates and packs all the UI widgets for the FileManagerWindow"""
@@ -41,10 +43,26 @@ def setup_file_manager_ui(window):
     window.tree.tag_configure('new_file_highlight', foreground="#40C040") # Bright Green
 
     title_frame = Frame(main_frame, bg=c.DARK_BG)
-    title_frame.grid(row=0, column=2, columnspan=2, sticky='w', padx=(10, 0))
-    Label(title_frame, text="Merge Order", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left')
+    title_frame.grid(row=0, column=2, columnspan=2, sticky='nsew', padx=(10, 0))
+    title_frame.columnconfigure(1, weight=1)
+
+    Label(title_frame, text="Merge Order", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).grid(row=0, column=0, sticky='w')
     window.merge_order_details_label = Label(title_frame, text="", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
-    window.merge_order_details_label.pack(side='left')
+    window.merge_order_details_label.grid(row=0, column=1, sticky='w', padx=(5,0))
+
+    window.toggle_paths_button = Button(
+        title_frame,
+        image=assets.paths_icon,
+        command=window.toggle_full_path_view,
+        bg=c.DARK_BG,
+        activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
+        relief='flat',
+        bd=0,
+        cursor='hand2'
+    )
+    window.toggle_paths_button.grid(row=0, column=2, sticky='e', padx=(5,0))
+    ToolTip(window.toggle_paths_button, "Toggle full path view")
+
 
     # --- Merge Order List (Custom Widget) ---
     list_frame = Frame(main_frame, bg=c.DARK_BG)

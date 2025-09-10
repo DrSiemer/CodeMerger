@@ -24,12 +24,18 @@ class SelectionListHandler:
         self.line_count_enabled = line_count_enabled
         self.line_count_threshold = line_count_threshold
         self.ordered_selection = []
+        self.show_full_paths = False
         self.tooltip_window = None
         self.tooltip_job = None
         self.listbox.bind_event('<<ListSelectionChanged>>', self.on_list_selection_change)
         self.listbox.bind_event('<Double-1>', self.open_selected_file)
         self.listbox.bind_event('<Motion>', self._schedule_tooltip)
         self.listbox.bind_event('<Leave>', self._hide_tooltip)
+
+    def toggle_full_path_view(self):
+        """Toggles the display of full paths and refreshes the list."""
+        self.show_full_paths = not self.show_full_paths
+        self._update_list_display(is_reorder=False)
 
     def set_initial_selection(self, selection_list):
         self.ordered_selection = list(selection_list)
@@ -65,7 +71,7 @@ class SelectionListHandler:
             if len(ranked_files) > 2: color_map[ranked_files[2]['path']] = c.NOTE
         for file_info in self.ordered_selection:
             path = file_info['path']
-            basename = os.path.basename(path)
+            display_text = path if self.show_full_paths else os.path.basename(path)
             right_col_text = ""
             right_col_color = c.TEXT_SUBTLE_COLOR
             if self.line_count_enabled:
@@ -79,7 +85,7 @@ class SelectionListHandler:
                     elif line_count == -1:
                         right_col_text = "?"
             display_items.append({
-                'left': basename,
+                'left': display_text,
                 'right': right_col_text,
                 'right_fg': right_col_color,
                 'data': path # Store original path for identification
@@ -296,7 +302,7 @@ class SelectionListHandler:
                 tooltip_text = f"{line_count} lines of text"
 
         # If we are not showing the line count tooltip, fall back to the path tooltip
-        if tooltip_text is None:
+        if tooltip_text is None and not self.show_full_paths:
             basename = os.path.basename(path)
             full_path_display = path.replace('/', os.sep)
             if basename != full_path_display:

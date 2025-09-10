@@ -24,6 +24,7 @@ class FileManagerWindow(Toplevel):
         self.default_editor = default_editor
         self.app_state = app_state
         self.newly_detected_files = newly_detected_files or []
+        self.full_paths_visible = False
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
@@ -65,6 +66,23 @@ class FileManagerWindow(Toplevel):
 
         self._position_window()
         self.deiconify()
+
+    def toggle_full_path_view(self):
+        """Toggles full path visibility and resizes the columns."""
+        self.full_paths_visible = not self.full_paths_visible
+
+        # Tell the selection list handler to update its view
+        self.selection_handler.toggle_full_path_view()
+
+        # Update column weights
+        if self.full_paths_visible:
+            # Give merge order list more space
+            self.tree.master.grid_columnconfigure(0, weight=1)
+            self.tree.master.grid_columnconfigure(2, weight=2)
+        else:
+            # Reset to equal space
+            self.tree.master.grid_columnconfigure(0, weight=1)
+            self.tree.master.grid_columnconfigure(2, weight=1)
 
     def _check_for_modifications_and_recalculate(self):
         """
