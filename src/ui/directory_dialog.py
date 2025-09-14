@@ -51,6 +51,7 @@ class DirectoryDialog(Toplevel):
             self.recent_dirs_frame.pack(fill='x', expand=False, pady=5)
             for path in self.recent_projects:
                 self.create_recent_dir_entry(path, font_button)
+            self.update_idletasks()
 
         browse_btn = RoundedButton(
             self,
