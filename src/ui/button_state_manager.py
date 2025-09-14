@@ -24,7 +24,6 @@ class ButtonStateManager:
             app.select_project_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
         app.manage_files_button.set_state(dir_dependent_state)
-        app.compact_mode_button.set_state(dir_dependent_state)
 
         if is_dir_active:
             app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))

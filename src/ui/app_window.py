@@ -52,6 +52,8 @@ class App(Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
+        self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
+        self.bind("<Configure>", self._on_window_configure)
 
         # Initialize StringVar members before UI build
         self.active_dir = StringVar()
@@ -71,6 +73,18 @@ class App(Tk):
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
         self.deiconify() # Show window now that it's fully configured
+
+    def _on_window_configure(self, event):
+        """
+        Saves the main window's geometry whenever it's moved or resized.
+        This ensures we have the correct position before an animation starts.
+        """
+        # We only save the geometry when the main window is in its normal state.
+        if self.view_manager.current_state == 'normal':
+            self.view_manager.main_window_geom = (
+                self.winfo_x(), self.winfo_y(),
+                self.winfo_width(), self.winfo_height()
+            )
 
     def edit_project_title(self, event=None):
         project_config = self.project_manager.get_current_project()

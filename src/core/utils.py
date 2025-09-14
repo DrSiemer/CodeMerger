@@ -37,7 +37,8 @@ def _create_and_get_default_config():
         'default_intro_prompt': DEFAULT_INTRO_PROMPT,
         'default_outro_prompt': DEFAULT_OUTRO_PROMPT,
         'line_count_enabled': LINE_COUNT_ENABLED_DEFAULT,
-        'line_count_threshold': LINE_COUNT_THRESHOLD_DEFAULT
+        'line_count_threshold': LINE_COUNT_THRESHOLD_DEFAULT,
+        'enable_compact_mode_on_minimize': True
     }
     try:
         # Load the list of filetypes from the bundled template
@@ -88,6 +89,8 @@ def load_config():
                 config['line_count_enabled'] = LINE_COUNT_ENABLED_DEFAULT
             if 'line_count_threshold' not in config:
                 config['line_count_threshold'] = LINE_COUNT_THRESHOLD_DEFAULT
+            if 'enable_compact_mode_on_minimize' not in config:
+                config['enable_compact_mode_on_minimize'] = True
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
         # Any failure in reading the config results in creating a new one

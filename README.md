@@ -28,7 +28,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Merged" button. You can also set application-wide default intro and outro texts for the wrapper feature
 - **Customizable Wrapper Text**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
 - **Drag & Drop Reordering**: Easily reorder the files in your merge list to control the final output structure
-- **Compact Mode**: A small, always-on-top, draggable window for quick copy-pasting while you work
+- **Compact Mode**: A small, always-on-top, draggable window for quick copy-pasting that appears when the main window is minimized
 - **Recent Projects**: Quickly switch between your recent project folders
 - **Project Colors**: Assign a unique color to each project for easy identification in compact mode
 
@@ -58,16 +58,18 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Click "Copy Merged" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM
     - If you added wrapper text, a "Copy Wrapped" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation
 - **Compact Mode**
-    - Click "Compact Mode" to switch to a small, always-on-top copy button
+    - Minimize the main window to activate a small, always-on-top copy button
+    - Restore the app from the taskbar to return to the full view
     - The button is colored with your project's assigned color and shows the project name on hover
     - A warning icon will appear on the button if new files are found
     - A small "W" button is available for copying the wrapped version
-    - Double-click the move bar or use the close button to return to the full view
+    - Double-click the move bar or use the close button to exit compact mode and show the main window again
 
 
 ### Settings
 
 - **Application Updates**: Enable or disable the automatic daily check for new versions
+- **Window Behavior**: Disable the automatic compact mode when the main window is minimized
 - **File System Monitoring**: Configure the automatic check for new files (enable/disable and set the check interval)
 - **Secret Scanning**: Enable a check for potential secrets (API keys, etc) that runs before copying code to the clipboard
 - **Prompts**:

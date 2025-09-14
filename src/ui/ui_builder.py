@@ -69,11 +69,6 @@ def setup_ui(app):
     app.manage_files_button = RoundedButton(left_buttons, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files)
     app.manage_files_button.pack(side='left', padx=(10, 0))
 
-    right_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
-    right_buttons.grid(row=0, column=2, sticky='e')
-    app.compact_mode_button = RoundedButton(right_buttons, text="Compact Mode", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.view_manager.toggle_compact_mode)
-    app.compact_mode_button.pack()
-
     # --- Center "Wrapper & Output" Box (Row 2) ---
     center_frame = Frame(app, bg=c.DARK_BG)
     center_frame.grid(row=2, column=0, sticky='nsew', pady=0)

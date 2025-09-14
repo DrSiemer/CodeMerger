@@ -24,6 +24,7 @@ class SettingsWindow(Toplevel):
         self.new_file_check_interval = StringVar(value=str(config.get('new_file_check_interval', 5)))
         self.line_count_enabled = BooleanVar(value=config.get('line_count_enabled', c.LINE_COUNT_ENABLED_DEFAULT))
         self.line_count_threshold = StringVar(value=str(config.get('line_count_threshold', c.LINE_COUNT_THRESHOLD_DEFAULT)))
+        self.enable_compact_mode_on_minimize = BooleanVar(value=config.get('enable_compact_mode_on_minimize', True))
 
         # --- Style Definitions ---
         self.font_family = "Segoe UI"
@@ -92,6 +93,12 @@ class SettingsWindow(Toplevel):
 
         self.update_checkbox = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
         self.update_checkbox.pack(side='left')
+
+        Label(self.scrollable_frame, text="Window Behavior", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
+        window_behavior_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
+        window_behavior_frame.pack(fill='x', expand=True, pady=(0, 15))
+        self.compact_mode_checkbox = ttk.Checkbutton(window_behavior_frame, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton')
+        self.compact_mode_checkbox.pack(anchor='w')
 
         Label(self.scrollable_frame, text="File System Monitoring", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         file_system_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
@@ -294,6 +301,7 @@ class SettingsWindow(Toplevel):
         config['default_outro_prompt'] = self.default_outro_text.get('1.0', 'end-1c')
         config['enable_new_file_check'] = self.enable_new_file_check.get()
         config['line_count_enabled'] = self.line_count_enabled.get()
+        config['enable_compact_mode_on_minimize'] = self.enable_compact_mode_on_minimize.get()
 
         try:
             config['new_file_check_interval'] = int(self.new_file_check_interval.get())
