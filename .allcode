@@ -2,6 +2,7 @@
   "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
   "project_name": "CodeMerger",
   "project_color": "#808080",
+  "project_font_color": "light",
   "expanded_dirs": [
     ".github",
     ".github/workflows",

@@ -11,7 +11,7 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR, show_wrapped_button=False):
+    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR, font_color_name='light', show_wrapped_button=False):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
@@ -37,6 +37,7 @@ class CompactMode(tk.Toplevel):
         BAR_AND_BORDER_COLOR = self.instance_color # Use the passed-in color
         BORDER_WIDTH = 1
         MOVE_BAR_HEIGHT = 14
+        text_hex_color = c.TEXT_COLOR if font_color_name == 'light' else '#000000'
 
         # --- Window Configuration ---
         self.overrideredirect(True)
@@ -59,7 +60,7 @@ class CompactMode(tk.Toplevel):
             self.move_bar,
             text=title_abbr,
             bg=BAR_AND_BORDER_COLOR,
-            fg=c.TEXT_COLOR,
+            fg=text_hex_color,
             font=('Segoe UI', 8)
         )
         self.title_label.pack(side='left', padx=(4, 0))

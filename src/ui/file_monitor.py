@@ -24,7 +24,7 @@ class FileMonitor:
         self._update_warning_ui() # Clear any old warning state immediately
 
         is_dir_active = self.app.project_manager.get_current_project() is not None
-        if self.app.state.config.get('enable_new_file_check', True) and is_dir_active:
+        if self.app.app_state.config.get('enable_new_file_check', True) and is_dir_active:
             # Perform the first check immediately, then schedule subsequent checks
             self.app.after(100, self.perform_new_file_check)
 
@@ -87,7 +87,7 @@ class FileMonitor:
             self._update_warning_ui()
 
         # Reschedule the next check
-        interval_sec = self.app.state.config.get('new_file_check_interval', 5)
+        interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
         self._schedule_next_check(interval_sec * 1000)
 
     def get_newly_detected_files_and_reset(self):

@@ -28,6 +28,18 @@ def _generate_random_color():
     r_int, g_int, b_int = int(r * 255), int(g * 255), int(b * 255)
     return f"#{r_int:02x}{g_int:02x}{b_int:02x}"
 
+def _calculate_font_color(hex_color):
+    """Determines if light or dark text should be used for a given hex background color."""
+    try:
+        hex_color = hex_color.lstrip('#')
+        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        # Using the luminance formula to determine brightness
+        # A threshold of 150 is used for better visual comfort, favoring light text.
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b)
+        return 'dark' if luminance > 150 else 'light'
+    except (ValueError, IndexError):
+        return 'light' # Default to light text on error
+
 class ProjectConfig:
     """
     Manages loading and saving the .allcode configuration for a project directory
@@ -43,6 +55,7 @@ class ProjectConfig:
         self.intro_text = ''
         self.outro_text = ''
         self.project_color = COMPACT_MODE_BG_COLOR
+        self.project_font_color = 'light'
 
     def load(self):
         """
@@ -85,6 +98,14 @@ class ProjectConfig:
             config_was_updated = True
         else:
             self.project_color = color_value
+
+        # --- Calculate font color if it's not set ---
+        font_color_value = data.get('project_font_color')
+        if not font_color_value or font_color_value not in ['light', 'dark']:
+            self.project_font_color = _calculate_font_color(self.project_color)
+            config_was_updated = True
+        else:
+            self.project_font_color = font_color_value
 
         # --- Process selected_files, handling both old and new formats ---
         cleaned_selection = []
@@ -144,6 +165,7 @@ class ProjectConfig:
             "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
             "project_name": self.project_name,
             "project_color": self.project_color,
+            "project_font_color": self.project_font_color,
             "expanded_dirs": sorted(list(self.expanded_dirs)),
             "selected_files": self.selected_files,
             "total_tokens": self.total_tokens,

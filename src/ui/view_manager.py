@@ -30,9 +30,15 @@ class ViewManager:
         """
         # The 'iconic' state is the definitive sign of minimization. This event
         # often fires right before the state officially becomes 'iconic'.
-        if self.current_state == self.STATE_NORMAL and self.main_window.state.enable_compact_mode_on_minimize:
+        if self.current_state == self.STATE_NORMAL and self.main_window.app_state.enable_compact_mode_on_minimize:
             # Use 'after' to let the OS finish its state change before we interfere.
-            self.main_window.after(10, self.transition_to_compact)
+            # This check now explicitly verifies the window is minimized ('iconic') before
+            # transitioning, preventing modal dialogs from causing the effect.
+            def check_and_transition():
+                if self.main_window.state() == 'iconic':
+                    self.transition_to_compact()
+
+            self.main_window.after(10, check_and_transition)
 
     def on_main_window_restored(self, event=None):
         """
@@ -170,10 +176,12 @@ class ViewManager:
 
         project_name = "CodeMerger"
         has_wrapper_text = False
+        project_font_color_name = 'light'
         project_config = self.main_window.project_manager.get_current_project()
 
         if project_config:
             project_name = project_config.project_name
+            project_font_color_name = project_config.project_font_color
             if project_config.intro_text or project_config.outro_text:
                 has_wrapper_text = True
 
@@ -187,6 +195,7 @@ class ViewManager:
             image_down_tk=assets.compact_mode_image_down,
             image_close=assets.compact_mode_close_image,
             instance_color=self.main_window.project_color,
+            font_color_name=project_font_color_name,
             show_wrapped_button=has_wrapper_text
         )
         self.main_window.file_monitor._update_warning_ui()

@@ -23,6 +23,7 @@ from ..core.project_manager import ProjectManager
 from ..core.clipboard import copy_project_to_clipboard
 from .assets import assets
 from .button_state_manager import ButtonStateManager
+from ..core.project_config import _calculate_font_color
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -34,11 +35,12 @@ class App(Tk):
         self.app_version = app_version
         self.app_bg_color = c.DARK_BG
         self.project_color = c.COMPACT_MODE_BG_COLOR
+        self.project_font_color = 'light'
         self.window_geometries = {}
 
-        self.state = AppState()
+        self.app_state = AppState()
         self.view_manager = ViewManager(self)
-        self.updater = Updater(self, self.state, self.app_version)
+        self.updater = Updater(self, self.app_state, self.app_version)
         self.project_manager = ProjectManager(lambda: self.file_extensions)
         self.file_monitor = FileMonitor(self)
         self.button_manager = ButtonStateManager(self)
@@ -65,10 +67,10 @@ class App(Tk):
 
         # --- Project Loading Logic ---
         if initial_project_path and os.path.isdir(initial_project_path):
-            self.state.update_active_dir(initial_project_path)
+            self.app_state.update_active_dir(initial_project_path)
             self.set_active_dir_display(initial_project_path)
         else:
-            self.set_active_dir_display(self.state.active_directory)
+            self.set_active_dir_display(self.app_state.active_directory)
 
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
@@ -133,27 +135,29 @@ class App(Tk):
             self.active_dir.set(path)
             self.project_title_var.set(project_config.project_name)
             self.project_color = project_config.project_color
+            self.project_font_color = project_config.project_font_color
             self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
         else:
             self.active_dir.set("No project selected")
             self.project_title_var.set("(no active project)")
             self.project_color = c.COMPACT_MODE_BG_COLOR
+            self.project_font_color = 'light'
             self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
 
         self.file_monitor.start()
         self.button_manager.update_button_states()
 
     def on_settings_closed(self):
-        self.state.reload()
+        self.app_state.reload()
         self.file_monitor.start()
         self.status_var.set("Settings updated")
 
     def on_directory_selected(self, new_dir):
-        if self.state.update_active_dir(new_dir):
+        if self.app_state.update_active_dir(new_dir):
             self.set_active_dir_display(new_dir)
 
     def on_recent_removed(self, path_to_remove):
-        cleared_active = self.state.remove_recent_project(path_to_remove)
+        cleared_active = self.app_state.remove_recent_project(path_to_remove)
         self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent projects")
         if cleared_active:
             self.set_active_dir_display(None)
@@ -163,8 +167,15 @@ class App(Tk):
         if not project_config: return
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
         if result and result[1]:
-            self.project_color = result[1]
-            project_config.project_color = self.project_color
+            new_color = result[1]
+            self.project_color = new_color
+            project_config.project_color = new_color
+
+            # Calculate and save the new font color
+            new_font_color = _calculate_font_color(new_color)
+            self.project_font_color = new_font_color
+            project_config.project_font_color = new_font_color
+
             project_config.save()
             self.button_manager.update_button_states()
 
@@ -203,11 +214,11 @@ class App(Tk):
         self.file_monitor.start()
 
     def open_change_directory_dialog(self):
-        self.state._prune_recent_projects()
+        self.app_state._prune_recent_projects()
         DirectoryDialog(
             parent=self,
             app_bg_color=self.app_bg_color,
-            recent_projects=self.state.recent_projects,
+            recent_projects=self.app_state.recent_projects,
             on_select_callback=self.on_directory_selected,
             on_remove_callback=self.on_recent_removed
         )
@@ -229,8 +240,8 @@ class App(Tk):
             base_dir=base_dir,
             project_config=project_config,
             use_wrapper=use_wrapper,
-            copy_merged_prompt=self.state.copy_merged_prompt,
-            scan_secrets_enabled=self.state.scan_for_secrets
+            copy_merged_prompt=self.app_state.copy_merged_prompt,
+            scan_secrets_enabled=self.app_state.scan_for_secrets
         )
         self.status_var.set(status_message)
 
@@ -253,8 +264,8 @@ class App(Tk):
             project_config,
             self.status_var,
             self.file_extensions,
-            self.state.default_editor,
-            app_state=self.state,
+            self.app_state.default_editor,
+            app_state=self.app_state,
             newly_detected_files=files_to_highlight
         )
         self.wait_window(fm_window)
