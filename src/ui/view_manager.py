@@ -24,19 +24,13 @@ class ViewManager:
         self.compact_mode_last_y = None
         self.main_window_geom = None
 
-    def _log(self, message):
-        """Helper for detailed logging during debugging."""
-        print(f"[{time.strftime('%H:%M:%S')}] [ViewManager] {message}")
-
     def on_main_window_minimized(self, event=None):
         """
         Called when the main window is unmapped (minimized).
         """
-        self._log(f"Received <Unmap> event. WM_STATE='{self.main_window.wm_state()}', Current state='{self.current_state}'.")
         # The 'iconic' state is the definitive sign of minimization. This event
         # often fires right before the state officially becomes 'iconic'.
         if self.current_state == self.STATE_NORMAL and self.main_window.state.enable_compact_mode_on_minimize:
-            self._log("Window is being minimized and compact mode is enabled. Starting transition TO compact.")
             # Use 'after' to let the OS finish its state change before we interfere.
             self.main_window.after(10, self.transition_to_compact)
 
@@ -44,16 +38,13 @@ class ViewManager:
         """
         Called when the main window is restored (e.g., from the taskbar).
         """
-        self._log(f"Received <Map> event. Current state='{self.current_state}'.")
         if self.current_state == self.STATE_COMPACT:
-            self._log("Window is mapped and was in compact mode. Starting transition TO normal.")
             self.transition_to_normal()
 
     def exit_compact_mode_manually(self):
         """
         A dedicated method for when the user closes the compact window directly.
         """
-        self._log("Compact window close requested by user.")
         self.transition_to_normal()
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
@@ -87,15 +78,12 @@ class ViewManager:
     def _on_animation_complete(self, is_shrinking, final_geom):
         """Handles state changes after an animation finishes."""
         if is_shrinking:
-            self._log("Shrink animation complete.")
             # [FIX] Use iconify() to ensure taskbar presence.
             self.main_window.iconify()
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.deiconify()
             self.current_state = self.STATE_COMPACT
-            self._log(f"--> State is now {self.current_state}")
         else:
-            self._log("Grow animation complete.")
             self.main_window.geometry(f"{final_geom[2]}x{final_geom[3]}+{final_geom[0]}+{final_geom[1]}")
             self.main_window.attributes("-alpha", 1.0)
             self.main_window.minsize(500, 405)
@@ -103,16 +91,13 @@ class ViewManager:
                 self.compact_mode_window.destroy()
                 self.compact_mode_window = None
             self.current_state = self.STATE_NORMAL
-            self._log(f"--> State is now {self.current_state}")
 
     def transition_to_compact(self):
         """Starts the process of shrinking the main window and showing the compact view."""
         if self.current_state != self.STATE_NORMAL:
-            self._log(f"Transition to compact aborted, state is not NORMAL (is {self.current_state})")
             return
 
         self.current_state = self.STATE_SHRINKING
-        self._log(f"--> State is now {self.current_state}")
 
         # The key to overriding the OS animation: de-iconify the window but make it
         # transparent immediately so it's not visible to the user.
@@ -129,9 +114,7 @@ class ViewManager:
             start_geom = self.main_window_geom
         else:
             start_geom = (self.main_window.winfo_x(), self.main_window.winfo_y(), self.main_window.winfo_width(), self.main_window.winfo_height())
-        
-        self._log(f"Starting shrink animation from: {start_geom}")
-        
+
         # Make window visible again to start the fade-out animation.
         self.main_window.attributes("-alpha", 1.0)
         self.main_window.minsize(1, 1)
@@ -149,36 +132,31 @@ class ViewManager:
             margin = 10
             target_x = max(margin, min(ideal_x, screen_w - widget_w - margin))
             target_y = max(margin, min(ideal_y, screen_h - widget_h - margin))
-        
+
         end_geom = (target_x, target_y, widget_w, widget_h)
-        self._log(f"Animation target (compact window): {end_geom}")
         self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
         self._animate_window(time.time(), 0.25, start_geom, end_geom, is_shrinking=True)
 
     def transition_to_normal(self):
         """Starts the process of growing the main window back to its normal state."""
         if self.current_state != self.STATE_COMPACT:
-            self._log(f"Transition to normal aborted, state is not COMPACT (is {self.current_state})")
             return
 
         if not self.compact_mode_window or not self.compact_mode_window.winfo_exists():
-            self._log("Compact window doesn't exist. Forcing state to NORMAL.")
             self.current_state = self.STATE_NORMAL
             self.main_window.show_and_raise()
             return
 
         self.current_state = self.STATE_GROWING
-        self._log(f"--> State is now {self.current_state}")
 
         self.compact_mode_last_x = self.compact_mode_window.winfo_x()
         self.compact_mode_last_y = self.compact_mode_window.winfo_y()
 
         start_geom = (self.compact_mode_last_x, self.compact_mode_last_y, self.compact_mode_window.winfo_width(), self.compact_mode_window.winfo_height())
         end_geom = self.main_window_geom
-        self._log(f"Grow animation starting from {start_geom} to {end_geom}")
 
         self.compact_mode_window.withdraw()
-        
+
         self.main_window.attributes("-alpha", 0.0)
         self.main_window.deiconify()
         self.main_window.geometry(f"{start_geom[2]}x{start_geom[3]}+{start_geom[0]}+{start_geom[1]}")
@@ -214,4 +192,3 @@ class ViewManager:
         self.main_window.file_monitor._update_warning_ui()
         self.compact_mode_window.withdraw()
         self.compact_mode_window.update_idletasks()
-        self._log("Compact mode window prepared.")
