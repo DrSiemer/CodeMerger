@@ -170,8 +170,8 @@ class App(Tk):
         project_config = self.project_manager.get_current_project()
         if not project_config: return
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if result and result:
-            new_color = result
+        if result and result[1]:
+            new_color = result[1]
             self.project_color = new_color
             project_config.project_color = new_color
 
