@@ -43,28 +43,17 @@ class SelectionListHandler:
 
     def _update_list_display(self, is_reorder=False):
         """
-        Refreshes the merge order list, handling token counts, coloring,
+        Refreshes the merge order list using cached data, handling coloring
         and font styles based on user settings.
         """
         display_items = []
         color_map = {}
         # --- Prepare data for display ---
         if self.token_count_enabled:
-            file_details = []
-            for file_info in self.ordered_selection:
-                path = file_info['path']
-                token_count = 0
-                try:
-                    with open(os.path.join(self.base_dir, path), 'r', encoding='utf-8', errors='ignore') as f:
-                        content = f.read()
-                        token_count = get_token_count_for_text(content)
-                except (IOError, OSError):
-                    token_count = -1
-                file_details.append({'path': path, 'token_count': token_count})
-            # Determine color tags for top 3 longest files by token count
+            # Determine color tags for top 3 longest files by token count from cache
             ranked_files = sorted(
-                [f for f in file_details if f['token_count'] >= self.token_count_threshold],
-                key=lambda x: x['token_count'],
+                [f for f in self.ordered_selection if f.get('tokens', 0) >= self.token_count_threshold],
+                key=lambda x: x.get('tokens', 0),
                 reverse=True
             )
             if len(ranked_files) > 0: color_map[ranked_files[0]['path']] = c.WARN
@@ -78,15 +67,13 @@ class SelectionListHandler:
             right_col_color = c.TEXT_SUBTLE_COLOR
 
             if self.token_count_enabled:
-                data = next((item for item in file_details if item["path"] == path), None)
-                if data:
-                    token_count = data['token_count']
-                    if token_count > self.token_count_threshold:
-                        right_col_text = str(token_count)
-                        if path in color_map:
-                            right_col_color = color_map[path]
-                    elif token_count == -1:
-                        right_col_text = "?"
+                token_count = file_info.get('tokens', -1)
+                if token_count > self.token_count_threshold:
+                    right_col_text = str(token_count)
+                    if path in color_map:
+                        right_col_color = color_map[path]
+                elif token_count == -1:
+                    right_col_text = "?"
 
             display_items.append({
                 'left': display_text,
@@ -113,22 +100,34 @@ class SelectionListHandler:
         self.move_down_button.config(state=new_state)
         self.move_to_bottom_button.config(state=new_state)
 
+    def _calculate_stats_for_file(self, path):
+        """Reads a file and returns its stats, or None on error."""
+        full_path = os.path.join(self.base_dir, path)
+        try:
+            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+
+            mtime = os.path.getmtime(full_path)
+            file_hash = get_file_hash(full_path)
+            tokens = get_token_count_for_text(content)
+            lines = content.count('\n') + 1
+
+            if file_hash is not None:
+                return {'path': path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines}
+        except OSError:
+            messagebox.showerror("Error", f"Could not access file: {path}", parent=self.parent)
+        return None
+
     def toggle_file(self, path):
         """Adds or removes a file from the selection model"""
         current_selection_paths = {f['path'] for f in self.ordered_selection}
         if path in current_selection_paths:
             self.ordered_selection = [f for f in self.ordered_selection if f['path'] != path]
         else:
-            full_path = os.path.join(self.base_dir, path)
-            try:
-                mtime = os.path.getmtime(full_path)
-                file_hash = get_file_hash(full_path)
-                if file_hash is not None:
-                    new_entry = {'path': path, 'mtime': mtime, 'hash': file_hash}
-                    self.ordered_selection.append(new_entry)
-            except OSError:
-                messagebox.showerror("Error", f"Could not access file: {path}", parent=self.parent)
-                return
+            new_entry = self._calculate_stats_for_file(path)
+            if new_entry:
+                self.ordered_selection.append(new_entry)
+
         self._update_list_display(is_reorder=False)
         self.on_change()
 
@@ -136,15 +135,10 @@ class SelectionListHandler:
         current_selection_paths = {f['path'] for f in self.ordered_selection}
         for path in paths_to_add:
             if path not in current_selection_paths:
-                full_path = os.path.join(self.base_dir, path)
-                try:
-                    mtime = os.path.getmtime(full_path)
-                    file_hash = get_file_hash(full_path)
-                    if file_hash is not None:
-                        new_entry = {'path': path, 'mtime': mtime, 'hash': file_hash}
-                        self.ordered_selection.append(new_entry)
-                except OSError:
-                    continue
+                new_entry = self._calculate_stats_for_file(path)
+                if new_entry:
+                    self.ordered_selection.append(new_entry)
+
         self._update_list_display(is_reorder=False)
         self.on_change()
 
@@ -293,16 +287,8 @@ class SelectionListHandler:
         tooltip_text = None
 
         if is_over_token_count_area and self.token_count_enabled:
-            # Re-check if a token count is actually VISIBLE for this item
-            token_count = -1
-            line_count = -1
-            try:
-                with open(os.path.join(self.base_dir, path), 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                    token_count = get_token_count_for_text(content)
-                    line_count = content.count('\n') + 1
-            except (IOError, OSError):
-                pass # counts remain -1
+            token_count = item_info.get('tokens', -1)
+            line_count = item_info.get('lines', -1)
 
             # Tooltip should only show if the text is visible (i.e., over the threshold)
             if token_count > self.token_count_threshold:

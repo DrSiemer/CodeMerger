@@ -5,7 +5,7 @@ import re
 import colorsys
 import hashlib
 from ..constants import COMPACT_MODE_BG_COLOR
-from .merger import recalculate_token_count
+from .utils import get_token_count_for_text
 
 def _get_file_hash(full_path):
     """Calculates the SHA1 hash of a file's content."""
@@ -119,17 +119,26 @@ class ProjectConfig:
                 full_path = os.path.join(self.base_dir, f_path)
                 if os.path.isfile(full_path):
                     try:
+                        content = ""
+                        with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                            content = f.read()
+
                         mtime = os.path.getmtime(full_path)
                         file_hash = _get_file_hash(full_path)
-                        cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash})
+                        tokens = get_token_count_for_text(content)
+                        lines = content.count('\n') + 1
+
+                        cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
                     except OSError:
                         continue # Skip files that can't be accessed
         else:
-            # New format (list of dicts): filter out non-existent files
-            cleaned_selection = [
-                f_info for f_info in original_selection
-                if os.path.isfile(os.path.join(self.base_dir, f_info['path']))
-            ]
+            # New format (list of dicts): filter out non-existent files and add missing keys
+            for f_info in original_selection:
+                if os.path.isfile(os.path.join(self.base_dir, f_info['path'])):
+                    if 'tokens' not in f_info or 'lines' not in f_info:
+                        config_was_updated = True
+                    cleaned_selection.append(f_info)
+
         self.selected_files = cleaned_selection
         files_were_cleaned = len(cleaned_selection) < len(original_selection)
 
@@ -141,10 +150,7 @@ class ProjectConfig:
         known_files_were_cleaned = len(cleaned_known_files) < len(original_known_files)
 
         if files_were_cleaned:
-            if len(self.selected_files) > 100:
-                self.total_tokens = 0
-            else:
-                self.total_tokens = recalculate_token_count(self.base_dir, self.selected_files)
+            self.total_tokens = sum(f.get('tokens', 0) for f in self.selected_files)
             config_was_updated = True
         else:
             # The file list is intact, so the cached token count is trustworthy

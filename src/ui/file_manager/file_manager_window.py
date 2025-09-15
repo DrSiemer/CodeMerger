@@ -2,9 +2,8 @@ import os
 import tkinter as tk
 from tkinter import Toplevel, messagebox
 
-from ...core.utils import parse_gitignore, get_file_hash
+from ...core.utils import parse_gitignore, get_file_hash, get_token_count_for_text
 from .file_tree_builder import build_file_tree_data
-from ...core.merger import recalculate_token_count
 from .file_tree_handler import FileTreeHandler
 from .selection_list_handler import SelectionListHandler
 from .ui_setup import setup_file_manager_ui
@@ -36,7 +35,6 @@ class FileManagerWindow(Toplevel):
         self.focus_force()
         self.configure(bg=c.DARK_BG)
 
-        self._recalculate_job = None
         self.current_total_tokens = self.project_config.total_tokens
 
         files_were_cleaned = self.project_config.load()
@@ -52,18 +50,14 @@ class FileManagerWindow(Toplevel):
         setup_file_manager_ui(self)
         self.create_handlers()
 
+        # Validate cache before populating UI
+        self._validate_and_update_cache()
+
         # Populate with initial data
         self.selection_handler.set_initial_selection(self.project_config.selected_files)
         self.populate_tree()
+        self.run_token_recalculation() # Update title from validated cache
         self.update_all_button_states()
-        self._update_title(self.project_config.total_tokens)
-
-        # Check for modifications before showing the window
-        self._check_for_modifications_and_recalculate()
-
-        # Recalculate if files were cleaned OR if the token count is zero despite having files
-        if files_were_cleaned or (self.current_total_tokens == 0 and self.project_config.selected_files):
-            self.trigger_recalculation()
 
         self._position_window()
         self.deiconify()
@@ -87,37 +81,58 @@ class FileManagerWindow(Toplevel):
             self.tree.master.grid_columnconfigure(2, weight=1)
             self.toggle_paths_button.config(image=assets.paths_icon)
 
-    def _check_for_modifications_and_recalculate(self):
+    def _validate_and_update_cache(self):
         """
-        Checks for file modifications by comparing mtime and hash, then triggers
-        a token recalculation if any changes are found.
+        Checks for file modifications by comparing mtime/hash or missing keys, then updates
+        the token/line cache for any changed files.
         """
-        needs_recalc = False
-        needs_save = False
+        cache_was_updated = False
         for file_info in self.project_config.selected_files:
             path = file_info.get('path')
             if not path: continue
 
             full_path = os.path.join(self.base_dir, path)
-            try:
-                current_mtime = os.path.getmtime(full_path)
-                # Compare mtime first as it's a cheap check
-                if current_mtime != file_info.get('mtime'):
-                    current_hash = get_file_hash(full_path)
-                    # If hash is also different, the file has changed
-                    if current_hash is not None and current_hash != file_info.get('hash'):
-                        needs_recalc = True
-                        needs_save = True
-                        file_info['mtime'] = current_mtime
-                        file_info['hash'] = current_hash
-            except OSError:
-                continue # File might be inaccessible, handled by cleaning logic
+            recalculate = False
 
-        if needs_save:
-            self.project_config.save()
-        if needs_recalc:
-            self.trigger_recalculation()
-            self.status_var.set("File changes detected, tokens recalculated.")
+            # --- Determine if a recalculation is needed ---
+            # Reason 1: Essential data is missing from the cache.
+            if 'tokens' not in file_info or 'lines' not in file_info:
+                recalculate = True
+            else:
+                try:
+                    current_mtime = os.path.getmtime(full_path)
+                    # Reason 2: Modification time has changed.
+                    if current_mtime != file_info.get('mtime'):
+                        recalculate = True
+                    # Reason 3: mtime is the same, but hash has changed (covers fast saves).
+                    else:
+                        current_hash = get_file_hash(full_path)
+                        if current_hash is not None and current_hash != file_info.get('hash'):
+                            recalculate = True
+                except OSError:
+                    continue # Skip inaccessible files.
+
+            # --- Perform recalculation if needed ---
+            if recalculate:
+                try:
+                    with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        content = f.read()
+
+                    file_info['mtime'] = os.path.getmtime(full_path)
+                    file_info['hash'] = get_file_hash(full_path)
+                    file_info['tokens'] = get_token_count_for_text(content)
+                    file_info['lines'] = content.count('\n') + 1
+                    cache_was_updated = True
+                except (OSError, IOError):
+                    # If file is unreadable now, mark stats as invalid
+                    file_info['tokens'] = -1
+                    file_info['lines'] = -1
+                    cache_was_updated = True
+
+
+        if cache_was_updated:
+            self.project_config.save() # Save the updated cache to .allcode
+            self.status_var.set("File cache updated for modified files.")
 
     def _position_window(self):
         position_window(self)
@@ -187,7 +202,7 @@ class FileManagerWindow(Toplevel):
         """Callback from SelectionListHandler when its data changes"""
         self.tree_handler.update_all_checkboxes()
         self.update_all_button_states()
-        self.trigger_recalculation()
+        self.run_token_recalculation()
 
     def on_file_toggled(self, path):
         """Callback from FileTreeHandler when a file is toggled"""
@@ -226,12 +241,12 @@ class FileManagerWindow(Toplevel):
         source_widget = None
 
         if self.tree.selection():
-            item_id = self.tree.selection()
+            item_id = self.tree.selection()[0]
             if self.item_map.get(item_id, {}).get('type') == 'file':
                 selected_path = self.item_map[item_id]['path']
                 source_widget = self.tree
         elif self.merge_order_list.curselection():
-            selected_index = self.merge_order_list.curselection()
+            selected_index = self.merge_order_list.curselection()[0]
             selected_path = self.merge_order_list.get_item_data(selected_index)
             source_widget = self.merge_order_list
 
@@ -250,13 +265,9 @@ class FileManagerWindow(Toplevel):
                 self.tree.item(item_id, tags=('file', 'subtle_highlight'))
                 self.tree.see(item_id)
 
-    def trigger_recalculation(self):
-        if self._recalculate_job: self.after_cancel(self._recalculate_job)
-        self._recalculate_job = self.after(250, self.run_token_recalculation)
-
     def run_token_recalculation(self):
-        self._recalculate_job = None
-        total_tokens = recalculate_token_count(self.base_dir, self.selection_handler.ordered_selection)
+        # Calculate total by summing cached values
+        total_tokens = sum(f.get('tokens', 0) for f in self.selection_handler.ordered_selection)
         self._update_title(total_tokens)
 
     def _update_title(self, total_tokens):
