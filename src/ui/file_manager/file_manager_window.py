@@ -25,6 +25,7 @@ class FileManagerWindow(Toplevel):
         self.app_state = app_state
         self.newly_detected_files = newly_detected_files or []
         self.full_paths_visible = False
+        self.token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
@@ -84,7 +85,8 @@ class FileManagerWindow(Toplevel):
     def _validate_and_update_cache(self):
         """
         Checks for file modifications by comparing mtime/hash or missing keys, then updates
-        the token/line cache for any changed files.
+        the token/line cache for any changed files. Also re-validates files with 0 tokens
+        if token counting is enabled.
         """
         cache_was_updated = False
         for file_info in self.project_config.selected_files:
@@ -98,13 +100,21 @@ class FileManagerWindow(Toplevel):
             # Reason 1: Essential data is missing from the cache.
             if 'tokens' not in file_info or 'lines' not in file_info:
                 recalculate = True
+            # Reason 2: Token counting is ON, but the cached value is 0. This is suspicious
+            # unless the file is genuinely empty.
+            elif self.token_count_enabled and file_info.get('tokens', -1) == 0:
+                try:
+                    if os.path.getsize(full_path) > 0:
+                        recalculate = True
+                except OSError:
+                    continue # File might have been deleted, skip.
             else:
                 try:
                     current_mtime = os.path.getmtime(full_path)
-                    # Reason 2: Modification time has changed.
+                    # Reason 3: Modification time has changed.
                     if current_mtime != file_info.get('mtime'):
                         recalculate = True
-                    # Reason 3: mtime is the same, but hash has changed (covers fast saves).
+                    # Reason 4: mtime is the same, but hash has changed (covers fast saves).
                     else:
                         current_hash = get_file_hash(full_path)
                         if current_hash is not None and current_hash != file_info.get('hash'):
@@ -120,8 +130,13 @@ class FileManagerWindow(Toplevel):
 
                     file_info['mtime'] = os.path.getmtime(full_path)
                     file_info['hash'] = get_file_hash(full_path)
-                    file_info['tokens'] = get_token_count_for_text(content)
-                    file_info['lines'] = content.count('\n') + 1
+
+                    if self.token_count_enabled:
+                        file_info['tokens'] = get_token_count_for_text(content)
+                        file_info['lines'] = content.count('\n') + 1
+                    else:
+                        file_info['tokens'] = 0
+                        file_info['lines'] = 0
                     cache_was_updated = True
                 except (OSError, IOError):
                     # If file is unreadable now, mark stats as invalid
@@ -155,7 +170,8 @@ class FileManagerWindow(Toplevel):
         }
         self.selection_handler = SelectionListHandler(
             self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor,
-            self.on_selection_list_changed
+            self.on_selection_list_changed,
+            token_count_enabled=self.token_count_enabled
         )
 
         self.tree_handler = FileTreeHandler(
@@ -239,12 +255,12 @@ class FileManagerWindow(Toplevel):
         source_widget = None
 
         if self.tree.selection():
-            item_id = self.tree.selection()
+            item_id = self.tree.selection()[0]
             if self.item_map.get(item_id, {}).get('type') == 'file':
                 selected_path = self.item_map[item_id]['path']
                 source_widget = self.tree
         elif self.merge_order_list.curselection():
-            selected_index = self.merge_order_list.curselection()
+            selected_index = self.merge_order_list.curselection()[0]
             selected_path = self.merge_order_list.get_item_data(selected_index)
             source_widget = self.merge_order_list
 
@@ -265,18 +281,27 @@ class FileManagerWindow(Toplevel):
 
     def run_token_recalculation(self):
         # Calculate total by summing cached values
-        total_tokens = sum(f.get('tokens', 0) for f in self.selection_handler.ordered_selection)
-        self._update_title(total_tokens)
+        if self.token_count_enabled:
+            total_tokens = sum(f.get('tokens', 0) for f in self.selection_handler.ordered_selection)
+            self._update_title(total_tokens)
+        else:
+            self._update_title(None)
 
     def _update_title(self, total_tokens):
-        self.current_total_tokens = total_tokens
         num_files = len(self.selection_handler.ordered_selection)
         file_text = "files" if num_files != 1 else "file"
-        if total_tokens >= 0:
-            formatted_tokens = f"{total_tokens:,}".replace(',', '.')
-            details_text = f"({num_files} {file_text} selected, {formatted_tokens} tokens)"
+
+        if total_tokens is not None:
+            self.current_total_tokens = total_tokens
+            if total_tokens >= 0:
+                formatted_tokens = f"{total_tokens:,}".replace(',', '.')
+                details_text = f"({num_files} {file_text} selected, {formatted_tokens} tokens)"
+            else:
+                details_text = f"({num_files} {file_text} selected, token count error)"
         else:
-            details_text = f"({num_files} {file_text} selected, token count error)"
+            self.current_total_tokens = 0
+            details_text = f"({num_files} {file_text} selected)"
+
         self.merge_order_details_label.config(text=details_text)
 
     def select_all_files(self):

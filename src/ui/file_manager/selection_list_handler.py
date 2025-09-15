@@ -10,7 +10,7 @@ class SelectionListHandler:
     Manages the 'Merge Order' listbox and its associated buttons,
     handling the data model (ordered_selection) and user actions.
     """
-    def __init__(self, parent, list_widget, buttons, base_dir, default_editor, on_change_callback):
+    def __init__(self, parent, list_widget, buttons, base_dir, default_editor, on_change_callback, token_count_enabled):
         self.parent = parent
         self.listbox = list_widget
         self.move_to_top_button = buttons['top']
@@ -21,6 +21,7 @@ class SelectionListHandler:
         self.base_dir = base_dir
         self.default_editor = default_editor
         self.on_change = on_change_callback
+        self.token_count_enabled = token_count_enabled
         self.ordered_selection = []
         self.show_full_paths = False
         self.tooltip_window = None
@@ -46,9 +47,9 @@ class SelectionListHandler:
             return c.TEXT_SUBTLE_COLOR
 
         p = (count - min_val) / (max_val - min_val)
-        # [MODIFIED] Added the background color as the first stop in the gradient
         colors = [c.TEXT_INPUT_BG, c.TEXT_SUBTLE_COLOR, c.NOTE, c.ATTENTION, c.WARN]
 
+        # [FIX] Return the first or last color, not the entire list
         if p <= 0: return colors[0]
         if p >= 1: return colors[-1]
 
@@ -78,21 +79,24 @@ class SelectionListHandler:
         token counts based on their range.
         """
         display_items = []
-        token_counts = [f.get('tokens', 0) for f in self.ordered_selection if f.get('tokens', -1) >= 0]
-        min_tokens = min(token_counts) if token_counts else 0
-        max_tokens = max(token_counts) if token_counts else 0
+        if self.token_count_enabled:
+            token_counts = [f.get('tokens', 0) for f in self.ordered_selection if f.get('tokens', -1) >= 0]
+            min_tokens = min(token_counts) if token_counts else 0
+            max_tokens = max(token_counts) if token_counts else 0
 
         for file_info in self.ordered_selection:
             path = file_info['path']
             display_text = path if self.show_full_paths else os.path.basename(path)
-            token_count = file_info.get('tokens', -1)
+            right_col_text = ""
+            right_col_color = c.TEXT_SUBTLE_COLOR
 
-            if token_count >= 0:
-                right_col_text = str(token_count)
-                right_col_color = self._get_color_for_token_count(token_count, min_tokens, max_tokens)
-            else:
-                right_col_text = "?"
-                right_col_color = c.TEXT_SUBTLE_COLOR
+            if self.token_count_enabled:
+                token_count = file_info.get('tokens', -1)
+                if token_count >= 0:
+                    right_col_text = str(token_count)
+                    right_col_color = self._get_color_for_token_count(token_count, min_tokens, max_tokens)
+                else:
+                    right_col_text = "?"
 
             display_items.append({
                 'left': display_text,
@@ -128,8 +132,13 @@ class SelectionListHandler:
 
             mtime = os.path.getmtime(full_path)
             file_hash = get_file_hash(full_path)
-            tokens = get_token_count_for_text(content)
-            lines = content.count('\n') + 1
+
+            if self.token_count_enabled:
+                tokens = get_token_count_for_text(content)
+                lines = content.count('\n') + 1
+            else:
+                tokens = 0
+                lines = 0
 
             if file_hash is not None:
                 return {'path': path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines}
@@ -305,7 +314,7 @@ class SelectionListHandler:
         is_over_token_count_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
         tooltip_text = None
 
-        if is_over_token_count_area:
+        if is_over_token_count_area and self.token_count_enabled:
             token_count = item_info.get('tokens', -1)
             line_count = item_info.get('lines', -1)
 

@@ -9,6 +9,7 @@ from ..core.paths import (
 )
 from ..constants import (
     DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT,
+    TOKEN_COUNT_ENABLED_DEFAULT,
     ADD_ALL_WARNING_THRESHOLD_DEFAULT
 )
 
@@ -48,6 +49,7 @@ def _create_and_get_default_config():
         'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT,
         'default_intro_prompt': DEFAULT_INTRO_PROMPT,
         'default_outro_prompt': DEFAULT_OUTRO_PROMPT,
+        'token_count_enabled': TOKEN_COUNT_ENABLED_DEFAULT,
         'enable_compact_mode_on_minimize': True,
         'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT
     }
@@ -97,9 +99,9 @@ def load_config():
             if 'default_outro_prompt' not in config:
                 config['default_outro_prompt'] = DEFAULT_OUTRO_PROMPT
             if 'line_count_enabled' in config: # Backward compatibility cleanup
-                config.pop('line_count_enabled')
-            if 'token_count_enabled' in config: # Backward compatibility cleanup
-                config.pop('token_count_enabled')
+                config['token_count_enabled'] = config.pop('line_count_enabled')
+            if 'token_count_enabled' not in config:
+                config['token_count_enabled'] = TOKEN_COUNT_ENABLED_DEFAULT
             if 'line_count_threshold' in config: # Backward compatibility cleanup
                 config.pop('line_count_threshold')
             if 'token_count_threshold' in config: # Backward compatibility cleanup

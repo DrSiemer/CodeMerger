@@ -22,6 +22,7 @@ class SettingsWindow(Toplevel):
         self.check_for_updates = BooleanVar(value=get_setting('AutomaticUpdates', True))
         self.enable_new_file_check = BooleanVar(value=config.get('enable_new_file_check', True))
         self.new_file_check_interval = StringVar(value=str(config.get('new_file_check_interval', 5)))
+        self.token_count_enabled = BooleanVar(value=config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT))
         self.enable_compact_mode_on_minimize = BooleanVar(value=config.get('enable_compact_mode_on_minimize', True))
         self.add_all_warning_threshold = StringVar(value=str(config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT)))
 
@@ -121,6 +122,12 @@ class SettingsWindow(Toplevel):
         self.add_all_entry = Entry(add_all_frame, textvariable=self.add_all_warning_threshold, width=6, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=self.font_normal, validate='key', validatecommand=vcmd)
         self.add_all_entry.pack(side='left')
         Label(add_all_frame, text="files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal).pack(side='left', padx=(5, 0))
+
+        Label(self.scrollable_frame, text="Performance", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
+        performance_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
+        performance_frame.pack(fill='x', expand=True, pady=(0, 15))
+        self.scan_checkbox = ttk.Checkbutton(performance_frame, text="Enable token counting (disable for a slight speed boost)", variable=self.token_count_enabled, style='Dark.TCheckbutton')
+        self.scan_checkbox.pack(anchor='w')
 
         Label(self.scrollable_frame, text="Secret Scanning", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
         secrets_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
@@ -286,6 +293,7 @@ class SettingsWindow(Toplevel):
         config['default_intro_prompt'] = self.default_intro_text.get('1.0', 'end-1c')
         config['default_outro_prompt'] = self.default_outro_text.get('1.0', 'end-1c')
         config['enable_new_file_check'] = self.enable_new_file_check.get()
+        config['token_count_enabled'] = self.token_count_enabled.get()
         config['enable_compact_mode_on_minimize'] = self.enable_compact_mode_on_minimize.get()
 
         try:

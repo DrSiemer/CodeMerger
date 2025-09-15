@@ -85,10 +85,10 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1757927347.935457,
-      "hash": "763b21d3fb853808f48071a4954bf4b03701cee2",
-      "tokens": 783,
-      "lines": 72
+      "mtime": 1757928686.31304,
+      "hash": "689e2dc49412c4b1bd0397e86392fd69eea259ea",
+      "tokens": 790,
+      "lines": 73
     },
     {
       "path": "src/core/paths.py",
@@ -106,10 +106,10 @@
     },
     {
       "path": "src/core/utils.py",
-      "mtime": 1757927338.5670264,
-      "hash": "139b098aefba5a3e79d2ff23cc4746ef2301591b",
-      "tokens": 2190,
-      "lines": 251
+      "mtime": 1757928695.7908912,
+      "hash": "31f78dc970f8c7ad2213e01b55e86048c9f59395",
+      "tokens": 2214,
+      "lines": 253
     },
     {
       "path": "src/core/file_scanner.py",
@@ -246,10 +246,10 @@
     },
     {
       "path": "src/ui/file_manager/selection_list_handler.py",
-      "mtime": 1757928343.772252,
-      "hash": "3274e0e961196eb377af6e0cfb864aa7a2f37197",
-      "tokens": 3268,
-      "lines": 345
+      "mtime": 1757928923.7893295,
+      "hash": "d3be2a71704306636a9e2a093827d639912e398d",
+      "tokens": 3328,
+      "lines": 354
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
@@ -260,10 +260,10 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1757927306.675817,
-      "hash": "9994f84ec415c26a0b534c9674cea7542f627aff",
-      "tokens": 3051,
-      "lines": 350
+      "mtime": 1757929286.6028323,
+      "hash": "dbd5558aa598804459fd7a82e6a91442e36cf25f",
+      "tokens": 3276,
+      "lines": 375
     },
     {
       "path": "src/ui/directory_dialog.py",
@@ -281,10 +281,10 @@
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1757927321.8494081,
-      "hash": "16a5876224e723ca80fe533239420f1863289990",
-      "tokens": 3845,
-      "lines": 306
+      "mtime": 1757928702.1533465,
+      "hash": "bce9412799839811f53691d50d592def09de7fc3",
+      "tokens": 4002,
+      "lines": 314
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",
@@ -350,7 +350,7 @@
       "lines": 276
     }
   ],
-  "total_tokens": 56858,
+  "total_tokens": 56951,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
