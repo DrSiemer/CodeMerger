@@ -47,9 +47,8 @@ class SelectionListHandler:
             return c.TEXT_SUBTLE_COLOR
 
         p = (count - min_val) / (max_val - min_val)
-        colors = [c.TEXT_INPUT_BG, c.TEXT_SUBTLE_COLOR, c.NOTE, c.ATTENTION, c.WARN]
+        colors = [c.TEXT_SUBTLE_COLOR, c.TEXT_SUBTLE_COLOR, c.NOTE, c.ATTENTION, c.WARN]
 
-        # [FIX] Return the first or last color, not the entire list
         if p <= 0: return colors[0]
         if p >= 1: return colors[-1]
 
@@ -83,6 +82,9 @@ class SelectionListHandler:
             token_counts = [f.get('tokens', 0) for f in self.ordered_selection if f.get('tokens', -1) >= 0]
             min_tokens = min(token_counts) if token_counts else 0
             max_tokens = max(token_counts) if token_counts else 0
+            # Enforce a minimum range for token coloring to avoid small files looking "hot"
+            if max_tokens < c.TOKEN_COLOR_RANGE_MIN_MAX:
+                max_tokens = c.TOKEN_COLOR_RANGE_MIN_MAX
 
         for file_info in self.ordered_selection:
             path = file_info['path']

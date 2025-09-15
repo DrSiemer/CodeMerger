@@ -22,7 +22,7 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1757926564.1767776,
+      "mtime": 1757935849.124177,
       "hash": "8cfda3c5f231ab59aa427b293e731af7bcf59030",
       "tokens": 1211,
       "lines": 52
@@ -85,10 +85,10 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1757928686.31304,
-      "hash": "689e2dc49412c4b1bd0397e86392fd69eea259ea",
-      "tokens": 790,
-      "lines": 73
+      "mtime": 1757936532.9945598,
+      "hash": "0d34c2e62f7cd3b95d87f7b94f88a2edf5f961ab",
+      "tokens": 800,
+      "lines": 74
     },
     {
       "path": "src/core/paths.py",
@@ -246,10 +246,10 @@
     },
     {
       "path": "src/ui/file_manager/selection_list_handler.py",
-      "mtime": 1757928923.7893295,
-      "hash": "d3be2a71704306636a9e2a093827d639912e398d",
-      "tokens": 3328,
-      "lines": 354
+      "mtime": 1757936371.6628234,
+      "hash": "a56d6afb1b5445015dac8a5d2e835e94b372711a",
+      "tokens": 3356,
+      "lines": 356
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
@@ -281,10 +281,10 @@
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1757928702.1533465,
-      "hash": "bce9412799839811f53691d50d592def09de7fc3",
-      "tokens": 4002,
-      "lines": 314
+      "mtime": 1757932686.6227026,
+      "hash": "74e7330189955127b02fe2d586aaee45b896408e",
+      "tokens": 3947,
+      "lines": 323
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",

@@ -13,6 +13,7 @@ DEFAULT_OUTRO_PROMPT = 'DO:\n- always return full code, unless a change is VERY 
 # --- UI Theming & Configuration ---
 PROJECT_TITLE_MAX_LENGTH = 64
 COMPACT_MODE_BG_COLOR = "#6f6f6f"
+TOKEN_COLOR_RANGE_MIN_MAX = 2500
 
 # --- UI Color Palette ---
 DARK_BG = '#2E2E2E'
@@ -28,7 +29,7 @@ WRAPPER_BORDER = '#555555'
 STATUS_BG = '#3A3A3A'
 STATUS_FG = '#D3D3D3'
 SUBTLE_HIGHLIGHT_COLOR = "#555555"
-WARN = "#CF1818"
+WARN = "#DF2622"
 ATTENTION = "#DE6808"
 NOTE = "#B77B06"
 
