@@ -71,8 +71,8 @@ class FileMonitor:
             project_config.known_files = list(known_set - deleted_files)
             # Also remove them from the selection list if they were there
             original_selection_count = len(project_config.selected_files)
-            project_config.selected_files = [f for f in project_config.selected_files if f not in deleted_files]
-            
+            project_config.selected_files = [f for f in project_config.selected_files if f['path'] not in deleted_files]
+
             # If the selection changed, invalidate the token count
             if len(project_config.selected_files) != original_selection_count:
                 project_config.total_tokens = 0

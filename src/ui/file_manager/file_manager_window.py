@@ -285,11 +285,26 @@ class FileManagerWindow(Toplevel):
         all_paths = self.tree_handler.get_all_file_paths_in_tree_order()
         current_selection_paths = {f['path'] for f in self.selection_handler.ordered_selection}
         paths_to_add = [p for p in all_paths if p not in current_selection_paths]
-        if paths_to_add:
-            self.selection_handler.add_files(paths_to_add)
-            self.status_var.set(f"Added {len(paths_to_add)} file(s) to the merge list")
-        else:
+
+        if not paths_to_add:
             self.status_var.set("No new files to add")
+            return
+
+        num_files_to_add = len(paths_to_add)
+        warning_threshold = self.app_state.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT)
+
+        if num_files_to_add > warning_threshold:
+            proceed = messagebox.askyesno(
+                "Confirm Adding Files",
+                f"You are about to add {num_files_to_add} files to the merge list.\n\nAre you sure you want to continue?",
+                parent=self
+            )
+            if not proceed:
+                self.status_var.set("Operation cancelled by user.")
+                return
+
+        self.selection_handler.add_files(paths_to_add)
+        self.status_var.set(f"Added {num_files_to_add} file(s) to the merge list")
 
     def remove_all_files(self):
         if not self.selection_handler.ordered_selection:

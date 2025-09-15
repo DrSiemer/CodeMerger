@@ -111,6 +111,6 @@ def setup_file_manager_ui(window):
 
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
     bulk_action_frame.grid(row=3, column=0, columnspan=4, sticky='ew', pady=(20, 0))
-    RoundedButton(bulk_action_frame, text="Select all", command=window.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='left')
+    RoundedButton(bulk_action_frame, text="Add all", command=window.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='left')
     RoundedButton(bulk_action_frame, text="Remove all", command=window.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='right')
     RoundedButton(bulk_action_frame, text="Save and Close", command=window.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 16), width=240).pack()
