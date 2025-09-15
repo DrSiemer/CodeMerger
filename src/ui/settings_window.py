@@ -35,7 +35,7 @@ class SettingsWindow(Toplevel):
         # --- Window Setup ---
         self.title("Settings")
         self.iconbitmap(ICON_PATH)
-        self.geometry("600x600")
+        self.geometry("500x640")
         self.minsize(500, 300)
         self.transient(parent)
         self.grab_set()
@@ -75,10 +75,39 @@ class SettingsWindow(Toplevel):
         s.map('Dark.TCombobox', foreground=[('readonly', c.TEXT_COLOR)], fieldbackground=[('readonly', c.TEXT_INPUT_BG)])
 
         # --- All content goes into the scrollable_frame ---
-        Label(self.scrollable_frame, text="Application Updates", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        updates_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        updates_frame.pack(fill='x', expand=True, pady=(0, 15))
 
+        # --- Application Settings Section ---
+        Label(self.scrollable_frame, text="Application settings", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
+        app_settings_container = Frame(self.scrollable_frame, bg=c.DARK_BG)
+        app_settings_container.pack(fill='x', expand=True, pady=(0, 15), padx=(25, 0))
+
+        # Periodic new file check
+        file_check_frame = Frame(app_settings_container, bg=c.DARK_BG)
+        file_check_frame.pack(fill='x', expand=True, pady=(0, 5))
+        self.new_file_check_checkbox = ttk.Checkbutton(file_check_frame, text="Periodically check for new project files", variable=self.enable_new_file_check, style='Dark.TCheckbutton', command=self.toggle_interval_selector)
+        self.new_file_check_checkbox.pack(anchor='w')
+        interval_frame = Frame(file_check_frame, bg=c.DARK_BG)
+        interval_frame.pack(fill='x', padx=(25, 0), pady=(5, 0))
+        self.interval_label = Label(interval_frame, text="Check every:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal)
+        self.interval_label.pack(side='left', padx=(0, 10))
+        self.interval_combo = ttk.Combobox(interval_frame, textvariable=self.new_file_check_interval, values=['2', '5', '10', '30', '60'], state='readonly', width=5, style='Dark.TCombobox')
+        self.interval_combo.pack(side='left')
+        Label(interval_frame, text="seconds", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal).pack(side='left', padx=(5, 0))
+        self.toggle_interval_selector()
+
+        # Secret Scanning
+        self.scan_checkbox = ttk.Checkbutton(app_settings_container, text="Scan for secrets (on each copy)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
+        self.scan_checkbox.pack(anchor='w')
+
+        # Compact Mode
+        self.compact_mode_checkbox = ttk.Checkbutton(app_settings_container, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton')
+        self.compact_mode_checkbox.pack(anchor='w')
+
+        # Updates
+        updates_frame = Frame(app_settings_container, bg=c.DARK_BG)
+        updates_frame.pack(fill='x', expand=True, pady=(5, 0))
+        self.update_checkbox = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
+        self.update_checkbox.pack(side='left')
         self.check_now_button = RoundedButton(
             updates_frame,
             text="Check Now",
@@ -89,58 +118,37 @@ class SettingsWindow(Toplevel):
             height=22,
             radius=4
         )
-        self.check_now_button.pack(side='right', padx=(10, 0))
+        self.check_now_button.pack(side='left', padx=(10, 0))
 
-        self.update_checkbox = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
-        self.update_checkbox.pack(side='left')
+        # --- File Manager Section ---
+        Label(self.scrollable_frame, text="File Manager", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
+        fm_settings_container = Frame(self.scrollable_frame, bg=c.DARK_BG)
+        fm_settings_container.pack(fill='x', expand=True, pady=(0, 15), padx=(25, 0))
 
-        Label(self.scrollable_frame, text="Window Behavior", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        window_behavior_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        window_behavior_frame.pack(fill='x', expand=True, pady=(0, 15))
-        self.compact_mode_checkbox = ttk.Checkbutton(window_behavior_frame, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton')
-        self.compact_mode_checkbox.pack(anchor='w')
+        # Token Counting
+        self.token_count_checkbox = ttk.Checkbutton(fm_settings_container, text="Enable token counting", variable=self.token_count_enabled, style='Dark.TCheckbutton')
+        self.token_count_checkbox.pack(anchor='w')
 
-        Label(self.scrollable_frame, text="File System Monitoring", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        file_system_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        file_system_frame.pack(fill='x', expand=True, pady=(0, 15))
-        self.new_file_check_checkbox = ttk.Checkbutton(file_system_frame, text="Periodically check for new project files", variable=self.enable_new_file_check, style='Dark.TCheckbutton', command=self.toggle_interval_selector)
-        self.new_file_check_checkbox.pack(anchor='w')
-        interval_frame = Frame(file_system_frame, bg=c.DARK_BG)
-        interval_frame.pack(fill='x', padx=(25, 0), pady=(5, 0))
-        self.interval_label = Label(interval_frame, text="Check every:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal)
-        self.interval_label.pack(side='left', padx=(0, 10))
-        self.interval_combo = ttk.Combobox(interval_frame, textvariable=self.new_file_check_interval, values=['2', '5', '10', '30', '60'], state='readonly', width=5, style='Dark.TCombobox')
-        self.interval_combo.pack(side='left')
-        Label(interval_frame, text="seconds", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal).pack(side='left', padx=(5, 0))
-        self.toggle_interval_selector()
-
-        Label(self.scrollable_frame, text="File Management", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        add_all_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        add_all_frame.pack(fill='x', expand=True, pady=(0, 15), padx=(25, 0))
+        # 'Add All' Warning
+        add_all_frame = Frame(fm_settings_container, bg=c.DARK_BG)
+        add_all_frame.pack(fill='x', expand=True, pady=(5, 0))
         Label(add_all_frame, text="Warn when 'Add all' will add more than:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal).pack(side='left', padx=(0, 10))
         vcmd = (self.register(self.validate_integer), '%P')
         self.add_all_entry = Entry(add_all_frame, textvariable=self.add_all_warning_threshold, width=6, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=self.font_normal, validate='key', validatecommand=vcmd)
         self.add_all_entry.pack(side='left')
         Label(add_all_frame, text="files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal).pack(side='left', padx=(5, 0))
 
-        Label(self.scrollable_frame, text="Performance", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        performance_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        performance_frame.pack(fill='x', expand=True, pady=(0, 15))
-        self.scan_checkbox = ttk.Checkbutton(performance_frame, text="Enable token counting (disable for a slight speed boost)", variable=self.token_count_enabled, style='Dark.TCheckbutton')
-        self.scan_checkbox.pack(anchor='w')
+        # --- Prompts Section ---
+        Label(self.scrollable_frame, text="Prompts", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
+        prompts_container = Frame(self.scrollable_frame, bg=c.DARK_BG)
+        prompts_container.pack(fill='x', expand=True, pady=(0, 15))
 
-        Label(self.scrollable_frame, text="Secret Scanning", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        secrets_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        secrets_frame.pack(fill='x', expand=True, pady=(0, 15))
-        self.scan_checkbox = ttk.Checkbutton(secrets_frame, text="Scan for secrets on copy (slower)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
-        self.scan_checkbox.pack(anchor='w')
+        self.copy_merged_prompt_text = self._create_collapsible_text_section(prompts_container, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT)
+        self.default_intro_text = self._create_collapsible_text_section(prompts_container, 'Default Intro Prompt', config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT)
+        self.default_outro_text = self._create_collapsible_text_section(prompts_container, 'Default Outro Prompt', config.get('default_outro_prompt', ''), c.DEFAULT_OUTRO_PROMPT)
 
-        self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT)
-        self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT)
-        self.default_outro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Outro Prompt', config.get('default_outro_prompt', ''), c.DEFAULT_OUTRO_PROMPT)
-
-        Label(self.scrollable_frame, text="Default Editor", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
-        editor_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
+        Label(prompts_container, text="Default Editor", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
+        editor_frame = Frame(prompts_container, bg=c.DARK_BG)
         editor_frame.pack(fill='x', expand=True)
         self.editor_entry = Entry(editor_frame, textvariable=self.editor_path, state='readonly', readonlybackground=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, relief='flat', font=self.font_normal)
         self.editor_entry.pack(side='left', fill='x', expand=True, padx=(0, 10), ipady=4)
@@ -161,6 +169,7 @@ class SettingsWindow(Toplevel):
 
         self._position_window()
         self.deiconify()
+        self.after(10, self._manage_scrollbar)
 
     def validate_integer(self, value_if_allowed):
         """Validation function to allow only integers in an Entry widget."""
@@ -214,7 +223,7 @@ class SettingsWindow(Toplevel):
 
     def _create_collapsible_text_section(self, parent, title, initial_text, default_text):
         section_frame = Frame(parent, bg=c.DARK_BG)
-        section_frame.pack(fill='x', expand=True, pady=(15, 0))
+        section_frame.pack(fill='x', expand=True, pady=(5, 0))
 
         header_frame = Frame(section_frame, bg=c.DARK_BG)
         header_frame.pack(fill='x', expand=True)
