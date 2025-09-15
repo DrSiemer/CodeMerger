@@ -281,10 +281,31 @@
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1757923438.6245978,
-      "hash": "d011fa95662339a21f5b2726d5c4d763dd905c1b",
-      "tokens": 4021,
-      "lines": 321
+      "mtime": 1757924964.9851637,
+      "hash": "61c2fce98bb5d84a652633ef340f6805b82e4af8",
+      "tokens": 2766,
+      "lines": 201
+    },
+    {
+      "path": "src/ui/widgets/scrollable_frame.py",
+      "mtime": 1757924921.420815,
+      "hash": "2d217753bf64878b99d206e56d2ca1acc0a0755c",
+      "tokens": 657,
+      "lines": 74
+    },
+    {
+      "path": "src/ui/widgets/collapsible_section.py",
+      "mtime": 1757924931.7255049,
+      "hash": "5da317d93e0ebc99b81e610fc8bb15c6809f034e",
+      "tokens": 755,
+      "lines": 74
+    },
+    {
+      "path": "src/ui/style_manager.py",
+      "mtime": 1757924947.749528,
+      "hash": "429d1882833dc1b852222c0676b86d88d5ffcb26",
+      "tokens": 344,
+      "lines": 43
     },
     {
       "path": "src/ui/title_edit_dialog.py",
@@ -322,7 +343,7 @@
       "lines": 272
     }
   ],
-  "total_tokens": 51715,
+  "total_tokens": 54190,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -363,11 +384,14 @@
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
     "src/ui/settings_window.py",
+    "src/ui/style_manager.py",
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",
     "src/ui/ui_builder.py",
     "src/ui/view_manager.py",
+    "src/ui/widgets/collapsible_section.py",
     "src/ui/widgets/rounded_button.py",
+    "src/ui/widgets/scrollable_frame.py",
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
     "src/ui/wrapper_text_window.py",
