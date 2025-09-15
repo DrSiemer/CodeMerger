@@ -55,7 +55,6 @@ def setup_ui(app):
     app.folder_icon_label.bind("<Button-1>", app.open_project_folder)
     ToolTip(app.folder_icon_label, "Open project folder", delay=500)
 
-
     # --- Top-Level Buttons (Row 1) ---
     top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20)
     top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
@@ -104,8 +103,7 @@ def setup_ui(app):
     RoundedButton(bottom_buttons_container, text="Settings", font=font_button, fg=c.TEXT_COLOR, command=app.open_settings_window, hollow=True).pack(side='left', padx=(10, 0))
 
     # --- Status Bar (Row 4) ---
-    app.status_var = app.status_var # This should already exist
-    status_bar = Label(
+    app.status_bar = Label(
         app,
         textvariable=app.status_var,
         relief='flat',
@@ -116,4 +114,4 @@ def setup_ui(app):
         padx=20,
         pady=4
     )
-    status_bar.grid(row=4, column=0, sticky='ew')
+    app.status_bar.grid(row=4, column=0, sticky='ew')
