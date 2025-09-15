@@ -66,6 +66,9 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Double-click the move bar or use the close button to exit compact mode and show the main window again
 
 
+![Settings](./dev/screenshot_04.png "Settings")
+
+
 ### Settings
 
 - **Application Updates**: Enable or disable the automatic daily check for new versions
