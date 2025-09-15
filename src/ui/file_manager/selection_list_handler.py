@@ -31,6 +31,11 @@ class SelectionListHandler:
         self.listbox.bind_event('<Double-1>', self.open_selected_file)
         self.listbox.bind_event('<Motion>', self._schedule_tooltip)
         self.listbox.bind_event('<Leave>', self._hide_tooltip)
+        self.listbox.bind_event('<MouseWheel>', self._on_scroll, add='+')
+
+    def _on_scroll(self, event=None):
+        """Hides the tooltip when the user scrolls the list."""
+        self._hide_tooltip()
 
     def toggle_full_path_view(self):
         """Toggles the display of full paths and refreshes the list."""
