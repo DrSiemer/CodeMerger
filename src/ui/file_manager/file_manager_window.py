@@ -155,9 +155,7 @@ class FileManagerWindow(Toplevel):
         }
         self.selection_handler = SelectionListHandler(
             self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor,
-            self.on_selection_list_changed,
-            token_count_enabled=self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT),
-            token_count_threshold=self.app_state.config.get('token_count_threshold', c.TOKEN_COUNT_THRESHOLD_DEFAULT)
+            self.on_selection_list_changed
         )
 
         self.tree_handler = FileTreeHandler(
@@ -241,12 +239,12 @@ class FileManagerWindow(Toplevel):
         source_widget = None
 
         if self.tree.selection():
-            item_id = self.tree.selection()[0]
+            item_id = self.tree.selection()
             if self.item_map.get(item_id, {}).get('type') == 'file':
                 selected_path = self.item_map[item_id]['path']
                 source_widget = self.tree
         elif self.merge_order_list.curselection():
-            selected_index = self.merge_order_list.curselection()[0]
+            selected_index = self.merge_order_list.curselection()
             selected_path = self.merge_order_list.get_item_data(selected_index)
             source_widget = self.merge_order_list
 

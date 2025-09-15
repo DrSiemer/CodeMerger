@@ -22,8 +22,6 @@ class SettingsWindow(Toplevel):
         self.check_for_updates = BooleanVar(value=get_setting('AutomaticUpdates', True))
         self.enable_new_file_check = BooleanVar(value=config.get('enable_new_file_check', True))
         self.new_file_check_interval = StringVar(value=str(config.get('new_file_check_interval', 5)))
-        self.token_count_enabled = BooleanVar(value=config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT))
-        self.token_count_threshold = StringVar(value=str(config.get('token_count_threshold', c.TOKEN_COUNT_THRESHOLD_DEFAULT)))
         self.enable_compact_mode_on_minimize = BooleanVar(value=config.get('enable_compact_mode_on_minimize', True))
         self.add_all_warning_threshold = StringVar(value=str(config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT)))
 
@@ -129,21 +127,6 @@ class SettingsWindow(Toplevel):
         secrets_frame.pack(fill='x', expand=True, pady=(0, 15))
         self.scan_checkbox = ttk.Checkbutton(secrets_frame, text="Scan for secrets on copy (slower)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
         self.scan_checkbox.pack(anchor='w')
-
-        Label(self.scrollable_frame, text="Token Counting", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
-        token_count_frame = Frame(self.scrollable_frame, bg=c.DARK_BG)
-        token_count_frame.pack(fill='x', expand=True, pady=(0, 15))
-        self.token_count_checkbox = ttk.Checkbutton(token_count_frame, text="Count tokens for selected files", variable=self.token_count_enabled, style='Dark.TCheckbutton', command=self.toggle_threshold_selector)
-        self.token_count_checkbox.pack(anchor='w')
-        threshold_frame = Frame(token_count_frame, bg=c.DARK_BG)
-        threshold_frame.pack(fill='x', padx=(25, 0), pady=(5, 0))
-        self.threshold_label = Label(threshold_frame, text="Only show count for files with more than:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal)
-        self.threshold_label.pack(side='left', padx=(0, 10))
-        self.threshold_entry = Entry(threshold_frame, textvariable=self.token_count_threshold, width=6, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=self.font_normal, validate='key', validatecommand=vcmd)
-        self.threshold_entry.pack(side='left')
-        self.tokens_label = Label(threshold_frame, text="tokens", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=self.font_normal)
-        self.tokens_label.pack(side='left', padx=(5, 0))
-        self.toggle_threshold_selector()
 
         self.copy_merged_prompt_text = self._create_collapsible_text_section(self.scrollable_frame, '"Copy Merged" Prompt', config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT)
         self.default_intro_text = self._create_collapsible_text_section(self.scrollable_frame, 'Default Intro Prompt', config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT)
@@ -283,12 +266,6 @@ class SettingsWindow(Toplevel):
         self.interval_label.config(state=new_state)
         self.interval_combo.config(state='readonly' if self.enable_new_file_check.get() else 'disabled')
 
-    def toggle_threshold_selector(self):
-        new_state = 'normal' if self.token_count_enabled.get() else 'disabled'
-        self.threshold_label.config(state=new_state)
-        self.threshold_entry.config(state=new_state)
-        self.tokens_label.config(state=new_state)
-
     def browse_for_editor(self):
         file_types = [("Executable files", "*.exe"), ("All files", "*.*")] if os.name == 'nt' else []
         filepath = filedialog.askopenfilename(title="Select Editor Application", filetypes=file_types, parent=self)
@@ -309,19 +286,12 @@ class SettingsWindow(Toplevel):
         config['default_intro_prompt'] = self.default_intro_text.get('1.0', 'end-1c')
         config['default_outro_prompt'] = self.default_outro_text.get('1.0', 'end-1c')
         config['enable_new_file_check'] = self.enable_new_file_check.get()
-        config['token_count_enabled'] = self.token_count_enabled.get()
         config['enable_compact_mode_on_minimize'] = self.enable_compact_mode_on_minimize.get()
 
         try:
             config['new_file_check_interval'] = int(self.new_file_check_interval.get())
         except ValueError:
             config['new_file_check_interval'] = 5
-
-        try:
-            threshold_val = self.token_count_threshold.get()
-            config['token_count_threshold'] = int(threshold_val) if threshold_val else 0
-        except ValueError:
-            config['token_count_threshold'] = c.TOKEN_COUNT_THRESHOLD_DEFAULT
 
         try:
             add_all_val = self.add_all_warning_threshold.get()

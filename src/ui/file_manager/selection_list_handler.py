@@ -10,7 +10,7 @@ class SelectionListHandler:
     Manages the 'Merge Order' listbox and its associated buttons,
     handling the data model (ordered_selection) and user actions.
     """
-    def __init__(self, parent, list_widget, buttons, base_dir, default_editor, on_change_callback, token_count_enabled, token_count_threshold):
+    def __init__(self, parent, list_widget, buttons, base_dir, default_editor, on_change_callback):
         self.parent = parent
         self.listbox = list_widget
         self.move_to_top_button = buttons['top']
@@ -21,8 +21,6 @@ class SelectionListHandler:
         self.base_dir = base_dir
         self.default_editor = default_editor
         self.on_change = on_change_callback
-        self.token_count_enabled = token_count_enabled
-        self.token_count_threshold = token_count_threshold
         self.ordered_selection = []
         self.show_full_paths = False
         self.tooltip_window = None
@@ -32,6 +30,34 @@ class SelectionListHandler:
         self.listbox.bind_event('<Motion>', self._schedule_tooltip)
         self.listbox.bind_event('<Leave>', self._hide_tooltip)
         self.listbox.bind_event('<MouseWheel>', self._on_scroll, add='+')
+
+    def _interpolate_color(self, color1_hex, color2_hex, factor):
+        """Linearly interpolates between two hex colors based on a factor from 0.0 to 1.0."""
+        r1, g1, b1 = tuple(int(color1_hex.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+        r2, g2, b2 = tuple(int(color2_hex.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+        r = int(r1 + (r2 - r1) * factor)
+        g = int(g1 + (g2 - g1) * factor)
+        b = int(b1 + (b2 - b1) * factor)
+        return f'#{r:02x}{g:02x}{b:02x}'
+
+    def _get_color_for_token_count(self, count, min_val, max_val):
+        """Calculates a color from a 5-stop gradient based on the token count's position in the range."""
+        if min_val >= max_val:
+            return c.TEXT_SUBTLE_COLOR
+
+        p = (count - min_val) / (max_val - min_val)
+        # [MODIFIED] Added the background color as the first stop in the gradient
+        colors = [c.TEXT_INPUT_BG, c.TEXT_SUBTLE_COLOR, c.NOTE, c.ATTENTION, c.WARN]
+
+        if p <= 0: return colors[0]
+        if p >= 1: return colors[-1]
+
+        scaled_p = p * (len(colors) - 1)
+        idx1 = int(scaled_p)
+        idx2 = min(idx1 + 1, len(colors) - 1)
+        local_p = scaled_p - idx1
+
+        return self._interpolate_color(colors[idx1], colors[idx2], local_p)
 
     def _on_scroll(self, event=None):
         """Hides the tooltip when the user scrolls the list."""
@@ -48,43 +74,31 @@ class SelectionListHandler:
 
     def _update_list_display(self, is_reorder=False):
         """
-        Refreshes the merge order list using cached data, handling coloring
-        and font styles based on user settings.
+        Refreshes the merge order list, applying a color gradient to the
+        token counts based on their range.
         """
         display_items = []
-        color_map = {}
-        # --- Prepare data for display ---
-        if self.token_count_enabled:
-            # Determine color tags for top 3 longest files by token count from cache
-            ranked_files = sorted(
-                [f for f in self.ordered_selection if f.get('tokens', 0) >= self.token_count_threshold],
-                key=lambda x: x.get('tokens', 0),
-                reverse=True
-            )
-            if len(ranked_files) > 0: color_map[ranked_files[0]['path']] = c.WARN
-            if len(ranked_files) > 1: color_map[ranked_files[1]['path']] = c.ATTENTION
-            if len(ranked_files) > 2: color_map[ranked_files[2]['path']] = c.NOTE
+        token_counts = [f.get('tokens', 0) for f in self.ordered_selection if f.get('tokens', -1) >= 0]
+        min_tokens = min(token_counts) if token_counts else 0
+        max_tokens = max(token_counts) if token_counts else 0
 
         for file_info in self.ordered_selection:
             path = file_info['path']
             display_text = path if self.show_full_paths else os.path.basename(path)
-            right_col_text = ""
-            right_col_color = c.TEXT_SUBTLE_COLOR
+            token_count = file_info.get('tokens', -1)
 
-            if self.token_count_enabled:
-                token_count = file_info.get('tokens', -1)
-                if token_count > self.token_count_threshold:
-                    right_col_text = str(token_count)
-                    if path in color_map:
-                        right_col_color = color_map[path]
-                elif token_count == -1:
-                    right_col_text = "?"
+            if token_count >= 0:
+                right_col_text = str(token_count)
+                right_col_color = self._get_color_for_token_count(token_count, min_tokens, max_tokens)
+            else:
+                right_col_text = "?"
+                right_col_color = c.TEXT_SUBTLE_COLOR
 
             display_items.append({
                 'left': display_text,
                 'right': right_col_text,
                 'right_fg': right_col_color,
-                'data': path # Store original path for identification
+                'data': path
             })
 
         if is_reorder:
@@ -291,12 +305,11 @@ class SelectionListHandler:
         is_over_token_count_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
         tooltip_text = None
 
-        if is_over_token_count_area and self.token_count_enabled:
+        if is_over_token_count_area:
             token_count = item_info.get('tokens', -1)
             line_count = item_info.get('lines', -1)
 
-            # Tooltip should only show if the text is visible (i.e., over the threshold)
-            if token_count > self.token_count_threshold:
+            if token_count >= 0:
                 tooltip_text = f"{token_count} tokens, {line_count} lines"
 
         # If we are not showing the line count tooltip, fall back to the path tooltip

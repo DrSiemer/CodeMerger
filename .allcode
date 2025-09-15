@@ -85,10 +85,10 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1757926887.1533833,
-      "hash": "7a2589aa91442b4fb2f9e6f59784d9b1f43f44a0",
-      "tokens": 799,
-      "lines": 74
+      "mtime": 1757927347.935457,
+      "hash": "763b21d3fb853808f48071a4954bf4b03701cee2",
+      "tokens": 783,
+      "lines": 72
     },
     {
       "path": "src/core/paths.py",
@@ -106,10 +106,10 @@
     },
     {
       "path": "src/core/utils.py",
-      "mtime": 1757925600.50616,
-      "hash": "15b68145d03d06b5c0ffb5627fa90b45ce69a9c0",
-      "tokens": 2235,
-      "lines": 254
+      "mtime": 1757927338.5670264,
+      "hash": "139b098aefba5a3e79d2ff23cc4746ef2301591b",
+      "tokens": 2190,
+      "lines": 251
     },
     {
       "path": "src/core/file_scanner.py",
@@ -246,10 +246,10 @@
     },
     {
       "path": "src/ui/file_manager/selection_list_handler.py",
-      "mtime": 1757926078.4485257,
-      "hash": "5bd4dad46fe8e319ff5be8c71e80c10529cbcc53",
-      "tokens": 3041,
-      "lines": 332
+      "mtime": 1757928343.772252,
+      "hash": "3274e0e961196eb377af6e0cfb864aa7a2f37197",
+      "tokens": 3268,
+      "lines": 345
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
@@ -260,10 +260,10 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1757925693.2260764,
-      "hash": "b518caf5f320fd1c1243ab1faafc9b27c02f2722",
-      "tokens": 3097,
-      "lines": 352
+      "mtime": 1757927306.675817,
+      "hash": "9994f84ec415c26a0b534c9674cea7542f627aff",
+      "tokens": 3051,
+      "lines": 350
     },
     {
       "path": "src/ui/directory_dialog.py",
@@ -281,10 +281,10 @@
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1757925690.2300339,
-      "hash": "3a79d27490ca59153ecee18ddb76ca0d1dfa9109",
-      "tokens": 4345,
-      "lines": 336
+      "mtime": 1757927321.8494081,
+      "hash": "16a5876224e723ca80fe533239420f1863289990",
+      "tokens": 3845,
+      "lines": 306
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",
