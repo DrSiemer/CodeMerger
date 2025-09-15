@@ -1,7 +1,7 @@
 import os
 import json
-import tiktoken
 from .. import constants as c
+from .utils import get_token_count_for_text
 
 def get_language_from_path(path):
     """Gets a markdown language identifier from a file path based on its extension"""
@@ -79,13 +79,4 @@ def recalculate_token_count(base_dir, selected_files_info):
             continue
 
     full_text = "\n".join(all_content)
-
-    try:
-        # cl100k_base is the encoding for gpt-4, gpt-3.5-turbo, and text-embedding-ada-002
-        encoding = tiktoken.get_encoding("cl100k_base")
-        # Using disallowed_special=() to count all tokens without errors
-        total_tokens = len(encoding.encode(full_text, disallowed_special=()))
-        return total_tokens
-    except Exception:
-        # If tiktoken fails for any reason, return -1 to indicate an error
-        return -1
+    return get_token_count_for_text(full_text)

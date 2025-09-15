@@ -3,14 +3,14 @@ import sys
 import subprocess
 from tkinter import messagebox, Toplevel, Label
 from ... import constants as c
-from ...core.utils import get_file_hash
+from ...core.utils import get_file_hash, get_token_count_for_text
 
 class SelectionListHandler:
     """
     Manages the 'Merge Order' listbox and its associated buttons,
     handling the data model (ordered_selection) and user actions.
     """
-    def __init__(self, parent, list_widget, buttons, base_dir, default_editor, on_change_callback, line_count_enabled, line_count_threshold):
+    def __init__(self, parent, list_widget, buttons, base_dir, default_editor, on_change_callback, token_count_enabled, token_count_threshold):
         self.parent = parent
         self.listbox = list_widget
         self.move_to_top_button = buttons['top']
@@ -21,8 +21,8 @@ class SelectionListHandler:
         self.base_dir = base_dir
         self.default_editor = default_editor
         self.on_change = on_change_callback
-        self.line_count_enabled = line_count_enabled
-        self.line_count_threshold = line_count_threshold
+        self.token_count_enabled = token_count_enabled
+        self.token_count_threshold = token_count_threshold
         self.ordered_selection = []
         self.show_full_paths = False
         self.tooltip_window = None
@@ -43,47 +43,51 @@ class SelectionListHandler:
 
     def _update_list_display(self, is_reorder=False):
         """
-        Refreshes the merge order list, handling line counts, coloring,
+        Refreshes the merge order list, handling token counts, coloring,
         and font styles based on user settings.
         """
         display_items = []
         color_map = {}
         # --- Prepare data for display ---
-        if self.line_count_enabled:
+        if self.token_count_enabled:
             file_details = []
             for file_info in self.ordered_selection:
                 path = file_info['path']
-                line_count = 0
+                token_count = 0
                 try:
                     with open(os.path.join(self.base_dir, path), 'r', encoding='utf-8', errors='ignore') as f:
-                        line_count = len(f.readlines())
+                        content = f.read()
+                        token_count = get_token_count_for_text(content)
                 except (IOError, OSError):
-                    line_count = -1
-                file_details.append({'path': path, 'line_count': line_count})
-            # Determine color tags for top 3 longest files
+                    token_count = -1
+                file_details.append({'path': path, 'token_count': token_count})
+            # Determine color tags for top 3 longest files by token count
             ranked_files = sorted(
-                [f for f in file_details if f['line_count'] >= self.line_count_threshold],
-                key=lambda x: x['line_count'],
+                [f for f in file_details if f['token_count'] >= self.token_count_threshold],
+                key=lambda x: x['token_count'],
                 reverse=True
             )
             if len(ranked_files) > 0: color_map[ranked_files[0]['path']] = c.WARN
             if len(ranked_files) > 1: color_map[ranked_files[1]['path']] = c.ATTENTION
             if len(ranked_files) > 2: color_map[ranked_files[2]['path']] = c.NOTE
+
         for file_info in self.ordered_selection:
             path = file_info['path']
             display_text = path if self.show_full_paths else os.path.basename(path)
             right_col_text = ""
             right_col_color = c.TEXT_SUBTLE_COLOR
-            if self.line_count_enabled:
+
+            if self.token_count_enabled:
                 data = next((item for item in file_details if item["path"] == path), None)
                 if data:
-                    line_count = data['line_count']
-                    if line_count > self.line_count_threshold:
-                        right_col_text = str(line_count)
+                    token_count = data['token_count']
+                    if token_count > self.token_count_threshold:
+                        right_col_text = str(token_count)
                         if path in color_map:
                             right_col_color = color_map[path]
-                    elif line_count == -1:
+                    elif token_count == -1:
                         right_col_text = "?"
+
             display_items.append({
                 'left': display_text,
                 'right': right_col_text,
@@ -285,21 +289,24 @@ class SelectionListHandler:
             return
 
         # Decide which tooltip to show based on horizontal position
-        is_over_line_count_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
+        is_over_token_count_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
         tooltip_text = None
 
-        if is_over_line_count_area and self.line_count_enabled:
-            # Re-check if a line count is actually VISIBLE for this item
+        if is_over_token_count_area and self.token_count_enabled:
+            # Re-check if a token count is actually VISIBLE for this item
+            token_count = -1
             line_count = -1
             try:
                 with open(os.path.join(self.base_dir, path), 'r', encoding='utf-8', errors='ignore') as f:
-                    line_count = len(f.readlines())
+                    content = f.read()
+                    token_count = get_token_count_for_text(content)
+                    line_count = content.count('\n') + 1
             except (IOError, OSError):
-                pass # line_count remains -1
+                pass # counts remain -1
 
             # Tooltip should only show if the text is visible (i.e., over the threshold)
-            if line_count > self.line_count_threshold:
-                tooltip_text = f"{line_count} lines of text"
+            if token_count > self.token_count_threshold:
+                tooltip_text = f"{token_count} tokens, {line_count} lines"
 
         # If we are not showing the line count tooltip, fall back to the path tooltip
         if tooltip_text is None and not self.show_full_paths:

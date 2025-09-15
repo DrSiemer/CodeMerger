@@ -1,8 +1,8 @@
 # --- Application Behavior ---
 RECENT_PROJECTS_MAX = 10
 MAX_SECRET_SCAN_REPORT_LINES = 10
-LINE_COUNT_ENABLED_DEFAULT = True
-LINE_COUNT_THRESHOLD_DEFAULT = 300
+TOKEN_COUNT_ENABLED_DEFAULT = True
+TOKEN_COUNT_THRESHOLD_DEFAULT = 1000
 
 # --- Default Content ---
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"

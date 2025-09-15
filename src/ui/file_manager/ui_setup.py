@@ -11,7 +11,7 @@ def setup_file_manager_ui(window):
     font_family = "Segoe UI"
     font_normal = (font_family, 12)
     font_button = (font_family, 14)
-    # Define a smaller font for the line numbers
+    # Define a smaller font for the token counts
     window.font_small = font.Font(family=font_family, size=9)
 
     main_frame = Frame(window, bg=c.DARK_BG)

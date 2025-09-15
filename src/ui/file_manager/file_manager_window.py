@@ -141,8 +141,8 @@ class FileManagerWindow(Toplevel):
         self.selection_handler = SelectionListHandler(
             self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor,
             self.on_selection_list_changed,
-            line_count_enabled=self.app_state.config.get('line_count_enabled', c.LINE_COUNT_ENABLED_DEFAULT),
-            line_count_threshold=self.app_state.config.get('line_count_threshold', c.LINE_COUNT_THRESHOLD_DEFAULT)
+            token_count_enabled=self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT),
+            token_count_threshold=self.app_state.config.get('token_count_threshold', c.TOKEN_COUNT_THRESHOLD_DEFAULT)
         )
 
         self.tree_handler = FileTreeHandler(

@@ -2,14 +2,26 @@ import os
 import json
 import fnmatch
 import hashlib
+import tiktoken
 from pathlib import Path
 from ..core.paths import (
     CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
 )
 from ..constants import (
     DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT,
-    LINE_COUNT_ENABLED_DEFAULT, LINE_COUNT_THRESHOLD_DEFAULT
+    TOKEN_COUNT_ENABLED_DEFAULT, TOKEN_COUNT_THRESHOLD_DEFAULT
 )
+
+def get_token_count_for_text(text):
+    """Calculates the token count for a given string."""
+    try:
+        # cl100k_base is the encoding for gpt-4, gpt-3.5-turbo, and text-embedding-ada-002
+        encoding = tiktoken.get_encoding("cl100k_base")
+        # Using disallowed_special=() to count all tokens without errors
+        return len(encoding.encode(text, disallowed_special=()))
+    except Exception:
+        # If tiktoken fails for any reason, return -1 to indicate an error
+        return -1
 
 def get_file_hash(full_path):
     """Calculates the SHA1 hash of a file's content."""
@@ -36,8 +48,8 @@ def _create_and_get_default_config():
         'copy_merged_prompt': DEFAULT_COPY_MERGED_PROMPT,
         'default_intro_prompt': DEFAULT_INTRO_PROMPT,
         'default_outro_prompt': DEFAULT_OUTRO_PROMPT,
-        'line_count_enabled': LINE_COUNT_ENABLED_DEFAULT,
-        'line_count_threshold': LINE_COUNT_THRESHOLD_DEFAULT,
+        'token_count_enabled': TOKEN_COUNT_ENABLED_DEFAULT,
+        'token_count_threshold': TOKEN_COUNT_THRESHOLD_DEFAULT,
         'enable_compact_mode_on_minimize': True
     }
     try:
@@ -85,10 +97,14 @@ def load_config():
                 config['default_intro_prompt'] = DEFAULT_INTRO_PROMPT
             if 'default_outro_prompt' not in config:
                 config['default_outro_prompt'] = DEFAULT_OUTRO_PROMPT
-            if 'line_count_enabled' not in config:
-                config['line_count_enabled'] = LINE_COUNT_ENABLED_DEFAULT
-            if 'line_count_threshold' not in config:
-                config['line_count_threshold'] = LINE_COUNT_THRESHOLD_DEFAULT
+            if 'line_count_enabled' in config: # Backward compatibility
+                config['token_count_enabled'] = config.pop('line_count_enabled')
+            if 'token_count_enabled' not in config:
+                config['token_count_enabled'] = TOKEN_COUNT_ENABLED_DEFAULT
+            if 'line_count_threshold' in config: # Backward compatibility
+                config['token_count_threshold'] = config.pop('line_count_threshold')
+            if 'token_count_threshold' not in config:
+                config['token_count_threshold'] = TOKEN_COUNT_THRESHOLD_DEFAULT
             if 'enable_compact_mode_on_minimize' not in config:
                 config['enable_compact_mode_on_minimize'] = True
             return config
