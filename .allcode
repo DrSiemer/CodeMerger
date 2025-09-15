@@ -22,10 +22,10 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1757921572.578643,
-      "hash": "7b2f8c83b92da83b138711d30e9f826843ccd501",
-      "tokens": 1109,
-      "lines": 51
+      "mtime": 1757926564.1767776,
+      "hash": "8cfda3c5f231ab59aa427b293e731af7bcf59030",
+      "tokens": 1211,
+      "lines": 52
     },
     {
       "path": "requirements.txt",
@@ -85,10 +85,10 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1757925588.8731196,
-      "hash": "5f554dc02c46106c2cee5602afad9bfdaaf4e1cb",
-      "tokens": 791,
-      "lines": 73
+      "mtime": 1757926887.1533833,
+      "hash": "7a2589aa91442b4fb2f9e6f59784d9b1f43f44a0",
+      "tokens": 799,
+      "lines": 74
     },
     {
       "path": "src/core/paths.py",
@@ -330,20 +330,27 @@
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1757921572.5856414,
-      "hash": "08f7e78a41351690a645c8da7c9fe7b150d4b16d",
-      "tokens": 1593,
-      "lines": 119
+      "mtime": 1757926571.3278823,
+      "hash": "b3eead2a7e10c0620f05427304ca3dfc242dbb7c",
+      "tokens": 1581,
+      "lines": 117
+    },
+    {
+      "path": "src/ui/status_bar_manager.py",
+      "mtime": 1757926898.257661,
+      "hash": "282e6df517d1ec5109f39e5b3bf92913eae664b5",
+      "tokens": 740,
+      "lines": 68
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1757921572.581644,
-      "hash": "729fb453eea5bc194757b309a6e893483d8a7405",
-      "tokens": 2121,
-      "lines": 272
+      "mtime": 1757926893.1157937,
+      "hash": "9bfb782f2097e0df20bd80c842ba210c4d611eba",
+      "tokens": 2155,
+      "lines": 276
     }
   ],
-  "total_tokens": 54190,
+  "total_tokens": 56858,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -384,6 +391,7 @@
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
     "src/ui/settings_window.py",
+    "src/ui/status_bar_manager.py",
     "src/ui/style_manager.py",
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",
