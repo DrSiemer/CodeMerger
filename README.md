@@ -3,7 +3,7 @@
 A simple app for developers that prefer to stay in control and want to avoid working in AI powered IDE's. It allows you to define which files should be merged into a single string, so you can easily paste all relevant code into an LLM. Settings for a folder are stored in a .allcode file that can be committed with your project.
 
 
-![Main application window](./dev/screenshot_01.png "The main application window")
+![Main application window](./dev/screenshot_01b.png "The main application window")
 
 
 I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts/new_chat), because there you currently get a very large context length with high rate limits for free.
@@ -16,7 +16,7 @@ Download the latest release [here](https://github.com/DrSiemer/codemerger/releas
 The download is a portable executable for Windows. Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"). The app is safe; all it does is bundle text with a convenient UI.
 
 
-![Compact mode](./dev/screenshot_02.png "Always-in-front compact mode")
+![Compact mode](./dev/screenshot_02b.png "Always-in-front compact mode")
 
 
 ## Features
@@ -33,7 +33,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **Project Colors**: Assign a unique color to each project for easy identification in compact mode
 
 
-![File management](./dev/screenshot_03c.png "File management")
+![File management](./dev/screenshot_03d.png "File management")
 
 
 ## Usage
