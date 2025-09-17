@@ -5,6 +5,7 @@
   { "ext": ".cpp", "active": true },
   { "ext": ".css", "active": true },
   { "ext": ".cs", "active": true },
+  { "ext": ".glsl", "active": true },
   { "ext": ".go", "active": true },
   { "ext": ".h", "active": true },
   { "ext": ".html", "active": true },
