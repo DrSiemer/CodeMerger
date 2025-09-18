@@ -44,7 +44,6 @@ class AppAssets:
         self.compact_mode_image_down = self._pil_to_photoimage(self.compact_mode_pil_down)
         self.compact_mode_close_image = self._pil_to_photoimage(self.compact_mode_close_pil)
 
-
     def _load_image(self, path, resize=None):
         try:
             img = Image.open(path)

@@ -19,7 +19,6 @@ if sys.platform == "win32":
     # Load the user32 library
     user32 = ctypes.windll.user32
 
-
 def position_window(window):
     """
     Calculates the position for a window, preferring a saved position only if it's on the
@@ -71,7 +70,6 @@ def position_window(window):
         x = parent_x + (parent_w - win_w) // 2
         y = parent_y + (parent_h - win_h) // 2
 
-
     # --- Step 2: Constrain the calculated position to be fully on-screen ---
     if sys.platform == "win32":
         try:
@@ -108,7 +106,6 @@ def position_window(window):
     if y < 0: y = 0
 
     window.geometry(f'+{x}+{y}')
-
 
 def save_window_geometry(window):
     """Saves the window's current geometry to the parent's registry."""

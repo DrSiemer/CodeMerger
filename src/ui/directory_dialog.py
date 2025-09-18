@@ -59,7 +59,8 @@ class DirectoryDialog(Toplevel):
             command=self.browse_for_new_dir,
             bg=c.BTN_BLUE,
             fg=c.BTN_BLUE_TEXT,
-            font=font_button
+            font=font_button,
+            cursor='hand2'
         )
         browse_btn.pack(pady=20, padx=20)
 
@@ -98,7 +99,8 @@ class DirectoryDialog(Toplevel):
             bg=c.BTN_GRAY_BG,
             fg=c.BTN_GRAY_TEXT,
             font=font,
-            height=32
+            height=32,
+            cursor='hand2'
         )
         btn.pack(side='left', expand=True, fill='x')
 
@@ -112,7 +114,8 @@ class DirectoryDialog(Toplevel):
                 image=assets.trash_icon_image,
                 bg=c.BTN_GRAY_BG,
                 width=32,
-                height=32
+                height=32,
+                cursor='hand2'
             )
             remove_btn.pack(side='left', padx=(10, 0))
 

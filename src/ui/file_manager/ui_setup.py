@@ -36,7 +36,7 @@ def setup_file_manager_ui(window):
     tree_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=window.tree.yview)
     tree_scroll.grid(row=1, column=1, sticky='ns')
     window.tree.config(yscrollcommand=tree_scroll.set)
-    window.tree_action_button = RoundedButton(main_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, width=220)
+    window.tree_action_button = RoundedButton(main_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, width=220, cursor='hand2')
     window.tree_action_button.grid(row=2, column=0, sticky='w', pady=(10, 0))
     window.tree_action_button.set_state('disabled')
     window.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
@@ -62,7 +62,6 @@ def setup_file_manager_ui(window):
     )
     window.toggle_paths_button.grid(row=0, column=2, sticky='e', padx=(5,0))
     ToolTip(window.toggle_paths_button, "Toggle full path view")
-
 
     # --- Merge Order List (Custom Widget) ---
     list_frame = Frame(main_frame, bg=c.DARK_BG)
@@ -94,15 +93,15 @@ def setup_file_manager_ui(window):
     move_buttons_frame.grid_columnconfigure(4, weight=1, uniform="group1")
 
     narrow_padding = 20
-    window.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
+    window.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding, cursor='hand2')
     window.move_to_top_button.grid(row=0, column=0, sticky='ew', padx=(0, 2))
-    window.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
+    window.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding, cursor='hand2')
     window.move_up_button.grid(row=0, column=1, sticky='ew', padx=(2, 2))
-    window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=font_button, hollow=True, h_padding=narrow_padding)
+    window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=font_button, hollow=True, h_padding=narrow_padding, cursor='hand2')
     window.remove_button.grid(row=0, column=2, sticky='ew', padx=2)
-    window.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
+    window.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding, cursor='hand2')
     window.move_down_button.grid(row=0, column=3, sticky='ew', padx=(2, 2))
-    window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding)
+    window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding, cursor='hand2')
     window.move_to_bottom_button.grid(row=0, column=4, sticky='ew', padx=(2, 0))
 
     # Disable all move buttons initially
@@ -111,6 +110,6 @@ def setup_file_manager_ui(window):
 
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
     bulk_action_frame.grid(row=3, column=0, columnspan=4, sticky='ew', pady=(20, 0))
-    RoundedButton(bulk_action_frame, text="Add all", command=window.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='left')
-    RoundedButton(bulk_action_frame, text="Remove all", command=window.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='right')
-    RoundedButton(bulk_action_frame, text="Save and Close", command=window.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 16), width=240).pack()
+    RoundedButton(bulk_action_frame, text="Add all", command=window.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2').pack(side='left')
+    RoundedButton(bulk_action_frame, text="Remove all", command=window.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2').pack(side='right')
+    RoundedButton(bulk_action_frame, text="Save and Close", command=window.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 16), width=240, cursor='hand2').pack()

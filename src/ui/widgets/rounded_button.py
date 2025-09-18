@@ -6,7 +6,7 @@ from ..font_utils import get_pil_font
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, h_padding=None):
+    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, h_padding=None, cursor=None):
         if font:
             # If a tuple like ("Segoe UI", 12) is passed, use it directly
             self.tk_font_tuple = font
@@ -40,7 +40,7 @@ class RoundedButton(tk.Canvas):
         if self.hollow:
             self.width += 2
             self.height += 2
-        super().__init__(parent, width=self.width, height=self.height, bg=parent.cget('bg'), bd=0, highlightthickness=0)
+        super().__init__(parent, width=self.width, height=self.height, bg=parent.cget('bg'), bd=0, highlightthickness=0, cursor=cursor)
         self.text = text
         self.original_bg_color = bg
         self.original_fg_color = fg

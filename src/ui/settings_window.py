@@ -116,7 +116,8 @@ class SettingsWindow(Toplevel):
             fg=c.BTN_GRAY_TEXT,
             font=(self.font_family, 9),
             height=22,
-            radius=4
+            radius=4,
+            cursor='hand2'
         )
         self.check_now_button.pack(side='left', padx=(10, 0))
 
@@ -152,16 +153,16 @@ class SettingsWindow(Toplevel):
         editor_frame.pack(fill='x', expand=True)
         self.editor_entry = Entry(editor_frame, textvariable=self.editor_path, state='readonly', readonlybackground=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, relief='flat', font=self.font_normal)
         self.editor_entry.pack(side='left', fill='x', expand=True, padx=(0, 10), ipady=4)
-        self.browse_button = RoundedButton(editor_frame, text="Browse...", command=self.browse_for_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=self.font_button)
+        self.browse_button = RoundedButton(editor_frame, text="Browse...", command=self.browse_for_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=self.font_button, cursor='hand2')
         self.browse_button.pack(side='left', padx=(0, 5))
-        self.clear_button = RoundedButton(editor_frame, text="Clear", command=self.clear_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=self.font_button)
+        self.clear_button = RoundedButton(editor_frame, text="Clear", command=self.clear_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=self.font_button, cursor='hand2')
         self.clear_button.pack(side='left')
 
         # --- Action Buttons (Outside scroll area) ---
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=1, column=0, columnspan=2, sticky='ew', padx=20, pady=(0, 20))
         button_frame.grid_columnconfigure(0, weight=1)
-        self.save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=self.font_button)
+        self.save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=self.font_button, cursor='hand2')
         self.save_button.grid(row=0, column=1, sticky='e')
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -253,7 +254,8 @@ class SettingsWindow(Toplevel):
             fg=c.BTN_GRAY_TEXT,
             font=(self.font_family, 9),
             height=22,
-            radius=4
+            radius=4,
+            cursor='hand2'
         )
         reset_button.pack(side='right', padx=(5, 0))
 

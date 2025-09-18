@@ -55,7 +55,7 @@ class FiletypesManagerWindow(Toplevel):
         # --- Add/Delete Buttons ---
         list_button_frame = Frame(main_frame, bg=c.DARK_BG)
         list_button_frame.pack(fill='x', pady=5)
-        self.delete_button = RoundedButton(list_button_frame, text="Delete Selected", command=self.delete_selected_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button)
+        self.delete_button = RoundedButton(list_button_frame, text="Delete Selected", command=self.delete_selected_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2')
         self.delete_button.pack(side='right')
         self.delete_button.set_state('disabled') # Start disabled
 
@@ -65,10 +65,10 @@ class FiletypesManagerWindow(Toplevel):
         Label(add_frame, text="Add new:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left', padx=(0, 5))
         self.add_entry = Entry(add_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=font_normal)
         self.add_entry.pack(side='left', expand=True, fill='x', ipady=4)
-        RoundedButton(add_frame, text="Add", command=self.add_new_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button).pack(side='left', padx=(10, 0))
+        RoundedButton(add_frame, text="Add", command=self.add_new_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2').pack(side='left', padx=(10, 0))
 
         # --- Main Action Button ---
-        RoundedButton(self, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=font_button).pack(pady=10)
+        RoundedButton(self, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=font_button, cursor='hand2').pack(pady=10)
 
         # --- Bindings ---
         self.tree.bind('<Button-1>', self.handle_tree_click)

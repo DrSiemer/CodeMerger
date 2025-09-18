@@ -27,7 +27,8 @@ class CollapsibleTextSection(Frame):
         reset_button = RoundedButton(
             header_frame, text="Reset", command=self.reset_text,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT,
-            font=self.font_small_button, height=22, radius=4
+            font=self.font_small_button, height=22, radius=4,
+            cursor='hand2'
         )
         reset_button.pack(side='right', padx=(5, 0))
 

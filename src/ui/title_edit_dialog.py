@@ -36,10 +36,10 @@ class TitleEditDialog(Toplevel):
         right_buttons_frame = Frame(button_frame, bg=c.DARK_BG)
         right_buttons_frame.pack(side='right')
 
-        ok_button = RoundedButton(right_buttons_frame, text="OK", command=self.on_ok, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 12), width=90, height=30)
+        ok_button = RoundedButton(right_buttons_frame, text="OK", command=self.on_ok, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 12), width=90, height=30, cursor='hand2')
         ok_button.pack(side='right')
 
-        cancel_button = RoundedButton(right_buttons_frame, text="Cancel", command=self.on_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=("Segoe UI", 12), width=90, height=30)
+        cancel_button = RoundedButton(right_buttons_frame, text="Cancel", command=self.on_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=("Segoe UI", 12), width=90, height=30, cursor='hand2')
         cancel_button.pack(side='right', padx=(0, 10))
 
         self.bind("<Return>", self.on_ok)

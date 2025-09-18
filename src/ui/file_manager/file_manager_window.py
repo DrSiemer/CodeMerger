@@ -144,7 +144,6 @@ class FileManagerWindow(Toplevel):
                     file_info['lines'] = -1
                     cache_was_updated = True
 
-
         if cache_was_updated:
             self.project_config.save() # Save the updated cache to .allcode
             self.status_var.set("File cache updated for modified files.")

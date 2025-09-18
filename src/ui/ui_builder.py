@@ -62,12 +62,11 @@ def setup_ui(app):
     top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
     top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
 
-    app.manage_files_button = RoundedButton(top_buttons_container, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files)
+    app.manage_files_button = RoundedButton(top_buttons_container, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
 
-    app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog)
+    app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')
-
 
     # --- Center "Wrapper & Output" Box (Row 2) ---
     center_frame = Frame(app, bg=c.DARK_BG)
@@ -87,9 +86,9 @@ def setup_ui(app):
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
 
     copy_button_height = 60
-    app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.copy_wrapped_code)
-    app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Wrapper Texts", height=30, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_wrapper_text_window)
-    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.copy_merged_code)
+    app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.copy_wrapped_code, cursor='hand2')
+    app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Wrapper Texts", height=30, font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_wrapper_text_window, cursor='hand2')
+    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Merged", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.copy_merged_code, cursor='hand2')
 
     ToolTip(app.copy_wrapped_button, "Copy all included code with custom intro + outro\n(use this to start new conversations)", delay=500)
     ToolTip(app.copy_merged_button, "Copy all included code with custom intro\n(use this to update an LLM of your code changes)", delay=500)
@@ -100,8 +99,8 @@ def setup_ui(app):
     bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
     bottom_buttons_container.pack(side='left', padx=20)
 
-    RoundedButton(bottom_buttons_container, text="Manage Filetypes", font=font_button, fg=c.TEXT_COLOR, command=app.open_filetypes_manager, hollow=True).pack(side='left')
-    RoundedButton(bottom_buttons_container, text="Settings", font=font_button, fg=c.TEXT_COLOR, command=app.open_settings_window, hollow=True).pack(side='left', padx=(10, 0))
+    RoundedButton(bottom_buttons_container, text="Manage Filetypes", font=font_button, fg=c.TEXT_COLOR, command=app.open_filetypes_manager, hollow=True, cursor='hand2').pack(side='left')
+    RoundedButton(bottom_buttons_container, text="Settings", font=font_button, fg=c.TEXT_COLOR, command=app.open_settings_window, hollow=True, cursor='hand2').pack(side='left', padx=(10, 0))
 
     # --- Status Bar (Row 4) ---
     app.status_bar = Label(

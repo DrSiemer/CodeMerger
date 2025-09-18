@@ -53,7 +53,8 @@ class WrapperTextWindow(Toplevel):
             command=self.save_and_close,
             bg=c.BTN_BLUE,
             fg=c.BTN_BLUE_TEXT,
-            font=("Segoe UI", 16)
+            font=("Segoe UI", 16),
+            cursor='hand2'
         )
         self.save_button.pack(side='right')
 

@@ -26,7 +26,6 @@ class ScrollableFrame(tk.Frame):
         # Also bind mousewheel events on children to the canvas scroll
         self.scrollable_frame.bind_all("<MouseWheel>", self._on_mousewheel, add=True)
 
-
     def _on_frame_configure(self, event=None):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self._manage_scrollbar()
