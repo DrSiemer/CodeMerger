@@ -36,9 +36,11 @@ def setup_ui(app):
 
     app.title_label = Label(app.title_container, textvariable=app.project_title_var, font=font_large_bold, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
     app.title_label.pack(side='left')
-    app.title_label.bind("<Button-1>", app.edit_project_title)
-    app.title_container.bind("<Button-1>", app.edit_project_title)
-    ToolTip(app.title_container, "Click to update the project title", delay=500)
+    app.title_label.bind("<Button-1>", app.handle_title_click)
+    app.title_label.bind("<Double-Button-1>", app.edit_project_title)
+    app.title_container.bind("<Button-1>", app.handle_title_click)
+    app.title_container.bind("<Double-Button-1>", app.edit_project_title)
+    ToolTip(app.title_container, "Click to select project, double-click to edit title", delay=500)
 
     # Right-aligned items
     right_frame = Frame(top_bar, bg=c.TOP_BAR_BG)
@@ -58,15 +60,14 @@ def setup_ui(app):
     # --- Top-Level Buttons (Row 1) ---
     top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20)
     top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
-    top_buttons_container.columnconfigure(1, weight=1)
+    top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
 
-    left_buttons = Frame(top_buttons_container, bg=c.DARK_BG)
-    left_buttons.grid(row=0, column=0, sticky='w')
+    app.manage_files_button = RoundedButton(top_buttons_container, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files)
+    app.manage_files_button.grid(row=0, column=0, sticky='w')
 
-    app.select_project_button = RoundedButton(left_buttons, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog)
-    app.select_project_button.pack(side='left')
-    app.manage_files_button = RoundedButton(left_buttons, text="Manage Files", font=font_button, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files)
-    app.manage_files_button.pack(side='left', padx=(10, 0))
+    app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=font_button, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog)
+    app.select_project_button.grid(row=0, column=2, sticky='e')
+
 
     # --- Center "Wrapper & Output" Box (Row 2) ---
     center_frame = Frame(app, bg=c.DARK_BG)

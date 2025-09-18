@@ -38,6 +38,7 @@ class App(Tk):
         self.project_color = c.COMPACT_MODE_BG_COLOR
         self.project_font_color = 'light'
         self.window_geometries = {}
+        self.title_click_job = None
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -92,7 +93,31 @@ class App(Tk):
                 self.winfo_width(), self.winfo_height()
             )
 
+    def handle_title_click(self, event=None):
+        """
+        Handles a single click on the project title. Schedules project selection
+        to open after a short delay, allowing for a double-click to override it.
+        """
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            # If no project is active, open the dialog immediately.
+            self.open_change_directory_dialog()
+            return
+
+        # Always cancel any previous job to reset the timer
+        if self.title_click_job:
+            self.after_cancel(self.title_click_job)
+            self.title_click_job = None
+
+        # Schedule the project selector to open after a delay
+        self.title_click_job = self.after(250, self.open_change_directory_dialog)
+
     def edit_project_title(self, event=None):
+        # Cancel the pending single-click action first
+        if self.title_click_job:
+            self.after_cancel(self.title_click_job)
+            self.title_click_job = None
+
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return

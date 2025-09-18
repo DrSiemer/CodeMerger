@@ -36,10 +36,10 @@
     },
     {
       "path": "default_filetypes.json",
-      "mtime": 1756977697.0755806,
-      "hash": "a48ab88d109158a5e2ee0e78912f081e796e54ed",
-      "tokens": 541,
-      "lines": 43
+      "mtime": 1758195643.9459147,
+      "hash": "44a35e0df4bf2a32656f925991ca0d88a83a8c8f",
+      "tokens": 555,
+      "lines": 44
     },
     {
       "path": "codemerger.spec",
@@ -330,10 +330,10 @@
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1757938209.9259477,
-      "hash": "b3eead2a7e10c0620f05427304ca3dfc242dbb7c",
-      "tokens": 1581,
-      "lines": 117
+      "mtime": 1758196488.48277,
+      "hash": "5f310395611aabdd472745a213c55e04d126d343",
+      "tokens": 1607,
+      "lines": 118
     },
     {
       "path": "src/ui/status_bar_manager.py",
@@ -344,10 +344,10 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1758113948.1105485,
-      "hash": "21bbe179d5e2960df84579b54e0548d637e75761",
-      "tokens": 2159,
-      "lines": 276
+      "mtime": 1758196237.7612052,
+      "hash": "579a6ba93824ecf15c91872bffba0392673e19fc",
+      "tokens": 2352,
+      "lines": 301
     }
   ],
   "total_tokens": 56951,
