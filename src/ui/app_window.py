@@ -39,6 +39,7 @@ class App(Tk):
         self.project_font_color = 'light'
         self.window_geometries = {}
         self.title_click_job = None
+        self.current_monitor_handle = None
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -92,6 +93,37 @@ class App(Tk):
                 self.winfo_x(), self.winfo_y(),
                 self.winfo_width(), self.winfo_height()
             )
+            self._check_for_monitor_change()
+
+    def _check_for_monitor_change(self):
+        """
+        Detects if the main window has moved to a different monitor and clears
+        saved child window positions if so. (Windows-only)
+        """
+        if sys.platform != "win32":
+            return
+
+        try:
+            import ctypes
+            from ctypes import wintypes
+            user32 = ctypes.windll.user32
+            MONITOR_DEFAULTTONEAREST = 2
+
+            hwnd = self.winfo_id()
+            new_monitor_handle = user32.MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+
+            if self.current_monitor_handle is None:
+                self.current_monitor_handle = new_monitor_handle
+                return
+
+            if new_monitor_handle != self.current_monitor_handle:
+                self.current_monitor_handle = new_monitor_handle
+                if self.window_geometries:
+                    self.window_geometries.clear()
+                    self.status_var.set("Moved to new monitor, popup window positions cleared.")
+        except Exception:
+            # Fail silently if any of the Windows API calls fail
+            pass
 
     def handle_title_click(self, event=None):
         """

@@ -22,10 +22,10 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1757938209.6516702,
-      "hash": "8cfda3c5f231ab59aa427b293e731af7bcf59030",
-      "tokens": 1211,
-      "lines": 52
+      "mtime": 1758202425.2548838,
+      "hash": "53f01b4a3d5f9dfdfcd021e4b73536e3b78047b0",
+      "tokens": 1324,
+      "lines": 53
     },
     {
       "path": "requirements.txt",
@@ -169,10 +169,10 @@
     },
     {
       "path": "src/ui/assets.py",
-      "mtime": 1757938209.7413094,
-      "hash": "f7686b0d55c3ec3fd1c604f66ea863798e3bcf5c",
+      "mtime": 1758196745.5362816,
+      "hash": "9e0af69c8aff6d7e6f6493c543fe2ac8f4e4e282",
       "tokens": 697,
-      "lines": 62
+      "lines": 61
     },
     {
       "path": "src/ui/font_utils.py",
@@ -183,10 +183,10 @@
     },
     {
       "path": "src/ui/window_utils.py",
-      "mtime": 1758195495.287953,
-      "hash": "f7aebf8efae8014c7d9404450857357f1ec55c94",
-      "tokens": 1056,
-      "lines": 115
+      "mtime": 1758202748.2278552,
+      "hash": "cd4a6f7ff230829dcc9d30655e45fe715e6dbe68",
+      "tokens": 977,
+      "lines": 107
     },
     {
       "path": "src/ui/tooltip.py",
@@ -197,9 +197,9 @@
     },
     {
       "path": "src/ui/widgets/rounded_button.py",
-      "mtime": 1757938205.7744691,
-      "hash": "3b07212beb54f3701d1ac58ded6721a59b007ccc",
-      "tokens": 2141,
+      "mtime": 1758196601.7675016,
+      "hash": "f0d801e6dd881fc27a1d943bef3f291d912b243c",
+      "tokens": 2148,
       "lines": 204
     },
     {
@@ -253,52 +253,52 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1757938209.8770475,
-      "hash": "0317278215a6e594d1649b6b59f2c0d0a3a4b2b0",
-      "tokens": 1846,
-      "lines": 116
+      "mtime": 1758196807.271838,
+      "hash": "d9e7e2bc251208d73def5d7b84d03ef005ff6754",
+      "tokens": 1891,
+      "lines": 115
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1757938209.854416,
-      "hash": "dbd5558aa598804459fd7a82e6a91442e36cf25f",
+      "mtime": 1758196769.595725,
+      "hash": "839155645943cdf4695d78dbe9284de859570d90",
       "tokens": 3276,
-      "lines": 375
+      "lines": 374
     },
     {
       "path": "src/ui/directory_dialog.py",
-      "mtime": 1757938209.7771914,
-      "hash": "3a2cfbc6c5f2fc5fa4aa13824b902f4cb2b129b4",
-      "tokens": 1364,
-      "lines": 169
+      "mtime": 1758196612.9865668,
+      "hash": "cf44a40a9f608de752c0d28247ae1956b67f99b8",
+      "tokens": 1382,
+      "lines": 172
     },
     {
       "path": "src/ui/filetypes_manager.py",
-      "mtime": 1757938205.6647205,
-      "hash": "af411a3541b1b70318e94821b12fec1d59f6a9d8",
-      "tokens": 1707,
+      "mtime": 1758196651.423699,
+      "hash": "1988bf98d4bc7a930dc592effcfe2f20f1a88c29",
+      "tokens": 1722,
       "lines": 175
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1757938209.9048557,
-      "hash": "74e7330189955127b02fe2d586aaee45b896408e",
-      "tokens": 3947,
-      "lines": 323
+      "mtime": 1758196692.6742153,
+      "hash": "1c71498c89349427019bf19b93db053ea031ef02",
+      "tokens": 3974,
+      "lines": 325
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",
-      "mtime": 1757938209.9279518,
-      "hash": "2d217753bf64878b99d206e56d2ca1acc0a0755c",
+      "mtime": 1758196811.4257102,
+      "hash": "abb506eaaab554f30d8bc5c3b95612fd53c3dedc",
       "tokens": 657,
-      "lines": 74
+      "lines": 73
     },
     {
       "path": "src/ui/widgets/collapsible_section.py",
-      "mtime": 1757938209.9279518,
-      "hash": "5da317d93e0ebc99b81e610fc8bb15c6809f034e",
-      "tokens": 755,
-      "lines": 74
+      "mtime": 1758196861.0296001,
+      "hash": "793632fba34d93dc988d1ab6e7872ad70db61b6a",
+      "tokens": 761,
+      "lines": 75
     },
     {
       "path": "src/ui/style_manager.py",
@@ -309,17 +309,17 @@
     },
     {
       "path": "src/ui/title_edit_dialog.py",
-      "mtime": 1757938205.7729628,
-      "hash": "03efbff4211b7eed921d9e6bfea7f6dc012be8a5",
-      "tokens": 712,
+      "mtime": 1758196702.1334007,
+      "hash": "37e23c12555f986d893706ff5220957d02756ce6",
+      "tokens": 722,
       "lines": 76
     },
     {
       "path": "src/ui/wrapper_text_window.py",
-      "mtime": 1757938205.7759886,
-      "hash": "d8af9bb62f0dc54ad9048f9b8317a1073cf85253",
-      "tokens": 1576,
-      "lines": 141
+      "mtime": 1758196848.1504195,
+      "hash": "41a0f77a39bcb9cac5b47bf681f328222becbc47",
+      "tokens": 1582,
+      "lines": 142
     },
     {
       "path": "src/ui/compact_mode.py",
@@ -330,10 +330,10 @@
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1758196488.48277,
-      "hash": "5f310395611aabdd472745a213c55e04d126d343",
-      "tokens": 1607,
-      "lines": 118
+      "mtime": 1758196837.4545598,
+      "hash": "55aeb840c451c96a0a02ec388991c3c72537c6e4",
+      "tokens": 1642,
+      "lines": 117
     },
     {
       "path": "src/ui/status_bar_manager.py",
@@ -344,10 +344,10 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1758196237.7612052,
-      "hash": "579a6ba93824ecf15c91872bffba0392673e19fc",
-      "tokens": 2352,
-      "lines": 301
+      "mtime": 1758202492.8957205,
+      "hash": "5571c9ea4d4966579f265d76cf6b83fc1264a2a1",
+      "tokens": 2580,
+      "lines": 333
     }
   ],
   "total_tokens": 56951,

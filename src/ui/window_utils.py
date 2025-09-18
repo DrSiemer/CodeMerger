@@ -21,9 +21,10 @@ if sys.platform == "win32":
 
 def position_window(window):
     """
-    Calculates the position for a window, preferring a saved position only if it's on the
-    same monitor as the parent. Otherwise, it centers the window on the parent. Finally,
-    it constrains the position to ensure the window is fully visible on the correct monitor.
+    Calculates the position for a window, preferring a saved position. If no
+    saved position is available, it centers the window on its parent. Finally,
+    it constrains the position to ensure the window is fully visible on the
+    target monitor.
     """
     window.update_idletasks()  # Ensure window dimensions are up-to-date
 
@@ -31,37 +32,24 @@ def position_window(window):
     win_w = window.winfo_width()
     win_h = window.winfo_height()
 
-    x, y = 0, 0 # Initialize x and y
+    x, y = 0, 0
     use_saved_geometry = False
 
-    # --- Step 1: Decide whether to use saved geometry or center ---
+    # --- Step 1: Try to use saved geometry ---
     window_name = window.__class__.__name__
     saved_geometry = parent.window_geometries.get(window_name)
 
-    if sys.platform == "win32" and saved_geometry:
+    if saved_geometry:
         try:
-            # Get the monitor handle for the parent window
-            parent_hwnd = parent.winfo_id()
-            h_monitor_parent = user32.MonitorFromWindow(parent_hwnd, MONITOR_DEFAULTTONEAREST)
-
-            # Parse the saved geometry string to get its top-left corner
             parts = saved_geometry.replace('+', ' ').replace('x', ' ').split()
             saved_x, saved_y = int(parts[2]), int(parts[3])
-
-            # Get the monitor handle for the saved position
-            saved_point = wintypes.POINT(saved_x, saved_y)
-            h_monitor_saved = user32.MonitorFromPoint(saved_point, MONITOR_DEFAULTTONEAREST)
-
-            # If the monitors match, we can use the saved position
-            if h_monitor_parent == h_monitor_saved:
-                x, y = saved_x, saved_y
-                use_saved_geometry = True
-        except (ValueError, IndexError, AttributeError):
-            # If parsing or API calls fail, fallback to centering
-            use_saved_geometry = False
+            x, y = saved_x, saved_y
+            use_saved_geometry = True
+        except (ValueError, IndexError):
+            use_saved_geometry = False # Fallback to centering if parsing fails
 
     if not use_saved_geometry:
-        # If not using saved geometry (or on non-windows), calculate a centered position
+        # Fallback: Center on parent if no valid saved geometry
         parent_x = parent.winfo_rootx()
         parent_y = parent.winfo_rooty()
         parent_w = parent.winfo_width()
@@ -73,8 +61,15 @@ def position_window(window):
     # --- Step 2: Constrain the calculated position to be fully on-screen ---
     if sys.platform == "win32":
         try:
-            parent_hwnd = parent.winfo_id()
-            h_monitor = user32.MonitorFromWindow(parent_hwnd, MONITOR_DEFAULTTONEAREST)
+            h_monitor = None
+            # If centering, the reference monitor MUST be the parent's.
+            if not use_saved_geometry:
+                parent_hwnd = parent.winfo_id()
+                h_monitor = user32.MonitorFromWindow(parent_hwnd, MONITOR_DEFAULTTONEAREST)
+            # If using a saved position, the reference monitor is where that point is.
+            else:
+                target_point = wintypes.POINT(x, y)
+                h_monitor = user32.MonitorFromPoint(target_point, MONITOR_DEFAULTTONEAREST)
 
             monitor_info = MONITORINFO()
             monitor_info.cbSize = ctypes.sizeof(MONITORINFO)
