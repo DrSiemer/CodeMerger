@@ -15,10 +15,10 @@
   "selected_files": [
     {
       "path": "README.md",
-      "mtime": 1757944481.3304183,
-      "hash": "0790b4afd03349af9835904cb84cf4c82437b37c",
-      "tokens": 1399,
-      "lines": 94
+      "mtime": 1757946438.0404828,
+      "hash": "50f65454420cf60aeb435c6cec20b0af58dc5464",
+      "tokens": 1412,
+      "lines": 97
     },
     {
       "path": "llm.md",
@@ -183,10 +183,10 @@
     },
     {
       "path": "src/ui/window_utils.py",
-      "mtime": 1756977692.9519303,
-      "hash": "6d14d46c2890318169b40bc76d5f484e79c6ed4b",
-      "tokens": 358,
-      "lines": 42
+      "mtime": 1758195495.287953,
+      "hash": "f7aebf8efae8014c7d9404450857357f1ec55c94",
+      "tokens": 1056,
+      "lines": 115
     },
     {
       "path": "src/ui/tooltip.py",
@@ -344,9 +344,9 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1757938209.7332768,
-      "hash": "9bfb782f2097e0df20bd80c842ba210c4d611eba",
-      "tokens": 2155,
+      "mtime": 1758113948.1105485,
+      "hash": "21bbe179d5e2960df84579b54e0548d637e75761",
+      "tokens": 2159,
       "lines": 276
     }
   ],
