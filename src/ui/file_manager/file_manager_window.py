@@ -30,6 +30,7 @@ class FileManagerWindow(Toplevel):
         self.token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
         self.hovered_file_path = None
         self.current_total_tokens = self.project_config.total_tokens
+        self.sash_pos_normal = None
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
@@ -44,21 +45,18 @@ class FileManagerWindow(Toplevel):
             self.status_var.set("Cleaned missing files from .allcode")
 
         self.gitignore_patterns = parse_gitignore(self.base_dir)
-        setup_file_manager_ui(self)
-
-        # --- Controllers and Handlers ---
         self.ui_controller = FileManagerUIController(self)
         self.data_controller = FileManagerDataController(self)
         self.state_controller = FileManagerStateController(self)
+
+        setup_file_manager_ui(self)
         self.create_handlers()
 
-        # --- Filter Setup ---
         self.filter_text = StringVar()
         self.filter_entry.config(textvariable=self.filter_text)
         self.filter_text.trace_add('write', self.ui_controller.apply_filter)
         self.clear_filter_button.bind("<Button-1>", self.ui_controller.clear_filter)
 
-        # --- Bindings ---
         self.protocol("WM_DELETE_WINDOW", self.state_controller.on_closing)
         self.bind('<Escape>', lambda e: self.state_controller.on_closing())
         self.tree.bind("<Motion>", self.ui_controller.on_tree_motion)
@@ -66,7 +64,6 @@ class FileManagerWindow(Toplevel):
         self.folder_icon_label.bind("<Button-1>", self.ui_controller.on_folder_icon_click)
         ToolTip(self.folder_icon_label, text="Open file in folder", delay=500)
 
-        # --- Initial Population ---
         self.data_controller.validate_and_update_cache()
         self.selection_handler.set_initial_selection(self.project_config.selected_files)
         self.populate_tree()
@@ -82,6 +79,17 @@ class FileManagerWindow(Toplevel):
     def _close_and_save_geometry(self):
         save_window_geometry(self)
         self.destroy()
+
+    def _update_sash_cover_position(self, event=None):
+        try:
+            x = self.paned_window.sashpos(0)
+            self.sash_cover.place(x=x, y=0, anchor="nw", relheight=1.0)
+        except Exception:
+            pass 
+
+    def _on_manual_sash_move(self, event=None):
+        self.sash_pos_normal = self.paned_window.sashpos(0)
+        self._update_sash_cover_position()
 
     def save_and_close(self):
         self.state_controller.save_and_close()

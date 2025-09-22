@@ -11,42 +11,58 @@ def setup_file_manager_ui(window):
     font_family = "Segoe UI"
     font_normal = (font_family, 12)
     font_button = (font_family, 14)
-    # Define a smaller font for the token counts
     window.font_small = font.Font(family=font_family, size=9)
 
     main_frame = Frame(window, bg=c.DARK_BG)
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
+    main_frame.grid_rowconfigure(0, weight=1)
+    main_frame.grid_rowconfigure(1, weight=0)
     main_frame.grid_columnconfigure(0, weight=1)
-    main_frame.grid_columnconfigure(2, weight=1)
-    main_frame.grid_rowconfigure(1, weight=1)
 
-    available_files_title_frame = Frame(main_frame, bg=c.DARK_BG)
+    # --- Paned Window for a truly resizable and seamless layout ---
+    window.paned_window = ttk.PanedWindow(main_frame, orient='horizontal')
+    window.paned_window.grid(row=0, column=0, sticky='nsew')
+
+    # --- Left Panel (Available Files) ---
+    left_panel = Frame(window.paned_window, bg=c.DARK_BG)
+    left_panel.grid_columnconfigure(0, weight=1)
+    left_panel.grid_rowconfigure(1, weight=1)
+    window.paned_window.add(left_panel, weight=1)
+
+    # --- Right Panel (Merge Order) ---
+    right_panel = Frame(window.paned_window, bg=c.DARK_BG)
+    right_panel.grid_columnconfigure(0, weight=1)
+    right_panel.grid_rowconfigure(1, weight=1)
+    window.paned_window.add(right_panel, weight=1)
+    window.sash_cover = Frame(window.paned_window, bg=c.DARK_BG, width=6, cursor="sb_h_double_arrow")
+
+    # Bind events to the centralized methods in the main window class
+    window.paned_window.bind("<<SashMoved>>", window._on_manual_sash_move)
+    window.paned_window.bind("<Configure>", window._update_sash_cover_position)
+    window.after(10, window._update_sash_cover_position) # Initial placement
+
+    # ===============================
+    # === WIDGETS FOR LEFT PANEL ====
+    # ===============================
+    available_files_title_frame = Frame(left_panel, bg=c.DARK_BG)
     available_files_title_frame.grid(row=0, column=0, columnspan=2, sticky='w')
     Label(available_files_title_frame, text="Available Files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left')
     Label(available_files_title_frame, text="(double click or enter to add/remove)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal).pack(side='left')
 
-    # --- Treeview Styling ---
     style = ttk.Style()
     style.theme_use('default')
     style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=font_normal, rowheight=25)
     style.map("Treeview", background=[('selected', c.BTN_BLUE)], foreground=[('selected', c.BTN_BLUE_TEXT)])
 
-    window.tree = ttk.Treeview(main_frame, show='tree')
+    window.tree = ttk.Treeview(left_panel, show='tree')
     window.tree.grid(row=1, column=0, sticky='nsew')
-    tree_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=window.tree.yview)
+    tree_scroll = ttk.Scrollbar(left_panel, orient='vertical', command=window.tree.yview)
     tree_scroll.grid(row=1, column=1, sticky='ns')
     window.tree.config(yscrollcommand=tree_scroll.set)
 
-    # --- Open folder icon ---
-    window.folder_icon_label = Label(
-        window.tree,
-        image=assets.folder_reveal_icon,
-        bg=c.TEXT_INPUT_BG,
-        cursor="hand2"
-    )
+    window.folder_icon_label = Label(window.tree, image=assets.folder_reveal_icon, bg=c.TEXT_INPUT_BG, cursor="hand2")
 
-    # --- Frame for bottom-left actions (Add button and Filter) ---
-    tree_actions_frame = Frame(main_frame, bg=c.DARK_BG)
+    tree_actions_frame = Frame(left_panel, bg=c.DARK_BG)
     tree_actions_frame.grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 0))
     tree_actions_frame.columnconfigure(0, weight=1)
     tree_actions_frame.columnconfigure(1, weight=2)
@@ -55,80 +71,50 @@ def setup_file_manager_ui(window):
     window.tree_action_button.grid(row=0, column=0, sticky='ew')
     window.tree_action_button.set_state('disabled')
 
-    # --- Filter input ---
     filter_container = Frame(tree_actions_frame, bg=c.DARK_BG)
     filter_container.grid(row=0, column=1, sticky='ew', padx=(10, 0))
-
     Label(filter_container, text="Filter:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal).pack(side='left')
-
-    # This frame gets the colored border via highlightthickness
     window.filter_input_frame = Frame(filter_container, bg=c.TEXT_INPUT_BG, highlightthickness=1, highlightbackground=c.TEXT_INPUT_BG)
     window.filter_input_frame.pack(side='left', padx=(5,0), fill='x', expand=True)
-
-    # Padding on the right makes space for the clear button to hover over
     window.filter_entry = Entry(window.filter_input_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=font_normal, width=25)
     window.filter_entry.pack(side='left', fill='x', expand=True, ipady=3, padx=(5, 20))
-
-    window.clear_filter_button = Label(
-        window.filter_input_frame,
-        image=assets.compact_mode_close_image,
-        bg=c.TEXT_INPUT_BG,
-        cursor="hand2"
-    )
+    window.clear_filter_button = Label(window.filter_input_frame, image=assets.compact_mode_close_image, bg=c.TEXT_INPUT_BG, cursor="hand2")
     window.clear_filter_button.place(relx=1.0, rely=0.5, anchor='e', x=-5)
     window.clear_filter_button.place_forget()
-
-    # Add hover effect for the clear button
     window.clear_filter_button.bind("<Enter>", lambda e: window.clear_filter_button.config(bg=c.SUBTLE_HIGHLIGHT_COLOR))
     window.clear_filter_button.bind("<Leave>", lambda e: window.clear_filter_button.config(bg=c.TEXT_INPUT_BG))
 
     window.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
-    window.tree.tag_configure('new_file_highlight', foreground="#40C040") # Bright Green
+    window.tree.tag_configure('new_file_highlight', foreground="#40C040")
 
-    title_frame = Frame(main_frame, bg=c.DARK_BG)
-    title_frame.grid(row=0, column=2, columnspan=2, sticky='nsew', padx=(10, 0))
+    # ===============================
+    # === WIDGETS FOR RIGHT PANEL ===
+    # ===============================
+    title_frame = Frame(right_panel, bg=c.DARK_BG)
+    title_frame.grid(row=0, column=0, columnspan=2, sticky='nsew', padx=(10, 0))
     title_frame.columnconfigure(1, weight=1)
 
     Label(title_frame, text="Merge Order", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).grid(row=0, column=0, sticky='w')
     window.merge_order_details_label = Label(title_frame, text="", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal)
     window.merge_order_details_label.grid(row=0, column=1, sticky='w', padx=(5,0))
-
-    window.toggle_paths_button = Button(
-        title_frame,
-        image=assets.paths_icon,
-        command=window.toggle_full_path_view,
-        bg=c.DARK_BG,
-        activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
-        relief='flat',
-        bd=0,
-        cursor='hand2'
-    )
+    window.toggle_paths_button = Button(title_frame, image=assets.paths_icon, command=window.toggle_full_path_view, bg=c.DARK_BG, activebackground=c.SUBTLE_HIGHLIGHT_COLOR, relief='flat', bd=0, cursor='hand2')
     window.toggle_paths_button.grid(row=0, column=2, sticky='e', padx=(5,0))
     ToolTip(window.toggle_paths_button, "Toggle full path view")
 
-    # --- Merge Order List (Custom Widget) ---
-    list_frame = Frame(main_frame, bg=c.DARK_BG)
-    list_frame.grid(row=1, column=2, columnspan=2, sticky='nsew', padx=(10, 0))
+    list_frame = Frame(right_panel, bg=c.DARK_BG)
+    list_frame.grid(row=1, column=0, columnspan=2, sticky='nsew', padx=(10, 0))
     list_frame.grid_rowconfigure(0, weight=1)
     list_frame.grid_columnconfigure(0, weight=1)
 
-    window.merge_order_list = TwoColumnList(
-        list_frame,
-        right_col_font=window.font_small,
-        right_col_width=50
-    )
+    window.merge_order_list = TwoColumnList(list_frame, right_col_font=window.font_small, right_col_width=50)
     window.merge_order_list.grid(row=0, column=0, sticky='nsew')
-
     list_scroll = ttk.Scrollbar(list_frame, orient='vertical', command=window.merge_order_list.yview)
-    # The scrollbar is gridded here, but its visibility will be managed by the TwoColumnList widget
     list_scroll.grid(row=0, column=1, sticky='ns')
     window.merge_order_list.config(yscrollcommand=list_scroll.set)
-    # Link the scrollbar to the list widget for automatic hiding
     window.merge_order_list.link_scrollbar(list_scroll)
 
-    move_buttons_frame = Frame(main_frame, bg=c.DARK_BG)
-    move_buttons_frame.grid(row=2, column=2, sticky='ew', pady=(10, 0), padx=(10, 0))
-    # Configure grid columns to have equal weight, forcing buttons to the same size
+    move_buttons_frame = Frame(right_panel, bg=c.DARK_BG)
+    move_buttons_frame.grid(row=2, column=0, sticky='ew', pady=(10, 0), padx=(10, 0))
     move_buttons_frame.grid_columnconfigure(0, weight=1, uniform="group1")
     move_buttons_frame.grid_columnconfigure(1, weight=1, uniform="group1")
     move_buttons_frame.grid_columnconfigure(2, weight=1, uniform="group1")
@@ -147,12 +133,14 @@ def setup_file_manager_ui(window):
     window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=narrow_padding, cursor='hand2')
     window.move_to_bottom_button.grid(row=0, column=4, sticky='ew', padx=(2, 0))
 
-    # Disable all move buttons initially
     for btn in [window.move_to_top_button, window.move_up_button, window.remove_button, window.move_down_button, window.move_to_bottom_button]:
         btn.set_state('disabled')
 
+    # ===============================================
+    # === BOTTOM BUTTONS (Back in main_frame) =======
+    # ===============================================
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
-    bulk_action_frame.grid(row=3, column=0, columnspan=4, sticky='ew', pady=(20, 0))
+    bulk_action_frame.grid(row=1, column=0, sticky='ew', pady=(20, 0))
     RoundedButton(bulk_action_frame, text="Add all", command=window.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2').pack(side='left')
     RoundedButton(bulk_action_frame, text="Remove all", command=window.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2').pack(side='right')
     RoundedButton(bulk_action_frame, text="Save and Close", command=window.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 16), width=240, cursor='hand2').pack()

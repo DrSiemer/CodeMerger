@@ -84,7 +84,6 @@ class ViewManager:
     def _on_animation_complete(self, is_shrinking, final_geom):
         """Handles state changes after an animation finishes."""
         if is_shrinking:
-            # [FIX] Use iconify() to ensure taskbar presence.
             self.main_window.iconify()
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.deiconify()

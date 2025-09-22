@@ -253,17 +253,17 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758536985.040872,
-      "hash": "401fb3e994232a68c70c2cb46911c512ab77b4ff",
-      "tokens": 2375,
-      "lines": 158
+      "mtime": 1758544994.0268228,
+      "hash": "3f9150263931d7279af1637a123974f708f12d3a",
+      "tokens": 2537,
+      "lines": 149
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1758540676.160969,
-      "hash": "960899fe50fdfb19d5f6b65f451bf13629bc7445",
-      "tokens": 1689,
-      "lines": 187
+      "mtime": 1758545521.1519268,
+      "hash": "08b1f39411272bd55ad0b3533aff4e9c9f9fd278",
+      "tokens": 1813,
+      "lines": 197
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
@@ -281,10 +281,10 @@
     },
     {
       "path": "src/ui/file_manager/ui_controller.py",
-      "mtime": 1758540843.5024493,
-      "hash": "c3d13d1a8e2fbfd9e213eee10b3630e28c81b35f",
-      "tokens": 759,
-      "lines": 89
+      "mtime": 1758553892.8273504,
+      "hash": "e60439e80f2c687c5a9aa93b6ca07cf499ac92d6",
+      "tokens": 856,
+      "lines": 105
     },
     {
       "path": "src/ui/directory_dialog.py",

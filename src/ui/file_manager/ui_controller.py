@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import tkinter as tk
 from tkinter import messagebox
 from ... import constants as c
 from ..assets import assets
@@ -79,11 +80,25 @@ class FileManagerUIController:
         self.window.full_paths_visible = not self.window.full_paths_visible
         self.window.selection_handler.toggle_full_path_view()
 
-        if self.window.full_paths_visible:
-            self.window.tree.master.grid_columnconfigure(0, weight=1)
-            self.window.tree.master.grid_columnconfigure(2, weight=2)
-            self.window.toggle_paths_button.config(image=assets.paths_icon_active)
-        else:
-            self.window.tree.master.grid_columnconfigure(0, weight=1)
-            self.window.tree.master.grid_columnconfigure(2, weight=1)
-            self.window.toggle_paths_button.config(image=assets.paths_icon)
+        def adjust_sash():
+            try:
+                self.window.update_idletasks()
+                total_width = self.window.paned_window.winfo_width()
+
+                if total_width <= 1: return
+
+                if self.window.full_paths_visible:
+                    self.window.sash_pos_normal = self.window.paned_window.sashpos(0)
+                    sash_position = int(total_width * 0.4)
+                    self.window.toggle_paths_button.config(image=assets.paths_icon_active)
+                else:
+                    sash_position = self.window.sash_pos_normal or (total_width // 2)
+                    self.window.toggle_paths_button.config(image=assets.paths_icon)
+
+                self.window.paned_window.sashpos(0, sash_position)
+                self.window._update_sash_cover_position()
+
+            except tk.TclError:
+                pass
+
+        self.window.after(10, adjust_sash)
