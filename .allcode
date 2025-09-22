@@ -260,10 +260,31 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1758534178.1482792,
-      "hash": "d093b12ba7263c453f7fa4e97e0306ccae6c00da",
-      "tokens": 4206,
-      "lines": 482
+      "mtime": 1758540676.160969,
+      "hash": "960899fe50fdfb19d5f6b65f451bf13629bc7445",
+      "tokens": 1689,
+      "lines": 187
+    },
+    {
+      "path": "src/ui/file_manager/data_controller.py",
+      "mtime": 1758539676.574008,
+      "hash": "216c18e982833836bdfebcedb0e1d31de6b78d97",
+      "tokens": 692,
+      "lines": 71
+    },
+    {
+      "path": "src/ui/file_manager/state_controller.py",
+      "mtime": 1758540669.4548402,
+      "hash": "6cd4b5271f57369656119bfa71b760249ad86641",
+      "tokens": 617,
+      "lines": 70
+    },
+    {
+      "path": "src/ui/file_manager/ui_controller.py",
+      "mtime": 1758540843.5024493,
+      "hash": "c3d13d1a8e2fbfd9e213eee10b3630e28c81b35f",
+      "tokens": 759,
+      "lines": 89
     },
     {
       "path": "src/ui/directory_dialog.py",
@@ -350,7 +371,7 @@
       "lines": 333
     }
   ],
-  "total_tokens": 56951,
+  "total_tokens": 59884,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -382,10 +403,13 @@
     "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
     "src/ui/directory_dialog.py",
+    "src/ui/file_manager/data_controller.py",
     "src/ui/file_manager/file_manager_window.py",
     "src/ui/file_manager/file_tree_builder.py",
     "src/ui/file_manager/file_tree_handler.py",
     "src/ui/file_manager/selection_list_handler.py",
+    "src/ui/file_manager/state_controller.py",
+    "src/ui/file_manager/ui_controller.py",
     "src/ui/file_manager/ui_setup.py",
     "src/ui/file_monitor.py",
     "src/ui/filetypes_manager.py",
