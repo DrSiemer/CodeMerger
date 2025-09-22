@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, ttk, font, Button
+from tkinter import Frame, Label, ttk, font, Button, Entry
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.two_column_list import TwoColumnList
 from ... import constants as c
@@ -45,9 +45,43 @@ def setup_file_manager_ui(window):
         cursor="hand2"
     )
 
-    window.tree_action_button = RoundedButton(main_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, width=220, cursor='hand2')
-    window.tree_action_button.grid(row=2, column=0, sticky='w', pady=(10, 0))
+    # --- Frame for bottom-left actions (Add button and Filter) ---
+    tree_actions_frame = Frame(main_frame, bg=c.DARK_BG)
+    tree_actions_frame.grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 0))
+    tree_actions_frame.columnconfigure(0, weight=1)
+    tree_actions_frame.columnconfigure(1, weight=2)
+
+    window.tree_action_button = RoundedButton(tree_actions_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, h_padding=180, cursor='hand2')
+    window.tree_action_button.grid(row=0, column=0, sticky='ew')
     window.tree_action_button.set_state('disabled')
+
+    # --- Filter input ---
+    filter_container = Frame(tree_actions_frame, bg=c.DARK_BG)
+    filter_container.grid(row=0, column=1, sticky='ew', padx=(10, 0))
+
+    Label(filter_container, text="Filter:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=font_normal).pack(side='left')
+
+    # This frame gets the colored border via highlightthickness
+    window.filter_input_frame = Frame(filter_container, bg=c.TEXT_INPUT_BG, highlightthickness=1, highlightbackground=c.TEXT_INPUT_BG)
+    window.filter_input_frame.pack(side='left', padx=(5,0), fill='x', expand=True)
+
+    # Padding on the right makes space for the clear button to hover over
+    window.filter_entry = Entry(window.filter_input_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=font_normal, width=25)
+    window.filter_entry.pack(side='left', fill='x', expand=True, ipady=3, padx=(5, 20))
+
+    window.clear_filter_button = Label(
+        window.filter_input_frame,
+        image=assets.compact_mode_close_image,
+        bg=c.TEXT_INPUT_BG,
+        cursor="hand2"
+    )
+    window.clear_filter_button.place(relx=1.0, rely=0.5, anchor='e', x=-5)
+    window.clear_filter_button.place_forget()
+
+    # Add hover effect for the clear button
+    window.clear_filter_button.bind("<Enter>", lambda e: window.clear_filter_button.config(bg=c.SUBTLE_HIGHLIGHT_COLOR))
+    window.clear_filter_button.bind("<Leave>", lambda e: window.clear_filter_button.config(bg=c.TEXT_INPUT_BG))
+
     window.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
     window.tree.tag_configure('new_file_highlight', foreground="#40C040") # Bright Green
 

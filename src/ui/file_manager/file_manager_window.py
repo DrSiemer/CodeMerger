@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import Toplevel, messagebox
+from tkinter import Toplevel, messagebox, StringVar
 import subprocess
 import sys
 
@@ -54,6 +54,12 @@ class FileManagerWindow(Toplevel):
         # Build UI and then create handlers
         setup_file_manager_ui(self)
 
+        # Filter functionality
+        self.filter_text = StringVar()
+        self.filter_entry.config(textvariable=self.filter_text)
+        self.filter_text.trace_add('write', self._apply_filter)
+        self.clear_filter_button.bind("<Button-1>", self._clear_filter)
+
         # Bind events for the new hover-icon logic
         self.tree.bind("<Motion>", self._on_tree_motion)
         self.tree.bind("<Leave>", self._on_tree_leave)
@@ -73,6 +79,35 @@ class FileManagerWindow(Toplevel):
 
         self._position_window()
         self.deiconify()
+
+    def _clear_filter(self, event=None):
+        self.filter_text.set("")
+        self.focus_force() # Return focus to window
+
+    def _apply_filter(self, *args):
+        filter_query = self.filter_text.get().lower()
+
+        # Update UI based on filter state
+        if filter_query:
+            self.filter_input_frame.config(
+                highlightbackground=c.FILTER_ACTIVE_BORDER,
+                highlightcolor=c.FILTER_ACTIVE_BORDER
+            )
+            self.clear_filter_button.place(relx=1.0, rely=0.5, anchor='e', x=-5)
+            self.selection_handler.set_filtered_state(True)
+        else:
+            self.filter_input_frame.config(
+                highlightbackground=c.TEXT_INPUT_BG,
+                highlightcolor=c.TEXT_INPUT_BG
+            )
+            self.clear_filter_button.place_forget()
+            self.selection_handler.set_filtered_state(False)
+
+        # Filter the available files tree
+        self.populate_tree(filter_query)
+
+        # Filter the merge order list
+        self.selection_handler.filter_list(filter_query)
 
     def _on_tree_motion(self, event):
         """Shows and positions the folder icon when hovering over a file item."""
@@ -256,9 +291,15 @@ class FileManagerWindow(Toplevel):
         self.move_to_bottom_button.command = self.selection_handler.move_to_bottom
         self.remove_button.command = self.selection_handler.remove_selected
 
-    def populate_tree(self):
+    def populate_tree(self, filter_text=""):
         """Populates the treeview using data from the file_tree_builder"""
-        tree_data = build_file_tree_data(self.base_dir, self.file_extensions, self.gitignore_patterns)
+        # Clear existing tree
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        self.item_map.clear()
+        self.path_to_item_id.clear()
+
+        tree_data = build_file_tree_data(self.base_dir, self.file_extensions, self.gitignore_patterns, filter_text)
 
         def _insert_nodes(parent_id, nodes):
             for node in nodes:

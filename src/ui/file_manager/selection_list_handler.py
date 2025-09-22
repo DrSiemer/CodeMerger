@@ -24,6 +24,7 @@ class SelectionListHandler:
         self.token_count_enabled = token_count_enabled
         self.ordered_selection = []
         self.show_full_paths = False
+        self.is_filtered = False # Flag to control button states
         self.tooltip_window = None
         self.tooltip_job = None
         self.listbox.bind_event('<<ListSelectionChanged>>', self.on_list_selection_change)
@@ -72,21 +73,28 @@ class SelectionListHandler:
         self.ordered_selection = list(selection_list)
         self._update_list_display(is_reorder=False)
 
-    def _update_list_display(self, is_reorder=False):
+    def _update_list_display(self, is_reorder=False, filter_text=""):
         """
         Refreshes the merge order list, applying a color gradient to the
         token counts based on their range.
         """
         display_items = []
+        items_to_display = self.ordered_selection
+        if filter_text:
+            items_to_display = [
+                item for item in self.ordered_selection 
+                if filter_text in item['path'].lower()
+            ]
+
         if self.token_count_enabled:
-            token_counts = [f.get('tokens', 0) for f in self.ordered_selection if f.get('tokens', -1) >= 0]
+            token_counts = [f.get('tokens', 0) for f in items_to_display if f.get('tokens', -1) >= 0]
             min_tokens = min(token_counts) if token_counts else 0
             max_tokens = max(token_counts) if token_counts else 0
             # Enforce a minimum range for token coloring to avoid small files looking "hot"
             if max_tokens < c.TOKEN_COLOR_RANGE_MIN_MAX:
                 max_tokens = c.TOKEN_COLOR_RANGE_MIN_MAX
 
-        for file_info in self.ordered_selection:
+        for file_info in items_to_display:
             path = file_info['path']
             display_text = path if self.show_full_paths else os.path.basename(path)
             right_col_text = ""
@@ -118,12 +126,26 @@ class SelectionListHandler:
 
     def update_button_states(self):
         """Enables or disables the action buttons based on selection"""
-        new_state = 'normal' if self.listbox.curselection() else 'disabled'
-        self.move_to_top_button.config(state=new_state)
-        self.move_up_button.config(state=new_state)
-        self.remove_button.config(state=new_state)
-        self.move_down_button.config(state=new_state)
-        self.move_to_bottom_button.config(state=new_state)
+        selection_exists = self.listbox.curselection()
+
+        sort_buttons = [self.move_to_top_button, self.move_up_button, self.move_down_button, self.move_to_bottom_button]
+
+        # Sorting buttons are disabled if filtered, otherwise depend on selection
+        sort_button_state = 'disabled' if self.is_filtered else ('normal' if selection_exists else 'disabled')
+        for btn in sort_buttons:
+            btn.set_state(sort_button_state)
+
+        # Remove button only depends on selection
+        self.remove_button.set_state('normal' if selection_exists else 'disabled')
+
+    def set_filtered_state(self, is_filtered):
+        """Called by the main window to enable/disable sorting."""
+        self.is_filtered = is_filtered
+        self.update_button_states()
+
+    def filter_list(self, filter_text):
+        """Applies a filter to the displayed list without changing the underlying ordered_selection."""
+        self._update_list_display(is_reorder=False, filter_text=filter_text.lower())
 
     def _calculate_stats_for_file(self, path):
         """Reads a file and returns its stats, or None on error."""
