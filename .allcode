@@ -253,10 +253,10 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758529978.1116302,
-      "hash": "74ace5aee4e5ba9a5dff58392e282444395c3e93",
-      "tokens": 1981,
-      "lines": 126
+      "mtime": 1758531284.2161539,
+      "hash": "f0718ebf663ececc791f78ae3fa3b6c9ee0c3fe4",
+      "tokens": 1934,
+      "lines": 124
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
