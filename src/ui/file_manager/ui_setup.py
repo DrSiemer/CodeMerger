@@ -36,6 +36,15 @@ def setup_file_manager_ui(window):
     tree_scroll = ttk.Scrollbar(main_frame, orient='vertical', command=window.tree.yview)
     tree_scroll.grid(row=1, column=1, sticky='ns')
     window.tree.config(yscrollcommand=tree_scroll.set)
+
+    # --- Open folder icon ---
+    window.folder_icon_label = Label(
+        window.tree,
+        image=assets.folder_reveal_icon,
+        bg=c.TEXT_INPUT_BG,
+        cursor="hand2"
+    )
+
     window.tree_action_button = RoundedButton(main_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, width=220, cursor='hand2')
     window.tree_action_button.grid(row=2, column=0, sticky='w', pady=(10, 0))
     window.tree_action_button.set_state('disabled')

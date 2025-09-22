@@ -53,6 +53,9 @@ NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
 # Path to the folder icon
 FOLDER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder.png')
 
+# Path to the smaller folder icon used for revealing files
+FOLDER_REVEAL_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder_small.png')
+
 # Path to the trash icon
 TRASH_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'trash.png')
 

@@ -1,6 +1,8 @@
 import os
 import tkinter as tk
 from tkinter import Toplevel, messagebox
+import subprocess
+import sys
 
 from ...core.utils import parse_gitignore, get_file_hash, get_token_count_for_text
 from .file_tree_builder import build_file_tree_data
@@ -11,6 +13,7 @@ from ... import constants as c
 from ...core.paths import ICON_PATH
 from ..window_utils import position_window, save_window_geometry
 from ..assets import assets
+from ..tooltip import ToolTip
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, app_state, newly_detected_files=None):
@@ -26,6 +29,7 @@ class FileManagerWindow(Toplevel):
         self.newly_detected_files = newly_detected_files or []
         self.full_paths_visible = False
         self.token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
+        self.hovered_file_path = None
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
@@ -49,6 +53,13 @@ class FileManagerWindow(Toplevel):
 
         # Build UI and then create handlers
         setup_file_manager_ui(self)
+
+        # Bind events for the new hover-icon logic
+        self.tree.bind("<Motion>", self._on_tree_motion)
+        self.tree.bind("<Leave>", self._on_tree_leave)
+        self.folder_icon_label.bind("<Button-1>", self._on_folder_icon_click)
+        ToolTip(self.folder_icon_label, text="Open file in folder", delay=500)
+
         self.create_handlers()
 
         # Validate cache before populating UI
@@ -62,6 +73,62 @@ class FileManagerWindow(Toplevel):
 
         self._position_window()
         self.deiconify()
+
+    def _on_tree_motion(self, event):
+        """Shows and positions the folder icon when hovering over a file item."""
+        item_id = self.tree.identify_row(event.y)
+
+        if item_id:
+            item_info = self.item_map.get(item_id, {})
+            if item_info.get('type') == 'file':
+                full_row_bbox = self.tree.bbox(item_id)
+                if not full_row_bbox: # Item might be scrolled out of view
+                    self._on_tree_leave()
+                    return
+
+                # Position icon at the far right of the row, vertically centered
+                tree_width = self.tree.winfo_width()
+                icon_width = assets.folder_reveal_icon.width()
+                icon_height = assets.folder_reveal_icon.height()
+
+                icon_x = tree_width - icon_width - 8 # 8px padding from the right edge
+                icon_y = full_row_bbox[1] + (full_row_bbox[3] // 2) - (icon_height // 2)
+
+                self.folder_icon_label.place(x=icon_x, y=icon_y)
+                self.hovered_file_path = item_info['path']
+                return
+
+        # If not over a valid file item, hide the icon
+        self._on_tree_leave()
+
+    def _on_tree_leave(self, event=None):
+        """Hides the folder icon when the mouse leaves the treeview."""
+        self.folder_icon_label.place_forget()
+        self.hovered_file_path = None
+
+    def _on_folder_icon_click(self, event=None):
+        """Handles a click on the folder icon."""
+        if self.hovered_file_path:
+            self._open_file_location(self.hovered_file_path)
+
+    def _open_file_location(self, relative_path):
+        """Opens the system's file explorer to the location of the given file."""
+        full_path = os.path.join(self.base_dir, relative_path)
+        if not os.path.exists(full_path):
+            messagebox.showwarning("File Not Found", f"The file '{relative_path}' could not be found.", parent=self)
+            return
+
+        try:
+            if sys.platform == "win32":
+                subprocess.run(['explorer', '/select,', os.path.normpath(full_path)])
+            elif sys.platform == "darwin":
+                subprocess.run(["open", "-R", full_path], check=True)
+            else:
+                dir_path = os.path.dirname(full_path)
+                if os.path.isdir(dir_path):
+                    subprocess.run(["xdg-open", dir_path], check=True)
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open file location: {e}", parent=self)
 
     def toggle_full_path_view(self):
         """Toggles full path visibility and resizes the columns."""

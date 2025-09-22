@@ -2,7 +2,7 @@ from PIL import Image, ImageTk
 from ..core.paths import (
     TRASH_ICON_PATH, NEW_FILES_ICON_PATH, DEFAULTS_ICON_PATH,
     COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH,
-    FOLDER_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH
+    FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH
 )
 
 class AppAssets:
@@ -12,6 +12,7 @@ class AppAssets:
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
         self.defaults_pil = self._load_image(DEFAULTS_ICON_PATH, (24, 24))
         self.folder_icon_pil = self._load_image(FOLDER_ICON_PATH, (28, 22))
+        self.folder_reveal_pil = self._load_image(FOLDER_REVEAL_ICON_PATH)
         self.paths_icon_pil = self._load_image(PATHS_ICON_PATH, (16, 12))
         self.paths_icon_active_pil = self._load_image(PATHS_ACTIVE_ICON_PATH, (16, 12))
 
@@ -24,6 +25,7 @@ class AppAssets:
         self.new_files_icon = None
         self.defaults_icon = None
         self.folder_icon = None
+        self.folder_reveal_icon = None
         self.paths_icon = None
         self.paths_icon_active = None
         self.compact_mode_image_up = None
@@ -38,6 +40,7 @@ class AppAssets:
         self.new_files_icon = self._pil_to_photoimage(self.new_files_pil)
         self.defaults_icon = self._pil_to_photoimage(self.defaults_pil)
         self.folder_icon = self._pil_to_photoimage(self.folder_icon_pil)
+        self.folder_reveal_icon = self._pil_to_photoimage(self.folder_reveal_pil)
         self.paths_icon = self._pil_to_photoimage(self.paths_icon_pil)
         self.paths_icon_active = self._pil_to_photoimage(self.paths_icon_active_pil)
         self.compact_mode_image_up = self._pil_to_photoimage(self.compact_mode_pil_up)

@@ -85,17 +85,17 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1757938209.6877656,
-      "hash": "0d34c2e62f7cd3b95d87f7b94f88a2edf5f961ab",
-      "tokens": 800,
-      "lines": 74
+      "mtime": 1758531173.8520133,
+      "hash": "2a33a4983f6952925da9de4b4029513f2264ad54",
+      "tokens": 813,
+      "lines": 78
     },
     {
       "path": "src/core/paths.py",
-      "mtime": 1757938209.6992939,
-      "hash": "6cc58ff0fa670c0c69c52e5b0cc850bb8c9ba720",
-      "tokens": 655,
-      "lines": 75
+      "mtime": 1758530577.99221,
+      "hash": "f834541d5c1155530cf00acbb74c8e5d4c404ff4",
+      "tokens": 690,
+      "lines": 78
     },
     {
       "path": "src/core/registry.py",
@@ -169,10 +169,10 @@
     },
     {
       "path": "src/ui/assets.py",
-      "mtime": 1758196745.5362816,
-      "hash": "9e0af69c8aff6d7e6f6493c543fe2ac8f4e4e282",
-      "tokens": 697,
-      "lines": 61
+      "mtime": 1758530555.3329587,
+      "hash": "7fdfbb9d370b5ad980abc59ff3441da84388818b",
+      "tokens": 755,
+      "lines": 64
     },
     {
       "path": "src/ui/font_utils.py",
@@ -253,17 +253,17 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758196807.271838,
-      "hash": "d9e7e2bc251208d73def5d7b84d03ef005ff6754",
-      "tokens": 1891,
-      "lines": 115
+      "mtime": 1758529978.1116302,
+      "hash": "74ace5aee4e5ba9a5dff58392e282444395c3e93",
+      "tokens": 1981,
+      "lines": 126
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1758196769.595725,
-      "hash": "839155645943cdf4695d78dbe9284de859570d90",
-      "tokens": 3276,
-      "lines": 374
+      "mtime": 1758531203.168911,
+      "hash": "1ff9f18f5d1bd64a0a6ac6537e3f1f8f62791da7",
+      "tokens": 3904,
+      "lines": 441
     },
     {
       "path": "src/ui/directory_dialog.py",
