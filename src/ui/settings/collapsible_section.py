@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import Frame, Label, Text, BooleanVar
-from .rounded_button import RoundedButton
+from ..widgets.rounded_button import RoundedButton
 from ... import constants as c
 
 class CollapsibleTextSection(Frame):

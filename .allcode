@@ -10,6 +10,7 @@
     "src/core",
     "src/ui",
     "src/ui/file_manager",
+    "src/ui/settings",
     "src/ui/widgets"
   ],
   "selected_files": [
@@ -301,25 +302,11 @@
       "lines": 175
     },
     {
-      "path": "src/ui/settings_window.py",
-      "mtime": 1758632237.0690851,
-      "hash": "1c71498c89349427019bf19b93db053ea031ef02",
-      "tokens": 3974,
-      "lines": 325
-    },
-    {
       "path": "src/ui/widgets/scrollable_frame.py",
-      "mtime": 1758196811.4257102,
-      "hash": "abb506eaaab554f30d8bc5c3b95612fd53c3dedc",
-      "tokens": 657,
-      "lines": 73
-    },
-    {
-      "path": "src/ui/widgets/collapsible_section.py",
-      "mtime": 1758196861.0296001,
-      "hash": "793632fba34d93dc988d1ab6e7872ad70db61b6a",
-      "tokens": 761,
-      "lines": 75
+      "mtime": 1758661763.1586256,
+      "hash": "d07804755e12501badcc4fd986a6624c1535b8d0",
+      "tokens": 726,
+      "lines": 83
     },
     {
       "path": "src/ui/style_manager.py",
@@ -364,14 +351,56 @@
       "lines": 68
     },
     {
+      "path": "src/ui/settings/settings_window.py",
+      "mtime": 1758661618.7537642,
+      "hash": "6bdb6d3e6c3acb365065697e39cf748adbe58ef1",
+      "tokens": 1378,
+      "lines": 141
+    },
+    {
+      "path": "src/ui/settings/application_settings.py",
+      "mtime": 1758660505.1816242,
+      "hash": "bd05c8b9d13caef489fa6c08e4bedb2e91bbccf0",
+      "tokens": 828,
+      "lines": 59
+    },
+    {
+      "path": "src/ui/settings/file_manager_settings.py",
+      "mtime": 1758660491.5020592,
+      "hash": "daf27171172e05e87ee48cb0663e82b84e4edaf9",
+      "tokens": 474,
+      "lines": 37
+    },
+    {
+      "path": "src/ui/settings/prompts_settings.py",
+      "mtime": 1758660878.788007,
+      "hash": "e2328693bd141b1e631da5e608c3e8d10712d1be",
+      "tokens": 421,
+      "lines": 44
+    },
+    {
+      "path": "src/ui/settings/collapsible_section.py",
+      "mtime": 1758660953.7163954,
+      "hash": "715e37095f1c662031fc2bad0f4a22f2f9ed05d8",
+      "tokens": 763,
+      "lines": 75
+    },
+    {
+      "path": "src/ui/settings/editor_settings.py",
+      "mtime": 1758660445.6743305,
+      "hash": "7c4a67a6c0cda5f2b8264ee99d3322f3adf2d5a6",
+      "tokens": 428,
+      "lines": 33
+    },
+    {
       "path": "src/ui/app_window.py",
-      "mtime": 1758202492.8957205,
-      "hash": "5571c9ea4d4966579f265d76cf6b83fc1264a2a1",
-      "tokens": 2580,
+      "mtime": 1758660826.4792707,
+      "hash": "788cb327b28f58ea04083fd0e5c72c53959ecbcb",
+      "tokens": 2581,
       "lines": 333
     }
   ],
-  "total_tokens": 59884,
+  "total_tokens": 59806,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -414,14 +443,18 @@
     "src/ui/file_monitor.py",
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
-    "src/ui/settings_window.py",
+    "src/ui/settings/application_settings.py",
+    "src/ui/settings/collapsible_section.py",
+    "src/ui/settings/editor_settings.py",
+    "src/ui/settings/file_manager_settings.py",
+    "src/ui/settings/prompts_settings.py",
+    "src/ui/settings/settings_window.py",
     "src/ui/status_bar_manager.py",
     "src/ui/style_manager.py",
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",
     "src/ui/ui_builder.py",
     "src/ui/view_manager.py",
-    "src/ui/widgets/collapsible_section.py",
     "src/ui/widgets/rounded_button.py",
     "src/ui/widgets/scrollable_frame.py",
     "src/ui/widgets/two_column_list.py",

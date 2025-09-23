@@ -1,12 +1,8 @@
+__pycache__/
 /cm-venv
 /build
 /dist
 /dist-installer
-/src/__pycache__
-/src/core/__pycache__
-/src/ui/__pycache__
-/src/ui/file_manager/__pycache__
-/src/ui/widgets/__pycache__
 2do.txt
 config.json
 filetypes.json

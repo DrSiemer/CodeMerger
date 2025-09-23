@@ -12,7 +12,6 @@ class ScrollableFrame(tk.Frame):
 
         self.canvas = tk.Canvas(self, bg=bg_color, highlightthickness=0)
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        # This is the frame that other widgets will be packed into
         self.scrollable_frame = tk.Frame(self.canvas, bg=bg_color)
 
         self.canvas_window = self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
@@ -23,18 +22,21 @@ class ScrollableFrame(tk.Frame):
         self.scrollable_frame.bind("<Configure>", self._on_frame_configure)
         self.canvas.bind("<Configure>", self._on_canvas_configure)
         self.bind("<MouseWheel>", self._on_mousewheel)
-        # Also bind mousewheel events on children to the canvas scroll
+        # Propagate mousewheel events from all children to this widget
         self.scrollable_frame.bind_all("<MouseWheel>", self._on_mousewheel, add=True)
 
     def _on_frame_configure(self, event=None):
+        # Update the scrollable area when the inner frame's size changes
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self._manage_scrollbar()
 
     def _on_canvas_configure(self, event=None):
+        # Ensure the inner frame always fills the width of the canvas
         self.canvas.itemconfig(self.canvas_window, width=event.width)
+        self._manage_scrollbar()
 
     def _on_mousewheel(self, event):
-        # Do not scroll if the cursor is over a Text widget, as it has its own scrolling
+        # Prevent this widget from scrolling if the cursor is over a child Text widget
         widget_under_cursor = self.winfo_containing(event.x_root, event.y_root)
         w = widget_under_cursor
         while w is not None:
@@ -45,24 +47,32 @@ class ScrollableFrame(tk.Frame):
             w = w.master
 
         if self.scrollbar.winfo_ismapped():
-            # The direction and scaling of delta can differ between platforms
+            # Handle platform-specific scroll directions and speeds
             if event.num == 5 or event.delta == -120:
                 delta = 1
             elif event.num == 4 or event.delta == 120:
                 delta = -1
-            else: # Fallback for other systems
+            else:
                 delta = -1 * (event.delta // 120)
 
             self.canvas.yview_scroll(delta, "units")
 
     def _manage_scrollbar(self):
-        self.update_idletasks()
-        frame_height = self.scrollable_frame.winfo_reqheight()
-        canvas_height = self.canvas.winfo_height()
+        scrollregion = self.canvas.cget("scrollregion")
+        if scrollregion:
+            try:
+                content_height = int(scrollregion.split(' ')[3])
+                canvas_height = self.canvas.winfo_height()
 
-        if frame_height > canvas_height:
-            if not self.scrollbar.winfo_ismapped():
-                self.scrollbar.pack(side="right", fill="y")
+                if content_height > canvas_height:
+                    if not self.scrollbar.winfo_ismapped():
+                        self.scrollbar.pack(side="right", fill="y")
+                else:
+                    if self.scrollbar.winfo_ismapped():
+                        self.scrollbar.pack_forget()
+            except (ValueError, IndexError):
+                if self.scrollbar.winfo_ismapped():
+                    self.scrollbar.pack_forget()
         else:
             if self.scrollbar.winfo_ismapped():
                 self.scrollbar.pack_forget()

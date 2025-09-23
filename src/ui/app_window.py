@@ -9,7 +9,7 @@ from ..app_state import AppState
 from .view_manager import ViewManager
 from .file_manager.file_manager_window import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
-from .settings_window import SettingsWindow
+from .settings.settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
 from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions
