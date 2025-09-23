@@ -204,7 +204,7 @@
     },
     {
       "path": "src/ui/widgets/two_column_list.py",
-      "mtime": 1757938205.7759886,
+      "mtime": 1758555863.0143962,
       "hash": "8aa49194e7dabb6628731c6dbbc4bb88c01e3445",
       "tokens": 1972,
       "lines": 209
@@ -225,10 +225,10 @@
     },
     {
       "path": "src/ui/view_manager.py",
-      "mtime": 1757938209.9269545,
-      "hash": "63873a04c40747e4ba1c8d832a9747254ff07c31",
-      "tokens": 2028,
-      "lines": 203
+      "mtime": 1758554048.0555723,
+      "hash": "d26ac6d80e520a2aeb96bdc2a1639be81e26d37c",
+      "tokens": 2013,
+      "lines": 202
     },
     {
       "path": "src/ui/file_manager/file_tree_builder.py",
@@ -253,17 +253,17 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758544994.0268228,
-      "hash": "3f9150263931d7279af1637a123974f708f12d3a",
-      "tokens": 2537,
-      "lines": 149
+      "mtime": 1758555863.0143962,
+      "hash": "469bafbb6d25a49bc56ec2344f3d222b9ad49502",
+      "tokens": 2518,
+      "lines": 146
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1758545521.1519268,
-      "hash": "08b1f39411272bd55ad0b3533aff4e9c9f9fd278",
-      "tokens": 1813,
-      "lines": 197
+      "mtime": 1758555863.0143962,
+      "hash": "7f4abc2327909b20dd9fa810bb8b1f7f91d67867",
+      "tokens": 1772,
+      "lines": 195
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
@@ -281,10 +281,10 @@
     },
     {
       "path": "src/ui/file_manager/ui_controller.py",
-      "mtime": 1758553892.8273504,
-      "hash": "e60439e80f2c687c5a9aa93b6ca07cf499ac92d6",
-      "tokens": 856,
-      "lines": 105
+      "mtime": 1758555863.0143962,
+      "hash": "a82b3faa32c94d0c945c7864a83315e342cb9719",
+      "tokens": 843,
+      "lines": 104
     },
     {
       "path": "src/ui/directory_dialog.py",
@@ -302,7 +302,7 @@
     },
     {
       "path": "src/ui/settings_window.py",
-      "mtime": 1758196692.6742153,
+      "mtime": 1758632237.0690851,
       "hash": "1c71498c89349427019bf19b93db053ea031ef02",
       "tokens": 3974,
       "lines": 325
