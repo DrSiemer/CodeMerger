@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+import time
 import subprocess
 from tkinter import Tk, StringVar, messagebox, colorchooser
 from PIL import Image, ImageTk
@@ -40,6 +41,8 @@ class App(Tk):
         self.window_geometries = {}
         self.title_click_job = None
         self.current_monitor_handle = None
+        self.last_x = 0
+        self.last_y = 0
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -84,13 +87,18 @@ class App(Tk):
 
     def _on_window_configure(self, event):
         """
-        Saves the main window's geometry whenever it's moved or resized.
-        This ensures we have the correct position before an animation starts.
+        Saves the main window's geometry and detects movement.
         """
         # We only save the geometry when the main window is in its normal state.
         if self.view_manager.current_state == 'normal':
+            x, y = self.winfo_x(), self.winfo_y()
+            if x != self.last_x or y != self.last_y:
+                self.view_manager.main_window_last_move_time = time.time()
+                self.last_x = x
+                self.last_y = y
+
             self.view_manager.main_window_geom = (
-                self.winfo_x(), self.winfo_y(),
+                x, y,
                 self.winfo_width(), self.winfo_height()
             )
             self._check_for_monitor_change()

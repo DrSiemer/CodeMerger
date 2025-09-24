@@ -23,9 +23,9 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1758532662.6879854,
-      "hash": "beeb4c18ba57fe56eca0902c04e79ba7a85f7cf0",
-      "tokens": 1365,
+      "mtime": 1758717844.0806453,
+      "hash": "8286fd4660cf405dab4cd4bdf6c05582bb1e8788",
+      "tokens": 1406,
       "lines": 53
     },
     {
@@ -184,10 +184,10 @@
     },
     {
       "path": "src/ui/window_utils.py",
-      "mtime": 1758202748.2278552,
-      "hash": "cd4a6f7ff230829dcc9d30655e45fe715e6dbe68",
-      "tokens": 977,
-      "lines": 107
+      "mtime": 1758717832.5795314,
+      "hash": "8b84367a528aed6050d6eda5ea0dfa42da07a19b",
+      "tokens": 1182,
+      "lines": 129
     },
     {
       "path": "src/ui/tooltip.py",
@@ -226,10 +226,10 @@
     },
     {
       "path": "src/ui/view_manager.py",
-      "mtime": 1758554048.0555723,
-      "hash": "d26ac6d80e520a2aeb96bdc2a1639be81e26d37c",
-      "tokens": 2013,
-      "lines": 202
+      "mtime": 1758717914.5816238,
+      "hash": "cb58ab014d17c6d6faa3ef82ea914965357c13df",
+      "tokens": 2127,
+      "lines": 217
     },
     {
       "path": "src/ui/file_manager/file_tree_builder.py",
@@ -310,10 +310,10 @@
     },
     {
       "path": "src/ui/filetypes_manager.py",
-      "mtime": 1758716417.7396286,
-      "hash": "5a8ad8d2059ee24758c8624a0b76e164f6cb9a32",
-      "tokens": 1678,
-      "lines": 170
+      "mtime": 1758717278.2264526,
+      "hash": "0e7408b937559f231d2704257306a0b0ab2d0c96",
+      "tokens": 1856,
+      "lines": 193
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",
@@ -345,10 +345,10 @@
     },
     {
       "path": "src/ui/compact_mode.py",
-      "mtime": 1758716392.8437514,
-      "hash": "c96b33b5833c35a1ecce0f005982560618341bd0",
-      "tokens": 2211,
-      "lines": 222
+      "mtime": 1758717613.3364387,
+      "hash": "b1029da8cd390fc91ee006ce30c6279b658a5fc0",
+      "tokens": 2239,
+      "lines": 225
     },
     {
       "path": "src/ui/ui_builder.py",
@@ -408,10 +408,10 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1758716377.6262982,
-      "hash": "46c624b025b0777a89bcc8aa1e5505c774ae52b9",
-      "tokens": 2554,
-      "lines": 330
+      "mtime": 1758717596.674675,
+      "hash": "407d76ac1e9ddeda74ed96f36bc4c78283ce3205",
+      "tokens": 2607,
+      "lines": 338
     }
   ],
   "total_tokens": 59412,

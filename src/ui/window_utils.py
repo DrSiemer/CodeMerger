@@ -19,6 +19,28 @@ if sys.platform == "win32":
     # Load the user32 library
     user32 = ctypes.windll.user32
 
+def get_monitor_work_area(window):
+    """
+    Gets the work area of the monitor that the given window is on.
+    Returns a tuple (left, top, right, bottom).
+    Provides a fallback for non-Windows platforms.
+    """
+    if sys.platform == "win32":
+        try:
+            hwnd = window.winfo_id()
+            h_monitor = user32.MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+            monitor_info = MONITORINFO()
+            monitor_info.cbSize = ctypes.sizeof(MONITORINFO)
+            if user32.GetMonitorInfoW(h_monitor, ctypes.byref(monitor_info)):
+                work_area = monitor_info.rcWork
+                return (work_area.left, work_area.top, work_area.right, work_area.bottom)
+        except Exception:
+            # Fallback on API failure
+            pass
+
+    # Fallback for non-Windows or if API calls fail
+    return (0, 0, window.winfo_screenwidth(), window.winfo_screenheight())
+
 def position_window(window):
     """
     Calculates the position for a window, preferring a saved position. If no

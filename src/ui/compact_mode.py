@@ -11,10 +11,11 @@ class CompactMode(tk.Toplevel):
     Double-clicking the move bar or clicking the close button will close this
     window and restore the main application window.
     """
-    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR, font_color_name='light', show_wrapped_button=False):
+    def __init__(self, parent, close_callback, project_name, image_up_pil, image_down_pil, image_up_tk, image_down_tk, image_close, instance_color=c.COMPACT_MODE_BG_COLOR, font_color_name='light', show_wrapped_button=False, on_move_callback=None):
         super().__init__(parent)
         self.parent = parent
         self.close_callback = close_callback
+        self.on_move_callback = on_move_callback
         self.project_name = project_name
 
         # Store original images (both PIL for composing and Tk for displaying)
@@ -204,6 +205,8 @@ class CompactMode(tk.Toplevel):
     def on_release_drag(self, event):
         """Resets the dragging state when the mouse is released."""
         self._is_dragging = False
+        if self.on_move_callback:
+            self.on_move_callback()
 
     def on_press_click(self, event):
         """Changes the button image to its 'pressed' state."""

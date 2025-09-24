@@ -3,6 +3,7 @@ import os
 from tkinter import messagebox, Toplevel
 from .compact_mode import CompactMode
 from .assets import assets
+from .window_utils import get_monitor_work_area
 
 class ViewManager:
     """
@@ -23,6 +24,8 @@ class ViewManager:
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
         self.main_window_geom = None
+        self.main_window_last_move_time = 0
+        self.compact_mode_last_move_time = 0
 
     def on_main_window_minimized(self, event=None):
         """
@@ -52,6 +55,10 @@ class ViewManager:
         A dedicated method for when the user closes the compact window directly.
         """
         self.transition_to_normal()
+
+    def on_compact_mode_moved(self):
+        """Callback executed when the compact mode window is moved by the user."""
+        self.compact_mode_last_move_time = time.time()
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
         """Helper method to animate the main window's geometry and alpha with easing."""
@@ -128,15 +135,22 @@ class ViewManager:
         widget_w = self.compact_mode_window.winfo_reqwidth()
         widget_h = self.compact_mode_window.winfo_reqheight()
 
-        if self.compact_mode_last_x is not None:
+        use_saved_position = (
+            self.compact_mode_last_x is not None and
+            self.compact_mode_last_move_time > self.main_window_last_move_time
+        )
+
+        if use_saved_position:
             target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
         else:
-            screen_w, screen_h = self.main_window.winfo_screenwidth(), self.main_window.winfo_screenheight()
+            mon_x, mon_y, mon_right, mon_bottom = get_monitor_work_area(self.main_window)
+
             main_x, main_y, main_w, _ = start_geom
             ideal_x, ideal_y = main_x + main_w - widget_w - 20, main_y + 20
             margin = 10
-            target_x = max(margin, min(ideal_x, screen_w - widget_w - margin))
-            target_y = max(margin, min(ideal_y, screen_h - widget_h - margin))
+
+            target_x = max(mon_x + margin, min(ideal_x, mon_right - widget_w - margin))
+            target_y = max(mon_y + margin, min(ideal_y, mon_bottom - widget_h - margin))
 
         end_geom = (target_x, target_y, widget_w, widget_h)
         self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
@@ -187,6 +201,7 @@ class ViewManager:
         self.compact_mode_window = CompactMode(
             parent=self.main_window,
             close_callback=self.exit_compact_mode_manually,
+            on_move_callback=self.on_compact_mode_moved,
             project_name=project_name,
             image_up_pil=assets.compact_mode_pil_up,
             image_down_pil=assets.compact_mode_pil_down,
