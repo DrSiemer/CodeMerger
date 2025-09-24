@@ -4,7 +4,7 @@ from tkinter import Toplevel, StringVar
 from ...core.utils import parse_gitignore
 from .file_tree_builder import build_file_tree_data
 from .file_tree_handler import FileTreeHandler
-from .selection_list_handler import SelectionListHandler
+from .selection_list_controller import SelectionListController
 from .ui_setup import setup_file_manager_ui
 from .ui_controller import FileManagerUIController
 from .data_controller import FileManagerDataController
@@ -111,7 +111,7 @@ class FileManagerWindow(Toplevel):
             'remove': self.remove_button, 'down': self.move_down_button,
             'bottom': self.move_to_bottom_button
         }
-        self.selection_handler = SelectionListHandler(
+        self.selection_handler = SelectionListController(
             self, self.merge_order_list, listbox_buttons, self.base_dir, self.default_editor,
             self.on_selection_list_changed, self.token_count_enabled
         )
