@@ -53,7 +53,7 @@ jobs:
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
           path: setup.iss
-          options: '/dMyAppVersion="${{ github.ref_name }}"'
+          options: /dMyAppVersion=${{ github.ref_name }}
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
