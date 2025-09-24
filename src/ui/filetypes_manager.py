@@ -43,9 +43,8 @@ class FiletypesManagerWindow(Toplevel):
 
         self.tree = ttk.Treeview(tree_frame, show='tree', selectmode='browse')
         self.tree.pack(side='left', fill='both', expand=True)
-        tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
-        tree_scroll.pack(side='right', fill='y')
-        self.tree.config(yscrollcommand=tree_scroll.set)
+        self.tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
+        self.tree.config(yscrollcommand=self.tree_scroll.set)
 
         # --- Add/Delete Buttons ---
         list_button_frame = Frame(main_frame, bg=c.DARK_BG)
@@ -70,11 +69,34 @@ class FiletypesManagerWindow(Toplevel):
         self.tree.bind('<<TreeviewSelect>>', self.on_tree_selection_change)
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind('<Escape>', lambda e: self.on_closing())
+        self.bind('<Configure>', self._on_resize)
 
         self.populate_tree()
 
         self._position_window()
         self.deiconify()
+
+    def _on_resize(self, event=None):
+        self.after_idle(self._manage_scrollbar)
+
+    def _manage_scrollbar(self):
+        """Shows or hides the scrollbar based on content vs. visible height."""
+        self.update_idletasks()
+        style = ttk.Style()
+        try:
+            row_height = style.lookup("Treeview", "rowheight")
+        except tk.TclError:
+            row_height = 25
+
+        content_height = len(self.filetypes_data) * row_height
+        visible_height = self.tree.winfo_height()
+
+        if content_height > visible_height:
+            if not self.tree_scroll.winfo_ismapped():
+                self.tree_scroll.pack(side='right', fill='y')
+        else:
+            if self.tree_scroll.winfo_ismapped():
+                self.tree_scroll.pack_forget()
 
     def _position_window(self):
         position_window(self)
@@ -97,6 +119,7 @@ class FiletypesManagerWindow(Toplevel):
                 self.tree.selection_set(selection)
             except tk.TclError:
                 pass
+        self.after_idle(self._manage_scrollbar)
 
     def on_tree_selection_change(self, event=None):
         state = 'normal' if self.tree.selection() else 'disabled'
@@ -114,7 +137,7 @@ class FiletypesManagerWindow(Toplevel):
         selection = self.tree.selection()
         if not selection:
             return
-        item_iid = selection
+        item_iid = selection[0]
         for item in self.filetypes_data:
             if item['ext'] == item_iid:
                 item['active'] = not item['active']
