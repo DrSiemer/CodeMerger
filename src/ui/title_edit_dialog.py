@@ -23,7 +23,7 @@ class TitleEditDialog(Toplevel):
         Label(main_frame, text=prompt, wraplength=350, justify='left', bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(pady=(0, 10), anchor='w')
 
         self.entry_var = StringVar(value=initialvalue)
-        self.entry = Entry(main_frame, textvariable=self.entry_var, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=("Segoe UI", 12))
+        self.entry = Entry(main_frame, textvariable=self.entry_var, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
         self.entry.pack(pady=5, fill='x', ipady=4)
         self.entry.focus_set()
         self.entry.select_range(0, 'end')
@@ -36,10 +36,10 @@ class TitleEditDialog(Toplevel):
         right_buttons_frame = Frame(button_frame, bg=c.DARK_BG)
         right_buttons_frame.pack(side='right')
 
-        ok_button = RoundedButton(right_buttons_frame, text="OK", command=self.on_ok, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=("Segoe UI", 12), width=90, height=30, cursor='hand2')
+        ok_button = RoundedButton(right_buttons_frame, text="OK", command=self.on_ok, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor='hand2')
         ok_button.pack(side='right')
 
-        cancel_button = RoundedButton(right_buttons_frame, text="Cancel", command=self.on_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=("Segoe UI", 12), width=90, height=30, cursor='hand2')
+        cancel_button = RoundedButton(right_buttons_frame, text="Cancel", command=self.on_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor='hand2')
         cancel_button.pack(side='right', padx=(0, 10))
 
         self.bind("<Return>", self.on_ok)

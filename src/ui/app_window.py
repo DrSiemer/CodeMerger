@@ -186,9 +186,6 @@ class App(Tk):
 
     def set_active_dir_display(self, path):
         """Sets the display string for the active directory and loads its config"""
-        font_family = "Segoe UI"
-        font_large_bold = (font_family, 24, 'bold')
-
         project_config, status_message = self.project_manager.load_project(path)
         self.status_var.set(status_message)
 
@@ -197,13 +194,13 @@ class App(Tk):
             self.project_title_var.set(project_config.project_name)
             self.project_color = project_config.project_color
             self.project_font_color = project_config.project_font_color
-            self.title_label.config(font=font_large_bold, fg=c.TEXT_COLOR)
+            self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_COLOR)
         else:
             self.active_dir.set("No project selected")
             self.project_title_var.set("(no active project)")
             self.project_color = c.COMPACT_MODE_BG_COLOR
             self.project_font_color = 'light'
-            self.title_label.config(font=font_large_bold, fg=c.TEXT_SUBTLE_COLOR)
+            self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
 
         self.file_monitor.start()
         self.button_manager.update_button_states()
@@ -227,8 +224,8 @@ class App(Tk):
         project_config = self.project_manager.get_current_project()
         if not project_config: return
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if result and result[1]:
-            new_color = result[1]
+        if result and result:
+            new_color = result
             self.project_color = new_color
             project_config.project_color = new_color
 

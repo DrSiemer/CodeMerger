@@ -17,11 +17,6 @@ class FiletypesManagerWindow(Toplevel):
         self.filetypes_data = load_all_filetypes()
         self.last_tree_click_time = 0
 
-        # --- Style Definitions ---
-        font_family = "Segoe UI"
-        font_normal = (font_family, 12)
-        font_button = (font_family, 16)
-
         # --- Window Setup ---
         self.title("Manage Filetypes")
         self.iconbitmap(ICON_PATH)
@@ -37,14 +32,14 @@ class FiletypesManagerWindow(Toplevel):
 
         tree_frame = Frame(main_frame, bg=c.DARK_BG)
         tree_frame.pack(fill='both', expand=True, pady=(0, 10))
-        Label(tree_frame, text="Allowed Filetypes (double click to toggle)", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(anchor='w', pady=(0,5))
+        Label(tree_frame, text="Allowed Filetypes (double click to toggle)", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(anchor='w', pady=(0,5))
 
         # --- Treeview Styling ---
         style = ttk.Style()
         style.theme_use('default')
-        style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=font_normal, rowheight=25)
+        style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=c.FONT_NORMAL, rowheight=25)
         style.map("Treeview", background=[('selected', c.BTN_BLUE)], foreground=[('selected', c.BTN_BLUE_TEXT)])
-        style.configure("Treeview.Heading", font=(font_family, 12, 'bold')) # Not used here, but good practice
+        style.configure("Treeview.Heading", font=c.FONT_BOLD) # Not used here, but good practice
 
         self.tree = ttk.Treeview(tree_frame, show='tree', selectmode='browse')
         self.tree.pack(side='left', fill='both', expand=True)
@@ -55,20 +50,20 @@ class FiletypesManagerWindow(Toplevel):
         # --- Add/Delete Buttons ---
         list_button_frame = Frame(main_frame, bg=c.DARK_BG)
         list_button_frame.pack(fill='x', pady=5)
-        self.delete_button = RoundedButton(list_button_frame, text="Delete Selected", command=self.delete_selected_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2')
+        self.delete_button = RoundedButton(list_button_frame, text="Delete Selected", command=self.delete_selected_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2')
         self.delete_button.pack(side='right')
         self.delete_button.set_state('disabled') # Start disabled
 
         # --- Add New Filetype ---
         add_frame = Frame(main_frame, bg=c.DARK_BG)
         add_frame.pack(fill='x', pady=10)
-        Label(add_frame, text="Add new:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=font_normal).pack(side='left', padx=(0, 5))
-        self.add_entry = Entry(add_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=font_normal)
+        Label(add_frame, text="Add new:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(side='left', padx=(0, 5))
+        self.add_entry = Entry(add_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
         self.add_entry.pack(side='left', expand=True, fill='x', ipady=4)
-        RoundedButton(add_frame, text="Add", command=self.add_new_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=font_button, cursor='hand2').pack(side='left', padx=(10, 0))
+        RoundedButton(add_frame, text="Add", command=self.add_new_filetype, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2').pack(side='left', padx=(10, 0))
 
         # --- Main Action Button ---
-        RoundedButton(self, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=font_button, cursor='hand2').pack(pady=10)
+        RoundedButton(self, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2').pack(pady=10)
 
         # --- Bindings ---
         self.tree.bind('<Button-1>', self.handle_tree_click)
@@ -119,7 +114,7 @@ class FiletypesManagerWindow(Toplevel):
         selection = self.tree.selection()
         if not selection:
             return
-        item_iid = selection[0]
+        item_iid = selection
         for item in self.filetypes_data:
             if item['ext'] == item_iid:
                 item['active'] = not item['active']

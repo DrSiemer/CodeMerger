@@ -4,14 +4,13 @@ from .collapsible_section import CollapsibleTextSection
 from ... import constants as c
 
 class PromptsSettingsFrame(Frame):
-    def __init__(self, parent, config, style_config, on_toggle, **kwargs):
+    def __init__(self, parent, config, on_toggle, **kwargs):
         super().__init__(parent, bg=c.DARK_BG, **kwargs)
-        self.font_bold = style_config['font_bold']
 
         self._create_widgets(config, on_toggle)
 
     def _create_widgets(self, config, on_toggle):
-        Label(self, text="Prompts", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
+        Label(self, text="Prompts", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
         container = Frame(self, bg=c.DARK_BG)
         container.pack(fill='x', expand=True, pady=(0, 15))
 

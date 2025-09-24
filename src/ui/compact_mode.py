@@ -61,7 +61,7 @@ class CompactMode(tk.Toplevel):
             text=title_abbr,
             bg=BAR_AND_BORDER_COLOR,
             fg=text_hex_color,
-            font=('Segoe UI', 8)
+            font=c.FONT_COMPACT_TITLE
         )
         self.title_label.pack(side='left', padx=(4, 0))
 
@@ -79,7 +79,7 @@ class CompactMode(tk.Toplevel):
 
         # --- Tiny "Copy Wrapped" Button ---
         self.wrapped_button = tk.Button(
-            border_frame, text="W", font=('Segoe UI', 8, 'bold'),
+            border_frame, text="W", font=c.FONT_COMPACT_BUTTON,
             bg="#FFFFFF", fg="#000000", activebackground=c.SUBTLE_HIGHLIGHT_COLOR, activeforeground="#FFFFFF",
             bd=0, relief="flat", cursor="hand2", command=self.copy_wrapped
         )
@@ -164,7 +164,7 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window.wm_geometry(f"+{x}+{y}")
         label = tk.Label(self.tooltip_window, text=text_to_show, justify='left',
                       background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
-                      font=("tahoma", "8", "normal"))
+                      font=c.FONT_TOOLTIP)
         label.pack(ipadx=4, ipady=2)
         # Center tooltip below the widget
         self.tooltip_window.update_idletasks()

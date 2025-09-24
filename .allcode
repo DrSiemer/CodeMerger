@@ -86,10 +86,10 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1758533113.43794,
-      "hash": "d6f783bd0ef08b28b542d4fbc539bd42e5bf9517",
-      "tokens": 821,
-      "lines": 79
+      "mtime": 1758716228.2698014,
+      "hash": "a99616be0a8bc60a579d9a73d24a50b4f056f7ce",
+      "tokens": 1022,
+      "lines": 98
     },
     {
       "path": "src/core/paths.py",
@@ -191,23 +191,23 @@
     },
     {
       "path": "src/ui/tooltip.py",
-      "mtime": 1756990685.4947114,
-      "hash": "fbf0ac6415d706ac65d32af901cc28eb1f18c03a",
-      "tokens": 406,
+      "mtime": 1758716443.983997,
+      "hash": "612ea9a29b7fc05b985105a02f247c905faa64b3",
+      "tokens": 400,
       "lines": 60
     },
     {
       "path": "src/ui/widgets/rounded_button.py",
-      "mtime": 1758196601.7675016,
-      "hash": "f0d801e6dd881fc27a1d943bef3f291d912b243c",
-      "tokens": 2148,
-      "lines": 204
+      "mtime": 1758716746.7852373,
+      "hash": "1ff884e5a2d630a3ec3206afe43cdca2a05bd796",
+      "tokens": 2121,
+      "lines": 203
     },
     {
       "path": "src/ui/widgets/two_column_list.py",
-      "mtime": 1758555863.0143962,
-      "hash": "8aa49194e7dabb6628731c6dbbc4bb88c01e3445",
-      "tokens": 1972,
+      "mtime": 1758716955.2189624,
+      "hash": "00739d324989b62668b54cd7339e7a4cc7be588a",
+      "tokens": 1977,
       "lines": 209
     },
     {
@@ -247,16 +247,16 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758555863.0143962,
-      "hash": "469bafbb6d25a49bc56ec2344f3d222b9ad49502",
-      "tokens": 2518,
-      "lines": 146
+      "mtime": 1758716879.507617,
+      "hash": "69ca660263679232c7b833599eddd65ed1dd7d52",
+      "tokens": 2515,
+      "lines": 144
     },
     {
       "path": "src/ui/file_manager/selection_list_controller.py",
-      "mtime": 1758715800.7415185,
-      "hash": "2094e15996441d3aba61c15f6e03dc60e2fa70b4",
-      "tokens": 1734,
+      "mtime": 1758716801.9739702,
+      "hash": "47b479f9e2e299f311138b641c5032dcd7f5d1d0",
+      "tokens": 1728,
       "lines": 183
     },
     {
@@ -303,17 +303,17 @@
     },
     {
       "path": "src/ui/directory_dialog.py",
-      "mtime": 1758196612.9865668,
-      "hash": "cf44a40a9f608de752c0d28247ae1956b67f99b8",
-      "tokens": 1382,
-      "lines": 172
+      "mtime": 1758716405.9502933,
+      "hash": "6dbf738044b2abb2c6396cd3094d7a283b6291e9",
+      "tokens": 1336,
+      "lines": 167
     },
     {
       "path": "src/ui/filetypes_manager.py",
-      "mtime": 1758196651.423699,
-      "hash": "1988bf98d4bc7a930dc592effcfe2f20f1a88c29",
-      "tokens": 1722,
-      "lines": 175
+      "mtime": 1758716417.7396286,
+      "hash": "5a8ad8d2059ee24758c8624a0b76e164f6cb9a32",
+      "tokens": 1678,
+      "lines": 170
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",
@@ -324,38 +324,38 @@
     },
     {
       "path": "src/ui/style_manager.py",
-      "mtime": 1757938209.9169016,
-      "hash": "429d1882833dc1b852222c0676b86d88d5ffcb26",
-      "tokens": 344,
-      "lines": 43
+      "mtime": 1758716425.5924976,
+      "hash": "3f155fe7d6bc8956e86ef5c631826d30e606e461",
+      "tokens": 333,
+      "lines": 41
     },
     {
       "path": "src/ui/title_edit_dialog.py",
-      "mtime": 1758196702.1334007,
-      "hash": "37e23c12555f986d893706ff5220957d02756ce6",
-      "tokens": 722,
+      "mtime": 1758716436.013321,
+      "hash": "4efe25e61f8e3f368d51ae812974a5e7ed3867b4",
+      "tokens": 713,
       "lines": 76
     },
     {
       "path": "src/ui/wrapper_text_window.py",
-      "mtime": 1758196848.1504195,
-      "hash": "41a0f77a39bcb9cac5b47bf681f328222becbc47",
-      "tokens": 1582,
+      "mtime": 1758716462.1193678,
+      "hash": "598fb2a69682540e6719607a62c775c8efa93e3f",
+      "tokens": 1571,
       "lines": 142
     },
     {
       "path": "src/ui/compact_mode.py",
-      "mtime": 1757938209.7628586,
-      "hash": "65e0572ddd1a20cb559f975d77b66c5013448b7f",
-      "tokens": 2222,
+      "mtime": 1758716392.8437514,
+      "hash": "c96b33b5833c35a1ecce0f005982560618341bd0",
+      "tokens": 2211,
       "lines": 222
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1758196837.4545598,
-      "hash": "55aeb840c451c96a0a02ec388991c3c72537c6e4",
-      "tokens": 1642,
-      "lines": 117
+      "mtime": 1758716452.9354491,
+      "hash": "1a786f14009c172627d6a80f3a39e08d0d0c1373",
+      "tokens": 1589,
+      "lines": 111
     },
     {
       "path": "src/ui/status_bar_manager.py",
@@ -366,55 +366,55 @@
     },
     {
       "path": "src/ui/settings/settings_window.py",
-      "mtime": 1758661618.7537642,
-      "hash": "6bdb6d3e6c3acb365065697e39cf748adbe58ef1",
-      "tokens": 1378,
-      "lines": 141
+      "mtime": 1758716544.3986223,
+      "hash": "9e15977a4bc80f6f06cdb08e43a386ec211ccae7",
+      "tokens": 1301,
+      "lines": 135
     },
     {
       "path": "src/ui/settings/application_settings.py",
-      "mtime": 1758660505.1816242,
-      "hash": "bd05c8b9d13caef489fa6c08e4bedb2e91bbccf0",
-      "tokens": 828,
-      "lines": 59
+      "mtime": 1758716494.0726662,
+      "hash": "09c03a707b4a60096d2a7bed0097b6fefacb36de",
+      "tokens": 789,
+      "lines": 56
     },
     {
       "path": "src/ui/settings/file_manager_settings.py",
-      "mtime": 1758660491.5020592,
-      "hash": "daf27171172e05e87ee48cb0663e82b84e4edaf9",
-      "tokens": 474,
-      "lines": 37
+      "mtime": 1758716520.2651515,
+      "hash": "65c250d766c13600a555d1ede5573c7a72dcfe68",
+      "tokens": 449,
+      "lines": 35
     },
     {
       "path": "src/ui/settings/prompts_settings.py",
-      "mtime": 1758660878.788007,
-      "hash": "e2328693bd141b1e631da5e608c3e8d10712d1be",
-      "tokens": 421,
-      "lines": 44
+      "mtime": 1758716529.6244857,
+      "hash": "11c6a4dd6a45e0f088ab8285539fc00aa45cda60",
+      "tokens": 407,
+      "lines": 43
     },
     {
       "path": "src/ui/settings/collapsible_section.py",
-      "mtime": 1758660953.7163954,
-      "hash": "715e37095f1c662031fc2bad0f4a22f2f9ed05d8",
-      "tokens": 763,
-      "lines": 75
+      "mtime": 1758716502.0316217,
+      "hash": "32d05f4acc615d833677170e018176feea44930a",
+      "tokens": 723,
+      "lines": 72
     },
     {
       "path": "src/ui/settings/editor_settings.py",
-      "mtime": 1758660445.6743305,
-      "hash": "7c4a67a6c0cda5f2b8264ee99d3322f3adf2d5a6",
-      "tokens": 428,
-      "lines": 33
+      "mtime": 1758716510.2577918,
+      "hash": "fbb1d5e2e744c3f5d2bcc36041dc569e4bc95c4b",
+      "tokens": 392,
+      "lines": 30
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1758660826.4792707,
-      "hash": "788cb327b28f58ea04083fd0e5c72c53959ecbcb",
-      "tokens": 2581,
-      "lines": 333
+      "mtime": 1758716377.6262982,
+      "hash": "46c624b025b0777a89bcc8aa1e5505c774ae52b9",
+      "tokens": 2554,
+      "lines": 330
     }
   ],
-  "total_tokens": 59691,
+  "total_tokens": 59412,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [

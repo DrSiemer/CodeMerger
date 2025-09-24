@@ -46,12 +46,6 @@ class SettingsWindow(Toplevel):
         }
 
     def _init_styles(self):
-        self.style_config = {
-            'font_family': "Segoe UI",
-            'font_normal': ("Segoe UI", 12),
-            'font_bold': ("Segoe UI", 12, 'bold'),
-            'font_button': ("Segoe UI", 16)
-        }
         apply_dark_theme(self)
 
     def _init_window(self):
@@ -65,7 +59,7 @@ class SettingsWindow(Toplevel):
         self.configure(bg=c.DARK_BG)
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
-    
+
     def _create_widgets(self):
         # --- Main container frame ---
         main_frame = Frame(self, bg=c.DARK_BG)
@@ -80,16 +74,16 @@ class SettingsWindow(Toplevel):
         content_frame.config(padx=20, pady=20)
 
         # --- Instantiate and pack setting sections ---
-        app_settings = ApplicationSettingsFrame(content_frame, self.vars, self.updater, self.style_config)
+        app_settings = ApplicationSettingsFrame(content_frame, self.vars, self.updater)
         app_settings.pack(fill='x', expand=True)
 
-        fm_settings = FileManagerSettingsFrame(content_frame, self.vars, self.style_config)
+        fm_settings = FileManagerSettingsFrame(content_frame, self.vars)
         fm_settings.pack(fill='x', expand=True)
 
-        self.prompts_frame = PromptsSettingsFrame(content_frame, self.config, self.style_config, on_toggle=None)
+        self.prompts_frame = PromptsSettingsFrame(content_frame, self.config, on_toggle=None)
         self.prompts_frame.pack(fill='x', expand=True)
-        
-        editor_settings = EditorSettingsFrame(content_frame, self.vars, self.style_config)
+
+        editor_settings = EditorSettingsFrame(content_frame, self.vars)
         editor_settings.pack(fill='x', expand=True)
 
         # --- Action Buttons (Outside scroll area) ---
@@ -97,7 +91,7 @@ class SettingsWindow(Toplevel):
         # [FIX] Changed pady=(10, 20) to pady=(0, 20) to remove the top padding.
         button_frame.grid(row=1, column=0, sticky='ew', padx=20, pady=(0, 20))
         button_frame.grid_columnconfigure(0, weight=1)
-        save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=self.style_config['font_button'], cursor='hand2')
+        save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2')
         save_button.grid(row=0, column=1, sticky='e')
 
     def _position_window(self):
@@ -112,7 +106,7 @@ class SettingsWindow(Toplevel):
 
     def save_and_close(self):
         # The main config object is still the one loaded at the start
-        config = self.config 
+        config = self.config
         prompt_values = self.prompts_frame.get_values()
 
         config['default_editor'] = self.vars['editor_path'].get()

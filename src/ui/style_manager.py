@@ -6,8 +6,6 @@ def apply_dark_theme(window):
     Applies a consistent dark theme to all ttk widgets in the application.
     This should be called on any Toplevel window that uses ttk widgets.
     """
-    font_normal = ("Segoe UI", 12)
-
     window.option_add('*TCombobox*Listbox.background', c.TEXT_INPUT_BG)
     window.option_add('*TCombobox*Listbox.foreground', c.TEXT_COLOR)
     window.option_add('*TCombobox*Listbox.selectBackground', c.BTN_BLUE)
@@ -20,7 +18,7 @@ def apply_dark_theme(window):
     s.configure('Dark.TCheckbutton',
         background=c.DARK_BG,
         foreground=c.TEXT_COLOR,
-        font=font_normal
+        font=c.FONT_NORMAL
     )
     s.map('Dark.TCheckbutton',
         background=[('active', c.DARK_BG)],

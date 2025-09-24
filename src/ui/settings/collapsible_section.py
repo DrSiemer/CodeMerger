@@ -10,24 +10,21 @@ class CollapsibleTextSection(Frame):
     def __init__(self, parent, title, initial_text, default_text, on_toggle_callback=None, **kwargs):
         super().__init__(parent, bg=c.DARK_BG, **kwargs)
         self.on_toggle_callback = on_toggle_callback
-        self.font_bold = ("Segoe UI", 12, 'bold')
-        self.font_normal = ("Segoe UI", 12)
-        self.font_small_button = ("Segoe UI", 9)
 
         # --- Header ---
         header_frame = Frame(self, bg=c.DARK_BG)
         header_frame.pack(fill='x', expand=True)
 
-        self.icon_label = Label(header_frame, text="▶", font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
+        self.icon_label = Label(header_frame, text="▶", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
         self.icon_label.pack(side='left', padx=(0, 5))
 
-        title_label = Label(header_frame, text=title, font=self.font_bold, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
+        title_label = Label(header_frame, text=title, font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR, cursor="hand2")
         title_label.pack(side='left')
 
         reset_button = RoundedButton(
             header_frame, text="Reset", command=self.reset_text,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT,
-            font=self.font_small_button, height=22, radius=4,
+            font=c.FONT_SMALL_BUTTON, height=22, radius=4,
             cursor='hand2'
         )
         reset_button.pack(side='right', padx=(5, 0))
@@ -39,7 +36,7 @@ class CollapsibleTextSection(Frame):
         self.text_widget = Text(
             text_frame, wrap='word', undo=True, height=4,
             bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            relief='flat', bd=0, highlightthickness=0, font=self.font_normal
+            relief='flat', bd=0, highlightthickness=0, font=c.FONT_NORMAL
         )
         self.text_widget.pack(fill='x', expand=True, ipady=4, ipadx=4)
 

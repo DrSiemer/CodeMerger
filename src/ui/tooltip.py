@@ -50,7 +50,7 @@ class ToolTip:
             fg=c.TEXT_COLOR,
             relief='solid',
             borderwidth=1,
-            font=("tahoma", "8", "normal")
+            font=c.FONT_TOOLTIP
         )
         label.pack(ipadx=4, ipady=2)
 

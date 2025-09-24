@@ -11,9 +11,8 @@ class RoundedButton(tk.Canvas):
             # If a tuple like ("Segoe UI", 12) is passed, use it directly
             self.tk_font_tuple = font
         else:
-            # If font is None, get the default font and extract its properties
-            default_font = tkFont.nametofont("TkDefaultFont")
-            self.tk_font_tuple = (default_font.actual("family"), default_font.actual("size"))
+            # If font is None, use the default font from constants
+            self.tk_font_tuple = c.FONT_DEFAULT
         self.hollow = hollow
         self.image = image # Store the Pillow image object
         # Use the robust font loader

@@ -12,7 +12,7 @@ class TwoColumnList(tk.Canvas):
         self.selected_indices = set()
         self.highlighted_indices = set()
         self.row_height = 25
-        self.left_col_font = tkFont.Font(family="Segoe UI", size=12)
+        self.left_col_font = tkFont.Font(family=c.FONT_NORMAL[0], size=c.FONT_NORMAL[1])
         self.right_col_font = right_col_font
         self.right_col_width = right_col_width
         self.scrollbar = None

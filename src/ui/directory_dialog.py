@@ -22,11 +22,6 @@ class DirectoryDialog(Toplevel):
         self.on_remove_callback = on_remove_callback
         self.tooltip = None
 
-        # --- Style Definitions ---
-        font_family = "Segoe UI"
-        font_normal = (font_family, 12)
-        font_button = (font_family, 16)
-
         self.title("Select project")
         self.iconbitmap(ICON_PATH)
         self.transient(parent)
@@ -42,7 +37,7 @@ class DirectoryDialog(Toplevel):
         else:
             message = "Browse for a project folder to get started"
 
-        self.info_label = Label(self, text=message, padx=20, pady=10, bg=self.app_bg_color, fg=c.TEXT_COLOR, font=font_normal)
+        self.info_label = Label(self, text=message, padx=20, pady=10, bg=self.app_bg_color, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.info_label.pack(pady=(5, 10), anchor='w')
 
         self.recent_dirs_frame = Frame(self, bg=self.app_bg_color)
@@ -50,7 +45,7 @@ class DirectoryDialog(Toplevel):
         if self.recent_projects:
             self.recent_dirs_frame.pack(fill='x', expand=False, pady=5)
             for path in self.recent_projects:
-                self.create_recent_dir_entry(path, font_button)
+                self.create_recent_dir_entry(path)
             self.update_idletasks()
 
         browse_btn = RoundedButton(
@@ -59,7 +54,7 @@ class DirectoryDialog(Toplevel):
             command=self.browse_for_new_dir,
             bg=c.BTN_BLUE,
             fg=c.BTN_BLUE_TEXT,
-            font=font_button,
+            font=c.FONT_BUTTON,
             cursor='hand2'
         )
         browse_btn.pack(pady=20, padx=20)
@@ -79,7 +74,7 @@ class DirectoryDialog(Toplevel):
         save_window_geometry(self)
         self.destroy()
 
-    def create_recent_dir_entry(self, path, font):
+    def create_recent_dir_entry(self, path):
         """Creates a single row in the recent projects list"""
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
         entry_frame.pack(fill='x', padx=20, pady=3)
@@ -98,7 +93,7 @@ class DirectoryDialog(Toplevel):
             command=lambda p=path: self.select_and_close(p),
             bg=c.BTN_GRAY_BG,
             fg=c.BTN_GRAY_TEXT,
-            font=font,
+            font=c.FONT_BUTTON,
             height=32,
             cursor='hand2'
         )
@@ -133,7 +128,7 @@ class DirectoryDialog(Toplevel):
 
         label = Label(self.tooltip, text=path, justify='left',
                       background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
-                      font=("tahoma", "8", "normal"), padx=4, pady=2)
+                      font=c.FONT_TOOLTIP, padx=4, pady=2)
         label.pack(ipadx=2, ipady=1)
 
     def hide_path_tooltip(self, event):

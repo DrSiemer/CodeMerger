@@ -175,7 +175,7 @@ class SelectionListController:
         self.tooltip_window.wm_geometry(f"+{x}+{y}")
         label = Label(self.tooltip_window, text=tooltip_text, justify='left',
                       background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
-                      font=("tahoma", "8", "normal"))
+                      font=c.FONT_TOOLTIP)
         label.pack(ipadx=4, ipady=2)
 
     def _hide_tooltip(self, event=None):

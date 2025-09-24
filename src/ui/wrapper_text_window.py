@@ -53,7 +53,7 @@ class WrapperTextWindow(Toplevel):
             command=self.save_and_close,
             bg=c.BTN_BLUE,
             fg=c.BTN_BLUE_TEXT,
-            font=("Segoe UI", 16),
+            font=c.FONT_BUTTON,
             cursor='hand2'
         )
         self.save_button.pack(side='right')
@@ -72,8 +72,8 @@ class WrapperTextWindow(Toplevel):
         intro_frame.grid(row=0, column=0, sticky='nsew', pady=(0, 10))
         intro_label_frame = Frame(intro_frame, bg=c.DARK_BG)
         intro_label_frame.pack(anchor='w', pady=(0, 5))
-        Label(intro_label_frame, text="Intro Text", font=('Helvetica', 10, 'bold'), bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
-        Label(intro_label_frame, text="(prepended to the final output):", font=('Helvetica', 10), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
+        Label(intro_label_frame, text="Intro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        Label(intro_label_frame, text="(prepended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
         intro_text_frame = Frame(intro_frame, bd=1, relief='sunken')
         intro_text_frame.pack(fill='both', expand=True)
         self.intro_text = Text(intro_text_frame, wrap='word', undo=True, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0)
@@ -87,8 +87,8 @@ class WrapperTextWindow(Toplevel):
         outro_frame.grid(row=1, column=0, sticky='nsew', pady=(10, 0))
         outro_label_frame = Frame(outro_frame, bg=c.DARK_BG)
         outro_label_frame.pack(anchor='w', pady=(0, 5))
-        Label(outro_label_frame, text="Outro Text", font=('Helvetica', 10, 'bold'), bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
-        Label(outro_label_frame, text="(appended to the final output):", font=('Helvetica', 10), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
+        Label(outro_label_frame, text="Outro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        Label(outro_label_frame, text="(appended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
         outro_text_frame = Frame(outro_frame, bd=1, relief='sunken')
         outro_text_frame.pack(fill='both', expand=True)
         self.outro_text = Text(outro_text_frame, wrap='word', undo=True, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0)
