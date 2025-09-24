@@ -50,7 +50,7 @@ jobs:
       - name: Build with PyInstaller
         run: pyinstaller codemerger.spec
       - name: Compile Inno Setup installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
           path: setup.iss
           options: '/dMyAppVersion="${{ github.ref_name }}"'
