@@ -94,7 +94,7 @@ class RoundedButton(tk.Canvas):
         if draw_width <= 1: # On first draw, widget may not have a size yet
             draw_width = self.width
         self._last_draw_width = draw_width
-        scale = 4  # Use 4x supersampling for smooth edges
+        scale = c.ANTIALIASING_SCALE_FACTOR  # Use 4x supersampling for smooth edges
         scaled_width = draw_width * scale
         scaled_height = self.height * scale
         scaled_radius = self.radius * scale

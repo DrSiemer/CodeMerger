@@ -30,7 +30,7 @@ class DirectoryDialog(Toplevel):
         self.configure(bg=self.app_bg_color)
         self.resizable(False, False)
 
-        self.dialog_width = 450
+        self.dialog_width = c.DIRECTORY_DIALOG_WIDTH
 
         if self.recent_projects:
             message = "Select a recent project or browse for a new one"

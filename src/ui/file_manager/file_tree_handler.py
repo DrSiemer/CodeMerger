@@ -1,5 +1,6 @@
 import os
 import time
+from ... import constants as c
 
 class FileTreeHandler:
     """
@@ -81,7 +82,7 @@ class FileTreeHandler:
         current_time = time.time()
         time_diff = current_time - self.last_tree_click_time
 
-        if time_diff < 0.4 and item_id and item_id == self.last_clicked_item_id:
+        if time_diff < c.DOUBLE_CLICK_INTERVAL_SECONDS and item_id and item_id == self.last_clicked_item_id:
             self.toggle_selection_for_selected()
             self.last_tree_click_time = 0
             self.last_clicked_item_id = None

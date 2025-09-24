@@ -3,6 +3,7 @@ import webbrowser
 from datetime import datetime
 from urllib import request, error
 from tkinter import messagebox
+from .. import constants as c
 
 class Updater:
     """
@@ -12,7 +13,7 @@ class Updater:
         self.parent = parent
         self.state = app_state
         self.current_version = current_version
-        self.repo_url = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"
+        self.repo_url = c.GITHUB_API_URL
 
     def _should_check_for_updates(self):
         """

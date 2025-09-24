@@ -4,7 +4,7 @@ import random
 import re
 import colorsys
 import hashlib
-from ..constants import COMPACT_MODE_BG_COLOR
+from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
 from .utils import get_token_count_for_text
 
 def _get_file_hash(full_path):
@@ -36,7 +36,7 @@ def _calculate_font_color(hex_color):
         # Using the luminance formula to determine brightness
         # A threshold of 150 is used for better visual comfort, favoring light text.
         luminance = (0.299 * r + 0.587 * g + 0.114 * b)
-        return 'dark' if luminance > 150 else 'light'
+        return 'dark' if luminance > FONT_LUMINANCE_THRESHOLD else 'light'
     except (ValueError, IndexError):
         return 'light' # Default to light text on error
 

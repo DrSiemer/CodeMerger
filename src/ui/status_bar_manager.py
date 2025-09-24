@@ -25,7 +25,7 @@ class StatusBarManager:
     def _start_status_fade(self):
         """Kicks off the fade animation."""
         start_time = time.time()
-        duration = 0.5  # Fade over half a second
+        duration = c.STATUS_FADE_DURATION_SECONDS  # Fade over half a second
         self._fade_status_step(start_time, duration)
 
     def _fade_status_step(self, start_time, duration):

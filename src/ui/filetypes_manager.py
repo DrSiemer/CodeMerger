@@ -20,7 +20,7 @@ class FiletypesManagerWindow(Toplevel):
         # --- Window Setup ---
         self.title("Manage Filetypes")
         self.iconbitmap(ICON_PATH)
-        self.geometry("450x550")
+        self.geometry(c.FILETYPES_WINDOW_DEFAULT_GEOMETRY)
         self.transient(parent)
         self.grab_set()
         self.focus_force()

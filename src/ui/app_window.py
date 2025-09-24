@@ -54,8 +54,8 @@ class App(Tk):
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
-        self.geometry("700x405")
-        self.minsize(500, 405)
+        self.geometry(c.DEFAULT_WINDOW_GEOMETRY)
+        self.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
         self.configure(bg=self.app_bg_color)
 
         self.protocol("WM_DELETE_WINDOW", self.on_app_close)

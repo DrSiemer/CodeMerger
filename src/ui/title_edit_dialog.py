@@ -48,7 +48,7 @@ class TitleEditDialog(Toplevel):
         # Set a fixed width and make non-resizable
         self.update_idletasks()
         required_height = self.winfo_reqheight()
-        self.geometry(f"400x{required_height}")
+        self.geometry(f"{c.TITLE_EDIT_DIALOG_WIDTH}x{required_height}")
         self.resizable(False, False)
 
         self._position_window()

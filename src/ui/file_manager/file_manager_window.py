@@ -34,8 +34,8 @@ class FileManagerWindow(Toplevel):
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
-        self.geometry("1000x700")
-        self.minsize(600, 200)
+        self.geometry(c.FILE_MANAGER_DEFAULT_GEOMETRY)
+        self.minsize(c.FILE_MANAGER_MIN_WIDTH, c.FILE_MANAGER_MIN_HEIGHT)
         self.transient(parent)
         self.grab_set()
         self.focus_force()

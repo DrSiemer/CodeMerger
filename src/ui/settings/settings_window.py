@@ -51,8 +51,8 @@ class SettingsWindow(Toplevel):
     def _init_window(self):
         self.title("Settings")
         self.iconbitmap(ICON_PATH)
-        self.geometry("500x640")
-        self.minsize(500, 300)
+        self.geometry(c.SETTINGS_WINDOW_DEFAULT_GEOMETRY)
+        self.minsize(c.SETTINGS_WINDOW_MIN_WIDTH, c.SETTINGS_WINDOW_MIN_HEIGHT)
         self.transient(self.parent)
         self.grab_set()
         self.focus_force()

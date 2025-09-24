@@ -4,6 +4,7 @@ from tkinter import messagebox, Toplevel
 from .compact_mode import CompactMode
 from .assets import assets
 from .window_utils import get_monitor_work_area
+from .. import constants as c
 
 class ViewManager:
     """
@@ -98,7 +99,7 @@ class ViewManager:
         else:
             self.main_window.geometry(f"{final_geom[2]}x{final_geom[3]}+{final_geom[0]}+{final_geom[1]}")
             self.main_window.attributes("-alpha", 1.0)
-            self.main_window.minsize(500, 405)
+            self.main_window.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.destroy()
                 self.compact_mode_window = None
@@ -118,7 +119,7 @@ class ViewManager:
 
         # A small delay gives the window manager time to process deiconify
         # before we start our own animation, preventing visual glitches.
-        self.main_window.after(20, self._start_shrink_animation)
+        self.main_window.after(c.ANIMATION_START_DELAY_MS, self._start_shrink_animation)
 
     def _start_shrink_animation(self):
         """The actual animation logic for shrinking."""
@@ -154,7 +155,7 @@ class ViewManager:
 
         end_geom = (target_x, target_y, widget_w, widget_h)
         self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
-        self._animate_window(time.time(), 0.25, start_geom, end_geom, is_shrinking=True)
+        self._animate_window(time.time(), c.ANIMATION_DURATION_SECONDS, start_geom, end_geom, is_shrinking=True)
 
     def transition_to_normal(self):
         """Starts the process of growing the main window back to its normal state."""
@@ -180,7 +181,7 @@ class ViewManager:
         self.main_window.deiconify()
         self.main_window.geometry(f"{start_geom[2]}x{start_geom[3]}+{start_geom[0]}+{start_geom[1]}")
 
-        self._animate_window(time.time(), 0.25, start_geom, end_geom, is_shrinking=False)
+        self._animate_window(time.time(), c.ANIMATION_DURATION_SECONDS, start_geom, end_geom, is_shrinking=False)
 
     def _prepare_compact_mode_window(self):
         """Creates the CompactMode Toplevel window and configures it."""

@@ -20,7 +20,7 @@ class WrapperTextWindow(Toplevel):
         # --- Window Setup ---
         self.title("Set Wrapper Text")
         self.iconbitmap(ICON_PATH)
-        self.geometry("700x500")
+        self.geometry(c.WRAPPER_TEXT_WINDOW_DEFAULT_GEOMETRY)
         self.transient(parent)
         self.grab_set()
         self.focus_force()

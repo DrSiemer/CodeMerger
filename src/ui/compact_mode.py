@@ -36,8 +36,8 @@ class CompactMode(tk.Toplevel):
 
         # --- Style and Layout Constants ---
         BAR_AND_BORDER_COLOR = self.instance_color # Use the passed-in color
-        BORDER_WIDTH = 1
-        MOVE_BAR_HEIGHT = 14
+        BORDER_WIDTH = c.COMPACT_MODE_BORDER_WIDTH
+        MOVE_BAR_HEIGHT = c.COMPACT_MODE_MOVE_BAR_HEIGHT
         text_hex_color = c.TEXT_COLOR if font_color_name == 'light' else '#000000'
 
         # --- Window Configuration ---
