@@ -231,14 +231,15 @@ class App(Tk):
     def open_color_chooser(self, event=None):
         project_config = self.project_manager.get_current_project()
         if not project_config: return
+        # result is a tuple: ((r,g,b), '#rrggbb') or (None, None)
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if result and result:
-            new_color = result
-            self.project_color = new_color
-            project_config.project_color = new_color
+        if result and result[1]:
+            new_hex_color = result[1]
+            self.project_color = new_hex_color
+            project_config.project_color = new_hex_color
 
             # Calculate and save the new font color
-            new_font_color = _calculate_font_color(new_color)
+            new_font_color = _calculate_font_color(new_hex_color)
             self.project_font_color = new_font_color
             project_config.project_font_color = new_font_color
 
