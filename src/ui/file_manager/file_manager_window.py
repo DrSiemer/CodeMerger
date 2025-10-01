@@ -36,7 +36,6 @@ class FileManagerWindow(Toplevel):
         self.iconbitmap(ICON_PATH)
         self.geometry(c.FILE_MANAGER_DEFAULT_GEOMETRY)
         self.minsize(c.FILE_MANAGER_MIN_WIDTH, c.FILE_MANAGER_MIN_HEIGHT)
-        self.transient(parent)
         self.grab_set()
         self.focus_force()
         self.configure(bg=c.DARK_BG)
@@ -77,7 +76,8 @@ class FileManagerWindow(Toplevel):
         position_window(self)
 
     def _close_and_save_geometry(self):
-        save_window_geometry(self)
+        if self.state() == 'normal':
+            save_window_geometry(self)
         self.destroy()
 
     def _update_sash_cover_position(self, event=None):

@@ -247,7 +247,7 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758874183.9820206,
+      "mtime": 1759350879.7256546,
       "hash": "69ca660263679232c7b833599eddd65ed1dd7d52",
       "tokens": 2515,
       "lines": 144
@@ -275,10 +275,10 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1758874183.952018,
-      "hash": "3d3659fff7eed7cb4fef6f3d27f06d7f2d223f7f",
-      "tokens": 1779,
-      "lines": 195
+      "mtime": 1759350874.749476,
+      "hash": "bce8b2ba1ae7670444de1356ff6681876d8cd4eb",
+      "tokens": 1820,
+      "lines": 197
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
@@ -352,9 +352,9 @@
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1758874183.9870207,
-      "hash": "1a786f14009c172627d6a80f3a39e08d0d0c1373",
-      "tokens": 1589,
+      "mtime": 1759350378.0791848,
+      "hash": "bf93817d57b0d81ef571ce750e4e3ff268dffcc1",
+      "tokens": 1596,
       "lines": 111
     },
     {
@@ -408,10 +408,10 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1758874183.919013,
-      "hash": "da4f8944a9e1adae53b01d9e978fe2f1e82ac18f",
-      "tokens": 2643,
-      "lines": 339
+      "mtime": 1759350463.1525693,
+      "hash": "b73ddf20f99785592c110538029b7c7fa1ceec2d",
+      "tokens": 2727,
+      "lines": 351
     }
   ],
   "total_tokens": 59412,
