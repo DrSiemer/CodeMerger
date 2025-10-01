@@ -3,6 +3,7 @@ import json
 import sys
 import time
 import subprocess
+import pyperclip
 from tkinter import Tk, StringVar, messagebox, colorchooser
 from PIL import Image, ImageTk
 
@@ -248,6 +249,17 @@ class App(Tk):
 
     def open_project_folder(self, event=None):
         project_path = self.active_dir.get()
+        is_ctrl_pressed = event and (event.state & 0x0004)
+
+        if is_ctrl_pressed:
+            if project_path and os.path.isdir(project_path):
+                pyperclip.copy(project_path)
+                self.status_var.set("Copied project path to clipboard")
+            else:
+                self.status_var.set("No active project path to copy")
+            return
+
+        # Normal click
         if project_path and os.path.isdir(project_path):
             try:
                 if sys.platform == "win32":
