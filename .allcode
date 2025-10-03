@@ -23,7 +23,7 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1758717844.0806453,
+      "mtime": 1758720729.24228,
       "hash": "8286fd4660cf405dab4cd4bdf6c05582bb1e8788",
       "tokens": 1406,
       "lines": 53
@@ -37,7 +37,7 @@
     },
     {
       "path": "default_filetypes.json",
-      "mtime": 1758195643.9459147,
+      "mtime": 1758720725.992935,
       "hash": "44a35e0df4bf2a32656f925991ca0d88a83a8c8f",
       "tokens": 555,
       "lines": 44
@@ -58,21 +58,21 @@
     },
     {
       "path": ".github/workflows/release.yml",
-      "mtime": 1757342101.1170692,
-      "hash": "647d1ea3e435809ea4c0889acce891579253e380",
-      "tokens": 631,
+      "mtime": 1758725086.1971867,
+      "hash": "3dda90222f519bb257ce9154e049a99296213ebb",
+      "tokens": 630,
       "lines": 84
     },
     {
       "path": "go.bat",
-      "mtime": 1757340088.0638418,
+      "mtime": 1758724669.837057,
       "hash": "1fb133625b41eaf62013d464c21bbcc50280e2b5",
       "tokens": 1840,
       "lines": 236
     },
     {
       "path": "run.py",
-      "mtime": 1752850656.5047066,
+      "mtime": 1758726639.7019978,
       "hash": "0171f0345556bf0145d65b50baf26e2a40af3bfb",
       "tokens": 21,
       "lines": 4
@@ -86,14 +86,14 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1758719455.6798258,
+      "mtime": 1758720729.24228,
       "hash": "6f0032817de160b10b8ff18c87ae4782cccb9781",
       "tokens": 1278,
       "lines": 129
     },
     {
       "path": "src/core/paths.py",
-      "mtime": 1758530577.99221,
+      "mtime": 1758720729.243281,
       "hash": "f834541d5c1155530cf00acbb74c8e5d4c404ff4",
       "tokens": 690,
       "lines": 78
@@ -142,7 +142,7 @@
     },
     {
       "path": "src/core/project_config.py",
-      "mtime": 1758719873.6407702,
+      "mtime": 1758720729.2442849,
       "hash": "7b43fc4e07ef3a39a800c9d793e28759cc2c741e",
       "tokens": 1735,
       "lines": 183
@@ -156,7 +156,7 @@
     },
     {
       "path": "src/core/updater.py",
-      "mtime": 1758719475.9313788,
+      "mtime": 1758720729.2442849,
       "hash": "6df0aa5bb9731263b5a718009dd76edb2201b021",
       "tokens": 1099,
       "lines": 141
@@ -170,7 +170,7 @@
     },
     {
       "path": "src/ui/assets.py",
-      "mtime": 1758530555.3329587,
+      "mtime": 1758720729.245282,
       "hash": "7fdfbb9d370b5ad980abc59ff3441da84388818b",
       "tokens": 755,
       "lines": 64
@@ -184,28 +184,28 @@
     },
     {
       "path": "src/ui/window_utils.py",
-      "mtime": 1758717832.5795314,
+      "mtime": 1758720729.259336,
       "hash": "8b84367a528aed6050d6eda5ea0dfa42da07a19b",
       "tokens": 1182,
       "lines": 129
     },
     {
       "path": "src/ui/tooltip.py",
-      "mtime": 1758716443.983997,
+      "mtime": 1758720729.2563279,
       "hash": "612ea9a29b7fc05b985105a02f247c905faa64b3",
       "tokens": 400,
       "lines": 60
     },
     {
       "path": "src/ui/widgets/rounded_button.py",
-      "mtime": 1758719955.2263527,
+      "mtime": 1758720729.2583354,
       "hash": "8c83693c1bcd1eeebef3b18fc1bc6fdd97a31515",
       "tokens": 2127,
       "lines": 203
     },
     {
       "path": "src/ui/widgets/two_column_list.py",
-      "mtime": 1758719981.9234698,
+      "mtime": 1758720729.2583354,
       "hash": "41ce847d74758b1f0ac3ae83d1697a65e37fab0f",
       "tokens": 1980,
       "lines": 209
@@ -226,189 +226,189 @@
     },
     {
       "path": "src/ui/view_manager.py",
-      "mtime": 1758720070.028661,
+      "mtime": 1758720729.2573345,
       "hash": "2045a7a938660385537b21b642ab5edcd58b07f6",
       "tokens": 2147,
       "lines": 218
     },
     {
       "path": "src/ui/file_manager/file_tree_builder.py",
-      "mtime": 1758532685.4230022,
+      "mtime": 1758720729.2487977,
       "hash": "9dc185a2bef12f3077798c95a251e2a15ed0a0d6",
       "tokens": 771,
       "lines": 77
     },
     {
       "path": "src/ui/file_manager/file_tree_handler.py",
-      "mtime": 1758720370.1586113,
+      "mtime": 1758720729.2487977,
       "hash": "f1aec9e358cfbe0950b11d4f9633e001ebc37e77",
       "tokens": 1014,
       "lines": 116
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1758716879.507617,
+      "mtime": 1758720729.251798,
       "hash": "69ca660263679232c7b833599eddd65ed1dd7d52",
       "tokens": 2515,
       "lines": 144
     },
     {
       "path": "src/ui/file_manager/selection_list_controller.py",
-      "mtime": 1758716801.9739702,
+      "mtime": 1758720729.249796,
       "hash": "47b479f9e2e299f311138b641c5032dcd7f5d1d0",
       "tokens": 1728,
       "lines": 183
     },
     {
       "path": "src/ui/file_manager/selection_list_ui.py",
-      "mtime": 1758715785.1326358,
+      "mtime": 1758720729.249796,
       "hash": "3b17fd95c3149bba0c43e399ca8cf55b349aee4f",
       "tokens": 812,
       "lines": 63
     },
     {
       "path": "src/ui/file_manager/selection_data_manager.py",
-      "mtime": 1758715773.5324268,
+      "mtime": 1758720729.2487977,
       "hash": "0e72ced3ed493eb1ee20c9401d6549ce98608c1e",
       "tokens": 879,
       "lines": 97
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1758719900.8563383,
+      "mtime": 1758720729.2477975,
       "hash": "3d3659fff7eed7cb4fef6f3d27f06d7f2d223f7f",
       "tokens": 1779,
       "lines": 195
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
-      "mtime": 1758539676.574008,
+      "mtime": 1758720729.2477975,
       "hash": "216c18e982833836bdfebcedb0e1d31de6b78d97",
       "tokens": 692,
       "lines": 71
     },
     {
       "path": "src/ui/file_manager/state_controller.py",
-      "mtime": 1758540669.4548402,
+      "mtime": 1758720729.249796,
       "hash": "6cd4b5271f57369656119bfa71b760249ad86641",
       "tokens": 617,
       "lines": 70
     },
     {
       "path": "src/ui/file_manager/ui_controller.py",
-      "mtime": 1758555863.0143962,
+      "mtime": 1758720729.250798,
       "hash": "a82b3faa32c94d0c945c7864a83315e342cb9719",
       "tokens": 843,
       "lines": 104
     },
     {
       "path": "src/ui/directory_dialog.py",
-      "mtime": 1758719523.2862222,
+      "mtime": 1758720729.2467892,
       "hash": "0a86a88e8aad0f8d2da949e1f740ce4999a44f52",
       "tokens": 1340,
       "lines": 167
     },
     {
       "path": "src/ui/filetypes_manager.py",
-      "mtime": 1758720007.8378696,
+      "mtime": 1758720729.2523065,
       "hash": "c3fba2408f4c229877a7cf2a5fcc9fe0cee2aabb",
       "tokens": 1859,
       "lines": 193
     },
     {
       "path": "src/ui/widgets/scrollable_frame.py",
-      "mtime": 1758661763.1586256,
+      "mtime": 1758720729.2583354,
       "hash": "d07804755e12501badcc4fd986a6624c1535b8d0",
       "tokens": 726,
       "lines": 83
     },
     {
       "path": "src/ui/style_manager.py",
-      "mtime": 1758716425.5924976,
+      "mtime": 1758720729.2548213,
       "hash": "3f155fe7d6bc8956e86ef5c631826d30e606e461",
       "tokens": 333,
       "lines": 41
     },
     {
       "path": "src/ui/title_edit_dialog.py",
-      "mtime": 1758719602.0064662,
+      "mtime": 1758720729.2563279,
       "hash": "85f93f83d7b2d10e8534353fe041550533587658",
       "tokens": 719,
       "lines": 76
     },
     {
       "path": "src/ui/wrapper_text_window.py",
-      "mtime": 1758719636.2179828,
+      "mtime": 1758720729.259336,
       "hash": "7b685895a0ca8b9f76e6c61204b818edbf6a3bab",
       "tokens": 1575,
       "lines": 142
     },
     {
       "path": "src/ui/compact_mode.py",
-      "mtime": 1758719514.5775712,
+      "mtime": 1758720729.245282,
       "hash": "53bd3f75a8ba0694b2f6b54de083bece78b6106d",
       "tokens": 2248,
       "lines": 225
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1758716452.9354491,
+      "mtime": 1758720729.2573345,
       "hash": "1a786f14009c172627d6a80f3a39e08d0d0c1373",
       "tokens": 1589,
       "lines": 111
     },
     {
       "path": "src/ui/status_bar_manager.py",
-      "mtime": 1758719593.8621068,
+      "mtime": 1758720729.2548213,
       "hash": "76773b5b4f33e0330318a2e383017dc4e76933d5",
       "tokens": 742,
       "lines": 68
     },
     {
       "path": "src/ui/settings/settings_window.py",
-      "mtime": 1758719584.3955667,
+      "mtime": 1758720729.2548213,
       "hash": "3a46eb25814b8d1f64268bd4534ba1e6a2c50de6",
       "tokens": 1312,
       "lines": 135
     },
     {
       "path": "src/ui/settings/application_settings.py",
-      "mtime": 1758716494.0726662,
+      "mtime": 1758720729.2523065,
       "hash": "09c03a707b4a60096d2a7bed0097b6fefacb36de",
       "tokens": 789,
       "lines": 56
     },
     {
       "path": "src/ui/settings/file_manager_settings.py",
-      "mtime": 1758716520.2651515,
+      "mtime": 1758720729.2538133,
       "hash": "65c250d766c13600a555d1ede5573c7a72dcfe68",
       "tokens": 449,
       "lines": 35
     },
     {
       "path": "src/ui/settings/prompts_settings.py",
-      "mtime": 1758716529.6244857,
+      "mtime": 1758720729.2538133,
       "hash": "11c6a4dd6a45e0f088ab8285539fc00aa45cda60",
       "tokens": 407,
       "lines": 43
     },
     {
       "path": "src/ui/settings/collapsible_section.py",
-      "mtime": 1758716502.0316217,
+      "mtime": 1758720729.2523065,
       "hash": "32d05f4acc615d833677170e018176feea44930a",
       "tokens": 723,
       "lines": 72
     },
     {
       "path": "src/ui/settings/editor_settings.py",
-      "mtime": 1758716510.2577918,
+      "mtime": 1758720729.2523065,
       "hash": "fbb1d5e2e744c3f5d2bcc36041dc569e4bc95c4b",
       "tokens": 392,
       "lines": 30
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1758719499.2528996,
+      "mtime": 1758720729.245282,
       "hash": "3275d78f3b01cfdc4a68cf9e8ab5a46fa9bfafb6",
       "tokens": 2612,
       "lines": 338
@@ -416,7 +416,7 @@
   ],
   "total_tokens": 59412,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
-  "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
+  "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless they precede another sentence)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
