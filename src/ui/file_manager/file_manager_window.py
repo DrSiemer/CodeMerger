@@ -60,8 +60,6 @@ class FileManagerWindow(Toplevel):
         self.bind('<Escape>', lambda e: self.state_controller.on_closing())
         self.tree.bind("<Motion>", self.ui_controller.on_tree_motion)
         self.tree.bind("<Leave>", self.ui_controller.on_tree_leave)
-        self.folder_icon_label.bind("<Button-1>", self.ui_controller.on_folder_icon_click)
-        ToolTip(self.folder_icon_label, text="Open file in folder", delay=500)
 
         self.data_controller.validate_and_update_cache()
         self.selection_handler.set_initial_selection(self.project_config.selected_files)
@@ -193,3 +191,6 @@ class FileManagerWindow(Toplevel):
             item_id = self.path_to_item_id[selected_path]
             self.tree.item(item_id, tags=('subtle_highlight',))
             self.tree.see(item_id)
+
+        # [MODIFIED] Trigger an icon refresh to reflect the new highlight/selection state instantly.
+        self.ui_controller.refresh_hover_icon()

@@ -9,6 +9,7 @@ from ..assets import assets
 class FileManagerUIController:
     def __init__(self, window):
         self.window = window
+        self.active_folder_icon_label = None
 
     def clear_filter(self, event=None):
         self.window.filter_text.set("")
@@ -30,29 +31,63 @@ class FileManagerUIController:
         self.window.populate_tree(filter_query)
         self.window.selection_handler.filter_list(filter_query)
 
+    def _show_icon_for_item(self, item_id):
+        """Centralized logic to show the correct folder icon for a given item."""
+        if not item_id:
+            self.on_tree_leave()
+            return
+
+        item_info = self.window.item_map.get(item_id, {})
+        if item_info.get('type') != 'file':
+            self.on_tree_leave()
+            return
+
+        bbox = self.window.tree.bbox(item_id)
+        if not bbox:
+            self.on_tree_leave()
+            return
+
+        # Determine the correct state and select the pre-built label
+        current_state = 'default'
+        tags = self.window.tree.item(item_id, 'tags')
+        if item_id in self.window.tree.selection():
+            current_state = 'selected'
+        elif 'subtle_highlight' in tags:
+            current_state = 'highlight'
+
+        label_to_show = self.window.folder_icon_labels[current_state]
+
+        # Swap the visible label only if it has changed
+        if self.active_folder_icon_label is not label_to_show:
+            if self.active_folder_icon_label:
+                self.active_folder_icon_label.place_forget()
+            self.active_folder_icon_label = label_to_show
+
+        # Calculate position and place the icon
+        tree_width = self.window.tree.winfo_width()
+        icon_width = assets.folder_reveal_icon.width()
+        icon_height = assets.folder_reveal_icon.height()
+        icon_x = tree_width - icon_width - 8
+        icon_y = bbox[1] + (bbox[3] // 2) - (icon_height // 2)
+
+        self.active_folder_icon_label.place(x=icon_x, y=icon_y)
+        self.window.hovered_file_path = item_info['path']
+
+    def refresh_hover_icon(self):
+        """Forces an update of the hover icon if the mouse is over an item."""
+        if self.window.hovered_file_path:
+            item_id = self.window.path_to_item_id.get(self.window.hovered_file_path)
+            if item_id:
+                self._show_icon_for_item(item_id)
+
     def on_tree_motion(self, event):
         item_id = self.window.tree.identify_row(event.y)
-        if item_id:
-            item_info = self.window.item_map.get(item_id, {})
-            if item_info.get('type') == 'file':
-                bbox = self.window.tree.bbox(item_id)
-                if not bbox:
-                    self.on_tree_leave()
-                    return
-
-                tree_width = self.window.tree.winfo_width()
-                icon_width = assets.folder_reveal_icon.width()
-                icon_height = assets.folder_reveal_icon.height()
-                icon_x = tree_width - icon_width - 8
-                icon_y = bbox[1] + (bbox[3] // 2) - (icon_height // 2)
-
-                self.window.folder_icon_label.place(x=icon_x, y=icon_y)
-                self.window.hovered_file_path = item_info['path']
-                return
-        self.on_tree_leave()
+        self._show_icon_for_item(item_id)
 
     def on_tree_leave(self, event=None):
-        self.window.folder_icon_label.place_forget()
+        if self.active_folder_icon_label:
+            self.active_folder_icon_label.place_forget()
+            self.active_folder_icon_label = None
         self.window.hovered_file_path = None
 
     def on_folder_icon_click(self, event=None):

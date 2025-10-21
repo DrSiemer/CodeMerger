@@ -58,7 +58,16 @@ def setup_file_manager_ui(window):
     tree_scroll.grid(row=1, column=1, sticky='ns')
     window.tree.config(yscrollcommand=tree_scroll.set)
 
-    window.folder_icon_label = Label(window.tree, image=assets.folder_reveal_icon, bg=c.TEXT_INPUT_BG, cursor="hand2")
+    # [MODIFIED] Create and bind the three static folder icons. This is the core of the fix.
+    window.folder_icon_labels = {
+        'default': Label(window.tree, image=assets.folder_reveal_icon, bg=c.TEXT_INPUT_BG, cursor="hand2"),
+        'selected': Label(window.tree, image=assets.folder_reveal_icon, bg=c.BTN_BLUE, cursor="hand2"),
+        'highlight': Label(window.tree, image=assets.folder_reveal_icon, bg=c.SUBTLE_HIGHLIGHT_COLOR, cursor="hand2")
+    }
+    for label in window.folder_icon_labels.values():
+        label.bind("<Button-1>", window.ui_controller.on_folder_icon_click)
+        ToolTip(label, text="Open file in folder", delay=500)
+
 
     tree_actions_frame = Frame(left_panel, bg=c.DARK_BG)
     tree_actions_frame.grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 0))
