@@ -253,7 +253,7 @@ class App(Tk):
 
         if is_ctrl_pressed:
             if project_path and os.path.isdir(project_path):
-                pyperclip.copy(project_path)
+                pyperclip.copy(project_path.replace('/', '\\'))
                 self.status_var.set("Copied project path to clipboard")
             else:
                 self.status_var.set("No active project path to copy")
