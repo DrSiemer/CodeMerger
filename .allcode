@@ -275,10 +275,10 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1759350874.749476,
-      "hash": "bce8b2ba1ae7670444de1356ff6681876d8cd4eb",
-      "tokens": 1820,
-      "lines": 197
+      "mtime": 1759351140.1852448,
+      "hash": "901f4dea2ba01380ae5c92e003e9f121bfab357e",
+      "tokens": 1782,
+      "lines": 195
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
@@ -352,7 +352,7 @@
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1759350378.0791848,
+      "mtime": 1759351140.1852448,
       "hash": "bf93817d57b0d81ef571ce750e4e3ff268dffcc1",
       "tokens": 1596,
       "lines": 111
@@ -408,7 +408,7 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1759350463.1525693,
+      "mtime": 1759351140.184246,
       "hash": "b73ddf20f99785592c110538029b7c7fa1ceec2d",
       "tokens": 2727,
       "lines": 351

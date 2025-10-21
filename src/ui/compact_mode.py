@@ -51,8 +51,11 @@ class CompactMode(tk.Toplevel):
         self._is_dragging = False
 
         # --- Move Bar (for dragging and double-click) ---
-        self.move_bar = tk.Frame(self, height=MOVE_BAR_HEIGHT, bg=BAR_AND_BORDER_COLOR, cursor="fleur")
-        self.move_bar.pack(fill='x', side='top')
+        button_area_width = self.image_up_pil.width + (BORDER_WIDTH * 2)
+        self.move_bar = tk.Frame(self, width=button_area_width, height=MOVE_BAR_HEIGHT, bg=BAR_AND_BORDER_COLOR, cursor="fleur")
+        self.move_bar.pack_propagate(False)
+        self.move_bar.pack(fill='x', side='top', pady=2)
+
 
         # Add project title abbreviation
         no_space_title = project_name.replace(' ', '')
