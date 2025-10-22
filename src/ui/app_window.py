@@ -193,10 +193,11 @@ class App(Tk):
         self.lift()
         self.focus_force()
 
-    def set_active_dir_display(self, path):
+    def set_active_dir_display(self, path, set_status=True):
         """Sets the display string for the active directory and loads its config"""
         project_config, status_message = self.project_manager.load_project(path)
-        self.status_var.set(status_message)
+        if set_status:
+            self.status_var.set(status_message)
 
         if project_config:
             self.active_dir.set(path)
@@ -348,4 +349,4 @@ class App(Tk):
             newly_detected_files=files_to_highlight
         )
         self.wait_window(fm_window)
-        self.set_active_dir_display(self.active_dir.get())
+        self.set_active_dir_display(self.active_dir.get(), set_status=False)
