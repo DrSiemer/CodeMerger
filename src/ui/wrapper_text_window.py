@@ -76,11 +76,12 @@ class WrapperTextWindow(Toplevel):
         Label(intro_label_frame, text="(prepended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
         intro_text_frame = Frame(intro_frame, bd=1, relief='sunken')
         intro_text_frame.pack(fill='both', expand=True)
+        intro_text_frame.grid_rowconfigure(0, weight=1)
+        intro_text_frame.grid_columnconfigure(0, weight=1)
         self.intro_text = Text(intro_text_frame, wrap='word', undo=True, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0)
-        intro_scroll = Scrollbar(intro_text_frame, command=self.intro_text.yview)
-        self.intro_text.config(yscrollcommand=intro_scroll.set)
-        intro_scroll.pack(side='right', fill='y')
-        self.intro_text.pack(side='left', fill='both', expand=True)
+        self.intro_scroll = Scrollbar(intro_text_frame, command=self.intro_text.yview)
+        self.intro_text.config(yscrollcommand=self.intro_scroll.set)
+        self.intro_text.grid(row=0, column=0, sticky='nsew')
 
         # --- Outro Text Section ---
         outro_frame = Frame(fields_container, bg=c.DARK_BG)
@@ -91,11 +92,12 @@ class WrapperTextWindow(Toplevel):
         Label(outro_label_frame, text="(appended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
         outro_text_frame = Frame(outro_frame, bd=1, relief='sunken')
         outro_text_frame.pack(fill='both', expand=True)
+        outro_text_frame.grid_rowconfigure(0, weight=1)
+        outro_text_frame.grid_columnconfigure(0, weight=1)
         self.outro_text = Text(outro_text_frame, wrap='word', undo=True, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0)
-        outro_scroll = Scrollbar(outro_text_frame, command=self.outro_text.yview)
-        self.outro_text.config(yscrollcommand=outro_scroll.set)
-        outro_scroll.pack(side='right', fill='y')
-        self.outro_text.pack(side='left', fill='both', expand=True)
+        self.outro_scroll = Scrollbar(outro_text_frame, command=self.outro_text.yview)
+        self.outro_text.config(yscrollcommand=self.outro_scroll.set)
+        self.outro_text.grid(row=0, column=0, sticky='nsew')
 
         # --- Populate Text Fields ---
         self.intro_text.insert('1.0', self.project_config.intro_text)
@@ -104,8 +106,26 @@ class WrapperTextWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
 
+        self.intro_text.bind("<KeyRelease>", lambda e: self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll))
+        self.intro_text.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll))
+        self.outro_text.bind("<KeyRelease>", lambda e: self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll))
+        self.outro_text.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll))
+
         self._position_window()
         self.deiconify()
+
+        self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll)
+        self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll)
+
+    def _manage_scrollbar(self, text_widget, scrollbar):
+        """Shows or hides the scrollbar based on whether the content overflows."""
+        top, bottom = text_widget.yview()
+        is_needed = bottom < 1.0
+        is_visible = scrollbar.winfo_ismapped()
+        if is_needed and not is_visible:
+            scrollbar.grid(row=0, column=1, sticky='ns')
+        elif not is_needed and is_visible:
+            scrollbar.grid_forget()
 
     def _position_window(self):
         position_window(self)
@@ -124,6 +144,9 @@ class WrapperTextWindow(Toplevel):
 
         self.outro_text.delete('1.0', 'end')
         self.outro_text.insert('1.0', default_outro)
+
+        self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll)
+        self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll)
 
     def save_and_close(self):
         """Saves the intro/outro text to the .allcode file and closes the window"""
