@@ -1,5 +1,6 @@
 import os
 from ...core.utils import is_ignored
+from ... import constants as c
 
 def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_text="", is_extension_filter_active=True, selected_file_paths=None):
     """
@@ -9,7 +10,6 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
     extensions = {ext for ext in file_extensions if ext.startswith('.')}
     exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
     filter_text_lower = filter_text.lower()
-    special_files_to_ignore = {'.allcode', '.gitignore'}
 
     if selected_file_paths is None:
         selected_file_paths = set()
@@ -17,6 +17,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
     def is_file_visible(rel_path, file_name):
         """Helper to determine if a file should be visible based on the filter state."""
         file_name_lower = file_name.lower()
+        # os.path.splitext() returns a tuple ('name', '.ext'), the `[1]` is crucial to select only the extension string for the subsequent set/list lookups!
         file_ext = os.path.splitext(file_name_lower)[1]
         is_active_type = file_ext in extensions or file_name_lower in exact_filenames
 
@@ -27,7 +28,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
         def _has_relevant_files(path):
             try:
                 for entry in os.scandir(path):
-                    if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name.lower() in special_files_to_ignore:
+                    if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE:
                         continue
                     if entry.is_dir():
                         if _has_relevant_files(entry.path): return True
@@ -44,7 +45,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
             except OSError: return []
 
             for entry in entries:
-                if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name.lower() in special_files_to_ignore: continue
+                if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE: continue
                 rel_path = os.path.relpath(entry.path, base_dir).replace('\\', '/')
                 if entry.is_dir():
                     if _has_relevant_files(entry.path):
@@ -63,7 +64,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
 
         has_match_in_subtree = False
         for entry in entries:
-            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name.lower() in special_files_to_ignore: continue
+            if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE: continue
 
             rel_path = os.path.relpath(entry.path, base_dir).replace('\\', '/')
             name_matches_filter = filter_text_lower in entry.name.lower()

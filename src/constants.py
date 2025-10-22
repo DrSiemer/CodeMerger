@@ -8,6 +8,9 @@ STATUS_FADE_SECONDS = 5
 # --- API Endpoints ---
 GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"
 
+# --- File System ---
+SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json'}
+
 # --- Behavioral Magic Numbers ---
 ANTIALIASING_SCALE_FACTOR = 4
 FONT_LUMINANCE_THRESHOLD = 150
