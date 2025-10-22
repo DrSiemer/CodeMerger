@@ -42,8 +42,6 @@ class App(Tk):
         self.window_geometries = {}
         self.title_click_job = None
         self.current_monitor_handle = None
-        self.last_x = 0
-        self.last_y = 0
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -88,18 +86,12 @@ class App(Tk):
 
     def _on_window_configure(self, event):
         """
-        Saves the main window's geometry and detects movement.
+        Saves the main window's current geometry for the restore animation
+        and checks if the window has moved to a new monitor.
         """
-        # We only save the geometry when the main window is in its normal state.
         if self.view_manager.current_state == 'normal':
-            x, y = self.winfo_x(), self.winfo_y()
-            if x != self.last_x or y != self.last_y:
-                self.view_manager.main_window_last_move_time = time.time()
-                self.last_x = x
-                self.last_y = y
-
             self.view_manager.main_window_geom = (
-                x, y,
+                self.winfo_x(), self.winfo_y(),
                 self.winfo_width(), self.winfo_height()
             )
             self._check_for_monitor_change()
@@ -107,7 +99,7 @@ class App(Tk):
     def _check_for_monitor_change(self):
         """
         Detects if the main window has moved to a different monitor and clears
-        saved child window positions if so. (Windows-only)
+        saved window positions if so. (Windows-only)
         """
         if sys.platform != "win32":
             return
@@ -127,9 +119,12 @@ class App(Tk):
 
             if new_monitor_handle != self.current_monitor_handle:
                 self.current_monitor_handle = new_monitor_handle
-                if self.window_geometries:
-                    self.window_geometries.clear()
-                    self.status_var.set("Moved to new monitor, popup window positions cleared.")
+                
+                # Invalidate both child window AND compact mode positions
+                self.window_geometries.clear()
+                self.view_manager.invalidate_compact_mode_position()
+                
+                self.status_var.set("Moved to new monitor, window positions reset.")
         except Exception:
             # Fail silently if any of the Windows API calls fail
             pass

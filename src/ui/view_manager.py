@@ -25,8 +25,6 @@ class ViewManager:
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
         self.main_window_geom = None
-        self.main_window_last_move_time = 0
-        self.compact_mode_last_move_time = 0
 
     def on_main_window_minimized(self, event=None):
         """
@@ -59,7 +57,14 @@ class ViewManager:
 
     def on_compact_mode_moved(self):
         """Callback executed when the compact mode window is moved by the user."""
-        self.compact_mode_last_move_time = time.time()
+        if self.compact_mode_window and self.compact_mode_window.winfo_exists():
+            self.compact_mode_last_x = self.compact_mode_window.winfo_x()
+            self.compact_mode_last_y = self.compact_mode_window.winfo_y()
+
+    def invalidate_compact_mode_position(self):
+        """Forgets the last position, forcing recalculation on the next compact transition."""
+        self.compact_mode_last_x = None
+        self.compact_mode_last_y = None
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
         """Helper method to animate the main window's geometry and alpha with easing."""
@@ -136,10 +141,7 @@ class ViewManager:
         widget_w = self.compact_mode_window.winfo_reqwidth()
         widget_h = self.compact_mode_window.winfo_reqheight()
 
-        use_saved_position = (
-            self.compact_mode_last_x is not None and
-            self.compact_mode_last_move_time > self.main_window_last_move_time
-        )
+        use_saved_position = self.compact_mode_last_x is not None
 
         if use_saved_position:
             target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
