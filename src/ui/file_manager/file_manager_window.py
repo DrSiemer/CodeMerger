@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Toplevel, StringVar
+from tkinter import Toplevel, StringVar, ttk
 
 from ...core.utils import parse_gitignore
 from .file_tree_builder import build_file_tree_data
@@ -72,6 +72,9 @@ class FileManagerWindow(Toplevel):
         self._position_window()
         self.deiconify()
 
+        if self.newly_detected_files:
+            self.expand_and_scroll_to_new_files()
+
     def _position_window(self):
         position_window(self)
 
@@ -90,6 +93,55 @@ class FileManagerWindow(Toplevel):
     def _on_manual_sash_move(self, event=None):
         self.sash_pos_normal = self.paned_window.sashpos(0)
         self._update_sash_cover_position()
+
+    def expand_and_scroll_to_new_files(self):
+        """
+        Expands parent directories of newly detected files and scrolls the first one to the top of the view.
+        """
+        if not self.newly_detected_files:
+            return
+
+        first_file_path = sorted(self.newly_detected_files)[0]
+        first_item_id = self.path_to_item_id.get(first_file_path)
+
+        if first_item_id:
+            # This command ensures all parent folders are expanded so the item is reachable.
+            self.tree.see(first_item_id)
+
+            def scroll_when_ready(retries=15):
+                """Polls until the item is rendered, then scrolls it to the top."""
+                if retries <= 0:
+                    return
+
+                try:
+                    # If bbox is available, the item is rendered. Proceed with scrolling.
+                    if self.tree.bbox(first_item_id):
+                        # This logic robustly finds the item's visible index and scrolls it to the top.
+                        visible_items = []
+                        def _collect_visible_items(parent_id):
+                            if parent_id != '' and not self.tree.item(parent_id, 'open'): return
+                            for child_id in self.tree.get_children(parent_id):
+                                visible_items.append(child_id)
+                                _collect_visible_items(child_id)
+                        _collect_visible_items('')
+
+                        if not visible_items: return
+                        total_visible = len(visible_items)
+                        target_index = visible_items.index(first_item_id) if first_item_id in visible_items else -1
+
+                        if target_index != -1:
+                            target_fraction = target_index / total_visible
+                            self.tree.yview_moveto(max(0.0, min(1.0, target_fraction)))
+                    else:
+                        # If bbox is not ready, schedule another check shortly.
+                        self.after(10, scroll_when_ready, retries - 1)
+
+                except tk.TclError:
+                    # Window was likely closed during polling.
+                    pass
+
+            # Start the polling process.
+            self.after(10, scroll_when_ready)
 
     def save_and_close(self):
         self.state_controller.save_and_close()

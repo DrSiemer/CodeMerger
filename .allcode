@@ -275,10 +275,10 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1761146720.8848207,
-      "hash": "66acb237f4cb6aa23bf421f4a37d018e20aed760",
-      "tokens": 1978,
-      "lines": 225
+      "mtime": 1761159821.31314,
+      "hash": "5f16e07aa9df92e4d33505ac5270a4c40ce571d7",
+      "tokens": 2401,
+      "lines": 277
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
@@ -401,10 +401,10 @@
     },
     {
       "path": "src/ui/settings/collapsible_section.py",
-      "mtime": 1761155575.9593327,
-      "hash": "5392fe132ad9eb06c3c162bbac849a73ee853a5a",
-      "tokens": 971,
-      "lines": 102
+      "mtime": 1761158035.0304224,
+      "hash": "28224c26509f2ac8364b404850023532547ee65e",
+      "tokens": 660,
+      "lines": 72
     },
     {
       "path": "src/ui/settings/editor_settings.py",
@@ -421,9 +421,9 @@
       "lines": 347
     }
   ],
-  "total_tokens": 62212,
+  "total_tokens": 62513,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
-  "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
+  "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
@@ -481,10 +481,10 @@
     "src/ui/widgets/rounded_button.py",
     "src/ui/widgets/scrollable_frame.py",
     "src/ui/widgets/scrollable_text.py",
+    "src/ui/widgets/test.txt",
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
     "src/ui/wrapper_text_window.py",
-    "test.txt",
     "version.txt"
   ]
 }
