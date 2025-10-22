@@ -23,10 +23,10 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1758874183.9080133,
-      "hash": "8286fd4660cf405dab4cd4bdf6c05582bb1e8788",
-      "tokens": 1406,
-      "lines": 53
+      "mtime": 1761157755.1073425,
+      "hash": "013178ec791583172d1841114aad58a9ae535644",
+      "tokens": 1487,
+      "lines": 54
     },
     {
       "path": "requirements.txt",
@@ -86,10 +86,10 @@
     },
     {
       "path": "src/constants.py",
-      "mtime": 1761078962.5905485,
-      "hash": "8cf290c73deac18f29854f824eb9203793f32fb6",
-      "tokens": 1278,
-      "lines": 129
+      "mtime": 1761146910.8078544,
+      "hash": "4c9b7b20c6fe6ac76178737f5bf6f23165c1582d",
+      "tokens": 1303,
+      "lines": 132
     },
     {
       "path": "src/core/paths.py",
@@ -219,24 +219,24 @@
     },
     {
       "path": "src/ui/file_monitor.py",
-      "mtime": 1757972761.9068713,
-      "hash": "03d1e208378228d1b5a59873013fdc392389fa6a",
-      "tokens": 1182,
-      "lines": 134
+      "mtime": 1761146094.9306161,
+      "hash": "2e7fdebf2ed13d3a4329dd433eaed695df93a353",
+      "tokens": 1207,
+      "lines": 138
     },
     {
       "path": "src/ui/view_manager.py",
-      "mtime": 1758874183.9870207,
-      "hash": "2045a7a938660385537b21b642ab5edcd58b07f6",
-      "tokens": 2147,
-      "lines": 218
+      "mtime": 1761153847.9637642,
+      "hash": "9169eb94048f3810920d76f41470e337bd7492d3",
+      "tokens": 2189,
+      "lines": 220
     },
     {
       "path": "src/ui/file_manager/file_tree_builder.py",
-      "mtime": 1761080839.077842,
-      "hash": "840b317e258157b083e7ac4ccb9bdba4e45dc9ea",
-      "tokens": 820,
-      "lines": 82
+      "mtime": 1761147067.4976244,
+      "hash": "a592810f9610b8db409cf6b04c646eb7b01c79d9",
+      "tokens": 878,
+      "lines": 84
     },
     {
       "path": "src/ui/file_manager/file_tree_handler.py",
@@ -247,10 +247,10 @@
     },
     {
       "path": "src/ui/file_manager/ui_setup.py",
-      "mtime": 1761087286.288414,
-      "hash": "4bb00aa5de9727070de7194e988400728ad9c448",
-      "tokens": 2821,
-      "lines": 171
+      "mtime": 1761146736.3316824,
+      "hash": "b83f238fee7a8ddf2c647cee6f7c7af2102ab410",
+      "tokens": 2791,
+      "lines": 170
     },
     {
       "path": "src/ui/file_manager/selection_list_controller.py",
@@ -275,10 +275,10 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1761087299.169952,
-      "hash": "b1e764c2e3e0ffc96b0d0f554132a924ec5022e5",
-      "tokens": 1960,
-      "lines": 219
+      "mtime": 1761146720.8848207,
+      "hash": "66acb237f4cb6aa23bf421f4a37d018e20aed760",
+      "tokens": 1978,
+      "lines": 225
     },
     {
       "path": "src/ui/file_manager/data_controller.py",
@@ -323,6 +323,13 @@
       "lines": 83
     },
     {
+      "path": "src/ui/widgets/scrollable_text.py",
+      "mtime": 1761157645.8587387,
+      "hash": "717475484ad0d23eac1d87f8d21032975ee5e221",
+      "tokens": 520,
+      "lines": 57
+    },
+    {
       "path": "src/ui/style_manager.py",
       "mtime": 1758874183.9860208,
       "hash": "3f155fe7d6bc8956e86ef5c631826d30e606e461",
@@ -338,10 +345,10 @@
     },
     {
       "path": "src/ui/wrapper_text_window.py",
-      "mtime": 1758874183.9900224,
-      "hash": "7b685895a0ca8b9f76e6c61204b818edbf6a3bab",
-      "tokens": 1575,
-      "lines": 142
+      "mtime": 1761157121.3509512,
+      "hash": "58b417f3416a7b072125f11fe2c3e7f86130b476",
+      "tokens": 1298,
+      "lines": 125
     },
     {
       "path": "src/ui/compact_mode.py",
@@ -394,10 +401,10 @@
     },
     {
       "path": "src/ui/settings/collapsible_section.py",
-      "mtime": 1758874183.983021,
-      "hash": "32d05f4acc615d833677170e018176feea44930a",
-      "tokens": 723,
-      "lines": 72
+      "mtime": 1761155575.9593327,
+      "hash": "5392fe132ad9eb06c3c162bbac849a73ee853a5a",
+      "tokens": 971,
+      "lines": 102
     },
     {
       "path": "src/ui/settings/editor_settings.py",
@@ -408,13 +415,13 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1761079364.9484327,
-      "hash": "126271ee2bd96b84d2195c757818f49fb8d09fda",
-      "tokens": 2730,
-      "lines": 351
+      "mtime": 1761153940.1743388,
+      "hash": "86bf9640efaec5be3b66dd077784cf20bd8d8a9d",
+      "tokens": 2687,
+      "lines": 347
     }
   ],
-  "total_tokens": 59412,
+  "total_tokens": 62212,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -473,9 +480,11 @@
     "src/ui/view_manager.py",
     "src/ui/widgets/rounded_button.py",
     "src/ui/widgets/scrollable_frame.py",
+    "src/ui/widgets/scrollable_text.py",
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
     "src/ui/wrapper_text_window.py",
+    "test.txt",
     "version.txt"
   ]
 }

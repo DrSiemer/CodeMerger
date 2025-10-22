@@ -1,5 +1,5 @@
 import os
-from tkinter import Toplevel, Frame, Label, Text, Scrollbar
+from tkinter import Toplevel, Frame, Label
 from ..core.paths import ICON_PATH
 from .widgets.rounded_button import RoundedButton
 from .. import constants as c
@@ -7,6 +7,7 @@ from ..core.utils import load_config
 from .tooltip import ToolTip
 from .window_utils import position_window, save_window_geometry
 from .assets import assets
+from .widgets.scrollable_text import ScrollableText
 
 class WrapperTextWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, on_close_callback=None):
@@ -26,15 +27,42 @@ class WrapperTextWindow(Toplevel):
         self.focus_force()
         self.configure(bg=c.DARK_BG)
 
-        # --- UI Layout ---
+        # --- UI Layout using a single, robust Grid ---
         main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
         main_frame.pack(fill='both', expand=True)
+        main_frame.grid_columnconfigure(0, weight=1)
+        # Configure rows for labels, text areas (expanding), and buttons
+        main_frame.grid_rowconfigure(1, weight=1) # Intro text
+        main_frame.grid_rowconfigure(3, weight=1) # Outro text
 
-        # --- Action Buttons (pack to bottom first to ensure visibility) ---
+        # --- Intro Section ---
+        intro_label_frame = Frame(main_frame, bg=c.DARK_BG)
+        intro_label_frame.grid(row=0, column=0, sticky='w', pady=(0, 5))
+        Label(intro_label_frame, text="Intro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        Label(intro_label_frame, text="(prepended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
+
+        self.intro_text = ScrollableText(
+            main_frame, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
+            insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL
+        )
+        self.intro_text.grid(row=1, column=0, sticky='nsew', pady=(0, 10))
+
+        # --- Outro Section ---
+        outro_label_frame = Frame(main_frame, bg=c.DARK_BG)
+        outro_label_frame.grid(row=2, column=0, sticky='w', pady=(0, 5))
+        Label(outro_label_frame, text="Outro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        Label(outro_label_frame, text="(appended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
+
+        self.outro_text = ScrollableText(
+            main_frame, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
+            insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL
+        )
+        self.outro_text.grid(row=3, column=0, sticky='nsew')
+
+        # --- Action Buttons Section ---
         button_frame = Frame(main_frame, bg=c.DARK_BG)
-        button_frame.pack(side='bottom', fill='x', pady=(10, 0))
+        button_frame.grid(row=4, column=0, sticky='ew', pady=(10, 0))
 
-        # --- Place "Load Defaults" icon on the left side of the button bar ---
         config = load_config()
         default_intro = config.get('default_intro_prompt', '').strip()
         default_outro = config.get('default_outro_prompt', '').strip()
@@ -46,58 +74,11 @@ class WrapperTextWindow(Toplevel):
             self.defaults_button.bind("<Button-1>", self.populate_from_defaults)
             ToolTip(self.defaults_button, "Populate fields with default prompts from Settings")
 
-        # --- Save Button on the right ---
         self.save_button = RoundedButton(
-            button_frame,
-            text="Save and Close",
-            command=self.save_and_close,
-            bg=c.BTN_BLUE,
-            fg=c.BTN_BLUE_TEXT,
-            font=c.FONT_BUTTON,
-            cursor='hand2'
+            button_frame, text="Save and Close", command=self.save_and_close,
+            bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2'
         )
         self.save_button.pack(side='right')
-
-        # --- Container for text fields that will use grid for equal sizing ---
-        fields_container = Frame(main_frame, bg=c.DARK_BG)
-        fields_container.pack(fill='both', expand=True)
-
-        # Configure the grid to give equal vertical space to the two text areas
-        fields_container.rowconfigure(0, weight=1)
-        fields_container.rowconfigure(1, weight=1)
-        fields_container.columnconfigure(0, weight=1)
-
-        # --- Intro Text Section ---
-        intro_frame = Frame(fields_container, bg=c.DARK_BG)
-        intro_frame.grid(row=0, column=0, sticky='nsew', pady=(0, 10))
-        intro_label_frame = Frame(intro_frame, bg=c.DARK_BG)
-        intro_label_frame.pack(anchor='w', pady=(0, 5))
-        Label(intro_label_frame, text="Intro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
-        Label(intro_label_frame, text="(prepended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
-        intro_text_frame = Frame(intro_frame, bd=1, relief='sunken')
-        intro_text_frame.pack(fill='both', expand=True)
-        intro_text_frame.grid_rowconfigure(0, weight=1)
-        intro_text_frame.grid_columnconfigure(0, weight=1)
-        self.intro_text = Text(intro_text_frame, wrap='word', undo=True, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0)
-        self.intro_scroll = Scrollbar(intro_text_frame, command=self.intro_text.yview)
-        self.intro_text.config(yscrollcommand=self.intro_scroll.set)
-        self.intro_text.grid(row=0, column=0, sticky='nsew')
-
-        # --- Outro Text Section ---
-        outro_frame = Frame(fields_container, bg=c.DARK_BG)
-        outro_frame.grid(row=1, column=0, sticky='nsew', pady=(10, 0))
-        outro_label_frame = Frame(outro_frame, bg=c.DARK_BG)
-        outro_label_frame.pack(anchor='w', pady=(0, 5))
-        Label(outro_label_frame, text="Outro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
-        Label(outro_label_frame, text="(appended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
-        outro_text_frame = Frame(outro_frame, bd=1, relief='sunken')
-        outro_text_frame.pack(fill='both', expand=True)
-        outro_text_frame.grid_rowconfigure(0, weight=1)
-        outro_text_frame.grid_columnconfigure(0, weight=1)
-        self.outro_text = Text(outro_text_frame, wrap='word', undo=True, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', bd=0, highlightthickness=0)
-        self.outro_scroll = Scrollbar(outro_text_frame, command=self.outro_text.yview)
-        self.outro_text.config(yscrollcommand=self.outro_scroll.set)
-        self.outro_text.grid(row=0, column=0, sticky='nsew')
 
         # --- Populate Text Fields ---
         self.intro_text.insert('1.0', self.project_config.intro_text)
@@ -106,26 +87,8 @@ class WrapperTextWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
 
-        self.intro_text.bind("<KeyRelease>", lambda e: self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll))
-        self.intro_text.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll))
-        self.outro_text.bind("<KeyRelease>", lambda e: self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll))
-        self.outro_text.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll))
-
         self._position_window()
         self.deiconify()
-
-        self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll)
-        self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll)
-
-    def _manage_scrollbar(self, text_widget, scrollbar):
-        """Shows or hides the scrollbar based on whether the content overflows."""
-        top, bottom = text_widget.yview()
-        is_needed = bottom < 1.0
-        is_visible = scrollbar.winfo_ismapped()
-        if is_needed and not is_visible:
-            scrollbar.grid(row=0, column=1, sticky='ns')
-        elif not is_needed and is_visible:
-            scrollbar.grid_forget()
 
     def _position_window(self):
         position_window(self)
@@ -144,9 +107,6 @@ class WrapperTextWindow(Toplevel):
 
         self.outro_text.delete('1.0', 'end')
         self.outro_text.insert('1.0', default_outro)
-
-        self.after_idle(self._manage_scrollbar, self.intro_text, self.intro_scroll)
-        self.after_idle(self._manage_scrollbar, self.outro_text, self.outro_scroll)
 
     def save_and_close(self):
         """Saves the intro/outro text to the .allcode file and closes the window"""

@@ -7,12 +7,13 @@ class ScrollableText(tk.Frame):
     appears and disappears based on content overflow.
     """
     def __init__(self, parent, **kwargs):
-        # The main container is a sunken frame to match the original look
         super().__init__(parent, bd=1, relief='sunken')
 
-        # Extract text-specific kwargs and set defaults from the original implementation
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         text_kwargs = {
-            'wrap': 'word', 'undo': True, 'height': 4,
+            'wrap': 'word', 'undo': True,
             'relief': 'flat', 'bd': 0, 'highlightthickness': 0
         }
         text_kwargs.update(kwargs)
@@ -21,30 +22,29 @@ class ScrollableText(tk.Frame):
         self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.text_widget.yview)
         self.text_widget.configure(yscrollcommand=self.scrollbar.set)
 
-        self.text_widget.pack(side="left", fill="both", expand=True)
+        self.text_widget.grid(row=0, column=0, sticky='nsew')
 
-        # We use after_idle to ensure the check happens after any pending UI updates.
         self.text_widget.bind("<KeyRelease>", lambda e: self.after_idle(self._manage_scrollbar))
         self.text_widget.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar))
 
     def _manage_scrollbar(self):
         """
-        Checks if the text content is taller than the visible widget area and
-        shows or hides the scrollbar accordingly.
+        Forces a layout update and then checks if the text content is taller
+        than the visible widget area, showing or hiding the scrollbar.
         """
-        # The yview() method returns a tuple (top_fraction, bottom_fraction).
-        # If the content fits perfectly or is smaller, bottom_fraction will be 1.0.
-        # If the content is overflowing, bottom_fraction will be less than 1.0.
+        self.update_idletasks()
+
         top_fraction, bottom_fraction = self.text_widget.yview()
+        # A scrollbar is needed if the top is scrolled down (top > 0) OR
+        # if the bottom isn't visible (bottom < 1.0). This covers all overflow cases.
+        is_needed = top_fraction > 0.0 or bottom_fraction < 1.0
+        is_visible = self.scrollbar.winfo_ismapped()
 
-        is_needed = bottom_fraction < 1.0
+        if is_needed and not is_visible:
+            self.scrollbar.grid(row=0, column=1, sticky='ns')
+        elif not is_needed and is_visible:
+            self.scrollbar.grid_forget()
 
-        if is_needed and not self.scrollbar.winfo_ismapped():
-            self.scrollbar.pack(side="right", fill="y")
-        elif not is_needed and self.scrollbar.winfo_ismapped():
-            self.scrollbar.pack_forget()
-
-    # --- Delegate methods to the underlying Text widget for a familiar API ---
     def insert(self, index, chars, *args):
         self.text_widget.insert(index, chars, *args)
         self.after_idle(self._manage_scrollbar)
