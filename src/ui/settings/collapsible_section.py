@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import Frame, Label, Text, BooleanVar, ttk
+from tkinter import Frame, Label, BooleanVar
 from ..widgets.rounded_button import RoundedButton
 from ... import constants as c
+from ..widgets.scrollable_text import ScrollableText
 
 class CollapsibleTextSection(Frame):
     """
@@ -31,19 +32,14 @@ class CollapsibleTextSection(Frame):
 
         # --- Body (initially hidden) ---
         self.body_frame = Frame(self, bg=c.DARK_BG)
-        text_frame = Frame(self.body_frame, bd=1, relief='sunken')
-        text_frame.pack(fill='x', expand=True, padx=(22, 0))
-        text_frame.grid_rowconfigure(0, weight=1)
-        text_frame.grid_columnconfigure(0, weight=1)
 
-        self.text_widget = Text(
-            text_frame, wrap='word', undo=True, height=4,
+        self.text_widget = ScrollableText(
+            self.body_frame,
+            height=4,
             bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            relief='flat', bd=0, highlightthickness=0, font=c.FONT_NORMAL
+            font=c.FONT_NORMAL
         )
-        self.scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=self.text_widget.yview)
-        self.text_widget.configure(yscrollcommand=self.scrollbar.set)
-        self.text_widget.grid(row=0, column=0, sticky='nsew')
+        self.text_widget.pack(fill='x', expand=True, padx=(22, 0))
 
         # --- State and Bindings ---
         self.is_expanded = BooleanVar(value=False)
@@ -52,29 +48,6 @@ class CollapsibleTextSection(Frame):
 
         self.icon_label.bind("<Button-1>", self.toggle_section)
         title_label.bind("<Button-1>", self.toggle_section)
-
-        # Bind to events that change content or layout, ensuring the check always runs
-        self.text_widget.bind("<KeyRelease>", self._schedule_check)
-        self.text_widget.bind("<Configure>", self._schedule_check)
-        self.bind("<Configure>", self._schedule_check)
-
-    def _schedule_check(self, event=None):
-        """
-        Schedules a check using after_idle to ensure it runs after Tkinter
-        has finished all pending geometry calculations.
-        """
-        self.after_idle(self._manage_scrollbar)
-
-    def _manage_scrollbar(self):
-        top_fraction, bottom_fraction = self.text_widget.yview()
-
-        is_needed = bottom_fraction < 1.0
-        is_visible = self.scrollbar.winfo_ismapped()
-
-        if is_needed and not is_visible:
-            self.scrollbar.grid(row=0, column=1, sticky='ns')
-        elif not is_needed and is_visible:
-            self.scrollbar.grid_forget()
 
     def toggle_section(self, event=None):
         """Expands or collapses the text area."""
@@ -86,8 +59,6 @@ class CollapsibleTextSection(Frame):
             self.body_frame.pack_forget()
             self.icon_label.config(text="▶")
 
-        self._schedule_check()
-
         if self.on_toggle_callback:
             self.after(5, self.on_toggle_callback)
 
@@ -95,7 +66,6 @@ class CollapsibleTextSection(Frame):
         """Resets the text widget to its default value."""
         self.text_widget.delete('1.0', 'end')
         self.text_widget.insert('1.0', self.default_text)
-        self._schedule_check()
 
     def get_text(self):
         """Returns the current content of the text widget."""
