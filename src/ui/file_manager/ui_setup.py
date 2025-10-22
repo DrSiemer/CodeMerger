@@ -43,9 +43,26 @@ def setup_file_manager_ui(window):
     # === WIDGETS FOR LEFT PANEL ====
     # ===============================
     available_files_title_frame = Frame(left_panel, bg=c.DARK_BG)
-    available_files_title_frame.grid(row=0, column=0, columnspan=2, sticky='w')
-    Label(available_files_title_frame, text="Available Files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(side='left')
-    Label(available_files_title_frame, text="(double click or enter to add/remove)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left')
+    available_files_title_frame.grid(row=0, column=0, columnspan=2, sticky='ew')
+    available_files_title_frame.grid_columnconfigure(1, weight=1) # Middle column expands to push sides apart.
+
+    title_sub_frame = Frame(available_files_title_frame, bg=c.DARK_BG)
+    title_sub_frame.grid(row=0, column=0, sticky='w')
+    Label(title_sub_frame, text="Available Files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(side='left')
+    Label(title_sub_frame, text="(double click or enter to add/remove)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left', padx=(5,0))
+
+    window.toggle_filter_button = Button(
+        available_files_title_frame,
+        image=assets.filter_icon,
+        command=window.toggle_extension_filter,
+        bg=c.DARK_BG,
+        activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
+        relief='flat',
+        bd=0,
+        cursor='hand2'
+    )
+    window.toggle_filter_button.grid(row=0, column=2, sticky='e')
+    window.filter_button_tooltip = ToolTip(window.toggle_filter_button, "Filetype filter is ON. Click to show all files.")
 
     style = ttk.Style()
     style.theme_use('default')
@@ -58,7 +75,6 @@ def setup_file_manager_ui(window):
     tree_scroll.grid(row=1, column=1, sticky='ns')
     window.tree.config(yscrollcommand=tree_scroll.set)
 
-    # [MODIFIED] Create and bind the three static folder icons. This is the core of the fix.
     window.folder_icon_labels = {
         'default': Label(window.tree, image=assets.folder_reveal_icon, bg=c.TEXT_INPUT_BG, cursor="hand2"),
         'selected': Label(window.tree, image=assets.folder_reveal_icon, bg=c.BTN_BLUE, cursor="hand2"),
@@ -85,6 +101,7 @@ def setup_file_manager_ui(window):
     window.filter_input_frame.pack(side='left', padx=(5,0), fill='x', expand=True)
     window.filter_entry = Entry(window.filter_input_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL, width=25)
     window.filter_entry.pack(side='left', fill='x', expand=True, ipady=3, padx=(5, 20))
+
     window.clear_filter_button = Label(window.filter_input_frame, image=assets.compact_mode_close_image, bg=c.TEXT_INPUT_BG, cursor="hand2")
     window.clear_filter_button.place(relx=1.0, rely=0.5, anchor='e', x=-5)
     window.clear_filter_button.place_forget()

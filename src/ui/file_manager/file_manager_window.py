@@ -13,6 +13,7 @@ from ... import constants as c
 from ...core.paths import ICON_PATH
 from ..window_utils import position_window, save_window_geometry
 from ..tooltip import ToolTip
+from ..assets import assets
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, app_state, newly_detected_files=None):
@@ -28,6 +29,7 @@ class FileManagerWindow(Toplevel):
         self.newly_detected_files = newly_detected_files or []
         self.full_paths_visible = False
         self.token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
+        self.is_extension_filter_active = True
         self.hovered_file_path = None
         self.current_total_tokens = self.project_config.total_tokens
         self.sash_pos_normal = None
@@ -83,7 +85,7 @@ class FileManagerWindow(Toplevel):
             x = self.paned_window.sashpos(0)
             self.sash_cover.place(x=x, y=0, anchor="nw", relheight=1.0)
         except Exception:
-            pass 
+            pass
 
     def _on_manual_sash_move(self, event=None):
         self.sash_pos_normal = self.paned_window.sashpos(0)
@@ -100,6 +102,26 @@ class FileManagerWindow(Toplevel):
 
     def toggle_full_path_view(self):
         self.ui_controller.toggle_full_path_view()
+
+    def toggle_extension_filter(self):
+        """Toggles the filetype extension filter on and off."""
+        self.is_extension_filter_active = not self.is_extension_filter_active
+
+        self.filter_button_tooltip.cancel_show()
+        self.filter_button_tooltip.hide_tooltip()
+
+        if self.is_extension_filter_active:
+            self.toggle_filter_button.config(image=assets.filter_icon)
+            self.filter_button_tooltip.text = "Filetype filter is ON. Click to show all files."
+        else:
+            self.toggle_filter_button.config(image=assets.filter_icon_active)
+            self.filter_button_tooltip.text = "Filetype filter is OFF. Click to show only allowed filetypes."
+
+        # Show the new tooltip immediately. It will be hidden automatically on <Leave>.
+        self.filter_button_tooltip.show_tooltip()
+
+        # Repopulate tree using the current text filter value
+        self.populate_tree(self.filter_text.get())
 
     def create_handlers(self):
         self.item_map = {}
@@ -128,7 +150,15 @@ class FileManagerWindow(Toplevel):
     def populate_tree(self, filter_text=""):
         for item in self.tree.get_children(): self.tree.delete(item)
         self.item_map.clear(); self.path_to_item_id.clear()
-        tree_data = build_file_tree_data(self.base_dir, self.file_extensions, self.gitignore_patterns, filter_text)
+        selected_paths = {f['path'] for f in self.selection_handler.ordered_selection}
+        tree_data = build_file_tree_data(
+            self.base_dir,
+            self.file_extensions,
+            self.gitignore_patterns,
+            filter_text,
+            self.is_extension_filter_active,
+            selected_paths
+        )
         def _insert_nodes(parent_id, nodes):
             for node in nodes:
                 tags = ()
@@ -192,5 +222,4 @@ class FileManagerWindow(Toplevel):
             self.tree.item(item_id, tags=('subtle_highlight',))
             self.tree.see(item_id)
 
-        # [MODIFIED] Trigger an icon refresh to reflect the new highlight/selection state instantly.
         self.ui_controller.refresh_hover_icon()

@@ -66,7 +66,11 @@ class FileMonitor:
         known_set = set(project_config.known_files)
 
         # --- Check for and handle deleted files ---
-        deleted_files = known_set - current_set
+        deleted_files = {
+            known_file for known_file in project_config.known_files
+            if not os.path.isfile(os.path.join(base_dir, known_file))
+        }
+
         if deleted_files:
             project_config.known_files = list(known_set - deleted_files)
             # Also remove them from the selection list if they were there

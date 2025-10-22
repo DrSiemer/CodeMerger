@@ -2,7 +2,8 @@ from PIL import Image, ImageTk
 from ..core.paths import (
     TRASH_ICON_PATH, NEW_FILES_ICON_PATH, DEFAULTS_ICON_PATH,
     COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH,
-    FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH
+    FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
+    EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH
 )
 
 class AppAssets:
@@ -15,19 +16,23 @@ class AppAssets:
         self.folder_reveal_pil = self._load_image(FOLDER_REVEAL_ICON_PATH)
         self.paths_icon_pil = self._load_image(PATHS_ICON_PATH, (16, 12))
         self.paths_icon_active_pil = self._load_image(PATHS_ACTIVE_ICON_PATH, (16, 12))
+        self.filter_icon_pil = self._load_image(EXTRA_FILES_ICON_PATH, (17, 7))
+        self.filter_icon_active_pil = self._load_image(EXTRA_FILES_ICON_ACTIVE_PATH, (17, 7))
 
         button_size = (64, 64)
         self.compact_mode_pil_up = self._load_image(COMPACT_MODE_ICON_PATH, button_size)
         self.compact_mode_pil_down = self._load_image(COMPACT_MODE_ACTIVE_ICON_PATH, button_size)
         self.compact_mode_close_pil = self._load_image(COMPACT_MODE_CLOSE_ICON_PATH)
 
-        self.trash_icon_image = self.trash_icon_pil 
+        self.trash_icon_image = self.trash_icon_pil
         self.new_files_icon = None
         self.defaults_icon = None
         self.folder_icon = None
         self.folder_reveal_icon = None
         self.paths_icon = None
         self.paths_icon_active = None
+        self.filter_icon = None
+        self.filter_icon_active = None
         self.compact_mode_image_up = None
         self.compact_mode_image_down = None
         self.compact_mode_close_image = None
@@ -43,6 +48,8 @@ class AppAssets:
         self.folder_reveal_icon = self._pil_to_photoimage(self.folder_reveal_pil)
         self.paths_icon = self._pil_to_photoimage(self.paths_icon_pil)
         self.paths_icon_active = self._pil_to_photoimage(self.paths_icon_active_pil)
+        self.filter_icon = self._pil_to_photoimage(self.filter_icon_pil)
+        self.filter_icon_active = self._pil_to_photoimage(self.filter_icon_active_pil)
         self.compact_mode_image_up = self._pil_to_photoimage(self.compact_mode_pil_up)
         self.compact_mode_image_down = self._pil_to_photoimage(self.compact_mode_pil_down)
         self.compact_mode_close_image = self._pil_to_photoimage(self.compact_mode_close_pil)

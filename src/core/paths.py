@@ -70,6 +70,10 @@ COMPACT_MODE_CLOSE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode_c
 # Path to the defaults icon
 DEFAULTS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'defaults.png')
 
+# Path to the filetype filter toggle icon
+EXTRA_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files.png')
+EXTRA_FILES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files_active.png')
+
 # Path to the paths toggle icon
 PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')
 PATHS_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths_active.png')
