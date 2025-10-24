@@ -78,5 +78,8 @@ EXTRA_FILES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files_a
 PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')
 PATHS_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths_active.png')
 
+# Path to the order request icon
+ORDER_REQUEST_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'order_request.png')
+
 # Windows Registry path
 REGISTRY_KEY_PATH = r"Software\CodeMerger"

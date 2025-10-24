@@ -121,8 +121,22 @@ def setup_file_manager_ui(window):
     Label(title_frame, text="Merge Order", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).grid(row=0, column=0, sticky='w')
     window.merge_order_details_label = Label(title_frame, text="", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
     window.merge_order_details_label.grid(row=0, column=1, sticky='w', padx=(5,0))
+
+    window.order_request_button = Button(
+        title_frame,
+        image=assets.order_request_icon,
+        command=window.handle_order_request_click,
+        bg=c.DARK_BG,
+        activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
+        relief='flat',
+        bd=0,
+        cursor='hand2'
+    )
+    window.order_request_button.grid(row=0, column=2, sticky='e', padx=(5,0))
+    ToolTip(window.order_request_button, "Single-click: Copy order request to clipboard.\nDouble-click: Paste new order from clipboard.")
+
     window.toggle_paths_button = Button(title_frame, image=assets.paths_icon, command=window.toggle_full_path_view, bg=c.DARK_BG, activebackground=c.SUBTLE_HIGHLIGHT_COLOR, relief='flat', bd=0, cursor='hand2')
-    window.toggle_paths_button.grid(row=0, column=2, sticky='e', padx=(5,0))
+    window.toggle_paths_button.grid(row=0, column=3, sticky='e', padx=(5,0))
     ToolTip(window.toggle_paths_button, "Toggle full path")
 
     list_frame = Frame(right_panel, bg=c.DARK_BG)

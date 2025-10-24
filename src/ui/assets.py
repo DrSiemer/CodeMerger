@@ -3,7 +3,7 @@ from ..core.paths import (
     TRASH_ICON_PATH, NEW_FILES_ICON_PATH, DEFAULTS_ICON_PATH,
     COMPACT_MODE_ICON_PATH, COMPACT_MODE_ACTIVE_ICON_PATH, COMPACT_MODE_CLOSE_ICON_PATH,
     FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
-    EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH
+    EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH
 )
 
 class AppAssets:
@@ -16,6 +16,7 @@ class AppAssets:
         self.folder_reveal_pil = self._load_image(FOLDER_REVEAL_ICON_PATH)
         self.paths_icon_pil = self._load_image(PATHS_ICON_PATH, (16, 12))
         self.paths_icon_active_pil = self._load_image(PATHS_ACTIVE_ICON_PATH, (16, 12))
+        self.order_request_pil = self._load_image(ORDER_REQUEST_ICON_PATH, (14, 12))
         self.filter_icon_pil = self._load_image(EXTRA_FILES_ICON_PATH, (17, 7))
         self.filter_icon_active_pil = self._load_image(EXTRA_FILES_ICON_ACTIVE_PATH, (17, 7))
 
@@ -31,6 +32,7 @@ class AppAssets:
         self.folder_reveal_icon = None
         self.paths_icon = None
         self.paths_icon_active = None
+        self.order_request_icon = None
         self.filter_icon = None
         self.filter_icon_active = None
         self.compact_mode_image_up = None
@@ -48,6 +50,7 @@ class AppAssets:
         self.folder_reveal_icon = self._pil_to_photoimage(self.folder_reveal_pil)
         self.paths_icon = self._pil_to_photoimage(self.paths_icon_pil)
         self.paths_icon_active = self._pil_to_photoimage(self.paths_icon_active_pil)
+        self.order_request_icon = self._pil_to_photoimage(self.order_request_pil)
         self.filter_icon = self._pil_to_photoimage(self.filter_icon_pil)
         self.filter_icon_active = self._pil_to_photoimage(self.filter_icon_active_pil)
         self.compact_mode_image_up = self._pil_to_photoimage(self.compact_mode_pil_up)

@@ -68,7 +68,11 @@ def position_window(window):
     """
     parent = window.parent
     window_name = window.__class__.__name__
-    saved_geometry = parent.window_geometries.get(window_name)
+    saved_geometry = None
+    # [FIX] Check if the parent object actually supports saving window geometries
+    # before trying to access the attribute. This prevents crashes for nested dialogs.
+    if hasattr(parent, 'window_geometries'):
+        saved_geometry = parent.window_geometries.get(window_name)
 
     win_w, win_h, x, y = 0, 0, 0, 0
 
@@ -120,5 +124,6 @@ def position_window(window):
 
 def save_window_geometry(window):
     """Saves the window's current geometry to the parent's registry."""
-    if window.state() == 'normal':
+    # [FIX] Also check for the attribute before trying to save.
+    if window.state() == 'normal' and hasattr(window.parent, 'window_geometries'):
         window.parent.window_geometries[window.__class__.__name__] = window.geometry()
