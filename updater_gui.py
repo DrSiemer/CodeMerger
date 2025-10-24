@@ -9,6 +9,7 @@ import psutil
 import threading
 import tkinter as tk
 from tkinter import ttk, messagebox
+import shutil
 
 # --- Self-Contained Constants ---
 DARK_BG = '#2E2E2E'
@@ -68,6 +69,8 @@ class UpdateGUI(tk.Tk):
         y = (screen_h // 2) - (win_h // 2)
         self.geometry(f"+{x}+{y}")
         self.deiconify()
+        self.lift()
+        self.focus_force()
 
     def _update_worker(self):
         try:

@@ -85,7 +85,9 @@ class App(Tk):
 
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
-        self.deiconify() # Show window now that it's fully configured
+        self.deiconify()
+        self.lift()
+        self.focus_force()
 
     def _run_update_cleanup(self):
         """
@@ -158,11 +160,11 @@ class App(Tk):
 
             if new_monitor_handle != self.current_monitor_handle:
                 self.current_monitor_handle = new_monitor_handle
-                
+
                 # Invalidate both child window AND compact mode positions
                 self.window_geometries.clear()
                 self.view_manager.invalidate_compact_mode_position()
-                
+
                 self.status_var.set("Moved to new monitor, window positions reset.")
         except Exception:
             # Fail silently if any of the Windows API calls fail
