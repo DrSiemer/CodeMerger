@@ -1,4 +1,5 @@
 import sys
+from .. import constants as c
 
 # Platform-specific logic for getting monitor info
 if sys.platform == "win32":
@@ -27,8 +28,14 @@ def get_monitor_work_area(window):
     """
     if sys.platform == "win32":
         try:
-            hwnd = window.winfo_id()
-            h_monitor = user32.MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+            # Determine monitor from a point or window handle
+            if isinstance(window, tuple): # It's a point (x, y)
+                point = wintypes.POINT(window[0], window[1])
+                h_monitor = user32.MonitorFromPoint(point, MONITOR_DEFAULTTONEAREST)
+            else: # It's a window object
+                hwnd = window.winfo_id()
+                h_monitor = user32.MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
+
             monitor_info = MONITORINFO()
             monitor_info.cbSize = ctypes.sizeof(MONITORINFO)
             if user32.GetMonitorInfoW(h_monitor, ctypes.byref(monitor_info)):
@@ -41,89 +48,77 @@ def get_monitor_work_area(window):
     # Fallback for non-Windows or if API calls fail
     return (0, 0, window.winfo_screenwidth(), window.winfo_screenheight())
 
+def _get_default_geometry_for_window(window_class_name):
+    """Maps a window's class name to its default geometry string from constants."""
+    if window_class_name == 'FileManagerWindow':
+        return c.FILE_MANAGER_DEFAULT_GEOMETRY
+    if window_class_name == 'SettingsWindow':
+        return c.SETTINGS_WINDOW_DEFAULT_GEOMETRY
+    if window_class_name == 'FiletypesManagerWindow':
+        return c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
+    if window_class_name == 'WrapperTextWindow':
+        return c.WRAPPER_TEXT_WINDOW_DEFAULT_GEOMETRY
+    return "600x400" # Generic fallback
+
 def position_window(window):
     """
-    Calculates the position for a window, preferring a saved position. If no
-    saved position is available, it centers the window on its parent. Finally,
-    it constrains the position to ensure the window is fully visible on the
-    target monitor.
+    Calculates and applies the position for a window, ensuring it is always
+    fully visible on the screen. It correctly centers on the parent window by
+    default and respects saved positions.
     """
-    window.update_idletasks()  # Ensure window dimensions are up-to-date
-
     parent = window.parent
-    win_w = window.winfo_width()
-    win_h = window.winfo_height()
-
-    x, y = 0, 0
-    use_saved_geometry = False
-
-    # --- Step 1: Try to use saved geometry ---
     window_name = window.__class__.__name__
     saved_geometry = parent.window_geometries.get(window_name)
 
+    win_w, win_h, x, y = 0, 0, 0, 0
+
+    # --- Step 1: Determine authoritative dimensions and initial position ---
     if saved_geometry:
         try:
             parts = saved_geometry.replace('+', ' ').replace('x', ' ').split()
-            saved_x, saved_y = int(parts[2]), int(parts[3])
-            x, y = saved_x, saved_y
-            use_saved_geometry = True
+            if len(parts) == 4:
+                win_w, win_h, x, y = map(int, parts)
+            else: saved_geometry = None
         except (ValueError, IndexError):
-            use_saved_geometry = False # Fallback to centering if parsing fails
+            saved_geometry = None
 
-    if not use_saved_geometry:
-        # Fallback: Center on parent if no valid saved geometry
+    if not saved_geometry:
+        # Get default dimensions from constants to avoid race conditions.
+        default_geom_str = _get_default_geometry_for_window(window_name)
+        try:
+            size_part = default_geom_str.split('+')[0]
+            w_str, h_str = size_part.split('x')
+            win_w, win_h = int(w_str), int(h_str)
+        except (ValueError, IndexError):
+            win_w, win_h = 600, 400 # Absolute fallback
+
+        # Center vertically, but position horizontally to the right of the parent.
+        parent.update_idletasks()
         parent_x = parent.winfo_rootx()
         parent_y = parent.winfo_rooty()
-        parent_w = parent.winfo_width()
         parent_h = parent.winfo_height()
-
-        x = parent_x + (parent_w - win_w) // 2
+        x = parent_x + 200
         y = parent_y + (parent_h - win_h) // 2
 
-    # --- Step 2: Constrain the calculated position to be fully on-screen ---
-    if sys.platform == "win32":
-        try:
-            h_monitor = None
-            # If centering, the reference monitor MUST be the parent's.
-            if not use_saved_geometry:
-                parent_hwnd = parent.winfo_id()
-                h_monitor = user32.MonitorFromWindow(parent_hwnd, MONITOR_DEFAULTTONEAREST)
-            # If using a saved position, the reference monitor is where that point is.
-            else:
-                target_point = wintypes.POINT(x, y)
-                h_monitor = user32.MonitorFromPoint(target_point, MONITOR_DEFAULTTONEAREST)
+    # --- Step 2: Constrain the position to be fully on-screen ---
+    # Get the work area of the monitor where the window *would* be placed.
+    mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area((x, y))
 
-            monitor_info = MONITORINFO()
-            monitor_info.cbSize = ctypes.sizeof(MONITORINFO)
+    # Apply buffers to prevent spawning behind the taskbar or against the screen edges.
+    mon_bottom -= 50
+    mon_right -= 20
+    mon_left += 10
+    mon_top += 10
 
-            if user32.GetMonitorInfoW(h_monitor, ctypes.byref(monitor_info)):
-                # Use the work area of the correct monitor for bounds checking
-                monitor_work_area = monitor_info.rcWork
-                screen_x_min, screen_y_min = monitor_work_area.left, monitor_work_area.top
-                screen_x_max, screen_y_max = monitor_work_area.right, monitor_work_area.bottom
+    if x + win_w > mon_right: x = mon_right - win_w
+    if y + win_h > mon_bottom: y = mon_bottom - win_h
+    if x < mon_left: x = mon_left
+    if y < mon_top: y = mon_top
 
-                # Constrain the window to the monitor's work area
-                if x + win_w > screen_x_max: x = screen_x_max - win_w
-                if y + win_h > screen_y_max: y = screen_y_max - win_h
-                if x < screen_x_min: x = screen_x_min
-                if y < screen_y_min: y = screen_y_min
-
-                window.geometry(f'+{x}+{y}')
-                return # Exit after successful positioning
-        except Exception:
-            # Fallback if API calls fail
-            pass
-
-    # --- Fallback for non-Windows or if API calls fail ---
-    screen_w = window.winfo_screenwidth()
-    screen_h = window.winfo_screenheight()
-    if x + win_w > screen_w: x = screen_w - win_w
-    if y + win_h > screen_h: y = screen_h - win_h
-    if x < 0: x = 0
-    if y < 0: y = 0
-
-    window.geometry(f'+{x}+{y}')
+    # --- Step 3: Apply the final, fully calculated geometry ---
+    window.geometry(f"{win_w}x{win_h}+{x}+{y}")
 
 def save_window_geometry(window):
     """Saves the window's current geometry to the parent's registry."""
-    window.parent.window_geometries[window.__class__.__name__] = window.geometry()
+    if window.state() == 'normal':
+        window.parent.window_geometries[window.__class__.__name__] = window.geometry()
