@@ -4,7 +4,9 @@ import sys
 import time
 import subprocess
 import pyperclip
-from tkinter import Tk, StringVar, messagebox, colorchooser
+import shutil
+import tempfile
+from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel
 from PIL import Image, ImageTk
 
 from ..app_state import AppState
@@ -15,7 +17,7 @@ from .settings.settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
 from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions
-from ..core.paths import ICON_PATH
+from ..core.paths import ICON_PATH, UPDATE_CLEANUP_FILE_PATH
 from .. import constants as c
 from ..core.updater import Updater
 from .ui_builder import setup_ui
@@ -27,11 +29,13 @@ from .assets import assets
 from .button_state_manager import ButtonStateManager
 from ..core.project_config import _calculate_font_color
 from .status_bar_manager import StatusBarManager
+from .update_window import UpdateWindow
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
         super().__init__()
         self.withdraw()
+        self._run_update_cleanup()
         assets.load_tk_images()
 
         self.file_extensions = file_extensions
@@ -83,6 +87,48 @@ class App(Tk):
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
         self.deiconify() # Show window now that it's fully configured
+
+    def _run_update_cleanup(self):
+        """
+        Checks for and executes post-update cleanup instructions.
+        This is designed to be safe by only deleting a specific directory
+        located inside the system's temporary folder.
+        """
+        if not os.path.exists(UPDATE_CLEANUP_FILE_PATH):
+            return
+
+        try:
+            with open(UPDATE_CLEANUP_FILE_PATH, 'r', encoding='utf-8') as f:
+                cleanup_data = json.load(f)
+
+            dir_to_delete = cleanup_data.get('temp_dir_to_delete')
+            if not dir_to_delete:
+                return
+
+            system_temp_dir = os.path.realpath(tempfile.gettempdir())
+            path_to_delete = os.path.realpath(dir_to_delete)
+
+            if not path_to_delete.startswith(system_temp_dir):
+                print(f"Update Cleanup Aborted: Path '{path_to_delete}' is not in temp dir '{system_temp_dir}'.")
+                return
+
+            if os.path.isdir(path_to_delete):
+                shutil.rmtree(path_to_delete, ignore_errors=True)
+                print(f"Update Cleanup: Successfully removed temporary directory '{path_to_delete}'.")
+
+        except (IOError, json.JSONDecodeError) as e:
+            print(f"Update Cleanup Error: Could not read or parse cleanup file. Error: {e}")
+        finally:
+            try:
+                os.remove(UPDATE_CLEANUP_FILE_PATH)
+            except OSError:
+                pass
+
+    def start_update_process(self, release_data):
+        """
+        Launches the modal update window on top of the main window.
+        """
+        UpdateWindow(self, release_data)
 
     def _on_window_configure(self, event):
         """

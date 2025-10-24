@@ -83,3 +83,6 @@ ORDER_REQUEST_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'order_request.png'
 
 # Windows Registry path
 REGISTRY_KEY_PATH = r"Software\CodeMerger"
+
+# Path for post-update cleanup instructions
+UPDATE_CLEANUP_FILE_PATH = os.path.join(PERSISTENT_DATA_DIR, 'update_cleanup.json')

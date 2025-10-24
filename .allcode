@@ -93,10 +93,10 @@
     },
     {
       "path": "src/core/paths.py",
-      "mtime": 1761293471.5793183,
-      "hash": "dfe77158c7f123ec2363c4c3490c3356053c288e",
-      "tokens": 771,
-      "lines": 85
+      "mtime": 1761295868.202275,
+      "hash": "5e7b2c0a19544836760ffd6d381bfef374ade807",
+      "tokens": 799,
+      "lines": 88
     },
     {
       "path": "src/core/utils.py",
@@ -163,10 +163,10 @@
     },
     {
       "path": "src/core/updater.py",
-      "mtime": 1758874183.919013,
-      "hash": "6df0aa5bb9731263b5a718009dd76edb2201b021",
-      "tokens": 1099,
-      "lines": 141
+      "mtime": 1761295858.3941803,
+      "hash": "f87772338ef76c0ef0fa9874f8fcf8e782d6ee4f",
+      "tokens": 1084,
+      "lines": 139
     },
     {
       "path": "src/ui/assets.py",
@@ -324,9 +324,9 @@
     },
     {
       "path": "src/ui/file_manager/file_manager_window.py",
-      "mtime": 1761294116.7507834,
-      "hash": "5aa2db519dcc87bdc81aa7ea46c39f1a02528d57",
-      "tokens": 3431,
+      "mtime": 1761294299.2986655,
+      "hash": "b637ea0bcd4879cbd71fed2736642173fb0bdb3c",
+      "tokens": 3428,
       "lines": 387
     },
     {
@@ -414,6 +414,13 @@
       "lines": 135
     },
     {
+      "path": "src/ui/update_window.py",
+      "mtime": 1761295885.6130154,
+      "hash": "69d5ecab313cbf95649601db7ae86177ac82a8a9",
+      "tokens": 1525,
+      "lines": 167
+    },
+    {
       "path": "src/ui/ui_builder.py",
       "mtime": 1759351140.1852448,
       "hash": "bf93817d57b0d81ef571ce750e4e3ff268dffcc1",
@@ -422,13 +429,13 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1761153940.1743388,
-      "hash": "86bf9640efaec5be3b66dd077784cf20bd8d8a9d",
-      "tokens": 2687,
-      "lines": 347
+      "mtime": 1761295847.2089734,
+      "hash": "d5377cdd5096bebf04137ccd27000bf8658d3df9",
+      "tokens": 3075,
+      "lines": 400
     }
   ],
-  "total_tokens": 64219,
+  "total_tokens": 66142,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -485,6 +492,7 @@
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",
     "src/ui/ui_builder.py",
+    "src/ui/update_window.py",
     "src/ui/view_manager.py",
     "src/ui/widgets/rounded_button.py",
     "src/ui/widgets/scrollable_frame.py",

@@ -124,18 +124,16 @@ class Updater:
         """
         latest_version = release_data.get('tag_name', 'N/A')
         release_notes = release_data.get('body', 'No release notes available.')
-        release_url = release_data.get('html_url', '')
 
         message = (
             f"A new version of CodeMerger is available!\n\n"
             f"  Your version: {self.current_version}\n"
             f"  Latest version: {latest_version}\n\n"
             f"Release Notes:\n{release_notes}\n\n"
-            f"Would you like to go to the download page?"
+            f"Would you like to automatically download and install the update now?"
         )
 
         if messagebox.askyesno("Update Available", message, parent=self.parent):
-            if release_url:
-                webbrowser.open_new_tab(release_url)
+            self.parent.start_update_process(release_data)
         else:
             print("  Update declined :'(")
