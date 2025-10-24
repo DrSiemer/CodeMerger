@@ -147,7 +147,12 @@ class UpdateWindow(Toplevel):
 
     def _launch_and_exit(self, installer_path):
         try:
-            subprocess.Popen([installer_path, '/SILENT'])
+            creationflags = 0
+            if sys.platform == "win32":
+                creationflags = subprocess.DETACHED_PROCESS
+
+            subprocess.Popen([installer_path, '/SILENT'], creationflags=creationflags)
+
             self.parent.destroy()
             sys.exit(0)
         except Exception as e:
