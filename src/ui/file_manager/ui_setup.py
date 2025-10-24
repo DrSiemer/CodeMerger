@@ -123,7 +123,7 @@ def setup_file_manager_ui(window):
     window.merge_order_details_label.grid(row=0, column=1, sticky='w', padx=(5,0))
     window.toggle_paths_button = Button(title_frame, image=assets.paths_icon, command=window.toggle_full_path_view, bg=c.DARK_BG, activebackground=c.SUBTLE_HIGHLIGHT_COLOR, relief='flat', bd=0, cursor='hand2')
     window.toggle_paths_button.grid(row=0, column=2, sticky='e', padx=(5,0))
-    ToolTip(window.toggle_paths_button, "Toggle full path view")
+    ToolTip(window.toggle_paths_button, "Toggle full path")
 
     list_frame = Frame(right_panel, bg=c.DARK_BG)
     list_frame.grid(row=1, column=0, columnspan=2, sticky='nsew', padx=(10, 0))
