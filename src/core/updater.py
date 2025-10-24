@@ -1,9 +1,13 @@
 import json
 import webbrowser
+import os
+import sys
+import subprocess
 from datetime import datetime
 from urllib import request, error
 from tkinter import messagebox
 from .. import constants as c
+from ..core.paths import BUNDLE_DIR
 
 class Updater:
     """
@@ -25,7 +29,7 @@ class Updater:
 
         last_check_str = self.state.last_update_check
         if not last_check_str:
-            return True 
+            return True
 
         try:
             last_check_date = datetime.fromisoformat(last_check_str).date()
@@ -130,10 +134,54 @@ class Updater:
             f"  Your version: {self.current_version}\n"
             f"  Latest version: {latest_version}\n\n"
             f"Release Notes:\n{release_notes}\n\n"
-            f"Would you like to automatically download and install the update now?"
+            f"CodeMerger will now close and the update will be installed automatically.\n\n"
+            "Do you want to proceed?"
         )
 
         if messagebox.askyesno("Update Available", message, parent=self.parent):
-            self.parent.start_update_process(release_data)
+            self.start_update_process(release_data)
         else:
             print("  Update declined :'(")
+
+    def start_update_process(self, release_data):
+        """
+        Launches the external updater executable and exits the main application.
+        """
+        assets = release_data.get('assets', [])
+        download_url = next((asset.get('browser_download_url') for asset in assets if asset.get('name', '').endswith('_Setup.exe')), None)
+
+        if not download_url:
+            messagebox.showerror("Update Error", "Could not find a downloadable installer in the release.", parent=self.parent)
+            return
+
+        updater_exe_path = os.path.join(BUNDLE_DIR, "updater_launcher.exe")
+
+        # Fallback for running from source
+        if not os.path.exists(updater_exe_path):
+             updater_exe_path = os.path.join(os.path.dirname(sys.executable), "updater_launcher.exe")
+
+        if not os.path.exists(updater_exe_path):
+            messagebox.showerror("Update Error", f"The updater application is missing. Could not find it at:\n{updater_exe_path}\n\nPlease reinstall CodeMerger.", parent=self.parent)
+            return
+
+        try:
+            pid = os.getpid()
+
+            # This flag is essential for ensuring the launcher process is
+            # completely independent of the main app.
+            creationflags = 0
+            if sys.platform == "win32":
+                creationflags = subprocess.DETACHED_PROCESS
+
+            subprocess.Popen(
+                [updater_exe_path, str(pid), download_url],
+                creationflags=creationflags,
+                close_fds=True
+            )
+
+            # Exit the main application
+            self.parent.destroy()
+            sys.exit(0)
+
+        except Exception as e:
+            messagebox.showerror("Update Error", f"Failed to launch the updater process: {e}", parent=self.parent)

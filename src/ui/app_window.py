@@ -29,7 +29,6 @@ from .assets import assets
 from .button_state_manager import ButtonStateManager
 from ..core.project_config import _calculate_font_color
 from .status_bar_manager import StatusBarManager
-from .update_window import UpdateWindow
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -123,12 +122,6 @@ class App(Tk):
                 os.remove(UPDATE_CLEANUP_FILE_PATH)
             except OSError:
                 pass
-
-    def start_update_process(self, release_data):
-        """
-        Launches the modal update window on top of the main window.
-        """
-        UpdateWindow(self, release_data)
 
     def _on_window_configure(self, event):
         """
