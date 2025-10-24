@@ -134,7 +134,7 @@ class Updater:
             f"  Your version: {self.current_version}\n"
             f"  Latest version: {latest_version}\n\n"
             f"Release Notes:\n{release_notes}\n\n"
-            f"CodeMerger will now close and the update will be installed automatically.\n\n"
+            f"CodeMerger will now close and the update will be downloaded and installed.\n\n"
             "Do you want to proceed?"
         )
 
@@ -145,7 +145,7 @@ class Updater:
 
     def start_update_process(self, release_data):
         """
-        Launches the external updater executable and exits the main application.
+        Launches the external GUI updater executable and exits the main application.
         """
         assets = release_data.get('assets', [])
         download_url = next((asset.get('browser_download_url') for asset in assets if asset.get('name', '').endswith('_Setup.exe')), None)
@@ -154,21 +154,21 @@ class Updater:
             messagebox.showerror("Update Error", "Could not find a downloadable installer in the release.", parent=self.parent)
             return
 
-        updater_exe_path = os.path.join(BUNDLE_DIR, "updater_launcher.exe")
-
-        # Fallback for running from source
-        if not os.path.exists(updater_exe_path):
-             updater_exe_path = os.path.join(os.path.dirname(sys.executable), "updater_launcher.exe")
+        updater_exe_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
 
         if not os.path.exists(updater_exe_path):
-            messagebox.showerror("Update Error", f"The updater application is missing. Could not find it at:\n{updater_exe_path}\n\nPlease reinstall CodeMerger.", parent=self.parent)
+             # Fallback for running from a built distribution folder directly
+             if getattr(sys, 'frozen', False):
+                 base_path = os.path.dirname(sys.executable)
+                 updater_exe_path = os.path.join(base_path, "updater_gui.exe")
+
+        if not os.path.exists(updater_exe_path):
+            messagebox.showerror("Update Error", f"The updater application is missing and could not be found.\n\nPlease reinstall CodeMerger.", parent=self.parent)
             return
 
         try:
             pid = os.getpid()
 
-            # This flag is essential for ensuring the launcher process is
-            # completely independent of the main app.
             creationflags = 0
             if sys.platform == "win32":
                 creationflags = subprocess.DETACHED_PROCESS

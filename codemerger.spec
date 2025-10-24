@@ -17,7 +17,7 @@ a = Analysis(
         'PIL.ImageTk',
         'tiktoken_ext.openai_public',
         'detect_secrets.plugins',
-        'psutil'  # Add psutil here as well for safety
+        'psutil'
     ],
     hookspath=[],
     hooksconfig={},
@@ -44,9 +44,9 @@ exe = EXE(
     icon=app_icon_path
 )
 
-# --- Updater Launcher Analysis ---
+# --- Updater GUI Launcher Analysis ---
 updater_a = Analysis(
-    ['updater_launcher.py'],
+    ['updater_gui.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -64,20 +64,17 @@ updater_exe = EXE(
     updater_pyz,
     updater_a.scripts,
     [],
-    name='updater_launcher',
+    name='updater_gui',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     runtime_tmpdir=None,
-    # Console must be True for this detached process to work reliably without a GUI.
-    console=True,
-    icon=None
+    console=False,
+    icon=app_icon_path
 )
 
 # --- Collection ---
-# This COLLECT block gathers the outputs of both EXE builds into a single
-# directory named 'CodeMerger' inside the 'dist' folder.
 coll = COLLECT(
     exe,
     updater_exe,
