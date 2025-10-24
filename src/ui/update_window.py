@@ -133,44 +133,26 @@ class UpdateWindow(Toplevel):
         self.details_label.config(text=f"{downloaded_bytes/1024/1024:.2f} MB / {total_bytes/1024/1024:.2f} MB")
 
     def on_complete(self, installer_path, temp_dir_path):
-        self.status_label.config(text="Download complete. Preparing to launch installer...")
+        self.status_label.config(text="Download complete. Launching installer...")
         self.progress_bar['value'] = 100
         self.cancel_button.set_state('disabled')
 
         try:
             with open(UPDATE_CLEANUP_FILE_PATH, 'w', encoding='utf-8') as f:
                 json.dump({'temp_dir_to_delete': temp_dir_path}, f)
+        except IOError:
+            pass
 
-            launcher_path = os.path.join(temp_dir_path, 'run_update.bat')
-            installer_filename = os.path.basename(installer_path)
+        self.after(1000, lambda: self._launch_and_exit(installer_path))
 
-            script_content = f"""
-@echo off
-timeout /t 2 /nobreak > NUL
-start "" "{installer_filename}" /SILENT
-(goto) 2>nul & del "%~f0"
-"""
-            with open(launcher_path, 'w', encoding='utf-8') as f:
-                f.write(script_content)
-
-        except IOError as e:
-            self.on_error(f"Failed to create update script: {e}")
-            return
-
-        self.after(500, lambda: self._launch_and_exit(launcher_path, temp_dir_path))
-
-    def _launch_and_exit(self, launcher_path, working_dir):
+    def _launch_and_exit(self, installer_path):
         try:
-            creationflags = 0
-            if sys.platform == "win32":
-                creationflags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NO_WINDOW
-
-            subprocess.Popen([launcher_path], creationflags=creationflags, cwd=working_dir)
-
+            # Using Popen directly is sufficient now that setup.iss handles the detachment
+            subprocess.Popen([installer_path, '/SILENT'])
             self.parent.destroy()
             sys.exit(0)
         except Exception as e:
-            self.on_error(f"Failed to launch update script: {e}")
+            self.on_error(f"Failed to launch installer: {e}")
 
     def on_error(self, message):
         self.grab_release()
