@@ -37,8 +37,7 @@ Name: "checkforupdates"; Description: "Enable automatic update checks"; GroupDes
 Name: "addcontextmenu"; Description: "Add 'Open in CodeMerger' to folder context menu"; GroupDescription: "Integration:"
 
 [Files]
-Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "assets\uninstall.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\CodeMerger\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

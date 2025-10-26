@@ -29,7 +29,6 @@ from .assets import assets
 from .button_state_manager import ButtonStateManager
 from ..core.project_config import _calculate_font_color
 from .status_bar_manager import StatusBarManager
-from .update_window import UpdateWindow
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -86,7 +85,9 @@ class App(Tk):
 
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
-        self.deiconify() # Show window now that it's fully configured
+        self.deiconify()
+        self.lift()
+        self.focus_force()
 
     def _run_update_cleanup(self):
         """
@@ -124,12 +125,6 @@ class App(Tk):
             except OSError:
                 pass
 
-    def start_update_process(self, release_data):
-        """
-        Launches the modal update window on top of the main window.
-        """
-        UpdateWindow(self, release_data)
-
     def _on_window_configure(self, event):
         """
         Saves the main window's current geometry for the restore animation
@@ -165,11 +160,11 @@ class App(Tk):
 
             if new_monitor_handle != self.current_monitor_handle:
                 self.current_monitor_handle = new_monitor_handle
-                
+
                 # Invalidate both child window AND compact mode positions
                 self.window_geometries.clear()
                 self.view_manager.invalidate_compact_mode_position()
-                
+
                 self.status_var.set("Moved to new monitor, window positions reset.")
         except Exception:
             # Fail silently if any of the Windows API calls fail
