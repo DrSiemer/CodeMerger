@@ -2,7 +2,6 @@ from tkinter import Toplevel, Frame, Label, Entry, StringVar
 from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
-from .window_utils import position_window, save_window_geometry
 
 class TitleEditDialog(Toplevel):
     def __init__(self, parent, title, prompt, initialvalue="", max_length=None):
@@ -45,22 +44,24 @@ class TitleEditDialog(Toplevel):
         self.bind("<Return>", self.on_ok)
         self.bind("<Escape>", self.on_cancel)
 
-        # Set a fixed width and make non-resizable
+        # Set a fixed width, calculate height, and center on parent
         self.update_idletasks()
         required_height = self.winfo_reqheight()
         self.geometry(f"{c.TITLE_EDIT_DIALOG_WIDTH}x{required_height}")
         self.resizable(False, False)
 
-        self._position_window()
+        parent_x = self.parent.winfo_rootx()
+        parent_y = self.parent.winfo_rooty()
+        parent_w = self.parent.winfo_width()
+        parent_h = self.parent.winfo_height()
+        win_w = c.TITLE_EDIT_DIALOG_WIDTH
+        win_h = required_height
+        x = parent_x + (parent_w - win_w) // 2
+        y = parent_y + (parent_h - win_h) // 2
+        self.geometry(f"+{x}+{y}")
+
         self.deiconify()
         self.wait_window(self)
-
-    def _position_window(self):
-        position_window(self)
-
-    def _close_and_save_geometry(self):
-        save_window_geometry(self)
-        self.destroy()
 
     def _validate_length(self, *args):
         value = self.entry_var.get()
@@ -69,8 +70,8 @@ class TitleEditDialog(Toplevel):
 
     def on_ok(self, event=None):
         self.result = self.entry_var.get()
-        self._close_and_save_geometry()
+        self.destroy()
 
     def on_cancel(self, event=None):
         self.result = None
-        self._close_and_save_geometry()
+        self.destroy()
