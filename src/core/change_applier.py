@@ -5,7 +5,6 @@ def preprocess_content(content):
     """
     Preprocesses the markdown content to handle specific formatting issues.
     - Adds a linebreak before closing triple backticks if they are at the end of a line of code.
-    - Removes lines that contain nothing but tabs.
     """
     lines = content.split('\n')
     processed_lines = []
@@ -14,9 +13,6 @@ def preprocess_content(content):
         if line.strip().endswith('```') and len(line.strip()) > 3:
             processed_lines.append(line.replace('```', ''))
             processed_lines.append('```')
-        # Remove lines that contain only tabs
-        elif line.strip('\t') == '' and '\t' in line:
-            continue
         else:
             processed_lines.append(line)
     return '\n'.join(processed_lines)
@@ -45,7 +41,6 @@ def apply_changes_from_markdown(base_dir, markdown_text):
     if len(text_segments) <= len(code_blocks):
          return False, "Error: Could not properly segment the input text. Make sure each code block is preceded by a file path."
 
-
     files_to_update = {}
     for i, code_block in enumerate(code_blocks):
         preceding_text = text_segments[i]
@@ -72,6 +67,27 @@ def apply_changes_from_markdown(base_dir, markdown_text):
     # If all checks pass, apply the changes
     try:
         for path, content in files_to_update.items():
+            _, extension = os.path.splitext(path)
+
+            # For non-markdown files, clean up extra whitespace
+            if extension.lower() != '.md':
+                # Sanitize each line: remove trailing whitespace, which also turns
+                # lines with only spaces/tabs into truly empty lines.
+                lines = [line.rstrip() for line in content.splitlines()]
+
+                # Now, collapse multiple consecutive empty lines into a single one
+                collapsed_lines = []
+                last_line_was_empty = False
+                for line in lines:
+                    is_empty = not line
+                    if is_empty and last_line_was_empty:
+                        continue  # Skip this consecutive empty line
+
+                    collapsed_lines.append(line)
+                    last_line_was_empty = is_empty
+
+                content = '\n'.join(collapsed_lines)
+
             with open(path, 'w', encoding='utf-8') as f:
                 f.write(content)
     except IOError as e:
