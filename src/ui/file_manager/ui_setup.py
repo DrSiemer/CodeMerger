@@ -54,7 +54,7 @@ def setup_file_manager_ui(window):
     window.toggle_filter_button = Button(
         available_files_title_frame,
         image=assets.filter_icon,
-        command=window.toggle_extension_filter,
+        command=window.ui_controller.toggle_extension_filter,
         bg=c.DARK_BG,
         activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
         relief='flat',
@@ -125,7 +125,7 @@ def setup_file_manager_ui(window):
     window.order_request_button = Button(
         title_frame,
         image=assets.order_request_icon,
-        command=window.handle_order_request_click,
+        command=window.order_request_handler.handle_click,
         bg=c.DARK_BG,
         activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
         relief='flat',
@@ -135,7 +135,7 @@ def setup_file_manager_ui(window):
     window.order_request_button.grid(row=0, column=2, sticky='e', padx=(5,0))
     ToolTip(window.order_request_button, "Single-click: Copy order request to clipboard.\nDouble-click: Paste new order from clipboard.")
 
-    window.toggle_paths_button = Button(title_frame, image=assets.paths_icon, command=window.toggle_full_path_view, bg=c.DARK_BG, activebackground=c.SUBTLE_HIGHLIGHT_COLOR, relief='flat', bd=0, cursor='hand2')
+    window.toggle_paths_button = Button(title_frame, image=assets.paths_icon, command=window.ui_controller.toggle_full_path_view, bg=c.DARK_BG, activebackground=c.SUBTLE_HIGHLIGHT_COLOR, relief='flat', bd=0, cursor='hand2')
     window.toggle_paths_button.grid(row=0, column=3, sticky='e', padx=(5,0))
     ToolTip(window.toggle_paths_button, "Toggle full path")
 
@@ -179,6 +179,6 @@ def setup_file_manager_ui(window):
     # ===============================================
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
     bulk_action_frame.grid(row=1, column=0, sticky='ew', pady=(20, 0))
-    RoundedButton(bulk_action_frame, text="Add all", command=window.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='left')
-    RoundedButton(bulk_action_frame, text="Remove all", command=window.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='right')
-    RoundedButton(bulk_action_frame, text="Save and Close", command=window.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2').pack()
+    RoundedButton(bulk_action_frame, text="Add all", command=window.state_controller.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='left')
+    RoundedButton(bulk_action_frame, text="Remove all", command=window.state_controller.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='right')
+    RoundedButton(bulk_action_frame, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2').pack()

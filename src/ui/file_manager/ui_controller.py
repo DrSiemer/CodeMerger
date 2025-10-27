@@ -32,7 +32,6 @@ class FileManagerUIController:
         self.window.selection_handler.filter_list(filter_query)
 
     def _show_icon_for_item(self, item_id):
-        """Centralized logic to show the correct folder icon for a given item."""
         if not item_id:
             self.on_tree_leave()
             return
@@ -74,7 +73,6 @@ class FileManagerUIController:
         self.window.hovered_file_path = item_info['path']
 
     def refresh_hover_icon(self):
-        """Forces an update of the hover icon if the mouse is over an item."""
         if self.window.hovered_file_path:
             item_id = self.window.path_to_item_id.get(self.window.hovered_file_path)
             if item_id:
@@ -119,7 +117,6 @@ class FileManagerUIController:
             try:
                 self.window.update_idletasks()
                 total_width = self.window.paned_window.winfo_width()
-
                 if total_width <= 1: return
 
                 if self.window.full_paths_visible:
@@ -129,11 +126,62 @@ class FileManagerUIController:
                 else:
                     sash_position = self.window.sash_pos_normal or (total_width // 2)
                     self.window.toggle_paths_button.config(image=assets.paths_icon)
-
                 self.window.paned_window.sashpos(0, sash_position)
                 self.window._update_sash_cover_position()
-
-            except tk.TclError:
-                pass
-
+            except tk.TclError: pass
         self.window.after(10, adjust_sash)
+
+    def toggle_extension_filter(self):
+        """Toggles the filetype extension filter on and off."""
+        self.window.is_extension_filter_active = not self.window.is_extension_filter_active
+
+        self.window.filter_button_tooltip.cancel_show()
+        self.window.filter_button_tooltip.hide_tooltip()
+
+        if self.window.is_extension_filter_active:
+            self.window.toggle_filter_button.config(image=assets.filter_icon)
+            self.window.filter_button_tooltip.text = "Filetype filter is ON. Click to show all files."
+        else:
+            self.window.toggle_filter_button.config(image=assets.filter_icon_active)
+            self.window.filter_button_tooltip.text = "Filetype filter is OFF. Click to show only allowed filetypes."
+
+        # Show the new tooltip immediately. It will be hidden automatically on <Leave>.
+        self.window.filter_button_tooltip.show_tooltip()
+
+        # Repopulate tree using the current text filter value
+        self.window.populate_tree(self.window.filter_text.get())
+
+    def expand_and_scroll_to_new_files(self):
+        """Expands parent directories of newly detected files and scrolls to the first one."""
+        if not self.window.newly_detected_files:
+            return
+
+        first_file_path = sorted(self.window.newly_detected_files)[0]
+        first_item_id = self.window.path_to_item_id.get(first_file_path)
+
+        if first_item_id:
+            self.window.tree.see(first_item_id)
+
+            def scroll_when_ready(retries=15):
+                if retries <= 0: return
+                try:
+                    if self.window.tree.bbox(first_item_id):
+                        visible_items = []
+                        def _collect_visible(parent_id):
+                            if parent_id != '' and not self.window.tree.item(parent_id, 'open'): return
+                            for child_id in self.window.tree.get_children(parent_id):
+                                visible_items.append(child_id)
+                                _collect_visible(child_id)
+                        _collect_visible('')
+
+                        if not visible_items: return
+                        total, target_idx = len(visible_items), -1
+                        try: target_idx = visible_items.index(first_item_id)
+                        except ValueError: return
+
+                        if target_idx != -1:
+                            self.window.tree.yview_moveto(max(0.0, min(1.0, target_idx / total)))
+                    else:
+                        self.window.after(10, scroll_when_ready, retries - 1)
+                except tk.TclError: pass
+            self.window.after(10, scroll_when_ready)
