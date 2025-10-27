@@ -7,10 +7,11 @@ from ..core import change_applier
 from .window_utils import position_window
 
 class PasteChangesDialog(Toplevel):
-    def __init__(self, parent, project_base_dir):
+    def __init__(self, parent, project_base_dir, status_var):
         super().__init__(parent)
         self.parent = parent
         self.base_dir = project_base_dir
+        self.status_var = status_var
         self.withdraw()
         self.transient(parent)
         self.grab_set()
@@ -72,7 +73,7 @@ class PasteChangesDialog(Toplevel):
         success, message = change_applier.apply_changes_from_markdown(self.base_dir, markdown_text)
 
         if success:
-            messagebox.showinfo("Success", message, parent=self.parent)
+            self.status_var.set(message)
             self.destroy()
         else:
             messagebox.showerror("Error", message, parent=self)

@@ -272,8 +272,8 @@ class App(Tk):
         if not project_config: return
         # result is a tuple: ((r,g,b), '#rrggbb') or (None, None)
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if result and result:
-            new_hex_color = result
+        if result and result[1]:
+            new_hex_color = result[1]
             self.project_color = new_hex_color
             project_config.project_color = new_hex_color
 
@@ -327,7 +327,7 @@ class App(Tk):
         if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        PasteChangesDialog(self, project_config.base_dir)
+        PasteChangesDialog(self, project_config.base_dir, self.status_var)
 
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)

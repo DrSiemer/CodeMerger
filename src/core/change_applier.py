@@ -44,22 +44,44 @@ def apply_changes_from_markdown(base_dir, markdown_text):
     files_to_update = {}
     for i, code_block in enumerate(code_blocks):
         preceding_text = text_segments[i]
+        relative_path = None
+        content_to_write = code_block
 
-        # Find the last potential file path in the text before the code block
-        # This looks for paths wrapped in backticks or just as plain text.
-        path_match = re.findall(r'[`]?([a-zA-Z0-9_./\\-]+[a-zA-Z0-9_.-])[`]?', preceding_text)
+        # A more robust regex that only matches valid path characters.
+        # It requires at least one path separator.
+        path_regex = r'[\w./\\-]*[/\\][\w./\\-]+'
 
-        if not path_match:
+        # Primary Strategy: Find all strings that look like paths in the preceding text.
+        path_candidates = re.findall(path_regex, preceding_text)
+        if path_candidates:
+            # Use the last candidate found, as it's closest to the code block.
+            # Strip common surrounding punctuation as a final safeguard.
+            last_candidate = path_candidates[-1].strip('`\'":*,.()')
+            if len(last_candidate) > 0:
+                relative_path = last_candidate.replace('\\', '/')
+
+        # Fallback Strategy: If no path was found externally, check the first line inside the code block.
+        if not relative_path and code_block:
+            lines = code_block.split('\n')
+            if lines:
+                first_line = lines[0] # [FIX] Correctly get the first line string, not the whole list.
+                internal_path_candidates = re.findall(path_regex, first_line)
+                if internal_path_candidates:
+                    last_candidate = internal_path_candidates[-1].strip('`\'":*,#()')
+                    if len(last_candidate) > 0:
+                        relative_path = last_candidate.replace('\\', '/')
+                        # If found inside, remove the path line from the content to be written.
+                        content_to_write = '\n'.join(lines[1:])
+
+        if not relative_path:
             return False, f"Error: Could not find a file path for code block {i + 1}."
 
-        # Use the last found path-like string as the file path
-        relative_path = path_match[-1].replace('\\', '/')
         full_path = os.path.join(base_dir, relative_path)
 
         if not os.path.isfile(full_path):
             return False, f"Error: The file '{relative_path}' does not exist in the project."
 
-        files_to_update[full_path] = code_block
+        files_to_update[full_path] = content_to_write
 
     if not files_to_update:
         return False, "Error: No valid files to update were found."
