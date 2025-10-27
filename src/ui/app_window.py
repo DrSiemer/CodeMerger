@@ -29,6 +29,7 @@ from .assets import assets
 from .button_state_manager import ButtonStateManager
 from ..core.project_config import _calculate_font_color
 from .status_bar_manager import StatusBarManager
+from .paste_changes_dialog import PasteChangesDialog
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -271,8 +272,8 @@ class App(Tk):
         if not project_config: return
         # result is a tuple: ((r,g,b), '#rrggbb') or (None, None)
         result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if result and result[1]:
-            new_hex_color = result[1]
+        if result and result:
+            new_hex_color = result
             self.project_color = new_hex_color
             project_config.project_color = new_hex_color
 
@@ -320,6 +321,13 @@ class App(Tk):
             return
         wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
         self.wait_window(wt_window)
+
+    def open_paste_changes_dialog(self):
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            messagebox.showerror("Error", "Please select a valid project folder first")
+            return
+        PasteChangesDialog(self, project_config.base_dir)
 
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)

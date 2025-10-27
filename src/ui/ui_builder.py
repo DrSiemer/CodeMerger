@@ -80,6 +80,7 @@ def setup_ui(app):
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
 
     copy_button_height = 60
+    app.paste_changes_button = RoundedButton(app.button_grid_frame, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_paste_changes_dialog, cursor='hand2')
     app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Wrapped", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.copy_wrapped_code, cursor='hand2')
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Wrapper Texts", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_wrapper_text_window, cursor='hand2')
     app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Merged", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.copy_merged_code, cursor='hand2')

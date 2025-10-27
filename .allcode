@@ -23,10 +23,10 @@
     },
     {
       "path": "llm.md",
-      "mtime": 1761558936.4254198,
-      "hash": "24d40af97d1d8d40d852cae9fe2d9ff3e0793d5e",
-      "tokens": 1695,
-      "lines": 56
+      "mtime": 1761563480.9975505,
+      "hash": "6ce05b1faad2dbc968056413b93f30c6f0104bfb",
+      "tokens": 1471,
+      "lines": 69
     },
     {
       "path": "requirements.txt",
@@ -121,7 +121,7 @@
     },
     {
       "path": "src/core/project_config.py",
-      "mtime": 1758720729.2442849,
+      "mtime": 1761583778.6776998,
       "hash": "7b43fc4e07ef3a39a800c9d793e28759cc2c741e",
       "tokens": 1735,
       "lines": 183
@@ -184,17 +184,17 @@
     },
     {
       "path": "src/ui/app_window.py",
-      "mtime": 1761558936.427424,
-      "hash": "a1c11a1f088f3d3c54735242b3950f249cefa27d",
-      "tokens": 2986,
-      "lines": 388
+      "mtime": 1761584146.758021,
+      "hash": "a0fa5c2013b37a4d21b550366e543310bc17abd6",
+      "tokens": 3048,
+      "lines": 396
     },
     {
       "path": "src/ui/ui_builder.py",
-      "mtime": 1761212688.312168,
-      "hash": "bf93817d57b0d81ef571ce750e4e3ff268dffcc1",
-      "tokens": 1596,
-      "lines": 111
+      "mtime": 1761584134.6890988,
+      "hash": "abeef637de136a3ed14ba48812c0d4b7511bf5a5",
+      "tokens": 1652,
+      "lines": 112
     },
     {
       "path": "src/ui/view_manager.py",
@@ -205,10 +205,10 @@
     },
     {
       "path": "src/ui/button_state_manager.py",
-      "mtime": 1757938209.7548351,
-      "hash": "25249ce74d15d3150298e94f54ddb1291be8c5ff",
-      "tokens": 714,
-      "lines": 76
+      "mtime": 1761584126.3473375,
+      "hash": "3ac95d833c80359260529a8b235760a848fb8321",
+      "tokens": 776,
+      "lines": 84
     },
     {
       "path": "src/ui/status_bar_manager.py",
@@ -447,9 +447,23 @@
       "hash": "7288acc450422bdcf9cc44785cbfeca88bdc63dc",
       "tokens": 624,
       "lines": 57
+    },
+    {
+      "path": "src/core/change_applier.py",
+      "mtime": 1761583712.1086287,
+      "hash": "1b22c4f1cf49f7105348d5fac747c051c9e28cc5",
+      "tokens": 730,
+      "lines": 80
+    },
+    {
+      "path": "src/ui/paste_changes_dialog.py",
+      "mtime": 1761583718.8988254,
+      "hash": "203650f04c0b69c3a1b9d528a01ec6931aa88b38",
+      "tokens": 703,
+      "lines": 81
     }
   ],
-  "total_tokens": 67241,
+  "total_tokens": 68630,
   "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
   "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
   "known_files": [
@@ -466,6 +480,7 @@
     "src/app_state.py",
     "src/codemerger.py",
     "src/constants.py",
+    "src/core/change_applier.py",
     "src/core/clipboard.py",
     "src/core/file_scanner.py",
     "src/core/merger.py",
@@ -496,6 +511,7 @@
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
     "src/ui/multiline_input_dialog.py",
+    "src/ui/paste_changes_dialog.py",
     "src/ui/settings/application_settings.py",
     "src/ui/settings/collapsible_section.py",
     "src/ui/settings/editor_settings.py",

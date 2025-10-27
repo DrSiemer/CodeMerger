@@ -42,11 +42,13 @@ class ButtonStateManager:
             app.wrapper_text_button.set_state('disabled')
             app.copy_merged_button.set_state('disabled')
             app.copy_wrapped_button.set_state('disabled')
+            app.paste_changes_button.set_state('disabled')
         else:
             app.no_project_label.pack_forget()
             app.wrapper_box_title.pack(pady=(10, 5))
             app.button_grid_frame.pack(pady=(5, 18), padx=30)
             app.wrapper_text_button.set_state('normal')
+            app.paste_changes_button.set_state('normal')
 
             copy_buttons_state = 'disabled'
             has_wrapper_text = False
@@ -65,12 +67,18 @@ class ButtonStateManager:
             app.copy_wrapped_button.grid_remove()
             app.copy_merged_button.grid_remove()
             app.wrapper_text_button.grid_remove()
+            app.paste_changes_button.grid_remove()
+
+            gap = 5
+
+            # Row 0: Small configuration buttons
+            app.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5), padx=(0, gap))
+            app.paste_changes_button.grid(row=0, column=1, sticky='ew', pady=(0, 5), padx=(gap, 0))
 
             if has_wrapper_text:
-                gap = 5
-                app.wrapper_text_button.grid(row=0, column=0, columnspan=1, sticky='ew', pady=(0, 5), padx=(0, gap))
+                # Row 1: Both large copy buttons
                 app.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
                 app.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
             else:
-                app.wrapper_text_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5), padx=0)
+                # Row 1: The single large copy button spans the full width
                 app.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew', padx=0)
