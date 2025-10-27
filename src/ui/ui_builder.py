@@ -62,14 +62,14 @@ def setup_ui(app):
     app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')
 
-    # --- Center "Wrapper & Output" Box (Row 2) ---
+    # --- Center "Actions" Box (Row 2) ---
     center_frame = Frame(app, bg=c.DARK_BG)
     center_frame.grid(row=2, column=0, sticky='nsew', pady=0)
 
     wrapper_box = Frame(center_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
     wrapper_box.place(relx=0.5, rely=0.55, anchor='center')
 
-    app.wrapper_box_title = Label(wrapper_box, text="Wrapper & Output", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, pady=2)
+    app.wrapper_box_title = Label(wrapper_box, text="Actions", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, pady=2)
 
     # This label is shown when no project is selected
     app.no_project_label = Label(wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
