@@ -259,6 +259,7 @@ class App(Tk):
         if not project_config:
             self.profile_navigator.grid_forget()
             self.add_profile_button.set_state('disabled')
+            self.delete_profile_button.grid_forget()
             return
 
         self.add_profile_button.set_state('normal')
@@ -266,10 +267,16 @@ class App(Tk):
         active_name = project_config.active_profile_name
 
         if len(profile_names) > 1:
-            self.profile_navigator.grid(row=0, column=1, sticky='ew')
+            self.profile_navigator.grid(row=0, column=1, sticky='')
             self.profile_navigator.set_profiles(profile_names, active_name)
         else:
             self.profile_navigator.grid_forget()
+
+        # Show or hide delete button based on active profile
+        if active_name != "Default":
+            self.delete_profile_button.grid(row=0, column=3, sticky='w', padx=(5, 0))
+        else:
+            self.delete_profile_button.grid_forget()
 
     def on_profile_switched(self, new_profile_name):
         project_config = self.project_manager.get_current_project()
@@ -281,6 +288,7 @@ class App(Tk):
             project_config.save()
             self.status_var.set(f"Switched to profile: {new_profile_name}")
             self.button_manager.update_button_states()
+        self._update_profile_selector_ui()
         self.focus_set()
 
     def open_new_profile_dialog(self, event=None):
@@ -307,6 +315,32 @@ class App(Tk):
                 self.status_var.set(f"Created and switched to profile: {new_name}")
             else:
                 self.status_var.set(f"Error: Profile '{new_name}' already exists.")
+
+    def delete_current_profile(self, event=None):
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return
+
+        profile_to_delete = project_config.active_profile_name
+        if profile_to_delete == "Default":
+            self.status_var.set("Cannot delete the Default profile.")
+            return
+
+        if messagebox.askyesno(
+            "Confirm Delete",
+            f"Are you sure you want to delete the profile '{profile_to_delete}'?\nThis cannot be undone.",
+            parent=self
+        ):
+            if project_config.delete_profile(profile_to_delete):
+                # Switch back to default profile
+                project_config.active_profile_name = "Default"
+                project_config.save()
+                self.status_var.set(f"Profile '{profile_to_delete}' deleted.")
+                # Refresh UI
+                self._update_profile_selector_ui()
+                self.button_manager.update_button_states()
+            else:
+                self.status_var.set(f"Error: Could not delete profile '{profile_to_delete}'.")
 
     def on_settings_closed(self):
         self.app_state.reload()

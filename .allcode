@@ -483,30 +483,6 @@
         "src/ui/settings",
         "src/ui/widgets"
       ]
-    },
-    "Test": {
-      "selected_files": [
-        {
-          "path": "src/core/merger.py",
-          "mtime": 1757938209.6982982,
-          "hash": "2a8ba44b404d6b768fa83281ffd392240d2157f5",
-          "tokens": 638,
-          "lines": 82
-        }
-      ],
-      "total_tokens": 638,
-      "intro_text": "",
-      "outro_text": "",
-      "expanded_dirs": [
-        ".github",
-        ".github/workflows",
-        "src",
-        "src/core",
-        "src/ui",
-        "src/ui/file_manager",
-        "src/ui/settings",
-        "src/ui/widgets"
-      ]
     }
   },
   "known_files": [

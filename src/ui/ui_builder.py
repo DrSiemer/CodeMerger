@@ -65,8 +65,9 @@ def setup_ui(app):
     profile_frame.grid(row=0, column=1, sticky='we') # This will center the frame's content
     profile_frame.grid_columnconfigure(0, weight=1) # Pad left
     profile_frame.grid_columnconfigure(1, weight=0) # Navigator
-    profile_frame.grid_columnconfigure(2, weight=0) # Button
-    profile_frame.grid_columnconfigure(3, weight=1) # Pad right
+    profile_frame.grid_columnconfigure(2, weight=0) # Add Button
+    profile_frame.grid_columnconfigure(3, weight=0) # Delete Button
+    profile_frame.grid_columnconfigure(4, weight=1) # Pad right
 
     # --- Profile Navigator ---
     app.profile_navigator = ProfileNavigator(profile_frame, on_change_callback=app.on_profile_switched)
@@ -74,8 +75,13 @@ def setup_ui(app):
 
     # --- Add Profile Button ---
     app.add_profile_button = RoundedButton(profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_new_profile_dialog, cursor='hand2', width=20, height=28)
-    app.add_profile_button.grid(row=0, column=2, sticky='w', padx=10)
+    app.add_profile_button.grid(row=0, column=2, sticky='w', padx=(10, 0))
     ToolTip(app.add_profile_button, "Create an additional project profile", delay=500)
+
+    # --- Delete Profile Button ---
+    app.delete_profile_button = RoundedButton(profile_frame, text="-", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.delete_current_profile, cursor='hand2', width=20, height=28)
+    app.delete_profile_button.grid(row=0, column=3, sticky='w', padx=(5, 0))
+    ToolTip(app.delete_profile_button, "Delete the current profile", delay=500)
 
     app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')

@@ -280,3 +280,10 @@ class ProjectConfig:
 
         self.profiles[new_name] = new_profile
         return True
+
+    def delete_profile(self, profile_name_to_delete):
+        """Deletes a profile if it exists and is not the default profile."""
+        if profile_name_to_delete == "Default" or profile_name_to_delete not in self.profiles:
+            return False
+        del self.profiles[profile_name_to_delete]
+        return True
