@@ -56,7 +56,7 @@ def apply_changes_from_markdown(base_dir, markdown_text):
         if path_candidates:
             # Use the last candidate found, as it's closest to the code block.
             # Strip common surrounding punctuation as a final safeguard.
-            last_candidate = path_candidates[-1].strip('`\'":*,.()')
+            last_candidate = path_candidates[-1].strip('`\'":*,.() ')
             if len(last_candidate) > 0:
                 relative_path = last_candidate.replace('\\', '/')
 
@@ -64,10 +64,10 @@ def apply_changes_from_markdown(base_dir, markdown_text):
         if not relative_path and code_block:
             lines = code_block.split('\n')
             if lines:
-                first_line = lines[0] # [FIX] Correctly get the first line string, not the whole list.
+                first_line = lines[0] # Correctly get the first line string, not the whole list.
                 internal_path_candidates = re.findall(path_regex, first_line)
                 if internal_path_candidates:
-                    last_candidate = internal_path_candidates[-1].strip('`\'":*,#()')
+                    last_candidate = internal_path_candidates[-1].strip('`\'":*,#() ')
                     if len(last_candidate) > 0:
                         relative_path = last_candidate.replace('\\', '/')
                         # If found inside, remove the path line from the content to be written.
