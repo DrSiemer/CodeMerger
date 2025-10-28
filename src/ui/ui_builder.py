@@ -1,4 +1,4 @@
-from tkinter import Frame, Label
+from tkinter import Frame, Label, ttk
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 from .tooltip import ToolTip
@@ -58,6 +58,43 @@ def setup_ui(app):
 
     app.manage_files_button = RoundedButton(top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
+
+    # --- Profile Management Frame (centered) ---
+    profile_frame = Frame(top_buttons_container, bg=c.DARK_BG)
+    profile_frame.grid(row=0, column=1, sticky='we') # This will center the frame's content
+    profile_frame.grid_columnconfigure(0, weight=1) # Pad left
+    profile_frame.grid_columnconfigure(1, weight=0) # Combobox
+    profile_frame.grid_columnconfigure(2, weight=0) # Button
+    profile_frame.grid_columnconfigure(3, weight=1) # Pad right
+
+    # --- Profile Selector Combobox ---
+    s = ttk.Style(app) # Need a style object
+    app.option_add('*TCombobox*Listbox.background', c.TEXT_INPUT_BG)
+    app.option_add('*TCombobox*Listbox.foreground', c.TEXT_COLOR)
+    app.option_add('*TCombobox*Listbox.selectBackground', c.BTN_BLUE)
+    app.option_add('*TCombobox*Listbox.selectForeground', c.BTN_BLUE_TEXT)
+    s.configure('Profile.TCombobox',
+        fieldbackground=c.TEXT_INPUT_BG,
+        background=c.TEXT_INPUT_BG,
+        arrowcolor=c.TEXT_COLOR,
+        foreground=c.TEXT_COLOR,
+        selectbackground=c.TEXT_INPUT_BG,
+        selectforeground=c.TEXT_COLOR,
+        font=c.FONT_NORMAL,
+        padding=(10, 6)
+    )
+    s.map('Profile.TCombobox',
+        foreground=[('readonly', c.TEXT_COLOR)],
+        fieldbackground=[('readonly', c.TEXT_INPUT_BG)]
+    )
+
+    app.profile_selector = ttk.Combobox(profile_frame, textvariable=app.active_profile_var, state='readonly', style='Profile.TCombobox', width=20)
+    app.profile_selector.bind('<<ComboboxSelected>>', app.on_profile_switched)
+
+    # --- Add Profile Button ---
+    app.add_profile_button = RoundedButton(profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_new_profile_dialog, cursor='hand2', width=20, height=28)
+    app.add_profile_button.grid(row=0, column=2, sticky='w', padx=10)
+    ToolTip(app.add_profile_button, "Create a new project profile", delay=500)
 
     app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')

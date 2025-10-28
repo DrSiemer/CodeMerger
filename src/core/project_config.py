@@ -48,23 +48,83 @@ class ProjectConfig:
         self.base_dir = base_dir
         self.allcode_path = os.path.join(self.base_dir, '.allcode')
         self.project_name = os.path.basename(self.base_dir)
-        self.selected_files = []
-        self.known_files = []
-        self.expanded_dirs = set()
-        self.total_tokens = 0
-        self.intro_text = ''
-        self.outro_text = ''
         self.project_color = COMPACT_MODE_BG_COLOR
         self.project_font_color = 'light'
+        self.known_files = []
+
+        self.profiles = {}
+        self.active_profile_name = "Default"
+
+    def get_active_profile(self):
+        """Returns the dictionary for the currently active profile."""
+        # [FIX] Ensure the active profile always exists, create if not.
+        if self.active_profile_name not in self.profiles:
+            self.profiles[self.active_profile_name] = self._create_empty_profile()
+        return self.profiles[self.active_profile_name]
+
+    def _create_empty_profile(self):
+        """Returns a new, empty profile dictionary."""
+        return {
+            "selected_files": [],
+            "total_tokens": 0,
+            "intro_text": "",
+            "outro_text": "",
+            "expanded_dirs": []
+        }
+
+    # These properties are for backward compatibility and convenience.
+    @property
+    def selected_files(self):
+        return self.get_active_profile().get('selected_files', [])
+
+    @selected_files.setter
+    def selected_files(self, value):
+        self.get_active_profile()['selected_files'] = value
+
+    @property
+    def total_tokens(self):
+        return self.get_active_profile().get('total_tokens', 0)
+
+    @total_tokens.setter
+    def total_tokens(self, value):
+        self.get_active_profile()['total_tokens'] = value
+
+    @property
+    def intro_text(self):
+        return self.get_active_profile().get('intro_text', '')
+
+    @intro_text.setter
+    def intro_text(self, value):
+        self.get_active_profile()['intro_text'] = value
+
+    @property
+    def outro_text(self):
+        return self.get_active_profile().get('outro_text', '')
+
+    @outro_text.setter
+    def outro_text(self, value):
+        self.get_active_profile()['outro_text'] = value
+
+    @property
+    def expanded_dirs(self):
+        # Return as a set for consistency with old implementation
+        return set(self.get_active_profile().get('expanded_dirs', []))
+
+    @expanded_dirs.setter
+    def expanded_dirs(self, value):
+        # Store as a sorted list for stable JSON output
+        self.get_active_profile()['expanded_dirs'] = sorted(list(value))
 
     def load(self):
         """
-        Loads the .allcode config, and crucially, cleans out any references
-        to files that no longer exist on the filesystem. Returns True if
-        the file list was modified during the cleaning process
+        Loads the .allcode config, handles migration from old format, and
+        cleans out any references to files that no longer exist.
+        Returns True if the file list was modified during the cleaning process.
         """
         data = {}
         config_was_updated = False
+        files_were_cleaned_globally = False
+
         try:
             if os.path.isfile(self.allcode_path):
                 with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
@@ -81,88 +141,108 @@ class ProjectConfig:
         except (json.JSONDecodeError, IOError):
             pass # Treat corrupt/unreadable files as empty
 
+        # --- Load project-level settings ---
         self.project_name = data.get('project_name', os.path.basename(self.base_dir))
-        self.intro_text = data.get('intro_text', '')
-        self.outro_text = data.get('outro_text', '')
-        self.expanded_dirs = set(data.get('expanded_dirs', []))
-        original_selection = data.get('selected_files', [])
         original_known_files = data.get('known_files', [])
-
-        if 'project_name' not in data:
-            config_was_updated = True
-
         color_value = data.get('project_color')
-        # Validate color value; if missing, invalid, or not a hex string, generate a new one
+        font_color_value = data.get('project_font_color')
+
+        if 'project_name' not in data: config_was_updated = True
         if not color_value or not isinstance(color_value, str) or not re.match(r'^#[0-9a-fA-F]{6}$', color_value):
             self.project_color = _generate_random_color()
             config_was_updated = True
         else:
             self.project_color = color_value
 
-        # --- Calculate font color if it's not set ---
-        font_color_value = data.get('project_font_color')
         if not font_color_value or font_color_value not in ['light', 'dark']:
             self.project_font_color = _calculate_font_color(self.project_color)
             config_was_updated = True
         else:
             self.project_font_color = font_color_value
 
-        # --- Process selected_files, handling both old and new formats ---
-        cleaned_selection = []
-        # Check if the list is not empty and the first item is a dictionary with 'path'
+        # --- Handle Profile Migration and Loading ---
+        if 'profiles' in data and isinstance(data['profiles'], dict):
+            # New format, load profiles directly
+            self.profiles = data.get('profiles', {})
+            self.active_profile_name = data.get('active_profile', 'Default')
+            if not self.profiles: # Handle empty profiles dict
+                self.profiles['Default'] = self._create_empty_profile()
+                self.active_profile_name = 'Default'
+                config_was_updated = True
+            if self.active_profile_name not in self.profiles:
+                self.active_profile_name = list(self.profiles.keys())[0]
+                config_was_updated = True
+        else:
+            # Old format, migrate to new structure
+            config_was_updated = True
+            default_profile = self._create_empty_profile()
+            default_profile['intro_text'] = data.get('intro_text', '')
+            default_profile['outro_text'] = data.get('outro_text', '')
+            default_profile['expanded_dirs'] = sorted(list(set(data.get('expanded_dirs', []))))
+            default_profile['selected_files'] = data.get('selected_files', [])
+            default_profile['total_tokens'] = data.get('total_tokens', 0)
+            self.profiles = {'Default': default_profile}
+            self.active_profile_name = 'Default'
+
+        # --- Clean known_files (project-level) ---
+        cleaned_known_files = [f for f in original_known_files if os.path.isfile(os.path.join(self.base_dir, f))]
+        self.known_files = cleaned_known_files
+        if len(cleaned_known_files) < len(original_known_files):
+            config_was_updated = True
+
+        # --- Clean selected_files within each profile ---
+        for profile_name, profile_data in self.profiles.items():
+            files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
+            if files_cleaned_in_profile:
+                files_were_cleaned_globally = True
+            if profile_updated:
+                config_was_updated = True
+
+        if config_was_updated or files_were_cleaned_globally:
+            self.save()
+
+        return files_were_cleaned_globally
+
+    def _clean_profile_files(self, profile_data):
+        """Cleans file lists for a single profile. Returns (bool_cleaned, bool_updated)."""
+        profile_was_updated = False
+        original_selection = profile_data.get('selected_files', [])
         is_new_format = original_selection and isinstance(original_selection[0], dict) and 'path' in original_selection[0]
 
+        cleaned_selection = []
         if not is_new_format:
-            # Old format (list of strings): convert to the new format
-            if original_selection: config_was_updated = True
+            if original_selection: profile_was_updated = True
             for f_path in original_selection:
                 full_path = os.path.join(self.base_dir, f_path)
                 if os.path.isfile(full_path):
                     try:
-                        content = ""
-                        with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                            content = f.read()
-
+                        with open(full_path, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
                         mtime = os.path.getmtime(full_path)
                         file_hash = _get_file_hash(full_path)
                         tokens = get_token_count_for_text(content)
                         lines = content.count('\n') + 1
-
                         cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
-                    except OSError:
-                        continue # Skip files that can't be accessed
+                    except OSError: continue
         else:
-            # New format (list of dicts): filter out non-existent files and add missing keys
             for f_info in original_selection:
                 if os.path.isfile(os.path.join(self.base_dir, f_info['path'])):
                     if 'tokens' not in f_info or 'lines' not in f_info:
-                        config_was_updated = True
+                        profile_was_updated = True
                     cleaned_selection.append(f_info)
 
-        self.selected_files = cleaned_selection
+        profile_data['selected_files'] = cleaned_selection
         files_were_cleaned = len(cleaned_selection) < len(original_selection)
 
-        cleaned_known_files = [
-            f for f in original_known_files
-            if os.path.isfile(os.path.join(self.base_dir, f))
-        ]
-        self.known_files = cleaned_known_files
-        known_files_were_cleaned = len(cleaned_known_files) < len(original_known_files)
-
         if files_were_cleaned:
-            self.total_tokens = sum(f.get('tokens', 0) for f in self.selected_files)
-            config_was_updated = True
-        else:
-            # The file list is intact, so the cached token count is trustworthy
-            self.total_tokens = data.get('total_tokens', 0)
+            profile_data['total_tokens'] = sum(f.get('tokens', 0) for f in cleaned_selection)
+            profile_was_updated = True
 
-        if known_files_were_cleaned:
-            config_was_updated = True
+        # Ensure expanded_dirs is a list for JSON
+        if isinstance(profile_data.get('expanded_dirs'), set):
+            profile_data['expanded_dirs'] = sorted(list(profile_data['expanded_dirs']))
+            profile_was_updated = True
 
-        if config_was_updated:
-            self.save()
-
-        return files_were_cleaned
+        return files_were_cleaned, profile_was_updated
 
     def save(self):
         """Saves the configuration to the .allcode file"""
@@ -172,12 +252,31 @@ class ProjectConfig:
             "project_name": self.project_name,
             "project_color": self.project_color,
             "project_font_color": self.project_font_color,
-            "expanded_dirs": sorted(list(self.expanded_dirs)),
-            "selected_files": self.selected_files,
-            "total_tokens": self.total_tokens,
-            "intro_text": self.intro_text,
-            "outro_text": self.outro_text,
+            "active_profile": self.active_profile_name,
+            "profiles": self.profiles,
             "known_files": sorted(list(set(self.known_files)))
         }
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
             json.dump(final_data, f, indent=2)
+
+    def get_profile_names(self):
+        return sorted(list(self.profiles.keys()))
+
+    def create_new_profile(self, new_name, copy_files, copy_wrappers):
+        if new_name in self.profiles:
+            return False # Profile already exists
+
+        if copy_files or copy_wrappers:
+            source_profile = self.get_active_profile()
+            new_profile = {
+                "selected_files": source_profile.get('selected_files', []) if copy_files else [],
+                "total_tokens": source_profile.get('total_tokens', 0) if copy_files else 0,
+                "intro_text": source_profile.get('intro_text', '') if copy_wrappers else '',
+                "outro_text": source_profile.get('outro_text', '') if copy_wrappers else '',
+                "expanded_dirs": source_profile.get('expanded_dirs', []) if copy_files else []
+            }
+        else:
+            new_profile = self._create_empty_profile()
+
+        self.profiles[new_name] = new_profile
+        return True
