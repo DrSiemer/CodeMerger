@@ -256,10 +256,14 @@ class App(Tk):
 
     def _update_profile_selector_ui(self):
         project_config = self.project_manager.get_current_project()
+        profile_frame = self.profile_frame
+
+        # Forget all children of the profile frame to reset its layout
+        for widget in profile_frame.winfo_children():
+            widget.grid_forget()
+
         if not project_config:
-            self.profile_navigator.grid_forget()
             self.add_profile_button.set_state('disabled')
-            self.delete_profile_button.grid_forget()
             return
 
         self.add_profile_button.set_state('normal')
@@ -267,16 +271,31 @@ class App(Tk):
         active_name = project_config.active_profile_name
 
         if len(profile_names) > 1:
+            # NAVIGATOR layout (centered)
+            # Configure profile_frame for centering
+            profile_frame.grid_columnconfigure(0, weight=1)
+            profile_frame.grid_columnconfigure(1, weight=0)
+            profile_frame.grid_columnconfigure(2, weight=0)
+            profile_frame.grid_columnconfigure(3, weight=0)
+            profile_frame.grid_columnconfigure(4, weight=1)
+
+            # Grid the widgets inside profile_frame
             self.profile_navigator.grid(row=0, column=1, sticky='')
             self.profile_navigator.set_profiles(profile_names, active_name)
-        else:
-            self.profile_navigator.grid_forget()
+            self.add_profile_button.grid(row=0, column=2, sticky='w', padx=(10, 0))
 
-        # Show or hide delete button based on active profile
-        if active_name != "Default":
-            self.delete_profile_button.grid(row=0, column=3, sticky='w', padx=(5, 0))
+            if active_name != "Default":
+                self.delete_profile_button.grid(row=0, column=3, sticky='w', padx=(5, 0))
         else:
-            self.delete_profile_button.grid_forget()
+            # COMPACT layout (left-aligned)
+            # Configure profile_frame for left-alignment with an expanding column to push content left
+            profile_frame.grid_columnconfigure(0, weight=0)
+            profile_frame.grid_columnconfigure(1, weight=1) # Expanding pad
+            for i in range(2, 5): # Reset other columns
+                profile_frame.grid_columnconfigure(i, weight=0)
+
+            # Grid the '+' button at the start of the profile_frame
+            self.add_profile_button.grid(row=0, column=0, sticky='w', padx=(10, 0))
 
     def on_profile_switched(self, new_profile_name):
         project_config = self.project_manager.get_current_project()
