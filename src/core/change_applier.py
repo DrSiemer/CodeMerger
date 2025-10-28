@@ -17,102 +17,120 @@ def preprocess_content(content):
             processed_lines.append(line)
     return '\n'.join(processed_lines)
 
-def apply_changes_from_markdown(base_dir, markdown_text):
-    """
-    Parses markdown text, extracts file paths and code blocks,
-    and applies the changes to the corresponding files in the project.
+def _sanitize_content(path, content):
+    """Cleans up whitespace in non-markdown code files."""
+    _, extension = os.path.splitext(path)
+    if extension.lower() == '.md':
+        return content  # Don't sanitize markdown
 
-    Returns:
-        (bool, str): A tuple containing a boolean indicating success
-                     and a message string.
+    # Sanitize each line: remove trailing whitespace
+    lines = [line.rstrip() for line in content.splitlines()]
+
+    # Collapse multiple consecutive empty lines into a single one
+    collapsed_lines = []
+    last_line_was_empty = False
+    for line in lines:
+        is_empty = not line
+        if is_empty and last_line_was_empty:
+            continue
+        collapsed_lines.append(line)
+        last_line_was_empty = is_empty
+    return '\n'.join(collapsed_lines)
+
+def execute_plan(updates, creations):
+    """Writes the planned changes to the filesystem."""
+    try:
+        # Create new files
+        for path, content in creations.items():
+            dir_path = os.path.dirname(path)
+            if not os.path.isdir(dir_path):
+                os.makedirs(dir_path, exist_ok=True)
+
+            sanitized_content = _sanitize_content(path, content)
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(sanitized_content)
+
+        # Update existing files
+        for path, content in updates.items():
+            sanitized_content = _sanitize_content(path, content)
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(sanitized_content)
+
+    except IOError as e:
+        return False, f"Error writing to file: {e}"
+
+    total_files = len(updates) + len(creations)
+    return True, f"Successfully applied changes to {total_files} file(s)."
+
+def parse_and_plan_changes(base_dir, markdown_text):
+    """
+    Parses markdown, plans changes, and returns a dictionary describing the plan.
+    This does NOT write any files.
     """
     markdown_text = preprocess_content(markdown_text)
 
-    # Regex to find all code blocks with optional language tags
     code_blocks = re.findall(r'```(?:\w+)?\n(.*?)\n```', markdown_text, re.DOTALL)
-
-    # Split the text by code blocks to find the preceding file paths
-    # The delimiter is the full code block pattern
     text_segments = re.split(r'```(?:\w+)?\n(?:.*?)\n```', markdown_text, flags=re.DOTALL)
 
     if not code_blocks:
-        return False, "Error: No code blocks found in the input text."
+        return {'status': 'ERROR', 'message': "Error: No code blocks found in the input text."}
 
     if len(text_segments) <= len(code_blocks):
-         return False, "Error: Could not properly segment the input text. Make sure each code block is preceded by a file path."
+        return {'status': 'ERROR', 'message': "Error: Could not properly segment the input text. Make sure each code block is preceded by a file path."}
 
     files_to_update = {}
+    files_to_create = {}
+
     for i, code_block in enumerate(code_blocks):
         preceding_text = text_segments[i]
         relative_path = None
         content_to_write = code_block
-
-        # A more robust regex that only matches valid path characters.
-        # It requires at least one path separator.
         path_regex = r'[\w./\\-]*[/\\][\w./\\-]+'
 
-        # Primary Strategy: Find all strings that look like paths in the preceding text.
         path_candidates = re.findall(path_regex, preceding_text)
         if path_candidates:
-            # Use the last candidate found, as it's closest to the code block.
-            # Strip common surrounding punctuation as a final safeguard.
             last_candidate = path_candidates[-1].strip('`\'":*,.() ')
             if len(last_candidate) > 0:
                 relative_path = last_candidate.replace('\\', '/')
 
-        # Fallback Strategy: If no path was found externally, check the first line inside the code block.
         if not relative_path and code_block:
             lines = code_block.split('\n')
             if lines:
-                first_line = lines[0] # Correctly get the first line string, not the whole list.
+                first_line = lines
                 internal_path_candidates = re.findall(path_regex, first_line)
                 if internal_path_candidates:
                     last_candidate = internal_path_candidates[-1].strip('`\'":*,#() ')
                     if len(last_candidate) > 0:
                         relative_path = last_candidate.replace('\\', '/')
-                        # If found inside, remove the path line from the content to be written.
                         content_to_write = '\n'.join(lines[1:])
 
         if not relative_path:
-            return False, f"Error: Could not find a file path for code block {i + 1}."
+            return {'status': 'ERROR', 'message': f"Error: Could not find a file path for code block {i + 1}."}
 
-        full_path = os.path.join(base_dir, relative_path)
+        full_path = os.path.normpath(os.path.join(base_dir, relative_path))
 
-        if not os.path.isfile(full_path):
-            return False, f"Error: The file '{relative_path}' does not exist in the project."
+        if not full_path.startswith(os.path.normpath(base_dir)):
+            return {'status': 'ERROR', 'message': f"Error: Path '{relative_path}' attempts to access a location outside the project directory."}
 
-        files_to_update[full_path] = content_to_write
+        if os.path.isfile(full_path):
+            files_to_update[full_path] = content_to_write
+        elif os.path.isdir(full_path):
+            return {'status': 'ERROR', 'message': f"Error: The path '{relative_path}' points to a directory, not a file."}
+        else:
+            files_to_create[full_path] = content_to_write
 
-    if not files_to_update:
-        return False, "Error: No valid files to update were found."
+    if not files_to_update and not files_to_create:
+        return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
 
-    # If all checks pass, apply the changes
-    try:
-        for path, content in files_to_update.items():
-            _, extension = os.path.splitext(path)
-
-            # For non-markdown files, clean up extra whitespace
-            if extension.lower() != '.md':
-                # Sanitize each line: remove trailing whitespace, which also turns
-                # lines with only spaces/tabs into truly empty lines.
-                lines = [line.rstrip() for line in content.splitlines()]
-
-                # Now, collapse multiple consecutive empty lines into a single one
-                collapsed_lines = []
-                last_line_was_empty = False
-                for line in lines:
-                    is_empty = not line
-                    if is_empty and last_line_was_empty:
-                        continue  # Skip this consecutive empty line
-
-                    collapsed_lines.append(line)
-                    last_line_was_empty = is_empty
-
-                content = '\n'.join(collapsed_lines)
-
-            with open(path, 'w', encoding='utf-8') as f:
-                f.write(content)
-    except IOError as e:
-        return False, f"Error writing to file: {e}"
-
-    return True, f"Successfully applied changes to {len(files_to_update)} file(s)."
+    if files_to_create:
+        return {
+            'status': 'CONFIRM_CREATION',
+            'updates': files_to_update,
+            'creations': files_to_create
+        }
+    else:
+        return {
+            'status': 'SUCCESS',
+            'updates': files_to_update,
+            'creations': {}
+        }

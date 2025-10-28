@@ -1,3 +1,4 @@
+import os
 from tkinter import Toplevel, Frame, Label, messagebox
 from .. import constants as c
 from ..core.paths import ICON_PATH
@@ -70,13 +71,41 @@ class PasteChangesDialog(Toplevel):
             messagebox.showwarning("Input Error", "The text input cannot be empty.", parent=self)
             return
 
-        success, message = change_applier.apply_changes_from_markdown(self.base_dir, markdown_text)
+        plan = change_applier.parse_and_plan_changes(self.base_dir, markdown_text)
+
+        status = plan.get('status')
+        message = plan.get('message')
+
+        if status == 'ERROR':
+            messagebox.showerror("Error", message, parent=self)
+            return
+
+        if status == 'CONFIRM_CREATION':
+            creations = plan.get('creations', {})
+            # Get relative paths for display in the confirmation dialog
+            creation_rel_paths = [os.path.relpath(p, self.base_dir).replace('\\', '/') for p in creations.keys()]
+
+            confirm_message = (
+                f"This operation will create {len(creations)} new file(s):\n\n"
+                f" - " + "\n - ".join(creation_rel_paths) +
+                "\n\nDo you want to proceed?"
+            )
+
+            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=self):
+                self.status_var.set("Operation cancelled by user.")
+                return
+
+        # Proceed if status was 'SUCCESS' or if user confirmed creation
+        updates = plan.get('updates', {})
+        creations = plan.get('creations', {})
+
+        success, final_message = change_applier.execute_plan(updates, creations)
 
         if success:
-            self.status_var.set(message)
+            self.status_var.set(final_message)
             self.destroy()
         else:
-            messagebox.showerror("Error", message, parent=self)
+            messagebox.showerror("File Write Error", final_message, parent=self)
 
     def on_cancel(self, event=None):
         self.destroy()
