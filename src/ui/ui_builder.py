@@ -75,7 +75,7 @@ def setup_ui(app):
     # --- Add Profile Button ---
     app.add_profile_button = RoundedButton(profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_new_profile_dialog, cursor='hand2', width=20, height=28)
     app.add_profile_button.grid(row=0, column=2, sticky='w', padx=10)
-    ToolTip(app.add_profile_button, "Create a new project profile", delay=500)
+    ToolTip(app.add_profile_button, "Create an additional project profile", delay=500)
 
     app.select_project_button = RoundedButton(top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')
