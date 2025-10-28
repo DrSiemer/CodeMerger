@@ -15,7 +15,7 @@ def get_pil_font(font_tuple):
     Tries to find and load a requested font, with a prioritized list of
     fallbacks for cross-platform compatibility.
     """
-    requested_family, font_size = font_tuple
+    requested_family, font_size, *_ = font_tuple
     # Create a dynamic search list, starting with the requested font
     search_list = [requested_family] + [f for f in FONT_FALLBACK_ORDER if f.lower() != requested_family.lower()]
     for family in search_list:

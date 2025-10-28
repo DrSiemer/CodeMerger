@@ -107,14 +107,14 @@
         },
         {
           "path": "src/core/project_manager.py",
-          "mtime": 1756977697.07909,
+          "mtime": 1761659721.9400194,
           "hash": "7d4c11c8b8dfe53fa3b68dad9f13152864a4e7bb",
           "tokens": 385,
           "lines": 46
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1761657000.9797273,
+          "mtime": 1761659798.2077012,
           "hash": "09f24d8823bbac00cf48bd53125a1bfac8df8146",
           "tokens": 2571,
           "lines": 282
@@ -177,17 +177,17 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1761657000.9807265,
-          "hash": "8014e40d435b94e164c99acab51ea0b6bf272b8c",
-          "tokens": 3513,
-          "lines": 454
+          "mtime": 1761663628.084384,
+          "hash": "1ba3d43bf261a2eee6a7aa75d77be11718fe3179",
+          "tokens": 3479,
+          "lines": 452
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1761657000.9807265,
-          "hash": "1be657188bcb6ca1cd16c94f483361e7d2a58f02",
-          "tokens": 2118,
-          "lines": 148
+          "mtime": 1761663431.6132708,
+          "hash": "68ec167102986d263687efba3baa9371b852b491",
+          "tokens": 1931,
+          "lines": 130
         },
         {
           "path": "src/ui/view_manager.py",
@@ -233,9 +233,9 @@
         },
         {
           "path": "src/ui/font_utils.py",
-          "mtime": 1757938205.674311,
-          "hash": "b2bd0d98f0f9a4ba9799c52d732d579391930665",
-          "tokens": 442,
+          "mtime": 1761663631.833203,
+          "hash": "cf147eaf00c2e39406b48e8548da9191156daf53",
+          "tokens": 444,
           "lines": 44
         },
         {
@@ -282,7 +282,7 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1761562996.325769,
+          "mtime": 1761659724.8946753,
           "hash": "7f5a54341b96bec116eaff937a25f511ff6954c2",
           "tokens": 1777,
           "lines": 196
@@ -461,9 +461,16 @@
           "hash": "c9b35dae1c4df2a7953d7c73d8f0a9e420e47f54",
           "tokens": 920,
           "lines": 88
+        },
+        {
+          "path": "src/ui/widgets/profile_navigator.py",
+          "mtime": 1761663431.6132708,
+          "hash": "d65f2f2ae55c9ce9a711bcef5e0b4e0bc0aec6f5",
+          "tokens": 681,
+          "lines": 80
         }
       ],
-      "total_tokens": 72012,
+      "total_tokens": 72474,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -561,6 +568,7 @@
     "src/ui/tooltip.py",
     "src/ui/ui_builder.py",
     "src/ui/view_manager.py",
+    "src/ui/widgets/profile_navigator.py",
     "src/ui/widgets/rounded_button.py",
     "src/ui/widgets/scrollable_frame.py",
     "src/ui/widgets/scrollable_text.py",

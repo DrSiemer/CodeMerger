@@ -1,6 +1,7 @@
-from tkinter import Frame, Label, ttk
+from tkinter import Frame, Label
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
+from .widgets.profile_navigator import ProfileNavigator
 from .tooltip import ToolTip
 from .assets import assets
 
@@ -63,33 +64,13 @@ def setup_ui(app):
     profile_frame = Frame(top_buttons_container, bg=c.DARK_BG)
     profile_frame.grid(row=0, column=1, sticky='we') # This will center the frame's content
     profile_frame.grid_columnconfigure(0, weight=1) # Pad left
-    profile_frame.grid_columnconfigure(1, weight=0) # Combobox
+    profile_frame.grid_columnconfigure(1, weight=0) # Navigator
     profile_frame.grid_columnconfigure(2, weight=0) # Button
     profile_frame.grid_columnconfigure(3, weight=1) # Pad right
 
-    # --- Profile Selector Combobox ---
-    s = ttk.Style(app) # Need a style object
-    app.option_add('*TCombobox*Listbox.background', c.TEXT_INPUT_BG)
-    app.option_add('*TCombobox*Listbox.foreground', c.TEXT_COLOR)
-    app.option_add('*TCombobox*Listbox.selectBackground', c.BTN_BLUE)
-    app.option_add('*TCombobox*Listbox.selectForeground', c.BTN_BLUE_TEXT)
-    s.configure('Profile.TCombobox',
-        fieldbackground=c.TEXT_INPUT_BG,
-        background=c.TEXT_INPUT_BG,
-        arrowcolor=c.TEXT_COLOR,
-        foreground=c.TEXT_COLOR,
-        selectbackground=c.TEXT_INPUT_BG,
-        selectforeground=c.TEXT_COLOR,
-        font=c.FONT_NORMAL,
-        padding=(10, 6)
-    )
-    s.map('Profile.TCombobox',
-        foreground=[('readonly', c.TEXT_COLOR)],
-        fieldbackground=[('readonly', c.TEXT_INPUT_BG)]
-    )
-
-    app.profile_selector = ttk.Combobox(profile_frame, textvariable=app.active_profile_var, state='readonly', style='Profile.TCombobox', width=20)
-    app.profile_selector.bind('<<ComboboxSelected>>', app.on_profile_switched)
+    # --- Profile Navigator ---
+    app.profile_navigator = ProfileNavigator(profile_frame, on_change_callback=app.on_profile_switched)
+    app.profile_navigator.grid(row=0, column=1, sticky='')
 
     # --- Add Profile Button ---
     app.add_profile_button = RoundedButton(profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_new_profile_dialog, cursor='hand2', width=20, height=28)

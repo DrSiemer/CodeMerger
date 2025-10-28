@@ -6,7 +6,7 @@ import subprocess
 import pyperclip
 import shutil
 import tempfile
-from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel, ttk
+from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel
 from PIL import Image, ImageTk
 
 from ..app_state import AppState
@@ -70,10 +70,8 @@ class App(Tk):
         # Initialize StringVar members before UI build
         self.active_dir = StringVar()
         self.project_title_var = StringVar()
-        self.active_profile_var = StringVar()
         self.status_var = StringVar(value="")
         self.active_dir.trace_add('write', self.button_manager.update_button_states)
-        self.active_profile_var.trace_add('write', self.button_manager.update_button_states)
 
         setup_ui(self)
 
@@ -259,7 +257,7 @@ class App(Tk):
     def _update_profile_selector_ui(self):
         project_config = self.project_manager.get_current_project()
         if not project_config:
-            self.profile_selector.grid_forget()
+            self.profile_navigator.grid_forget()
             self.add_profile_button.set_state('disabled')
             return
 
@@ -268,33 +266,22 @@ class App(Tk):
         active_name = project_config.active_profile_name
 
         if len(profile_names) > 1:
-            self.profile_selector['values'] = profile_names
-            # [FIX] Set the string variable AND the widget's current index
-            # to ensure the correct value is displayed on initial load.
-            self.active_profile_var.set(active_name)
-            if active_name in profile_names:
-                self.profile_selector.current(profile_names.index(active_name))
-            self.profile_selector.grid(row=0, column=1, sticky='e')
+            self.profile_navigator.grid(row=0, column=1, sticky='ew')
+            self.profile_navigator.set_profiles(profile_names, active_name)
         else:
-            self.profile_selector.grid_forget()
-            self.active_profile_var.set(active_name)
+            self.profile_navigator.grid_forget()
 
-    def on_profile_switched(self, event=None):
+    def on_profile_switched(self, new_profile_name):
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return
 
-        new_profile_name = self.active_profile_var.get()
         if new_profile_name != project_config.active_profile_name:
             project_config.active_profile_name = new_profile_name
             project_config.save()
             self.status_var.set(f"Switched to profile: {new_profile_name}")
             self.button_manager.update_button_states()
         self.focus_set()
-
-    def on_profile_selector_focus_out(self, event=None):
-        """Callback to clear selection when the combobox loses focus."""
-        self.profile_selector.selection_clear()
 
     def open_new_profile_dialog(self, event=None):
         project_config = self.project_manager.get_current_project()
@@ -316,6 +303,7 @@ class App(Tk):
                 project_config.active_profile_name = new_name # Switch to the new profile
                 project_config.save()
                 self._update_profile_selector_ui()
+                self.button_manager.update_button_states()
                 self.status_var.set(f"Created and switched to profile: {new_name}")
             else:
                 self.status_var.set(f"Error: Profile '{new_name}' already exists.")
