@@ -6,7 +6,7 @@ import subprocess
 import pyperclip
 import shutil
 import tempfile
-from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel
+from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel, Frame
 from PIL import Image, ImageTk
 
 from ..app_state import AppState
@@ -275,13 +275,13 @@ class App(Tk):
             # NAVIGATOR layout (centered)
             # Configure profile_frame for centering
             profile_frame.grid_columnconfigure(0, weight=1)
-            profile_frame.grid_columnconfigure(1, weight=0)
-            profile_frame.grid_columnconfigure(2, weight=0)
-            profile_frame.grid_columnconfigure(3, weight=0)
+            profile_frame.grid_columnconfigure(1, weight=0) # navigator
+            profile_frame.grid_columnconfigure(2, weight=0) # + button
+            profile_frame.grid_columnconfigure(3, weight=0, minsize=25) # width 20 + padx 5
             profile_frame.grid_columnconfigure(4, weight=1)
 
             # Grid the widgets inside profile_frame
-            self.profile_navigator.grid(row=0, column=1, sticky='')
+            self.profile_navigator.grid(row=0, column=1, sticky='w', padx=(30, 0))
             self.profile_navigator.set_profiles(profile_names, active_name)
             self.add_profile_button.grid(row=0, column=2, sticky='w', padx=(10, 0))
 
@@ -289,11 +289,12 @@ class App(Tk):
                 self.delete_profile_button.grid(row=0, column=3, sticky='w', padx=(5, 0))
         else:
             # COMPACT layout (left-aligned)
-            # Configure profile_frame for left-alignment with an expanding column to push content left
+            # Configure profile_frame for left-alignment with an expanding column
             profile_frame.grid_columnconfigure(0, weight=0)
             profile_frame.grid_columnconfigure(1, weight=1) # Expanding pad
-            for i in range(2, 5): # Reset other columns
-                profile_frame.grid_columnconfigure(i, weight=0)
+            # Reset other columns to clear any previous settings like minsize
+            for i in range(2, 5):
+                profile_frame.grid_columnconfigure(i, weight=0, minsize=0)
 
             # Grid the '+' button at the start of the profile_frame
             self.add_profile_button.grid(row=0, column=0, sticky='w', padx=(10, 0))
