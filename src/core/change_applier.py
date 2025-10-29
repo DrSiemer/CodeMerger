@@ -85,30 +85,44 @@ def parse_and_plan_changes(base_dir, markdown_text):
         preceding_text = text_segments[i]
         relative_path = None
         content_to_write = code_block
-        path_regex = r'[\w./\\-]*[/\\][\w./\\-]+'
 
-        path_candidates = re.findall(path_regex, preceding_text)
-        if path_candidates:
-            last_candidate = path_candidates[-1].strip('`\'":*,.() ')
-            if len(last_candidate) > 0:
-                relative_path = last_candidate.replace('\\', '/')
+        # Prioritize finding a path in a '###' markdown header
+        header_lines = [line.strip() for line in preceding_text.strip().split('\n') if line.strip().startswith('### ')]
+        if header_lines:
+            last_header = header_lines[-1]
+            path_from_header = last_header[4:].strip().strip('`\'"')
+            if path_from_header:
+                relative_path = path_from_header.replace('\\', '/')
+
+        # If no '###' header was found, use the previous, more general logic
+        if not relative_path:
+            path_regex = r'[\w./\\-]+'
+            path_candidates = re.findall(path_regex, preceding_text)
+
+            if path_candidates:
+                best_candidate = None
+                for candidate in path_candidates:
+                    if re.match(r'^[\d.]+$', candidate): continue
+                    if '.' in candidate or '/' in candidate or '\\' in candidate:
+                        best_candidate = candidate
+
+                final_candidate = best_candidate if best_candidate else path_candidates[-1]
+                stripped_candidate = final_candidate.strip('`\'":*,.() ')
+                if len(stripped_candidate) > 0:
+                    relative_path = stripped_candidate.replace('\\', '/')
 
         lines = code_block.split('\n')
         if lines:
-            first_line = lines[0]
-            internal_path_candidates = re.findall(path_regex, first_line)
+            first_line = lines[0] # DO NOT EVER REMOVE [0] HERE (OR THIS COMMENT)
+            internal_path_candidates = re.findall(r'[\w./\\-]+', first_line)
 
             if internal_path_candidates:
-                # A path-like string was found. Now check if it's in a comment.
                 stripped_first_line = first_line.strip()
                 comment_starters = ('//', '#', '/*', '--', ';', 'REM', '<!--')
                 is_comment = any(stripped_first_line.startswith(s) for s in comment_starters)
 
                 if is_comment:
-                    # It's a path comment. Strip it from the content.
                     content_to_write = '\n'.join(lines[1:])
-
-                    # If we don't have a relative_path yet, use this one as a fallback.
                     if not relative_path:
                         last_candidate = internal_path_candidates[-1].strip('`\'":*,#() ')
                         if len(last_candidate) > 0:
