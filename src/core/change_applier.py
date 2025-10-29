@@ -93,16 +93,26 @@ def parse_and_plan_changes(base_dir, markdown_text):
             if len(last_candidate) > 0:
                 relative_path = last_candidate.replace('\\', '/')
 
-        if not relative_path and code_block:
-            lines = code_block.split('\n')
-            if lines:
-                first_line = lines
-                internal_path_candidates = re.findall(path_regex, first_line)
-                if internal_path_candidates:
-                    last_candidate = internal_path_candidates[-1].strip('`\'":*,#() ')
-                    if len(last_candidate) > 0:
-                        relative_path = last_candidate.replace('\\', '/')
-                        content_to_write = '\n'.join(lines[1:])
+        lines = code_block.split('\n')
+        if lines:
+            first_line = lines[0]
+            internal_path_candidates = re.findall(path_regex, first_line)
+
+            if internal_path_candidates:
+                # A path-like string was found. Now check if it's in a comment.
+                stripped_first_line = first_line.strip()
+                comment_starters = ('//', '#', '/*', '--', ';', 'REM', '<!--')
+                is_comment = any(stripped_first_line.startswith(s) for s in comment_starters)
+
+                if is_comment:
+                    # It's a path comment. Strip it from the content.
+                    content_to_write = '\n'.join(lines[1:])
+
+                    # If we don't have a relative_path yet, use this one as a fallback.
+                    if not relative_path:
+                        last_candidate = internal_path_candidates[-1].strip('`\'":*,#() ')
+                        if len(last_candidate) > 0:
+                            relative_path = last_candidate.replace('\\', '/')
 
         if not relative_path:
             return {'status': 'ERROR', 'message': f"Error: Could not find a file path for code block {i + 1}."}
