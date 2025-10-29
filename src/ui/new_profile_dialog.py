@@ -26,7 +26,6 @@ class NewProfileDialog(Toplevel):
         self.entry_var = StringVar()
         self.entry = Entry(main_frame, textvariable=self.entry_var, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
         self.entry.pack(pady=5, fill='x', ipady=4)
-        self.entry.focus_set()
 
         options_frame = Frame(main_frame, bg=c.DARK_BG)
         options_frame.pack(fill='x', pady=(15, 0))
@@ -65,6 +64,7 @@ class NewProfileDialog(Toplevel):
         self.geometry(f"+{x}+{y}")
 
         self.deiconify()
+        self.entry.focus_set()
         self.wait_window(self)
 
     def on_ok(self, event=None):

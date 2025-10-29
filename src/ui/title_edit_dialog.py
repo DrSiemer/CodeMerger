@@ -24,7 +24,6 @@ class TitleEditDialog(Toplevel):
         self.entry_var = StringVar(value=initialvalue)
         self.entry = Entry(main_frame, textvariable=self.entry_var, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
         self.entry.pack(pady=5, fill='x', ipady=4)
-        self.entry.focus_set()
         self.entry.select_range(0, 'end')
 
         if self.max_length:
@@ -61,6 +60,7 @@ class TitleEditDialog(Toplevel):
         self.geometry(f"+{x}+{y}")
 
         self.deiconify()
+        self.entry.focus_set()
         self.wait_window(self)
 
     def _validate_length(self, *args):

@@ -37,7 +37,6 @@ class PasteChangesDialog(Toplevel):
             insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL
         )
         self.text_widget.grid(row=1, column=0, sticky='nsew', pady=5)
-        self.text_widget.text_widget.focus_set()
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=2, column=0, pady=(15, 0), sticky='e')
@@ -63,6 +62,9 @@ class PasteChangesDialog(Toplevel):
         self.minsize(500, 400)
         position_window(self)
         self.deiconify()
+        self.lift()
+        self.focus_force()
+        self.text_widget.text_widget.focus_set()
         self.wait_window(self)
 
     def on_apply(self):

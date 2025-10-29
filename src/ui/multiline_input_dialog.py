@@ -27,7 +27,6 @@ class MultilineInputDialog(Toplevel):
         text_frame.grid(row=1, column=0, sticky='nsew', pady=5)
         self.text_widget = Text(text_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL, undo=True, wrap='word')
         self.text_widget.pack(fill='both', expand=True, padx=5, pady=5)
-        self.text_widget.focus_set()
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=2, column=0, pady=(15, 0), sticky='e')
@@ -46,6 +45,7 @@ class MultilineInputDialog(Toplevel):
         self.minsize(400, 300)
         position_window(self)
         self.deiconify()
+        self.text_widget.focus_set()
         self.wait_window(self)
 
     def on_ok(self, event=None):

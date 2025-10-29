@@ -79,10 +79,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1761732050.2552512,
-          "hash": "129802a329a561dadb939c4204544afdb2722e37",
-          "tokens": 1303,
-          "lines": 132
+          "mtime": 1761749113.6884854,
+          "hash": "874f023a648d144d3448f8e4470f73696b44b1f4",
+          "tokens": 1319,
+          "lines": 134
         },
         {
           "path": "src/core/paths.py",
@@ -170,10 +170,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1761697749.366528,
-          "hash": "b88d91dfc1c09564b54fea6a8365f3193ccc928e",
-          "tokens": 1184,
-          "lines": 136
+          "mtime": 1761749758.3142588,
+          "hash": "dd5395331f74724e3375c4c0a653d47d8ce42d64",
+          "tokens": 1292,
+          "lines": 146
         },
         {
           "path": "src/ui/app_window.py",
@@ -184,9 +184,9 @@
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1761731989.1932392,
-          "hash": "d393b41241de70b0abb99e235d79ad14319a03ef",
-          "tokens": 1950,
+          "mtime": 1761749039.8248405,
+          "hash": "8b87ab6674d9c7de11f6bedfbd51cc6e64447815",
+          "tokens": 1951,
           "lines": 126
         },
         {
@@ -443,29 +443,29 @@
         },
         {
           "path": "src/ui/title_edit_dialog.py",
-          "mtime": 1761599421.388799,
-          "hash": "a7a24b05ace7de4efaa177ae983e4a1dd3bfb06f",
+          "mtime": 1761749974.5499096,
+          "hash": "ce530b9c079ab9cba0f403313eecde4c86944b06",
           "tokens": 771,
           "lines": 77
         },
         {
           "path": "src/ui/new_profile_dialog.py",
-          "mtime": 1761697749.4035275,
-          "hash": "c9b35dae1c4df2a7953d7c73d8f0a9e420e47f54",
+          "mtime": 1761749974.55091,
+          "hash": "56fd6efc104bd3d85661fa7e760a25ca6ff939a7",
           "tokens": 920,
           "lines": 88
         },
         {
           "path": "src/ui/paste_changes_dialog.py",
-          "mtime": 1761697749.4125297,
-          "hash": "2f104a7a27d4bf20e6f2f302765ebafeaab6b851",
-          "tokens": 944,
-          "lines": 111
+          "mtime": 1761749974.5499096,
+          "hash": "400603f109b7e031549cb8410b107435257562d2",
+          "tokens": 953,
+          "lines": 113
         },
         {
           "path": "src/ui/multiline_input_dialog.py",
-          "mtime": 1761297206.6408358,
-          "hash": "7288acc450422bdcf9cc44785cbfeca88bdc63dc",
+          "mtime": 1761749974.55091,
+          "hash": "25204c027109e2f629866dc6ac84dd82553c818f",
           "tokens": 624,
           "lines": 57
         }
