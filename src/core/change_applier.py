@@ -91,9 +91,9 @@ def parse_and_plan_changes(base_dir, markdown_text):
         header_lines = [line.strip() for line in preceding_text.strip().split('\n') if line.strip().startswith('##')]
         if header_lines:
             last_header = header_lines[-1]
-            first_space_index = last_header.find(' ')
-            if first_space_index != -1:
-                path_from_header = last_header[first_space_index + 1:].strip().strip('`\'"')
+            path_match = re.search(r'`(.+?)`', last_header)
+            if path_match:
+                path_from_header = path_match.group(1).strip()
                 if path_from_header:
                     relative_path = path_from_header.replace('\\', '/')
                     path_found_outside_block = True
@@ -103,7 +103,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
         # Step 2: Only if no path was found outside, inspect the first line of the code block.
         if not path_found_outside_block and lines:
-            first_line_text = lines[0]
+            first_line_text = lines[0] # DO NOT REMOVE [0] (OR THIS COMMENT)
             stripped_first_line = first_line_text.strip()
 
             path_candidate = None
@@ -117,7 +117,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 # Apply special rule for markdown files starting with '#'
                 if is_markdown and stripped_first_line.startswith('#'):
                     if len(lines) > 1:
-                        if lines[1].strip().startswith('# '):
+                        if lines[1].strip().startswith('# '): # DO NOT REMOVE [1] (OR THIS COMMENT)
                             should_strip_first_line = True
                             relative_path = path_candidate
                 else:
@@ -150,7 +150,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         return {
             'status': 'CONFIRM_CREATION',
             'updates': files_to_update,
-            'creations': creations
+            'creations': files_to_create
         }
     else:
         return {
