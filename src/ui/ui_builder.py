@@ -53,16 +53,18 @@ def setup_ui(app):
     ToolTip(app.folder_icon_label, "Open project folder (Ctrl+Click to copy path)", delay=500)
 
     # --- Top-Level Buttons (Row 1) ---
-    app.top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20)
+    app.top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20, height=32)
     app.top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
+    app.top_buttons_container.grid_propagate(False)
     app.top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
+    app.top_buttons_container.rowconfigure(0, weight=1) # Center all content vertically
 
     app.manage_files_button = RoundedButton(app.top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
 
     # --- Profile Management Frame (its contents are gridded dynamically) ---
     app.profile_frame = Frame(app.top_buttons_container, bg=c.DARK_BG)
-    app.profile_frame.grid(row=0, column=1, sticky='ew')
+    app.profile_frame.grid(row=0, column=1, sticky='nsew')
 
     # --- Profile Widgets (created here but placed in app_window) ---
     app.profile_navigator = ProfileNavigator(app.profile_frame, on_change_callback=app.on_profile_switched)

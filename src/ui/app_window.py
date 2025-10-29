@@ -257,6 +257,7 @@ class App(Tk):
     def _update_profile_selector_ui(self):
         project_config = self.project_manager.get_current_project()
         profile_frame = self.profile_frame
+        profile_frame.grid_rowconfigure(0, weight=1)
 
         # Forget all children of the profile frame to reset its layout
         for widget in profile_frame.winfo_children():
