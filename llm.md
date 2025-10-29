@@ -47,6 +47,7 @@ Assume I have full project context. Do not explain obvious code, file structures
 
 ### User Interface (`src/ui`)
 
+- **General Dialog Focus**: In several dialog windows (`PasteChangesDialog`, `NewProfileDialog`, etc.), the call to `.focus_set()` on an input widget was moved to *after* the `.deiconify()` call. Setting focus before the window is visible is unreliable and was causing input fields to not receive focus on launch. Adding `.lift()` and `.focus_force()` to the `PasteChangesDialog` was also done for extra robustness.
 - `src/ui/app_window.py`: On startup, `_run_update_cleanup()` safely removes temporary installer files from any previous update. It then calls `lift()` and `focus_force()` to ensure the main window gets focus, which is particularly important when relaunched by the installer.
 - `src/ui/app_window.py`: Tracks its last move time via the `<Configure>` event. This allows the `ViewManager` to decide whether to use a saved compact mode position or calculate a new one. When moved to a new display, only saved child window positions (`window_geometries`) are cleared.
 - `src/ui/assets.py`: Uses a two-stage load (PIL then `PhotoImage`) to avoid a Tkinter race condition where `PhotoImage` requires a root window to exist before it can be instantiated.
