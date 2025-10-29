@@ -85,51 +85,51 @@ def parse_and_plan_changes(base_dir, markdown_text):
         preceding_text = text_segments[i]
         relative_path = None
         content_to_write = code_block
+        path_found_outside_block = False
 
-        # Prioritize finding a path in a '###' markdown header
-        header_lines = [line.strip() for line in preceding_text.strip().split('\n') if line.strip().startswith('### ')]
+        # Step 1: Prioritize finding a path in a markdown header (e.g., ## `path`)
+        header_lines = [line.strip() for line in preceding_text.strip().split('\n') if line.strip().startswith('##')]
         if header_lines:
             last_header = header_lines[-1]
-            path_from_header = last_header[4:].strip().strip('`\'"')
-            if path_from_header:
-                relative_path = path_from_header.replace('\\', '/')
-
-        # If no '###' header was found, use the previous, more general logic
-        if not relative_path:
-            path_regex = r'[\w./\\-]+'
-            path_candidates = re.findall(path_regex, preceding_text)
-
-            if path_candidates:
-                best_candidate = None
-                for candidate in path_candidates:
-                    if re.match(r'^[\d.]+$', candidate): continue
-                    if '.' in candidate or '/' in candidate or '\\' in candidate:
-                        best_candidate = candidate
-
-                final_candidate = best_candidate if best_candidate else path_candidates[-1]
-                stripped_candidate = final_candidate.strip('`\'":*,.() ')
-                if len(stripped_candidate) > 0:
-                    relative_path = stripped_candidate.replace('\\', '/')
+            first_space_index = last_header.find(' ')
+            if first_space_index != -1:
+                path_from_header = last_header[first_space_index + 1:].strip().strip('`\'"')
+                if path_from_header:
+                    relative_path = path_from_header.replace('\\', '/')
+                    path_found_outside_block = True
 
         lines = code_block.split('\n')
-        if lines:
-            first_line = lines[0] # DO NOT EVER REMOVE [0] HERE (OR THIS COMMENT)
-            internal_path_candidates = re.findall(r'[\w./\\-]+', first_line)
+        should_strip_first_line = False
 
-            if internal_path_candidates:
-                stripped_first_line = first_line.strip()
-                comment_starters = ('//', '#', '/*', '--', ';', 'REM', '<!--')
-                is_comment = any(stripped_first_line.startswith(s) for s in comment_starters)
+        # Step 2: Only if no path was found outside, inspect the first line of the code block.
+        if not path_found_outside_block and lines:
+            first_line_text = lines[0]
+            stripped_first_line = first_line_text.strip()
 
-                if is_comment:
-                    content_to_write = '\n'.join(lines[1:])
-                    if not relative_path:
-                        last_candidate = internal_path_candidates[-1].strip('`\'":*,#() ')
-                        if len(last_candidate) > 0:
-                            relative_path = last_candidate.replace('\\', '/')
+            path_candidate = None
+            match = re.search(r'([\w.-]+(?:/|\\)[\w./\\-]*[\w-]+|[\w-]+\.[\w-]+)', stripped_first_line)
+            if match:
+                path_candidate = match.group(0).strip('`\'":*,#() ').replace('\\', '/')
+
+            if path_candidate:
+                is_markdown = path_candidate.lower().endswith('.md')
+
+                # Apply special rule for markdown files starting with '#'
+                if is_markdown and stripped_first_line.startswith('#'):
+                    if len(lines) > 1:
+                        if lines[1].strip().startswith('# '):
+                            should_strip_first_line = True
+                            relative_path = path_candidate
+                else:
+                    # For non-markdown files, or markdown not starting with '#', strip if a path was found.
+                    should_strip_first_line = True
+                    relative_path = path_candidate
+
+        if should_strip_first_line:
+            content_to_write = '\n'.join(lines[1:])
 
         if not relative_path:
-            return {'status': 'ERROR', 'message': f"Error: Could not find a file path for code block {i + 1}."}
+            return {'status': 'ERROR', 'message': f"Error: Could not determine a file path for code block {i + 1}."}
 
         full_path = os.path.normpath(os.path.join(base_dir, relative_path))
 
@@ -150,7 +150,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         return {
             'status': 'CONFIRM_CREATION',
             'updates': files_to_update,
-            'creations': files_to_create
+            'creations': creations
         }
     else:
         return {
