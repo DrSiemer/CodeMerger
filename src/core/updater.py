@@ -154,16 +154,16 @@ class Updater:
             messagebox.showerror("Update Error", "Could not find a downloadable installer in the release.", parent=self.parent)
             return
 
-        updater_exe_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
+        updater_exe_path = ""
+        if getattr(sys, 'frozen', False):
+            base_path = os.path.dirname(sys.executable)
+            updater_exe_path = os.path.join(base_path, "updater_gui.exe")
+        else:
+            # This path is for running from source code.
+            updater_exe_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
 
         if not os.path.exists(updater_exe_path):
-             # Fallback for running from a built distribution folder directly
-             if getattr(sys, 'frozen', False):
-                 base_path = os.path.dirname(sys.executable)
-                 updater_exe_path = os.path.join(base_path, "updater_gui.exe")
-
-        if not os.path.exists(updater_exe_path):
-            messagebox.showerror("Update Error", f"The updater application is missing and could not be found.\n\nPlease reinstall CodeMerger.", parent=self.parent)
+            messagebox.showerror("Update Error", f"The updater application is missing and could not be found.\n\nChecked path: {updater_exe_path}\n\nPlease reinstall CodeMerger.", parent=self.parent)
             return
 
         try:
