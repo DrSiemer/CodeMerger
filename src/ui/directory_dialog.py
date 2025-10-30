@@ -6,7 +6,7 @@ from .widgets.rounded_button import RoundedButton
 from .widgets.scrollable_frame import ScrollableFrame
 from .. import constants as c
 from ..core.paths import ICON_PATH
-from .window_utils import save_window_geometry
+from .window_utils import save_window_geometry, get_monitor_work_area
 from .assets import assets
 
 class DirectoryDialog(Toplevel):
@@ -25,6 +25,9 @@ class DirectoryDialog(Toplevel):
         self.tooltip = None
         self.project_widgets = []
         self.non_list_height = 0
+        # Instance variables to reliably store the current position.
+        self.current_x = 0
+        self.current_y = 0
 
         self.title("Select Project")
         self.iconbitmap(ICON_PATH)
@@ -68,25 +71,50 @@ class DirectoryDialog(Toplevel):
         )
         self.browse_btn.grid(row=3, column=0, sticky='ew', pady=20, padx=20)
 
-        # Perform initial sizing and positioning logic
+        # Let the window calculate its size with no list items.
         self.update_idletasks()
-        if self.recent_projects:
-            self._populate_projects(self.recent_projects, is_initial_call=True)
-        else:
-            self._adjust_height()
+        initial_height = self.winfo_reqheight()
+        x, y = 0, 0
+        saved_geometry = None
 
-        # Center the window on the parent the first time it's created.
-        self.update_idletasks()
-        final_height = self.winfo_reqheight()
-        parent_x, parent_y = self.parent.winfo_rootx(), self.parent.winfo_rooty()
-        parent_w, parent_h = self.parent.winfo_width(), self.parent.winfo_height()
-        x = parent_x + (parent_w - self.dialog_width) // 2
-        y = parent_y + (parent_h - final_height) // 2
-        self.geometry(f"{self.dialog_width}x{final_height}+{x}+{y}")
+        if hasattr(self.parent, 'window_geometries'):
+            saved_geometry = self.parent.window_geometries.get(self.__class__.__name__)
 
+        if saved_geometry:
+            try:
+                parts = saved_geometry.replace('+', ' ').replace('x', ' ').split()
+                if len(parts) == 4:
+                    _, _, x, y = map(int, parts)
+                else:
+                    saved_geometry = None
+            except (ValueError, IndexError):
+                saved_geometry = None
+
+        if not saved_geometry:
+            parent_x, parent_y = self.parent.winfo_rootx(), self.parent.winfo_rooty()
+            parent_w, parent_h = self.parent.winfo_width(), self.parent.winfo_height()
+            x = parent_x + (parent_w - self.dialog_width) // 2
+            y = parent_y + (parent_h - initial_height) // 2
+
+        # Store the calculated position reliably.
+        self.current_x = x
+        self.current_y = y
+
+        self.geometry(f"{self.dialog_width}x{initial_height}+{self.current_x}+{self.current_y}")
+
+        self._populate_projects(self.recent_projects)
+
+        self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
+        self.bind('<Configure>', self._on_drag)
         self.deiconify()
         search_entry.focus_set()
+
+    def _on_drag(self, event):
+        """Updates the stored position when the window is moved by the user."""
+        if self.state() == 'normal':
+            self.current_x = self.winfo_x()
+            self.current_y = self.winfo_y()
 
     def _filter_projects(self, *args):
         query = self.search_var.get().lower()
@@ -96,7 +124,7 @@ class DirectoryDialog(Toplevel):
         ]
         self._populate_projects(filtered_list)
 
-    def _populate_projects(self, project_list, is_initial_call=False):
+    def _populate_projects(self, project_list):
         for widget in self.project_widgets:
             widget.destroy()
         self.project_widgets.clear()
@@ -105,9 +133,7 @@ class DirectoryDialog(Toplevel):
             entry_frame = self._create_recent_dir_entry(path)
             self.project_widgets.append(entry_frame)
 
-        # On subsequent calls (like filtering), only adjust height, do not re-center.
-        if not is_initial_call:
-            self._adjust_height()
+        self._adjust_height()
 
     def _adjust_height(self):
         self.update_idletasks()
@@ -131,10 +157,19 @@ class DirectoryDialog(Toplevel):
 
         final_height = self.non_list_height + list_items_height
 
-        # Get the window's current position and apply the new height.
-        current_x = self.winfo_x()
-        current_y = self.winfo_y()
-        self.geometry(f"{self.dialog_width}x{final_height}+{current_x}+{current_y}")
+        x, y = self.current_x, self.current_y
+
+        win_w, win_h = self.dialog_width, final_height
+        mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area((x, y))
+
+        mon_bottom -= 50; mon_right -= 20; mon_left += 10; mon_top += 10
+
+        if x + win_w > mon_right: x = mon_right - win_w
+        if y + win_h > mon_bottom: y = mon_bottom - win_h
+        if x < mon_left: x = mon_left
+        if y < mon_top: y = mon_top
+
+        self.geometry(f"{win_w}x{win_h}+{x}+{y}")
 
     def _close_and_save_geometry(self):
         save_window_geometry(self)
