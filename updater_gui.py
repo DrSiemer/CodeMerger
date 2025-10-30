@@ -21,10 +21,25 @@ FONT_NORMAL = ("Segoe UI", 11)
 FONT_STATUS_BAR = ("Segoe UI", 9)
 FONT_BUTTON = ("Segoe UI", 12)
 
+def get_bundle_dir():
+    """Gets the base path for reading bundled resources."""
+    if hasattr(sys, '_MEIPASS'):
+        return sys._MEIPASS
+    return os.path.abspath(".")
+
 class UpdateGUI(tk.Tk):
     def __init__(self, pid_to_wait_for, download_url):
         super().__init__()
         self.withdraw()  # Start hidden
+
+        try:
+            bundle_dir = get_bundle_dir()
+            icon_path = os.path.join(bundle_dir, 'assets', 'install.ico')
+            if os.path.exists(icon_path):
+                self.iconbitmap(icon_path)
+        except Exception:
+            # Silently fail if icon cannot be set.
+            pass
 
         self.pid_to_wait_for = pid_to_wait_for
         self.download_url = download_url
@@ -75,12 +90,13 @@ class UpdateGUI(tk.Tk):
     def _update_worker(self):
         try:
             if self.pid_to_wait_for:
-                p = psutil.Process(self.pid_to_wait_for)
-                p.wait(timeout=10)
-        except (psutil.NoSuchProcess, psutil.TimeoutExpired):
-            pass # Process is already gone or wait timed out, proceed.
+                end_time = time.time() + 10  # 10-second timeout
+                while time.time() < end_time:
+                    if not psutil.pid_exists(self.pid_to_wait_for):
+                        break  # Process has terminated
+                    time.sleep(0.2)
         except Exception:
-            pass # Ignore other potential errors, the goal is to proceed.
+            pass
 
         time.sleep(0.5) # Brief pause for safety
 

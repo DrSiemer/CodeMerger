@@ -7,6 +7,7 @@ app_data_files = [
     ('version.txt', '.')
 ]
 app_icon_path = 'assets/icon.ico'
+install_icon_path = 'assets/install.ico'
 
 a = Analysis(
     ['run.py'],
@@ -49,7 +50,7 @@ updater_a = Analysis(
     ['updater_gui.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[(install_icon_path, 'assets')],
     hiddenimports=['psutil'],
     hookspath=[],
     hooksconfig={},
@@ -71,7 +72,7 @@ updater_exe = EXE(
     upx=True,
     runtime_tmpdir=None,
     console=False,
-    icon=app_icon_path
+    icon=install_icon_path
 )
 
 # --- Collection ---
