@@ -281,7 +281,7 @@ class App(Tk):
             profile_frame.grid_columnconfigure(4, weight=1)
 
             # Grid the widgets inside profile_frame
-            self.profile_navigator.grid(row=0, column=1, sticky='w', padx=(30, 0))
+            self.profile_navigator.grid(row=0, column=1, sticky='e')
             self.profile_navigator.set_profiles(profile_names, active_name)
             self.add_profile_button.grid(row=0, column=2, sticky='w', padx=(10, 0))
 

@@ -41,7 +41,7 @@ class ProfileNavigator(Frame):
 
         self.prev_button.pack(side='left', padx=(0, 0))
         self.label_container.pack(side='left', fill='y')
-        self.profile_label.pack(expand=True, fill='both', padx=(10, 0))
+        self.profile_label.pack(expand=True, fill='both')
         self.next_button.pack(side='left', padx=(0, 0))
 
     def set_profiles(self, profile_list, active_profile_name):
@@ -63,7 +63,7 @@ class ProfileNavigator(Frame):
             MIN_WIDTH = 80
             MAX_WIDTH = 120
 
-            final_width = max(MIN_WIDTH, min(max_w + 10, MAX_WIDTH))
+            final_width = max(MIN_WIDTH, min(max_w + 20, MAX_WIDTH))
             self.label_container.config(width=final_width)
         else:
             self.label_container.config(width=0)
