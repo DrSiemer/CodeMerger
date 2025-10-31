@@ -196,6 +196,10 @@ class TwoColumnList(tk.Canvas):
         self.selected_indices = set(range(start, (end if end is not None else start) + 1))
         self._update_styles()
 
+    def set_selection_anchor(self, index):
+        """Sets the anchor for the next shift-click operation."""
+        self.last_clicked_index = index
+
     def get_item_data(self, index):
         if 0 <= index < len(self.items): return self.items[index].get('data')
         return None

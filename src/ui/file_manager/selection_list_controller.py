@@ -67,6 +67,7 @@ class SelectionListController:
         self._update_and_notify(is_reorder=True)
         self.listbox.selection_set(new_selection.start, new_selection.stop - 1)
         self.listbox.see(new_selection.start)
+        self.listbox.set_selection_anchor(new_selection.start)
 
     def move_up(self):
         indices = self.listbox.curselection()
@@ -75,6 +76,7 @@ class SelectionListController:
             self._update_and_notify(is_reorder=True)
             self.listbox.selection_set(new_selection.start, new_selection.stop - 1)
             self.listbox.see(new_selection.start)
+            self.listbox.set_selection_anchor(new_selection.start)
 
     def move_down(self):
         indices = self.listbox.curselection()
@@ -83,6 +85,7 @@ class SelectionListController:
             self._update_and_notify(is_reorder=True)
             self.listbox.selection_set(new_selection.start, new_selection.stop - 1)
             self.listbox.see(new_selection.stop - 1)
+            self.listbox.set_selection_anchor(new_selection.stop - 1)
 
     def move_to_bottom(self):
         indices = self.listbox.curselection()
@@ -91,6 +94,7 @@ class SelectionListController:
         self._update_and_notify(is_reorder=True)
         self.listbox.selection_set(new_selection.start, new_selection.stop - 1)
         self.listbox.see(new_selection.stop - 1)
+        self.listbox.set_selection_anchor(new_selection.stop - 1)
 
     def remove_selected(self):
         indices = self.listbox.curselection()
