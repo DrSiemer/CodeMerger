@@ -46,13 +46,14 @@ class CompactMode(tk.Toplevel):
         self.close_button.pack(side='right', padx=(0, 1))
 
         # --- Button Container ---
-        button_container = tk.Frame(self, bg=c.DARK_BG)
-        button_container.pack(fill='both', expand=True, pady=(1,0))
+        button_container = tk.Frame(self, bg=c.DARK_BG, padx=4, pady=2)
+        button_container.pack(fill='both', expand=True, pady=(1, 0))
 
-        button_font = c.FONT_SMALL_BUTTON
+        button_font = c.FONT_COMPACT_BUTTON
         button_height = 24
         button_radius = 4
         button_fg = '#FFFFFF'
+        button_padding = {'pady': 2}
 
         if show_wrapped_button:
             self.copy_wrapped_button = RoundedButton(
@@ -61,7 +62,7 @@ class CompactMode(tk.Toplevel):
                 command=self.parent.copy_wrapped_code,
                 height=button_height, radius=button_radius, cursor='hand2'
             )
-            self.copy_wrapped_button.pack(fill='x', expand=True, pady=(0, 1))
+            self.copy_wrapped_button.pack(fill='x', expand=True, **button_padding)
 
         self.copy_merged_button = RoundedButton(
             button_container, text="Copy Merged", font=button_font,
@@ -69,7 +70,7 @@ class CompactMode(tk.Toplevel):
             command=self.parent.copy_merged_code,
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        self.copy_merged_button.pack(fill='x', expand=True, pady=(0, 1))
+        self.copy_merged_button.pack(fill='x', expand=True, **button_padding)
 
         self.paste_button = RoundedButton(
             button_container, text="Paste", font=button_font,
@@ -77,7 +78,7 @@ class CompactMode(tk.Toplevel):
             command=None, # We use custom bindings instead
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        self.paste_button.pack(fill='x', expand=True)
+        self.paste_button.pack(fill='x', expand=True, **button_padding)
 
         # Override the command with specific bindings for ctrl-click
         self.paste_button.bind("<Button-1>", self.on_paste_click)
