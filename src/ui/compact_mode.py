@@ -37,7 +37,7 @@ class CompactMode(tk.Toplevel):
 
         # Project title abbreviation
         no_space_title = project_name.replace(' ', '')
-        title_abbr = no_space_title[:5]
+        title_abbr = no_space_title[:10]
         self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_AND_BORDER_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
         self.title_label.pack(side='left', padx=(4, 0))
 
