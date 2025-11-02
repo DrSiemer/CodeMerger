@@ -31,6 +31,8 @@ from ..core.project_config import _calculate_font_color
 from .status_bar_manager import StatusBarManager
 from .paste_changes_dialog import PasteChangesDialog
 from .new_profile_dialog import NewProfileDialog
+from ..core import change_applier
+from .compact_status import CompactStatusToast
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -38,6 +40,7 @@ class App(Tk):
         self.withdraw()
         self._run_update_cleanup()
         assets.load_tk_images()
+        self.assets = assets # [FIX] Assign assets to the instance
 
         self.file_extensions = file_extensions
         self.app_version = app_version
@@ -433,12 +436,66 @@ class App(Tk):
         wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
         self.wait_window(wt_window)
 
-    def open_paste_changes_dialog(self):
+    def open_paste_changes_dialog(self, initial_content=None):
         project_config = self.project_manager.get_current_project()
         if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        PasteChangesDialog(self, project_config.base_dir, self.status_var)
+        PasteChangesDialog(self, project_config.base_dir, self.status_var, initial_content=initial_content)
+
+    def _show_compact_toast(self, message):
+        """Displays a temporary status message below the compact mode window."""
+        compact_window = self.view_manager.compact_mode_window
+        if compact_window and compact_window.winfo_exists():
+            CompactStatusToast(compact_window, message)
+        else:
+            # Fallback to the main status bar if not in compact mode
+            self.status_var.set(message)
+
+    def apply_changes_from_clipboard(self):
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            messagebox.showerror("Error", "Please select a valid project folder first")
+            return
+
+        markdown_text = pyperclip.paste()
+        # [LOGGING] Add logging to see what the parser is receiving
+        print("\n--- Clipboard Content for Parsing ---")
+        print(markdown_text)
+        print("-------------------------------------\n")
+        if not markdown_text.strip():
+            self._show_compact_toast("Clipboard is empty.")
+            return
+
+        plan = change_applier.parse_and_plan_changes(project_config.base_dir, markdown_text)
+
+        status = plan.get('status')
+        message = plan.get('message')
+
+        if status == 'ERROR':
+            messagebox.showerror("Parsing Error", message, parent=self)
+            return
+
+        # Direct apply is only safe if no new files are being created
+        if status == 'CONFIRM_CREATION':
+            messagebox.showinfo(
+                "Confirmation Needed",
+                "The changes require creating new files.\nPlease use the standard 'Paste Changes' window to review and confirm.",
+                parent=self
+            )
+            # Open the dialog with the content pre-filled for convenience
+            self.open_paste_changes_dialog(initial_content=markdown_text)
+            return
+
+        updates = plan.get('updates', {})
+        creations = plan.get('creations', {}) # Should be empty here
+
+        success, final_message = change_applier.execute_plan(updates, creations)
+
+        if success:
+            self._show_compact_toast(final_message)
+        else:
+            messagebox.showerror("File Write Error", final_message, parent=self)
 
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)

@@ -9,10 +9,10 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1757972761.8078718,
-          "hash": "50f65454420cf60aeb435c6cec20b0af58dc5464",
-          "tokens": 1412,
-          "lines": 97
+          "mtime": 1762087483.0081372,
+          "hash": "dd9601dc7a4ed8b9c3e6ae0740793039ec9b3797",
+          "tokens": 1472,
+          "lines": 96
         },
         {
           "path": "llm.md",
@@ -86,10 +86,10 @@
         },
         {
           "path": "src/core/paths.py",
-          "mtime": 1761297206.6368334,
-          "hash": "5e7b2c0a19544836760ffd6d381bfef374ade807",
-          "tokens": 799,
-          "lines": 88
+          "mtime": 1762087483.0081372,
+          "hash": "50ba500874f92887fc7fdc9d5b8ae3c904eb6366",
+          "tokens": 755,
+          "lines": 86
         },
         {
           "path": "src/app_state.py",
@@ -170,17 +170,17 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1761759700.030056,
-          "hash": "b0a63700843d1628808f5c5d4b2cd9bb56cd20f8",
-          "tokens": 1448,
-          "lines": 160
+          "mtime": 1762088008.3128762,
+          "hash": "1d3cc0be419f3a09003d6f6574b89f687dece2b0",
+          "tokens": 1465,
+          "lines": 161
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1761759700.0350585,
-          "hash": "cf71766263df0dca995d425687bf45bddcdcc67b",
-          "tokens": 4034,
-          "lines": 507
+          "mtime": 1762088008.3128762,
+          "hash": "1c2435d30e5889ce813ec45eccf52a1b75453e76",
+          "tokens": 4454,
+          "lines": 560
         },
         {
           "path": "src/ui/ui_builder.py",
@@ -191,16 +191,16 @@
         },
         {
           "path": "src/ui/view_manager.py",
-          "mtime": 1761297202.903105,
-          "hash": "9169eb94048f3810920d76f41470e337bd7492d3",
-          "tokens": 2189,
-          "lines": 220
+          "mtime": 1762087483.0091405,
+          "hash": "0943f41bb88459c6b34fe1f36ec180d490e533c2",
+          "tokens": 2124,
+          "lines": 215
         },
         {
           "path": "src/ui/button_state_manager.py",
-          "mtime": 1761756149.7565875,
-          "hash": "f05c47e64a2cf50ae739228dac560fd28a310810",
-          "tokens": 776,
+          "mtime": 1762086855.6577702,
+          "hash": "e771c090aa5274ccd3c8b0065b6565886d0f89a5",
+          "tokens": 783,
           "lines": 84
         },
         {
@@ -219,10 +219,10 @@
         },
         {
           "path": "src/ui/assets.py",
-          "mtime": 1761297206.6388361,
-          "hash": "9cb9769a7f753c31275180976d8d5f32de713ba3",
-          "tokens": 923,
-          "lines": 74
+          "mtime": 1762087483.0101388,
+          "hash": "15e6ae5f1c3c2e4400097ee7e561283cf1312807",
+          "tokens": 787,
+          "lines": 67
         },
         {
           "path": "src/ui/style_manager.py",
@@ -282,9 +282,9 @@
         },
         {
           "path": "src/ui/widgets/profile_navigator.py",
-          "mtime": 1761756149.7605853,
-          "hash": "d0cc7b3c0945bfa2886cbf8fe2f57520120daeac",
-          "tokens": 817,
+          "mtime": 1761908824.6465917,
+          "hash": "6c577982d069802c7e21974612c80aae7f59a185",
+          "tokens": 810,
           "lines": 99
         },
         {
@@ -345,10 +345,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1761908118.0029714,
-          "hash": "1cbd0dde95c502e4d282abf0c6c988d00fbece73",
-          "tokens": 1846,
-          "lines": 191
+          "mtime": 1761908157.9117274,
+          "hash": "a3d98f552c6d758569669e9e8a6457d4849d3e96",
+          "tokens": 1778,
+          "lines": 187
         },
         {
           "path": "src/ui/file_manager/selection_data_manager.py",
@@ -415,10 +415,10 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1761759700.0360587,
-          "hash": "70f4f4a35c7b806f59d3c818b9f858ede13e2696",
-          "tokens": 2287,
-          "lines": 228
+          "mtime": 1762087483.0101388,
+          "hash": "3a4e22af207928a4e15fd1952d9ccb809e215a97",
+          "tokens": 1686,
+          "lines": 163
         },
         {
           "path": "src/ui/directory_dialog.py",
@@ -457,10 +457,10 @@
         },
         {
           "path": "src/ui/paste_changes_dialog.py",
-          "mtime": 1761756149.7595844,
-          "hash": "400603f109b7e031549cb8410b107435257562d2",
-          "tokens": 953,
-          "lines": 113
+          "mtime": 1762087483.0101388,
+          "hash": "9eb49634f047d83ee9a4e5c70d2e69633acba333",
+          "tokens": 975,
+          "lines": 116
         },
         {
           "path": "src/ui/multiline_input_dialog.py",
@@ -468,9 +468,16 @@
           "hash": "25204c027109e2f629866dc6ac84dd82553c818f",
           "tokens": 624,
           "lines": 57
+        },
+        {
+          "path": "src/ui/compact_status.py",
+          "mtime": 1762088008.3118856,
+          "hash": "fde7979f40f3a3c4588f49607e960a2ea172d266",
+          "tokens": 446,
+          "lines": 53
         }
       ],
-      "total_tokens": 73250,
+      "total_tokens": 74349,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\nalways place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nWhen asked to add logs by the user to debug an issue, do not remove them until the user indicates that the issue is resolved.\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -514,6 +521,7 @@
     "src/ui/assets.py",
     "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
+    "src/ui/compact_status.py",
     "src/ui/directory_dialog.py",
     "src/ui/file_manager/data_controller.py",
     "src/ui/file_manager/file_manager_window.py",

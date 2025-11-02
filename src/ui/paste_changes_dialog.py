@@ -8,7 +8,7 @@ from ..core import change_applier
 from .window_utils import position_window
 
 class PasteChangesDialog(Toplevel):
-    def __init__(self, parent, project_base_dir, status_var):
+    def __init__(self, parent, project_base_dir, status_var, initial_content=None):
         super().__init__(parent)
         self.parent = parent
         self.base_dir = project_base_dir
@@ -37,6 +37,9 @@ class PasteChangesDialog(Toplevel):
             insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL
         )
         self.text_widget.grid(row=1, column=0, sticky='nsew', pady=5)
+
+        if initial_content:
+            self.text_widget.insert('1.0', initial_content)
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=2, column=0, pady=(15, 0), sticky='e')

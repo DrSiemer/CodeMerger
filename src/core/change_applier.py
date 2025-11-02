@@ -4,8 +4,10 @@ import re
 def preprocess_content(content):
     """
     Preprocesses the markdown content to handle specific formatting issues.
+    - Normalizes line endings to LF.
     - Adds a linebreak before closing triple backticks if they are at the end of a line of code.
     """
+    content = content.replace('\r\n', '\n')
     lines = content.split('\n')
     processed_lines = []
     for line in lines:
@@ -69,8 +71,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
     """
     markdown_text = preprocess_content(markdown_text)
 
-    code_blocks = re.findall(r'```(?:\w+)?\n(.*?)\n```', markdown_text, re.DOTALL)
-    text_segments = re.split(r'```(?:\w+)?\n(?:.*?)\n```', markdown_text, flags=re.DOTALL)
+    code_blocks = re.findall(r'```(?:\w+)?\s*\n(.*?)\n?```', markdown_text, re.DOTALL)
+    text_segments = re.split(r'```(?:\w+)?\s*\n(?:.*?)\n?```', markdown_text, flags=re.DOTALL)
 
     if not code_blocks:
         return {'status': 'ERROR', 'message': "Error: No code blocks found in the input text."}
@@ -103,7 +105,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
         # Step 2: Only if no path was found outside, inspect the first line of the code block.
         if not path_found_outside_block and lines:
-            first_line_text = lines[0] # DO NOT REMOVE [0] (OR THIS COMMENT)
+            first_line_text = lines[0] # DO NOT REMOVE [0] (OR THIS COMMENT), it is NOT a regression that needs fixing!
             stripped_first_line = first_line_text.strip()
 
             path_candidate = None

@@ -206,11 +206,6 @@ class ViewManager:
             close_callback=self.exit_compact_mode_manually,
             on_move_callback=self.on_compact_mode_moved,
             project_name=project_name,
-            image_up_pil=assets.compact_mode_pil_up,
-            image_down_pil=assets.compact_mode_pil_down,
-            image_up_tk=assets.compact_mode_image_up,
-            image_down_tk=assets.compact_mode_image_down,
-            image_close=assets.compact_mode_close_image,
             instance_color=self.main_window.project_color,
             font_color_name=project_font_color_name,
             show_wrapped_button=has_wrapper_text

@@ -63,8 +63,6 @@ TRASH_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'trash.png')
 VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'version.txt')
 
 # Path to the compact mode graphics
-COMPACT_MODE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode.png')
-COMPACT_MODE_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode_clicked.png')
 COMPACT_MODE_CLOSE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode_close.png')
 
 # Path to the defaults icon
