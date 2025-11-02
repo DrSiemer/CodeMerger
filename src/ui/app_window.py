@@ -459,10 +459,6 @@ class App(Tk):
             return
 
         markdown_text = pyperclip.paste()
-        # [LOGGING] Add logging to see what the parser is receiving
-        print("\n--- Clipboard Content for Parsing ---")
-        print(markdown_text)
-        print("-------------------------------------\n")
         if not markdown_text.strip():
             self._show_compact_toast("Clipboard is empty.")
             return
