@@ -71,14 +71,14 @@ class ButtonStateManager:
 
             gap = 5
 
-            # Row 0: Small configuration buttons
-            app.wrapper_text_button.grid(row=0, column=0, sticky='ew', pady=(0, 5), padx=(0, gap))
-            app.paste_changes_button.grid(row=0, column=1, sticky='ew', pady=(0, 5), padx=(gap, 0))
-
             if has_wrapper_text:
-                # Row 1: Both large copy buttons
-                app.copy_wrapped_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
-                app.copy_merged_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
+                # Row 0: Both large copy buttons
+                app.copy_wrapped_button.grid(row=0, column=0, sticky='ew', pady=(0, 5), padx=(0, gap))
+                app.copy_merged_button.grid(row=0, column=1, sticky='ew', pady=(0, 5), padx=(gap, 0))
             else:
-                # Row 1: The single large copy button spans the full width
-                app.copy_merged_button.grid(row=1, column=0, columnspan=2, sticky='ew', padx=0)
+                # Row 0: The single large copy button spans the full width
+                app.copy_merged_button.grid(row=0, column=0, columnspan=2, sticky='ew', pady=(0, 5), padx=0)
+
+            # Row 1: Small configuration buttons
+            app.wrapper_text_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
+            app.paste_changes_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
