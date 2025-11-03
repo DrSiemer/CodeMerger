@@ -2,15 +2,16 @@ import os
 import re
 
 def _sanitize_content(path, content):
-    """Cleans up whitespace in non-markdown code files."""
+    """Cleans up whitespace and line endings"""
+    lines = content.split('\n')
+    lines = [line.rstrip() for line in lines]
+
     _, extension = os.path.splitext(path)
     if extension.lower() == '.md':
-        return content  # Don't sanitize markdown
+        # For markdown, only normalize line endings and trailing whitespace
+        return '\n'.join(lines)
 
-    # Sanitize each line: remove trailing whitespace
-    lines = [line.rstrip() for line in content.splitlines()]
-
-    # Collapse multiple consecutive empty lines into a single one
+    # For all other code files, also collapse multiple consecutive empty lines
     collapsed_lines = []
     last_line_was_empty = False
     for line in lines:
@@ -22,7 +23,7 @@ def _sanitize_content(path, content):
     return '\n'.join(collapsed_lines)
 
 def execute_plan(updates, creations):
-    """Writes the planned changes to the filesystem."""
+    """Writes the planned changes to the filesystem"""
     try:
         # Create new files
         for path, content in creations.items():
@@ -80,7 +81,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
             files_to_create[full_path] = content
 
     if not files_to_update and not files_to_create:
-        # This case should be rare if file_blocks is not empty, but it's a good safeguard.
+        # This case should be rare if file_blocks is not empty, but it's a good safeguard
         return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
 
     if files_to_create:
