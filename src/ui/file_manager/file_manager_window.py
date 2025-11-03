@@ -119,6 +119,9 @@ class FileManagerWindow(Toplevel):
         self.remove_button.command = self.selection_handler.remove_selected
 
     def populate_tree(self, filter_text=""):
+        # Get currently expanded directories before clearing the tree
+        expanded_dirs_before_rebuild = set(self.tree_handler.get_expanded_dirs())
+
         for item in self.tree.get_children(): self.tree.delete(item)
         self.item_map.clear(); self.path_to_item_id.clear()
         selected_paths = {f['path'] for f in self.selection_handler.ordered_selection}
@@ -135,7 +138,13 @@ class FileManagerWindow(Toplevel):
                 tags = ()
                 if node['type'] == 'file' and node['path'] in self.newly_detected_files:
                     tags += ('new_file_highlight',)
-                item_id = self.tree.insert(parent_id, 'end', text=node['name'], open=node.get('path') in self.project_config.expanded_dirs, tags=tags)
+
+                # A directory should be open if it was already open in the current session,
+                # or if it was saved as expanded from a previous session.
+                is_open = node.get('path') in expanded_dirs_before_rebuild or \
+                          node.get('path') in self.project_config.expanded_dirs
+
+                item_id = self.tree.insert(parent_id, 'end', text=node['name'], open=is_open, tags=tags)
                 self.item_map[item_id] = {'path': node['path'], 'type': node['type']}
                 self.path_to_item_id[node['path']] = item_id
                 if node['type'] == 'dir':

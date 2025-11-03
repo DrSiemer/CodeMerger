@@ -170,10 +170,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1762179101.8898764,
-          "hash": "de7b0e13923820de5ccd98e43b6b94b99654d3e9",
-          "tokens": 829,
-          "lines": 98
+          "mtime": 1762180889.8780727,
+          "hash": "3d0a803b23d33bacdb1112fce8bd3b104c9c8fad",
+          "tokens": 857,
+          "lines": 100
         },
         {
           "path": "src/ui/app_window.py",
@@ -296,10 +296,10 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1761659724.8946753,
-          "hash": "7f5a54341b96bec116eaff937a25f511ff6954c2",
-          "tokens": 1777,
-          "lines": 196
+          "mtime": 1762181090.8874192,
+          "hash": "77f97257a7ddee32f02b1eba9323c5a8158bb73f",
+          "tokens": 1857,
+          "lines": 205
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
@@ -415,7 +415,7 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1762180312.2746634,
+          "mtime": 1762180778.628518,
           "hash": "e94b81ed68fd7195bbb93322a7a6bfdedc3044b1",
           "tokens": 1932,
           "lines": 188
