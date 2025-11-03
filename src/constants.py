@@ -12,6 +12,7 @@ GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/late
 SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json'}
 
 # --- Behavioral Magic Numbers ---
+TOKEN_THRESHOLD_WARNING = 800000
 ANTIALIASING_SCALE_FACTOR = 4
 FONT_LUMINANCE_THRESHOLD = 150
 
@@ -25,6 +26,7 @@ STATUS_FADE_DURATION_SECONDS = 0.5
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"
 DEFAULT_INTRO_PROMPT = 'Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n'
 DEFAULT_OUTRO_PROMPT = 'DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- wrap each file\'s code block with a `--- File: `path/to/file.ext` ---` header and an `--- End of file ---` footer\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line, NEVER do this: "</table>```"\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., "1.") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something "final" or "definitive"; it usually isn\'t\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you\'ve changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.'
+TOKEN_THRESHOLD_WARNING_TEXT = "You are close to the current maximum tokens\nfor currently available language models"
 
 # --- UI Theming & Configuration ---
 PROJECT_TITLE_MAX_LENGTH = 64

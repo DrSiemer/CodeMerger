@@ -84,7 +84,6 @@ def setup_file_manager_ui(window):
         label.bind("<Button-1>", window.ui_controller.on_folder_icon_click)
         ToolTip(label, text="Open file in folder", delay=500)
 
-
     tree_actions_frame = Frame(left_panel, bg=c.DARK_BG)
     tree_actions_frame.grid(row=2, column=0, columnspan=2, sticky='ew', pady=(10, 0))
     tree_actions_frame.columnconfigure(0, weight=1)
@@ -121,6 +120,7 @@ def setup_file_manager_ui(window):
     Label(title_frame, text="Merge Order", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).grid(row=0, column=0, sticky='w')
     window.merge_order_details_label = Label(title_frame, text="", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
     window.merge_order_details_label.grid(row=0, column=1, sticky='w', padx=(5,0))
+    window.token_count_tooltip = ToolTip(window.merge_order_details_label, text="", delay=300)
 
     window.order_request_button = Button(
         title_frame,

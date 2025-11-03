@@ -79,10 +79,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1761819740.0708075,
-          "hash": "874f023a648d144d3448f8e4470f73696b44b1f4",
-          "tokens": 1319,
-          "lines": 134
+          "mtime": 1762168893.8353634,
+          "hash": "c2b7a328fd9f5780d424a4dc2fb9bced904852b8",
+          "tokens": 1414,
+          "lines": 136
         },
         {
           "path": "src/core/paths.py",
@@ -135,10 +135,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1762164653.8138535,
-          "hash": "3e3b6e7d0e63d0437915ebc93dbfeca6f9fc459b",
-          "tokens": 634,
-          "lines": 82
+          "mtime": 1762168153.9004884,
+          "hash": "87503ceebc56d05668c8797fb874c90913327ae1",
+          "tokens": 633,
+          "lines": 81
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -170,10 +170,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1762164653.8138535,
-          "hash": "9e170d3889af6a1f6d359f99f69cb7677be67c71",
-          "tokens": 855,
-          "lines": 105
+          "mtime": 1762168127.0360675,
+          "hash": "321a66119397d7820f9da38dea5b10f70357d7a0",
+          "tokens": 1477,
+          "lines": 160
         },
         {
           "path": "src/ui/app_window.py",
@@ -303,9 +303,9 @@
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
-          "mtime": 1761562996.3272762,
-          "hash": "9cfc87cb8449ad84938aae6deffbc98ead6dacb7",
-          "tokens": 2918,
+          "mtime": 1762168058.6356306,
+          "hash": "44d4011d3b11500b7b6f9bf84a827cfa0c86a5cd",
+          "tokens": 2938,
           "lines": 184
         },
         {
@@ -317,10 +317,10 @@
         },
         {
           "path": "src/ui/file_manager/data_controller.py",
-          "mtime": 1761561971.7505555,
-          "hash": "216c18e982833836bdfebcedb0e1d31de6b78d97",
-          "tokens": 692,
-          "lines": 71
+          "mtime": 1762168011.124068,
+          "hash": "8577c0522045f452433d9bf2f8b9719110521a21",
+          "tokens": 770,
+          "lines": 81
         },
         {
           "path": "src/ui/file_manager/ui_controller.py",
