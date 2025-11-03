@@ -534,7 +534,6 @@
     "src/ui/file_manager/state_controller.py",
     "src/ui/file_manager/ui_controller.py",
     "src/ui/file_manager/ui_setup.py",
-    "src/ui/file_manager/y.py",
     "src/ui/file_monitor.py",
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",

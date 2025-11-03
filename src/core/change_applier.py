@@ -52,6 +52,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
+    markdown_text = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text)
+
     file_blocks = re.findall(
         r'--- File: `(.+?)` ---\s*\n```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
         markdown_text,
