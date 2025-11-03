@@ -47,6 +47,9 @@ DEFAULT_FILETYPES_CONFIG_PATH = os.path.join(BUNDLE_DIR, 'default_filetypes.json
 # Path to the application icon
 ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 
+# Path to the logo mask for the project color swatch
+LOGO_MASK_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask.png')
+
 # Path to the new files warning icon
 NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
 

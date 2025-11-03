@@ -53,6 +53,7 @@ class App(Tk):
         self.window_geometries = {}
         self.title_click_job = None
         self.current_monitor_handle = None
+        self.masked_logo_tk = None
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)

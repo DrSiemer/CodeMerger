@@ -20,10 +20,8 @@ def setup_ui(app):
     left_frame = Frame(top_bar, bg=c.TOP_BAR_BG)
     left_frame.grid(row=0, column=0, sticky='w')
 
-    app.color_swatch = Frame(left_frame, width=48, height=48, cursor="hand2")
-    app.color_swatch.pack_propagate(False)
+    app.color_swatch = Label(left_frame, cursor="hand2", bg=c.TOP_BAR_BG, bd=0, highlightthickness=0)
     app.color_swatch.bind("<Button-1>", app.open_color_chooser)
-    app.color_swatch.config(bg=c.TOP_BAR_BG)
     ToolTip(app.color_swatch, "Click to change the project color", delay=500)
 
     app.title_container = Frame(left_frame, bg=c.TOP_BAR_BG, cursor="hand2")

@@ -27,7 +27,9 @@ class ButtonStateManager:
 
         if is_dir_active:
             app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))
-            app.color_swatch.config(bg=app.project_color)
+            # Generate the masked logo image and apply it to the label
+            app.masked_logo_tk = app.assets.create_masked_logo(app.project_color)
+            app.color_swatch.config(image=app.masked_logo_tk, bg=c.TOP_BAR_BG)
             if not app.color_swatch.winfo_ismapped():
                  app.color_swatch.pack(side='left', padx=(0, 15), before=app.title_container)
         else:
