@@ -455,7 +455,7 @@ class App(Tk):
     def apply_changes_from_clipboard(self):
         project_config = self.project_manager.get_current_project()
         if not project_config:
-            messagebox.showerror("Error", "Please select a valid project folder first")
+            messagebox.showerror("Error", "Please select a valid project folder first", parent=self)
             return
 
         markdown_text = pyperclip.paste()
@@ -472,19 +472,22 @@ class App(Tk):
             messagebox.showerror("Parsing Error", message, parent=self)
             return
 
-        # Direct apply is only safe if no new files are being created
+        # Direct confirmation for new files, skipping the full paste dialog
         if status == 'CONFIRM_CREATION':
-            messagebox.showinfo(
-                "Confirmation Needed",
-                "The changes require creating new files.\nPlease use the standard 'Paste Changes' window to review and confirm.",
-                parent=self
+            creations = plan.get('creations', {})
+            creation_rel_paths = [os.path.relpath(p, project_config.base_dir).replace('\\', '/') for p in creations.keys()]
+
+            confirm_message = (
+                f"This operation will create {len(creations)} new file(s):\n\n"
+                f" - " + "\n - ".join(creation_rel_paths) +
+                "\n\nDo you want to proceed?"
             )
-            # Open the dialog with the content pre-filled for convenience
-            self.open_paste_changes_dialog(initial_content=markdown_text)
-            return
+            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=self):
+                self._show_compact_toast("Operation cancelled.")
+                return
 
         updates = plan.get('updates', {})
-        creations = plan.get('creations', {}) # Should be empty here
+        creations = plan.get('creations', {})
 
         success, final_message = change_applier.execute_plan(updates, creations)
 
@@ -492,6 +495,19 @@ class App(Tk):
             self._show_compact_toast(final_message)
         else:
             messagebox.showerror("File Write Error", final_message, parent=self)
+
+    def on_paste_click(self, event):
+        """Handles the press event for the main paste button to show a click."""
+        self.paste_changes_button._draw(self.paste_changes_button.click_color)
+
+    def on_paste_release(self, event):
+        """Handles the release event to trigger the correct paste action."""
+        self.paste_changes_button._draw(self.paste_changes_button.hover_color)
+        is_ctrl = (event.state & 0x0004)
+        if is_ctrl:
+            self.apply_changes_from_clipboard()
+        else:
+            self.open_paste_changes_dialog()
 
     def open_filetypes_manager(self):
         FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
