@@ -14,7 +14,7 @@ class CompactMode(tk.Toplevel):
         self.on_move_callback = on_move_callback
         self.project_name = project_name
         self.tooltip_window = None
-        self.new_files_label = None
+        self.new_files_button = None
 
         # --- Style and Layout Constants ---
         BAR_AND_BORDER_COLOR = instance_color
@@ -41,8 +41,12 @@ class CompactMode(tk.Toplevel):
         self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_AND_BORDER_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
         self.title_label.pack(side='left', padx=(4, 0))
 
+        # --- Right-aligned icons container ---
+        self.right_icons_frame = tk.Frame(self.move_bar, bg=BAR_AND_BORDER_COLOR)
+        self.right_icons_frame.pack(side='right')
+
         # --- Close Button ---
-        self.close_button = tk.Label(self.move_bar, image=self.parent.assets.compact_mode_close_image, bg=BAR_AND_BORDER_COLOR, cursor="hand2")
+        self.close_button = tk.Label(self.right_icons_frame, image=self.parent.assets.compact_mode_close_image, bg=BAR_AND_BORDER_COLOR, cursor="hand2")
         self.close_button.pack(side='right', padx=(0, 1))
 
         # --- Button Container ---
@@ -94,6 +98,11 @@ class CompactMode(tk.Toplevel):
         self.title_label.bind("<B1-Motion>", self.on_drag)
         self.title_label.bind("<ButtonRelease-1>", self.on_release_drag)
         self.title_label.bind("<Double-Button-1>", self.close_window)
+        # Bind dragging to the icon container as well
+        self.right_icons_frame.bind("<ButtonPress-1>", self.on_press_drag)
+        self.right_icons_frame.bind("<B1-Motion>", self.on_drag)
+        self.right_icons_frame.bind("<ButtonRelease-1>", self.on_release_drag)
+        self.right_icons_frame.bind("<Double-Button-1>", self.close_window)
         self.close_button.bind("<Button-1>", self.close_window)
 
         # Tooltips
@@ -118,15 +127,30 @@ class CompactMode(tk.Toplevel):
         else:
             self.parent.open_paste_changes_dialog()
 
+    def _exit_and_open_file_manager(self):
+        # This will start the animation to restore the main window.
+        self.close_callback()
+        # Schedule the file manager to open after the animation is likely complete.
+        self.parent.after(int(c.ANIMATION_DURATION_SECONDS * 1000) + 50, self.parent.manage_files)
+
     def show_warning(self, file_count, project_name):
-        if not self.new_files_label:
-            self.new_files_label = tk.Label(self.move_bar, image=self.parent.assets.new_files_icon, bg=self.move_bar.cget('bg'))
-            self.new_files_label.pack(side='right', before=self.close_button)
+        if not self.new_files_button:
+            self.new_files_button = RoundedButton(
+                self.right_icons_frame,
+                command=self._exit_and_open_file_manager,
+                image=self.parent.assets.new_files_compact_pil,
+                bg=self.move_bar.cget('bg'),
+                width=18,
+                height=12,
+                radius=3,
+                cursor="hand2"
+            )
+            self.new_files_button.pack(side='left', padx=(0, 2))
 
     def hide_warning(self, project_name):
-        if self.new_files_label:
-            self.new_files_label.destroy()
-            self.new_files_label = None
+        if self.new_files_button:
+            self.new_files_button.destroy()
+            self.new_files_button = None
 
     def show_tooltip(self, text, event=None):
         if self.tooltip_window: return

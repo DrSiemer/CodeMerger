@@ -11,6 +11,7 @@ class AppAssets:
     def __init__(self):
         self.trash_icon_pil = self._load_image(TRASH_ICON_PATH, (18, 18))
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
+        self.new_files_compact_pil = self._load_image(NEW_FILES_ICON_PATH, (12, 12))
         self.defaults_pil = self._load_image(DEFAULTS_ICON_PATH, (24, 24))
         self.folder_icon_pil = self._load_image(FOLDER_ICON_PATH, (28, 22))
         self.folder_reveal_pil = self._load_image(FOLDER_REVEAL_ICON_PATH)

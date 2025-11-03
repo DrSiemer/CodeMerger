@@ -219,10 +219,10 @@
         },
         {
           "path": "src/ui/assets.py",
-          "mtime": 1762160620.8380067,
-          "hash": "15e6ae5f1c3c2e4400097ee7e561283cf1312807",
-          "tokens": 787,
-          "lines": 67
+          "mtime": 1762180161.166915,
+          "hash": "396120f0081d62d05dd4fa4723423638cc8018c6",
+          "tokens": 812,
+          "lines": 68
         },
         {
           "path": "src/ui/style_manager.py",
@@ -415,10 +415,10 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1762160620.839005,
-          "hash": "b8807dfa7a06096c362c08486168bf4a7c7ed069",
-          "tokens": 1705,
-          "lines": 164
+          "mtime": 1762180312.2746634,
+          "hash": "e94b81ed68fd7195bbb93322a7a6bfdedc3044b1",
+          "tokens": 1932,
+          "lines": 188
         },
         {
           "path": "src/ui/directory_dialog.py",
@@ -534,6 +534,7 @@
     "src/ui/file_manager/state_controller.py",
     "src/ui/file_manager/ui_controller.py",
     "src/ui/file_manager/ui_setup.py",
+    "src/ui/file_manager/y.py",
     "src/ui/file_monitor.py",
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
