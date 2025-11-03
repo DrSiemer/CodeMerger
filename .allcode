@@ -79,7 +79,7 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1762168893.8353634,
+          "mtime": 1762172036.3664033,
           "hash": "c2b7a328fd9f5780d424a4dc2fb9bced904852b8",
           "tokens": 1414,
           "lines": 136
@@ -135,10 +135,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1762169214.6500685,
-          "hash": "48fdec0d2edc621d81374604fbd9a604091c1230",
-          "tokens": 650,
-          "lines": 82
+          "mtime": 1762169825.838569,
+          "hash": "87503ceebc56d05668c8797fb874c90913327ae1",
+          "tokens": 633,
+          "lines": 81
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -170,10 +170,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1762169224.0869772,
-          "hash": "2fec9658761789614a0301817b8089d8ece96933",
-          "tokens": 874,
-          "lines": 100
+          "mtime": 1762169460.031471,
+          "hash": "bef96296c82cc9cd7c1ce5c9c9e2db47e80848a8",
+          "tokens": 823,
+          "lines": 97
         },
         {
           "path": "src/ui/app_window.py",
@@ -477,7 +477,7 @@
           "lines": 54
         }
       ],
-      "total_tokens": 74349,
+      "total_tokens": 73951,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- wrap each file's code block with a `--- File: \\`path/to/file.ext\\` ---` header and an `--- End of file ---` footer\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
