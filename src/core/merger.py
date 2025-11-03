@@ -29,8 +29,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
             content = code_file.read()
 
         language = get_language_from_path(path)
-        # Format each file as a standard Markdown section with a fenced code block
-        output_blocks.append(f"## `{path}`\n\n```{language}\n{content}\n```")
+        output_blocks.append(f"--- File: `{path}` ---\n\n```{language}\n{content}\n```\n\n--- End of file ---")
 
     merged_code = '\n\n'.join(output_blocks)
 

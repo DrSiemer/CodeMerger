@@ -89,23 +89,21 @@ def parse_and_plan_changes(base_dir, markdown_text):
         content_to_write = code_block
         path_found_outside_block = False
 
-        # Step 1: Prioritize finding a path in a markdown header (e.g., ## `path`)
-        header_lines = [line.strip() for line in preceding_text.strip().split('\n') if line.strip().startswith('##')]
-        if header_lines:
-            last_header = header_lines[-1]
-            path_match = re.search(r'`(.+?)`', last_header)
-            if path_match:
-                path_from_header = path_match.group(1).strip()
-                if path_from_header:
-                    relative_path = path_from_header.replace('\\', '/')
-                    path_found_outside_block = True
+        # Step 1: Prioritize finding a path in the expected file format (e.g., --- File: `path` ---)
+        path_match = re.search(r'--- File: `(.+?)` ---', preceding_text)
+        if path_match:
+            path_from_header = path_match.group(1).strip()
+            if path_from_header:
+                relative_path = path_from_header.replace('\\', '/')
+                path_found_outside_block = True
 
         lines = code_block.split('\n')
         should_strip_first_line = False
 
         # Step 2: Only if no path was found outside, inspect the first line of the code block.
         if not path_found_outside_block and lines:
-            first_line_text = lines[0] # DO NOT REMOVE [0] (OR THIS COMMENT), it is NOT a regression that needs fixing!
+            first_line_text = lines[0] # DO NOT REMOVE [0] (OR THIS COMMENT), it is NOT a regression that needs fixing! It will NOT prevent AttributeError: 'list' object has no attribute 'strip' if you remove it! HAND'S OFF!
+
             stripped_first_line = first_line_text.strip()
 
             path_candidate = None
