@@ -18,7 +18,6 @@ a = Analysis(
         'PIL.ImageTk',
         'tiktoken_ext.openai_public',
         'detect_secrets.plugins',
-        'psutil',
         'rich'
     ],
     hookspath=[],
@@ -52,7 +51,7 @@ updater_a = Analysis(
     pathex=[],
     binaries=[],
     datas=[(install_icon_path, 'assets')],
-    hiddenimports=['psutil'],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

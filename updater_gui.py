@@ -5,7 +5,6 @@ import time
 import requests
 import subprocess
 import tempfile
-import psutil
 import threading
 import tkinter as tk
 import logging
@@ -33,6 +32,32 @@ logging.basicConfig(
     ]
 )
 log = logging.getLogger(__name__)
+
+def is_pid_running(pid):
+    """
+    Checks if a process with the given PID is running.
+    This is a dependency-free implementation for Windows using ctypes.
+    """
+    if sys.platform != "win32":
+        # Fallback for non-windows, though this updater is windows-specific
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
+
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    PROCESS_QUERY_INFORMATION = 0x0400
+
+    handle = kernel32.OpenProcess(PROCESS_QUERY_INFORMATION, 0, pid)
+    if handle == 0:
+        return False
+
+    # If we have a handle, the process exists. We must close it.
+    kernel32.CloseHandle(handle)
+    return True
 
 def get_bundle_dir():
     """Gets the base path for reading bundled resources."""
@@ -106,7 +131,7 @@ class UpdateGUI(tk.Tk):
                 log.info(f"Waiting for main process (PID: {self.pid_to_wait_for}) to exit.")
                 end_time = time.time() + 10  # 10-second timeout
                 while time.time() < end_time:
-                    if not psutil.pid_exists(self.pid_to_wait_for):
+                    if not is_pid_running(self.pid_to_wait_for):
                         log.info(f"Main process (PID: {self.pid_to_wait_for}) has exited.")
                         break
                     time.sleep(0.2)
