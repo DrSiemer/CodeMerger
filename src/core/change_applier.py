@@ -1,24 +1,6 @@
 import os
 import re
 
-def preprocess_content(content):
-    """
-    Preprocesses the markdown content to handle specific formatting issues.
-    - Normalizes line endings to LF.
-    - Adds a linebreak before closing triple backticks if they are at the end of a line of code.
-    """
-    content = content.replace('\r\n', '\n')
-    lines = content.split('\n')
-    processed_lines = []
-    for line in lines:
-        # Add a newline before closing backticks if they are not on their own line
-        if line.strip().endswith('```') and len(line.strip()) > 3:
-            processed_lines.append(line.replace('```', ''))
-            processed_lines.append('```')
-        else:
-            processed_lines.append(line)
-    return '\n'.join(processed_lines)
-
 def _sanitize_content(path, content):
     """Cleans up whitespace in non-markdown code files."""
     _, extension = os.path.splitext(path)
@@ -66,84 +48,39 @@ def execute_plan(updates, creations):
 
 def parse_and_plan_changes(base_dir, markdown_text):
     """
-    Parses markdown, plans changes, and returns a dictionary describing the plan.
-    This does NOT write any files.
+    Parses markdown using custom file wrappers, plans changes, and returns
+    a dictionary describing the plan. This does NOT write any files.
     """
-    markdown_text = preprocess_content(markdown_text)
+    file_blocks = re.findall(
+        r'--- File: `(.+?)` ---\s*\n```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
+        markdown_text,
+        re.DOTALL
+    )
 
-    code_blocks = re.findall(r'```(?:\w+)?\s*\n(.*?)\n?```', markdown_text, re.DOTALL)
-    text_segments = re.split(r'```(?:\w+)?\s*\n(?:.*?)\n?```', markdown_text, flags=re.DOTALL)
-
-    if not code_blocks:
-        return {'status': 'ERROR', 'message': "Error: No code blocks found in the input text."}
-
-    if len(text_segments) <= len(code_blocks):
-        return {'status': 'ERROR', 'message': "Error: Could not properly segment the input text. Make sure each code block is preceded by a file path."}
+    if not file_blocks:
+        return {'status': 'ERROR', 'message': "Error: No valid file blocks found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---'."}
 
     files_to_update = {}
     files_to_create = {}
 
-    for i, code_block in enumerate(code_blocks):
-        preceding_text = text_segments[i]
-        relative_path = None
-        content_to_write = code_block
-        path_found_outside_block = False
-
-        # Step 1: Prioritize finding a path in the expected file format (e.g., --- File: `path` ---)
-        path_match = re.search(r'--- File: `(.+?)` ---', preceding_text)
-        if path_match:
-            path_from_header = path_match.group(1).strip()
-            if path_from_header:
-                relative_path = path_from_header.replace('\\', '/')
-                path_found_outside_block = True
-
-        lines = code_block.split('\n')
-        should_strip_first_line = False
-
-        # Step 2: Only if no path was found outside, inspect the first line of the code block.
-        if not path_found_outside_block and lines:
-            first_line_text = lines[0] # DO NOT REMOVE [0] (OR THIS COMMENT), it is NOT a regression that needs fixing! It will NOT prevent AttributeError: 'list' object has no attribute 'strip' if you remove it! HAND'S OFF!
-
-            stripped_first_line = first_line_text.strip()
-
-            path_candidate = None
-            match = re.search(r'([\w.-]+(?:/|\\)[\w./\\-]*[\w-]+|[\w-]+\.[\w-]+)', stripped_first_line)
-            if match:
-                path_candidate = match.group(0).strip('`\'":*,#() ').replace('\\', '/')
-
-            if path_candidate:
-                is_markdown = path_candidate.lower().endswith('.md')
-
-                # Apply special rule for markdown files starting with '#'
-                if is_markdown and stripped_first_line.startswith('#'):
-                    if len(lines) > 1:
-                        if lines[1].strip().startswith('# '): # DO NOT REMOVE [1] (OR THIS COMMENT)
-                            should_strip_first_line = True
-                            relative_path = path_candidate
-                else:
-                    # For non-markdown files, or markdown not starting with '#', strip if a path was found.
-                    should_strip_first_line = True
-                    relative_path = path_candidate
-
-        if should_strip_first_line:
-            content_to_write = '\n'.join(lines[1:])
-
-        if not relative_path:
-            return {'status': 'ERROR', 'message': f"Error: Could not determine a file path for code block {i + 1}."}
-
+    for relative_path, content in file_blocks:
+        # Normalize path separators
+        relative_path = relative_path.strip().replace('\\', '/')
         full_path = os.path.normpath(os.path.join(base_dir, relative_path))
 
+        # Security check: ensure the path is within the project directory
         if not full_path.startswith(os.path.normpath(base_dir)):
             return {'status': 'ERROR', 'message': f"Error: Path '{relative_path}' attempts to access a location outside the project directory."}
 
         if os.path.isfile(full_path):
-            files_to_update[full_path] = content_to_write
+            files_to_update[full_path] = content
         elif os.path.isdir(full_path):
             return {'status': 'ERROR', 'message': f"Error: The path '{relative_path}' points to a directory, not a file."}
         else:
-            files_to_create[full_path] = content_to_write
+            files_to_create[full_path] = content
 
     if not files_to_update and not files_to_create:
+        # This case should be rare if file_blocks is not empty, but it's a good safeguard.
         return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
 
     if files_to_create:

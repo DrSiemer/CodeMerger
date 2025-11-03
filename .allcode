@@ -135,10 +135,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1762168153.9004884,
-          "hash": "87503ceebc56d05668c8797fb874c90913327ae1",
-          "tokens": 633,
-          "lines": 81
+          "mtime": 1762169214.6500685,
+          "hash": "48fdec0d2edc621d81374604fbd9a604091c1230",
+          "tokens": 650,
+          "lines": 82
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -170,10 +170,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1762168127.0360675,
-          "hash": "321a66119397d7820f9da38dea5b10f70357d7a0",
-          "tokens": 1477,
-          "lines": 160
+          "mtime": 1762169224.0869772,
+          "hash": "2fec9658761789614a0301817b8089d8ece96933",
+          "tokens": 874,
+          "lines": 100
         },
         {
           "path": "src/ui/app_window.py",
