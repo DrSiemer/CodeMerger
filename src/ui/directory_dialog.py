@@ -183,9 +183,10 @@ class DirectoryDialog(Toplevel):
         pc.load()
         display_text = pc.project_name
 
-        color_swatch = Frame(entry_frame, width=28, height=28, bg=pc.project_color, relief='flat')
+        logo_image = self.parent.assets.create_masked_logo_small(pc.project_color)
+        color_swatch = Label(entry_frame, image=logo_image, bg=self.app_bg_color)
+        color_swatch.image = logo_image # Prevent garbage collection
         color_swatch.pack(side='left', padx=(0, 10))
-        color_swatch.pack_propagate(False)
 
         btn = RoundedButton(
             entry_frame, text=display_text, command=lambda p=path: self.select_and_close(p),

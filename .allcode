@@ -23,14 +23,14 @@
         },
         {
           "path": "requirements.txt",
-          "mtime": 1762181513.4315271,
-          "hash": "daa7812ed9cbeb965aa0de5bf945ba64d6efe7bc",
-          "tokens": 171,
-          "lines": 19
+          "mtime": 1762183655.5646014,
+          "hash": "580ad43a25397c8bbb661e87ada3f69f627594c8",
+          "tokens": 162,
+          "lines": 18
         },
         {
           "path": "version.txt",
-          "mtime": 1761819740.1361449,
+          "mtime": 1762183920.8759592,
           "hash": "6c4a39617f3a3b447817bc1abd206ca3a0419779",
           "tokens": 11,
           "lines": 3
@@ -44,10 +44,10 @@
         },
         {
           "path": "codemerger.spec",
-          "mtime": 1762181513.4325078,
-          "hash": "dbeaf02662d64c52ac76879c1aa02e5f31de693f",
-          "tokens": 445,
-          "lines": 89
+          "mtime": 1762183655.565124,
+          "hash": "c8d097f073792a191b9e6917115493e5ed88315d",
+          "tokens": 438,
+          "lines": 88
         },
         {
           "path": "setup.iss",
@@ -86,10 +86,10 @@
         },
         {
           "path": "src/core/paths.py",
-          "mtime": 1762160620.8360052,
-          "hash": "50ba500874f92887fc7fdc9d5b8ae3c904eb6366",
-          "tokens": 755,
-          "lines": 86
+          "mtime": 1762207651.5846174,
+          "hash": "bf2843961bda6e6e8d1fbf446e009b4a0985bc96",
+          "tokens": 810,
+          "lines": 90
         },
         {
           "path": "src/app_state.py",
@@ -163,10 +163,10 @@
         },
         {
           "path": "updater_gui.py",
-          "mtime": 1762181513.4335084,
-          "hash": "a87f63dd694b51b417f37444b181cb55c9ff05f5",
-          "tokens": 1817,
-          "lines": 207
+          "mtime": 1762183883.6093273,
+          "hash": "7a0d20c050a30eb87d490d3276e8bc3f782f85da",
+          "tokens": 1977,
+          "lines": 232
         },
         {
           "path": "src/core/change_applier.py",
@@ -177,17 +177,17 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1762181976.0082831,
-          "hash": "d3bdb07cc867a92797ce19edfa303490f46f79d3",
-          "tokens": 4706,
-          "lines": 583
+          "mtime": 1762186197.5792508,
+          "hash": "910159d38b992d0ca80f38816dea75f4e7e41c31",
+          "tokens": 4716,
+          "lines": 584
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1762178583.6268947,
-          "hash": "7261430cbb99a2c20be1f4133469c086945abb3c",
-          "tokens": 2035,
-          "lines": 132
+          "mtime": 1762186197.5802524,
+          "hash": "79f829cd12551ae1b49bd122e1d6321e3e0e461b",
+          "tokens": 2020,
+          "lines": 130
         },
         {
           "path": "src/ui/view_manager.py",
@@ -198,10 +198,10 @@
         },
         {
           "path": "src/ui/button_state_manager.py",
-          "mtime": 1762160620.8380067,
-          "hash": "e771c090aa5274ccd3c8b0065b6565886d0f89a5",
-          "tokens": 783,
-          "lines": 84
+          "mtime": 1762186197.5802524,
+          "hash": "dda73faa95d1f7d8f20d28f84897cdb81b010848",
+          "tokens": 824,
+          "lines": 86
         },
         {
           "path": "src/ui/status_bar_manager.py",
@@ -219,10 +219,10 @@
         },
         {
           "path": "src/ui/assets.py",
-          "mtime": 1762180161.166915,
-          "hash": "396120f0081d62d05dd4fa4723423638cc8018c6",
-          "tokens": 812,
-          "lines": 68
+          "mtime": 1762207651.585618,
+          "hash": "adbeb8c1327e329fdc9284ed50e9938dba660594",
+          "tokens": 1458,
+          "lines": 122
         },
         {
           "path": "src/ui/style_manager.py",
@@ -422,10 +422,10 @@
         },
         {
           "path": "src/ui/directory_dialog.py",
-          "mtime": 1761840181.9487064,
-          "hash": "379228f53d934a27f3f14e28148851ae491ad2c6",
-          "tokens": 2315,
-          "lines": 233
+          "mtime": 1762188421.6232753,
+          "hash": "1fe9709ba32704f21265179e4044133d5eda2cc7",
+          "tokens": 2327,
+          "lines": 234
         },
         {
           "path": "src/ui/filetypes_manager.py",
