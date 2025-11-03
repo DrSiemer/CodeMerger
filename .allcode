@@ -9,7 +9,7 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1762160620.8350053,
+          "mtime": 1762179146.6739247,
           "hash": "a8173731f1b70ddfcfa178592fa06673e3acfe1b",
           "tokens": 1491,
           "lines": 99
@@ -170,24 +170,24 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1762169460.031471,
-          "hash": "bef96296c82cc9cd7c1ce5c9c9e2db47e80848a8",
-          "tokens": 823,
-          "lines": 97
+          "mtime": 1762179101.8898764,
+          "hash": "de7b0e13923820de5ccd98e43b6b94b99654d3e9",
+          "tokens": 829,
+          "lines": 98
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1762160620.837005,
-          "hash": "1c2435d30e5889ce813ec45eccf52a1b75453e76",
-          "tokens": 4454,
-          "lines": 560
+          "mtime": 1762178583.6268947,
+          "hash": "1ef31cc09f7a543ae5aca7c0ac01deaeaad6082d",
+          "tokens": 4624,
+          "lines": 576
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1761819740.119583,
-          "hash": "8b87ab6674d9c7de11f6bedfbd51cc6e64447815",
-          "tokens": 1951,
-          "lines": 126
+          "mtime": 1762178583.6268947,
+          "hash": "7261430cbb99a2c20be1f4133469c086945abb3c",
+          "tokens": 2035,
+          "lines": 132
         },
         {
           "path": "src/ui/view_manager.py",
@@ -324,10 +324,10 @@
         },
         {
           "path": "src/ui/file_manager/ui_controller.py",
-          "mtime": 1761562996.3272762,
-          "hash": "2193cc8f0d6bb39a89fdf8b46224ca1a0c6fe845",
-          "tokens": 1576,
-          "lines": 187
+          "mtime": 1762179230.3312047,
+          "hash": "911860aaae6412b4a7cf9655060a4e74be51febc",
+          "tokens": 1528,
+          "lines": 181
         },
         {
           "path": "src/ui/file_manager/file_tree_handler.py",

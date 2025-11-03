@@ -156,32 +156,26 @@ class FileManagerUIController:
         if not self.window.newly_detected_files:
             return
 
+        # Expand all parent directories for each new file.
+        for file_path in self.window.newly_detected_files:
+            item_id = self.window.path_to_item_id.get(file_path)
+            if item_id:
+                parent_id = self.window.tree.parent(item_id)
+                while parent_id:
+                    self.window.tree.item(parent_id, open=True)
+                    parent_id = self.window.tree.parent(parent_id)
+
+        # Scroll to the first new file alphabetically.
         first_file_path = sorted(self.window.newly_detected_files)[0]
         first_item_id = self.window.path_to_item_id.get(first_file_path)
 
         if first_item_id:
-            self.window.tree.see(first_item_id)
-
-            def scroll_when_ready(retries=15):
-                if retries <= 0: return
+            # Use 'after' to give the UI time to update with the new expansions
+            # before trying to scroll. This prevents a race condition.
+            def scroll_if_ready():
                 try:
-                    if self.window.tree.bbox(first_item_id):
-                        visible_items = []
-                        def _collect_visible(parent_id):
-                            if parent_id != '' and not self.window.tree.item(parent_id, 'open'): return
-                            for child_id in self.window.tree.get_children(parent_id):
-                                visible_items.append(child_id)
-                                _collect_visible(child_id)
-                        _collect_visible('')
-
-                        if not visible_items: return
-                        total, target_idx = len(visible_items), -1
-                        try: target_idx = visible_items.index(first_item_id)
-                        except ValueError: return
-
-                        if target_idx != -1:
-                            self.window.tree.yview_moveto(max(0.0, min(1.0, target_idx / total)))
-                    else:
-                        self.window.after(10, scroll_when_ready, retries - 1)
-                except tk.TclError: pass
-            self.window.after(10, scroll_when_ready)
+                    self.window.tree.see(first_item_id)
+                except tk.TclError:
+                    # Window might have been closed during the delay
+                    pass
+            self.window.after(50, scroll_if_ready)
