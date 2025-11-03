@@ -3,11 +3,14 @@ import webbrowser
 import os
 import sys
 import subprocess
+import logging
 from datetime import datetime
 from urllib import request, error
 from tkinter import messagebox
 from .. import constants as c
 from ..core.paths import BUNDLE_DIR
+
+log = logging.getLogger("CodeMerger")
 
 class Updater:
     """
@@ -25,18 +28,25 @@ class Updater:
         and the last check date. An update check is performed if it's a new day.
         """
         if not self.state.check_for_updates:
+            log.info("Update check skipped: disabled by user setting.")
             return False
 
         last_check_str = self.state.last_update_check
         if not last_check_str:
+            log.info("Performing first-time update check.")
             return True
 
         try:
             last_check_date = datetime.fromisoformat(last_check_str).date()
             current_date = datetime.now().date()
             should_check = current_date > last_check_date
+            if should_check:
+                log.info("Performing daily update check.")
+            else:
+                log.info("Update check skipped: already checked today.")
             return should_check
         except (ValueError, TypeError) as e:
+            log.warning(f"Could not parse last update check date '{last_check_str}'. Performing check. Error: {e}")
             return True
 
     def check_for_updates(self):
@@ -59,18 +69,21 @@ class Updater:
                     if self._is_newer(latest_version, current_version_normalized):
                         self._notify_user(data)
                     else:
-                        print("  You are on the latest version.")
+                        log.info(f"Application is up to date (current: {self.current_version}).")
+                else:
+                    log.warning(f"Update check failed: Server returned status {response.status}.")
         except Exception as e:
-            print(f"  Updater Error: An exception was caught during the network check: {e}")
+            log.error(f"Update check failed with a network error: {e}", exc_info=False)
             pass
         finally:
-            print("  Updating last check date to now.")
+            log.info("Updating last check date to now.")
             self.state.update_last_check_date()
 
     def check_for_updates_manual(self):
         """
         Performs a user-initiated update check and provides direct feedback.
         """
+        log.info("Performing manual update check.")
         try:
             with request.urlopen(self.repo_url) as response:
                 if response.status == 200:
@@ -95,12 +108,14 @@ class Updater:
                         parent=self.parent
                     )
         except error.URLError as e:
+            log.error(f"Manual update check failed: {e.reason}")
             messagebox.showerror(
                 "Update Check Failed",
                 f"Could not check for updates. Please check your internet connection.\n\nDetails: {e.reason}",
                 parent=self.parent
             )
         except Exception as e:
+            log.exception("An unexpected error occurred during manual update check.")
             messagebox.showerror(
                 "Update Check Failed",
                 f"An unexpected error occurred while checking for updates.\n\nDetails: {e}",
@@ -116,10 +131,10 @@ class Updater:
             latest_parts = tuple(map(int, latest_str.split('.')))
             current_parts = tuple(map(int, current_str.split('.')))
             is_newer = latest_parts > current_parts
-            print(f"  Version comparison result: {latest_parts} > {current_parts} is {is_newer}")
+            log.info(f"Version comparison: latest={latest_parts} > current={current_parts} is {is_newer}")
             return is_newer
         except (ValueError, IndexError) as e:
-            print(f"    Updater Version Parse Error: Could not compare '{latest_str}' and '{current_str}'. Details: {e}")
+            log.error(f"Could not parse version strings for comparison: latest='{latest_str}', current='{current_str}'. Error: {e}")
             return False
 
     def _notify_user(self, release_data):
@@ -128,6 +143,7 @@ class Updater:
         """
         latest_version = release_data.get('tag_name', 'N/A')
         release_notes = release_data.get('body', 'No release notes available.')
+        log.info(f"New version available: {latest_version}. Prompting user to update.")
 
         message = (
             f"A new version of CodeMerger is available!\n\n"
@@ -141,7 +157,7 @@ class Updater:
         if messagebox.askyesno("Update Available", message, parent=self.parent):
             self.start_update_process(release_data)
         else:
-            print("  Update declined :'(")
+            log.info("User declined the update.")
 
     def start_update_process(self, release_data):
         """
@@ -151,6 +167,7 @@ class Updater:
         download_url = next((asset.get('browser_download_url') for asset in assets if asset.get('name', '').endswith('_Setup.exe')), None)
 
         if not download_url:
+            log.error("Could not find a downloadable setup file in the latest release assets.")
             messagebox.showerror("Update Error", "Could not find a downloadable installer in the release.", parent=self.parent)
             return
 
@@ -163,11 +180,13 @@ class Updater:
             updater_exe_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
 
         if not os.path.exists(updater_exe_path):
+            log.critical(f"Updater executable 'updater_gui.exe' not found at expected path: {updater_exe_path}")
             messagebox.showerror("Update Error", f"The updater application is missing and could not be found.\n\nChecked path: {updater_exe_path}\n\nPlease reinstall CodeMerger.", parent=self.parent)
             return
 
         try:
             pid = os.getpid()
+            log.info(f"Starting update process. Current PID: {pid}. Updater: {updater_exe_path}. URL: {download_url}")
 
             creationflags = 0
             if sys.platform == "win32":
@@ -179,9 +198,11 @@ class Updater:
                 close_fds=True
             )
 
+            log.info("Updater launched. Exiting main application.")
             # Exit the main application
             self.parent.destroy()
             sys.exit(0)
 
         except Exception as e:
+            log.exception("Failed to launch the updater process.")
             messagebox.showerror("Update Error", f"Failed to launch the updater process: {e}", parent=self.parent)

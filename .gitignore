@@ -3,6 +3,7 @@ __pycache__/
 /build
 /dist
 /dist-installer
+*.log
 2do.txt
 config.json
 filetypes.json

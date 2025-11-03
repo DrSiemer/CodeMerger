@@ -6,6 +6,7 @@ import subprocess
 import pyperclip
 import shutil
 import tempfile
+import logging
 from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel, Frame
 from PIL import Image, ImageTk
 
@@ -33,6 +34,8 @@ from .paste_changes_dialog import PasteChangesDialog
 from .new_profile_dialog import NewProfileDialog
 from ..core import change_applier
 from .compact_status import CompactStatusToast
+
+log = logging.getLogger("CodeMerger")
 
 class App(Tk):
     def __init__(self, file_extensions, app_version="", initial_project_path=None):
@@ -103,32 +106,34 @@ class App(Tk):
         if not os.path.exists(UPDATE_CLEANUP_FILE_PATH):
             return
 
+        log.info("Update cleanup file found. Proceeding with cleanup.")
         try:
             with open(UPDATE_CLEANUP_FILE_PATH, 'r', encoding='utf-8') as f:
                 cleanup_data = json.load(f)
 
             dir_to_delete = cleanup_data.get('temp_dir_to_delete')
             if not dir_to_delete:
+                log.warning("Cleanup file exists but contains no directory to delete.")
                 return
 
             system_temp_dir = os.path.realpath(tempfile.gettempdir())
             path_to_delete = os.path.realpath(dir_to_delete)
 
             if not path_to_delete.startswith(system_temp_dir):
-                print(f"Update Cleanup Aborted: Path '{path_to_delete}' is not in temp dir '{system_temp_dir}'.")
+                log.error(f"SECURITY: Update cleanup aborted. Path '{path_to_delete}' is not in temp dir '{system_temp_dir}'.")
                 return
 
             if os.path.isdir(path_to_delete):
                 shutil.rmtree(path_to_delete, ignore_errors=True)
-                print(f"Update Cleanup: Successfully removed temporary directory '{path_to_delete}'.")
+                log.info(f"Update Cleanup: Successfully removed temporary directory '{path_to_delete}'.")
 
         except (IOError, json.JSONDecodeError) as e:
-            print(f"Update Cleanup Error: Could not read or parse cleanup file. Error: {e}")
+            log.error(f"Update Cleanup Error: Could not read or parse cleanup file. Error: {e}")
         finally:
             try:
                 os.remove(UPDATE_CLEANUP_FILE_PATH)
-            except OSError:
-                pass
+            except OSError as e:
+                log.error(f"Failed to remove cleanup file: {e}")
 
     def _on_window_configure(self, event):
         """
@@ -171,7 +176,8 @@ class App(Tk):
                 self.view_manager.invalidate_compact_mode_position()
 
                 self.status_var.set("Moved to new monitor, window positions reset.")
-        except Exception:
+        except Exception as e:
+            log.warning(f"Failed to check for monitor change: {e}")
             # Fail silently if any of the Windows API calls fail
             pass
 
@@ -223,6 +229,7 @@ class App(Tk):
 
     def on_app_close(self):
         """Safely destroys child windows before closing the main app"""
+        log.info("Application closing.")
         self.file_monitor.stop()
         if self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
             self.view_manager.compact_mode_window.destroy()

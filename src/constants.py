@@ -11,6 +11,11 @@ GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/late
 # --- File System ---
 SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json'}
 
+# --- Logging ---
+LOG_FILENAME = "codemerger.log"
+LOG_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
+LOG_BACKUP_COUNT = 3
+
 # --- Behavioral Magic Numbers ---
 TOKEN_THRESHOLD_WARNING = 800000
 ANTIALIASING_SCALE_FACTOR = 4

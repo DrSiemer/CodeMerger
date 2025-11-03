@@ -18,7 +18,8 @@ a = Analysis(
         'PIL.ImageTk',
         'tiktoken_ext.openai_public',
         'detect_secrets.plugins',
-        'psutil'
+        'psutil',
+        'rich'
     ],
     hookspath=[],
     hooksconfig={},

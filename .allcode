@@ -16,16 +16,16 @@
         },
         {
           "path": "llm.md",
-          "mtime": 1761819747.3414197,
-          "hash": "c8cf462cbb78ae056dee1c33c13a80ff54dbfd12",
-          "tokens": 1670,
-          "lines": 71
+          "mtime": 1762181513.4345078,
+          "hash": "4025fee14c24033ad4ab81c7639e61c4f4811201",
+          "tokens": 1720,
+          "lines": 72
         },
         {
           "path": "requirements.txt",
-          "mtime": 1761819740.0708075,
-          "hash": "449c3d6f823d16a8f50469ac5ad2c14df3d4e579",
-          "tokens": 170,
+          "mtime": 1762181513.4315271,
+          "hash": "daa7812ed9cbeb965aa0de5bf945ba64d6efe7bc",
+          "tokens": 171,
           "lines": 19
         },
         {
@@ -44,10 +44,10 @@
         },
         {
           "path": "codemerger.spec",
-          "mtime": 1761819747.3414197,
-          "hash": "d2601602877520bbbc3c9ff05d211aed2964d1e2",
-          "tokens": 441,
-          "lines": 88
+          "mtime": 1762181513.4325078,
+          "hash": "dbeaf02662d64c52ac76879c1aa02e5f31de693f",
+          "tokens": 445,
+          "lines": 89
         },
         {
           "path": "setup.iss",
@@ -72,17 +72,17 @@
         },
         {
           "path": "src/codemerger.py",
-          "mtime": 1757923396.9040568,
-          "hash": "93cff1a6cf763b5f5b7555c0cb16aa1a693f7d3b",
-          "tokens": 246,
-          "lines": 37
+          "mtime": 1762181513.4325078,
+          "hash": "450a781e49644b81b4219ace6ea22c68d971e73d",
+          "tokens": 342,
+          "lines": 46
         },
         {
           "path": "src/constants.py",
-          "mtime": 1762172036.3664033,
-          "hash": "c2b7a328fd9f5780d424a4dc2fb9bced904852b8",
-          "tokens": 1414,
-          "lines": 136
+          "mtime": 1762181976.0082831,
+          "hash": "50630179922843a46276388e4d24780237c23602",
+          "tokens": 1455,
+          "lines": 141
         },
         {
           "path": "src/core/paths.py",
@@ -156,17 +156,17 @@
         },
         {
           "path": "src/core/updater.py",
-          "mtime": 1761819747.3424194,
-          "hash": "e0477a27882b3a79ff6687972e0b036d0e47dd0a",
-          "tokens": 1466,
-          "lines": 187
+          "mtime": 1762181513.4325078,
+          "hash": "b24cba06f9ddc55a47a5dba8627f9b4d2793dbd8",
+          "tokens": 1736,
+          "lines": 208
         },
         {
           "path": "updater_gui.py",
-          "mtime": 1761819747.3424194,
-          "hash": "2b562e4c3c1cc80fe945c9d200fd931c99fc33f2",
-          "tokens": 1538,
-          "lines": 182
+          "mtime": 1762181513.4335084,
+          "hash": "a87f63dd694b51b417f37444b181cb55c9ff05f5",
+          "tokens": 1817,
+          "lines": 207
         },
         {
           "path": "src/core/change_applier.py",
@@ -177,10 +177,10 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1762178583.6268947,
-          "hash": "1ef31cc09f7a543ae5aca7c0ac01deaeaad6082d",
-          "tokens": 4624,
-          "lines": 576
+          "mtime": 1762181976.0082831,
+          "hash": "d3bdb07cc867a92797ce19edfa303490f46f79d3",
+          "tokens": 4706,
+          "lines": 583
         },
         {
           "path": "src/ui/ui_builder.py",
@@ -475,9 +475,16 @@
           "hash": "56fc604efe19d30572f32aa58d030013bdb33939",
           "tokens": 464,
           "lines": 54
+        },
+        {
+          "path": "src/core/logger.py",
+          "mtime": 1762181976.0092838,
+          "hash": "160dd9946bf51ef2c2b641e39741b2983ed5e967",
+          "tokens": 391,
+          "lines": 53
         }
       ],
-      "total_tokens": 73951,
+      "total_tokens": 75744,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- wrap each file's code block with a `--- File: \\`path/to/file.ext\\` ---` header and an `--- End of file ---` footer\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -494,9 +501,15 @@
   },
   "known_files": [
     ".github/workflows/release.yml",
+    "2do.txt",
     "README.md",
+    "build/codemerger/warn-codemerger.txt",
+    "build/codemerger/xref-codemerger.html",
     "codemerger.spec",
+    "config.json",
     "default_filetypes.json",
+    "dist/CodeMerger/_internal/default_filetypes.json",
+    "dist/CodeMerger/_internal/version.txt",
     "go.bat",
     "llm.md",
     "requirements.txt",
@@ -509,6 +522,7 @@
     "src/core/change_applier.py",
     "src/core/clipboard.py",
     "src/core/file_scanner.py",
+    "src/core/logger.py",
     "src/core/merger.py",
     "src/core/paths.py",
     "src/core/project_config.py",

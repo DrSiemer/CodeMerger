@@ -14,5 +14,6 @@ pywin32-ctypes==0.2.3
 PyYAML==6.0.2
 regex==2025.7.34
 requests==2.32.4
+rich
 tiktoken==0.10.0
 urllib3==2.5.0

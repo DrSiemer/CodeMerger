@@ -8,6 +8,7 @@ import tempfile
 import psutil
 import threading
 import tkinter as tk
+import logging
 from tkinter import ttk, messagebox
 import shutil
 
@@ -20,6 +21,18 @@ BTN_BLUE = '#0078D4'
 FONT_NORMAL = ("Segoe UI", 11)
 FONT_STATUS_BAR = ("Segoe UI", 9)
 FONT_BUTTON = ("Segoe UI", 12)
+
+# --- Logging Setup ---
+log_dir = tempfile.gettempdir()
+log_file = os.path.join(log_dir, "codemerger_updater.log")
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file, mode='a', encoding='utf-8')
+    ]
+)
+log = logging.getLogger(__name__)
 
 def get_bundle_dir():
     """Gets the base path for reading bundled resources."""
@@ -90,22 +103,28 @@ class UpdateGUI(tk.Tk):
     def _update_worker(self):
         try:
             if self.pid_to_wait_for:
+                log.info(f"Waiting for main process (PID: {self.pid_to_wait_for}) to exit.")
                 end_time = time.time() + 10  # 10-second timeout
                 while time.time() < end_time:
                     if not psutil.pid_exists(self.pid_to_wait_for):
-                        break  # Process has terminated
+                        log.info(f"Main process (PID: {self.pid_to_wait_for}) has exited.")
+                        break
                     time.sleep(0.2)
-        except Exception:
-            pass
+                else:
+                    log.warning(f"Timeout waiting for main process (PID: {self.pid_to_wait_for}) to exit.")
+        except Exception as e:
+            log.warning(f"Error while waiting for main process to exit: {e}")
 
         time.sleep(0.5) # Brief pause for safety
 
         self.after(0, lambda: self.status_label.config(text=f"Downloading update..."))
         self.temp_dir = tempfile.mkdtemp(prefix="codemerger-update-")
+        log.info(f"Created temporary directory for update: {self.temp_dir}")
 
         try:
             filename = self.download_url.split('/')[-1]
             self.installer_path = os.path.join(self.temp_dir, filename)
+            log.info(f"Downloading from {self.download_url} to {self.installer_path}")
 
             with requests.get(self.download_url, stream=True, timeout=60) as r:
                 r.raise_for_status()
@@ -115,6 +134,7 @@ class UpdateGUI(tk.Tk):
                 with open(self.installer_path, 'wb') as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if self.cancelled:
+                            log.info("Download cancelled by user.")
                             self._cleanup_temp_dir()
                             return
                         f.write(chunk)
@@ -127,6 +147,7 @@ class UpdateGUI(tk.Tk):
                 self.after(0, self._on_complete)
 
         except Exception as e:
+            log.exception(f"Download failed from URL: {self.download_url}")
             self._cleanup_temp_dir()
             self.after(0, self.show_error, f"Download failed: {e}")
 
@@ -142,9 +163,11 @@ class UpdateGUI(tk.Tk):
 
     def _launch_and_exit(self):
         try:
+            log.info(f"Download complete. Launching installer: {self.installer_path}")
             subprocess.Popen(f'start "" "{self.installer_path}" /SILENT', shell=True)
             self._cleanup_and_destroy()
         except Exception as e:
+            log.exception("Failed to launch installer.")
             self.show_error(f"Failed to launch installer: {e}")
 
     def show_error(self, message):
@@ -153,6 +176,7 @@ class UpdateGUI(tk.Tk):
 
     def _cleanup_temp_dir(self):
         if self.temp_dir and os.path.isdir(self.temp_dir):
+            log.info(f"Cleaning up temporary directory: {self.temp_dir}")
             shutil.rmtree(self.temp_dir, ignore_errors=True)
 
     def _cleanup_and_destroy(self):
@@ -160,6 +184,7 @@ class UpdateGUI(tk.Tk):
         sys.exit(0)
 
     def _on_cancel(self):
+        log.info("Update process cancelled by user via GUI.")
         self.cancelled = True
         self.status_label.config(text="Cancelling...")
         # The worker thread will see the flag and clean up. We just close the window.
@@ -167,16 +192,16 @@ class UpdateGUI(tk.Tk):
 
 def main():
     if len(sys.argv) != 3:
+        log.error(f"Updater GUI launched with incorrect arguments: {sys.argv}")
         return
     try:
         pid = int(sys.argv[1])
         url = sys.argv[2]
+        log.info(f"Updater GUI started. PID to wait for: {pid}, URL: {url}")
         app = UpdateGUI(pid, url)
         app.mainloop()
     except Exception as e:
-        log_dir = tempfile.gettempdir()
-        with open(os.path.join(log_dir, "updater_gui_error.log"), "a") as f:
-            f.write(f"An error occurred during updater startup: {e}\n")
+        log.exception("An error occurred during updater startup.")
 
 if __name__ == '__main__':
     main()
