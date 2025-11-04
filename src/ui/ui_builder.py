@@ -102,7 +102,7 @@ def setup_ui(app):
     app.paste_changes_button.unbind("<ButtonRelease-1>")
     app.paste_changes_button.bind("<ButtonRelease-1>", app.on_paste_release)
 
-    ToolTip(app.paste_changes_button, "Open paste window (Ctrl+Click to paste from clipboard)", delay=500)
+    ToolTip(app.paste_changes_button, "Open paste window\n(Ctrl+Click to paste from clipboard)", delay=500)
     ToolTip(app.copy_wrapped_button, "Copy all included code with custom intro + outro\n(use this to start new conversations)", delay=500)
     ToolTip(app.copy_merged_button, "Copy all included code with custom intro\n(use this to update an LLM of your code changes)", delay=500)
 

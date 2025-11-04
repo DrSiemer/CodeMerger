@@ -111,7 +111,7 @@ class CompactMode(tk.Toplevel):
             self.copy_wrapped_button.bind("<Leave>", self.hide_tooltip)
         self.copy_merged_button.bind("<Enter>", lambda e: self.show_tooltip("Copy with 'Copy Merged' prompt"))
         self.copy_merged_button.bind("<Leave>", self.hide_tooltip)
-        self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window (Ctrl+Click to paste from clipboard)"))
+        self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window\n(Ctrl+Click to paste from clipboard)"))
         self.paste_button.bind("<Leave>", self.hide_tooltip)
 
     def on_paste_click(self, event):
