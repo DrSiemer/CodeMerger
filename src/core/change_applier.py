@@ -52,6 +52,22 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
+    # --- Pre-processing for common LLM formatting errors ---
+
+    markdown_text = re.sub(r'(--- File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
+
+    lines = markdown_text.split('\n')
+    processed_lines = []
+    for line in lines:
+        stripped_line = line.strip()
+        # Find ``` that is not at the start of the line and has content before it.
+        if stripped_line.endswith('```') and stripped_line != '```':
+            pos = line.rfind('```')
+            processed_lines.append(line[:pos])
+            processed_lines.append(line[pos:])
+        else:
+            processed_lines.append(line)
+    markdown_text = '\n'.join(processed_lines)
     markdown_text = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text)
 
     file_blocks = re.findall(
