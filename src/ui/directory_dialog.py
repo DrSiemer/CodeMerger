@@ -179,11 +179,9 @@ class DirectoryDialog(Toplevel):
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
         entry_frame.pack(fill='x', padx=20, pady=3)
 
-        pc = ProjectConfig(path)
-        pc.load()
-        display_text = pc.project_name
+        display_text, project_color = ProjectConfig.read_project_display_info(path)
 
-        logo_image = self.parent.assets.create_masked_logo_small(pc.project_color)
+        logo_image = self.parent.assets.create_masked_logo_small(project_color)
         color_swatch = Label(entry_frame, image=logo_image, bg=self.app_bg_color)
         color_swatch.image = logo_image # Prevent garbage collection
         color_swatch.pack(side='left', padx=(0, 10))
