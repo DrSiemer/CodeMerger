@@ -1,7 +1,7 @@
-# LLM Project Log
+# Notes on project quirks for language models
 
-**Core Directive: Act as a Peer Programmer.**
-Assume I have full project context. Do not explain obvious code, file structures, or self-evident logic. Focus on the *'why'* behind non-obvious code.
+**Core Directive: Act as a support programmer.**
+Assume the user has full project context. Do not explain obvious code, file structures, or self-evident logic. Focus on the *'why'* behind non-obvious code.
 
 **DO:**
 
