@@ -8,6 +8,7 @@ from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import save_window_geometry, get_monitor_work_area
 from .assets import assets
+import json
 
 class DirectoryDialog(Toplevel):
     """
@@ -25,6 +26,7 @@ class DirectoryDialog(Toplevel):
         self.tooltip = None
         self.project_widgets = []
         self.non_list_height = 0
+        self.project_metadata_cache = {}
         # Instance variables to reliably store the current position.
         self.current_x = 0
         self.current_y = 0
@@ -124,6 +126,33 @@ class DirectoryDialog(Toplevel):
         ]
         self._populate_projects(filtered_list)
 
+    def _get_project_metadata(self, path):
+        """
+        Retrieves project name and color from a cache to avoid repeated file I/O.
+        If not in cache, reads .allcode, caches the data, and returns it.
+        """
+        if path in self.project_metadata_cache:
+            return self.project_metadata_cache[path]
+
+        allcode_path = os.path.join(path, '.allcode')
+        name = os.path.basename(path)
+        color = c.COMPACT_MODE_BG_COLOR
+
+        if os.path.isfile(allcode_path):
+            try:
+                with open(allcode_path, 'r', encoding='utf-8-sig') as f:
+                    content = f.read()
+                    if content:
+                        data = json.loads(content)
+                        name = data.get('project_name', name)
+                        color = data.get('project_color', color)
+            except (IOError, json.JSONDecodeError):
+                pass # Use defaults if file is unreadable
+
+        metadata = {'name': name, 'color': color}
+        self.project_metadata_cache[path] = metadata
+        return metadata
+
     def _populate_projects(self, project_list):
         for widget in self.project_widgets:
             widget.destroy()
@@ -179,11 +208,11 @@ class DirectoryDialog(Toplevel):
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
         entry_frame.pack(fill='x', padx=20, pady=3)
 
-        pc = ProjectConfig(path)
-        pc.load()
-        display_text = pc.project_name
+        metadata = self._get_project_metadata(path)
+        display_text = metadata['name']
+        project_color = metadata['color']
 
-        logo_image = self.parent.assets.create_masked_logo_small(pc.project_color)
+        logo_image = self.parent.assets.create_masked_logo_small(project_color)
         color_swatch = Label(entry_frame, image=logo_image, bg=self.app_bg_color)
         color_swatch.image = logo_image # Prevent garbage collection
         color_swatch.pack(side='left', padx=(0, 10))

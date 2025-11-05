@@ -11,6 +11,8 @@ from ..core.paths import (
 class AppAssets:
     """A central class to load and hold all application image assets."""
     def __init__(self):
+        self.logo_mask_cache = {}
+        self.logo_mask_small_cache = {}
         # If the logo mask exists, load it; otherwise, it remains None.
         self.logo_mask_pil = self._load_image(LOGO_MASK_PATH, (48, 48)) if os.path.exists(LOGO_MASK_PATH) else None
         self.logo_mask_small_pil = self._load_image(LOGO_MASK_SMALL_PATH, (28, 28)) if os.path.exists(LOGO_MASK_SMALL_PATH) else None
@@ -58,6 +60,9 @@ class AppAssets:
 
     def create_masked_logo(self, color_hex):
         """Creates a PhotoImage by using the logo's alpha channel as a mask for the project color."""
+        if color_hex in self.logo_mask_cache:
+            return self.logo_mask_cache[color_hex]
+
         # Fallback to a simple colored square if the logo mask file doesn't exist.
         if not self.logo_mask_pil:
             try:
@@ -80,7 +85,9 @@ class AppAssets:
             # areas defined by the logo's alpha mask. This effectively "colors in" the logo.
             result_img.paste(color_img, (0, 0), alpha_mask)
 
-            return ImageTk.PhotoImage(result_img)
+            result_tk = ImageTk.PhotoImage(result_img)
+            self.logo_mask_cache[color_hex] = result_tk
+            return result_tk
         except (ValueError, AttributeError, IndexError):
             # Fallback for invalid colors or if the logo mask is not a proper RGBA image.
             img = Image.new('RGB', (48, 48), "#FF0000") # Red square indicates an error
@@ -88,10 +95,15 @@ class AppAssets:
 
     def create_masked_logo_small(self, color_hex):
         """Creates a smaller (28x28) PhotoImage for the project selector."""
+        if color_hex in self.logo_mask_small_cache:
+            return self.logo_mask_small_cache[color_hex]
+
         if not self.logo_mask_small_pil:
             try:
                 img = Image.new('RGB', (28, 28), color_hex)
-                return ImageTk.PhotoImage(img)
+                result_tk = ImageTk.PhotoImage(img)
+                self.logo_mask_small_cache[color_hex] = result_tk
+                return result_tk
             except ValueError:
                 return None
 
@@ -100,7 +112,9 @@ class AppAssets:
             alpha_mask = self.logo_mask_small_pil.getchannel('A')
             result_img = Image.new("RGBA", self.logo_mask_small_pil.size, (0, 0, 0, 0))
             result_img.paste(color_img, (0, 0), alpha_mask)
-            return ImageTk.PhotoImage(result_img)
+            result_tk = ImageTk.PhotoImage(result_img)
+            self.logo_mask_small_cache[color_hex] = result_tk
+            return result_tk
         except (ValueError, AttributeError, IndexError):
             img = Image.new('RGB', (28, 28), "#FF0000")
             return ImageTk.PhotoImage(img)
