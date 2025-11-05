@@ -9,16 +9,16 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1762089713.528963,
-          "hash": "a8173731f1b70ddfcfa178592fa06673e3acfe1b",
-          "tokens": 1491,
-          "lines": 99
+          "mtime": 1762375485.3706577,
+          "hash": "8c7251cdee93ebb5b300308510b4ed3f33139746",
+          "tokens": 1522,
+          "lines": 101
         },
         {
           "path": "llm.md",
-          "mtime": 1762302310.4793763,
-          "hash": "86bb6d66352449158ff4d4e0f6524ef454a29586",
-          "tokens": 1799,
+          "mtime": 1762375485.3776605,
+          "hash": "db859092828cea161a6edde1dea7595429e09672",
+          "tokens": 1804,
           "lines": 73
         },
         {
@@ -100,10 +100,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1761756149.7465868,
-          "hash": "0c5bd7beb9aba546de40a20327caa44d48632c0c",
-          "tokens": 2637,
-          "lines": 289
+          "mtime": 1762375485.3876567,
+          "hash": "e45e09138a794f7f8c29235e13819c0d88c8c09b",
+          "tokens": 2891,
+          "lines": 318
         },
         {
           "path": "src/core/project_manager.py",
@@ -135,9 +135,9 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1762301072.3850427,
-          "hash": "989dc34a821dd557818fc37d9f8831543bbe6eeb",
-          "tokens": 717,
+          "mtime": 1762375742.291132,
+          "hash": "6eef715468ab511c8e53a3055ecd807eba3ec10d",
+          "tokens": 720,
           "lines": 88
         },
         {
@@ -415,17 +415,17 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1762268079.1329942,
-          "hash": "9ee79da01186f65fd5b1997e075a9be0523b4a4e",
-          "tokens": 1933,
-          "lines": 188
+          "mtime": 1762375485.396659,
+          "hash": "51ec9ca91a452f66361edeec459ac4df17e2fa0a",
+          "tokens": 2049,
+          "lines": 200
         },
         {
           "path": "src/ui/directory_dialog.py",
-          "mtime": 1762302310.480377,
-          "hash": "bf55c5f629483edcbc22f426ddd22875f3d5bd6e",
-          "tokens": 2408,
-          "lines": 245
+          "mtime": 1762375787.4180365,
+          "hash": "1ed5788daaf23f73862ad937ca0532bd15cae1e3",
+          "tokens": 2481,
+          "lines": 252
         },
         {
           "path": "src/ui/filetypes_manager.py",
