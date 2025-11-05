@@ -38,12 +38,19 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         intro_text = project_config.intro_text
         outro_text = project_config.outro_text
 
+        # Always append the required footer line to the wrapped output
+        hardcoded_footer = "Always return full code. Wrap each file's code block with a `--- File: `path/to/file.ext` ---` header and an `--- End of file ---` footer."
+
+        if outro_text:
+            final_outro = f"{outro_text}\n\n{hardcoded_footer}"
+        else:
+            final_outro = hardcoded_footer
+
         final_parts = [f"# {project_title}"]
         if intro_text:
             final_parts.append(intro_text)
         final_parts.append(merged_code)
-        if outro_text:
-            final_parts.append(outro_text)
+        final_parts.append(final_outro)
 
         final_content = '\n\n'.join(final_parts) + '\n'
         status_message = "Wrapped code copied as Markdown"
