@@ -15,6 +15,7 @@ class CompactMode(tk.Toplevel):
         self.project_name = project_name
         self.tooltip_window = None
         self.new_files_button = None
+        self.show_wrapped_button = show_wrapped_button
 
         # --- Style and Layout Constants ---
         BAR_AND_BORDER_COLOR = instance_color
@@ -59,22 +60,17 @@ class CompactMode(tk.Toplevel):
         button_fg = '#FFFFFF'
         button_padding = {'pady': 2}
 
-        if show_wrapped_button:
-            self.copy_wrapped_button = RoundedButton(
-                button_container, text="Copy Wrapped", font=button_font,
-                bg=c.BTN_BLUE, fg=button_fg,
-                command=self.parent.copy_wrapped_code,
-                height=button_height, radius=button_radius, cursor='hand2'
-            )
-            self.copy_wrapped_button.pack(fill='x', expand=True, **button_padding)
-
-        self.copy_merged_button = RoundedButton(
-            button_container, text="Copy Merged", font=button_font,
-            bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT,
-            command=self.parent.copy_merged_code,
+        # Unified copy button
+        copy_button_text = "Copy Wrapped" if self.show_wrapped_button else "Copy Merged"
+        copy_button_bg = c.BTN_BLUE if self.show_wrapped_button else c.BTN_GRAY_BG
+        copy_button_fg = c.BTN_BLUE_TEXT if self.show_wrapped_button else c.BTN_GRAY_TEXT
+        self.copy_button = RoundedButton(
+            button_container, text=copy_button_text, font=button_font,
+            bg=copy_button_bg, fg=copy_button_fg,
+            command=None, # Use custom bindings
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        self.copy_merged_button.pack(fill='x', expand=True, **button_padding)
+        self.copy_button.pack(fill='x', expand=True, **button_padding)
 
         self.paste_button = RoundedButton(
             button_container, text="Paste", font=button_font,
@@ -85,6 +81,10 @@ class CompactMode(tk.Toplevel):
         self.paste_button.pack(fill='x', expand=True, **button_padding)
 
         # Override the command with specific bindings for ctrl-click
+        self.copy_button.bind("<Button-1>", self.on_copy_click)
+        self.copy_button.unbind("<ButtonRelease-1>")
+        self.copy_button.bind("<ButtonRelease-1>", self.on_copy_release)
+
         self.paste_button.bind("<Button-1>", self.on_paste_click)
         self.paste_button.unbind("<ButtonRelease-1>") # remove the original release binding
         self.paste_button.bind("<ButtonRelease-1>", self.on_paste_release)
@@ -106,13 +106,25 @@ class CompactMode(tk.Toplevel):
         self.close_button.bind("<Button-1>", self.close_window)
 
         # Tooltips
-        if show_wrapped_button:
-            self.copy_wrapped_button.bind("<Enter>", lambda e: self.show_tooltip("Copy with intro/outro text"))
-            self.copy_wrapped_button.bind("<Leave>", self.hide_tooltip)
-        self.copy_merged_button.bind("<Enter>", lambda e: self.show_tooltip("Copy with 'Copy Merged' prompt"))
-        self.copy_merged_button.bind("<Leave>", self.hide_tooltip)
+        copy_tooltip_text = "Copy with intro/outro (Ctrl+Click for 'Merged')" if self.show_wrapped_button else "Copy with 'Copy Merged' prompt"
+        self.copy_button.bind("<Enter>", lambda e: self.show_tooltip(copy_tooltip_text))
+        self.copy_button.bind("<Leave>", self.hide_tooltip)
         self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window\n(Ctrl+Click to paste from clipboard)"))
         self.paste_button.bind("<Leave>", self.hide_tooltip)
+
+    def on_copy_click(self, event):
+        self.copy_button._draw(self.copy_button.click_color)
+
+    def on_copy_release(self, event):
+        self.copy_button._draw(self.copy_button.hover_color)
+        is_ctrl = (event.state & 0x0004)
+        if is_ctrl:
+            self.parent.copy_merged_code()
+        else:
+            if self.show_wrapped_button:
+                self.parent.copy_wrapped_code()
+            else:
+                self.parent.copy_merged_code()
 
     def on_paste_click(self, event):
         # This re-implements the click visual from RoundedButton
