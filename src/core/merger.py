@@ -39,7 +39,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         outro_text = project_config.outro_text
 
         # Always append the required footer line to the wrapped output
-        hardcoded_footer = "Always return full code. Wrap each file's code block with a `--- File: `path/to/file.ext` ---` header and an `--- End of file ---` footer."
+        hardcoded_footer = "Always return complete files, not segments. Wrap each file's code block with a `--- File: `path/to/file.ext` ---` header and an `--- End of file ---` footer."
 
         if outro_text:
             final_outro = f"{outro_text}\n\n{hardcoded_footer}"
