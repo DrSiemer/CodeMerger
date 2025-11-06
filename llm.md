@@ -1,37 +1,55 @@
 # Notes on project quirks for language models
 
 **Core Directive: Act as a support programmer.**
-Assume the user has full project context. Do not explain obvious code, file structures, or self-evident logic. Focus on the *'why'* behind non-obvious code.
+Assume the user has full project context. Do not explain obvious code, file structures, or self-evident logic.
 
-**DO:**
+**The Litmus Test: The "Surprise" Factor**
+Before adding a note, ask: **"Would an experienced developer be surprised by this code? Is it a workaround, a counter-intuitive performance hack, or a deviation from a standard pattern?"** If the answer is no, do not add a note.
 
-- **Log Exceptions & Decisions:** Note *why* a solution is unusual (e.g., "Workaround for library bug X," "Chose Y library for performance reasons").
-- **Log Corrections:** If I correct your behavior, add a note so you don't repeat the mistake.
-- **Consolidate Comments:** You may move verbose comments from the source code into this log to improve code readability.
-- **Merge Updates:** When updating an existing note, merge new information with the old. Do not remove valid existing details.
-- **Be Concise:** Focus on the technical implementation and its direct technical reason.
+**DO (Only if it passes the "Surprise" Test):**
+
+- **Log Workarounds:** Document solutions that exist specifically to fix a library bug, an OS-level inconsistency, or a race condition.
+- **Log Atypical Choices:** Note *why* a solution was chosen when a more common or obvious one was deliberately avoided (e.g., "Used library X instead of the more popular library Y because Y has a memory leak on Windows").
+- **Log Complex Business Logic:** If a piece of code is inherently complex due to project requirements (e.g., a complex state machine), briefly note the reason for its complexity.
 
 **DO NOT:**
 
+- **Do not log routine bug fixes.** A fix for incorrect window parenting is standard development, not a project quirk.
+- **Do not log standard implementation patterns.** Using a specific design pattern or a common programming idiom is expected.
 - **Do not write summaries** of the project, architecture, or individual file functions.
 - **Do not explain basic concepts** or write long paragraphs.
-- **Do not explain user-facing benefits.** Stick to the "how" and "why" of the code itself.
+- **Do not explain user-facing benefits.**
+
+---
+
+### Meta-Log: Notes on My Behavior
+
+*(Use this section to log corrections to my own behavior, so I don't repeat mistakes. This is separate from code logic.)*
+
+- **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
 
 ---
 
 ### Quick Examples
 
-**Good Note:**
+**Good Note (A Workaround):**
 
 - `src/ui/assets.py`: Uses a two-stage load (PIL then `PhotoImage`) to avoid a Tkinter race condition with the root window. This is intentional.
 
-**Bad Note:**
+**Good Note (An Atypical Choice):**
+- `src/core/secret_scanner.py`: Explicitly defines all plugins via `transient_settings` instead of relying on filesystem discovery, which is unreliable in a PyInstaller bundle.
 
-- `src/ui/app_window.py`: This file contains the main `App` class which initializes the UI... *(This is an obvious summary)*.
+**Bad Note (A Routine Bug Fix):**
+
+- `src/ui/file_manager/file_manager_window.py`: The `show_error_dialog` method was changed to instantiate its own `CustomErrorDialog`... *(This is a standard fix for window focus issues and should not be logged.)*
+
+**Bad Note (An Obvious Summary):**
+
+- `src/ui/app_window.py`: This file contains the main `App` class which initializes the UI...
 
 ---
 
-## Notes
+## Code Quirks & Workarounds
 *(Append new notes below this line)*
 
 ### Architectural
