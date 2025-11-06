@@ -12,6 +12,7 @@ from .order_request_handler import OrderRequestHandler
 from ... import constants as c
 from ...core.paths import ICON_PATH
 from ..window_utils import position_window, save_window_geometry
+from ..custom_error_dialog import CustomErrorDialog
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, app_state, newly_detected_files=None):
@@ -76,8 +77,8 @@ class FileManagerWindow(Toplevel):
             self.ui_controller.expand_and_scroll_to_new_files()
 
     def show_error_dialog(self, title, message):
-        # Delegate to the main application window
-        self.parent.show_error_dialog(title, message)
+        # Instantiate the dialog with this window as the parent to keep focus.
+        CustomErrorDialog(self, title, message)
 
     def _position_window(self):
         position_window(self)

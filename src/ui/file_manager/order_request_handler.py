@@ -74,7 +74,7 @@ class OrderRequestHandler:
             if not isinstance(new_order_list, list):
                 raise ValueError("The parsed JSON is not a list.")
         except (ValueError, json.JSONDecodeError) as e:
-            messagebox.showwarning("Parsing Error", f"Could not parse the new file order.\n\nError: {e}", parent=self.window)
+            self.window.show_error_dialog("Parsing Error", f"Could not parse the new file order.\n\nError: {e}")
             return
 
         current_paths_set = {f['path'] for f in current_selection}
@@ -86,7 +86,7 @@ class OrderRequestHandler:
             error_message = "The provided file list is invalid.\n"
             if missing_files: error_message += f"\nMissing files:\n- " + "\n- ".join(sorted(list(missing_files)))
             if unknown_files: error_message += f"\nUnknown files:\n- " + "\n- ".join(sorted(list(unknown_files)))
-            messagebox.showwarning("Validation Error", error_message, parent=self.window)
+            self.window.show_error_dialog("Validation Error", error_message)
             return
 
         path_map = {f['path']: f for f in current_selection}
