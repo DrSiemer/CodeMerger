@@ -6,6 +6,7 @@ from .widgets.rounded_button import RoundedButton
 from .widgets.scrollable_text import ScrollableText
 from ..core import change_applier
 from .window_utils import position_window
+from .custom_error_dialog import CustomErrorDialog
 
 class PasteChangesDialog(Toplevel):
     def __init__(self, parent, project_base_dir, status_var, initial_content=None):
@@ -82,7 +83,7 @@ class PasteChangesDialog(Toplevel):
         message = plan.get('message')
 
         if status == 'ERROR':
-            messagebox.showerror("Error", message, parent=self)
+            CustomErrorDialog(self, title="Error", message=message)
             return
 
         if status == 'CONFIRM_CREATION':
@@ -110,7 +111,7 @@ class PasteChangesDialog(Toplevel):
             self.status_var.set(final_message)
             self.destroy()
         else:
-            messagebox.showerror("File Write Error", final_message, parent=self)
+            CustomErrorDialog(self, title="File Write Error", message=final_message)
 
     def on_cancel(self, event=None):
         self.destroy()

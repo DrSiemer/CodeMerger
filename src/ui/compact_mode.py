@@ -36,11 +36,17 @@ class CompactMode(tk.Toplevel):
         self.move_bar = tk.Frame(self, height=MOVE_BAR_HEIGHT, bg=BAR_AND_BORDER_COLOR, cursor="fleur")
         self.move_bar.pack(fill='x', side='top')
 
+        # --- App Icon ---
+        self.app_icon_image = self.parent.assets.compact_icon_tk
+        if self.app_icon_image:
+            self.app_icon_label = tk.Label(self.move_bar, image=self.app_icon_image, bg=BAR_AND_BORDER_COLOR)
+            self.app_icon_label.pack(side='left', padx=(2, 1), pady=3)
+
         # Project title abbreviation
         no_space_title = project_name.replace(' ', '')
         title_abbr = no_space_title[:10]
         self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_AND_BORDER_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
-        self.title_label.pack(side='left', padx=(4, 0))
+        self.title_label.pack(side='left', padx=(0, 4))
 
         # --- Right-aligned icons container ---
         self.right_icons_frame = tk.Frame(self.move_bar, bg=BAR_AND_BORDER_COLOR)
@@ -104,6 +110,12 @@ class CompactMode(tk.Toplevel):
         self.right_icons_frame.bind("<ButtonRelease-1>", self.on_release_drag)
         self.right_icons_frame.bind("<Double-Button-1>", self.close_window)
         self.close_button.bind("<Button-1>", self.close_window)
+
+        if self.app_icon_image:
+            self.app_icon_label.bind("<ButtonPress-1>", self.on_press_drag)
+            self.app_icon_label.bind("<B1-Motion>", self.on_drag)
+            self.app_icon_label.bind("<ButtonRelease-1>", self.on_release_drag)
+            self.app_icon_label.bind("<Double-Button-1>", self.close_window)
 
         # Tooltips
         copy_tooltip_text = "Copy with intro/outro (Ctrl+Click for 'Merged')" if self.show_wrapped_button else "Copy with 'Copy Merged' prompt"

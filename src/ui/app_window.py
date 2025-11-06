@@ -43,7 +43,7 @@ class App(Tk):
         self.withdraw()
         self._run_update_cleanup()
         assets.load_tk_images()
-        self.assets = assets # [FIX] Assign assets to the instance
+        self.assets = assets
 
         self.file_extensions = file_extensions
         self.app_version = app_version
@@ -81,6 +81,8 @@ class App(Tk):
         self.active_dir.trace_add('write', self.button_manager.update_button_states)
 
         setup_ui(self)
+        self.bind("<Configure>", self._update_responsive_layout, add='+')
+        self.after(50, self._update_responsive_layout) # Initial call
 
         # Initialize the status bar manager now that the widget exists
         self.status_bar_manager = StatusBarManager(self, self.status_bar, self.status_var)
@@ -135,6 +137,19 @@ class App(Tk):
                 os.remove(UPDATE_CLEANUP_FILE_PATH)
             except OSError as e:
                 log.error(f"Failed to remove cleanup file: {e}")
+
+    def _update_responsive_layout(self, event=None):
+        """Dynamically adjusts the layout based on the window width."""
+        # This is the breakpoint you can change.
+        THRESHOLD = 600
+        width = self.winfo_width()
+
+        if width > THRESHOLD:
+            # --- WIDE LAYOUT: Center the action box ---
+            self.main_content_frame.grid_configure(sticky='', padx=0)
+        else:
+            # --- NARROW LAYOUT: Align the action box to the left ---
+            self.main_content_frame.grid_configure(sticky='w', padx=(20, 0))
 
     def _on_window_configure(self, event):
         """
@@ -241,6 +256,10 @@ class App(Tk):
         self.deiconify()
         self.lift()
         self.focus_force()
+
+    def show_error_dialog(self, title, message):
+        from .custom_error_dialog import CustomErrorDialog
+        CustomErrorDialog(self, title, message)
 
     def set_active_dir_display(self, path, set_status=True):
         """Sets the display string for the active directory and loads its config"""
@@ -429,7 +448,7 @@ class App(Tk):
                 else:
                     subprocess.Popen(["xdg-open", project_path])
             except Exception as e:
-                messagebox.showerror("Error", f"Could not open folder: {e}", parent=self)
+                self.show_error_dialog("Error", f"Could not open folder: {e}")
         else:
             self.status_var.set("No active project folder to open.")
 
@@ -477,13 +496,13 @@ class App(Tk):
         message = plan.get('message')
 
         if status == 'ERROR':
-            messagebox.showerror("Parsing Error", message, parent=self)
+            self.show_error_dialog("Parsing Error", message)
             return
 
         # Direct confirmation for new files, skipping the full paste dialog
         if status == 'CONFIRM_CREATION':
             creations = plan.get('creations', {})
-            creation_rel_paths = [os.path.relpath(p, project_config.base_dir).replace('\\', '/') for p in creations.keys()]
+            creation_rel_paths = [os.path.relpath(p, self.base_dir).replace('\\', '/') for p in creations.keys()]
 
             confirm_message = (
                 f"This operation will create {len(creations)} new file(s):\n\n"
@@ -502,7 +521,7 @@ class App(Tk):
         if success:
             self._show_compact_toast(final_message)
         else:
-            messagebox.showerror("File Write Error", final_message, parent=self)
+            self.show_error_dialog("File Write Error", final_message)
 
     def on_paste_click(self, event):
         """Handles the press event for the main paste button to show a click."""
@@ -538,7 +557,7 @@ class App(Tk):
     def _perform_copy(self, use_wrapper: bool):
         base_dir = self.active_dir.get()
         if not os.path.isdir(base_dir):
-            messagebox.showerror("Error", "Please select a valid project folder first", parent=self)
+            self.show_error_dialog("Error", "Please select a valid project folder first")
             self.status_var.set("Error: Invalid project folder")
             return
 

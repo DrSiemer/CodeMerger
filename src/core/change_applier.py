@@ -71,7 +71,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     markdown_text = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text)
 
     file_blocks = re.findall(
-        r'--- File: `(.+?)` ---\s*\n```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
+        r'--- File: `([^\n`]+)` ---\s*```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
         markdown_text,
         re.DOTALL
     )
@@ -82,10 +82,22 @@ def parse_and_plan_changes(base_dir, markdown_text):
     files_to_update = {}
     files_to_create = {}
 
+    invalid_chars_pattern = r'[<>:"|?*]'
+
     for relative_path, content in file_blocks:
         # Normalize path separators
         relative_path = relative_path.strip().replace('\\', '/')
         full_path = os.path.normpath(os.path.join(base_dir, relative_path))
+
+        # Validation for illegal characters in the path
+        if re.search(invalid_chars_pattern, relative_path):
+            return {'status': 'ERROR', 'message': f"Error: The file path '{relative_path}' contains invalid characters."}
+
+        # Validation for path component length
+        path_components = relative_path.split('/')
+        for component in path_components:
+            if len(component) > 260:
+                return {'status': 'ERROR', 'message': f"Error: A filename or directory in the path '{relative_path}' exceeds the 260-character limit."}
 
         # Security check: ensure the path is within the project directory
         if not full_path.startswith(os.path.normpath(base_dir)):

@@ -2,10 +2,11 @@ import os
 from PIL import Image, ImageTk, ImageColor
 from ..core.paths import (
     TRASH_ICON_PATH, NEW_FILES_ICON_PATH, DEFAULTS_ICON_PATH,
-    LOGO_MASK_PATH, LOGO_MASK_SMALL_PATH,
+    LOGO_MASK_PATH, LOGO_MASK_SMALL_PATH, ICON_PATH,
     COMPACT_MODE_CLOSE_ICON_PATH,
     FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
-    EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH
+    EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH,
+    SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH
 )
 
 class AppAssets:
@@ -16,6 +17,7 @@ class AppAssets:
         # If the logo mask exists, load it; otherwise, it remains None.
         self.logo_mask_pil = self._load_image(LOGO_MASK_PATH, (48, 48)) if os.path.exists(LOGO_MASK_PATH) else None
         self.logo_mask_small_pil = self._load_image(LOGO_MASK_SMALL_PATH, (28, 28)) if os.path.exists(LOGO_MASK_SMALL_PATH) else None
+        self.compact_icon_pil = self._load_image(ICON_PATH, (12, 12))
         self.trash_icon_pil = self._load_image(TRASH_ICON_PATH, (18, 18))
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
         self.new_files_compact_pil = self._load_image(NEW_FILES_ICON_PATH, (12, 12))
@@ -27,10 +29,15 @@ class AppAssets:
         self.order_request_pil = self._load_image(ORDER_REQUEST_ICON_PATH, (14, 12))
         self.filter_icon_pil = self._load_image(EXTRA_FILES_ICON_PATH, (17, 7))
         self.filter_icon_active_pil = self._load_image(EXTRA_FILES_ICON_ACTIVE_PATH, (17, 7))
+        self.settings_icon_pil = self._load_image(SETTINGS_ICON_PATH, (30, 30))
+        self.filetypes_icon_pil = self._load_image(FILETYPES_ICON_PATH, (30, 30))
+        self.settings_icon_active_pil = self._load_image(SETTINGS_ICON_ACTIVE_PATH, (30, 30))
+        self.filetypes_icon_active_pil = self._load_image(FILETYPES_ICON_ACTIVE_PATH, (30, 30))
 
         self.compact_mode_close_pil = self._load_image(COMPACT_MODE_CLOSE_ICON_PATH)
 
         self.trash_icon_image = self.trash_icon_pil
+        self.compact_icon_tk = None
         self.new_files_icon = None
         self.defaults_icon = None
         self.folder_icon = None
@@ -41,12 +48,17 @@ class AppAssets:
         self.filter_icon = None
         self.filter_icon_active = None
         self.compact_mode_close_image = None
+        self.settings_icon = None
+        self.filetypes_icon = None
+        self.settings_icon_active = None
+        self.filetypes_icon_active = None
 
     def load_tk_images(self):
         """
         Converts the loaded PIL images into Tkinter PhotoImage objects.
         This method MUST be called after the Tk() root window has been created.
         """
+        self.compact_icon_tk = self._pil_to_photoimage(self.compact_icon_pil)
         self.new_files_icon = self._pil_to_photoimage(self.new_files_pil)
         self.defaults_icon = self._pil_to_photoimage(self.defaults_pil)
         self.folder_icon = self._pil_to_photoimage(self.folder_icon_pil)
@@ -57,6 +69,10 @@ class AppAssets:
         self.filter_icon = self._pil_to_photoimage(self.filter_icon_pil)
         self.filter_icon_active = self._pil_to_photoimage(self.filter_icon_active_pil)
         self.compact_mode_close_image = self._pil_to_photoimage(self.compact_mode_close_pil)
+        self.settings_icon = self._pil_to_photoimage(self.settings_icon_pil)
+        self.filetypes_icon = self._pil_to_photoimage(self.filetypes_icon_pil)
+        self.settings_icon_active = self._pil_to_photoimage(self.settings_icon_active_pil)
+        self.filetypes_icon_active = self._pil_to_photoimage(self.filetypes_icon_active_pil)
 
     def create_masked_logo(self, color_hex):
         """Creates a PhotoImage by using the logo's alpha channel as a mask for the project color."""

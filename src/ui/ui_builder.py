@@ -9,7 +9,8 @@ def setup_ui(app):
     """Creates and places all the UI widgets for the main application window"""
     # --- Window Grid Configuration ---
     app.columnconfigure(0, weight=1)
-    app.rowconfigure(2, weight=1)
+    app.rowconfigure(2, weight=1) # Central content row expands vertically
+    app.rowconfigure(3, weight=0) # Status bar row is fixed height
 
     # --- Top Bar (Row 0) ---
     top_bar = Frame(app, bg=c.TOP_BAR_BG, padx=20, pady=15)
@@ -74,20 +75,40 @@ def setup_ui(app):
     app.select_project_button = RoundedButton(app.top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')
 
-    # --- Center "Actions" Box (Row 2) ---
+    # --- Center Content Area (Row 2) ---
     center_frame = Frame(app, bg=c.DARK_BG)
-    center_frame.grid(row=2, column=0, sticky='nsew', pady=0)
+    center_frame.grid(row=2, column=0, sticky='nsew')
+    center_frame.grid_rowconfigure(0, weight=1)
+    center_frame.grid_columnconfigure(0, weight=1)
+    app.center_frame = center_frame
 
-    wrapper_box = Frame(center_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-    wrapper_box.place(relx=0.5, rely=0.55, anchor='center')
+    # A container for the icon buttons, placed in the main central frame.
+    # It sticks to the bottom-right corner.
+    app.bottom_buttons_container = Frame(center_frame, bg=c.DARK_BG)
+    app.bottom_buttons_container.grid(row=0, column=0, sticky='se', padx=20, pady=(0, 18))
 
-    app.wrapper_box_title = Label(wrapper_box, text="Actions", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, pady=2)
+    app.filetypes_button = Label(app.bottom_buttons_container, image=assets.filetypes_icon, bg=c.DARK_BG, cursor='hand2')
+    app.filetypes_button.pack(side='top')
+    ToolTip(app.filetypes_button, "Manage Filetypes", delay=500)
 
-    # This label is shown when no project is selected
-    app.no_project_label = Label(wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
+    app.settings_button = Label(app.bottom_buttons_container, image=assets.settings_icon, bg=c.DARK_BG, cursor='hand2')
+    app.settings_button.pack(side='top', pady=(10, 0))
+    ToolTip(app.settings_button, "Settings", delay=500)
 
-    app.button_grid_frame = Frame(wrapper_box, bg=c.DARK_BG)
-    # Configure the grid columns to have equal weight. This is the key to alignment.
+    # This frame holds the actions box. Its alignment is controlled by the responsive layout function.
+    app.main_content_frame = Frame(center_frame, bg=c.DARK_BG)
+    app.main_content_frame.grid(row=0, column=0, sticky='') # Starts centered
+    app.main_content_frame.grid_rowconfigure(0, weight=1)
+    app.main_content_frame.grid_columnconfigure(0, weight=1)
+
+    app.wrapper_box = Frame(app.main_content_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
+    app.wrapper_box.grid(row=0, column=0, sticky='s') # Aligns to the bottom of its cell
+
+    app.wrapper_box_title = Label(app.wrapper_box, text="Actions", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, pady=2)
+
+    app.no_project_label = Label(app.wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
+
+    app.button_grid_frame = Frame(app.wrapper_box, bg=c.DARK_BG)
     app.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
 
@@ -97,7 +118,6 @@ def setup_ui(app):
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Wrapper Texts", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_wrapper_text_window, cursor='hand2')
     app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Merged", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.copy_merged_code, cursor='hand2')
 
-    # Bindings for main paste button to allow Ctrl+Click
     app.paste_changes_button.bind("<Button-1>", app.on_paste_click)
     app.paste_changes_button.unbind("<ButtonRelease-1>")
     app.paste_changes_button.bind("<ButtonRelease-1>", app.on_paste_release)
@@ -106,16 +126,15 @@ def setup_ui(app):
     ToolTip(app.copy_wrapped_button, "Copy all included code with custom intro + outro\n(use this to start new conversations)", delay=500)
     ToolTip(app.copy_merged_button, "Copy all included code with custom intro\n(use this to update an LLM of your code changes)", delay=500)
 
-    # --- Bottom Bar (Row 3) ---
-    bottom_bar = Frame(app, bg=c.DARK_BG)
-    bottom_bar.grid(row=3, column=0, sticky='ew', pady=(20, 15))
-    bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
-    bottom_buttons_container.pack(side='left', padx=20)
+    app.settings_button.bind("<Enter>", lambda e: app.settings_button.config(image=assets.settings_icon_active), add='+')
+    app.settings_button.bind("<Leave>", lambda e: app.settings_button.config(image=assets.settings_icon), add='+')
+    app.settings_button.bind("<Button-1>", lambda e: app.open_settings_window())
 
-    RoundedButton(bottom_buttons_container, text="Manage Filetypes", font=c.FONT_BUTTON, fg=c.TEXT_COLOR, command=app.open_filetypes_manager, hollow=True, cursor='hand2').pack(side='left')
-    RoundedButton(bottom_buttons_container, text="Settings", font=c.FONT_BUTTON, fg=c.TEXT_COLOR, command=app.open_settings_window, hollow=True, cursor='hand2').pack(side='left', padx=(10, 0))
+    app.filetypes_button.bind("<Enter>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon_active), add='+')
+    app.filetypes_button.bind("<Leave>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon), add='+')
+    app.filetypes_button.bind("<Button-1>", lambda e: app.open_filetypes_manager())
 
-    # --- Status Bar (Row 4) ---
+    # --- Status Bar (Row 3) ---
     app.status_bar = Label(
         app,
         textvariable=app.status_var,
@@ -127,4 +146,4 @@ def setup_ui(app):
         padx=20,
         pady=4
     )
-    app.status_bar.grid(row=4, column=0, sticky='ew')
+    app.status_bar.grid(row=3, column=0, sticky='ew')
