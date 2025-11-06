@@ -108,12 +108,36 @@ def setup_ui(app):
 
     # --- Bottom Bar (Row 3) ---
     bottom_bar = Frame(app, bg=c.DARK_BG)
-    bottom_bar.grid(row=3, column=0, sticky='ew', pady=(20, 15))
+    bottom_bar.grid(row=3, column=0, sticky='ew', pady=(0, 15))
     bottom_buttons_container = Frame(bottom_bar, bg=c.DARK_BG)
-    bottom_buttons_container.pack(side='left', padx=20)
+    bottom_buttons_container.pack(side='right', padx=20)
 
-    RoundedButton(bottom_buttons_container, text="Manage Filetypes", font=c.FONT_BUTTON, fg=c.TEXT_COLOR, command=app.open_filetypes_manager, hollow=True, cursor='hand2').pack(side='left')
-    RoundedButton(bottom_buttons_container, text="Settings", font=c.FONT_BUTTON, fg=c.TEXT_COLOR, command=app.open_settings_window, hollow=True, cursor='hand2').pack(side='left', padx=(10, 0))
+    app.settings_button = Label(
+        bottom_buttons_container,
+        image=assets.settings_icon,
+        bg=c.DARK_BG,
+        cursor='hand2'
+    )
+    app.settings_button.pack(side='right', padx=(10, 0))
+    ToolTip(app.settings_button, "Settings", delay=500)
+
+    app.filetypes_button = Label(
+        bottom_buttons_container,
+        image=assets.filetypes_icon,
+        bg=c.DARK_BG,
+        cursor='hand2'
+    )
+    app.filetypes_button.pack(side='right')
+    ToolTip(app.filetypes_button, "Manage Filetypes", delay=500)
+
+    # --- Event Bindings for Icon Buttons ---
+    app.settings_button.bind("<Enter>", lambda e: app.settings_button.config(image=assets.settings_icon_active), add='+')
+    app.settings_button.bind("<Leave>", lambda e: app.settings_button.config(image=assets.settings_icon), add='+')
+    app.settings_button.bind("<Button-1>", lambda e: app.open_settings_window())
+
+    app.filetypes_button.bind("<Enter>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon_active), add='+')
+    app.filetypes_button.bind("<Leave>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon), add='+')
+    app.filetypes_button.bind("<Button-1>", lambda e: app.open_filetypes_manager())
 
     # --- Status Bar (Row 4) ---
     app.status_bar = Label(
