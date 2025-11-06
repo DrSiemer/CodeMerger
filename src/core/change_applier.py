@@ -66,10 +66,16 @@ def parse_and_plan_changes(base_dir, markdown_text):
     files_to_update = {}
     files_to_create = {}
 
+    invalid_chars_pattern = r'[<>:"|?*]'
+
     for relative_path, content in file_blocks:
         # Normalize path separators
         relative_path = relative_path.strip().replace('\\', '/')
         full_path = os.path.normpath(os.path.join(base_dir, relative_path))
+
+        # Validation for illegal characters in the path
+        if re.search(invalid_chars_pattern, relative_path):
+            return {'status': 'ERROR', 'message': f"Error: The file path '{relative_path}' contains invalid characters."}
 
         # Security check: ensure the path is within the project directory
         if not full_path.startswith(os.path.normpath(base_dir)):
