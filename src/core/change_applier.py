@@ -93,6 +93,12 @@ def parse_and_plan_changes(base_dir, markdown_text):
         if re.search(invalid_chars_pattern, relative_path):
             return {'status': 'ERROR', 'message': f"Error: The file path '{relative_path}' contains invalid characters."}
 
+        # Validation for path component length
+        path_components = relative_path.split('/')
+        for component in path_components:
+            if len(component) > 260:
+                return {'status': 'ERROR', 'message': f"Error: A filename or directory in the path '{relative_path}' exceeds the 260-character limit."}
+
         # Security check: ensure the path is within the project directory
         if not full_path.startswith(os.path.normpath(base_dir)):
             return {'status': 'ERROR', 'message': f"Error: Path '{relative_path}' attempts to access a location outside the project directory."}
