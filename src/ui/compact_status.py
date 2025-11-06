@@ -20,7 +20,6 @@ class CompactStatusToast(tk.Toplevel):
         )
         label.pack()
 
-        # [FIX] Force an update of the parent's geometry before calculating position
         parent_widget.update_idletasks()
         parent_x = parent_widget.winfo_x()
         parent_y = parent_widget.winfo_y()

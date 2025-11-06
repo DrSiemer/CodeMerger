@@ -88,7 +88,6 @@ class SettingsWindow(Toplevel):
 
         # --- Action Buttons (Outside scroll area) ---
         button_frame = Frame(main_frame, bg=c.DARK_BG)
-        # [FIX] Changed pady=(10, 20) to pady=(0, 20) to remove the top padding.
         button_frame.grid(row=1, column=0, sticky='ew', padx=20, pady=(0, 20))
         button_frame.grid_columnconfigure(0, weight=1)
         save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2')
