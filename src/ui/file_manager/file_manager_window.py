@@ -75,6 +75,10 @@ class FileManagerWindow(Toplevel):
         if self.newly_detected_files:
             self.ui_controller.expand_and_scroll_to_new_files()
 
+    def show_error_dialog(self, title, message):
+        # Delegate to the main application window
+        self.parent.show_error_dialog(title, message)
+
     def _position_window(self):
         position_window(self)
 

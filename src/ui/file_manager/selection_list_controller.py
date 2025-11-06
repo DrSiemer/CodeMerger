@@ -143,7 +143,7 @@ class SelectionListController:
         except (AttributeError, FileNotFoundError):
             messagebox.showinfo("Unsupported Action", "Could not open file with the system default\nPlease configure a default editor in Settings", parent=self.parent)
         except Exception as e:
-            messagebox.showerror("Error", f"Could not open file: {e}", parent=self.parent)
+            self.parent.show_error_dialog("Error", f"Could not open file: {e}")
         return "break"
 
     def _on_scroll(self, event=None):

@@ -149,17 +149,17 @@
         },
         {
           "path": "src/core/clipboard.py",
-          "mtime": 1757938205.62897,
-          "hash": "a3f9d9686f39096e7d9a3474a6541690ae49b270",
-          "tokens": 349,
+          "mtime": 1762422075.7398598,
+          "hash": "02b6bb01fcf99a56e189e8f8401463353d1a8ae1",
+          "tokens": 346,
           "lines": 45
         },
         {
           "path": "src/core/updater.py",
-          "mtime": 1762181513.4325078,
-          "hash": "b24cba06f9ddc55a47a5dba8627f9b4d2793dbd8",
-          "tokens": 1736,
-          "lines": 208
+          "mtime": 1762422075.7404416,
+          "hash": "e8146c167e73e904e2928ad6b4e953c91b5da209",
+          "tokens": 1721,
+          "lines": 205
         },
         {
           "path": "updater_gui.py",
@@ -177,10 +177,10 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1762186197.5792508,
-          "hash": "910159d38b992d0ca80f38816dea75f4e7e41c31",
-          "tokens": 4716,
-          "lines": 584
+          "mtime": 1762422075.7409663,
+          "hash": "5a98e9e2a9dc21c49f877ddeef27aafae2e348e3",
+          "tokens": 4740,
+          "lines": 588
         },
         {
           "path": "src/ui/ui_builder.py",
@@ -296,10 +296,10 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1762181090.8874192,
-          "hash": "77f97257a7ddee32f02b1eba9323c5a8158bb73f",
-          "tokens": 1857,
-          "lines": 205
+          "mtime": 1762422075.741485,
+          "hash": "d9b61c14294d563710fe4412dbe8945f2b3b306a",
+          "tokens": 1887,
+          "lines": 209
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
@@ -317,7 +317,7 @@
         },
         {
           "path": "src/ui/file_manager/data_controller.py",
-          "mtime": 1762168011.124068,
+          "mtime": 1762422075.742003,
           "hash": "8577c0522045f452433d9bf2f8b9719110521a21",
           "tokens": 770,
           "lines": 81
@@ -345,9 +345,9 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1762160620.8400052,
-          "hash": "a3d98f552c6d758569669e9e8a6457d4849d3e96",
-          "tokens": 1778,
+          "mtime": 1762422075.742003,
+          "hash": "6c3fc04bffcd362b4d45309e18eb378097c16fe2",
+          "tokens": 1776,
           "lines": 187
         },
         {
@@ -422,9 +422,9 @@
         },
         {
           "path": "src/ui/directory_dialog.py",
-          "mtime": 1762188421.6232753,
-          "hash": "1fe9709ba32704f21265179e4044133d5eda2cc7",
-          "tokens": 2327,
+          "mtime": 1762207791.6884954,
+          "hash": "0b85171a2a9cefa2c183e3c6b5817ee93c0e5bc5",
+          "tokens": 2328,
           "lines": 234
         },
         {
@@ -457,10 +457,10 @@
         },
         {
           "path": "src/ui/paste_changes_dialog.py",
-          "mtime": 1762160620.8410056,
-          "hash": "9eb49634f047d83ee9a4e5c70d2e69633acba333",
-          "tokens": 975,
-          "lines": 116
+          "mtime": 1762422075.7409663,
+          "hash": "1454cc4d891f5ba58d22f19a0d7809ecb1fff12a",
+          "tokens": 988,
+          "lines": 117
         },
         {
           "path": "src/ui/multiline_input_dialog.py",
@@ -482,9 +482,16 @@
           "hash": "160dd9946bf51ef2c2b641e39741b2983ed5e967",
           "tokens": 391,
           "lines": 53
+        },
+        {
+          "path": "src/ui/custom_error_dialog.py",
+          "mtime": 1762422075.7289736,
+          "hash": "09aa2222934edf1ac5f4eaf0d7cbbec702156fb2",
+          "tokens": 528,
+          "lines": 56
         }
       ],
-      "total_tokens": 75744,
+      "total_tokens": 77206,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "DO:\n- always return full code, unless a change is VERY small (a single line or a short connected segment)\n- wrap each file's code block with a `--- File: \\`path/to/file.ext\\` ---` header and an `--- End of file ---` footer\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line, NEVER do this: \"</table>```\")\n\nDo NOT:\n- remove my original comments\n- return diff files\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: `// [KEYWORD] Comment` (e.g., `[FIX] Now using correct value`, `[MODIFIED] Improved algorithm`). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -532,6 +539,7 @@
     "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
     "src/ui/compact_status.py",
+    "src/ui/custom_error_dialog.py",
     "src/ui/directory_dialog.py",
     "src/ui/file_manager/data_controller.py",
     "src/ui/file_manager/file_manager_window.py",

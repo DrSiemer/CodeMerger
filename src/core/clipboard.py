@@ -41,5 +41,5 @@ def copy_project_to_clipboard(parent, base_dir, project_config, use_wrapper, cop
         else:
             return status_message or "Error: Could not generate content."
     except Exception as e:
-        messagebox.showerror("Merging Error", f"An error occurred: {e}", parent=parent)
+        parent.show_error_dialog("Merging Error", f"An error occurred: {e}")
         return f"Error during merging: {e}"

@@ -102,24 +102,21 @@ class Updater:
                             parent=self.parent
                         )
                 else:
-                    messagebox.showerror(
+                    self.parent.show_error_dialog(
                         "Update Check Failed",
-                        f"Could not check for updates. Server returned status {response.status}.",
-                        parent=self.parent
+                        f"Could not check for updates. Server returned status {response.status}."
                     )
         except error.URLError as e:
             log.error(f"Manual update check failed: {e.reason}")
-            messagebox.showerror(
+            self.parent.show_error_dialog(
                 "Update Check Failed",
-                f"Could not check for updates. Please check your internet connection.\n\nDetails: {e.reason}",
-                parent=self.parent
+                f"Could not check for updates. Please check your internet connection.\n\nDetails: {e.reason}"
             )
         except Exception as e:
             log.exception("An unexpected error occurred during manual update check.")
-            messagebox.showerror(
+            self.parent.show_error_dialog(
                 "Update Check Failed",
-                f"An unexpected error occurred while checking for updates.\n\nDetails: {e}",
-                parent=self.parent
+                f"An unexpected error occurred while checking for updates.\n\nDetails: {e}"
             )
 
     def _is_newer(self, latest_str, current_str):
@@ -168,7 +165,7 @@ class Updater:
 
         if not download_url:
             log.error("Could not find a downloadable setup file in the latest release assets.")
-            messagebox.showerror("Update Error", "Could not find a downloadable installer in the release.", parent=self.parent)
+            self.parent.show_error_dialog("Update Error", "Could not find a downloadable installer in the release.")
             return
 
         updater_exe_path = ""
@@ -181,7 +178,7 @@ class Updater:
 
         if not os.path.exists(updater_exe_path):
             log.critical(f"Updater executable 'updater_gui.exe' not found at expected path: {updater_exe_path}")
-            messagebox.showerror("Update Error", f"The updater application is missing and could not be found.\n\nChecked path: {updater_exe_path}\n\nPlease reinstall CodeMerger.", parent=self.parent)
+            self.parent.show_error_dialog("Update Error", f"The updater application is missing and could not be found.\n\nChecked path: {updater_exe_path}\n\nPlease reinstall CodeMerger.")
             return
 
         try:
@@ -205,4 +202,4 @@ class Updater:
 
         except Exception as e:
             log.exception("Failed to launch the updater process.")
-            messagebox.showerror("Update Error", f"Failed to launch the updater process: {e}", parent=self.parent)
+            self.parent.show_error_dialog("Update Error", f"Failed to launch the updater process: {e}")
