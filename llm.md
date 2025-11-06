@@ -1,7 +1,7 @@
-# LLM Project Log
+# Notes on project quirks for language models
 
-**Core Directive: Act as a Peer Programmer.**
-Assume I have full project context. Do not explain obvious code, file structures, or self-evident logic. Focus on the *'why'* behind non-obvious code.
+**Core Directive: Act as a support programmer.**
+Assume the user has full project context. Do not explain obvious code, file structures, or self-evident logic. Focus on the *'why'* behind non-obvious code.
 
 **DO:**
 
@@ -53,6 +53,7 @@ Assume I have full project context. Do not explain obvious code, file structures
 - `src/ui/app_window.py`: On startup, `_run_update_cleanup()` safely removes temporary installer files from any previous update. It then calls `lift()` and `focus_force()` to ensure the main window gets focus, which is particularly important when relaunched by the installer.
 - `src/ui/app_window.py`: Tracks its last move time via the `<Configure>` event. This allows the `ViewManager` to decide whether to use a saved compact mode position or calculate a new one. When moved to a new display, only saved child window positions (`window_geometries`) are cleared.
 - `src/ui/assets.py`: Uses a two-stage load (PIL then `PhotoImage`) to avoid a Tkinter race condition where `PhotoImage` requires a root window to exist before it can be instantiated.
+- `src/ui/assets.py`: Implemented caching for the `create_masked_logo` and `create_masked_logo_small` methods. The generated `PhotoImage` objects for project color swatches are now stored in a dictionary keyed by their hex color code. This prevents costly PIL operations from being repeated every time the project selector is opened or the main window UI is updated, significantly improving performance.
 - `src/ui/compact_mode.py`: The new files warning icon is composited onto the button's base PIL images at runtime to avoid needing separate asset files for every state. Dragging is implemented manually by tracking mouse offsets on a dedicated move bar.
 - `src/ui/custom_widgets.py`: The `RoundedButton` is drawn using Pillow with 4x supersampling for anti-aliasing. Font selection is OS-aware to find `segoeui.ttf` on Windows. It redraws on `<Configure>` to support responsive layouts.
 - `src/ui/file_manager/file_manager_window.py`: Token recalculation is debounced using `after(250, ...)` to prevent performance issues when rapidly adding/removing many files.

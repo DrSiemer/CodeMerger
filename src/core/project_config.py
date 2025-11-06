@@ -55,6 +55,35 @@ class ProjectConfig:
         self.profiles = {}
         self.active_profile_name = "Default"
 
+    @staticmethod
+    def read_project_display_info(base_dir):
+        """
+        Performs a lightweight read of .allcode just for display purposes,
+        avoiding the expensive file system validation of a full load().
+        Returns a tuple of (project_name, project_color).
+        """
+        allcode_path = os.path.join(base_dir, '.allcode')
+        project_name = os.path.basename(base_dir) # Default
+        project_color = COMPACT_MODE_BG_COLOR # Default
+
+        if not os.path.isfile(allcode_path):
+            return project_name, project_color
+
+        try:
+            with open(allcode_path, 'r', encoding='utf-8-sig') as f:
+                content = f.read()
+                if not content: return project_name, project_color
+                data = json.loads(content)
+                project_name = data.get('project_name', project_name)
+                color_value = data.get('project_color')
+                if color_value and isinstance(color_value, str) and re.match(r'^#[0-9a-fA-F]{6}$', color_value):
+                        project_color = color_value
+        except (json.JSONDecodeError, IOError):
+            # On error, just return the defaults.
+            pass
+
+        return project_name, project_color
+
     def get_active_profile(self):
         """Returns the dictionary for the currently active profile."""
         # [FIX] Ensure the active profile always exists, create if not.

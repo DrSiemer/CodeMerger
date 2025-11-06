@@ -28,7 +28,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Merged" button. You can also set application-wide default intro and outro texts for the wrapper feature
 - **Customizable Wrapper Text**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
 - **Drag & Drop Reordering**: Easily reorder the files in your merge list to control the final output structure
-- **Compact Mode**: A small, always-on-top, draggable window for quick access to core functions that appears when the main window is minimized. It includes buttons for "Copy Wrapped," "Copy Merged," and "Paste."
+- **Compact Mode**: A small, always-on-top, draggable window for quick access to core functions that appears when the main window is minimized. It includes an adaptive copy button (Copy Wrapped / Copy Merged) and a paste button.
 - **Recent Projects**: Quickly switch between your recent project folders
 - **Project Colors**: Assign a unique color to each project for easy identification in compact mode
 
@@ -59,9 +59,11 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - If you added wrapper text, a "Copy Wrapped" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation
 - **Compact Mode**
     - Minimize the main window to activate the compact mode panel.
-    - The panel contains three buttons:
-        - **Copy Wrapped**: Copies the code with your project-specific intro and outro texts. This button only appears if you have defined wrapper text for the project.
-        - **Copy Merged**: Copies the code with your default "Copy Merged" prompt.
+    - The panel contains two primary buttons:
+        - **Copy (Wrapped/Merged)**: A single adaptive button for copying code.
+            - It appears as "Copy Wrapped" if you have defined wrapper text for the project, and "Copy Merged" if you have not.
+            - A normal click performs the action shown on the button.
+            - Holding **Ctrl** while clicking will always perform the "Copy Merged" action.
         - **Paste**: Opens the "Paste Changes" window. If you hold **Ctrl** while clicking, it will immediately apply the changes from your clipboard without opening the window (unless new files need to be created).
     - The panel is colored with your project's assigned color.
     - A warning icon will appear in the move bar if new files are found.
