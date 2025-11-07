@@ -6,7 +6,7 @@ from ..font_utils import get_pil_font
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, h_padding=None, cursor=None):
+    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, h_padding=None, cursor=None, text_align='center'):
         if font:
             # If a tuple like ("Segoe UI", 12) is passed, use it directly
             self.tk_font_tuple = font
@@ -15,6 +15,7 @@ class RoundedButton(tk.Canvas):
             self.tk_font_tuple = c.FONT_DEFAULT
         self.hollow = hollow
         self.image = image # Store the Pillow image object
+        self.text_align = text_align
         # Use the robust font loader
         self.pil_font = get_pil_font(self.tk_font_tuple)
         # Calculate width if not provided
@@ -126,14 +127,19 @@ class RoundedButton(tk.Canvas):
         elif self.text:
             original_font_size = self.tk_font_tuple[1]
             scaled_font = get_pil_font((self.tk_font_tuple[0], original_font_size * scale))
-            center_x = scaled_width / 2
+            anchor = "mm"
+            text_x = scaled_width / 2
+            if self.text_align == 'left':
+                anchor = "lm"
+                text_x = 10 * scale
+
             center_y = (scaled_height / 2) - (0.5 * scale)
             draw.text(
-                (center_x, center_y),
+                (text_x, center_y),
                 self.text,
                 font=scaled_font,
                 fill=text_fill_color,
-                anchor="mm"
+                anchor=anchor
             )
         # Scale the high-resolution image down to the final size with a high-quality filter
         img = img.resize((draw_width, self.height), Image.Resampling.LANCZOS)

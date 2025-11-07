@@ -233,7 +233,7 @@ class DirectoryDialog(Toplevel):
 
         btn = RoundedButton(
             buttons_container, text=display_text, command=None,
-            bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, height=32, cursor='hand2'
+            bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, height=32, cursor='hand2', text_align='left'
         )
         btn.pack(side='left', expand=True, fill='x')
 
