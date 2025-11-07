@@ -38,13 +38,15 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         intro_text = project_config.intro_text
         outro_text = project_config.outro_text
 
-        # Always append the required footer line to the wrapped output
-        hardcoded_footer = "Always return complete files, not segments. Wrap each file's code block with a `--- File: `path/to/file.ext` ---` header and an `--- End of file ---` footer."
+        # Always prepend this to the wrapped outro text
+        formatting_instruction = """**Important Instructions:**
+1.  **Always return the complete source code for every file you modify.** Do not use diffs or snippets.
+2.  **Enclose each file's content in a markdown block**, preceded by a `--- File: `path/to/file.ext` ---` header and followed by a `--- End of file ---` footer."""
 
         if outro_text:
-            final_outro = f"{outro_text}\n\n{hardcoded_footer}"
+            final_outro = f"{formatting_instruction}\n\n{outro_text}"
         else:
-            final_outro = hardcoded_footer
+            final_outro = formatting_instruction
 
         final_parts = [f"# {project_title}"]
         if intro_text:
