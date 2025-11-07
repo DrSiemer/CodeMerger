@@ -15,18 +15,18 @@ class FileMonitor:
 
     def start(self):
         """
-        Starts or restarts the periodic check for new files based on current settings.
-        Immediately performs a scan after starting.
+        Starts or restarts the *periodic* check for new files.
+        The initial scan is now handled separately during project load.
         """
         self.stop() # Ensure any existing job is cancelled before starting a new one
 
-        self.newly_detected_files = []
-        self._update_warning_ui() # Clear any old warning state immediately
+        self._update_warning_ui() # Update UI based on any initial scan results
 
         is_dir_active = self.app.project_manager.get_current_project() is not None
         if self.app.app_state.config.get('enable_new_file_check', True) and is_dir_active:
-            # Perform the first check immediately, then schedule subsequent checks
-            self.app.after(100, self.perform_new_file_check)
+            # Schedule the *first periodic* check to run after the configured interval.
+            interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
+            self._schedule_next_check(interval_sec * 1000)
 
     def stop(self):
         """Stops the currently running file check job."""
@@ -38,10 +38,19 @@ class FileMonitor:
         """Schedules the next execution of the file check."""
         self._check_job = self.app.after(interval_ms, self.perform_new_file_check)
 
-    def perform_new_file_check(self):
+    def perform_initial_scan(self):
+        """
+        Performs a single, synchronous scan for new/deleted files.
+        This is intended to be called once during project loading.
+        It does NOT schedule subsequent checks.
+        """
+        self.newly_detected_files = [] # Reset before scan
+        self.perform_new_file_check(schedule_next=False)
+
+    def perform_new_file_check(self, schedule_next=True):
         """
         Scans for new and deleted files and updates the state accordingly.
-        Also schedules the next check.
+        Also schedules the next check if requested.
         """
         project_config = self.app.project_manager.get_current_project()
         if not project_config:
@@ -66,18 +75,13 @@ class FileMonitor:
         known_set = set(project_config.known_files)
 
         # --- Check for and handle deleted files ---
-        deleted_files = {
-            known_file for known_file in project_config.known_files
-            if not os.path.isfile(os.path.join(base_dir, known_file))
-        }
+        deleted_files = known_set - current_set
 
         if deleted_files:
             project_config.known_files = list(known_set - deleted_files)
-            # Also remove them from the selection list if they were there
             original_selection_count = len(project_config.selected_files)
             project_config.selected_files = [f for f in project_config.selected_files if f['path'] not in deleted_files]
 
-            # If the selection changed, invalidate the token count
             if len(project_config.selected_files) != original_selection_count:
                 project_config.total_tokens = 0
 
@@ -90,9 +94,10 @@ class FileMonitor:
             self.newly_detected_files = new_files
             self._update_warning_ui()
 
-        # Reschedule the next check
-        interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
-        self._schedule_next_check(interval_sec * 1000)
+        # Reschedule the next check if applicable
+        if schedule_next:
+            interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
+            self._schedule_next_check(interval_sec * 1000)
 
     def get_newly_detected_files_and_reset(self):
         """

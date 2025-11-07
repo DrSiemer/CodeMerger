@@ -508,10 +508,8 @@
   },
   "known_files": [
     ".github/workflows/release.yml",
-    "2do.txt",
     "README.md",
     "codemerger.spec",
-    "config.json",
     "default_filetypes.json",
     "go.bat",
     "llm.md",

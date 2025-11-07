@@ -7,6 +7,7 @@ import pyperclip
 import shutil
 import tempfile
 import logging
+import threading
 from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel, Frame
 from PIL import Image, ImageTk
 
@@ -54,6 +55,8 @@ class App(Tk):
         self.title_click_job = None
         self.current_monitor_handle = None
         self.masked_logo_tk = None
+        self.load_thread = None
+        self.load_thread_result = None
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -302,10 +305,49 @@ class App(Tk):
 
     def _load_project_async(self, path, set_status=True):
         """
-        Performs the actual project loading and updates the UI with the results.
-        This is called by `set_active_dir_display` after a delay.
+        Starts a background thread to load the project, leaving the UI responsive.
         """
+        self.load_thread = threading.Thread(
+            target=self._load_project_worker,
+            args=(path, set_status),
+            daemon=True
+        )
+        self.load_thread.start()
+        # Start polling for the thread's completion.
+        self.after(100, self._check_load_project_thread)
+
+    def _load_project_worker(self, path, set_status):
+        """
+        This function runs in a separate thread. It performs all blocking I/O.
+        """
+        # Step 1: Load the project config from .allcode
         project_config, status_message = self.project_manager.load_project(path)
+
+        # Step 2: Perform the initial, blocking file scan.
+        if project_config:
+            self.file_monitor.perform_initial_scan()
+
+        # Store the results to be picked up by the main thread.
+        self.load_thread_result = (project_config, status_message, path, set_status)
+
+    def _check_load_project_thread(self):
+        """
+        Polls the loading thread. If it's done, triggers the UI update.
+        """
+        if self.load_thread and self.load_thread.is_alive():
+            # Thread is still running, check again later.
+            self.after(100, self._check_load_project_thread)
+        else:
+            # Thread has finished, update the UI with the results.
+            if self.load_thread_result:
+                self._on_project_load_complete(*self.load_thread_result)
+                self.load_thread_result = None
+            self.load_thread = None
+
+    def _on_project_load_complete(self, project_config, status_message, path, set_status):
+        """
+        This function runs on the main UI thread once the background work is done.
+        """
         if set_status:
             self.status_var.set(status_message)
 
@@ -316,14 +358,13 @@ class App(Tk):
             self.project_font_color = project_config.project_font_color
             self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_COLOR)
         else:
-            # This case might happen if the directory becomes invalid during the delay
             self.active_dir.set("No project selected")
             self.project_title_var.set("(no active project)")
             self.project_color = c.COMPACT_MODE_BG_COLOR
             self.project_font_color = 'light'
             self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
 
-        # Final UI update
+        # Start the *periodic* file monitoring and update buttons.
         self._update_profile_selector_ui()
         self.file_monitor.start()
         self.button_manager.update_button_states()
