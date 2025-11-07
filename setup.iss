@@ -26,7 +26,7 @@ SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
 SetupIconFile=assets\install.ico
-UninstallDisplayIcon={app}\uninstall.ico
+UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -42,7 +42,6 @@ Source: "dist\CodeMerger\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 [Icons]
 Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-Name: "{commonprograms}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"; IconFilename: "{app}\uninstall.ico"
 
 [Registry]
 Root: HKLM; Subkey: "Software\{#MyAppName}"; ValueType: dword; ValueName: "AutomaticUpdates"; ValueData: "{code:GetCheckForUpdatesValue}"; Flags: uninsdeletekey
@@ -249,7 +248,6 @@ begin
     RegWriteStringValue(HKLM, UninstallKey, 'DisplayVersion', g_CleanedAppVersion);
   end;
 end;
-
 
 // --- Uninstall steps ---
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
