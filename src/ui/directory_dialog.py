@@ -1,6 +1,9 @@
 import os
 import tkinter as tk
-from tkinter import Toplevel, Frame, Label, filedialog, StringVar, Entry
+from tkinter import Toplevel, Frame, Label, filedialog, StringVar, Entry, messagebox
+import sys
+import subprocess
+import json
 from ..core.project_config import ProjectConfig
 from .widgets.rounded_button import RoundedButton
 from .widgets.scrollable_frame import ScrollableFrame
@@ -8,7 +11,6 @@ from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import save_window_geometry, get_monitor_work_area
 from .assets import assets
-import json
 
 class DirectoryDialog(Toplevel):
     """
@@ -218,10 +220,11 @@ class DirectoryDialog(Toplevel):
         color_swatch.pack(side='left', padx=(0, 10))
 
         btn = RoundedButton(
-            entry_frame, text=display_text, command=lambda p=path: self.select_and_close(p),
+            entry_frame, text=display_text, command=None,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, height=32, cursor='hand2'
         )
         btn.pack(side='left', expand=True, fill='x')
+        btn.bind("<ButtonRelease-1>", lambda e, p=path: self.on_project_button_release(e, p))
         btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
         btn.bind("<Leave>", self.hide_path_tooltip)
 
@@ -234,13 +237,34 @@ class DirectoryDialog(Toplevel):
 
         return entry_frame
 
+    def on_project_button_release(self, event, path):
+        # Ctrl key is state 4
+        is_ctrl = (event.state & 0x0004)
+        if is_ctrl:
+            self.open_project_folder(path)
+        else:
+            self.select_and_close(path)
+
+    def open_project_folder(self, path):
+        if not (path and os.path.isdir(path)):
+            return
+        try:
+            if sys.platform == "win32":
+                os.startfile(path)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open folder: {e}", parent=self)
+
     def show_path_tooltip(self, event, path):
         if self.tooltip: self.tooltip.destroy()
         x, y = event.widget.winfo_rootx(), event.widget.winfo_rooty() + event.widget.winfo_height() + 1
         self.tooltip = Toplevel(self)
         self.tooltip.wm_overrideredirect(True)
         self.tooltip.wm_geometry(f"+{x}+{y}")
-        label = Label(self.tooltip, text=path, justify='left', bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1, font=c.FONT_TOOLTIP, padx=4, pady=2)
+        label = Label(self.tooltip, text=path+" (ctrl-click to open)", justify='left', bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1, font=c.FONT_TOOLTIP, padx=4, pady=2)
         label.pack(ipadx=2, ipady=1)
 
     def hide_path_tooltip(self, event):
