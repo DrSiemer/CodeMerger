@@ -206,6 +206,14 @@ class DirectoryDialog(Toplevel):
         save_window_geometry(self)
         self.destroy()
 
+    def _show_trash_button(self, container):
+        if hasattr(container, 'trash_button'):
+            container.trash_button.pack(side='left', padx=(10, 0))
+
+    def _hide_trash_button(self, container):
+        if hasattr(container, 'trash_button'):
+            container.trash_button.pack_forget()
+
     def _create_recent_dir_entry(self, path):
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
         entry_frame.pack(fill='x', padx=20, pady=3)
@@ -219,21 +227,32 @@ class DirectoryDialog(Toplevel):
         color_swatch.image = logo_image # Prevent garbage collection
         color_swatch.pack(side='left', padx=(0, 10))
 
+        # This container will hold the main project button and the trash button
+        buttons_container = Frame(entry_frame, bg=self.app_bg_color)
+        buttons_container.pack(side='left', expand=True, fill='x')
+
         btn = RoundedButton(
-            entry_frame, text=display_text, command=None,
+            buttons_container, text=display_text, command=None,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, height=32, cursor='hand2'
         )
         btn.pack(side='left', expand=True, fill='x')
+
+        if assets.trash_icon_image:
+            remove_btn = RoundedButton(
+                parent=buttons_container, command=lambda p=path: self.remove_and_update_dialog(p),
+                image=assets.trash_icon_image, bg=c.BTN_GRAY_BG, width=32, height=32, cursor='hand2'
+            )
+            # The button is created but not packed initially. It will be shown on hover.
+            buttons_container.trash_button = remove_btn
+
+        # --- Event Bindings ---
         btn.bind("<ButtonRelease-1>", lambda e, p=path: self.on_project_button_release(e, p))
         btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
         btn.bind("<Leave>", self.hide_path_tooltip)
 
-        if assets.trash_icon_image:
-            remove_btn = RoundedButton(
-                parent=entry_frame, command=lambda p=path, w=entry_frame: self.remove_and_update_dialog(p, w),
-                image=assets.trash_icon_image, bg=c.BTN_GRAY_BG, width=32, height=32, cursor='hand2'
-            )
-            remove_btn.pack(side='left', padx=(10, 0))
+        # Bind hover events to the entire row for a better user experience
+        entry_frame.bind("<Enter>", lambda e, c=buttons_container: self._show_trash_button(c))
+        entry_frame.bind("<Leave>", lambda e, c=buttons_container: self._hide_trash_button(c))
 
         return entry_frame
 
@@ -278,7 +297,7 @@ class DirectoryDialog(Toplevel):
         new_path = filedialog.askdirectory(title="Select Project Folder", parent=self)
         if new_path: self.select_and_close(new_path)
 
-    def remove_and_update_dialog(self, path_to_remove, widget_to_destroy):
+    def remove_and_update_dialog(self, path_to_remove):
         self.on_remove_callback(path_to_remove)
         self.recent_projects = [p for p in self.recent_projects if p != path_to_remove]
         self._filter_projects()
