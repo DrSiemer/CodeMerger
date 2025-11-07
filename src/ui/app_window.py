@@ -191,7 +191,6 @@ class App(Tk):
                 self.window_geometries.clear()
                 self.view_manager.invalidate_compact_mode_position()
 
-                self.status_var.set("Moved to new monitor, window positions reset.")
         except Exception as e:
             log.warning(f"Failed to check for monitor change: {e}")
             # Fail silently if any of the Windows API calls fail
@@ -261,8 +260,51 @@ class App(Tk):
         from .custom_error_dialog import CustomErrorDialog
         CustomErrorDialog(self, title, message)
 
+    def _clear_project_ui(self):
+        """Resets the UI to the 'no project selected' state."""
+        # Use the project manager to formally unload any project
+        project_config, status_message = self.project_manager.load_project(None)
+        self.status_var.set(status_message)
+
+        # Set UI elements
+        self.active_dir.set("No project selected")
+        self.project_title_var.set("(no active project)")
+        self.project_color = c.COMPACT_MODE_BG_COLOR
+        self.project_font_color = 'light'
+        self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
+
+        # Update dependent components
+        self._update_profile_selector_ui()
+        self.file_monitor.start() # This will stop if no project is active
+        self.button_manager.update_button_states()
+
     def set_active_dir_display(self, path, set_status=True):
-        """Sets the display string for the active directory and loads its config"""
+        """
+        Initiates the project loading process, showing a 'Loading...' state
+        before performing the actual load asynchronously.
+        """
+        if not path or not os.path.isdir(path):
+            self._clear_project_ui()
+            return
+
+        # --- Set UI to 'Loading...' state immediately ---
+        self.project_title_var.set("Loading...")
+        # active_dir is checked with os.path.isdir, so a non-path string will work
+        self.active_dir.set("Loading...")
+        self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
+
+        # Update buttons to disabled state based on "Loading..." active_dir
+        self.button_manager.update_button_states()
+        self._update_profile_selector_ui() # This will disable profile buttons
+
+        # --- Schedule the actual loading ---
+        self._load_project_async(path, set_status)
+
+    def _load_project_async(self, path, set_status=True):
+        """
+        Performs the actual project loading and updates the UI with the results.
+        This is called by `set_active_dir_display` after a delay.
+        """
         project_config, status_message = self.project_manager.load_project(path)
         if set_status:
             self.status_var.set(status_message)
@@ -274,12 +316,14 @@ class App(Tk):
             self.project_font_color = project_config.project_font_color
             self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_COLOR)
         else:
+            # This case might happen if the directory becomes invalid during the delay
             self.active_dir.set("No project selected")
             self.project_title_var.set("(no active project)")
             self.project_color = c.COMPACT_MODE_BG_COLOR
             self.project_font_color = 'light'
             self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
 
+        # Final UI update
         self._update_profile_selector_ui()
         self.file_monitor.start()
         self.button_manager.update_button_states()
