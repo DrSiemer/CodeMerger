@@ -58,23 +58,32 @@ class FileTreeHandler:
         self.parent.handle_tree_select(event)
 
     def update_action_button_state(self):
-        """Updates the state and text of the button under the treeview"""
+        """Updates the state and text of the button under the treeview based on multi-selection."""
         selection = self.tree.selection()
         if not selection:
             self.action_button.config(state='disabled', text="Add to Merge List")
             return
 
-        item_id = selection[0]
-        item_info = self.item_map.get(item_id, {})
-        if item_info.get('type') != 'file':
+        selected_files = [
+            self.item_map.get(item_id) for item_id in selection
+            if self.item_map.get(item_id, {}).get('type') == 'file'
+        ]
+
+        if not selected_files:
             self.action_button.config(state='disabled', text="Add to Merge List")
             return
 
         self.action_button.config(state='normal')
-        if self.is_selected(item_info['path']):
+
+        paths = [f['path'] for f in selected_files]
+        selection_states = [self.is_selected(path) for path in paths]
+
+        if all(selection_states):
             self.action_button.config(text="Remove from Merge List")
-        else:
+        elif not any(selection_states):
             self.action_button.config(text="Add to Merge List")
+        else:
+            self.action_button.config(text="Toggle Selection")
 
     def handle_tree_click(self, event):
         """Detects a double-click on the same treeview item"""
@@ -83,7 +92,7 @@ class FileTreeHandler:
         time_diff = current_time - self.last_tree_click_time
 
         if time_diff < c.DOUBLE_CLICK_INTERVAL_SECONDS and item_id and item_id == self.last_clicked_item_id:
-            self.toggle_selection_for_selected()
+            self._toggle_item(item_id) # Toggle the specific item that was double-clicked
             self.last_tree_click_time = 0
             self.last_clicked_item_id = None
         else:
@@ -91,15 +100,14 @@ class FileTreeHandler:
             self.last_clicked_item_id = item_id
 
     def toggle_selection_for_selected(self, event=None):
-        """Adds or removes the selected file from the merge list via the callback"""
+        """Adds or removes the selected file(s) from the merge list via the callback"""
         selection = self.tree.selection()
-        if not selection: return "break"
+        if not selection:
+            return "break"
 
-        item_id = selection[0]
-        item_info = self.item_map.get(item_id, {})
-        if item_info.get('type') != 'file': return "break"
+        for item_id in selection:
+            self._toggle_item(item_id)
 
-        self.on_toggle(item_info['path'])
         return "break"
 
     def get_all_file_paths_in_tree_order(self):
@@ -114,3 +122,11 @@ class FileTreeHandler:
                     _traverse(item_id)
         _traverse('')
         return all_tree_files
+
+    def _toggle_item(self, item_id):
+        """Toggles a single file item based on its ID."""
+        if not item_id:
+            return
+        item_info = self.item_map.get(item_id, {})
+        if item_info.get('type') == 'file':
+            self.on_toggle(item_info['path'])

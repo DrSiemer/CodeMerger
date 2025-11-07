@@ -69,7 +69,7 @@ def setup_file_manager_ui(window):
     style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=c.FONT_NORMAL, rowheight=25)
     style.map("Treeview", background=[('selected', c.BTN_BLUE)], foreground=[('selected', c.BTN_BLUE_TEXT)])
 
-    window.tree = ttk.Treeview(left_panel, show='tree')
+    window.tree = ttk.Treeview(left_panel, show='tree', selectmode='extended')
     window.tree.grid(row=1, column=0, sticky='nsew')
     tree_scroll = ttk.Scrollbar(left_panel, orient='vertical', command=window.tree.yview)
     tree_scroll.grid(row=1, column=1, sticky='ns')
