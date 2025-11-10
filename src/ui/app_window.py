@@ -76,6 +76,7 @@ class App(Tk):
         self.bind("<Map>", self.view_manager.on_main_window_restored)
         self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
         self.bind("<Configure>", self._on_window_configure)
+        self.bind("<Control-Shift-V>", lambda event: self.apply_changes_from_clipboard())
 
         # Initialize StringVar members before UI build
         self.active_dir = StringVar()

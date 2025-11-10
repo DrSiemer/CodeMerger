@@ -9,7 +9,7 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1762343529.124027,
+          "mtime": 1762817427.857484,
           "hash": "8c7251cdee93ebb5b300308510b4ed3f33139746",
           "tokens": 1522,
           "lines": 101
@@ -149,9 +149,9 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1762809491.5405111,
-          "hash": "450feef58febf130d4ec37bc95034a0bc11c4edc",
-          "tokens": 751,
+          "mtime": 1762814895.5424192,
+          "hash": "5dc742fcd69d5e2a92866a85fedab18595943217",
+          "tokens": 759,
           "lines": 90
         },
         {
@@ -261,10 +261,10 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1762809491.541511,
-          "hash": "3361d1e98a0a0d794523d315416c1b4f4977453d",
-          "tokens": 5581,
-          "lines": 688
+          "mtime": 1762817449.7105196,
+          "hash": "d603e7000ef6c9a3435770d7c4c1340ab104cf0a",
+          "tokens": 5600,
+          "lines": 689
         },
         {
           "path": "src/ui/ui_builder.py",
@@ -491,7 +491,7 @@
           "lines": 57
         }
       ],
-      "total_tokens": 80884,
+      "total_tokens": 80911,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
