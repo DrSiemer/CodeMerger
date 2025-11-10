@@ -40,7 +40,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
         # Always prepend this to the wrapped outro text
         formatting_instruction = """**Important Instructions:**
-1.  **Always return the complete source code for every file you modify.** Do not use diffs or snippets.
+1.  **Always return the complete source code for every file you modify.** Do not use diffs or snippets. Do not return files that are unchanged.
 2.  **Enclose each file's content in a markdown block**, preceded by a `--- File: `path/to/file.ext` ---` header and followed by a `--- End of file ---` footer."""
 
         if outro_text:
