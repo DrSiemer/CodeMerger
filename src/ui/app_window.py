@@ -588,14 +588,19 @@ class App(Tk):
         # Direct confirmation for new files, skipping the full paste dialog
         if status == 'CONFIRM_CREATION':
             creations = plan.get('creations', {})
-            creation_rel_paths = [os.path.relpath(p, self.base_dir).replace('\\', '/') for p in creations.keys()]
+            # Use the correct base directory from the project_config object
+            creation_rel_paths = [os.path.relpath(p, project_config.base_dir).replace('\\', '/') for p in creations.keys()]
 
             confirm_message = (
                 f"This operation will create {len(creations)} new file(s):\n\n"
                 f" - " + "\n - ".join(creation_rel_paths) +
                 "\n\nDo you want to proceed?"
             )
-            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=self):
+            dialog_parent = self
+            if self.view_manager.current_state == 'compact' and self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
+                dialog_parent = self.view_manager.compact_mode_window
+
+            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=dialog_parent):
                 self._show_compact_toast("Operation cancelled.")
                 return
 
