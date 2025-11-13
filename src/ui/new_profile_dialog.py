@@ -33,8 +33,8 @@ class NewProfileDialog(Toplevel):
         self.copy_files_var = BooleanVar(value=False)
         ttk.Checkbutton(options_frame, text="Copy current file selection", variable=self.copy_files_var, style='Dark.TCheckbutton').pack(anchor='w')
 
-        self.copy_wrappers_var = BooleanVar(value=False)
-        ttk.Checkbutton(options_frame, text="Copy current wrapper texts", variable=self.copy_wrappers_var, style='Dark.TCheckbutton').pack(anchor='w')
+        self.copy_instructions_var = BooleanVar(value=False)
+        ttk.Checkbutton(options_frame, text="Copy current instructions", variable=self.copy_instructions_var, style='Dark.TCheckbutton').pack(anchor='w')
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.pack(pady=(20, 0), fill='x', anchor='e')
@@ -79,7 +79,7 @@ class NewProfileDialog(Toplevel):
         self.result = {
             "name": name,
             "copy_files": self.copy_files_var.get(),
-            "copy_wrappers": self.copy_wrappers_var.get()
+            "copy_instructions": self.copy_instructions_var.get()
         }
         self.destroy()
 

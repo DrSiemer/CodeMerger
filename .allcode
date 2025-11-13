@@ -9,9 +9,9 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1763028177.7956932,
-          "hash": "0aa1389e436a69426cbcd33c4e95b036749bc02b",
-          "tokens": 1601,
+          "mtime": 1763043078.597229,
+          "hash": "fc05d29f0b4b6ed8d37d0dec2092157a831f53e4",
+          "tokens": 1600,
           "lines": 104
         },
         {
@@ -86,8 +86,8 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1763031170.0242293,
-          "hash": "c68afe1efb9e19fb586b56f62f48eabc089adcab",
+          "mtime": 1763043311.038178,
+          "hash": "51e21075a64174e2519339c0c64e5e82508c849b",
           "tokens": 1481,
           "lines": 143
         },
@@ -212,10 +212,10 @@
         },
         {
           "path": "src/ui/window_utils.py",
-          "mtime": 1763042443.533213,
-          "hash": "e2a3ee5190175f038fc1b05ee97e06b482c72617",
-          "tokens": 1301,
-          "lines": 138
+          "mtime": 1763043322.5070329,
+          "hash": "790fd9255c539074f3e1cfec57d02f9550d639a6",
+          "tokens": 1272,
+          "lines": 135
         },
         {
           "path": "src/ui/tooltip.py",
@@ -261,16 +261,16 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1763038812.2664623,
-          "hash": "924a7c4f3b163cf6152015e8a9a770a3aca7275f",
-          "tokens": 6366,
+          "mtime": 1763043291.6634219,
+          "hash": "203971918d4e6ee72585ac393c29dc7fc20a5ab2",
+          "tokens": 6362,
           "lines": 777
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1763026648.1810317,
-          "hash": "f8000bc5afab9f18160d656b3e22947723ebec6c",
-          "tokens": 2403,
+          "mtime": 1763043078.597229,
+          "hash": "7a4dcce10c6a30c0695cec3f00aba949a5f71d1b",
+          "tokens": 2386,
           "lines": 159
         },
         {
@@ -282,7 +282,7 @@
         },
         {
           "path": "src/ui/button_state_manager.py",
-          "mtime": 1762509780.2839386,
+          "mtime": 1763043304.6619556,
           "hash": "dda73faa95d1f7d8f20d28f84897cdb81b010848",
           "tokens": 824,
           "lines": 86
@@ -303,9 +303,9 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1763028177.7966938,
-          "hash": "af3a4a66a515f664d3dfc32353fb1916ec3c9f46",
-          "tokens": 2601,
+          "mtime": 1763043078.5982294,
+          "hash": "8b04a7218208bf463aa0cdcebdcf6c1241179457",
+          "tokens": 2596,
           "lines": 252
         },
         {
@@ -422,8 +422,8 @@
         },
         {
           "path": "src/ui/settings/prompts_settings.py",
-          "mtime": 1758720729.2538133,
-          "hash": "11c6a4dd6a45e0f088ab8285539fc00aa45cda60",
+          "mtime": 1763043078.5982294,
+          "hash": "73dcb4c5047ca6ab3191f5fdf24f64f0c0799b5f",
           "tokens": 407,
           "lines": 43
         },
@@ -447,13 +447,6 @@
           "hash": "455ca5bc5075bb23ab0788b913fb0569f9f6917f",
           "tokens": 2769,
           "lines": 271
-        },
-        {
-          "path": "src/ui/wrapper_text_window.py",
-          "mtime": 1761212693.11732,
-          "hash": "58b417f3416a7b072125f11fe2c3e7f86130b476",
-          "tokens": 1298,
-          "lines": 125
         },
         {
           "path": "src/ui/paste_changes_dialog.py",
@@ -496,9 +489,16 @@
           "hash": "1e91f2b8d490208d091bcaba95adcb5b6418fbc1",
           "tokens": 691,
           "lines": 73
+        },
+        {
+          "path": "src/ui/instructions_window.py",
+          "mtime": 1763043395.5553799,
+          "hash": "df951e3d7d07b7575f73f5b4fc6cd68793254e9c",
+          "tokens": 1297,
+          "lines": 125
         }
       ],
-      "total_tokens": 85149,
+      "total_tokens": 85087,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -560,6 +560,7 @@
     "src/ui/file_monitor.py",
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
+    "src/ui/instructions_window.py",
     "src/ui/multiline_input_dialog.py",
     "src/ui/new_filetypes_dialog.py",
     "src/ui/new_profile_dialog.py",
@@ -582,7 +583,6 @@
     "src/ui/widgets/scrollable_text.py",
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
-    "src/ui/wrapper_text_window.py",
     "updater_gui.py",
     "version.txt"
   ]

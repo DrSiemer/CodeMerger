@@ -25,10 +25,10 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **`.gitignore` Aware**: The file browser automatically hides files and folders listed in your `.gitignore` file
 - **New File Detection**: Automatically scans your project for new files that match your filetype settings and alerts you with a visual indicator. New files are highlighted in the file manager for easy review
 - **Token Counting**: Calculates the total token count of your selected files to help you stay within an LLM's context limit
-- **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Merged" button. You can also set application-wide default intro and outro texts for the wrapper feature
-- **Customizable Wrapper Text**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
+- **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Code Only" button. You can also set application-wide default intro and outro texts for the instructions feature
+- **Customizable Instructions**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
 - **Drag & Drop Reordering**: Easily reorder the files in your merge list to control the final output structure
-- **Compact Mode**: A small, always-on-top, draggable window for quick access to core functions that appears when the main window is minimized. It includes an adaptive copy button (Copy Wrapped / Copy Merged) and a paste button.
+- **Compact Mode**: A small, always-on-top, draggable window for quick access to core functions that appears when the main window is minimized. It includes an adaptive copy button (Copy with Instructions / Copy Code Only) and a paste button.
 - **Recent Projects**: Quickly switch between your recent project folders
 - **Project Colors**: Assign a unique color to each project for easy identification in compact mode
 
@@ -52,19 +52,19 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
         - The window title displays the number of selected files and the total token count
     - Double-click a file in either list to open it in your default or configured editor
     - Click "Save and Close" to save your selection to `.allcode`
-- **Add Wrapper Text**
-    - Click "Wrapper Text" to add a project-specific introduction or conclusion that will be wrapped around the merged code block
+- **Add Instructions**
+    - Click "Define Instructions" to add a project-specific introduction or conclusion that will be wrapped around the merged code block
     - You can click the "Load Defaults" icon in this window to populate the fields with your predefined default prompts from the Settings
 - **Copy Code**
-    - Click "Copy Merged" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM
-    - If you added wrapper text, a "Copy Wrapped" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation
+    - Click "Copy Code Only" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM
+    - If you added instructions, a "Copy with Instructions" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation
 - **Compact Mode**
     - Minimize the main window to activate the compact mode panel.
     - The panel contains two primary buttons:
-        - **Copy (Wrapped/Merged)**: A single adaptive button for copying code.
-            - It appears as "Copy Wrapped" if you have defined wrapper text for the project, and "Copy Merged" if you have not.
+        - **Copy (Instructions/Code Only)**: A single adaptive button for copying code.
+            - It appears as "Copy with Instructions" if you have defined instructions for the project, and "Copy Code Only" if you have not.
             - A normal click performs the action shown on the button.
-            - Holding **Ctrl** while clicking will always perform the "Copy Merged" action.
+            - Holding **Ctrl** while clicking will always perform the "Copy Code Only" action.
         - **Paste**: Opens the "Paste Changes" window. If you hold **Ctrl** while clicking, it will immediately apply the changes from your clipboard without opening the window (unless new files need to be created).
     - The panel is colored with your project's assigned color.
     - A warning icon will appear in the move bar if new files are found.
@@ -83,8 +83,8 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **File System Monitoring**: Configure the automatic check for new files (enable/disable and set the check interval)
 - **Secret Scanning**: Enable a check for potential secrets (API keys, etc) that runs before copying code to the clipboard
 - **Prompts**:
-    - **"Copy Merged" Prompt**: Set the default text that is automatically prepended when you click "Copy Merged"
-    - **Default Intro/Outro Prompts**: Define reusable, application-wide default texts for the wrapper feature. These can be quickly loaded into any project's specific wrapper text
+    - **"Copy Code Only" Prompt**: Set the default text that is automatically prepended when you click "Copy Code Only"
+    - **Default Intro/Outro Prompts**: Define reusable, application-wide default texts for the instructions feature. These can be quickly loaded into any project's specific instructions
 - **Default Editor**: Select your preferred editor for opening files from the file manager (leaving it blank uses the system default)
 - To manage indexed filetypes, click "Manage Filetypes" from the main window
 

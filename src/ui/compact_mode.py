@@ -83,7 +83,7 @@ class CompactMode(tk.Toplevel):
         button_padding = {'pady': 2}
 
         # Unified copy button
-        copy_button_text = "Copy Wrapped" if self.show_wrapped_button else "Copy Merged"
+        copy_button_text = "Copy with Instructions" if self.show_wrapped_button else "Copy Code Only"
         copy_button_bg = c.BTN_BLUE if self.show_wrapped_button else c.BTN_GRAY_BG
         copy_button_fg = c.BTN_BLUE_TEXT if self.show_wrapped_button else c.BTN_GRAY_TEXT
         self.copy_button = RoundedButton(
@@ -134,7 +134,7 @@ class CompactMode(tk.Toplevel):
             self.app_icon_label.bind("<Double-Button-1>", self.close_window)
 
         # Tooltips
-        copy_tooltip_text = "Copy with intro/outro (Ctrl+Click for 'Merged')" if self.show_wrapped_button else "Copy with 'Copy Merged' prompt"
+        copy_tooltip_text = "Copy with instructions (Ctrl+Click for 'Code Only')" if self.show_wrapped_button else "Copy just the code"
         self.copy_button.bind("<Enter>", lambda e: self.show_tooltip(copy_tooltip_text))
         self.copy_button.bind("<Leave>", self.hide_tooltip)
         self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window\n(Ctrl+Click to paste from clipboard)"))

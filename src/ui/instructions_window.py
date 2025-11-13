@@ -9,7 +9,7 @@ from .window_utils import position_window, save_window_geometry
 from .assets import assets
 from .widgets.scrollable_text import ScrollableText
 
-class WrapperTextWindow(Toplevel):
+class InstructionsWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, on_close_callback=None):
         super().__init__(parent)
         self.withdraw()
@@ -19,9 +19,9 @@ class WrapperTextWindow(Toplevel):
         self.on_close_callback = on_close_callback
 
         # --- Window Setup ---
-        self.title("Set Wrapper Text")
+        self.title("Set Instructions")
         self.iconbitmap(ICON_PATH)
-        self.geometry(c.WRAPPER_TEXT_WINDOW_DEFAULT_GEOMETRY)
+        self.geometry(c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY)
         self.transient(parent)
         self.grab_set()
         self.focus_force()
@@ -38,7 +38,7 @@ class WrapperTextWindow(Toplevel):
         # --- Intro Section ---
         intro_label_frame = Frame(main_frame, bg=c.DARK_BG)
         intro_label_frame.grid(row=0, column=0, sticky='w', pady=(0, 5))
-        Label(intro_label_frame, text="Intro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        Label(intro_label_frame, text="Intro Instructions", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
         Label(intro_label_frame, text="(prepended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
 
         self.intro_text = ScrollableText(
@@ -50,7 +50,7 @@ class WrapperTextWindow(Toplevel):
         # --- Outro Section ---
         outro_label_frame = Frame(main_frame, bg=c.DARK_BG)
         outro_label_frame.grid(row=2, column=0, sticky='w', pady=(0, 5))
-        Label(outro_label_frame, text="Outro Text", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        Label(outro_label_frame, text="Outro Instructions", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
         Label(outro_label_frame, text="(appended to the final output):", font=c.FONT_WRAPPER_SUBTITLE, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(4,0))
 
         self.outro_text = ScrollableText(
@@ -115,9 +115,9 @@ class WrapperTextWindow(Toplevel):
 
         try:
             self.project_config.save()
-            self.status_var.set("Wrapper text saved successfully.")
+            self.status_var.set("Instructions saved successfully.")
         except IOError as e:
-            self.status_var.set(f"Error saving wrapper text: {e}")
+            self.status_var.set(f"Error saving instructions: {e}")
 
         if self.on_close_callback:
             self.on_close_callback()

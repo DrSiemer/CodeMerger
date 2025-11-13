@@ -56,8 +56,8 @@ def _get_default_geometry_for_window(window_class_name):
         return c.SETTINGS_WINDOW_DEFAULT_GEOMETRY
     if window_class_name == 'FiletypesManagerWindow':
         return c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
-    if window_class_name == 'WrapperTextWindow':
-        return c.WRAPPER_TEXT_WINDOW_DEFAULT_GEOMETRY
+    if window_class_name == 'InstructionsWindow':
+        return c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY
     # Return None if no specific default is found for this window type
     return None
 
@@ -103,13 +103,13 @@ def position_window(window):
             if win_w <= 1 or win_h <= 1: # Absolute fallback
                 win_w, win_h = 600, 400
 
-        # Now that we have a definitive width and height, calculate the position.
+        # Now that we have a definitive width and height, calculate the centered position.
         parent.update_idletasks()
         parent_x = parent.winfo_rootx()
         parent_y = parent.winfo_rooty()
         parent_w = parent.winfo_width()
         parent_h = parent.winfo_height()
-        x = parent_x + 200
+        x = parent_x + (parent_w - win_w) // 2
         y = parent_y + (parent_h - win_h) // 2
 
     # --- Step 2: Constrain the position to be fully on-screen ---

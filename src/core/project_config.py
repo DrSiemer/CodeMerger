@@ -290,17 +290,17 @@ class ProjectConfig:
     def get_profile_names(self):
         return sorted(list(self.profiles.keys()))
 
-    def create_new_profile(self, new_name, copy_files, copy_wrappers):
+    def create_new_profile(self, new_name, copy_files, copy_instructions):
         if new_name in self.profiles:
             return False # Profile already exists
 
-        if copy_files or copy_wrappers:
+        if copy_files or copy_instructions:
             source_profile = self.get_active_profile()
             new_profile = {
                 "selected_files": source_profile.get('selected_files', []) if copy_files else [],
                 "total_tokens": source_profile.get('total_tokens', 0) if copy_files else 0,
-                "intro_text": source_profile.get('intro_text', '') if copy_wrappers else '',
-                "outro_text": source_profile.get('outro_text', '') if copy_wrappers else '',
+                "intro_text": source_profile.get('intro_text', '') if copy_instructions else '',
+                "outro_text": source_profile.get('outro_text', '') if copy_instructions else '',
                 "expanded_dirs": source_profile.get('expanded_dirs', []) if copy_files else []
             }
         else:

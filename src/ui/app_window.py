@@ -16,7 +16,7 @@ from .view_manager import ViewManager
 from .file_manager.file_manager_window import FileManagerWindow
 from .filetypes_manager import FiletypesManagerWindow
 from .settings.settings_window import SettingsWindow
-from .wrapper_text_window import WrapperTextWindow
+from .instructions_window import InstructionsWindow
 from .directory_dialog import DirectoryDialog
 from ..core.utils import load_active_file_extensions, get_file_hash, get_token_count_for_text
 from ..core.paths import ICON_PATH, UPDATE_CLEANUP_FILE_PATH
@@ -464,9 +464,9 @@ class App(Tk):
         if result:
             new_name = result['name']
             copy_files = result['copy_files']
-            copy_wrappers = result['copy_wrappers']
+            copy_instructions = result['copy_instructions']
 
-            if project_config.create_new_profile(new_name, copy_files, copy_wrappers):
+            if project_config.create_new_profile(new_name, copy_files, copy_instructions):
                 project_config.active_profile_name = new_name # Switch to the new profile
                 project_config.save()
                 self._update_profile_selector_ui()
@@ -563,12 +563,12 @@ class App(Tk):
     def open_settings_window(self):
         SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)
 
-    def open_wrapper_text_window(self):
+    def open_instructions_window(self):
         project_config = self.project_manager.get_current_project()
         if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        wt_window = WrapperTextWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
+        wt_window = InstructionsWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
         self.wait_window(wt_window)
 
     def open_paste_changes_dialog(self, initial_content=None):

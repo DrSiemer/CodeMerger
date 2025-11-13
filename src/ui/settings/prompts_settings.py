@@ -15,21 +15,21 @@ class PromptsSettingsFrame(Frame):
         container.pack(fill='x', expand=True, pady=(0, 15))
 
         self.copy_merged_prompt = CollapsibleTextSection(
-            container, '\"Copy Merged\" Prompt',
+            container, '\"Copy Code Only\" Prompt',
             config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT,
             on_toggle_callback=on_toggle
         )
         self.copy_merged_prompt.pack(fill='x', expand=True, pady=(5, 0))
 
         self.default_intro = CollapsibleTextSection(
-            container, 'Default Intro Prompt',
+            container, 'Default Intro Instructions',
             config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT,
             on_toggle_callback=on_toggle
         )
         self.default_intro.pack(fill='x', expand=True, pady=(5, 0))
 
         self.default_outro = CollapsibleTextSection(
-            container, 'Default Outro Prompt',
+            container, 'Default Outro Instructions',
             config.get('default_outro_prompt', ''), c.DEFAULT_OUTRO_PROMPT,
             on_toggle_callback=on_toggle
         )
