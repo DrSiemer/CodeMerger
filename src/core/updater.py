@@ -42,8 +42,6 @@ class Updater:
             should_check = current_date > last_check_date
             if should_check:
                 log.info("Performing daily update check.")
-            else:
-                log.info("Update check skipped: already checked today.")
             return should_check
         except (ValueError, TypeError) as e:
             log.warning(f"Could not parse last update check date '{last_check_str}'. Performing check. Error: {e}")
