@@ -296,17 +296,17 @@
         },
         {
           "path": "src/ui/file_monitor.py",
-          "mtime": 1762527043.0375004,
-          "hash": "4a90929beab215cad18dcd35d50111617ccf535c",
-          "tokens": 1255,
+          "mtime": 1763026970.2490473,
+          "hash": "5e7d91ad782519c8c9f22602c913ab900f8c7006",
+          "tokens": 1267,
           "lines": 143
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1763026648.1810317,
-          "hash": "fa3f9d9c462daaa04fb706fd83ec08e31557f6d4",
-          "tokens": 2320,
-          "lines": 227
+          "mtime": 1763027085.5497525,
+          "hash": "0f02846378e0b4257bbe8166da397f8652398cb4",
+          "tokens": 2389,
+          "lines": 232
         },
         {
           "path": "src/ui/compact_status.py",
@@ -489,16 +489,9 @@
           "hash": "25204c027109e2f629866dc6ac84dd82553c818f",
           "tokens": 624,
           "lines": 57
-        },
-        {
-          "path": "test7.txt",
-          "mtime": 1763026698.3817158,
-          "hash": "11f6ad8ec52a2984abaafd7c3b516503785c2072",
-          "tokens": 1,
-          "lines": 1
         }
       ],
-      "total_tokens": 82011,
+      "total_tokens": 82010,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -582,7 +575,6 @@
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
     "src/ui/wrapper_text_window.py",
-    "test7.txt",
     "updater_gui.py",
     "version.txt"
   ]

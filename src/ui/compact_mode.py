@@ -42,9 +42,25 @@ class CompactMode(tk.Toplevel):
             self.app_icon_label = tk.Label(self.move_bar, image=self.app_icon_image, bg=BAR_AND_BORDER_COLOR)
             self.app_icon_label.pack(side='left', padx=(2, 1), pady=3)
 
-        # Project title abbreviation
-        no_space_title = project_name.replace(' ', '')
-        title_abbr = no_space_title[:10]
+        # --- Project title abbreviation logic ---
+        max_len = c.COMPACT_MODE_PROJECT_TITLE_MAX_LENGTH
+        capital_indices = [i for i, char in enumerate(project_name) if 'A' <= char <= 'Z']
+
+        if len(capital_indices) > 1:
+            lowercase_indices = [i for i, char in enumerate(project_name) if 'a' <= char <= 'z']
+            lowercase_needed = max_len - len(capital_indices)
+
+            if lowercase_needed > 0:
+                indices_to_keep = capital_indices + lowercase_indices[:lowercase_needed]
+            else:
+                indices_to_keep = capital_indices[:max_len]
+
+            indices_to_keep.sort()
+            title_abbr = "".join(project_name[i] for i in indices_to_keep)
+        else:
+            no_space_title = project_name.replace(' ', '')
+            title_abbr = no_space_title[:max_len]
+
         self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_AND_BORDER_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
         self.title_label.pack(side='left', padx=(0, 4))
 
