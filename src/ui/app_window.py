@@ -18,7 +18,7 @@ from .filetypes_manager import FiletypesManagerWindow
 from .settings.settings_window import SettingsWindow
 from .wrapper_text_window import WrapperTextWindow
 from .directory_dialog import DirectoryDialog
-from ..core.utils import load_active_file_extensions
+from ..core.utils import load_active_file_extensions, get_file_hash, get_token_count_for_text
 from ..core.paths import ICON_PATH, UPDATE_CLEANUP_FILE_PATH
 from .. import constants as c
 from ..core.updater import Updater
@@ -708,3 +708,64 @@ class App(Tk):
         )
         self.wait_window(fm_window)
         self.set_active_dir_display(self.active_dir.get(), set_status=False)
+
+    def _calculate_stats_for_file(self, path):
+        """Reads a file and returns its stats, or None on error."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config: return None
+        full_path = os.path.join(project_config.base_dir, path)
+        try:
+            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+
+            mtime = os.path.getmtime(full_path)
+            file_hash = get_file_hash(full_path)
+
+            token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
+            if token_count_enabled:
+                tokens = get_token_count_for_text(content)
+                lines = content.count('\n') + 1
+            else:
+                tokens, lines = 0, 0
+
+            if file_hash is not None:
+                return {'path': path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines}
+        except OSError:
+            self.show_error_dialog("File Access Error", f"Could not access file to add it to the merge list:\n{path}")
+        return None
+
+    def add_new_files_to_merge_order(self):
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return
+
+        new_files = self.file_monitor.get_newly_detected_files_and_reset()
+
+        if not new_files:
+            self.status_var.set("No new files to add.")
+            return
+
+        current_selection_paths = {f['path'] for f in project_config.selected_files}
+        files_to_add = [path for path in new_files if path not in current_selection_paths]
+
+        if not files_to_add:
+            self.status_var.set("New files are already in the merge list.")
+            return
+
+        for path in files_to_add:
+            new_entry = self._calculate_stats_for_file(path)
+            if new_entry:
+                project_config.selected_files.append(new_entry)
+
+        project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+        project_config.save()
+
+        self.status_var.set(f"Added {len(files_to_add)} new file(s) to merge order.")
+        self.button_manager.update_button_states()
+
+    def on_new_files_click(self, event):
+        is_ctrl = (event.state & 0x0004)
+        if is_ctrl:
+            self.add_new_files_to_merge_order()
+        else:
+            self.manage_files()

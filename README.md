@@ -42,6 +42,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Click "Select project" to browse for a folder or choose one from your recent projects list
 - **Manage Files**
     - A warning icon will appear in the top bar if new files are detected in your project. Click this or the "Manage Files" button to open the file manager
+        - **Ctrl-clicking** the new files icon will immediately add all new files to the current merge list without opening the file manager.
     - In the "Manage Files" window, a tree of available files is shown on the left
         - Newly detected files are highlighted in green for easy identification
         - Files listed in `.gitignore` are automatically hidden
@@ -67,6 +68,8 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
         - **Paste**: Opens the "Paste Changes" window. If you hold **Ctrl** while clicking, it will immediately apply the changes from your clipboard without opening the window (unless new files need to be created).
     - The panel is colored with your project's assigned color.
     - A warning icon will appear in the move bar if new files are found.
+        - **Click** the icon to restore the main window and open the file manager.
+        - **Ctrl-click** the icon to immediately add all new files to the merge list.
     - Double-click the move bar or use the close button to exit compact mode and restore the main window.
 
 

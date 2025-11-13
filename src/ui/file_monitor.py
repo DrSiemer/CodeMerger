@@ -127,7 +127,7 @@ class FileMonitor:
 
         if file_count > 0:
             file_str_verb = "file was" if file_count == 1 else "files were"
-            tooltip_text = f"{file_count} new {file_str_verb} found in the project"
+            tooltip_text = f"{file_count} new {file_str_verb} found.\nClick to manage, Ctrl+Click to add all to merge order."
             self.app.new_files_tooltip.text = tooltip_text
             if not self.app.new_files_label.winfo_ismapped():
                 self.app.new_files_label.grid(row=0, column=0, sticky='e', padx=(10, 0))

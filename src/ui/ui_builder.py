@@ -53,7 +53,7 @@ def setup_ui(app):
 
     # New files warning icon
     app.new_files_label = Label(right_frame, image=assets.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    app.new_files_label.bind("<Button-1>", lambda e: app.manage_files())
+    app.new_files_label.bind("<Button-1>", app.on_new_files_click)
     app.new_files_tooltip = ToolTip(app.new_files_label, text="")
 
     # Open folder icon

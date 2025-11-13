@@ -157,11 +157,24 @@ class CompactMode(tk.Toplevel):
         # Schedule the file manager to open after the animation is likely complete.
         self.parent.after(int(c.ANIMATION_DURATION_SECONDS * 1000) + 50, self.parent.manage_files)
 
+    def on_new_files_release(self, event):
+        if self.new_files_button:
+            # Visual feedback for the button release
+            self.new_files_button._draw(self.new_files_button.hover_color)
+            self.hide_tooltip()
+
+            # Command logic
+            is_ctrl = (event.state & 0x0004)
+            if is_ctrl:
+                self.parent.add_new_files_to_merge_order()
+            else:
+                self._exit_and_open_file_manager()
+
     def show_warning(self, file_count, project_name):
         if not self.new_files_button:
             self.new_files_button = RoundedButton(
                 self.right_icons_frame,
-                command=self._exit_and_open_file_manager,
+                command=None,
                 image=self.parent.assets.new_files_compact_pil,
                 bg=self.move_bar.cget('bg'),
                 width=18,
@@ -170,6 +183,13 @@ class CompactMode(tk.Toplevel):
                 cursor="hand2"
             )
             self.new_files_button.pack(side='left', padx=(0, 2))
+            # Override the button's default bindings to handle Ctrl-click
+            self.new_files_button.unbind("<ButtonRelease-1>")
+            self.new_files_button.bind("<ButtonRelease-1>", self.on_new_files_release)
+            # Add tooltip
+            tooltip_text = "New files found.\nClick: Open manager\nCtrl+Click: Add all to merge"
+            self.new_files_button.bind("<Enter>", lambda e, text=tooltip_text: self.show_tooltip(text))
+            self.new_files_button.bind("<Leave>", self.hide_tooltip)
 
     def hide_warning(self, project_name):
         if self.new_files_button:
