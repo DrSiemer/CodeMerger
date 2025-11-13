@@ -83,7 +83,7 @@ class CompactMode(tk.Toplevel):
         button_padding = {'pady': 2}
 
         # Unified copy button
-        copy_button_text = "Copy with Instructions" if self.show_wrapped_button else "Copy Code Only"
+        copy_button_text = "Copy" if self.show_wrapped_button else "Copy Code Only"
         copy_button_bg = c.BTN_BLUE if self.show_wrapped_button else c.BTN_GRAY_BG
         copy_button_fg = c.BTN_BLUE_TEXT if self.show_wrapped_button else c.BTN_GRAY_TEXT
         self.copy_button = RoundedButton(
