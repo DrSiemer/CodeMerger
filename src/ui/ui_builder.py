@@ -1,4 +1,4 @@
-from tkinter import Frame, Label
+from tkinter import Frame, Label, font as tkFont
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 from .widgets.profile_navigator import ProfileNavigator
@@ -28,8 +28,18 @@ def setup_ui(app):
     app.title_container = Frame(left_frame, bg=c.TOP_BAR_BG, cursor="hand2")
     app.title_container.pack(side='left')
 
+    # Use grid within the title container to manage a minimum height, preventing layout shifts
+    app.title_container.grid_rowconfigure(0, weight=1)
+    app.title_container.grid_columnconfigure(0, weight=1)
+
     app.title_label = Label(app.title_container, textvariable=app.project_title_var, font=c.FONT_LARGE_BOLD, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
-    app.title_label.pack(side='left')
+    app.title_label.grid(row=0, column=0, sticky='w')
+
+    # Set a minimum height on the container's grid row based on the label's actual required height
+    app.update_idletasks()
+    required_height = app.title_label.winfo_reqheight()
+    app.title_container.grid_rowconfigure(0, minsize=required_height)
+
     app.title_label.bind("<Button-1>", app.handle_title_click)
     app.title_label.bind("<Double-Button-1>", app.edit_project_title)
     app.title_container.bind("<Button-1>", app.handle_title_click)

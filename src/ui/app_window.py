@@ -57,6 +57,7 @@ class App(Tk):
         self.masked_logo_tk = None
         self.load_thread = None
         self.load_thread_result = None
+        self.loading_animation_job = None
 
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -264,8 +265,24 @@ class App(Tk):
         from .custom_error_dialog import CustomErrorDialog
         CustomErrorDialog(self, title, message)
 
+    def _animate_loading(self, step=0):
+        dots = (step % 3) + 1
+        self.project_title_var.set("Loading" + "." * dots)
+        self.loading_animation_job = self.after(400, self._animate_loading, step + 1)
+
+    def _start_loading_animation(self):
+        self._stop_loading_animation()
+        self.title_label.config(font=c.FONT_LOADING_TITLE, fg=c.TEXT_SUBTLE_COLOR)
+        self._animate_loading(0)
+
+    def _stop_loading_animation(self):
+        if self.loading_animation_job:
+            self.after_cancel(self.loading_animation_job)
+            self.loading_animation_job = None
+
     def _clear_project_ui(self):
         """Resets the UI to the 'no project selected' state."""
+        self._stop_loading_animation()
         # Use the project manager to formally unload any project
         project_config, status_message = self.project_manager.load_project(None)
         self.status_var.set(status_message)
@@ -292,10 +309,8 @@ class App(Tk):
             return
 
         # --- Set UI to 'Loading...' state immediately ---
-        self.project_title_var.set("Loading...")
-        # active_dir is checked with os.path.isdir, so a non-path string will work
         self.active_dir.set("Loading...")
-        self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
+        self._start_loading_animation()
 
         # Update buttons to disabled state based on "Loading..." active_dir
         self.button_manager.update_button_states()
@@ -349,6 +364,7 @@ class App(Tk):
         """
         This function runs on the main UI thread once the background work is done.
         """
+        self._stop_loading_animation()
         if set_status:
             self.status_var.set(status_message)
 
