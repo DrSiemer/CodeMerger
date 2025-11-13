@@ -1,5 +1,5 @@
 import time
-from .. import constants as c
+from ... import constants as c
 
 class StatusBarManager:
     """Manages the behavior and fading animation of the main status bar."""

@@ -1,41 +1,28 @@
 import os
 import json
-import sys
-import time
-import subprocess
-import pyperclip
 import shutil
 import tempfile
 import logging
-import threading
-from tkinter import Tk, StringVar, messagebox, colorchooser, Toplevel, Frame
-from PIL import Image, ImageTk
+from tkinter import Tk, StringVar
 
 from ..app_state import AppState
 from .view_manager import ViewManager
-from .file_manager.file_manager_window import FileManagerWindow
-from .filetypes_manager import FiletypesManagerWindow
-from .settings.settings_window import SettingsWindow
-from .instructions_window import InstructionsWindow
-from .directory_dialog import DirectoryDialog
-from ..core.utils import load_active_file_extensions, get_file_hash, get_token_count_for_text
 from ..core.paths import ICON_PATH, UPDATE_CLEANUP_FILE_PATH
 from .. import constants as c
 from ..core.updater import Updater
 from .ui_builder import setup_ui
 from .file_monitor import FileMonitor
-from .title_edit_dialog import TitleEditDialog
 from ..core.project_manager import ProjectManager
-from ..core.clipboard import copy_project_to_clipboard
 from .assets import assets
-from .button_state_manager import ButtonStateManager
-from ..core.project_config import _calculate_font_color
-from .status_bar_manager import StatusBarManager
-from .paste_changes_dialog import PasteChangesDialog
-from .new_profile_dialog import NewProfileDialog
-from ..core import change_applier
-from .compact_status import CompactStatusToast
+from .app_window_parts.button_state_manager import ButtonStateManager
+from .app_window_parts.status_bar_manager import StatusBarManager
 from .new_filetypes_dialog import NewFiletypesDialog
+from .app_window_parts.action_handlers import ActionHandlers
+from .app_window_parts.event_handlers import EventHandlers
+from .app_window_parts.project_actions import ProjectActions
+from .app_window_parts.profile_actions import ProfileActions
+from .app_window_parts.ui_callbacks import UICallbacks
+from .app_window_parts.helpers import AppHelpers
 
 log = logging.getLogger("CodeMerger")
 
@@ -60,12 +47,21 @@ class App(Tk):
         self.load_thread_result = None
         self.loading_animation_job = None
 
+        # Core Components
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
         self.updater = Updater(self, self.app_state, self.app_version)
         self.project_manager = ProjectManager(lambda: self.file_extensions)
         self.file_monitor = FileMonitor(self)
         self.button_manager = ButtonStateManager(self)
+
+        # Refactored Logic Handlers
+        self.action_handlers = ActionHandlers(self)
+        self.event_handlers = EventHandlers(self)
+        self.project_actions = ProjectActions(self)
+        self.profile_actions = ProfileActions(self)
+        self.ui_callbacks = UICallbacks(self)
+        self.helpers = AppHelpers(self)
 
         # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
@@ -74,11 +70,12 @@ class App(Tk):
         self.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
         self.configure(bg=self.app_bg_color)
 
-        self.protocol("WM_DELETE_WINDOW", self.on_app_close)
+        # Bindings
+        self.protocol("WM_DELETE_WINDOW", self.event_handlers.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
         self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
-        self.bind("<Configure>", self._on_window_configure)
-        self.bind("<Control-Shift-V>", lambda event: self.apply_changes_from_clipboard())
+        self.bind("<Configure>", self.event_handlers.on_window_configure)
+        self.bind("<Control-Shift-V>", lambda event: self.action_handlers.apply_changes_from_clipboard())
 
         # Initialize StringVar members before UI build
         self.active_dir = StringVar()
@@ -87,23 +84,20 @@ class App(Tk):
         self.active_dir.trace_add('write', self.button_manager.update_button_states)
 
         setup_ui(self)
-        self.bind("<Configure>", self._update_responsive_layout, add='+')
-        self.after(50, self._update_responsive_layout) # Initial call
+        self.bind("<Configure>", self.event_handlers.update_responsive_layout, add='+')
+        self.after(50, self.event_handlers.update_responsive_layout)
 
-        # Initialize the status bar manager now that the widget exists
         self.status_bar_manager = StatusBarManager(self, self.status_bar, self.status_var)
 
-        # --- Project Loading Logic ---
+        # Project Loading Logic
         if initial_project_path and os.path.isdir(initial_project_path):
             self.app_state.update_active_dir(initial_project_path)
-            self.set_active_dir_display(initial_project_path)
+            self.project_actions.set_active_dir_display(initial_project_path)
         else:
-            self.set_active_dir_display(self.app_state.active_directory)
+            self.project_actions.set_active_dir_display(self.app_state.active_directory)
 
-        # Perform update check
         self.after(1500, self.updater.check_for_updates)
 
-        # Show the new filetypes dialog after the main window is ready
         if newly_added_filetypes:
             self.after(500, lambda: NewFiletypesDialog(self, newly_added_filetypes))
 
@@ -112,11 +106,6 @@ class App(Tk):
         self.focus_force()
 
     def _run_update_cleanup(self):
-        """
-        Checks for and executes post-update cleanup instructions.
-        This is designed to be safe by only deleting a specific directory
-        located inside the system's temporary folder.
-        """
         if not os.path.exists(UPDATE_CLEANUP_FILE_PATH):
             return
 
@@ -149,629 +138,9 @@ class App(Tk):
             except OSError as e:
                 log.error(f"Failed to remove cleanup file: {e}")
 
-    def _update_responsive_layout(self, event=None):
-        """Dynamically adjusts the layout based on the window width."""
-        # This is the breakpoint you can change.
-        THRESHOLD = 600
-        width = self.winfo_width()
-
-        if width > THRESHOLD:
-            # --- WIDE LAYOUT: Center the action box ---
-            self.main_content_frame.grid_configure(sticky='', padx=0)
-        else:
-            # --- NARROW LAYOUT: Align the action box to the left ---
-            self.main_content_frame.grid_configure(sticky='w', padx=(20, 0))
-
-    def _on_window_configure(self, event):
-        """
-        Saves the main window's current geometry for the restore animation
-        and checks if the window has moved to a new monitor.
-        """
-        if self.view_manager.current_state == 'normal':
-            self.view_manager.main_window_geom = (
-                self.winfo_x(), self.winfo_y(),
-                self.winfo_width(), self.winfo_height()
-            )
-            self._check_for_monitor_change()
-
-    def _check_for_monitor_change(self):
-        """
-        Detects if the main window has moved to a different monitor and clears
-        saved window positions if so. (Windows-only)
-        """
-        if sys.platform != "win32":
-            return
-
-        try:
-            import ctypes
-            from ctypes import wintypes
-            user32 = ctypes.windll.user32
-            MONITOR_DEFAULTTONEAREST = 2
-
-            hwnd = self.winfo_id()
-            new_monitor_handle = user32.MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST)
-
-            if self.current_monitor_handle is None:
-                self.current_monitor_handle = new_monitor_handle
-                return
-
-            if new_monitor_handle != self.current_monitor_handle:
-                self.current_monitor_handle = new_monitor_handle
-
-                # Invalidate both child window AND compact mode positions
-                self.window_geometries.clear()
-                self.view_manager.invalidate_compact_mode_position()
-
-        except Exception as e:
-            log.warning(f"Failed to check for monitor change: {e}")
-            # Fail silently if any of the Windows API calls fail
-            pass
-
-    def handle_title_click(self, event=None):
-        """
-        Handles a single click on the project title. Schedules project selection
-        to open after a short delay, allowing for a double-click to override it.
-        """
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            # If no project is active, open the dialog immediately.
-            self.open_change_directory_dialog()
-            return
-
-        # Always cancel any previous job to reset the timer
-        if self.title_click_job:
-            self.after_cancel(self.title_click_job)
-            self.title_click_job = None
-
-        # Schedule the project selector to open after a delay
-        self.title_click_job = self.after(250, self.open_change_directory_dialog)
-
-    def edit_project_title(self, event=None):
-        # Cancel the pending single-click action first
-        if self.title_click_job:
-            self.after_cancel(self.title_click_job)
-            self.title_click_job = None
-
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            return
-
-        current_name = project_config.project_name
-        dialog = TitleEditDialog(
-            parent=self,
-            title="Edit Project Title",
-            prompt="Enter the new title for the project:",
-            initialvalue=current_name,
-            max_length=c.PROJECT_TITLE_MAX_LENGTH
-        )
-        new_name = dialog.result
-
-        if new_name is not None and new_name.strip() and new_name.strip() != current_name:
-            new_name = new_name.strip()
-            self.project_title_var.set(new_name)
-            project_config.project_name = new_name
-            project_config.save()
-            self.status_var.set(f"Project title changed to '{new_name}'")
-
-    def on_app_close(self):
-        """Safely destroys child windows before closing the main app"""
-        log.info("Application closing.")
-        self.file_monitor.stop()
-        if self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
-            self.view_manager.compact_mode_window.destroy()
-        self.destroy()
-
+    # For convenience, keep these direct calls
     def show_and_raise(self):
-        """De-minimizes, raises, and focuses the main window"""
-        self.deiconify()
-        self.lift()
-        self.focus_force()
+        self.helpers.show_and_raise()
 
     def show_error_dialog(self, title, message):
-        from .custom_error_dialog import CustomErrorDialog
-        CustomErrorDialog(self, title, message)
-
-    def _animate_loading(self, step=0):
-        dots = (step % 3) + 1
-        self.project_title_var.set("Loading" + "." * dots)
-        self.loading_animation_job = self.after(400, self._animate_loading, step + 1)
-
-    def _start_loading_animation(self):
-        self._stop_loading_animation()
-        self.title_label.config(font=c.FONT_LOADING_TITLE, fg=c.TEXT_SUBTLE_COLOR)
-        self._animate_loading(0)
-
-    def _stop_loading_animation(self):
-        if self.loading_animation_job:
-            self.after_cancel(self.loading_animation_job)
-            self.loading_animation_job = None
-
-    def _clear_project_ui(self):
-        """Resets the UI to the 'no project selected' state."""
-        self._stop_loading_animation()
-        # Use the project manager to formally unload any project
-        project_config, status_message = self.project_manager.load_project(None)
-        self.status_var.set(status_message)
-
-        # Set UI elements
-        self.active_dir.set("No project selected")
-        self.project_title_var.set("(no active project)")
-        self.project_color = c.COMPACT_MODE_BG_COLOR
-        self.project_font_color = 'light'
-        self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
-
-        # Update dependent components
-        self._update_profile_selector_ui()
-        self.file_monitor.start() # This will stop if no project is active
-        self.button_manager.update_button_states()
-
-    def set_active_dir_display(self, path, set_status=True):
-        """
-        Initiates the project loading process, showing a 'Loading...' state
-        before performing the actual load asynchronously.
-        """
-        if not path or not os.path.isdir(path):
-            self._clear_project_ui()
-            return
-
-        # --- Set UI to 'Loading...' state immediately ---
-        self.active_dir.set("Loading...")
-        self._start_loading_animation()
-
-        # Update buttons to disabled state based on "Loading..." active_dir
-        self.button_manager.update_button_states()
-        self._update_profile_selector_ui() # This will disable profile buttons
-
-        # --- Schedule the actual loading ---
-        self._load_project_async(path, set_status)
-
-    def _load_project_async(self, path, set_status=True):
-        """
-        Starts a background thread to load the project, leaving the UI responsive.
-        """
-        self.load_thread = threading.Thread(
-            target=self._load_project_worker,
-            args=(path, set_status),
-            daemon=True
-        )
-        self.load_thread.start()
-        # Start polling for the thread's completion.
-        self.after(100, self._check_load_project_thread)
-
-    def _load_project_worker(self, path, set_status):
-        """
-        This function runs in a separate thread. It performs all blocking I/O.
-        """
-        # Step 1: Load the project config from .allcode
-        project_config, status_message = self.project_manager.load_project(path)
-
-        # Step 2: Perform the initial, blocking file scan.
-        if project_config:
-            self.file_monitor.perform_initial_scan()
-
-        # Store the results to be picked up by the main thread.
-        self.load_thread_result = (project_config, status_message, path, set_status)
-
-    def _check_load_project_thread(self):
-        """
-        Polls the loading thread. If it's done, triggers the UI update.
-        """
-        if self.load_thread and self.load_thread.is_alive():
-            # Thread is still running, check again later.
-            self.after(100, self._check_load_project_thread)
-        else:
-            # Thread has finished, update the UI with the results.
-            if self.load_thread_result:
-                self._on_project_load_complete(*self.load_thread_result)
-                self.load_thread_result = None
-            self.load_thread = None
-
-    def _on_project_load_complete(self, project_config, status_message, path, set_status):
-        """
-        This function runs on the main UI thread once the background work is done.
-        """
-        self._stop_loading_animation()
-        if set_status:
-            self.status_var.set(status_message)
-
-        if project_config:
-            self.active_dir.set(path)
-            self.project_title_var.set(project_config.project_name)
-            self.project_color = project_config.project_color
-            self.project_font_color = project_config.project_font_color
-            self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_COLOR)
-        else:
-            self.active_dir.set("No project selected")
-            self.project_title_var.set("(no active project)")
-            self.project_color = c.COMPACT_MODE_BG_COLOR
-            self.project_font_color = 'light'
-            self.title_label.config(font=c.FONT_LARGE_BOLD, fg=c.TEXT_SUBTLE_COLOR)
-
-        # Start the *periodic* file monitoring and update buttons.
-        self._update_profile_selector_ui()
-        self.file_monitor.start()
-        self.button_manager.update_button_states()
-
-    def _update_profile_selector_ui(self):
-        project_config = self.project_manager.get_current_project()
-        profile_frame = self.profile_frame
-        profile_frame.grid_rowconfigure(0, weight=1)
-
-        # Forget all children of the profile frame to reset its layout
-        for widget in profile_frame.winfo_children():
-            widget.grid_forget()
-
-        if not project_config:
-            self.add_profile_button.set_state('disabled')
-            return
-
-        self.add_profile_button.set_state('normal')
-        profile_names = project_config.get_profile_names()
-        active_name = project_config.active_profile_name
-
-        if len(profile_names) > 1:
-            # NAVIGATOR layout (centered)
-            # Configure profile_frame for centering
-            profile_frame.grid_columnconfigure(0, weight=1)
-            profile_frame.grid_columnconfigure(1, weight=0) # navigator
-            profile_frame.grid_columnconfigure(2, weight=0) # + button
-            profile_frame.grid_columnconfigure(3, weight=0, minsize=25) # width 20 + padx 5
-            profile_frame.grid_columnconfigure(4, weight=1)
-
-            # Grid the widgets inside profile_frame
-            self.profile_navigator.grid(row=0, column=1, sticky='e')
-            self.profile_navigator.set_profiles(profile_names, active_name)
-            self.add_profile_button.grid(row=0, column=2, sticky='w', padx=(10, 0))
-
-            if active_name != "Default":
-                self.delete_profile_button.grid(row=0, column=3, sticky='w', padx=(5, 0))
-        else:
-            # COMPACT layout (left-aligned)
-            # Configure profile_frame for left-alignment with an expanding column
-            profile_frame.grid_columnconfigure(0, weight=0)
-            profile_frame.grid_columnconfigure(1, weight=1) # Expanding pad
-            # Reset other columns to clear any previous settings like minsize
-            for i in range(2, 5):
-                profile_frame.grid_columnconfigure(i, weight=0, minsize=0)
-
-            # Grid the '+' button at the start of the profile_frame
-            self.add_profile_button.grid(row=0, column=0, sticky='w', padx=(10, 0))
-
-    def on_profile_switched(self, new_profile_name):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            return
-
-        if new_profile_name != project_config.active_profile_name:
-            project_config.active_profile_name = new_profile_name
-            project_config.save()
-            self.status_var.set(f"Switched to profile: {new_profile_name}")
-            self.button_manager.update_button_states()
-        self._update_profile_selector_ui()
-        self.focus_set()
-
-    def open_new_profile_dialog(self, event=None):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            return
-
-        dialog = NewProfileDialog(
-            parent=self,
-            existing_profile_names=project_config.get_profile_names()
-        )
-        result = dialog.result
-
-        if result:
-            new_name = result['name']
-            copy_files = result['copy_files']
-            copy_instructions = result['copy_instructions']
-
-            if project_config.create_new_profile(new_name, copy_files, copy_instructions):
-                project_config.active_profile_name = new_name # Switch to the new profile
-                project_config.save()
-                self._update_profile_selector_ui()
-                self.button_manager.update_button_states()
-                self.status_var.set(f"Created and switched to profile: {new_name}")
-            else:
-                self.status_var.set(f"Error: Profile '{new_name}' already exists.")
-
-    def delete_current_profile(self, event=None):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            return
-
-        profile_to_delete = project_config.active_profile_name
-        if profile_to_delete == "Default":
-            self.status_var.set("Cannot delete the Default profile.")
-            return
-
-        if messagebox.askyesno(
-            "Confirm Delete",
-            f"Are you sure you want to delete the profile '{profile_to_delete}'?\nThis cannot be undone.",
-            parent=self
-        ):
-            if project_config.delete_profile(profile_to_delete):
-                # Switch back to default profile
-                project_config.active_profile_name = "Default"
-                project_config.save()
-                self.status_var.set(f"Profile '{profile_to_delete}' deleted.")
-                # Refresh UI
-                self._update_profile_selector_ui()
-                self.button_manager.update_button_states()
-            else:
-                self.status_var.set(f"Error: Could not delete profile '{profile_to_delete}'.")
-
-    def on_settings_closed(self):
-        self.app_state.reload()
-        self.file_monitor.start()
-        self.status_var.set("Settings updated")
-
-    def on_directory_selected(self, new_dir):
-        if self.app_state.update_active_dir(new_dir):
-            self.set_active_dir_display(new_dir)
-
-    def on_recent_removed(self, path_to_remove):
-        cleared_active = self.app_state.remove_recent_project(path_to_remove)
-        self.status_var.set(f"Removed '{os.path.basename(path_to_remove)}' from recent projects")
-        if cleared_active:
-            self.set_active_dir_display(None)
-
-    def open_color_chooser(self, event=None):
-        project_config = self.project_manager.get_current_project()
-        if not project_config: return
-        # result is a tuple: ((r,g,b), '#rrggbb') or (None, None)
-        result = colorchooser.askcolor(title="Choose project color", initialcolor=self.project_color)
-        if result and result[1]:
-            new_hex_color = result[1]
-            self.project_color = new_hex_color
-            project_config.project_color = new_hex_color
-
-            # Calculate and save the new font color
-            new_font_color = _calculate_font_color(new_hex_color)
-            self.project_font_color = new_font_color
-            project_config.project_font_color = new_font_color
-
-            project_config.save()
-            self.button_manager.update_button_states()
-
-    def open_project_folder(self, event=None):
-        project_path = self.active_dir.get()
-        is_ctrl_pressed = event and (event.state & 0x0004)
-
-        if is_ctrl_pressed:
-            if project_path and os.path.isdir(project_path):
-                pyperclip.copy(project_path.replace('/', '\\'))
-                self.status_var.set("Copied project path to clipboard")
-            else:
-                self.status_var.set("No active project path to copy")
-            return
-
-        # Normal click
-        if project_path and os.path.isdir(project_path):
-            try:
-                if sys.platform == "win32":
-                    os.startfile(project_path)
-                elif sys.platform == "darwin":
-                    subprocess.Popen(["open", project_path])
-                else:
-                    subprocess.Popen(["xdg-open", project_path])
-            except Exception as e:
-                self.show_error_dialog("Error", f"Could not open folder: {e}")
-        else:
-            self.status_var.set("No active project folder to open.")
-
-    def open_settings_window(self):
-        SettingsWindow(self, self.updater, on_close_callback=self.on_settings_closed)
-
-    def open_instructions_window(self):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            messagebox.showerror("Error", "Please select a valid project folder first")
-            return
-        wt_window = InstructionsWindow(self, project_config, self.status_var, on_close_callback=self.button_manager.update_button_states)
-        self.wait_window(wt_window)
-
-    def open_paste_changes_dialog(self, initial_content=None):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            messagebox.showerror("Error", "Please select a valid project folder first")
-            return
-        PasteChangesDialog(self, project_config.base_dir, self.status_var, initial_content=initial_content)
-
-    def _show_compact_toast(self, message):
-        """Displays a temporary status message below the compact mode window."""
-        compact_window = self.view_manager.compact_mode_window
-        if compact_window and compact_window.winfo_exists():
-            CompactStatusToast(compact_window, message)
-        else:
-            # Fallback to the main status bar if not in compact mode
-            self.status_var.set(message)
-
-    def apply_changes_from_clipboard(self):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            messagebox.showerror("Error", "Please select a valid project folder first", parent=self)
-            return
-
-        markdown_text = pyperclip.paste()
-        if not markdown_text.strip():
-            self._show_compact_toast("Clipboard is empty.")
-            return
-
-        plan = change_applier.parse_and_plan_changes(project_config.base_dir, markdown_text)
-
-        status = plan.get('status')
-        message = plan.get('message')
-
-        if status == 'ERROR':
-            self.show_error_dialog("Parsing Error", message)
-            return
-
-        # Direct confirmation for new files, skipping the full paste dialog
-        if status == 'CONFIRM_CREATION':
-            creations = plan.get('creations', {})
-            # Use the correct base directory from the project_config object
-            creation_rel_paths = [os.path.relpath(p, project_config.base_dir).replace('\\', '/') for p in creations.keys()]
-
-            confirm_message = (
-                f"This operation will create {len(creations)} new file(s):\n\n"
-                f" - " + "\n - ".join(creation_rel_paths) +
-                "\n\nDo you want to proceed?"
-            )
-            dialog_parent = self
-            if self.view_manager.current_state == 'compact' and self.view_manager.compact_mode_window and self.view_manager.compact_mode_window.winfo_exists():
-                dialog_parent = self.view_manager.compact_mode_window
-
-            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=dialog_parent):
-                self._show_compact_toast("Operation cancelled.")
-                return
-
-        updates = plan.get('updates', {})
-        creations = plan.get('creations', {})
-
-        success, final_message = change_applier.execute_plan(updates, creations)
-
-        if success:
-            self._show_compact_toast(final_message)
-        else:
-            self.show_error_dialog("File Write Error", final_message)
-
-    def on_paste_click(self, event):
-        """Handles the press event for the main paste button to show a click."""
-        self.paste_changes_button._draw(self.paste_changes_button.click_color)
-
-    def on_paste_release(self, event):
-        """Handles the release event to trigger the correct paste action."""
-        self.paste_changes_button._draw(self.paste_changes_button.hover_color)
-        is_ctrl = (event.state & 0x0004)
-        if is_ctrl:
-            self.apply_changes_from_clipboard()
-        else:
-            self.open_paste_changes_dialog()
-
-    def open_filetypes_manager(self):
-        FiletypesManagerWindow(self, on_close_callback=self.reload_active_extensions)
-
-    def reload_active_extensions(self):
-        self.file_extensions = load_active_file_extensions()
-        self.status_var.set("Filetype configuration updated")
-        self.file_monitor.start()
-
-    def open_change_directory_dialog(self):
-        self.app_state._prune_recent_projects()
-        DirectoryDialog(
-            parent=self,
-            app_bg_color=self.app_bg_color,
-            recent_projects=self.app_state.recent_projects,
-            on_select_callback=self.on_directory_selected,
-            on_remove_callback=self.on_recent_removed
-        )
-
-    def _perform_copy(self, use_wrapper: bool):
-        base_dir = self.active_dir.get()
-        if not os.path.isdir(base_dir):
-            self.show_error_dialog("Error", "Please select a valid project folder first")
-            self.status_var.set("Error: Invalid project folder")
-            return
-
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            self.status_var.set("Error: No active project.")
-            return
-
-        status_message = copy_project_to_clipboard(
-            parent=self,
-            base_dir=base_dir,
-            project_config=project_config,
-            use_wrapper=use_wrapper,
-            copy_merged_prompt=self.app_state.copy_merged_prompt,
-            scan_secrets_enabled=self.app_state.scan_for_secrets
-        )
-        self.status_var.set(status_message)
-
-    def copy_merged_code(self):
-        self._perform_copy(use_wrapper=False)
-
-    def copy_wrapped_code(self):
-        self._perform_copy(use_wrapper=True)
-
-    def manage_files(self):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            messagebox.showerror("Error", "Please select a valid project folder first")
-            return
-
-        files_to_highlight = self.file_monitor.get_newly_detected_files_and_reset()
-
-        fm_window = FileManagerWindow(
-            self,
-            project_config,
-            self.status_var,
-            self.file_extensions,
-            self.app_state.default_editor,
-            app_state=self.app_state,
-            newly_detected_files=files_to_highlight
-        )
-        self.wait_window(fm_window)
-        self.set_active_dir_display(self.active_dir.get(), set_status=False)
-
-    def _calculate_stats_for_file(self, path):
-        """Reads a file and returns its stats, or None on error."""
-        project_config = self.project_manager.get_current_project()
-        if not project_config: return None
-        full_path = os.path.join(project_config.base_dir, path)
-        try:
-            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                content = f.read()
-
-            mtime = os.path.getmtime(full_path)
-            file_hash = get_file_hash(full_path)
-
-            token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
-            if token_count_enabled:
-                tokens = get_token_count_for_text(content)
-                lines = content.count('\n') + 1
-            else:
-                tokens, lines = 0, 0
-
-            if file_hash is not None:
-                return {'path': path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines}
-        except OSError:
-            self.show_error_dialog("File Access Error", f"Could not access file to add it to the merge list:\n{path}")
-        return None
-
-    def add_new_files_to_merge_order(self):
-        project_config = self.project_manager.get_current_project()
-        if not project_config:
-            return
-
-        new_files = self.file_monitor.get_newly_detected_files_and_reset()
-
-        if not new_files:
-            self.status_var.set("No new files to add.")
-            return
-
-        current_selection_paths = {f['path'] for f in project_config.selected_files}
-        files_to_add = [path for path in new_files if path not in current_selection_paths]
-
-        if not files_to_add:
-            self.status_var.set("New files are already in the merge list.")
-            return
-
-        for path in files_to_add:
-            new_entry = self._calculate_stats_for_file(path)
-            if new_entry:
-                project_config.selected_files.append(new_entry)
-
-        project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
-        project_config.save()
-
-        self.status_var.set(f"Added {len(files_to_add)} new file(s) to merge order.")
-        self.button_manager.update_button_states()
-
-    def on_new_files_click(self, event):
-        is_ctrl = (event.state & 0x0004)
-        if is_ctrl:
-            self.add_new_files_to_merge_order()
-        else:
-            self.manage_files()
+        self.helpers.show_error_dialog(title, message)

@@ -22,7 +22,7 @@ def setup_ui(app):
     left_frame.grid(row=0, column=0, sticky='w')
 
     app.color_swatch = Label(left_frame, cursor="hand2", bg=c.TOP_BAR_BG, bd=0, highlightthickness=0)
-    app.color_swatch.bind("<Button-1>", app.open_color_chooser)
+    app.color_swatch.bind("<Button-1>", app.action_handlers.open_color_chooser)
     ToolTip(app.color_swatch, "Click to change the project color", delay=500)
 
     app.title_container = Frame(left_frame, bg=c.TOP_BAR_BG, cursor="hand2")
@@ -40,10 +40,10 @@ def setup_ui(app):
     required_height = app.title_label.winfo_reqheight()
     app.title_container.grid_rowconfigure(0, minsize=required_height)
 
-    app.title_label.bind("<Button-1>", app.handle_title_click)
-    app.title_label.bind("<Double-Button-1>", app.edit_project_title)
-    app.title_container.bind("<Button-1>", app.handle_title_click)
-    app.title_container.bind("<Double-Button-1>", app.edit_project_title)
+    app.title_label.bind("<Button-1>", app.action_handlers.handle_title_click)
+    app.title_label.bind("<Double-Button-1>", app.action_handlers.edit_project_title)
+    app.title_container.bind("<Button-1>", app.action_handlers.handle_title_click)
+    app.title_container.bind("<Double-Button-1>", app.action_handlers.edit_project_title)
     ToolTip(app.title_container, "Click to select project, double-click to edit title", delay=500)
 
     # Right-aligned items
@@ -53,12 +53,12 @@ def setup_ui(app):
 
     # New files warning icon
     app.new_files_label = Label(right_frame, image=assets.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    app.new_files_label.bind("<Button-1>", app.on_new_files_click)
+    app.new_files_label.bind("<Button-1>", app.action_handlers.on_new_files_click)
     app.new_files_tooltip = ToolTip(app.new_files_label, text="")
 
     # Open folder icon
     app.folder_icon_label = Label(right_frame, image=assets.folder_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    app.folder_icon_label.bind("<Button-1>", app.open_project_folder)
+    app.folder_icon_label.bind("<Button-1>", app.action_handlers.open_project_folder)
     ToolTip(app.folder_icon_label, "Open project folder (Ctrl+Click to copy path)", delay=500)
 
     # --- Top-Level Buttons (Row 1) ---
@@ -68,7 +68,7 @@ def setup_ui(app):
     app.top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
     app.top_buttons_container.rowconfigure(0, weight=1) # Center all content vertically
 
-    app.manage_files_button = RoundedButton(app.top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.manage_files, cursor='hand2')
+    app.manage_files_button = RoundedButton(app.top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
 
     # --- Profile Management Frame (its contents are gridded dynamically) ---
@@ -76,13 +76,13 @@ def setup_ui(app):
     app.profile_frame.grid(row=0, column=1, sticky='nsew')
 
     # --- Profile Widgets (created here but placed in app_window) ---
-    app.profile_navigator = ProfileNavigator(app.profile_frame, on_change_callback=app.on_profile_switched)
-    app.add_profile_button = RoundedButton(app.profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.open_new_profile_dialog, cursor='hand2', width=20, height=28, hollow=True)
+    app.profile_navigator = ProfileNavigator(app.profile_frame, on_change_callback=app.profile_actions.on_profile_switched)
+    app.add_profile_button = RoundedButton(app.profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.profile_actions.open_new_profile_dialog, cursor='hand2', width=20, height=28, hollow=True)
     ToolTip(app.add_profile_button, "Create an additional project profile", delay=500)
-    app.delete_profile_button = RoundedButton(app.profile_frame, text="-", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.delete_current_profile, cursor='hand2', width=20, height=28, hollow=True)
+    app.delete_profile_button = RoundedButton(app.profile_frame, text="-", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.profile_actions.delete_current_profile, cursor='hand2', width=20, height=28, hollow=True)
     ToolTip(app.delete_profile_button, "Delete the current profile", delay=500)
 
-    app.select_project_button = RoundedButton(app.top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.open_change_directory_dialog, cursor='hand2')
+    app.select_project_button = RoundedButton(app.top_buttons_container, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_change_directory_dialog, cursor='hand2')
     app.select_project_button.grid(row=0, column=2, sticky='e')
 
     # --- Center Content Area (Row 2) ---
@@ -124,13 +124,13 @@ def setup_ui(app):
 
     copy_button_height = 60
     app.paste_changes_button = RoundedButton(app.button_grid_frame, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, command=None, cursor='hand2')
-    app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy with Instructions", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.copy_wrapped_code, cursor='hand2')
-    app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.open_instructions_window, cursor='hand2')
-    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.copy_merged_code, cursor='hand2')
+    app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy with Instructions", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.copy_wrapped_code, cursor='hand2')
+    app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.open_instructions_window, cursor='hand2')
+    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
 
-    app.paste_changes_button.bind("<Button-1>", app.on_paste_click)
+    app.paste_changes_button.bind("<Button-1>", app.action_handlers.on_paste_click)
     app.paste_changes_button.unbind("<ButtonRelease-1>")
-    app.paste_changes_button.bind("<ButtonRelease-1>", app.on_paste_release)
+    app.paste_changes_button.bind("<ButtonRelease-1>", app.action_handlers.on_paste_release)
 
     ToolTip(app.paste_changes_button, "Open paste window\n(Ctrl+Click to paste from clipboard)", delay=500)
     ToolTip(app.copy_wrapped_button, "Copy all included code with your custom intro/outro instructions", delay=500)
@@ -138,11 +138,11 @@ def setup_ui(app):
 
     app.settings_button.bind("<Enter>", lambda e: app.settings_button.config(image=assets.settings_icon_active), add='+')
     app.settings_button.bind("<Leave>", lambda e: app.settings_button.config(image=assets.settings_icon), add='+')
-    app.settings_button.bind("<Button-1>", lambda e: app.open_settings_window())
+    app.settings_button.bind("<Button-1>", lambda e: app.action_handlers.open_settings_window())
 
     app.filetypes_button.bind("<Enter>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon_active), add='+')
     app.filetypes_button.bind("<Leave>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon), add='+')
-    app.filetypes_button.bind("<Button-1>", lambda e: app.open_filetypes_manager())
+    app.filetypes_button.bind("<Button-1>", lambda e: app.action_handlers.open_filetypes_manager())
 
     # --- Status Bar (Row 3) ---
     app.status_bar = Label(

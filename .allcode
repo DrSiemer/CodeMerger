@@ -92,18 +92,18 @@
           "lines": 143
         },
         {
-          "path": "src/core/logger.py",
-          "mtime": 1762434765.4892774,
-          "hash": "160dd9946bf51ef2c2b641e39741b2983ed5e967",
-          "tokens": 391,
-          "lines": 53
-        },
-        {
           "path": "src/core/paths.py",
           "mtime": 1762434765.4902828,
           "hash": "188a3c4cf4ee04ee14ecfcf02d083737f4ada27a",
           "tokens": 899,
           "lines": 96
+        },
+        {
+          "path": "src/core/logger.py",
+          "mtime": 1762434765.4892774,
+          "hash": "160dd9946bf51ef2c2b641e39741b2983ed5e967",
+          "tokens": 391,
+          "lines": 53
         },
         {
           "path": "src/core/utils.py",
@@ -261,16 +261,72 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1763043527.2560153,
-          "hash": "8a0671db12abdab3af1678fdc63ef6e93c6322e7",
-          "tokens": 6359,
-          "lines": 777
+          "mtime": 1763045720.2239757,
+          "hash": "b2880c105fabeeebbbcaf5c242c58088b8019e3b",
+          "tokens": 1206,
+          "lines": 146
+        },
+        {
+          "path": "src/ui/app_window_parts/button_state_manager.py",
+          "mtime": 1763045720.2239757,
+          "hash": "ac937db0606c24634351519e00ae26c2fb8014cc",
+          "tokens": 824,
+          "lines": 86
+        },
+        {
+          "path": "src/ui/app_window_parts/event_handlers.py",
+          "mtime": 1763044892.6432743,
+          "hash": "6ba625e797e3a19220b2fb00c8a143d118c97f3d",
+          "tokens": 402,
+          "lines": 60
+        },
+        {
+          "path": "src/ui/app_window_parts/status_bar_manager.py",
+          "mtime": 1763045720.2239757,
+          "hash": "94ea75d7486a8898a494eeb579f449bff67730e9",
+          "tokens": 742,
+          "lines": 68
+        },
+        {
+          "path": "src/ui/app_window_parts/action_handlers.py",
+          "mtime": 1763044892.64227,
+          "hash": "4dc7deae4e5572af41b48f068c0f8ecd951dcbdc",
+          "tokens": 2441,
+          "lines": 314
+        },
+        {
+          "path": "src/ui/app_window_parts/project_actions.py",
+          "mtime": 1763044892.6442735,
+          "hash": "39a1097dc96cde5b4adc2fcbee485ecd84d46553",
+          "tokens": 708,
+          "lines": 99
+        },
+        {
+          "path": "src/ui/app_window_parts/profile_actions.py",
+          "mtime": 1763044892.6442735,
+          "hash": "440a85d3f43209ff9b01961db8b4ffe63f02fef3",
+          "tokens": 871,
+          "lines": 108
+        },
+        {
+          "path": "src/ui/app_window_parts/ui_callbacks.py",
+          "mtime": 1763044892.6452734,
+          "hash": "da8853b88087ccbe6105afc14a8f5d08b8fc5d54",
+          "tokens": 213,
+          "lines": 30
+        },
+        {
+          "path": "src/ui/app_window_parts/helpers.py",
+          "mtime": 1763044892.6432743,
+          "hash": "6e3b18513419a96a10a87815d02e4b8a1835af27",
+          "tokens": 248,
+          "lines": 35
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1763043078.597229,
-          "hash": "7a4dcce10c6a30c0695cec3f00aba949a5f71d1b",
-          "tokens": 2386,
+          "mtime": 1763045077.741213,
+          "hash": "81086dbbd6db9779d9154c8465dfed90b0df7bf2",
+          "tokens": 2424,
           "lines": 159
         },
         {
@@ -279,20 +335,6 @@
           "hash": "0943f41bb88459c6b34fe1f36ec180d490e533c2",
           "tokens": 2124,
           "lines": 215
-        },
-        {
-          "path": "src/ui/button_state_manager.py",
-          "mtime": 1763043304.6619556,
-          "hash": "dda73faa95d1f7d8f20d28f84897cdb81b010848",
-          "tokens": 824,
-          "lines": 86
-        },
-        {
-          "path": "src/ui/status_bar_manager.py",
-          "mtime": 1758720729.2548213,
-          "hash": "76773b5b4f33e0330318a2e383017dc4e76933d5",
-          "tokens": 742,
-          "lines": 68
         },
         {
           "path": "src/ui/file_monitor.py",
@@ -449,6 +491,13 @@
           "lines": 271
         },
         {
+          "path": "src/ui/instructions_window.py",
+          "mtime": 1763043527.2560153,
+          "hash": "09fa4475656d5d6c607030e05c1f75a294e36c52",
+          "tokens": 1293,
+          "lines": 125
+        },
+        {
           "path": "src/ui/paste_changes_dialog.py",
           "mtime": 1762434765.5055695,
           "hash": "1454cc4d891f5ba58d22f19a0d7809ecb1fff12a",
@@ -489,16 +538,9 @@
           "hash": "1e91f2b8d490208d091bcaba95adcb5b6418fbc1",
           "tokens": 691,
           "lines": 73
-        },
-        {
-          "path": "src/ui/instructions_window.py",
-          "mtime": 1763043527.2560153,
-          "hash": "09fa4475656d5d6c607030e05c1f75a294e36c52",
-          "tokens": 1293,
-          "lines": 125
         }
       ],
-      "total_tokens": 85208,
+      "total_tokens": 85060,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -507,6 +549,7 @@
         "src",
         "src/core",
         "src/ui",
+        "src/ui/app_window_parts",
         "src/ui/file_manager",
         "src/ui/settings",
         "src/ui/widgets"
@@ -540,8 +583,16 @@
     "src/core/updater.py",
     "src/core/utils.py",
     "src/ui/app_window.py",
+    "src/ui/app_window_parts/__init__.py",
+    "src/ui/app_window_parts/action_handlers.py",
+    "src/ui/app_window_parts/button_state_manager.py",
+    "src/ui/app_window_parts/event_handlers.py",
+    "src/ui/app_window_parts/helpers.py",
+    "src/ui/app_window_parts/profile_actions.py",
+    "src/ui/app_window_parts/project_actions.py",
+    "src/ui/app_window_parts/status_bar_manager.py",
+    "src/ui/app_window_parts/ui_callbacks.py",
     "src/ui/assets.py",
-    "src/ui/button_state_manager.py",
     "src/ui/compact_mode.py",
     "src/ui/compact_status.py",
     "src/ui/custom_error_dialog.py",
@@ -571,7 +622,6 @@
     "src/ui/settings/file_manager_settings.py",
     "src/ui/settings/prompts_settings.py",
     "src/ui/settings/settings_window.py",
-    "src/ui/status_bar_manager.py",
     "src/ui/style_manager.py",
     "src/ui/title_edit_dialog.py",
     "src/ui/tooltip.py",

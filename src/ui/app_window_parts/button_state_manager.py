@@ -1,5 +1,5 @@
 import os
-from .. import constants as c
+from ... import constants as c
 
 class ButtonStateManager:
     """Handles updating the state of buttons and UI elements in the main window."""
