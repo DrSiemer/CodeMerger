@@ -107,10 +107,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1763036423.3485398,
-          "hash": "de344530d8be7bdc051c8771df09249dca19eaf6",
-          "tokens": 2572,
-          "lines": 298
+          "mtime": 1763044649.0995204,
+          "hash": "686fe7737aa28afd0e13b395454c5a00acbb6368",
+          "tokens": 2769,
+          "lines": 324
         },
         {
           "path": "src/core/registry.py",
@@ -121,16 +121,16 @@
         },
         {
           "path": "src/app_state.py",
-          "mtime": 1757938209.673718,
-          "hash": "27d60305fabd10432948d0872a284a23ed6182a1",
-          "tokens": 859,
+          "mtime": 1763044478.0369923,
+          "hash": "fc1126d529908fa3f7838b4b6c2e59e59ea63330",
+          "tokens": 883,
           "lines": 97
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1763036441.6483593,
-          "hash": "d59ac44b491141d74839568751491b2da5af02b1",
-          "tokens": 2875,
+          "mtime": 1763043527.2560153,
+          "hash": "f06520eec89c14be19c8d70395683a9cb6053812",
+          "tokens": 2871,
           "lines": 317
         },
         {
@@ -261,9 +261,9 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1763043291.6634219,
-          "hash": "203971918d4e6ee72585ac393c29dc7fc20a5ab2",
-          "tokens": 6362,
+          "mtime": 1763043527.2560153,
+          "hash": "8a0671db12abdab3af1678fdc63ef6e93c6322e7",
+          "tokens": 6359,
           "lines": 777
         },
         {
@@ -471,9 +471,9 @@
         },
         {
           "path": "src/ui/new_profile_dialog.py",
-          "mtime": 1761819740.1185825,
-          "hash": "56fd6efc104bd3d85661fa7e760a25ca6ff939a7",
-          "tokens": 920,
+          "mtime": 1763043527.2560153,
+          "hash": "db2f9a7cca3ae5e22a4c57ab1e74c59306c96f4b",
+          "tokens": 915,
           "lines": 88
         },
         {
@@ -492,13 +492,13 @@
         },
         {
           "path": "src/ui/instructions_window.py",
-          "mtime": 1763043395.5553799,
-          "hash": "df951e3d7d07b7575f73f5b4fc6cd68793254e9c",
-          "tokens": 1297,
+          "mtime": 1763043527.2560153,
+          "hash": "09fa4475656d5d6c607030e05c1f75a294e36c52",
+          "tokens": 1293,
           "lines": 125
         }
       ],
-      "total_tokens": 85087,
+      "total_tokens": 85208,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

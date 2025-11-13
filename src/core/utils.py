@@ -39,8 +39,6 @@ def _create_and_get_default_config():
     """
     config = {
         'active_directory': '',
-        'recent_projects': [],
-        'filetypes': [],
         'default_editor': '',
         'scan_for_secrets': False,
         'last_update_check': None,
@@ -51,12 +49,16 @@ def _create_and_get_default_config():
         'default_outro_prompt': DEFAULT_OUTRO_PROMPT,
         'token_count_enabled': TOKEN_COUNT_ENABLED_DEFAULT,
         'enable_compact_mode_on_minimize': True,
-        'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT
+        'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT,
+        'user_lists': {
+            'recent_projects': [],
+            'filetypes': []
+        }
     }
     try:
         # Load the list of filetypes from the bundled template
         with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
-            config['filetypes'] = json.load(f)
+            config['user_lists']['filetypes'] = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         # Fallback in case the template is missing or corrupt
         pass
@@ -68,26 +70,39 @@ def _create_and_get_default_config():
 def load_config():
     """
     Loads the main application configuration from config.json.
-    If the file is missing or corrupt, it's created from the default template
+    If the file is missing or corrupt, it's created from the default template.
+    It also handles automatic migration from older config formats.
     """
     try:
-        # If config file doesn't exist, this will raise FileNotFoundError
         with open(CONFIG_FILE_PATH, 'r', encoding='utf-8-sig') as f:
-            # If file is empty, this will raise JSONDecodeError
             config = json.load(f)
-            # If file is valid but missing keys, handle that too
-            if 'filetypes' not in config:
+            migration_occurred = False
+
+            # --- Backward Compatibility: Migrate old flat list format to new nested format ---
+            if 'recent_projects' in config or 'filetypes' in config or 'recent_directories' in config:
+                migration_occurred = True
+                user_lists_group = config.setdefault('user_lists', {})
+
+                # Handle 'recent_projects' or the even older 'recent_directories'
+                if 'recent_projects' in config:
+                    user_lists_group['recent_projects'] = config.pop('recent_projects', [])
+                elif 'recent_directories' in config:
+                    user_lists_group['recent_projects'] = config.pop('recent_directories', [])
+
+                if 'filetypes' in config:
+                    user_lists_group['filetypes'] = config.pop('filetypes', [])
+
+            # --- Standard key validation and addition for backward compatibility ---
+            if 'user_lists' not in config or 'filetypes' not in config.get('user_lists', {}):
                 raise ValueError("Config is missing 'filetypes' key.")
             if 'default_editor' not in config:
-                config['default_editor'] = '' # Add missing key for backward compatibility
-            if 'recent_directories' in config: # Backward compatibility
-                config['recent_projects'] = config.pop('recent_directories')
+                config['default_editor'] = ''
             if 'scan_for_secrets' not in config:
-                config['scan_for_secrets'] = False # Add missing key for backward compatibility
+                config['scan_for_secrets'] = False
             if 'last_update_check' not in config:
                 config['last_update_check'] = None
             if 'check_for_updates' in config:
-                del config['check_for_updates'] # Clean up old key if present
+                del config['check_for_updates']
             if 'enable_new_file_check' not in config:
                 config['enable_new_file_check'] = True
             if 'new_file_check_interval' not in config:
@@ -98,28 +113,38 @@ def load_config():
                 config['default_intro_prompt'] = DEFAULT_INTRO_PROMPT
             if 'default_outro_prompt' not in config:
                 config['default_outro_prompt'] = DEFAULT_OUTRO_PROMPT
-            if 'line_count_enabled' in config: # Backward compatibility cleanup
+            if 'line_count_enabled' in config:
                 config['token_count_enabled'] = config.pop('line_count_enabled')
             if 'token_count_enabled' not in config:
                 config['token_count_enabled'] = TOKEN_COUNT_ENABLED_DEFAULT
-            if 'line_count_threshold' in config: # Backward compatibility cleanup
+            if 'line_count_threshold' in config:
                 config.pop('line_count_threshold')
-            if 'token_count_threshold' in config: # Backward compatibility cleanup
+            if 'token_count_threshold' in config:
                 config.pop('token_count_threshold')
             if 'enable_compact_mode_on_minimize' not in config:
                 config['enable_compact_mode_on_minimize'] = True
             if 'add_all_warning_threshold' not in config:
                 config['add_all_warning_threshold'] = ADD_ALL_WARNING_THRESHOLD_DEFAULT
+
+            # If a migration was performed, save the newly structured config immediately.
+            if migration_occurred:
+                save_config(config)
+
             return config
     except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
-        # Any failure in reading the config results in creating a new one
+        # Any failure results in creating a new, correctly structured config
         return _create_and_get_default_config()
 
 def save_config(config):
     """Saves the complete application configuration object to config.json"""
-    # Ensure filetypes are sorted alphabetically for consistency
-    if 'filetypes' in config and isinstance(config.get('filetypes'), list):
-        config['filetypes'].sort(key=lambda item: item['ext'])
+    # Force 'user_lists' to be the last key for consistent ordering.
+    user_lists_data = config.pop('user_lists', {'recent_projects': [], 'filetypes': []})
+
+    # Ensure filetypes within the group are sorted alphabetically for consistency
+    if isinstance(user_lists_data.get('filetypes'), list):
+        user_lists_data['filetypes'].sort(key=lambda item: item['ext'])
+
+    config['user_lists'] = user_lists_data
 
     with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2)
@@ -130,7 +155,8 @@ def update_and_get_new_filetypes():
     Returns a list of newly added filetype dictionaries.
     """
     config = load_config()
-    local_filetypes = config.get('filetypes', [])
+    user_lists = config.setdefault('user_lists', {})
+    local_filetypes = user_lists.get('filetypes', [])
 
     try:
         with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
@@ -164,7 +190,7 @@ def update_and_get_new_filetypes():
             newly_added.append(default_ft.copy())
 
     if config_changed:
-        config['filetypes'] = local_filetypes
+        user_lists['filetypes'] = local_filetypes
         save_config(config)
 
     return newly_added
@@ -172,14 +198,14 @@ def update_and_get_new_filetypes():
 def load_all_filetypes():
     """Helper function to load just the filetypes list from the main config"""
     config = load_config()
-    return config.get('filetypes', [])
+    return config.get('user_lists', {}).get('filetypes', [])
 
 def save_filetypes(filetypes_list):
     """
     Loads the current config, updates the filetypes list, and saves it back
     """
     config = load_config()
-    config['filetypes'] = filetypes_list
+    config.setdefault('user_lists', {})['filetypes'] = filetypes_list
     save_config(config)
 
 def load_active_file_extensions():

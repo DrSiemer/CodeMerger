@@ -11,7 +11,7 @@ class AppState:
     def __init__(self):
         self.config = load_config()
         self.active_directory = self.config.get('active_directory', '')
-        self.recent_projects = self.config.get('recent_projects', [])
+        self.recent_projects = self.config.get('user_lists', {}).get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
         self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
@@ -34,7 +34,7 @@ class AppState:
         initial_count = len(self.recent_projects)
         self.recent_projects = [d for d in self.recent_projects if os.path.isdir(d)]
         if len(self.recent_projects) != initial_count:
-            self.config['recent_projects'] = self.recent_projects
+            self.config.setdefault('user_lists', {})['recent_projects'] = self.recent_projects
             self._save()
 
     def _save(self):
@@ -71,7 +71,7 @@ class AppState:
             self.recent_projects.remove(new_dir)
         self.recent_projects.insert(0, new_dir)
         self.recent_projects = self.recent_projects[:RECENT_PROJECTS_MAX]
-        self.config['recent_projects'] = self.recent_projects
+        self.config.setdefault('user_lists', {})['recent_projects'] = self.recent_projects
 
         self._save()
         return True
@@ -85,7 +85,7 @@ class AppState:
         cleared_active = False
         if path_to_remove in self.recent_projects:
             self.recent_projects.remove(path_to_remove)
-            self.config['recent_projects'] = self.recent_projects
+            self.config.setdefault('user_lists', {})['recent_projects'] = self.recent_projects
 
             if path_to_remove == self.active_directory:
                 self.active_directory = ''
