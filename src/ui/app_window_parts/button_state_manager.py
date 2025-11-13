@@ -14,14 +14,21 @@ class ButtonStateManager:
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file."""
         app = self.app
-        is_dir_active = os.path.isdir(app.active_dir.get())
+        active_dir_path = app.active_dir.get()
+        is_loading = active_dir_path == "Loading..."
+        is_dir_active = os.path.isdir(active_dir_path)
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
         project_config = app.project_manager.get_current_project()
 
-        if is_dir_active:
-            app.select_project_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+        # Handle the loading state for the Select Project button
+        if is_loading:
+            app.select_project_button.set_state('disabled')
         else:
-            app.select_project_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+            app.select_project_button.set_state('normal')  # Re-enable the button first
+            if is_dir_active:
+                app.select_project_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+            else:
+                app.select_project_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
         app.manage_files_button.set_state(dir_dependent_state)
 

@@ -181,7 +181,6 @@ class SelectionListController:
         tooltip_text = None
         if is_over_token_area and self.ui_manager.token_count_enabled:
             tokens, lines = item_info.get('tokens', -1), item_info.get('lines', -1)
-            # [MODIFIED] Add the Ctrl+Click hint to the tooltip text.
             if tokens >= 0:
                 tooltip_text = f"{tokens} tokens, {lines} lines\nCtrl+Click to copy breakup request"
         elif not self.ui_manager.show_full_paths:
