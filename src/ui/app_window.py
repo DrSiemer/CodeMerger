@@ -35,11 +35,12 @@ from .paste_changes_dialog import PasteChangesDialog
 from .new_profile_dialog import NewProfileDialog
 from ..core import change_applier
 from .compact_status import CompactStatusToast
+from .new_filetypes_dialog import NewFiletypesDialog
 
 log = logging.getLogger("CodeMerger")
 
 class App(Tk):
-    def __init__(self, file_extensions, app_version="", initial_project_path=None):
+    def __init__(self, file_extensions, app_version="", initial_project_path=None, newly_added_filetypes=None):
         super().__init__()
         self.withdraw()
         self._run_update_cleanup()
@@ -101,6 +102,11 @@ class App(Tk):
 
         # Perform update check
         self.after(1500, self.updater.check_for_updates)
+
+        # Show the new filetypes dialog after the main window is ready
+        if newly_added_filetypes:
+            self.after(500, lambda: NewFiletypesDialog(self, newly_added_filetypes))
+
         self.deiconify()
         self.lift()
         self.focus_force()

@@ -124,6 +124,51 @@ def save_config(config):
     with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2)
 
+def update_and_get_new_filetypes():
+    """
+    Checks for new default filetypes and updates the format of existing ones.
+    Returns a list of newly added filetype dictionaries.
+    """
+    config = load_config()
+    local_filetypes = config.get('filetypes', [])
+
+    try:
+        with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
+            default_filetypes = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+    local_map = {ft['ext']: ft for ft in local_filetypes}
+    default_map = {ft['ext']: ft for ft in default_filetypes}
+
+    newly_added = []
+    config_changed = False
+
+    # 1. Update existing local filetypes to the new format
+    for ext, local_ft in local_map.items():
+        if 'description' not in local_ft or 'default' not in local_ft:
+            config_changed = True
+            default_ft = default_map.get(ext)
+            if default_ft: # This is a default filetype
+                local_ft['description'] = default_ft.get('description', '')
+                local_ft['default'] = True
+            else: # This is a custom user-added filetype
+                local_ft.setdefault('description', '')
+                local_ft['default'] = False
+
+    # 2. Add new default filetypes that are not in the local list
+    for ext, default_ft in default_map.items():
+        if ext not in local_map:
+            config_changed = True
+            local_filetypes.append(default_ft.copy())
+            newly_added.append(default_ft.copy())
+
+    if config_changed:
+        config['filetypes'] = local_filetypes
+        save_config(config)
+
+    return newly_added
+
 def load_all_filetypes():
     """Helper function to load just the filetypes list from the main config"""
     config = load_config()

@@ -58,7 +58,8 @@ def _get_default_geometry_for_window(window_class_name):
         return c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
     if window_class_name == 'WrapperTextWindow':
         return c.WRAPPER_TEXT_WINDOW_DEFAULT_GEOMETRY
-    return "600x400" # Generic fallback
+    # Return None if no specific default is found for this window type
+    return None
 
 def position_window(window):
     """
@@ -85,25 +86,33 @@ def position_window(window):
             saved_geometry = None
 
     if not saved_geometry:
-        # Get default dimensions from constants to avoid race conditions.
+        # First, try to get a predefined default size from constants.
         default_geom_str = _get_default_geometry_for_window(window_name)
-        try:
-            size_part = default_geom_str.split('+')[0]
-            w_str, h_str = size_part.split('x')
-            win_w, win_h = int(w_str), int(h_str)
-        except (ValueError, IndexError):
-            win_w, win_h = 600, 400 # Absolute fallback
+        if default_geom_str:
+            try:
+                size_part = default_geom_str.split('+')[0]
+                w_str, h_str = size_part.split('x')
+                win_w, win_h = int(w_str), int(h_str)
+            except (ValueError, IndexError):
+                win_w, win_h = 600, 400 # Fallback for malformed string
+        else:
+            # If no default string exists, trust the window's self-calculated size.
+            window.update_idletasks()
+            win_w = window.winfo_width()
+            win_h = window.winfo_height()
+            if win_w <= 1 or win_h <= 1: # Absolute fallback
+                win_w, win_h = 600, 400
 
-        # Center vertically, but position horizontally to the right of the parent.
+        # Now that we have a definitive width and height, calculate the position.
         parent.update_idletasks()
         parent_x = parent.winfo_rootx()
         parent_y = parent.winfo_rooty()
+        parent_w = parent.winfo_width()
         parent_h = parent.winfo_height()
         x = parent_x + 200
         y = parent_y + (parent_h - win_h) // 2
 
     # --- Step 2: Constrain the position to be fully on-screen ---
-    # Get the work area of the monitor where the window *would* be placed.
     mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area((x, y))
 
     # Apply buffers to prevent spawning behind the taskbar or against the screen edges.

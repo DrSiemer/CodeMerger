@@ -86,7 +86,6 @@ class ProjectConfig:
 
     def get_active_profile(self):
         """Returns the dictionary for the currently active profile."""
-        # [FIX] Ensure the active profile always exists, create if not.
         if self.active_profile_name not in self.profiles:
             self.profiles[self.active_profile_name] = self._create_empty_profile()
         return self.profiles[self.active_profile_name]

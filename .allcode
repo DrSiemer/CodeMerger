@@ -9,9 +9,9 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1763026648.1810317,
-          "hash": "b378ab495582bb9c8550a197357eddd8fde55ee1",
-          "tokens": 1587,
+          "mtime": 1763028177.7956932,
+          "hash": "0aa1389e436a69426cbcd33c4e95b036749bc02b",
+          "tokens": 1601,
           "lines": 104
         },
         {
@@ -65,9 +65,9 @@
         },
         {
           "path": "default_filetypes.json",
-          "mtime": 1762508028.4609787,
-          "hash": "c4cde96ba4d5b92ba55a7aeee51cccdac4f13b0f",
-          "tokens": 624,
+          "mtime": 1763032437.6783035,
+          "hash": "77f65e230a2f747d6bcb23e988a5969fb860bdcd",
+          "tokens": 1278,
           "lines": 49
         },
         {
@@ -79,17 +79,17 @@
         },
         {
           "path": "src/codemerger.py",
-          "mtime": 1762512246.037659,
-          "hash": "450a781e49644b81b4219ace6ea22c68d971e73d",
-          "tokens": 342,
-          "lines": 46
+          "mtime": 1763040064.340142,
+          "hash": "e0f95faecea7038e020e448af1a58606ac3b418a",
+          "tokens": 394,
+          "lines": 50
         },
         {
           "path": "src/constants.py",
-          "mtime": 1763025730.0658474,
-          "hash": "c704282cf94dc11ae3554465179d26830c4a4c17",
-          "tokens": 1470,
-          "lines": 142
+          "mtime": 1763031170.0242293,
+          "hash": "c68afe1efb9e19fb586b56f62f48eabc089adcab",
+          "tokens": 1481,
+          "lines": 143
         },
         {
           "path": "src/core/logger.py",
@@ -107,10 +107,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1757938209.7239728,
-          "hash": "31f78dc970f8c7ad2213e01b55e86048c9f59395",
-          "tokens": 2214,
-          "lines": 253
+          "mtime": 1763036423.3485398,
+          "hash": "de344530d8be7bdc051c8771df09249dca19eaf6",
+          "tokens": 2572,
+          "lines": 298
         },
         {
           "path": "src/core/registry.py",
@@ -128,10 +128,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1762434765.491788,
-          "hash": "e45e09138a794f7f8c29235e13819c0d88c8c09b",
-          "tokens": 2891,
-          "lines": 318
+          "mtime": 1763036441.6483593,
+          "hash": "d59ac44b491141d74839568751491b2da5af02b1",
+          "tokens": 2875,
+          "lines": 317
         },
         {
           "path": "src/core/project_manager.py",
@@ -177,10 +177,10 @@
         },
         {
           "path": "src/core/updater.py",
-          "mtime": 1762434765.491788,
-          "hash": "e8146c167e73e904e2928ad6b4e953c91b5da209",
-          "tokens": 1721,
-          "lines": 205
+          "mtime": 1763041144.711733,
+          "hash": "0379a56f0f164cbf18ff179a151e074018cbeedf",
+          "tokens": 1706,
+          "lines": 203
         },
         {
           "path": "updater_gui.py",
@@ -212,10 +212,10 @@
         },
         {
           "path": "src/ui/window_utils.py",
-          "mtime": 1762434765.5419066,
-          "hash": "b38040240008f9c9c6db0601a97f53203eebadc9",
-          "tokens": 1178,
-          "lines": 126
+          "mtime": 1763042443.533213,
+          "hash": "e2a3ee5190175f038fc1b05ee97e06b482c72617",
+          "tokens": 1301,
+          "lines": 138
         },
         {
           "path": "src/ui/tooltip.py",
@@ -261,10 +261,10 @@
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1763026648.1800303,
-          "hash": "e0daa8d9aa7124d48d138a153e0c88b3c346e1d2",
-          "tokens": 6307,
-          "lines": 771
+          "mtime": 1763038812.2664623,
+          "hash": "924a7c4f3b163cf6152015e8a9a770a3aca7275f",
+          "tokens": 6366,
+          "lines": 777
         },
         {
           "path": "src/ui/ui_builder.py",
@@ -303,10 +303,10 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1763027085.5497525,
-          "hash": "0f02846378e0b4257bbe8166da397f8652398cb4",
-          "tokens": 2389,
-          "lines": 232
+          "mtime": 1763028177.7966938,
+          "hash": "af3a4a66a515f664d3dfc32353fb1916ec3c9f46",
+          "tokens": 2601,
+          "lines": 252
         },
         {
           "path": "src/ui/compact_status.py",
@@ -443,10 +443,10 @@
         },
         {
           "path": "src/ui/filetypes_manager.py",
-          "mtime": 1758720729.2523065,
-          "hash": "c3fba2408f4c229877a7cf2a5fcc9fe0cee2aabb",
-          "tokens": 1859,
-          "lines": 193
+          "mtime": 1763041802.5864718,
+          "hash": "455ca5bc5075bb23ab0788b913fb0569f9f6917f",
+          "tokens": 2769,
+          "lines": 271
         },
         {
           "path": "src/ui/wrapper_text_window.py",
@@ -489,9 +489,16 @@
           "hash": "25204c027109e2f629866dc6ac84dd82553c818f",
           "tokens": 624,
           "lines": 57
+        },
+        {
+          "path": "src/ui/new_filetypes_dialog.py",
+          "mtime": 1763039978.4020846,
+          "hash": "1e91f2b8d490208d091bcaba95adcb5b6418fbc1",
+          "tokens": 691,
+          "lines": 73
         }
       ],
-      "total_tokens": 82010,
+      "total_tokens": 85149,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -554,6 +561,7 @@
     "src/ui/filetypes_manager.py",
     "src/ui/font_utils.py",
     "src/ui/multiline_input_dialog.py",
+    "src/ui/new_filetypes_dialog.py",
     "src/ui/new_profile_dialog.py",
     "src/ui/paste_changes_dialog.py",
     "src/ui/settings/application_settings.py",

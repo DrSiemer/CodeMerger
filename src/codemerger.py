@@ -3,14 +3,17 @@ import sys
 import logging
 from tkinter import Tk, messagebox
 from .ui.app_window import App
-from .core.utils import load_active_file_extensions, load_app_version
+from .core.utils import load_active_file_extensions, load_app_version, update_and_get_new_filetypes
 from .core.logger import setup_logging
+from .ui.new_filetypes_dialog import NewFiletypesDialog
 
 def main():
     setup_logging()
     log = logging.getLogger("CodeMerger")
 
     try:
+        newly_added_filetypes = update_and_get_new_filetypes()
+
         # Check for command-line arguments
         initial_project_path = None
         if len(sys.argv) > 1:
@@ -23,11 +26,12 @@ def main():
         # Load active file extensions first
         loaded_extensions = load_active_file_extensions()
         log.info(f"CodeMerger {app_version} starting up.")
-        # Create and run the main application
+        # Create and run the main application, passing the new filetypes to it.
         app = App(
             file_extensions=loaded_extensions,
             app_version=app_version,
-            initial_project_path=initial_project_path
+            initial_project_path=initial_project_path,
+            newly_added_filetypes=newly_added_filetypes
         )
         app.mainloop()
     except Exception as e:
