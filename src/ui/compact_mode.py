@@ -149,12 +149,12 @@ class CompactMode(tk.Toplevel):
         self.copy_button._draw(self.copy_button.hover_color)
         is_ctrl = (event.state & 0x0004)
         if is_ctrl:
-            self.parent.copy_merged_code()
+            self.parent.action_handlers.copy_merged_code()
         else:
             if self.show_wrapped_button:
-                self.parent.copy_wrapped_code()
+                self.parent.action_handlers.copy_wrapped_code()
             else:
-                self.parent.copy_merged_code()
+                self.parent.action_handlers.copy_merged_code()
 
     def on_paste_click(self, event):
         # This re-implements the click visual from RoundedButton
@@ -165,15 +165,15 @@ class CompactMode(tk.Toplevel):
         self.paste_button._draw(self.paste_button.hover_color)
         is_ctrl = (event.state & 0x0004)
         if is_ctrl:
-            self.parent.apply_changes_from_clipboard()
+            self.parent.action_handlers.apply_changes_from_clipboard()
         else:
-            self.parent.open_paste_changes_dialog()
+            self.parent.action_handlers.open_paste_changes_dialog()
 
     def _exit_and_open_file_manager(self):
         # This will start the animation to restore the main window.
         self.close_callback()
         # Schedule the file manager to open after the animation is likely complete.
-        self.parent.after(int(c.ANIMATION_DURATION_SECONDS * 1000) + 50, self.parent.manage_files)
+        self.parent.after(int(c.ANIMATION_DURATION_SECONDS * 1000) + 50, self.parent.action_handlers.manage_files)
 
     def on_new_files_release(self, event):
         if self.new_files_button:
@@ -184,7 +184,7 @@ class CompactMode(tk.Toplevel):
             # Command logic
             is_ctrl = (event.state & 0x0004)
             if is_ctrl:
-                self.parent.add_new_files_to_merge_order()
+                self.parent.action_handlers.add_new_files_to_merge_order()
             else:
                 self._exit_and_open_file_manager()
 
@@ -234,7 +234,7 @@ class CompactMode(tk.Toplevel):
 
     def close_window(self, event=None):
         if event and (event.state & 0x0004):
-            self.parent.on_app_close()
+            self.parent.event_handlers.on_app_close()
         elif self.close_callback:
             self.close_callback()
 
