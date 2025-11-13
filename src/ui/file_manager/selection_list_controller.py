@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import pyperclip
 from tkinter import messagebox, Toplevel, Label
 from ... import constants as c
 from .selection_data_manager import SelectionDataManager
@@ -37,7 +38,21 @@ class SelectionListController:
         self.listbox.bind_event('<Motion>', self._schedule_tooltip)
         self.listbox.bind_event('<Leave>', self._hide_tooltip)
         self.listbox.bind_event('<MouseWheel>', self._on_scroll, add='+')
-        # Button commands will be set in file_manager_window.py
+        self.listbox.bind_event('<Control-Button-1>', self._on_ctrl_click)
+
+    def _on_ctrl_click(self, event):
+        """Handles Ctrl+Click events, specifically on the token count area."""
+        if event.x > (self.listbox.winfo_width() - self.listbox.right_col_width):
+            index = int(self.listbox.canvasy(event.y) // self.listbox.row_height)
+
+            if 0 <= index < len(self.ordered_selection):
+                path = self.ordered_selection[index].get('path')
+                if path:
+                    request_string = f"`{path}` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality."
+                    pyperclip.copy(request_string)
+                    self.parent.status_var.set(f"Copied breakup request for '{os.path.basename(path)}'")
+                    return "break"
+        return None
 
     def set_initial_selection(self, selection_list):
         self.data_manager.set_initial_selection(selection_list)
@@ -166,7 +181,9 @@ class SelectionListController:
         tooltip_text = None
         if is_over_token_area and self.ui_manager.token_count_enabled:
             tokens, lines = item_info.get('tokens', -1), item_info.get('lines', -1)
-            if tokens >= 0: tooltip_text = f"{tokens} tokens, {lines} lines"
+            # [MODIFIED] Add the Ctrl+Click hint to the tooltip text.
+            if tokens >= 0:
+                tooltip_text = f"{tokens} tokens, {lines} lines\nCtrl+Click to copy breakup request"
         elif not self.ui_manager.show_full_paths:
             basename, full_path_display = os.path.basename(path), path.replace('/', os.sep)
             if basename != full_path_display: tooltip_text = full_path_display

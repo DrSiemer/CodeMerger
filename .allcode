@@ -422,10 +422,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1762434765.4983046,
-          "hash": "6c3fc04bffcd362b4d45309e18eb378097c16fe2",
-          "tokens": 1776,
-          "lines": 187
+          "mtime": 1763046968.6930294,
+          "hash": "08d20d2a961b9a58ca59ffee84b4d09f3e41c2d3",
+          "tokens": 1981,
+          "lines": 204
         },
         {
           "path": "src/ui/file_manager/order_request_handler.py",
