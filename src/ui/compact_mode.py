@@ -139,6 +139,8 @@ class CompactMode(tk.Toplevel):
         self.copy_button.bind("<Leave>", self.hide_tooltip)
         self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window\n(Ctrl+Click to paste from clipboard)"))
         self.paste_button.bind("<Leave>", self.hide_tooltip)
+        self.close_button.bind("<Enter>", lambda e: self.show_tooltip("Restore window (Ctrl+Click to exit app)"))
+        self.close_button.bind("<Leave>", self.hide_tooltip)
 
     def on_copy_click(self, event):
         self.copy_button._draw(self.copy_button.click_color)
@@ -231,7 +233,9 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window = None
 
     def close_window(self, event=None):
-        if self.close_callback:
+        if event and (event.state & 0x0004):
+            self.parent.on_app_close()
+        elif self.close_callback:
             self.close_callback()
 
     def on_press_drag(self, event):

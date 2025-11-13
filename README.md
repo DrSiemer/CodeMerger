@@ -70,7 +70,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - A warning icon will appear in the move bar if new files are found.
         - **Click** the icon to restore the main window and open the file manager.
         - **Ctrl-click** the icon to immediately add all new files to the merge list.
-    - Double-click the move bar or use the close button to exit compact mode and restore the main window.
+    - Double-click the move bar or click the close button to exit compact mode and restore the main window. **Ctrl-clicking** the close button will exit the application immediately.
 
 
 ![Settings](./dev/screenshot_04.png "Settings")
