@@ -32,4 +32,9 @@ class AppHelpers:
 
     def show_error_dialog(self, title, message):
         from ..custom_error_dialog import CustomErrorDialog
-        CustomErrorDialog(self.app, title, message)
+        app = self.app
+        dialog_parent = app
+        if app.view_manager.current_state == 'compact' and app.view_manager.compact_mode_window and app.view_manager.compact_mode_window.winfo_exists():
+            dialog_parent = app.view_manager.compact_mode_window
+
+        CustomErrorDialog(dialog_parent, title, message)
