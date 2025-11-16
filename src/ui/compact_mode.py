@@ -142,6 +142,9 @@ class CompactMode(tk.Toplevel):
         self.close_button.bind("<Enter>", lambda e: self.show_tooltip("Restore window (Ctrl+Click to exit app)"))
         self.close_button.bind("<Leave>", self.hide_tooltip)
 
+        # Paste shortcut
+        self.bind("<Control-Shift-V>", lambda event: self.parent.action_handlers.apply_changes_from_clipboard())
+
     def on_copy_click(self, event):
         self.copy_button._draw(self.copy_button.click_color)
 
