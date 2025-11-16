@@ -75,6 +75,11 @@ class App(Tk):
         self.bind("<Map>", self.view_manager.on_main_window_restored)
         self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
         self.bind("<Configure>", self.event_handlers.on_window_configure)
+
+        # Keyboard shortcuts
+        self.bind("<Control-c>", lambda event: self.action_handlers.copy_wrapped_code())
+        self.bind("<Control-Shift-C>", lambda event: self.action_handlers.copy_merged_code())
+        self.bind("<Control-v>", lambda event: self.action_handlers.open_paste_changes_dialog())
         self.bind("<Control-Shift-V>", lambda event: self.action_handlers.apply_changes_from_clipboard())
 
         # Initialize StringVar members before UI build

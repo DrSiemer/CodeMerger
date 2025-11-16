@@ -56,10 +56,14 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Click "Define Instructions" to add a project-specific introduction or conclusion that will be wrapped around the merged code block
     - You can click the "Load Defaults" icon in this window to populate the fields with your predefined default prompts from the Settings
 - **Copy Code**
-    - Click "Copy Code Only" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM
-    - If you added instructions, a "Copy with Instructions" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation
+    - Click "Copy Code Only" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM. The keyboard shortcut for this action is **`Ctrl+Shift+C`**.
+    - If you added instructions, a "Copy with Instructions" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation. The keyboard shortcut for this action is **`Ctrl+C`**.
+- **Paste Changes**
+    - To apply changes from a language model, you can use the paste functionality.
+    - Pressing **`Ctrl+V`** will open the "Paste Changes" window, allowing you to review and apply the code from your clipboard.
+    - Pressing **`Ctrl+Shift+V`** will apply the changes from your clipboard immediately, without opening the review window (unless new files need to be created).
 - **Compact Mode**
-    - Minimize the main window to activate the compact mode panel.
+    - Minimize the main window to activate the compact mode panel. All keyboard shortcuts (`Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+V`, and `Ctrl+Shift+V`) are also active in this mode.
     - The panel contains two primary buttons:
         - **Copy (Instructions/Code Only)**: A single adaptive button for copying code.
             - It appears as "Copy with Instructions" if you have defined instructions for the project, and "Copy Code Only" if you have not.
