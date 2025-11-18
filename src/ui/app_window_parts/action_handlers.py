@@ -93,28 +93,43 @@ class ActionHandlers:
     def open_project_folder(self, event=None):
         app = self.app
         project_path = app.active_dir.get()
-        is_ctrl_pressed = event and (event.state & 0x0004)
 
-        if is_ctrl_pressed:
-            if project_path and os.path.isdir(project_path):
-                pyperclip.copy(project_path.replace('/', '\\'))
-                app.status_var.set("Copied project path to clipboard")
-            else:
-                app.status_var.set("No active project path to copy")
+        if not (project_path and os.path.isdir(project_path)):
+            app.status_var.set("No active project folder to open.")
             return
 
-        if project_path and os.path.isdir(project_path):
+        is_ctrl_pressed = event and (event.state & 0x0004)
+        is_alt_pressed = event and (event.state & 0x20000)
+
+        # Priority 1: Ctrl + Alt -> Open Console
+        if is_ctrl_pressed and is_alt_pressed:
             try:
                 if sys.platform == "win32":
-                    os.startfile(project_path)
-                elif sys.platform == "darwin":
-                    subprocess.Popen(["open", project_path])
+                    creationflags = subprocess.CREATE_NEW_CONSOLE
+                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=creationflags)
+                    app.status_var.set("Opened console in project folder")
                 else:
-                    subprocess.Popen(["xdg-open", project_path])
+                    app.status_var.set("Feature only available on Windows.")
             except Exception as e:
-                app.show_error_dialog("Error", f"Could not open folder: {e}")
-        else:
-            app.status_var.set("No active project folder to open.")
+                app.show_error_dialog("Error", f"Could not open console: {e}")
+            return
+
+        # Priority 2: Ctrl only -> Copy Path
+        if is_ctrl_pressed:
+            pyperclip.copy(project_path.replace('/', '\\'))
+            app.status_var.set("Copied project path to clipboard")
+            return
+
+        # Priority 3: No modifiers -> Open in File Explorer
+        try:
+            if sys.platform == "win32":
+                os.startfile(project_path)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", project_path])
+            else:
+                subprocess.Popen(["xdg-open", project_path])
+        except Exception as e:
+            app.show_error_dialog("Error", f"Could not open folder: {e}")
 
     def open_settings_window(self):
         app = self.app

@@ -59,7 +59,7 @@ def setup_ui(app):
     # Open folder icon
     app.folder_icon_label = Label(right_frame, image=assets.folder_icon, bg=c.TOP_BAR_BG, cursor="hand2")
     app.folder_icon_label.bind("<Button-1>", app.action_handlers.open_project_folder)
-    ToolTip(app.folder_icon_label, "Open project folder (Ctrl+Click to copy path)", delay=500)
+    ToolTip(app.folder_icon_label, "Open project folder\nCtrl+Click: Copy path\nCtrl+Alt+Click: Open console", delay=500)
 
     # --- Top-Level Buttons (Row 1) ---
     app.top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20, height=32)
