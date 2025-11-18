@@ -71,6 +71,11 @@ class SelectionListController:
         self.data_manager.add_files(paths_to_add)
         self._update_and_notify()
 
+    def remove_files(self, paths_to_remove):
+        """Removes a list of files from the selection and updates the UI."""
+        self.data_manager.remove_files(paths_to_remove)
+        self._update_and_notify()
+
     def remove_all_files(self):
         self.data_manager.remove_all()
         self._update_and_notify()

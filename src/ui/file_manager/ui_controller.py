@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, Toplevel, Label
 from ... import constants as c
 from ..assets import assets
 
@@ -10,6 +10,10 @@ class FileManagerUIController:
     def __init__(self, window):
         self.window = window
         self.active_folder_icon_label = None
+        self.folder_tooltip_window = None
+        self.folder_tooltip_label = None
+        self.folder_tooltip_job = None
+        self.hovered_folder_id = None
 
     def clear_filter(self, event=None):
         self.window.filter_text.set("")
@@ -82,11 +86,75 @@ class FileManagerUIController:
         item_id = self.window.tree.identify_row(event.y)
         self._show_icon_for_item(item_id)
 
+        # Cancel any pending job and hide the current tooltip.
+        if self.folder_tooltip_job:
+            self.window.after_cancel(self.folder_tooltip_job)
+            self.folder_tooltip_job = None
+        self._hide_folder_tooltip()
+
+        self.hovered_folder_id = None
+
+        if item_id:
+            item_info = self.window.item_map.get(item_id, {})
+            if item_info.get('type') == 'dir':
+                self.hovered_folder_id = item_id
+                self.folder_tooltip_job = self.window.after(500, lambda e=event, iid=item_id: self._show_folder_tooltip(e, iid))
+
     def on_tree_leave(self, event=None):
         if self.active_folder_icon_label:
             self.active_folder_icon_label.place_forget()
             self.active_folder_icon_label = None
         self.window.hovered_file_path = None
+
+        if self.folder_tooltip_job:
+            self.window.after_cancel(self.folder_tooltip_job)
+            self.folder_tooltip_job = None
+        self._hide_folder_tooltip()
+        self.hovered_folder_id = None
+
+    def _get_folder_tooltip_text(self, item_id):
+        """Calculates the dynamic text for the folder tooltip."""
+        files_in_subtree = self.window.tree_handler._get_all_files_in_subtree(item_id)
+        if not files_in_subtree:
+            return None
+
+        current_selection_paths = {f['path'] for f in self.window.selection_handler.ordered_selection}
+        subtree_paths_set = set(files_in_subtree)
+        is_fully_selected = subtree_paths_set.issubset(current_selection_paths)
+
+        action_text = "remove" if is_fully_selected else "add"
+        return f"Alt+Click to {action_text} all files in this folder"
+
+    def _show_folder_tooltip(self, event, item_id):
+        self._hide_folder_tooltip()
+
+        text = self._get_folder_tooltip_text(item_id)
+        if not text:
+            return
+
+        x, y = event.x_root + 15, event.y_root + 10
+        self.folder_tooltip_window = Toplevel(self.window)
+        self.folder_tooltip_window.wm_overrideredirect(True)
+        self.folder_tooltip_window.wm_geometry(f"+{x}+{y}")
+        self.folder_tooltip_label = Label(self.folder_tooltip_window, text=text, justify='left',
+                      background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
+                      font=c.FONT_TOOLTIP)
+        self.folder_tooltip_label.pack(ipadx=4, ipady=2)
+
+    def _hide_folder_tooltip(self):
+        if self.folder_tooltip_window:
+            self.folder_tooltip_window.destroy()
+        self.folder_tooltip_window = None
+        self.folder_tooltip_label = None
+
+    def update_active_folder_tooltip(self):
+        """Refreshes the folder tooltip text if it's currently visible."""
+        if self.hovered_folder_id and self.folder_tooltip_window and self.folder_tooltip_label:
+            new_text = self._get_folder_tooltip_text(self.hovered_folder_id)
+            if new_text:
+                self.folder_tooltip_label.config(text=new_text)
+            else:
+                self._hide_folder_tooltip()
 
     def on_folder_icon_click(self, event=None):
         if self.window.hovered_file_path:

@@ -162,6 +162,7 @@ class FileManagerWindow(Toplevel):
         self.tree_handler.update_all_checkboxes()
         self.update_all_button_states()
         self.data_controller.run_token_recalculation()
+        self.ui_controller.update_active_folder_tooltip()
 
     def on_file_toggled(self, path):
         self.selection_handler.toggle_file(path)

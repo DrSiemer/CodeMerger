@@ -20,6 +20,7 @@ class FileTreeHandler:
         self.last_clicked_item_id = None
 
         self.tree.bind('<Button-1>', self.handle_tree_click)
+        self.tree.bind('<Alt-Button-1>', self.handle_alt_click)
         self.tree.bind('<Return>', self.toggle_selection_for_selected) # For accessibility
         self.tree.bind('<<TreeviewSelect>>', self.on_tree_selection_change)
         self.tree.bind("<Button-1>", self.handle_tree_deselection_click, add='+')
@@ -98,6 +99,42 @@ class FileTreeHandler:
         else:
             self.last_tree_click_time = current_time
             self.last_clicked_item_id = item_id
+
+    def handle_alt_click(self, event):
+        """Handles an Alt+Click event on the tree, adding or removing all files in a folder."""
+        item_id = self.tree.identify_row(event.y)
+        if not item_id:
+            return
+
+        item_info = self.item_map.get(item_id, {})
+        if item_info.get('type') == 'dir':
+            files_in_subtree = self._get_all_files_in_subtree(item_id)
+            if not files_in_subtree:
+                return "break"
+
+            current_selection_paths = {f['path'] for f in self.parent.selection_handler.ordered_selection}
+            subtree_paths_set = set(files_in_subtree)
+
+            # If all files in the folder are already selected, remove them. Otherwise, add them.
+            if subtree_paths_set.issubset(current_selection_paths):
+                self.parent.selection_handler.remove_files(files_in_subtree)
+            else:
+                # Only add files that are not already in the selection
+                paths_to_add = [p for p in files_in_subtree if p not in current_selection_paths]
+                self.parent.selection_handler.add_files(paths_to_add)
+
+            return "break" # Prevent other bindings from firing
+
+    def _get_all_files_in_subtree(self, parent_id):
+        """Recursively collects all file paths under a given directory node in the tree."""
+        files = []
+        for child_id in self.tree.get_children(parent_id):
+            child_info = self.item_map.get(child_id, {})
+            if child_info.get('type') == 'file':
+                files.append(child_info['path'])
+            elif child_info.get('type') == 'dir':
+                files.extend(self._get_all_files_in_subtree(child_id))
+        return files
 
     def toggle_selection_for_selected(self, event=None):
         """Adds or removes the selected file(s) from the merge list via the callback"""

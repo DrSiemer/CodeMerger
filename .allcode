@@ -289,10 +289,10 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1763462402.1421351,
-          "hash": "fa0bded99dab2cc51f9dea26671a341f7ddb86b7",
-          "tokens": 2445,
-          "lines": 316
+          "mtime": 1763463153.400592,
+          "hash": "982ac35464aaf1ed056fc2b05945faa31beb1a5a",
+          "tokens": 2579,
+          "lines": 331
         },
         {
           "path": "src/ui/app_window_parts/project_actions.py",
@@ -324,9 +324,9 @@
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1763293171.8092737,
-          "hash": "81086dbbd6db9779d9154c8465dfed90b0df7bf2",
-          "tokens": 2424,
+          "mtime": 1763462745.307559,
+          "hash": "c117dbdaaa9934fad8a67df4801c1ec7157c0fc2",
+          "tokens": 2433,
           "lines": 159
         },
         {
@@ -359,10 +359,10 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1762809491.543511,
-          "hash": "2d89cb97aa677ddff12938d65a543daa394a004e",
-          "tokens": 1903,
-          "lines": 210
+          "mtime": 1763463981.3376913,
+          "hash": "05905688f7be13dfbf5676a0fe0cda49fdb9d89c",
+          "tokens": 1912,
+          "lines": 211
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
@@ -387,10 +387,10 @@
         },
         {
           "path": "src/ui/file_manager/ui_controller.py",
-          "mtime": 1762342470.6495702,
-          "hash": "911860aaae6412b4a7cf9655060a4e74be51febc",
-          "tokens": 1528,
-          "lines": 181
+          "mtime": 1763463981.3386772,
+          "hash": "7a2202f150466c8e5e1c959b1c15a81739716fe8",
+          "tokens": 2150,
+          "lines": 249
         },
         {
           "path": "src/ui/file_manager/file_tree_builder.py",
@@ -401,17 +401,17 @@
         },
         {
           "path": "src/ui/file_manager/file_tree_handler.py",
-          "mtime": 1762809491.5445113,
-          "hash": "24a9b2220499f69941ebc447cea282f651d78ed0",
-          "tokens": 1124,
-          "lines": 132
+          "mtime": 1763463596.365965,
+          "hash": "18c2276d0a6866d4ce86184b287dd76247b4ccdb",
+          "tokens": 1492,
+          "lines": 169
         },
         {
           "path": "src/ui/file_manager/selection_data_manager.py",
-          "mtime": 1761319775.2161472,
-          "hash": "0e72ced3ed493eb1ee20c9401d6549ce98608c1e",
-          "tokens": 879,
-          "lines": 97
+          "mtime": 1763463596.366933,
+          "hash": "9a9e170d090c8a79c2b7b234387b2e2f5fcc2c5c",
+          "tokens": 939,
+          "lines": 102
         },
         {
           "path": "src/ui/file_manager/selection_list_ui.py",
@@ -422,10 +422,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1763293171.8050237,
-          "hash": "26c180b7a33e39939aec7ffad0eae5c6d5189a34",
-          "tokens": 1964,
-          "lines": 203
+          "mtime": 1763463596.366933,
+          "hash": "34de885270f6c14135527ba9be853fec37743f4b",
+          "tokens": 2007,
+          "lines": 208
         },
         {
           "path": "src/ui/file_manager/order_request_handler.py",
@@ -540,7 +540,7 @@
           "lines": 73
         }
       ],
-      "total_tokens": 85703,
+      "total_tokens": 86948,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

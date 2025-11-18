@@ -52,6 +52,11 @@ class SelectionDataManager:
                 if new_entry:
                     self.ordered_selection.append(new_entry)
 
+    def remove_files(self, paths_to_remove):
+        """Removes a list of files from the selection based on their paths."""
+        paths_set = set(paths_to_remove)
+        self.ordered_selection = [f for f in self.ordered_selection if f['path'] not in paths_set]
+
     def remove_all(self):
         self.ordered_selection.clear()
 
