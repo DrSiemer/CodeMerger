@@ -93,10 +93,10 @@
         },
         {
           "path": "src/core/paths.py",
-          "mtime": 1762809491.5405111,
-          "hash": "188a3c4cf4ee04ee14ecfcf02d083737f4ada27a",
-          "tokens": 899,
-          "lines": 96
+          "mtime": 1763466517.2977834,
+          "hash": "1efcdfca3b63aa494eef8e2e15b50f689c61fc41",
+          "tokens": 950,
+          "lines": 100
         },
         {
           "path": "src/core/logger.py",
@@ -191,10 +191,10 @@
         },
         {
           "path": "src/ui/assets.py",
-          "mtime": 1762809491.541511,
-          "hash": "1586ca045b91490156b79a52e1aec9b7e7f0c69b",
-          "tokens": 1865,
-          "lines": 152
+          "mtime": 1763466517.2977834,
+          "hash": "e17fff53d5c272480a52be0c9103ff6487e11fb6",
+          "tokens": 1986,
+          "lines": 159
         },
         {
           "path": "src/ui/style_manager.py",
@@ -359,17 +359,17 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1763463981.3376913,
-          "hash": "05905688f7be13dfbf5676a0fe0cda49fdb9d89c",
-          "tokens": 1912,
-          "lines": 211
+          "mtime": 1763466517.2977834,
+          "hash": "792af77ee04a70a5202c3e6fff5c0640e7d6d117",
+          "tokens": 1930,
+          "lines": 213
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
-          "mtime": 1762809491.5460217,
-          "hash": "7601d5b863a81cd06a12acd85cb60d6f57dc8def",
-          "tokens": 2943,
-          "lines": 184
+          "mtime": 1763466517.2987835,
+          "hash": "f4b5baf915c583c14890f869cf2df0bbd9111266",
+          "tokens": 3084,
+          "lines": 200
         },
         {
           "path": "src/ui/file_manager/state_controller.py",
@@ -387,17 +387,17 @@
         },
         {
           "path": "src/ui/file_manager/ui_controller.py",
-          "mtime": 1763463981.3386772,
-          "hash": "7a2202f150466c8e5e1c959b1c15a81739716fe8",
-          "tokens": 2150,
-          "lines": 249
+          "mtime": 1763466517.2987835,
+          "hash": "ca785eefabc78ff2fb7addd7021963cd95e9e2c5",
+          "tokens": 2319,
+          "lines": 266
         },
         {
           "path": "src/ui/file_manager/file_tree_builder.py",
-          "mtime": 1761319775.215134,
-          "hash": "a592810f9610b8db409cf6b04c646eb7b01c79d9",
-          "tokens": 878,
-          "lines": 84
+          "mtime": 1763466517.2987835,
+          "hash": "ecec60bd40dc3e24e72b7bb9e4b263174b889f1e",
+          "tokens": 902,
+          "lines": 89
         },
         {
           "path": "src/ui/file_manager/file_tree_handler.py",
@@ -540,7 +540,7 @@
           "lines": 73
         }
       ],
-      "total_tokens": 86948,
+      "total_tokens": 87472,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

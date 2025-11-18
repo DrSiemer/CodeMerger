@@ -76,6 +76,10 @@ DEFAULTS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'defaults.png')
 EXTRA_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files.png')
 EXTRA_FILES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files_active.png')
 
+# Path to the gitignore toggle icon
+GIT_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'git_files.png')
+GIT_FILES_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'git_files_active.png')
+
 # Path to the paths toggle icon
 PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')
 PATHS_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths_active.png')

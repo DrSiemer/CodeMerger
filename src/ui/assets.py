@@ -6,6 +6,7 @@ from ..core.paths import (
     COMPACT_MODE_CLOSE_ICON_PATH,
     FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
     EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH,
+    GIT_FILES_ICON_PATH, GIT_FILES_ACTIVE_ICON_PATH,
     SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH
 )
 
@@ -27,8 +28,10 @@ class AppAssets:
         self.paths_icon_pil = self._load_image(PATHS_ICON_PATH, (16, 12))
         self.paths_icon_active_pil = self._load_image(PATHS_ACTIVE_ICON_PATH, (16, 12))
         self.order_request_pil = self._load_image(ORDER_REQUEST_ICON_PATH, (14, 12))
-        self.filter_icon_pil = self._load_image(EXTRA_FILES_ICON_PATH, (17, 7))
-        self.filter_icon_active_pil = self._load_image(EXTRA_FILES_ICON_ACTIVE_PATH, (17, 7))
+        self.git_files_icon_pil = self._load_image(GIT_FILES_ICON_PATH, (30, 14))
+        self.git_files_icon_active_pil = self._load_image(GIT_FILES_ACTIVE_ICON_PATH, (30, 14))
+        self.filter_icon_pil = self._load_image(EXTRA_FILES_ICON_PATH, (30, 14))
+        self.filter_icon_active_pil = self._load_image(EXTRA_FILES_ICON_ACTIVE_PATH, (30, 14))
         self.settings_icon_pil = self._load_image(SETTINGS_ICON_PATH, (30, 30))
         self.filetypes_icon_pil = self._load_image(FILETYPES_ICON_PATH, (30, 30))
         self.settings_icon_active_pil = self._load_image(SETTINGS_ICON_ACTIVE_PATH, (30, 30))
@@ -45,6 +48,8 @@ class AppAssets:
         self.paths_icon = None
         self.paths_icon_active = None
         self.order_request_icon = None
+        self.git_files_icon = None
+        self.git_files_icon_active = None
         self.filter_icon = None
         self.filter_icon_active = None
         self.compact_mode_close_image = None
@@ -66,6 +71,8 @@ class AppAssets:
         self.paths_icon = self._pil_to_photoimage(self.paths_icon_pil)
         self.paths_icon_active = self._pil_to_photoimage(self.paths_icon_active_pil)
         self.order_request_icon = self._pil_to_photoimage(self.order_request_pil)
+        self.git_files_icon = self._pil_to_photoimage(self.git_files_icon_pil)
+        self.git_files_icon_active = self._pil_to_photoimage(self.git_files_icon_active_pil)
         self.filter_icon = self._pil_to_photoimage(self.filter_icon_pil)
         self.filter_icon_active = self._pil_to_photoimage(self.filter_icon_active_pil)
         self.compact_mode_close_image = self._pil_to_photoimage(self.compact_mode_close_pil)

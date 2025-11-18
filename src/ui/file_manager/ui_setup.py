@@ -51,8 +51,24 @@ def setup_file_manager_ui(window):
     Label(title_sub_frame, text="Available Files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(side='left')
     Label(title_sub_frame, text="(double click or enter to add/remove)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left', padx=(5,0))
 
+    right_buttons_frame = Frame(available_files_title_frame, bg=c.DARK_BG)
+    right_buttons_frame.grid(row=0, column=2, sticky='e')
+
+    window.toggle_gitignore_button = Button(
+        right_buttons_frame,
+        image=assets.git_files_icon,
+        command=window.ui_controller.toggle_gitignore_filter,
+        bg=c.DARK_BG,
+        activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
+        relief='flat',
+        bd=0,
+        cursor='hand2'
+    )
+    window.toggle_gitignore_button.pack(side='left')
+    window.gitignore_button_tooltip = ToolTip(window.toggle_gitignore_button, ".gitignore filter is ON. Click to show all files.")
+
     window.toggle_filter_button = Button(
-        available_files_title_frame,
+        right_buttons_frame,
         image=assets.filter_icon,
         command=window.ui_controller.toggle_extension_filter,
         bg=c.DARK_BG,
@@ -61,7 +77,7 @@ def setup_file_manager_ui(window):
         bd=0,
         cursor='hand2'
     )
-    window.toggle_filter_button.grid(row=0, column=2, sticky='e')
+    window.toggle_filter_button.pack(side='left', padx=(5, 0))
     window.filter_button_tooltip = ToolTip(window.toggle_filter_button, "Filetype filter is ON. Click to show all files.")
 
     style = ttk.Style()

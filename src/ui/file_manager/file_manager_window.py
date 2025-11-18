@@ -29,6 +29,7 @@ class FileManagerWindow(Toplevel):
         self.full_paths_visible = False
         self.token_count_enabled = self.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
         self.is_extension_filter_active = True
+        self.is_gitignore_filter_active = True
         self.hovered_file_path = None
         self.current_total_tokens = self.project_config.total_tokens
         self.sash_pos_normal = None
@@ -136,7 +137,8 @@ class FileManagerWindow(Toplevel):
             self.gitignore_patterns,
             filter_text,
             self.is_extension_filter_active,
-            selected_paths
+            selected_paths,
+            self.is_gitignore_filter_active
         )
         def _insert_nodes(parent_id, nodes):
             for node in nodes:

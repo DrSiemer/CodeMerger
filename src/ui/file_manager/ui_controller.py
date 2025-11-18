@@ -199,6 +199,23 @@ class FileManagerUIController:
             except tk.TclError: pass
         self.window.after(10, adjust_sash)
 
+    def toggle_gitignore_filter(self):
+        """Toggles the .gitignore file filter on and off."""
+        self.window.is_gitignore_filter_active = not self.window.is_gitignore_filter_active
+
+        self.window.gitignore_button_tooltip.cancel_show()
+        self.window.gitignore_button_tooltip.hide_tooltip()
+
+        if self.window.is_gitignore_filter_active:
+            self.window.toggle_gitignore_button.config(image=assets.git_files_icon)
+            self.window.gitignore_button_tooltip.text = ".gitignore filter is ON. Click to show all files."
+        else:
+            self.window.toggle_gitignore_button.config(image=assets.git_files_icon_active)
+            self.window.gitignore_button_tooltip.text = ".gitignore filter is OFF. Click to hide ignored files."
+
+        self.window.gitignore_button_tooltip.show_tooltip()
+        self.window.populate_tree(self.window.filter_text.get())
+
     def toggle_extension_filter(self):
         """Toggles the filetype extension filter on and off."""
         self.window.is_extension_filter_active = not self.window.is_extension_filter_active
