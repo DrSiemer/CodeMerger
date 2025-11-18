@@ -201,7 +201,7 @@ class ActionHandlers:
             newly_detected_files=files_to_highlight
         )
         app.wait_window(fm_window)
-        app.project_actions.set_active_dir_display(app.active_dir.get(), set_status=False)
+        app.button_manager.update_button_states()
 
     def on_new_files_click(self, event):
         is_ctrl = (event.state & 0x0004)
