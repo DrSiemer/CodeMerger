@@ -109,6 +109,8 @@ class PasteChangesDialog(Toplevel):
 
         if success:
             self.status_var.set(final_message)
+            if creations:
+                self.parent.file_monitor.perform_new_file_check()
             self.destroy()
         else:
             CustomErrorDialog(self, title="File Write Error", message=final_message)

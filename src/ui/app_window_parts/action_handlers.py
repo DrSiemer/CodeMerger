@@ -310,5 +310,7 @@ class ActionHandlers:
 
         if success:
             app.helpers.show_compact_toast(final_message)
+            if creations:
+                app.file_monitor.perform_new_file_check()
         else:
             app.show_error_dialog("File Write Error", final_message)
