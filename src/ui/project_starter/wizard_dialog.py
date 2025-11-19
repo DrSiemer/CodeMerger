@@ -493,8 +493,7 @@ class ProjectStarterDialog(tk.Toplevel):
             # Close wizard and load project in main app
             full_path = str(Path(parent_folder) / project_folder_name)
 
-            # Apply default prompts to the new project
-            from ...core.project_config import ProjectConfig
+            # Apply default prompts and initialize project using the centralized ProjectManager logic
             from ...core.utils import load_config as load_app_config
 
             try:
@@ -505,13 +504,8 @@ class ProjectStarterDialog(tk.Toplevel):
                 # Replace placeholder
                 default_intro = default_intro.replace('REPLACE_ME', project_folder_name)
 
-                # We need to initialize a ProjectConfig for the new path
-                new_proj_config = ProjectConfig(full_path)
-                new_proj_config.load()
-
-                new_proj_config.intro_text = default_intro
-                new_proj_config.outro_text = default_outro
-                new_proj_config.save()
+                # Delegate initialization to ProjectManager to ensure files are auto-added and defaults are set
+                self.app.project_manager.create_project_with_defaults(full_path, default_intro, default_outro)
 
             except Exception as e:
                 log.error(f"Failed to apply default prompts to new project: {e}")

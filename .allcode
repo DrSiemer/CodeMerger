@@ -135,10 +135,10 @@
         },
         {
           "path": "src/core/project_manager.py",
-          "mtime": 1763552558.3228478,
-          "hash": "7d4c11c8b8dfe53fa3b68dad9f13152864a4e7bb",
-          "tokens": 385,
-          "lines": 46
+          "mtime": 1763556267.9335861,
+          "hash": "a69fdd5b27d13453183abbd28bfc844f429a068c",
+          "tokens": 640,
+          "lines": 83
         },
         {
           "path": "src/core/file_scanner.py",
@@ -555,10 +555,10 @@
         },
         {
           "path": "src/ui/project_starter/wizard_dialog.py",
-          "mtime": 1763555901.5387423,
-          "hash": "bbf6765796f08a0587fd1d678e48ac1c09f6664a",
-          "tokens": 4379,
-          "lines": 522
+          "mtime": 1763556267.9335861,
+          "hash": "425ca2065aff097173885216206893a7b0c60850",
+          "tokens": 4399,
+          "lines": 524
         },
         {
           "path": "src/ui/project_starter/step1_details.py",
