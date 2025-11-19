@@ -93,10 +93,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1763558306.1738214,
-          "hash": "5766a52fca939608439477a96cf89c59ec200977",
-          "tokens": 3003,
-          "lines": 349
+          "mtime": 1763558671.9228544,
+          "hash": "7efeeeeda8bfa2dac9688716a8cf585bb7754105",
+          "tokens": 2992,
+          "lines": 348
         },
         {
           "path": "src/app_state.py",
@@ -408,10 +408,10 @@
         },
         {
           "path": "src/ui/project_starter/wizard_dialog.py",
-          "mtime": 1763556942.5771153,
-          "hash": "f65e764b0f277cddd444ba95eae52eda91a51b64",
-          "tokens": 4373,
-          "lines": 518
+          "mtime": 1763559209.5838048,
+          "hash": "2005b6fb78c68c7d1e7b45af55fadbf264c37583",
+          "tokens": 2555,
+          "lines": 276
         },
         {
           "path": "src/ui/directory_dialog.py",
@@ -699,9 +699,23 @@
           "hash": "fda7b675deda07ff7d8472edf1ef11c4d264e0eb",
           "tokens": 539,
           "lines": 67
+        },
+        {
+          "path": "src/ui/project_starter/wizard_state.py",
+          "mtime": 1763559209.581804,
+          "hash": "8bdea23432fdd905acd43d16a6c2a403e2af55d5",
+          "tokens": 920,
+          "lines": 107
+        },
+        {
+          "path": "src/ui/project_starter/wizard_validator.py",
+          "mtime": 1763559209.5828037,
+          "hash": "fd557a9100efab2adaa1df37cf06168aeb73120e",
+          "tokens": 323,
+          "lines": 42
         }
       ],
-      "total_tokens": 112721,
+      "total_tokens": 113311,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -802,6 +816,8 @@
     "src/ui/project_starter/step4_generate.py",
     "src/ui/project_starter/success_view.py",
     "src/ui/project_starter/wizard_dialog.py",
+    "src/ui/project_starter/wizard_state.py",
+    "src/ui/project_starter/wizard_validator.py",
     "src/ui/settings/__init__.py",
     "src/ui/settings/application_settings.py",
     "src/ui/settings/collapsible_section.py",

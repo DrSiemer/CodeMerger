@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+import logging
 from pathlib import Path
 from tkinter import messagebox, filedialog
 from ... import constants as c
@@ -11,27 +12,28 @@ from .step3_todo import Step3TodoView
 from .step4_generate import Step4GenerateView
 from .success_view import SuccessView
 from ..window_utils import position_window
-from . import session_manager
-from . import generator
+from . import session_manager, generator, wizard_state, wizard_validator
+
+log = logging.getLogger("CodeMerger")
 
 class ProjectStarterDialog(tk.Toplevel):
     """
-    A wizard dialog for bootstrapping new software projects with persistence.
+    A wizard dialog for bootstrapping new software projects.
+    Delegates state to WizardState and validation to WizardValidator.
     """
     def __init__(self, parent, app, default_parent_folder):
         super().__init__(parent)
         self.withdraw()
         self.parent = parent
         self.app = app
-        self.default_parent_folder = default_parent_folder
+
+        self.state = wizard_state.WizardState(default_parent_folder)
 
         self.title("Project Starter Wizard")
-
         if parent.iconbitmap():
             try:
                 self.iconbitmap(parent.iconbitmap())
-            except Exception:
-                pass
+            except Exception: pass
 
         self.geometry(c.PROJECT_STARTER_GEOMETRY)
         self.minsize(700, 600)
@@ -41,30 +43,11 @@ class ProjectStarterDialog(tk.Toplevel):
 
         apply_dark_theme(self)
 
-        # State variables
-        self.current_step = 1
-        self.max_accessible_step = 1
-
-        self.project_data = {
-            "name": tk.StringVar(),
-            "parent_folder": tk.StringVar(value=self.default_parent_folder),
-            "stack": tk.StringVar(),
-            "description": "",
-            "goal": "",
-            "concept_md": "",
-            "todo_md": ""
-        }
-
-        # Setup auto-save triggers for StringVars
-        self.project_data["name"].trace_add("write", self._save_state)
-        self.project_data["parent_folder"].trace_add("write", self._save_state)
-        self.project_data["stack"].trace_add("write", self._save_state)
-
         self.current_view = None
         self._build_ui()
 
-        # Load previous session or default
-        self._load_state()
+        # Load previous session
+        self.state.load()
 
         self._show_current_step_view()
 
@@ -72,13 +55,13 @@ class ProjectStarterDialog(tk.Toplevel):
         self.deiconify()
         self.focus_force()
 
-        # Ensure saving on close
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def _build_ui(self):
         main_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
         main_frame.pack(expand=True, fill="both")
 
+        # --- Header & Tabs ---
         header_frame = tk.Frame(main_frame, bg=c.DARK_BG)
         header_frame.pack(fill="x", pady=(0, 10), side="top")
 
@@ -91,260 +74,101 @@ class ProjectStarterDialog(tk.Toplevel):
             tab = RoundedButton(
                 tabs_frame,
                 command=lambda step=i + 1: self._go_to_step(step),
-                text=name,
-                font=c.FONT_NORMAL,
-                bg=c.BTN_BLUE,
-                fg=c.BTN_BLUE_TEXT,
-                height=32,
-                radius=6,
-                hollow=True,
-                cursor="hand2"
+                text=name, font=c.FONT_NORMAL, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT,
+                height=32, radius=6, hollow=True, cursor="hand2"
             )
             tab.pack(side="left", padx=(0, 5), fill='x', expand=True)
             self.tabs.append(tab)
 
+        # --- Header Buttons ---
         right_header_frame = tk.Frame(header_frame, bg=c.DARK_BG)
         right_header_frame.pack(side="right")
 
         if self.app.assets.trash_icon_image:
-             self.clear_session_button = RoundedButton(
-                right_header_frame,
-                command=self._clear_session_data,
+             RoundedButton(
+                right_header_frame, command=self._clear_session_data,
                 image=self.app.assets.trash_icon_image,
-                bg=c.BTN_GRAY_BG,
-                fg=c.BTN_GRAY_TEXT,
-                width=32,
-                height=32,
-                radius=6,
-                cursor="hand2"
-            )
-             self.clear_session_button.pack(side="right", padx=(0, 0))
+                bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, width=32, height=32, radius=6, cursor="hand2"
+            ).pack(side="right", padx=(0, 0))
 
-        self.load_config_button = RoundedButton(
-            right_header_frame,
-            text="Load Config",
-            command=self.load_config_from_dialog,
-            bg=c.BTN_GRAY_BG,
-            fg=c.BTN_GRAY_TEXT,
-            font=c.FONT_SMALL_BUTTON,
-            height=32,
-            radius=6,
-            cursor="hand2"
-        )
-        self.load_config_button.pack(side="right", padx=(0, 10))
+        RoundedButton(
+            right_header_frame, text="Load Config", command=self.load_config_from_dialog,
+            bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
+            height=32, radius=6, cursor="hand2"
+        ).pack(side="right", padx=(0, 10))
 
+        # --- Footer Nav ---
         self.nav_frame = tk.Frame(main_frame, bg=c.DARK_BG)
         self.nav_frame.pack(fill="x", pady=(10, 0), side="bottom")
-
-        self.content_frame = tk.Frame(
-            main_frame, bg=c.DARK_BG,
-            highlightbackground=c.WRAPPER_BORDER, highlightthickness=1
-        )
-        self.content_frame.pack(expand=True, fill="both", side="top")
 
         self.prev_button = RoundedButton(self.nav_frame, text="< Prev", command=self._go_to_prev_step, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         self.start_over_button = RoundedButton(self.nav_frame, text="Reset this step", command=self._start_over, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         self.next_button = RoundedButton(self.nav_frame, text="Next >", command=self._go_to_next_step, height=30, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor="hand2")
 
+        # --- Main Content ---
+        self.content_frame = tk.Frame(main_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
+        self.content_frame.pack(expand=True, fill="both", side="top")
+
     def on_closing(self):
-        """Handles the window close event by saving one last time and exiting."""
-        self._save_current_view_data()
-        self._save_state()
+        self.state.update_from_view(self.current_view)
+        self.state.save()
         self.destroy()
 
-    def _get_state_dict(self):
-        """Helper to construct the state dictionary from current values."""
-        return {
-            "name": self.project_data["name"].get(),
-            "parent_folder": self.project_data["parent_folder"].get(),
-            "stack": self.project_data["stack"].get(),
-            "description": self.project_data.get("description", ""),
-            "goal": self.project_data.get("goal", ""),
-            "concept_md": self.project_data.get("concept_md", ""),
-            "todo_md": self.project_data.get("todo_md", "")
-        }
-
-    def _save_state(self, *args):
-        """Saves the current project_data to the default session file."""
-        state = self._get_state_dict()
-        session_manager.save_session_data(state)
-
-    def _load_state(self, filepath=None):
-        """Loads project_data from a given file path (defaults to session file)."""
-        loaded_data = session_manager.load_session_data(filepath)
-
-        self.project_data["name"].set(loaded_data.get("name", ""))
-
-        loaded_parent = loaded_data.get("parent_folder", "")
-        if loaded_parent and os.path.isdir(loaded_parent):
-            self.project_data["parent_folder"].set(loaded_parent)
-        else:
-             self.project_data["parent_folder"].set(self.default_parent_folder)
-
-        self.project_data["stack"].set(loaded_data.get("stack", ""))
-        self.project_data["description"] = loaded_data.get("description", "")
-        self.project_data["goal"] = loaded_data.get("goal", "")
-        self.project_data["concept_md"] = loaded_data.get("concept_md", "")
-        self.project_data["todo_md"] = loaded_data.get("todo_md", "")
-
-        # Determine progress
-        has_details = self.project_data["name"].get() and self.project_data["stack"].get() and self.project_data["description"]
-        has_concept = bool(self.project_data["concept_md"])
-        has_todo = bool(self.project_data["todo_md"])
-
-        if has_details and has_concept and has_todo:
-            self.max_accessible_step = 4
-        elif has_details and has_concept:
-            self.max_accessible_step = 3
-        elif has_details:
-             self.max_accessible_step = 2
-        else:
-            self.max_accessible_step = 1
-
     def load_config_from_dialog(self):
-        """Opens a dialog to load a project-starter.json file."""
         filepath = filedialog.askopenfilename(
             title="Load Project Configuration",
             filetypes=[("JSON files", "*.json")],
             defaultextension=".json",
             parent=self
         )
-        if not filepath:
-            return
+        if not filepath: return
 
-        self._save_current_view_data()
-        self._load_state(filepath)
-        self._save_state() # Save immediately to default session
-        self.current_step = 1
+        self.state.update_from_view(self.current_view)
+        self.state.load(filepath)
+        self.state.save() # Save to session immediately
+        self.state.current_step = 1
         self._show_current_step_view()
-
-    def _save_current_view_data(self):
-        """Extracts data from the current view's text widgets and updates the dictionary."""
-        if self.current_view and self.current_view.winfo_exists():
-            if self.current_step == 1:
-                self.project_data["description"] = self.current_view.get_description()
-            elif self.current_step == 2:
-                self.project_data["concept_md"] = self.current_view.get_concept_content()
-                if hasattr(self.current_view, 'get_goal_content'):
-                    self.project_data["goal"] = self.current_view.get_goal_content()
-            elif self.current_step == 3:
-                self.project_data["todo_md"] = self.current_view.get_todo_content()
 
     def _start_over(self):
         if self.current_view and hasattr(self.current_view, 'handle_reset'):
             self.current_view.handle_reset()
-            self._save_current_view_data()
-            self._save_state()
+            self.state.update_from_view(self.current_view)
+            self.state.save()
 
     def _clear_session_data(self):
-        if not messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh? This cannot be undone.", parent=self):
-            return
-        self._reset_state_silent()
-        self._show_current_step_view()
-
-    def _reset_state_silent(self):
-        self.project_data["name"].set("")
-        self.project_data["parent_folder"].set(self.default_parent_folder)
-        self.project_data["stack"].set("")
-        self.project_data["description"] = ""
-        self.project_data["goal"] = ""
-        self.project_data["concept_md"] = ""
-        self.project_data["todo_md"] = ""
-
-        session_manager.clear_default_session()
-
-        self.max_accessible_step = 1
-        self.current_step = 1
-
-    def _update_navigation_controls(self):
-        self.prev_button.pack_forget()
-        self.start_over_button.pack_forget()
-        self.next_button.pack_forget()
-
-        if self.current_step > 1:
-            self.prev_button.pack(side="left")
-        if self.current_step < 4:
-            self.next_button.pack(side="right")
-
-        can_start_over = self.current_view and hasattr(self.current_view, 'is_editor_visible') and self.current_view.is_editor_visible()
-        if can_start_over:
-            self.start_over_button.pack()
-
-    def _update_tab_styles(self):
-        for i, tab in enumerate(self.tabs):
-            is_active = (i + 1) == self.current_step
-            is_accessible = (i + 1) <= self.max_accessible_step
-
-            if not is_accessible:
-                tab.set_state('disabled')
-                tab.config(hollow=True, fg=c.BTN_GRAY_TEXT)
-            else:
-                tab.set_state('normal')
-                if is_active:
-                    tab.config(hollow=False, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-                else:
-                    tab.config(hollow=True, fg=c.TEXT_COLOR)
+        if messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh?", parent=self):
+            self.state.reset()
+            self._show_current_step_view()
 
     def _go_to_next_step(self):
-        if self.current_step < 4:
-            self._go_to_step(self.current_step + 1)
+        if self.state.current_step < 4:
+            self._go_to_step(self.state.current_step + 1)
 
     def _go_to_prev_step(self):
-        if self.current_step > 1:
-            self._go_to_step(self.current_step - 1)
+        if self.state.current_step > 1:
+            self._go_to_step(self.state.current_step - 1)
 
     def _go_to_step(self, target_step):
-        if target_step == self.current_step:
-            return
+        if target_step == self.state.current_step: return
 
-        self._save_current_view_data()
-        self._save_state()
+        # Save current view data before moving
+        self.state.update_from_view(self.current_view)
+        self.state.save()
 
-        if target_step > self.current_step:
-            if not self._validate_current_step():
+        # Validate if moving forward
+        if target_step > self.state.current_step:
+            is_valid, err_title, err_msg = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
+            if not is_valid:
+                messagebox.showerror(err_title, err_msg, parent=self)
                 return
-            self.max_accessible_step = max(self.max_accessible_step, target_step)
+            # Update max accessible step
+            self.state.max_accessible_step = max(self.state.max_accessible_step, target_step)
 
-        if target_step > self.max_accessible_step:
+        if target_step > self.state.max_accessible_step:
             return
 
-        self.current_step = target_step
+        self.state.current_step = target_step
         self._show_current_step_view()
-
-    def _validate_current_step(self):
-        if self.current_step == 1:
-            project_name = self.project_data["name"].get()
-            parent_folder = self.project_data["parent_folder"].get()
-            code_stack = self.project_data["stack"].get()
-            description = self.project_data["description"]
-
-            if not all([project_name, parent_folder, code_stack, description]):
-                messagebox.showerror("Error", "All fields are required.", parent=self)
-                return False
-
-            try:
-                path_obj = Path(parent_folder)
-                if not path_obj.exists():
-                    messagebox.showerror("Invalid Path", f"The parent folder does not exist:\n{parent_folder}", parent=self)
-                    return False
-                if not path_obj.is_dir():
-                    messagebox.showerror("Invalid Path", f"The path is not a directory:\n{parent_folder}", parent=self)
-                    return False
-            except Exception as e:
-                messagebox.showerror("Invalid Path", f"The parent folder path is invalid.\nError: {e}", parent=self)
-                return False
-
-        elif self.current_step == 2:
-            if not self.project_data["concept_md"]:
-                messagebox.showerror("Error", "The concept document cannot be empty.", parent=self)
-                return False
-
-        elif self.current_step == 3:
-            if not self.project_data["todo_md"]:
-                messagebox.showerror("Error", "The TODO plan cannot be empty.", parent=self)
-                return False
-
-        return True
 
     def _show_current_step_view(self):
         for widget in self.content_frame.winfo_children():
@@ -353,22 +177,24 @@ class ProjectStarterDialog(tk.Toplevel):
         view_frame = tk.Frame(self.content_frame, bg=c.DARK_BG, padx=10, pady=10)
         view_frame.pack(expand=True, fill="both")
 
-        if self.current_step == 1:
-            self.current_view = Step1DetailsView(view_frame, self.project_data)
-        elif self.current_step == 2:
-            self.current_view = Step2ConceptView(view_frame, self, self.project_data)
-        elif self.current_step == 3:
-            if not self.project_data["concept_md"]:
-                messagebox.showerror("Concept Missing", "Please complete the Concept step before generating the TODO plan.", parent=self)
-                self._go_to_step(2)
-                return
-            self.current_view = Step3TodoView(view_frame, self, self.project_data)
-        elif self.current_step == 4:
-            if not self.project_data["concept_md"] or not self.project_data["todo_md"]:
-                messagebox.showerror("Content Missing", "Please complete the Concept and TODO steps before generating the project.", parent=self)
-                self._go_to_step(2 if not self.project_data["concept_md"] else 3)
-                return
-            self.current_view = Step4GenerateView(view_frame, self.project_data, self.project_data["concept_md"], self.project_data["todo_md"], self.create_project)
+        step = self.state.current_step
+
+        # Pre-check dependencies for steps 3 and 4
+        if step == 3 and not self.state.project_data["concept_md"]:
+            messagebox.showerror("Concept Missing", "Complete Concept step first.", parent=self)
+            self._go_to_step(2); return
+        if step == 4 and (not self.state.project_data["concept_md"] or not self.state.project_data["todo_md"]):
+            messagebox.showerror("Content Missing", "Complete Concept and TODO steps first.", parent=self)
+            self._go_to_step(2 if not self.state.project_data["concept_md"] else 3); return
+
+        if step == 1:
+            self.current_view = Step1DetailsView(view_frame, self.state.project_data)
+        elif step == 2:
+            self.current_view = Step2ConceptView(view_frame, self, self.state.project_data)
+        elif step == 3:
+            self.current_view = Step3TodoView(view_frame, self, self.state.project_data)
+        elif step == 4:
+            self.current_view = Step4GenerateView(view_frame, self.state.project_data, self.state.project_data["concept_md"], self.state.project_data["todo_md"], self.create_project)
 
         if self.current_view:
             self.current_view.pack(expand=True, fill="both")
@@ -376,67 +202,75 @@ class ProjectStarterDialog(tk.Toplevel):
         self._update_tab_styles()
         self._update_navigation_controls()
 
-    def create_project(self, llm_output):
-        project_name = self.project_data["name"].get()
-        parent_folder = self.project_data["parent_folder"].get()
+    def _update_navigation_controls(self):
+        self.prev_button.pack_forget()
+        self.start_over_button.pack_forget()
+        self.next_button.pack_forget()
 
+        if self.state.current_step > 1: self.prev_button.pack(side="left")
+        if self.state.current_step < 4: self.next_button.pack(side="right")
+
+        can_reset = self.current_view and hasattr(self.current_view, 'is_editor_visible') and self.current_view.is_editor_visible()
+        if can_reset: self.start_over_button.pack()
+
+    def _update_tab_styles(self):
+        for i, tab in enumerate(self.tabs):
+            is_active = (i + 1) == self.state.current_step
+            is_accessible = (i + 1) <= self.state.max_accessible_step
+
+            tab.set_state('normal' if is_accessible else 'disabled')
+            tab.config(hollow=(not is_active),
+                      bg=(c.BTN_BLUE if is_active else c.BTN_GRAY_BG),
+                      fg=(c.BTN_BLUE_TEXT if is_active else (c.TEXT_COLOR if is_accessible else c.BTN_GRAY_TEXT)))
+
+    def create_project(self, llm_output):
         if not llm_output.strip():
             messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
             return
 
-        success, project_path, message = generator.prepare_project_directory(parent_folder, project_name, overwrite=False)
+        project_name = self.state.project_data["name"].get()
+        parent_folder = self.state.project_data["parent_folder"].get()
 
+        # 1. Prepare Directory
+        success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name)
         if not success:
-            # If failed because it exists, ask overwrite
-            if "already exists" in message:
-                if messagebox.askyesno("Warning", f"Project folder '{project_path.name}' already exists in '{parent_folder}'. Overwrite?", parent=self):
-                    success, project_path, message = generator.prepare_project_directory(parent_folder, project_name, overwrite=True)
-                else:
-                    return
+            if "already exists" in msg:
+                if messagebox.askyesno("Warning", f"{msg} Overwrite?", parent=self):
+                    success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name, overwrite=True)
+                else: return
 
-            # Check again after potential overwrite attempt
             if not success:
-                messagebox.showerror("Error", message, parent=self)
+                messagebox.showerror("Error", msg, parent=self)
                 return
 
-        success, files_created, message = generator.parse_and_write_files(project_path, llm_output)
-
+        # 2. Write Files
+        success, files_created, msg = generator.parse_and_write_files(project_path, llm_output)
         if not success:
-            messagebox.showerror("Error", message, parent=self)
+            messagebox.showerror("Error", msg, parent=self)
             return
 
-        # Save project config into the new project folder
-        self._save_current_view_data()
-        self._save_state()
-
-        # Save a copy of the config in the new project root
-        state = self._get_state_dict()
-        dest_config = project_path / "project-starter.json"
-        session_manager.save_session_data(state, dest_config)
+        # 3. Save Config to new project
+        self.state.update_from_view(self.current_view)
+        self.state.save()
+        session_manager.save_session_data(self.state.get_dict(), project_path / "project-starter.json")
 
         self._display_success_screen(project_path.name, files_created, parent_folder)
 
-    def _display_success_screen(self, project_folder_name, files_created, parent_folder):
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
+    def _display_success_screen(self, project_name, files, parent_folder):
+        for w in self.content_frame.winfo_children(): w.destroy()
         self.nav_frame.pack_forget()
 
         def on_start_work():
-            full_path = str(Path(parent_folder) / project_folder_name)
-            from ...core.utils import load_config as load_app_config
+            full_path = str(Path(parent_folder) / project_name)
+            # Load defaults
+            from ...core.utils import load_config
+            conf = load_config()
+            intro = conf.get('default_intro_prompt', c.DEFAULT_INTRO_PROMPT).replace('REPLACE_ME', project_name)
+            outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
 
-            try:
-                app_config = load_app_config()
-                default_intro = app_config.get('default_intro_prompt', c.DEFAULT_INTRO_PROMPT)
-                default_outro = app_config.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
-                default_intro = default_intro.replace('REPLACE_ME', project_folder_name)
-                self.app.project_manager.create_project_with_defaults(full_path, default_intro, default_outro)
-            except Exception:
-                pass
-
-            self._reset_state_silent()
+            self.app.project_manager.create_project_with_defaults(full_path, intro, outro)
+            self.state.reset()
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
 
-        success_view = SuccessView(self.content_frame, project_folder_name, files_created, on_start_work, parent_folder)
-        success_view.pack(expand=True, fill="both")
+        SuccessView(self.content_frame, project_name, files, on_start_work, parent_folder).pack(expand=True, fill="both")
