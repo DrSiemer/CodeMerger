@@ -10,6 +10,7 @@ GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/late
 
 # --- File System ---
 SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json'}
+START_WORK_FILENAME = "_start.txt"
 
 # --- Logging ---
 LOG_FILENAME = "codemerger.log"
@@ -56,6 +57,7 @@ FILETYPES_WINDOW_DEFAULT_GEOMETRY = "330x550"
 INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY = "700x500"
 DIRECTORY_DIALOG_WIDTH = 450
 TITLE_EDIT_DIALOG_WIDTH = 400
+PROJECT_STARTER_GEOMETRY = "900x700"
 
 # --- UI Color Palette (dark to light) ---
 
@@ -100,6 +102,8 @@ FONT_FILE_MANAGER_BUTTON = (FONT_FAMILY_PRIMARY, 14)
 FONT_BUTTON = (FONT_FAMILY_PRIMARY, 16)
 FONT_LOADING_TITLE = (FONT_FAMILY_PRIMARY, 18, 'bold')
 FONT_LARGE_BOLD = (FONT_FAMILY_PRIMARY, 24, 'bold')
+FONT_H2 = (FONT_FAMILY_PRIMARY, 18, 'bold')
+FONT_H3 = (FONT_FAMILY_PRIMARY, 14, 'bold')
 FONT_TOOLTIP = (FONT_FAMILY_TOOLTIP, 8, "normal")
 
 # --- Data Mappings ---
@@ -109,11 +113,16 @@ LANGUAGE_MAP = {
     '.conf': 'ini',
     '.cpp': 'cpp',
     '.cs': 'csharp',
+    '.csproj': 'xml',
     '.css': 'css',
+    '.fx': 'c',
+    '.glsl': 'c',
     '.go': 'go',
     '.h': 'c',
     '.html': 'html',
     '.htm': 'html',
+    '.ino': 'c',
+    '.iss': 'pascal',
     '.java': 'java',
     '.js': 'javascript',
     '.jsx': 'jsx',
@@ -122,6 +131,8 @@ LANGUAGE_MAP = {
     '.kts': 'kotlin',
     '.less': 'less',
     '.md': 'markdown',
+    '.mjs': 'javascript',
+    '.nsi': 'nsis',
     '.php': 'php',
     '.ps1': 'powershell',
     '.py': 'python',
@@ -131,13 +142,17 @@ LANGUAGE_MAP = {
     '.sass': 'sass',
     '.scss': 'scss',
     '.sh': 'shell',
+    '.sln': 'text',
+    '.spec': 'python',
     '.sql': 'sql',
     '.swift': 'swift',
     '.ts': 'typescript',
     '.tsx': 'tsx',
     '.txt': 'text',
     '.vue': 'vue',
+    '.xaml': 'xml',
     '.xml': 'xml',
     '.yaml': 'yaml',
-    '.yml': 'yaml'
+    '.yml': 'yaml',
+    'caddyfile': 'caddyfile'
 }

@@ -1,0 +1,9 @@
+[
+  "Review the following project concept. Are there any parts that are too vague or ambiguous? Suggest specific areas that need more detail.",
+  "Analyze this concept for internal contradictions. Are there any features, principles, or user actions that conflict with each other?",
+  "From a technical perspective, what is the single biggest risk or challenge in this concept? Suggest a potential mitigation.",
+  "Identify the core user journey described in this concept. Is it logical? Are there any obvious steps missing?",
+  "Based on this concept, suggest one or two 'quick win' features that could be implemented easily but would provide high value to the user.",
+  "What key assumptions does this concept make? Are they reasonable? What happens if one of them is wrong?",
+  "Does this concept describe a viable Minimum Viable Product (MVP)? If not, what could be simplified or removed to create a stronger MVP?"
+]

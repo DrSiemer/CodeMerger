@@ -46,6 +46,7 @@ class App(Tk):
         self.load_thread = None
         self.load_thread_result = None
         self.loading_animation_job = None
+        self.project_starter_window = None
 
         # Core Components
         self.app_state = AppState()

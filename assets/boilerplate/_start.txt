@@ -1,0 +1,9 @@
+Hi!
+
+This is a new "[ProjectName]" project, just generated from a boilerplate. I'm providing you with the full source code below.
+
+Your task is to start development by following the plan in `todo.md`.
+
+Please begin with the first incomplete task in "Phase 1: Environment Setup & Core Connection" and implement the necessary code changes.
+
+When you are done, please return the complete, updated source code for every file you modify.

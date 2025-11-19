@@ -3,9 +3,14 @@ certifi==2025.8.3
 charset-normalizer==3.4.2
 detect-secrets==1.5.0
 idna==3.10
+markdown-it-py==4.0.0
+markdown2==2.5.4
+mdurl==0.1.2
 packaging==25.0
 pefile==2023.2.7
 pillow==11.3.0
+psutil==7.1.2
+Pygments==2.19.2
 pyinstaller==6.14.2
 pyinstaller-hooks-contrib==2025.6
 pyperclip==1.9.0
@@ -13,6 +18,6 @@ pywin32-ctypes==0.2.3
 PyYAML==6.0.2
 regex==2025.7.34
 requests==2.32.4
-rich
+rich==14.2.0
 tiktoken==0.10.0
 urllib3==2.5.0

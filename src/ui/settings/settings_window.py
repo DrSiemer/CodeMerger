@@ -42,7 +42,8 @@ class SettingsWindow(Toplevel):
             'new_file_check_interval': StringVar(value=str(self.config.get('new_file_check_interval', 5))),
             'token_count_enabled': BooleanVar(value=self.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
-            'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT)))
+            'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT))),
+            'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', ''))
         }
 
     def _init_styles(self):
@@ -113,6 +114,7 @@ class SettingsWindow(Toplevel):
         config['enable_new_file_check'] = self.vars['enable_new_file_check'].get()
         config['token_count_enabled'] = self.vars['token_count_enabled'].get()
         config['enable_compact_mode_on_minimize'] = self.vars['enable_compact_mode_on_minimize'].get()
+        config['default_parent_folder'] = self.vars['default_parent_folder'].get()
         config.update(prompt_values)
 
         try:

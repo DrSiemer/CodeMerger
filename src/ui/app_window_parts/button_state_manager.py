@@ -32,6 +32,17 @@ class ButtonStateManager:
 
         app.manage_files_button.set_state(dir_dependent_state)
 
+        # --- Check for Start Work File ---
+        has_start_file = False
+        if is_dir_active:
+            start_file_path = os.path.join(active_dir_path, c.START_WORK_FILENAME)
+            has_start_file = os.path.exists(start_file_path)
+
+        if has_start_file:
+            app.start_work_button.pack(side='top', pady=(0, 5))
+        else:
+            app.start_work_button.pack_forget()
+
         if is_dir_active:
             app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))
             # Generate the masked logo image and apply it to the label

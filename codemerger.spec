@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 
 # --- Main Application Analysis ---
+# The ('assets', 'assets') tuple recursively includes assets/boilerplate and assets/reference
 app_data_files = [
     ('assets', 'assets'),
     ('default_filetypes.json', '.'),
@@ -18,7 +19,8 @@ a = Analysis(
         'PIL.ImageTk',
         'tiktoken_ext.openai_public',
         'detect_secrets.plugins',
-        'rich'
+        'rich',
+        'markdown2'
     ],
     hookspath=[],
     hooksconfig={},

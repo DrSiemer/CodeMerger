@@ -13,6 +13,7 @@ from ..directory_dialog import DirectoryDialog
 from ..title_edit_dialog import TitleEditDialog
 from ..paste_changes_dialog import PasteChangesDialog
 from ..new_profile_dialog import NewProfileDialog
+from ..project_starter.wizard_dialog import ProjectStarterDialog
 from ...core.clipboard import copy_project_to_clipboard
 from ...core import change_applier
 from ...core.project_config import _calculate_font_color
@@ -21,6 +22,73 @@ from ...core.utils import get_file_hash, get_token_count_for_text
 class ActionHandlers:
     def __init__(self, app):
         self.app = app
+
+    def open_project_starter(self, event=None):
+        app = self.app
+        if app.project_starter_window and app.project_starter_window.winfo_exists():
+            app.project_starter_window.lift()
+            app.project_starter_window.focus_force()
+            return
+
+        default_parent = app.app_state.config.get('default_parent_folder', '')
+        if not default_parent or not os.path.isdir(default_parent):
+             # Fallback to user's Desktop directory if not set
+             default_parent = os.path.join(os.path.expanduser("~"), "Desktop")
+
+        app.project_starter_window = ProjectStarterDialog(app, app, default_parent)
+
+    def start_work_on_click(self, event):
+        """Handles click (copy) and alt-click (delete) on the Start Work button."""
+        app = self.app
+        project_config = app.project_manager.get_current_project()
+        if not project_config:
+            return
+
+        start_file_path = os.path.join(project_config.base_dir, c.START_WORK_FILENAME)
+        if not os.path.exists(start_file_path):
+            app.status_var.set(f"File '{c.START_WORK_FILENAME}' not found.")
+            app.button_manager.update_button_states()
+            return
+
+        is_alt = (event.state & 0x20000) or (event.state & 131072) # Windows/Linux Alt mask
+
+        if is_alt:
+            # Delete file
+            if messagebox.askyesno("Delete File", f"Delete '{c.START_WORK_FILENAME}' from the project?", parent=app):
+                try:
+                    os.remove(start_file_path)
+                    app.status_var.set(f"Deleted '{c.START_WORK_FILENAME}'.")
+                    app.button_manager.update_button_states()
+                except OSError as e:
+                    app.show_error_dialog("Error", f"Could not delete file: {e}")
+        else:
+            # Perform Copy with Instructions using _start.txt as intro
+            try:
+                with open(start_file_path, 'r', encoding='utf-8') as f:
+                    start_content = f.read()
+
+                # Temporarily override the config intro/outro
+                original_intro = project_config.intro_text
+
+                project_config.intro_text = start_content
+                # Keeping existing outro or blank? Usually prompts are self-contained.
+                # Let's keep the outro if defined, as it contains formatting rules.
+
+                status_message = copy_project_to_clipboard(
+                    parent=app,
+                    base_dir=project_config.base_dir,
+                    project_config=project_config,
+                    use_wrapper=True,
+                    copy_merged_prompt="",
+                    scan_secrets_enabled=app.app_state.scan_for_secrets
+                )
+
+                # Restore
+                project_config.intro_text = original_intro
+                app.status_var.set("Copied start instructions and code to clipboard.")
+
+            except IOError as e:
+                app.show_error_dialog("Error", f"Could not read '{c.START_WORK_FILENAME}': {e}")
 
     def handle_title_click(self, event=None):
         app = self.app

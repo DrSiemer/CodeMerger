@@ -46,7 +46,7 @@ def scan_for_secrets(base_dir, files_to_scan):
             with open(filename, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
         except Exception:
-            pass 
+            pass
 
         for secret in file_secrets:
             rel_filename = os.path.relpath(secret.filename, base_dir).replace('\\', '/')

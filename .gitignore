@@ -4,7 +4,9 @@ __pycache__/
 /dist
 /dist-installer
 *.log
-2do.txt
-codemerger.log
-config.json
-filetypes.json
+
+/2do.txt
+/codemerger.log
+/config.json
+/filetypes.json
+/project_starter_session.json

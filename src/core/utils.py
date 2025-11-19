@@ -13,6 +13,24 @@ from ..constants import (
     ADD_ALL_WARNING_THRESHOLD_DEFAULT
 )
 
+def strip_markdown_wrapper(text):
+    """
+    Removes outer markdown code block wrappers (triple backticks) from a string.
+    Example: converts "```markdown\n# Title\n```" to "# Title".
+    """
+    if not text:
+        return ""
+
+    clean_text = text.strip()
+    if clean_text.startswith("```") and clean_text.endswith("```"):
+        # Find the end of the opening ``` line (e.g., ```markdown or just ```)
+        first_newline = clean_text.find('\n')
+        if first_newline != -1:
+            # Return content between the first newline and the last 3 characters
+            return clean_text[first_newline+1:-3].strip()
+
+    return clean_text
+
 def get_token_count_for_text(text):
     """Calculates the token count for a given string."""
     try:
@@ -40,6 +58,7 @@ def _create_and_get_default_config():
     config = {
         'active_directory': '',
         'default_editor': '',
+        'default_parent_folder': '', # For new projects
         'scan_for_secrets': False,
         'last_update_check': None,
         'enable_new_file_check': True,
@@ -97,6 +116,8 @@ def load_config():
                 raise ValueError("Config is missing 'filetypes' key.")
             if 'default_editor' not in config:
                 config['default_editor'] = ''
+            if 'default_parent_folder' not in config:
+                config['default_parent_folder'] = ''
             if 'scan_for_secrets' not in config:
                 config['scan_for_secrets'] = False
             if 'last_update_check' not in config:

@@ -44,6 +44,10 @@ CONFIG_FILE_PATH = os.path.join(PERSISTENT_DATA_DIR, 'config.json')
 # Path to the bundled default filetypes template
 DEFAULT_FILETYPES_CONFIG_PATH = os.path.join(BUNDLE_DIR, 'default_filetypes.json')
 
+# --- Project Starter Template Paths ---
+BOILERPLATE_DIR = os.path.join(BUNDLE_DIR, 'assets', 'boilerplate')
+REFERENCE_DIR = os.path.join(BUNDLE_DIR, 'assets', 'reference')
+
 # Path to the application icon
 ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 
@@ -92,6 +96,11 @@ SETTINGS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'settings.png')
 FILETYPES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes.png')
 SETTINGS_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'settings_active.png')
 FILETYPES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes_active.png')
+
+# --- Project Starter Icons ---
+PROJECT_STARTER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter.png')
+PROJECT_STARTER_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter_active.png')
+START_WORK_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'play.png') # You may need to provide this asset or use a placeholder
 
 # Windows Registry path
 REGISTRY_KEY_PATH = r"Software\CodeMerger"

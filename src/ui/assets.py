@@ -7,7 +7,8 @@ from ..core.paths import (
     FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
     EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH,
     GIT_FILES_ICON_PATH, GIT_FILES_ACTIVE_ICON_PATH,
-    SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH
+    SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH,
+    PROJECT_STARTER_ICON_PATH, PROJECT_STARTER_ACTIVE_ICON_PATH, START_WORK_ICON_PATH
 )
 
 class AppAssets:
@@ -15,9 +16,10 @@ class AppAssets:
     def __init__(self):
         self.logo_mask_cache = {}
         self.logo_mask_small_cache = {}
-        # If the logo mask exists, load it; otherwise, it remains None.
         self.logo_mask_pil = self._load_image(LOGO_MASK_PATH, (48, 48)) if os.path.exists(LOGO_MASK_PATH) else None
         self.logo_mask_small_pil = self._load_image(LOGO_MASK_SMALL_PATH, (28, 28)) if os.path.exists(LOGO_MASK_SMALL_PATH) else None
+
+        # Load main icons
         self.compact_icon_pil = self._load_image(ICON_PATH, (12, 12))
         self.trash_icon_pil = self._load_image(TRASH_ICON_PATH, (18, 18))
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
@@ -37,8 +39,14 @@ class AppAssets:
         self.settings_icon_active_pil = self._load_image(SETTINGS_ICON_ACTIVE_PATH, (30, 30))
         self.filetypes_icon_active_pil = self._load_image(FILETYPES_ICON_ACTIVE_PATH, (30, 30))
 
+        # New Project Starter Icons
+        self.project_starter_pil = self._load_image(PROJECT_STARTER_ICON_PATH, (30, 30))
+        self.project_starter_active_pil = self._load_image(PROJECT_STARTER_ACTIVE_ICON_PATH, (30, 30))
+        self.start_work_pil = self._load_image(START_WORK_ICON_PATH, (30, 30))
+
         self.compact_mode_close_pil = self._load_image(COMPACT_MODE_CLOSE_ICON_PATH)
 
+        # Placeholders for Tk images
         self.trash_icon_image = self.trash_icon_pil
         self.compact_icon_tk = None
         self.new_files_icon = None
@@ -57,6 +65,9 @@ class AppAssets:
         self.filetypes_icon = None
         self.settings_icon_active = None
         self.filetypes_icon_active = None
+        self.project_starter_icon = None
+        self.project_starter_active_icon = None
+        self.start_work_icon = None
 
     def load_tk_images(self):
         """
@@ -80,40 +91,32 @@ class AppAssets:
         self.filetypes_icon = self._pil_to_photoimage(self.filetypes_icon_pil)
         self.settings_icon_active = self._pil_to_photoimage(self.settings_icon_active_pil)
         self.filetypes_icon_active = self._pil_to_photoimage(self.filetypes_icon_active_pil)
+        self.project_starter_icon = self._pil_to_photoimage(self.project_starter_pil)
+        self.project_starter_active_icon = self._pil_to_photoimage(self.project_starter_active_pil)
+        self.start_work_icon = self._pil_to_photoimage(self.start_work_pil)
 
     def create_masked_logo(self, color_hex):
         """Creates a PhotoImage by using the logo's alpha channel as a mask for the project color."""
         if color_hex in self.logo_mask_cache:
             return self.logo_mask_cache[color_hex]
 
-        # Fallback to a simple colored square if the logo mask file doesn't exist.
         if not self.logo_mask_pil:
             try:
                 img = Image.new('RGB', (48, 48), color_hex)
                 return ImageTk.PhotoImage(img)
             except ValueError:
-                return None # Invalid color hex
+                return None
 
         try:
-            # Create a solid color image based on the project's hex color.
             color_img = Image.new("RGBA", self.logo_mask_pil.size, color_hex)
-
-            # Extract the alpha channel from the logo PNG. This is the mask.
             alpha_mask = self.logo_mask_pil.getchannel('A')
-
-            # Create a new, completely transparent image to serve as the canvas.
             result_img = Image.new("RGBA", self.logo_mask_pil.size, (0, 0, 0, 0))
-
-            # Paste the solid color image onto the transparent canvas, but only in the
-            # areas defined by the logo's alpha mask. This effectively "colors in" the logo.
             result_img.paste(color_img, (0, 0), alpha_mask)
-
             result_tk = ImageTk.PhotoImage(result_img)
             self.logo_mask_cache[color_hex] = result_tk
             return result_tk
         except (ValueError, AttributeError, IndexError):
-            # Fallback for invalid colors or if the logo mask is not a proper RGBA image.
-            img = Image.new('RGB', (48, 48), "#FF0000") # Red square indicates an error
+            img = Image.new('RGB', (48, 48), "#FF0000")
             return ImageTk.PhotoImage(img)
 
     def create_masked_logo_small(self, color_hex):
@@ -149,7 +152,8 @@ class AppAssets:
                 img = img.resize(resize, Image.Resampling.LANCZOS)
             return img
         except Exception:
-            return Image.new('RGB', resize if resize else (16, 16), 'red')
+            # Fallback blank image
+            return Image.new('RGB', resize if resize else (16, 16), '#444444')
 
     def _pil_to_photoimage(self, pil_image):
         if pil_image:
