@@ -68,12 +68,19 @@ def setup_ui(app):
     app.top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
     app.top_buttons_container.rowconfigure(0, weight=1) # Center all content vertically
 
+    # Column 0: Manage Files Button
     app.manage_files_button = RoundedButton(app.top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
 
-    # --- Profile Management Frame (its contents are gridded dynamically) ---
-    app.profile_frame = Frame(app.top_buttons_container, bg=c.DARK_BG)
-    app.profile_frame.grid(row=0, column=1, sticky='nsew')
+    # Column 1: Middle Container (Profiles + Start Button)
+    app.middle_container = Frame(app.top_buttons_container, bg=c.DARK_BG)
+    app.middle_container.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
+    app.middle_container.columnconfigure(0, weight=0) # Profile Frame
+    app.middle_container.columnconfigure(1, weight=0) # Start Button
+
+    # --- Profile Management Frame ---
+    app.profile_frame = Frame(app.middle_container, bg=c.DARK_BG)
+    app.profile_frame.grid(row=0, column=0, sticky='w')
 
     # --- Profile Widgets ---
     app.profile_navigator = ProfileNavigator(app.profile_frame, on_change_callback=app.profile_actions.on_profile_switched)
@@ -82,30 +89,27 @@ def setup_ui(app):
     app.delete_profile_button = RoundedButton(app.profile_frame, text="-", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.profile_actions.delete_current_profile, cursor='hand2', width=20, height=28, hollow=True)
     ToolTip(app.delete_profile_button, "Delete the current profile", delay=500)
 
-    # --- Project Selection and Wizard Container ---
-    # A frame to hold the wizard icon, start work button, and select project button
+    # --- Start Work Button ---
+    # Placed in Column 1 of middle_container, initially hidden/shown by ButtonStateManager
+    app.start_work_button = Label(app.middle_container, image=assets.start_work_icon, bg=c.DARK_BG, cursor="hand2")
+    app.start_work_button.bind("<Button-1>", app.action_handlers.start_work_on_click)
+    app.start_work_button.bind("<Enter>", lambda e: app.start_work_button.config(image=assets.start_work_active_icon))
+    app.start_work_button.bind("<Leave>", lambda e: app.start_work_button.config(image=assets.start_work_icon))
+    ToolTip(app.start_work_button, "Start Work: Copy code with '_start.txt' instructions\nAlt+Click to delete start file", delay=500)
+
+    # Column 2: Right Controls (Wizard + Select Project)
     right_controls_frame = Frame(app.top_buttons_container, bg=c.DARK_BG)
     right_controls_frame.grid(row=0, column=2, sticky='e')
 
-    # Column 0: Stack (Start Work / Project Starter)
-    stack_frame = Frame(right_controls_frame, bg=c.DARK_BG)
-    stack_frame.grid(row=0, column=0, padx=(0, 10))
-
-    app.start_work_button = Label(stack_frame, image=assets.start_work_icon, bg=c.DARK_BG, cursor="hand2")
-    # Start Work button logic is managed in ButtonStateManager/ActionHandlers, packed there or here initially hidden
-    app.start_work_button.bind("<Button-1>", app.action_handlers.start_work_on_click)
-    ToolTip(app.start_work_button, "Start Work: Copy code with '_start.txt' instructions\nAlt+Click to delete start file", delay=500)
-
-    app.project_starter_button = Label(stack_frame, image=assets.project_starter_icon, bg=c.DARK_BG, cursor="hand2")
-    app.project_starter_button.pack(side='bottom')
+    app.project_starter_button = Label(right_controls_frame, image=assets.project_starter_icon, bg=c.DARK_BG, cursor="hand2")
+    app.project_starter_button.pack(side='left', padx=(0, 10))
     app.project_starter_button.bind("<Enter>", lambda e: app.project_starter_button.config(image=assets.project_starter_active_icon))
     app.project_starter_button.bind("<Leave>", lambda e: app.project_starter_button.config(image=assets.project_starter_icon))
     app.project_starter_button.bind("<Button-1>", app.action_handlers.open_project_starter)
     ToolTip(app.project_starter_button, "New Project Wizard", delay=500)
 
-    # Column 1: Select Project Button
     app.select_project_button = RoundedButton(right_controls_frame, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_change_directory_dialog, cursor='hand2')
-    app.select_project_button.grid(row=0, column=1)
+    app.select_project_button.pack(side='left')
 
     # --- Center Content Area (Row 2) ---
     center_frame = Frame(app, bg=c.DARK_BG)

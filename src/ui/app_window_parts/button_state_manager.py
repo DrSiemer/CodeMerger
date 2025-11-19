@@ -39,9 +39,9 @@ class ButtonStateManager:
             has_start_file = os.path.exists(start_file_path)
 
         if has_start_file:
-            app.start_work_button.pack(side='top', pady=(0, 5))
+            app.start_work_button.grid(row=0, column=1, padx=(10, 0))
         else:
-            app.start_work_button.pack_forget()
+            app.start_work_button.grid_remove()
 
         if is_dir_active:
             app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))

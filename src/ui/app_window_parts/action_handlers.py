@@ -85,7 +85,7 @@ class ActionHandlers:
 
                 # Restore
                 project_config.intro_text = original_intro
-                app.status_var.set("Copied start instructions and code to clipboard.")
+                app.status_var.set(status_message)
 
             except IOError as e:
                 app.show_error_dialog("Error", f"Could not read '{c.START_WORK_FILENAME}': {e}")
