@@ -1,13 +1,8 @@
 import tkinter as tk
-import logging
-import json
 import os
 from pathlib import Path
-import shutil
-import re
 from tkinter import messagebox, filedialog
 from ... import constants as c
-from ...core.paths import PERSISTENT_DATA_DIR
 from ..widgets.rounded_button import RoundedButton
 from ..style_manager import apply_dark_theme
 from .step1_details import Step1DetailsView
@@ -16,8 +11,8 @@ from .step3_todo import Step3TodoView
 from .step4_generate import Step4GenerateView
 from .success_view import SuccessView
 from ..window_utils import position_window
-
-log = logging.getLogger("CodeMerger")
+from . import session_manager
+from . import generator
 
 class ProjectStarterDialog(tk.Toplevel):
     """
@@ -29,7 +24,6 @@ class ProjectStarterDialog(tk.Toplevel):
         self.parent = parent
         self.app = app
         self.default_parent_folder = default_parent_folder
-        self.session_file = os.path.join(PERSISTENT_DATA_DIR, "project_starter_session.json")
 
         self.title("Project Starter Wizard")
 
@@ -61,7 +55,7 @@ class ProjectStarterDialog(tk.Toplevel):
             "todo_md": ""
         }
 
-        # Setup auto-save triggers
+        # Setup auto-save triggers for StringVars
         self.project_data["name"].trace_add("write", self._save_state)
         self.project_data["parent_folder"].trace_add("write", self._save_state)
         self.project_data["stack"].trace_add("write", self._save_state)
@@ -109,7 +103,6 @@ class ProjectStarterDialog(tk.Toplevel):
             tab.pack(side="left", padx=(0, 5), fill='x', expand=True)
             self.tabs.append(tab)
 
-        # Create a container for the right-aligned buttons to ensure proper order
         right_header_frame = tk.Frame(header_frame, bg=c.DARK_BG)
         right_header_frame.pack(side="right")
 
@@ -159,15 +152,9 @@ class ProjectStarterDialog(tk.Toplevel):
         self._save_state()
         self.destroy()
 
-    # --- State Persistence ---
-
-    def _save_state(self, *args):
-        """Saves the current project_data to the session file."""
-        # If we are currently typing in a text field (description, etc),
-        # the trace on StringVars won't catch it. We rely on _save_current_view_data
-        # being called before navigation/closing.
-
-        state_to_save = {
+    def _get_state_dict(self):
+        """Helper to construct the state dictionary from current values."""
+        return {
             "name": self.project_data["name"].get(),
             "parent_folder": self.project_data["parent_folder"].get(),
             "stack": self.project_data["stack"].get(),
@@ -176,56 +163,43 @@ class ProjectStarterDialog(tk.Toplevel):
             "concept_md": self.project_data.get("concept_md", ""),
             "todo_md": self.project_data.get("todo_md", "")
         }
-        try:
-            with open(self.session_file, "w", encoding="utf-8") as f:
-                json.dump(state_to_save, f, indent=2)
-        except Exception as e:
-            log.error(f"Failed to save project starter session: {e}")
+
+    def _save_state(self, *args):
+        """Saves the current project_data to the default session file."""
+        state = self._get_state_dict()
+        session_manager.save_session_data(state)
 
     def _load_state(self, filepath=None):
         """Loads project_data from a given file path (defaults to session file)."""
-        target_path = filepath if filepath else self.session_file
+        loaded_data = session_manager.load_session_data(filepath)
 
-        if not os.path.exists(target_path):
-            return
+        self.project_data["name"].set(loaded_data.get("name", ""))
 
-        try:
-            with open(target_path, "r", encoding="utf-8") as f:
-                loaded_data = json.load(f)
+        loaded_parent = loaded_data.get("parent_folder", "")
+        if loaded_parent and os.path.isdir(loaded_parent):
+            self.project_data["parent_folder"].set(loaded_parent)
+        else:
+             self.project_data["parent_folder"].set(self.default_parent_folder)
 
-            self.project_data["name"].set(loaded_data.get("name", ""))
+        self.project_data["stack"].set(loaded_data.get("stack", ""))
+        self.project_data["description"] = loaded_data.get("description", "")
+        self.project_data["goal"] = loaded_data.get("goal", "")
+        self.project_data["concept_md"] = loaded_data.get("concept_md", "")
+        self.project_data["todo_md"] = loaded_data.get("todo_md", "")
 
-            # If loading a specific config, use its folder. If loading session, validate it.
-            loaded_parent = loaded_data.get("parent_folder", "")
-            if loaded_parent and os.path.isdir(loaded_parent):
-                self.project_data["parent_folder"].set(loaded_parent)
-            else:
-                 self.project_data["parent_folder"].set(self.default_parent_folder)
+        # Determine progress
+        has_details = self.project_data["name"].get() and self.project_data["stack"].get() and self.project_data["description"]
+        has_concept = bool(self.project_data["concept_md"])
+        has_todo = bool(self.project_data["todo_md"])
 
-            self.project_data["stack"].set(loaded_data.get("stack", ""))
-            self.project_data["description"] = loaded_data.get("description", "")
-            self.project_data["goal"] = loaded_data.get("goal", "")
-            self.project_data["concept_md"] = loaded_data.get("concept_md", "")
-            self.project_data["todo_md"] = loaded_data.get("todo_md", "")
-
-            # Determine progress
-            has_details = self.project_data["name"].get() and self.project_data["stack"].get() and self.project_data["description"]
-            has_concept = bool(self.project_data["concept_md"])
-            has_todo = bool(self.project_data["todo_md"])
-
-            if has_details and has_concept and has_todo:
-                self.max_accessible_step = 4
-            elif has_details and has_concept:
-                self.max_accessible_step = 3
-            elif has_details:
-                 self.max_accessible_step = 2
-            else:
-                self.max_accessible_step = 1
-
-        except Exception as e:
-            log.error(f"Failed to load configuration file '{target_path}': {e}")
-            if filepath: # Only warn if explicitly loading a file
-                messagebox.showerror("Error", f"Could not load the configuration file.\nError: {e}", parent=self)
+        if has_details and has_concept and has_todo:
+            self.max_accessible_step = 4
+        elif has_details and has_concept:
+            self.max_accessible_step = 3
+        elif has_details:
+             self.max_accessible_step = 2
+        else:
+            self.max_accessible_step = 1
 
     def load_config_from_dialog(self):
         """Opens a dialog to load a project-starter.json file."""
@@ -238,17 +212,10 @@ class ProjectStarterDialog(tk.Toplevel):
         if not filepath:
             return
 
-        # Save current view just in case
         self._save_current_view_data()
-
-        # Load new data
         self._load_state(filepath)
-
-        # Save immediately to session so it persists
-        self._save_state()
-
-        # Refresh UI
-        self.current_step = 1 # Reset to start when loading new config
+        self._save_state() # Save immediately to default session
+        self.current_step = 1
         self._show_current_step_view()
 
     def _save_current_view_data(self):
@@ -266,20 +233,16 @@ class ProjectStarterDialog(tk.Toplevel):
     def _start_over(self):
         if self.current_view and hasattr(self.current_view, 'handle_reset'):
             self.current_view.handle_reset()
-            # Force save after reset to clear the session file's data for this step
             self._save_current_view_data()
             self._save_state()
 
     def _clear_session_data(self):
-        """Clears all session data and resets the wizard."""
         if not messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh? This cannot be undone.", parent=self):
             return
-
         self._reset_state_silent()
         self._show_current_step_view()
 
     def _reset_state_silent(self):
-        """Resets internal data and deletes session file without prompt."""
         self.project_data["name"].set("")
         self.project_data["parent_folder"].set(self.default_parent_folder)
         self.project_data["stack"].set("")
@@ -288,11 +251,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.project_data["concept_md"] = ""
         self.project_data["todo_md"] = ""
 
-        if os.path.exists(self.session_file):
-            try:
-                os.remove(self.session_file)
-            except OSError as e:
-                log.error(f"Failed to delete session file: {e}")
+        session_manager.clear_default_session()
 
         self.max_accessible_step = 1
         self.current_step = 1
@@ -304,7 +263,6 @@ class ProjectStarterDialog(tk.Toplevel):
 
         if self.current_step > 1:
             self.prev_button.pack(side="left")
-
         if self.current_step < 4:
             self.next_button.pack(side="right")
 
@@ -377,14 +335,12 @@ class ProjectStarterDialog(tk.Toplevel):
                 return False
 
         elif self.current_step == 2:
-            concept = self.project_data["concept_md"]
-            if not concept:
+            if not self.project_data["concept_md"]:
                 messagebox.showerror("Error", "The concept document cannot be empty.", parent=self)
                 return False
 
         elif self.current_step == 3:
-            todo = self.project_data["todo_md"]
-            if not todo:
+            if not self.project_data["todo_md"]:
                 messagebox.showerror("Error", "The TODO plan cannot be empty.", parent=self)
                 return False
 
@@ -410,10 +366,7 @@ class ProjectStarterDialog(tk.Toplevel):
         elif self.current_step == 4:
             if not self.project_data["concept_md"] or not self.project_data["todo_md"]:
                 messagebox.showerror("Content Missing", "Please complete the Concept and TODO steps before generating the project.", parent=self)
-                if not self.project_data["concept_md"]:
-                    self._go_to_step(2)
-                else:
-                    self._go_to_step(3)
+                self._go_to_step(2 if not self.project_data["concept_md"] else 3)
                 return
             self.current_view = Step4GenerateView(view_frame, self.project_data, self.project_data["concept_md"], self.project_data["todo_md"], self.create_project)
 
@@ -431,84 +384,55 @@ class ProjectStarterDialog(tk.Toplevel):
             messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
             return
 
-        sanitized_name = re.sub(r'[^a-zA-Z0-9_-]+', '-', project_name.lower()).strip('-')
-        base_dir = Path(parent_folder)
-        project_path = base_dir / sanitized_name
+        success, project_path, message = generator.prepare_project_directory(parent_folder, project_name, overwrite=False)
 
-        if project_path.exists():
-            if not messagebox.askyesno("Warning", f"Project folder '{sanitized_name}' already exists in '{base_dir}'. Overwrite?", parent=self):
+        if not success:
+            # If failed because it exists, ask overwrite
+            if "already exists" in message:
+                if messagebox.askyesno("Warning", f"Project folder '{project_path.name}' already exists in '{parent_folder}'. Overwrite?", parent=self):
+                    success, project_path, message = generator.prepare_project_directory(parent_folder, project_name, overwrite=True)
+                else:
+                    return
+
+            # Check again after potential overwrite attempt
+            if not success:
+                messagebox.showerror("Error", message, parent=self)
                 return
-            try:
-                shutil.rmtree(project_path)
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to delete existing folder: {e}", parent=self)
-                return
 
-        try:
-            project_path.mkdir(parents=True, exist_ok=True)
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to create project directory: {e}", parent=self)
-            return
+        success, files_created, message = generator.parse_and_write_files(project_path, llm_output)
 
-        file_pattern = re.compile(r"--- File: `(.+?)` ---\s*```.*?$(.*?)```", re.MULTILINE | re.DOTALL)
-        files_created = []
-        matches = file_pattern.finditer(llm_output)
-
-        for match in matches:
-            file_path_str, content = match.groups()
-            relative_path = Path(file_path_str.replace("boilerplate/", ""))
-            full_path = project_path / relative_path
-
-            try:
-                full_path.parent.mkdir(parents=True, exist_ok=True)
-                full_path.write_text(content.lstrip(), encoding="utf-8")
-                files_created.append(str(relative_path))
-            except Exception as e:
-                log.error(f"Failed to write file {relative_path}: {e}")
-
-        if not files_created:
-            messagebox.showerror("Error", "Could not find any files to create in the LLM output. Ensure the format is correct.", parent=self)
+        if not success:
+            messagebox.showerror("Error", message, parent=self)
             return
 
         # Save project config into the new project folder
         self._save_current_view_data()
-        self._save_state() # Update session first
+        self._save_state()
 
-        try:
-            dest_config = project_path / "project-starter.json"
-            shutil.copy(self.session_file, dest_config)
-        except Exception as e:
-            log.error(f"Failed to save config to project folder: {e}")
+        # Save a copy of the config in the new project root
+        state = self._get_state_dict()
+        dest_config = project_path / "project-starter.json"
+        session_manager.save_session_data(state, dest_config)
 
-        self._display_success_screen(sanitized_name, files_created, parent_folder)
+        self._display_success_screen(project_path.name, files_created, parent_folder)
 
     def _display_success_screen(self, project_folder_name, files_created, parent_folder):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
-
-        # Hide navigation
         self.nav_frame.pack_forget()
 
         def on_start_work():
-            # Close wizard and load project in main app
             full_path = str(Path(parent_folder) / project_folder_name)
-
-            # Apply default prompts and initialize project using the centralized ProjectManager logic
             from ...core.utils import load_config as load_app_config
 
             try:
                 app_config = load_app_config()
                 default_intro = app_config.get('default_intro_prompt', c.DEFAULT_INTRO_PROMPT)
                 default_outro = app_config.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
-
-                # Replace placeholder
                 default_intro = default_intro.replace('REPLACE_ME', project_folder_name)
-
-                # Delegate initialization to ProjectManager to ensure files are auto-added and defaults are set
                 self.app.project_manager.create_project_with_defaults(full_path, default_intro, default_outro)
-
-            except Exception as e:
-                log.error(f"Failed to apply default prompts to new project: {e}")
+            except Exception:
+                pass
 
             self._reset_state_silent()
             self.app.ui_callbacks.on_directory_selected(full_path)

@@ -685,9 +685,23 @@
           "hash": "9decffc1e5d92c98a593ef7a766058f56b2325cc",
           "tokens": 193,
           "lines": 9
+        },
+        {
+          "path": "src/ui/project_starter/session_manager.py",
+          "mtime": 1763558872.3317769,
+          "hash": "9280f6e4c2f18b1a78f8ef641e1da2338b53527e",
+          "tokens": 317,
+          "lines": 43
+        },
+        {
+          "path": "src/ui/project_starter/generator.py",
+          "mtime": 1763558872.3317769,
+          "hash": "fda7b675deda07ff7d8472edf1ef11c4d264e0eb",
+          "tokens": 539,
+          "lines": 67
         }
       ],
-      "total_tokens": 111865,
+      "total_tokens": 112721,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -780,6 +794,8 @@
     "src/ui/new_profile_dialog.py",
     "src/ui/paste_changes_dialog.py",
     "src/ui/project_starter/__init__.py",
+    "src/ui/project_starter/generator.py",
+    "src/ui/project_starter/session_manager.py",
     "src/ui/project_starter/step1_details.py",
     "src/ui/project_starter/step2_concept.py",
     "src/ui/project_starter/step3_todo.py",
