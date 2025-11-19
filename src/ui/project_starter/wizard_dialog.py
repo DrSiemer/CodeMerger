@@ -275,7 +275,11 @@ class ProjectStarterDialog(tk.Toplevel):
         if not messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh? This cannot be undone.", parent=self):
             return
 
-        # Reset internal data
+        self._reset_state_silent()
+        self._show_current_step_view()
+
+    def _reset_state_silent(self):
+        """Resets internal data and deletes session file without prompt."""
         self.project_data["name"].set("")
         self.project_data["parent_folder"].set(self.default_parent_folder)
         self.project_data["stack"].set("")
@@ -284,17 +288,14 @@ class ProjectStarterDialog(tk.Toplevel):
         self.project_data["concept_md"] = ""
         self.project_data["todo_md"] = ""
 
-        # Remove session file
         if os.path.exists(self.session_file):
             try:
                 os.remove(self.session_file)
             except OSError as e:
                 log.error(f"Failed to delete session file: {e}")
 
-        # Reset UI state
         self.max_accessible_step = 1
         self.current_step = 1
-        self._show_current_step_view()
 
     def _update_navigation_controls(self):
         self.prev_button.pack_forget()
@@ -515,6 +516,7 @@ class ProjectStarterDialog(tk.Toplevel):
             except Exception as e:
                 log.error(f"Failed to apply default prompts to new project: {e}")
 
+            self._reset_state_silent()
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
 
