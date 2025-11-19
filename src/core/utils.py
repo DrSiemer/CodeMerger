@@ -55,10 +55,13 @@ def _create_and_get_default_config():
     Creates a new config object from the default template, saves it to disk,
     and returns it. This is the definitive first-run function
     """
+    # Determine default desktop path for the current user
+    default_desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+
     config = {
         'active_directory': '',
         'default_editor': '',
-        'default_parent_folder': '', # For new projects
+        'default_parent_folder': default_desktop, # For new projects
         'scan_for_secrets': False,
         'last_update_check': None,
         'enable_new_file_check': True,
@@ -117,7 +120,7 @@ def load_config():
             if 'default_editor' not in config:
                 config['default_editor'] = ''
             if 'default_parent_folder' not in config:
-                config['default_parent_folder'] = ''
+                config['default_parent_folder'] = os.path.join(os.path.expanduser("~"), "Desktop")
             if 'scan_for_secrets' not in config:
                 config['scan_for_secrets'] = False
             if 'last_update_check' not in config:

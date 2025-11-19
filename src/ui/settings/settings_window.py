@@ -10,6 +10,7 @@ from .application_settings import ApplicationSettingsFrame
 from .file_manager_settings import FileManagerSettingsFrame
 from .prompts_settings import PromptsSettingsFrame
 from .editor_settings import EditorSettingsFrame
+from .wizard_settings import WizardSettingsFrame
 from ... import constants as c
 from ..window_utils import position_window, save_window_geometry
 
@@ -86,6 +87,9 @@ class SettingsWindow(Toplevel):
 
         editor_settings = EditorSettingsFrame(content_frame, self.vars)
         editor_settings.pack(fill='x', expand=True)
+
+        wizard_settings = WizardSettingsFrame(content_frame, self.vars)
+        wizard_settings.pack(fill='x', expand=True)
 
         # --- Action Buttons (Outside scroll area) ---
         button_frame = Frame(main_frame, bg=c.DARK_BG)

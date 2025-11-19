@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import Frame, Label, ttk, Entry, filedialog
+from tkinter import Frame, Label, ttk
 from ..widgets.rounded_button import RoundedButton
 from ... import constants as c
 
@@ -12,10 +12,6 @@ class ApplicationSettingsFrame(Frame):
         self.scan_for_secrets = vars['scan_for_secrets']
         self.enable_compact_mode_on_minimize = vars['enable_compact_mode_on_minimize']
         self.check_for_updates = vars['check_for_updates']
-        # We'll add a new variable for default parent folder, usually handled in SettingsWindow init
-        # but we need to ensure it's passed down or handled here.
-        # Assuming SettingsWindow passes a dictionary of vars, we need to make sure it exists there.
-        self.default_parent_folder = vars.get('default_parent_folder')
 
         self._create_widgets()
 
@@ -44,18 +40,6 @@ class ApplicationSettingsFrame(Frame):
         # Compact Mode
         ttk.Checkbutton(container, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton').pack(anchor='w')
 
-        # Default Parent Folder for New Projects
-        if self.default_parent_folder:
-            new_proj_frame = Frame(container, bg=c.DARK_BG)
-            new_proj_frame.pack(fill='x', expand=True, pady=(10, 5))
-            Label(new_proj_frame, text="Default parent folder for new projects:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(anchor='w')
-
-            folder_select_frame = Frame(new_proj_frame, bg=c.DARK_BG)
-            folder_select_frame.pack(fill='x', pady=(5, 0))
-
-            Entry(folder_select_frame, textvariable=self.default_parent_folder, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL).pack(side='left', fill='x', expand=True, ipady=4)
-            RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2').pack(side='left', padx=(5, 0))
-
         # Updates
         updates_frame = Frame(container, bg=c.DARK_BG)
         updates_frame.pack(fill='x', expand=True, pady=(10, 0))
@@ -70,8 +54,3 @@ class ApplicationSettingsFrame(Frame):
         new_state = 'normal' if self.enable_new_file_check.get() else 'disabled'
         self.interval_label.config(state=new_state)
         self.interval_combo.config(state='readonly' if self.enable_new_file_check.get() else 'disabled')
-
-    def _browse_folder(self):
-        folder_selected = filedialog.askdirectory(parent=self)
-        if folder_selected:
-            self.default_parent_folder.set(folder_selected)
