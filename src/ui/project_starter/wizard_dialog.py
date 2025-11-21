@@ -8,8 +8,9 @@ from ..widgets.rounded_button import RoundedButton
 from ..style_manager import apply_dark_theme
 from .step1_details import Step1DetailsView
 from .step2_concept import Step2ConceptView
-from .step3_todo import Step3TodoView
-from .step4_generate import Step4GenerateView
+from .step3_stack import Step3StackView
+from .step4_todo import Step4TodoView
+from .step5_generate import Step5GenerateView
 from .success_view import SuccessView
 from ..window_utils import position_window
 from . import session_manager, generator, wizard_state, wizard_validator
@@ -49,6 +50,11 @@ class ProjectStarterDialog(tk.Toplevel):
         # Load previous session
         self.state.load()
 
+        # Add traces to trigger validation updates when data changes
+        self.state.project_data["name"].trace_add("write", lambda *args: self.update_nav_state())
+        self.state.project_data["parent_folder"].trace_add("write", lambda *args: self.update_nav_state())
+        self.state.project_data["stack"].trace_add("write", lambda *args: self.update_nav_state())
+
         self._show_current_step_view()
 
         position_window(self)
@@ -69,7 +75,7 @@ class ProjectStarterDialog(tk.Toplevel):
         tabs_frame.pack(side="left", fill='x', expand=True)
 
         self.tabs = []
-        tab_names = ["1. Details", "2. Concept", "3. TODO", "4. Generate & Create"]
+        tab_names = ["1. Details", "2. Concept", "3. Stack", "4. TODO", "5. Generate"]
         for i, name in enumerate(tab_names):
             tab = RoundedButton(
                 tabs_frame,
@@ -141,7 +147,7 @@ class ProjectStarterDialog(tk.Toplevel):
             self._show_current_step_view()
 
     def _go_to_next_step(self):
-        if self.state.current_step < 4:
+        if self.state.current_step < 5:
             self._go_to_step(self.state.current_step + 1)
 
     def _go_to_prev_step(self):
@@ -179,22 +185,27 @@ class ProjectStarterDialog(tk.Toplevel):
 
         step = self.state.current_step
 
-        # Pre-check dependencies for steps 3 and 4
-        if step == 3 and not self.state.project_data["concept_md"]:
+        # Pre-check dependencies
+        if step > 2 and not self.state.project_data["concept_md"]:
             messagebox.showerror("Concept Missing", "Complete Concept step first.", parent=self)
             self._go_to_step(2); return
-        if step == 4 and (not self.state.project_data["concept_md"] or not self.state.project_data["todo_md"]):
-            messagebox.showerror("Content Missing", "Complete Concept and TODO steps first.", parent=self)
-            self._go_to_step(2 if not self.state.project_data["concept_md"] else 3); return
+        if step > 3 and not self.state.project_data["stack"].get():
+            messagebox.showerror("Stack Missing", "Complete Code Stack step first.", parent=self)
+            self._go_to_step(3); return
+        if step == 5 and not self.state.project_data["todo_md"]:
+            messagebox.showerror("Content Missing", "Complete TODO step first.", parent=self)
+            self._go_to_step(4); return
 
         if step == 1:
             self.current_view = Step1DetailsView(view_frame, self.state.project_data)
         elif step == 2:
             self.current_view = Step2ConceptView(view_frame, self, self.state.project_data)
         elif step == 3:
-            self.current_view = Step3TodoView(view_frame, self, self.state.project_data)
+            self.current_view = Step3StackView(view_frame, self, self.state.project_data)
         elif step == 4:
-            self.current_view = Step4GenerateView(view_frame, self.state.project_data, self.state.project_data["concept_md"], self.state.project_data["todo_md"], self.create_project)
+            self.current_view = Step4TodoView(view_frame, self, self.state.project_data)
+        elif step == 5:
+            self.current_view = Step5GenerateView(view_frame, self.state.project_data, self.create_project)
 
         if self.current_view:
             self.current_view.pack(expand=True, fill="both")
@@ -208,10 +219,31 @@ class ProjectStarterDialog(tk.Toplevel):
         self.next_button.pack_forget()
 
         if self.state.current_step > 1: self.prev_button.pack(side="left")
-        if self.state.current_step < 4: self.next_button.pack(side="right")
+        if self.state.current_step < 5: self.next_button.pack(side="right")
 
-        can_reset = self.current_view and hasattr(self.current_view, 'is_editor_visible') and self.current_view.is_editor_visible()
+        can_reset = False
+        if self.current_view:
+            if hasattr(self.current_view, 'is_step_in_progress'):
+                can_reset = self.current_view.is_step_in_progress()
+            elif hasattr(self.current_view, 'is_editor_visible'):
+                can_reset = self.current_view.is_editor_visible()
+
         if can_reset: self.start_over_button.pack()
+
+        # Trigger validation state for Next button
+        self.update_nav_state()
+
+    def update_nav_state(self):
+        """Checks the current step's validity and enables/disables the Next button."""
+        if self.state.current_step < 5:
+            # We temporarily update the model from the view if possible, to get real-time text widget data
+            # This allows validation without saving to disk every keystroke
+            if self.current_view and hasattr(self.current_view, 'get_stack_content') and self.state.current_step == 3:
+                 # Special handling for Step 3 to get live text without forcing a save
+                 pass
+
+            is_valid, _, _ = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
+            self.next_button.set_state('normal' if is_valid else 'disabled')
 
     def _update_tab_styles(self):
         for i, tab in enumerate(self.tabs):

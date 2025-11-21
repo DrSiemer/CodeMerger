@@ -16,7 +16,6 @@ class WizardState:
             "name": tk.StringVar(),
             "parent_folder": tk.StringVar(value=default_parent_folder),
             "stack": tk.StringVar(),
-            "description": "",
             "goal": "",
             "concept_md": "",
             "todo_md": ""
@@ -33,7 +32,6 @@ class WizardState:
             "name": self.project_data["name"].get(),
             "parent_folder": self.project_data["parent_folder"].get(),
             "stack": self.project_data["stack"].get(),
-            "description": self.project_data.get("description", ""),
             "goal": self.project_data.get("goal", ""),
             "concept_md": self.project_data.get("concept_md", ""),
             "todo_md": self.project_data.get("todo_md", "")
@@ -58,7 +56,6 @@ class WizardState:
              self.project_data["parent_folder"].set(self.default_parent_folder)
 
         self.project_data["stack"].set(loaded_data.get("stack", ""))
-        self.project_data["description"] = loaded_data.get("description", "")
         self.project_data["goal"] = loaded_data.get("goal", "")
         self.project_data["concept_md"] = loaded_data.get("concept_md", "")
         self.project_data["todo_md"] = loaded_data.get("todo_md", "")
@@ -70,7 +67,6 @@ class WizardState:
         self.project_data["name"].set("")
         self.project_data["parent_folder"].set(self.default_parent_folder)
         self.project_data["stack"].set("")
-        self.project_data["description"] = ""
         self.project_data["goal"] = ""
         self.project_data["concept_md"] = ""
         self.project_data["todo_md"] = ""
@@ -80,11 +76,14 @@ class WizardState:
 
     def _recalc_progress(self):
         """Determines how far the user can navigate based on completed data."""
-        has_details = self.project_data["name"].get() and self.project_data["stack"].get() and self.project_data["description"]
+        has_details = self.project_data["name"].get() and self.project_data["parent_folder"].get()
         has_concept = bool(self.project_data["concept_md"])
+        has_stack = bool(self.project_data["stack"].get())
         has_todo = bool(self.project_data["todo_md"])
 
-        if has_details and has_concept and has_todo:
+        if has_details and has_concept and has_stack and has_todo:
+            self.max_accessible_step = 5
+        elif has_details and has_concept and has_stack:
             self.max_accessible_step = 4
         elif has_details and has_concept:
             self.max_accessible_step = 3
@@ -97,11 +96,12 @@ class WizardState:
         """Extracts data from the current view widget to update the state model."""
         if not view or not view.winfo_exists(): return
 
-        if self.current_step == 1:
-            self.project_data["description"] = view.get_description()
-        elif self.current_step == 2:
+        # Step 1 data is bound to StringVars, updated automatically
+        if self.current_step == 2:
             self.project_data["concept_md"] = view.get_concept_content()
             if hasattr(view, 'get_goal_content'):
                 self.project_data["goal"] = view.get_goal_content()
         elif self.current_step == 3:
+            self.project_data["stack"].set(view.get_stack_content())
+        elif self.current_step == 4:
             self.project_data["todo_md"] = view.get_todo_content()

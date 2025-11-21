@@ -14,11 +14,9 @@ def validate_step(step, state_data):
     if step == 1:
         project_name = state_data["name"].get()
         parent_folder = state_data["parent_folder"].get()
-        code_stack = state_data["stack"].get()
-        description = state_data["description"]
 
-        if not all([project_name, parent_folder, code_stack, description]):
-            return False, "Error", "All fields are required."
+        if not all([project_name, parent_folder]):
+            return False, "Error", "Project Name and Parent Folder are required."
 
         try:
             path_obj = Path(parent_folder)
@@ -35,6 +33,11 @@ def validate_step(step, state_data):
             return False, "Error", "The concept document cannot be empty."
 
     elif step == 3:
+        stack = state_data["stack"].get()
+        if not stack:
+            return False, "Error", "You must define a code stack."
+
+    elif step == 4:
         todo = state_data["todo_md"]
         if not todo:
             return False, "Error", "The TODO plan cannot be empty."

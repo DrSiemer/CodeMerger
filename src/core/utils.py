@@ -61,7 +61,8 @@ def _create_and_get_default_config():
     config = {
         'active_directory': '',
         'default_editor': '',
-        'default_parent_folder': default_desktop, # For new projects
+        'default_parent_folder': default_desktop,
+        'user_experience': '',
         'scan_for_secrets': False,
         'last_update_check': None,
         'enable_new_file_check': True,
@@ -121,6 +122,8 @@ def load_config():
                 config['default_editor'] = ''
             if 'default_parent_folder' not in config:
                 config['default_parent_folder'] = os.path.join(os.path.expanduser("~"), "Desktop")
+            if 'user_experience' not in config:
+                config['user_experience'] = ''
             if 'scan_for_secrets' not in config:
                 config['scan_for_secrets'] = False
             if 'last_update_check' not in config:

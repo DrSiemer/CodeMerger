@@ -10,101 +10,70 @@ from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from ..widgets.switch_button import SwitchButton
 
-DEFAULT_GOAL_TEXT = "The plan is to build a..."
-
-class Step2ConceptView(tk.Frame):
+class Step4TodoView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
         self.wizard_controller = wizard_controller
         self.project_data = project_data
 
-        self.concept_content = self.project_data.get("concept_md", "")
+        self.todo_content = self.project_data.get("todo_md", "")
         self.questions = self._load_questions()
         self.current_question_index = 0
         self.questions_frame_visible = True
         self.editor_is_active = False
 
-        if self.concept_content:
-            self.show_editor_view(self.concept_content)
+        if self.todo_content:
+            self.show_editor_view(self.todo_content)
         else:
-            self.show_initial_view()
+            self.show_generation_view()
 
     def _load_questions(self):
-        questions_path = os.path.join(REFERENCE_DIR, "concept_questions.json")
+        questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
         try:
             with open(questions_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 if not content: return []
                 return json.loads(content)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            # Fail silently or log if needed, but don't crash
             return []
 
-    def show_initial_view(self):
-        self._clear_frame()
-        self.editor_is_active = False
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(4, weight=1)
+    def _generate_prompt(self):
+        concept_md = self.project_data.get("concept_md")
+        stack = self.project_data["stack"].get()
 
-        tk.Label(self, text="Describe Your Goal", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, pady=10, sticky="w")
-        tk.Label(self, text="Briefly describe what you want to build. This will be used to generate a structured concept document from the template.", wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").grid(row=1, column=0, pady=5, sticky="w")
+        if not concept_md:
+            messagebox.showerror("Error", "Concept.md content is missing.", parent=self)
+            return None
 
-        self.goal_text = ScrollableText(self, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
-        self.goal_text.grid(row=2, column=0, pady=10, sticky="ew")
-
-        existing_goal = self.project_data.get("goal", "").strip()
-        if existing_goal:
-            self.goal_text.insert("1.0", existing_goal)
-        else:
-            self.goal_text.insert("1.0", DEFAULT_GOAL_TEXT)
-
-        self.goal_text.text_widget.bind("<KeyRelease>", self._update_button_state)
-
-        self.generate_btn = RoundedButton(self, text="Generate Concept Prompt", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
-        self.generate_btn.grid(row=3, column=0, pady=10, sticky="e")
-        self._update_button_state()
-
-        tk.Frame(self, bg=c.DARK_BG).grid(row=4, column=0)
-
-    def _update_button_state(self, event=None):
-        content = self.goal_text.get("1.0", "end-1c").strip()
-        if content and content != DEFAULT_GOAL_TEXT:
-            self.generate_btn.set_state('normal')
-        else:
-            self.generate_btn.set_state('disabled')
-
-    def handle_prompt_generation(self):
-        user_goal = self.goal_text.get("1.0", 'end-1c')
-        if not user_goal.strip() or user_goal.strip() == DEFAULT_GOAL_TEXT:
-            messagebox.showerror("Error", "Please describe your goal before generating the prompt.", parent=self)
-            return
-
-        template_path = os.path.join(REFERENCE_DIR, "concept.md")
+        template_path = os.path.join(REFERENCE_DIR, "todo.md")
         try:
             with open(template_path, "r", encoding="utf-8") as f:
-                concept_template = f.read()
+                todo_template = f.read()
         except FileNotFoundError:
-             messagebox.showerror("Error", f"Concept template not found at {template_path}", parent=self)
-             return
+            messagebox.showerror("Error", f"Reference file not found: {template_path}", parent=self)
+            return None
 
-        prompt = f"""Based on the following user goal, expand it into a full project concept document. Use the provided template as a strict guide for the structure.
+        prompt = f"""Based on the following project `concept.md` and technical stack, generate a detailed `todo.md` file. Use the provided `todo.md` template as a strict guide for the structure and phases.
 
-### User Goal
+### Tech Stack
+{stack}
+
+### Project Concept (`concept.md`)
+```markdown
+{concept_md}
 ```
-{user_goal.strip()}
-```
 
-### Template (`concept.md`)```markdown
-{concept_template}
+### TODO Template (`/reference/todo.md`)```markdown
+{todo_template}
 ```
 
 ### Instructions
-1.  Fill in every section of the template that is relevant to the user's goal.
-2.  If a section from the template is not applicable (e.g., 'Backend Schema' for a purely client-side application like a particle simulation), omit that section from the output.
-3.  Interpret the user's goal to generate plausible details for features, principles, and the data synchronization strategy.
-4.  Return *only* the generated markdown content for the new `concept.md` file, without any extra explanations or pleasantries.
+1.  Read the `concept.md` to understand the project's goals, features, and technical details.
+2.  Fill out the tasks in each phase of the `todo.md` template with specific actions relevant to the project described in the concept.
+3.  Be specific. Instead of a generic task like "Set up the database," write "Design and implement tables for `users` and `[primary_resource]` as defined in `concept.md`."
+4.  Return *only* the generated markdown content for the new `todo.md` file, without any extra explanations or pleasantries.
 """
-        self.show_generation_view(prompt)
+        return prompt
 
     def _copy_prompt_to_clipboard(self, button):
         if hasattr(self, 'prompt_area') and self.prompt_area.winfo_exists():
@@ -116,12 +85,17 @@ class Step2ConceptView(tk.Frame):
             button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
             self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
 
-    def show_generation_view(self, prompt):
+    def show_generation_view(self):
         self._clear_frame()
         self.editor_is_active = False
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(3, weight=1)
         self.grid_columnconfigure(0, weight=1)
+
+        prompt = self._generate_prompt()
+        if prompt is None:
+            tk.Label(self, text="Could not generate prompt. Please ensure previous steps are complete.", bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0)
+            return
 
         prompt_header = tk.Frame(self, bg=c.DARK_BG)
         prompt_header.grid(row=0, column=0, pady=(0, 5), sticky="ew")
@@ -145,10 +119,9 @@ class Step2ConceptView(tk.Frame):
             messagebox.showerror("Error", "The LLM response is empty.", parent=self)
             return
 
-        # Strip wrapper if present
-        self.concept_content = strip_markdown_wrapper(raw_content)
-        self.project_data["concept_md"] = self.concept_content
-        self.show_editor_view(self.concept_content)
+        self.todo_content = strip_markdown_wrapper(raw_content)
+        self.project_data["todo_md"] = self.todo_content
+        self.show_editor_view(self.todo_content)
 
     def show_editor_view(self, content):
         self._clear_frame()
@@ -159,7 +132,7 @@ class Step2ConceptView(tk.Frame):
 
         header_frame = tk.Frame(self, bg=c.DARK_BG)
         header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        tk.Label(header_frame, text="Edit Your Concept", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+        tk.Label(header_frame, text="Edit Your TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
         action_buttons_frame = tk.Frame(header_frame, bg=c.DARK_BG)
         action_buttons_frame.pack(side="right")
@@ -206,14 +179,12 @@ class Step2ConceptView(tk.Frame):
         self.question_label.pack(side='left', fill='x', expand=True)
         actions_frame = tk.Frame(content, bg=c.STATUS_BG)
         actions_frame.pack(side='left', padx=(10,0))
-
         nav_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
         nav_frame.pack()
         self.prev_question_button = RoundedButton(nav_frame, text="<", command=self._show_prev_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
         self.prev_question_button.pack(side="left")
         self.next_question_button = RoundedButton(nav_frame, text=">", command=self._show_next_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
         self.next_question_button.pack(side="left", padx=2)
-
         bottom_actions = tk.Frame(actions_frame, bg=c.STATUS_BG)
         bottom_actions.pack(pady=(2,0))
         copy_btn = RoundedButton(bottom_actions, text="Copy", command=lambda: self._copy_question_prompt(copy_btn), width=40, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
@@ -240,18 +211,18 @@ class Step2ConceptView(tk.Frame):
 
     def _copy_question_prompt(self, button):
         try:
-            concept_content = self.editor_text.get("1.0", "end-1c").strip()
+            todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
-            prompt_text = f"""Please act as a senior software developer and provide critical feedback on the following project concept document.
+            prompt_text = f"""Please act as a senior project manager and provide critical feedback on the following project plan.
 
 ### Your Task
 {current_question}
 
 ---
 
-### Project Concept Document
+### Project TODO Plan
 ```markdown
-{concept_content}
+{todo_content}
 ```"""
             self.clipboard_clear()
             self.clipboard_append(prompt_text)
@@ -274,25 +245,19 @@ class Step2ConceptView(tk.Frame):
         self._update_question_display()
 
     def handle_reset(self):
-        if messagebox.askyesno("Confirm", "Are you sure you want to start over? The current concept text will be lost.", parent=self):
-            self.project_data["concept_md"] = ""
-            self.project_data["goal"] = ""
-            self.concept_content = ""
+        if messagebox.askyesno("Confirm", "Are you sure you want to start over? The current TODO plan will be lost.", parent=self):
+            self.project_data["todo_md"] = ""
+            self.todo_content = ""
             self.questions = self._load_questions()
             self.questions_frame_visible = True
             self.current_question_index = 0
-            self.show_initial_view()
+            self.show_generation_view()
             self.wizard_controller._update_navigation_controls()
 
-    def get_goal_content(self):
-        if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
-            return self.goal_text.get("1.0", "end-1c").strip()
-        return self.project_data.get("goal", "")
-
-    def get_concept_content(self):
+    def get_todo_content(self):
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
             return self.editor_text.get("1.0", "end-1c").strip()
-        return self.concept_content
+        return self.todo_content
 
     def _clear_frame(self):
         for i in range(self.grid_size()[1]):
