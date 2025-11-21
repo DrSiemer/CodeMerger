@@ -1,5 +1,6 @@
 import os
 from ..core.utils import is_ignored
+from .. import constants as c
 
 def get_all_matching_files(base_dir, file_extensions, gitignore_patterns):
     """
@@ -13,7 +14,10 @@ def get_all_matching_files(base_dir, file_extensions, gitignore_patterns):
     def _scan_dir(current_path):
         try:
             for entry in os.scandir(current_path):
-                if is_ignored(entry.path, base_dir, gitignore_patterns) or entry.name == '.allcode':
+                if entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE:
+                    continue
+
+                if is_ignored(entry.path, base_dir, gitignore_patterns):
                     continue
 
                 if entry.is_dir():
