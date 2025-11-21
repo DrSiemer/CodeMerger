@@ -96,13 +96,12 @@ CodeStack: "{stack}"
 ### Provided Files
 {prompt_content}
 ### Core Instructions
-1.  Analyze the CodeStack to select the most appropriate `go_*.bat` file.
-2.  Rename the selected file to `go.bat`.
-3.  Do not include the unselected `go_*.bat` files in the final output.
-4.  Using the User Requirements (`ProjectName`, `CodeStack`) and the provided `concept.md`, intelligently populate the placeholders in the boilerplate `README.md` and `_start.txt`.
-5.  In `README.md`, generate a plausible 'Prerequisites' and 'Running the Project' section based on the `CodeStack` description.
-6.  Infer the 'Primary Data Entity' from the Goal and `ProjectName` (e.g., 'book' for a book tracker) and update the schema in `concept.md` accordingly (e.g., rename the `[primary_resource]` table).
-7.  Return the complete, modified source code for every file in the final package, including the populated `_start.txt`, following the exact `--- File: ... ---` format.
+1.  **Selection & Renaming:** Analyze the `CodeStack` to select the single most appropriate `go_*.bat` file (e.g. `go_python.bat` for python, `go_nodejs.bat` for node). Rename this file to `go.bat` in your output.
+2.  **Exclusion:** You must **NOT** include the unused `go_*.bat` files in your final response. The output should only contain the single selected and renamed `go.bat` file.
+3.  Using the User Requirements (`ProjectName`, `CodeStack`) and the provided `concept.md`, intelligently populate the placeholders in the boilerplate `README.md` and `_start.txt`.
+4.  In `README.md`, generate a plausible 'Prerequisites' and 'Running the Project' section based on the `CodeStack` description.
+5.  Infer the 'Primary Data Entity' from the Goal and `ProjectName` (e.g., 'book' for a book tracker) and update the schema in `concept.md` accordingly (e.g., rename the `[primary_resource]` table).
+6.  Return the complete, modified source code for every file in the final package, including the populated `_start.txt`, following the exact `--- File: ... ---` format.
 """
         return prompt
 
