@@ -1,4 +1,5 @@
 import os
+import re
 import tkinter as tk
 from tkinter import messagebox
 from ... import constants as c
@@ -40,7 +41,22 @@ class Step4GenerateView(tk.Frame):
         self.llm_result_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.llm_result_text.grid(row=6, column=0, pady=10, sticky="nsew")
 
-        RoundedButton(self, text="Create Project Files", command=self.on_create_project, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2").grid(row=7, column=0, pady=10, sticky="ew")
+        # Bind to text changes to validate input
+        self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_input)
+        self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_input)
+
+        self.create_button = RoundedButton(self, text="Create Project Files", command=self.on_create_project, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
+        self.create_button.grid(row=7, column=0, pady=10, sticky="ew")
+        self.create_button.set_state('disabled')
+
+    def _validate_input(self, event=None):
+        """Checks if the input contains at least one valid file block."""
+        content = self.llm_result_text.get("1.0", "end-1c")
+        # Simple regex check for the file header pattern
+        if re.search(r"--- File: `.+?` ---", content):
+            self.create_button.set_state('normal')
+        else:
+            self.create_button.set_state('disabled')
 
     def _generate_master_prompt(self, project_data, concept_md, todo_md):
         name = project_data['name'].get()
