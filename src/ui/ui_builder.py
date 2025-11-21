@@ -40,6 +40,7 @@ def setup_ui(app):
     required_height = app.title_label.winfo_reqheight()
     app.title_container.grid_rowconfigure(0, minsize=required_height)
 
+    # Title interaction uses Single and Double click, so we keep Button-1 to avoid conflicts
     app.title_label.bind("<Button-1>", app.action_handlers.handle_title_click)
     app.title_label.bind("<Double-Button-1>", app.action_handlers.edit_project_title)
     app.title_container.bind("<Button-1>", app.action_handlers.handle_title_click)
@@ -53,12 +54,12 @@ def setup_ui(app):
 
     # New files warning icon
     app.new_files_label = Label(right_frame, image=assets.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    app.new_files_label.bind("<Button-1>", app.action_handlers.on_new_files_click)
+    app.new_files_label.bind("<ButtonRelease-1>", app.action_handlers.on_new_files_click)
     app.new_files_tooltip = ToolTip(app.new_files_label, text="")
 
     # Open folder icon
     app.folder_icon_label = Label(right_frame, image=assets.folder_icon, bg=c.TOP_BAR_BG, cursor="hand2")
-    app.folder_icon_label.bind("<Button-1>", app.action_handlers.open_project_folder)
+    app.folder_icon_label.bind("<ButtonRelease-1>", app.action_handlers.open_project_folder)
     ToolTip(app.folder_icon_label, "Open project folder\nCtrl+Click: Copy path\nCtrl+Alt+Click: Open console", delay=500)
 
     # --- Top-Level Buttons (Row 1) ---
@@ -92,7 +93,7 @@ def setup_ui(app):
     # --- Start Work Button ---
     # Placed in Column 1 of middle_container, initially hidden/shown by ButtonStateManager
     app.start_work_button = Label(app.middle_container, image=assets.start_work_icon, bg=c.DARK_BG, cursor="hand2")
-    app.start_work_button.bind("<Button-1>", app.action_handlers.start_work_on_click)
+    app.start_work_button.bind("<ButtonRelease-1>", app.action_handlers.start_work_on_click)
     app.start_work_button.bind("<Enter>", lambda e: app.start_work_button.config(image=assets.start_work_active_icon))
     app.start_work_button.bind("<Leave>", lambda e: app.start_work_button.config(image=assets.start_work_icon))
     ToolTip(app.start_work_button, "Start Work: Copy code with '_start.txt' instructions\nAlt+Click to delete start file", delay=500)
@@ -105,7 +106,7 @@ def setup_ui(app):
     app.project_starter_button.pack(side='left', padx=(0, 10))
     app.project_starter_button.bind("<Enter>", lambda e: app.project_starter_button.config(image=assets.project_starter_active_icon))
     app.project_starter_button.bind("<Leave>", lambda e: app.project_starter_button.config(image=assets.project_starter_icon))
-    app.project_starter_button.bind("<Button-1>", app.action_handlers.open_project_starter)
+    app.project_starter_button.bind("<ButtonRelease-1>", app.action_handlers.open_project_starter)
     ToolTip(app.project_starter_button, "New Project Wizard", delay=500)
 
     app.select_project_button = RoundedButton(right_controls_frame, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_change_directory_dialog, cursor='hand2')
@@ -164,11 +165,11 @@ def setup_ui(app):
 
     app.settings_button.bind("<Enter>", lambda e: app.settings_button.config(image=assets.settings_icon_active), add='+')
     app.settings_button.bind("<Leave>", lambda e: app.settings_button.config(image=assets.settings_icon), add='+')
-    app.settings_button.bind("<Button-1>", lambda e: app.action_handlers.open_settings_window())
+    app.settings_button.bind("<ButtonRelease-1>", app.action_handlers.open_settings_window)
 
     app.filetypes_button.bind("<Enter>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon_active), add='+')
     app.filetypes_button.bind("<Leave>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon), add='+')
-    app.filetypes_button.bind("<Button-1>", lambda e: app.action_handlers.open_filetypes_manager())
+    app.filetypes_button.bind("<ButtonRelease-1>", app.action_handlers.open_filetypes_manager)
 
     # --- Status Bar (Row 3) ---
     app.status_bar = Label(

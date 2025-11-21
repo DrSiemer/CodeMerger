@@ -71,7 +71,7 @@ class InstructionsWindow(Toplevel):
             self.defaults_button = Label(button_frame, image=assets.defaults_icon, bg=c.DARK_BG, cursor="hand2")
             self.defaults_button.image = assets.defaults_icon
             self.defaults_button.pack(side='left', padx=(0, 10), anchor='w')
-            self.defaults_button.bind("<Button-1>", self.populate_from_defaults)
+            self.defaults_button.bind("<ButtonRelease-1>", self.populate_from_defaults)
             ToolTip(self.defaults_button, "Populate fields with default prompts from Settings")
 
         self.save_button = RoundedButton(
@@ -98,6 +98,10 @@ class InstructionsWindow(Toplevel):
         self.destroy()
 
     def populate_from_defaults(self, event=None):
+        if event is not None:
+            if not (0 <= event.x <= event.widget.winfo_width() and 0 <= event.y <= event.widget.winfo_height()):
+                return
+
         config = load_config()
         default_intro = config.get('default_intro_prompt', '')
         default_outro = config.get('default_outro_prompt', '')

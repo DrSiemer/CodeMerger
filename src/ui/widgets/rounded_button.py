@@ -153,10 +153,17 @@ class RoundedButton(tk.Canvas):
             self._draw(self.click_color)
 
     def _on_release(self, event):
+        """
+        Handles button release. Only triggers the command if the mouse is released
+        inside the button boundaries.
+        """
         if self.is_enabled:
-            self._draw(self.hover_color)
-            if self.command:
-                self.command()
+            if 0 <= event.x <= self.winfo_width() and 0 <= event.y <= self.winfo_height():
+                self._draw(self.hover_color)
+                if self.command:
+                    self.command()
+            else:
+                self._draw(self.base_color)
 
     def set_state(self, state):
         if state == 'disabled':

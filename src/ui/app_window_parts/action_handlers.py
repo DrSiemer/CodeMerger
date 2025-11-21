@@ -23,7 +23,14 @@ class ActionHandlers:
     def __init__(self, app):
         self.app = app
 
+    def _is_valid_click(self, event):
+        """Helper to ensure mouse release happened inside the widget."""
+        if event is None: return True
+        return 0 <= event.x <= event.widget.winfo_width() and 0 <= event.y <= event.widget.winfo_height()
+
     def open_project_starter(self, event=None):
+        if not self._is_valid_click(event): return
+
         app = self.app
         if app.project_starter_window and app.project_starter_window.winfo_exists():
             app.project_starter_window.lift()
@@ -39,6 +46,8 @@ class ActionHandlers:
 
     def start_work_on_click(self, event):
         """Handles click (copy) and alt-click (delete) on the Start Work button."""
+        if not self._is_valid_click(event): return
+
         app = self.app
         project_config = app.project_manager.get_current_project()
         if not project_config:
@@ -159,6 +168,8 @@ class ActionHandlers:
             app.button_manager.update_button_states()
 
     def open_project_folder(self, event=None):
+        if not self._is_valid_click(event): return
+
         app = self.app
         project_path = app.active_dir.get()
 
@@ -199,7 +210,8 @@ class ActionHandlers:
         except Exception as e:
             app.show_error_dialog("Error", f"Could not open folder: {e}")
 
-    def open_settings_window(self):
+    def open_settings_window(self, event=None):
+        if not self._is_valid_click(event): return
         app = self.app
         SettingsWindow(app, app.updater, on_close_callback=app.ui_callbacks.on_settings_closed)
 
@@ -225,14 +237,19 @@ class ActionHandlers:
 
     def on_paste_release(self, event):
         app = self.app
-        app.paste_changes_button._draw(app.paste_changes_button.hover_color)
-        is_ctrl = (event.state & 0x0004)
-        if is_ctrl:
-            self.apply_changes_from_clipboard()
+        btn = app.paste_changes_button
+        if 0 <= event.x <= btn.winfo_width() and 0 <= event.y <= btn.winfo_height():
+            btn._draw(btn.hover_color)
+            is_ctrl = (event.state & 0x0004)
+            if is_ctrl:
+                self.apply_changes_from_clipboard()
+            else:
+                self.open_paste_changes_dialog()
         else:
-            self.open_paste_changes_dialog()
+            btn._draw(btn.base_color)
 
-    def open_filetypes_manager(self):
+    def open_filetypes_manager(self, event=None):
+        if not self._is_valid_click(event): return
         app = self.app
         FiletypesManagerWindow(app, on_close_callback=app.ui_callbacks.reload_active_extensions)
 
@@ -287,6 +304,7 @@ class ActionHandlers:
         app.button_manager.update_button_states()
 
     def on_new_files_click(self, event):
+        if not self._is_valid_click(event): return
         is_ctrl = (event.state & 0x0004)
         if is_ctrl:
             self.add_new_files_to_merge_order()

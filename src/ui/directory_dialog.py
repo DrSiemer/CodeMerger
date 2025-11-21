@@ -257,12 +257,23 @@ class DirectoryDialog(Toplevel):
         return entry_frame
 
     def on_project_button_release(self, event, path):
-        # Ctrl key is state 4
-        is_ctrl = (event.state & 0x0004)
-        if is_ctrl:
-            self.open_project_folder(path)
+        widget = event.widget
+        # Only proceed if the release happens within the button's boundaries
+        if 0 <= event.x <= widget.winfo_width() and 0 <= event.y <= widget.winfo_height():
+            # Provide visual feedback of release/hover state
+            if hasattr(widget, '_draw') and hasattr(widget, 'hover_color'):
+                widget._draw(widget.hover_color)
+
+            # Ctrl key is state 4
+            is_ctrl = (event.state & 0x0004)
+            if is_ctrl:
+                self.open_project_folder(path)
+            else:
+                self.select_and_close(path)
         else:
-            self.select_and_close(path)
+            # If released outside, reset visual state to normal
+            if hasattr(widget, '_draw') and hasattr(widget, 'base_color'):
+                widget._draw(widget.base_color)
 
     def open_project_folder(self, path):
         if not (path and os.path.isdir(path)):

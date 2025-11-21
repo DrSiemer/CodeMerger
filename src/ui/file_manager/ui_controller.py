@@ -15,7 +15,13 @@ class FileManagerUIController:
         self.folder_tooltip_job = None
         self.hovered_folder_id = None
 
+    def _is_click_in_widget(self, event):
+        """Helper to check if the release event occurred inside the widget."""
+        if event is None: return True
+        return 0 <= event.x <= event.widget.winfo_width() and 0 <= event.y <= event.widget.winfo_height()
+
     def clear_filter(self, event=None):
+        if not self._is_click_in_widget(event): return
         self.window.filter_text.set("")
         self.window.focus_force()
 
@@ -157,6 +163,7 @@ class FileManagerUIController:
                 self._hide_folder_tooltip()
 
     def on_folder_icon_click(self, event=None):
+        if not self._is_click_in_widget(event): return
         if self.window.hovered_file_path:
             self._open_file_location(self.window.hovered_file_path)
 

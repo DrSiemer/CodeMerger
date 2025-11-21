@@ -97,7 +97,7 @@ def setup_file_manager_ui(window):
         'highlight': Label(window.tree, image=assets.folder_reveal_icon, bg=c.SUBTLE_HIGHLIGHT_COLOR, cursor="hand2")
     }
     for label in window.folder_icon_labels.values():
-        label.bind("<Button-1>", window.ui_controller.on_folder_icon_click)
+        label.bind("<ButtonRelease-1>", window.ui_controller.on_folder_icon_click)
         ToolTip(label, text="Open file in folder", delay=500)
 
     tree_actions_frame = Frame(left_panel, bg=c.DARK_BG)
@@ -122,6 +122,7 @@ def setup_file_manager_ui(window):
     window.clear_filter_button.place_forget()
     window.clear_filter_button.bind("<Enter>", lambda e: window.clear_filter_button.config(bg=c.SUBTLE_HIGHLIGHT_COLOR))
     window.clear_filter_button.bind("<Leave>", lambda e: window.clear_filter_button.config(bg=c.TEXT_INPUT_BG))
+    window.clear_filter_button.bind("<ButtonRelease-1>", window.ui_controller.clear_filter)
 
     window.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
     window.tree.tag_configure('new_file_highlight', foreground="#40C040")

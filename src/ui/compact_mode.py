@@ -125,7 +125,7 @@ class CompactMode(tk.Toplevel):
         self.right_icons_frame.bind("<B1-Motion>", self.on_drag)
         self.right_icons_frame.bind("<ButtonRelease-1>", self.on_release_drag)
         self.right_icons_frame.bind("<Double-Button-1>", self.close_window)
-        self.close_button.bind("<Button-1>", self.close_window)
+        self.close_button.bind("<ButtonRelease-1>", self.close_window)
 
         if self.app_icon_image:
             self.app_icon_label.bind("<ButtonPress-1>", self.on_press_drag)
@@ -152,28 +152,36 @@ class CompactMode(tk.Toplevel):
         self.copy_button._draw(self.copy_button.click_color)
 
     def on_copy_release(self, event):
-        self.copy_button._draw(self.copy_button.hover_color)
-        is_ctrl = (event.state & 0x0004)
-        if is_ctrl:
-            self.parent.action_handlers.copy_merged_code()
-        else:
-            if self.show_wrapped_button:
-                self.parent.action_handlers.copy_wrapped_code()
-            else:
+        # Verify the release is within the button
+        if 0 <= event.x <= self.copy_button.winfo_width() and 0 <= event.y <= self.copy_button.winfo_height():
+            self.copy_button._draw(self.copy_button.hover_color)
+            is_ctrl = (event.state & 0x0004)
+            if is_ctrl:
                 self.parent.action_handlers.copy_merged_code()
+            else:
+                if self.show_wrapped_button:
+                    self.parent.action_handlers.copy_wrapped_code()
+                else:
+                    self.parent.action_handlers.copy_merged_code()
+        else:
+            self.copy_button._draw(self.copy_button.base_color)
 
     def on_paste_click(self, event):
         # This re-implements the click visual from RoundedButton
         self.paste_button._draw(self.paste_button.click_color)
 
     def on_paste_release(self, event):
-        # This re-implements the release visual and command logic
-        self.paste_button._draw(self.paste_button.hover_color)
-        is_ctrl = (event.state & 0x0004)
-        if is_ctrl:
-            self.parent.action_handlers.apply_changes_from_clipboard()
+        # Verify the release is within the button
+        if 0 <= event.x <= self.paste_button.winfo_width() and 0 <= event.y <= self.paste_button.winfo_height():
+            # This re-implements the release visual and command logic
+            self.paste_button._draw(self.paste_button.hover_color)
+            is_ctrl = (event.state & 0x0004)
+            if is_ctrl:
+                self.parent.action_handlers.apply_changes_from_clipboard()
+            else:
+                self.parent.action_handlers.open_paste_changes_dialog()
         else:
-            self.parent.action_handlers.open_paste_changes_dialog()
+            self.paste_button._draw(self.paste_button.base_color)
 
     def _exit_and_open_file_manager(self):
         # This will start the animation to restore the main window.
@@ -183,16 +191,20 @@ class CompactMode(tk.Toplevel):
 
     def on_new_files_release(self, event):
         if self.new_files_button:
-            # Visual feedback for the button release
-            self.new_files_button._draw(self.new_files_button.hover_color)
-            self.hide_tooltip()
+            # Verify the release is within the button
+            if 0 <= event.x <= self.new_files_button.winfo_width() and 0 <= event.y <= self.new_files_button.winfo_height():
+                # Visual feedback for the button release
+                self.new_files_button._draw(self.new_files_button.hover_color)
+                self.hide_tooltip()
 
-            # Command logic
-            is_ctrl = (event.state & 0x0004)
-            if is_ctrl:
-                self.parent.action_handlers.add_new_files_to_merge_order()
+                # Command logic
+                is_ctrl = (event.state & 0x0004)
+                if is_ctrl:
+                    self.parent.action_handlers.add_new_files_to_merge_order()
+                else:
+                    self._exit_and_open_file_manager()
             else:
-                self._exit_and_open_file_manager()
+                self.new_files_button._draw(self.new_files_button.base_color)
 
     def show_warning(self, file_count, project_name):
         if not self.new_files_button:
@@ -239,6 +251,10 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window = None
 
     def close_window(self, event=None):
+        # Verify bounds if event is provided
+        if event and not (0 <= event.x <= event.widget.winfo_width() and 0 <= event.y <= event.widget.winfo_height()):
+            return
+
         if event and (event.state & 0x0004):
             self.parent.event_handlers.on_app_close()
         elif self.close_callback:
