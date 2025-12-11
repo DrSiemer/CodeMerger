@@ -97,6 +97,13 @@ class ViewManager:
     def _on_animation_complete(self, is_shrinking, final_geom):
         """Handles state changes after an animation finishes."""
         if is_shrinking:
+            # Restore main window to full size before minimizing for Windows taskbar preview
+            if self.main_window_geom:
+                w, h, x, y = self.main_window_geom[2], self.main_window_geom[3], self.main_window_geom[0], self.main_window_geom[1]
+                self.main_window.geometry(f"{w}x{h}+{x}+{y}")
+                self.main_window.attributes("-alpha", 0.01)
+                self.main_window.update()
+
             self.main_window.iconify()
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.deiconify()
