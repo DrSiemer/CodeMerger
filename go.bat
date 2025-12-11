@@ -27,7 +27,8 @@ REM Main Command Router
 if /I "%FLAG%"=="" goto :DefaultAction
 if /I "%FLAG%"=="cmd" goto :OpenCmd
 if /I "%FLAG%"=="f" goto :FreezeReqs
-if /I "%FLAG%"=="b" goto :BuildApp
+if /I "%FLAG%"=="b" goto :BuildFull
+if /I "%FLAG%"=="ba" goto :BuildAppOnly
 if /I "%FLAG%"=="bi" goto :BuildInstallerOnly
 if /I "%FLAG%"=="r" goto :HandleRelease
 echo Unrecognized command: %FLAG%
@@ -69,23 +70,9 @@ goto :eof
     set "VERSION=%MAJOR_VER%.%MINOR_VER%.%REVISION_VER%"
     exit /b 0
 
-:BuildApp
-    setlocal
-    echo.
-    echo Starting Full Build Process
-    echo Deleting old build folders...
-    rmdir /s /q dist 2>nul
-    rmdir /s /q build 2>nul
-    rmdir /s /q dist-installer 2>nul
-    echo Running PyInstaller with %SPEC_FILE%...
-    pyinstaller %SPEC_FILE%
-    if %errorlevel% neq 0 (
-        echo.
-        echo FATAL: PyInstaller build failed.
-        endlocal
-        goto :eof
-    )
-    echo Executable build complete! Found in 'dist' folder.
+:BuildFull
+    call :RunPyInstaller
+    if %errorlevel% neq 0 goto :eof
 
     call :BuildInstaller
     if %errorlevel% neq 0 (
@@ -94,6 +81,29 @@ goto :eof
 
     echo.
     echo Full Build Finished.
+    goto :eof
+
+:BuildAppOnly
+    call :RunPyInstaller
+    goto :eof
+
+:RunPyInstaller
+    setlocal
+    echo.
+    echo Starting PyInstaller Build Process
+    echo Deleting old build folders...
+    rmdir /s /q dist 2>nul
+    rmdir /s /q build 2>nul
+    rmdir /s /q dist-installer 2>nul
+    echo Running PyInstaller with %SPEC_FILE%
+    pyinstaller %SPEC_FILE%
+    if %errorlevel% neq 0 (
+        echo.
+        echo FATAL: PyInstaller build failed.
+        endlocal
+        goto :eof
+    )
+    echo Executable build complete! Found in 'dist' folder.
     endlocal
     goto :eof
 
