@@ -67,13 +67,30 @@ class ProjectActions:
 
     def _check_load_project_thread(self):
         app = self.app
-        if app.load_thread and app.load_thread.is_alive():
+        # If load_thread is None, it means the operation was cancelled or finished
+        if not app.load_thread:
+            return
+
+        if app.load_thread.is_alive():
             app.after(100, self._check_load_project_thread)
         else:
             if app.load_thread_result:
                 self._on_project_load_complete(*app.load_thread_result)
                 app.load_thread_result = None
             app.load_thread = None
+
+    def cancel_loading(self):
+        """Cancels the current project load operation and resets the UI."""
+        app = self.app
+        # Only act if a loading thread is actually active
+        if app.load_thread and app.load_thread.is_alive():
+            # Detach the thread by clearing the reference.
+            # This causes the next _check_load_project_thread to abort.
+            app.load_thread = None
+            app.load_thread_result = None
+
+            self._clear_project_ui()
+            app.status_var.set("Loading cancelled")
 
     def _on_project_load_complete(self, project_config, status_message, path, set_status):
         app = self.app
