@@ -18,13 +18,16 @@ class WizardState:
             "stack": tk.StringVar(),
             "goal": "",
             "concept_md": "",
-            "todo_md": ""
+            "todo_md": "",
+            "base_project_path": tk.StringVar(),
+            "base_project_files": [] # List of file info dicts
         }
 
         # Setup auto-save triggers for UI-bound variables
         self.project_data["name"].trace_add("write", self.save)
         self.project_data["parent_folder"].trace_add("write", self.save)
         self.project_data["stack"].trace_add("write", self.save)
+        self.project_data["base_project_path"].trace_add("write", self.save)
 
     def get_dict(self):
         """Returns a plain dictionary of the current state."""
@@ -34,7 +37,9 @@ class WizardState:
             "stack": self.project_data["stack"].get(),
             "goal": self.project_data.get("goal", ""),
             "concept_md": self.project_data.get("concept_md", ""),
-            "todo_md": self.project_data.get("todo_md", "")
+            "todo_md": self.project_data.get("todo_md", ""),
+            "base_project_path": self.project_data["base_project_path"].get(),
+            "base_project_files": self.project_data["base_project_files"]
         }
 
     def save(self, *args):
@@ -59,6 +64,8 @@ class WizardState:
         self.project_data["goal"] = loaded_data.get("goal", "")
         self.project_data["concept_md"] = loaded_data.get("concept_md", "")
         self.project_data["todo_md"] = loaded_data.get("todo_md", "")
+        self.project_data["base_project_path"].set(loaded_data.get("base_project_path", ""))
+        self.project_data["base_project_files"] = loaded_data.get("base_project_files", [])
 
         self._recalc_progress()
 
@@ -70,38 +77,48 @@ class WizardState:
         self.project_data["goal"] = ""
         self.project_data["concept_md"] = ""
         self.project_data["todo_md"] = ""
+        self.project_data["base_project_path"].set("")
+        self.project_data["base_project_files"] = []
         session_manager.clear_default_session()
         self.current_step = 1
         self.max_accessible_step = 1
 
     def _recalc_progress(self):
         """Determines how far the user can navigate based on completed data."""
-        has_details = self.project_data["name"].get() and self.project_data["parent_folder"].get()
+        has_details = bool(self.project_data["name"].get() and self.project_data["parent_folder"].get())
         has_concept = bool(self.project_data["concept_md"])
         has_stack = bool(self.project_data["stack"].get())
         has_todo = bool(self.project_data["todo_md"])
 
-        if has_details and has_concept and has_stack and has_todo:
-            self.max_accessible_step = 5
-        elif has_details and has_concept and has_stack:
-            self.max_accessible_step = 4
-        elif has_details and has_concept:
-            self.max_accessible_step = 3
-        elif has_details:
-             self.max_accessible_step = 2
-        else:
-            self.max_accessible_step = 1
+        self.max_accessible_step = 1
+
+        if has_details:
+            self.max_accessible_step = 2
+
+            # Step 2 (Base Files) is optional.
+            # If we have data for subsequent steps, we should unlock them.
+
+            if has_concept:
+                self.max_accessible_step = 3
+                if has_stack:
+                    self.max_accessible_step = 4
+                    if has_todo:
+                        self.max_accessible_step = 6 # Jump to Generate if all previous are done
 
     def update_from_view(self, view):
         """Extracts data from the current view widget to update the state model."""
         if not view or not view.winfo_exists(): return
 
         # Step 1 data is bound to StringVars, updated automatically
-        if self.current_step == 2:
+        # Base Files step updates project_data directly via internal callbacks, but we can verify here
+        if hasattr(view, 'save_state'):
+             view.save_state() # For BaseFilesView
+
+        if hasattr(view, 'get_concept_content'):
             self.project_data["concept_md"] = view.get_concept_content()
             if hasattr(view, 'get_goal_content'):
                 self.project_data["goal"] = view.get_goal_content()
-        elif self.current_step == 3:
+        elif hasattr(view, 'get_stack_content'):
             self.project_data["stack"].set(view.get_stack_content())
-        elif self.current_step == 4:
+        elif hasattr(view, 'get_todo_content'):
             self.project_data["todo_md"] = view.get_todo_content()

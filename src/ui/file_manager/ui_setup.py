@@ -6,12 +6,23 @@ from ...constants import SUBTLE_HIGHLIGHT_COLOR
 from ..assets import assets
 from ..tooltip import ToolTip
 
-def setup_file_manager_ui(window):
-    """Creates and packs all the UI widgets for the FileManagerWindow"""
+def setup_file_manager_ui(window, container=None, include_save_button=True):
+    """
+    Creates and packs all the UI widgets for the FileManagerWindow.
+
+    Args:
+        window: The controller object (FileManagerWindow or StepBaseFilesView) that holds logic and state.
+        container: Optional parent widget to pack the main frame into. If None, 'window' is used as parent.
+        include_save_button: Whether to show the 'Save and Close' button (defaults to True).
+                             'Add All' and 'Remove All' are now always shown.
+    """
     font_config = c.FONT_SMALL_BUTTON
     window.font_small = font.Font(family=font_config[0], size=font_config[1])
 
-    main_frame = Frame(window, bg=c.DARK_BG)
+    # Determine the parent widget for the UI components
+    parent_widget = container if container else window
+
+    main_frame = Frame(parent_widget, bg=c.DARK_BG)
     main_frame.pack(fill='both', expand=True, padx=10, pady=10)
     main_frame.grid_rowconfigure(0, weight=1)
     main_frame.grid_rowconfigure(1, weight=0)
@@ -194,8 +205,12 @@ def setup_file_manager_ui(window):
     # ===============================================
     # === BOTTOM BUTTONS (Back in main_frame) =======
     # ===============================================
+    # Bulk actions are always available (if they fit the use case)
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
     bulk_action_frame.grid(row=1, column=0, sticky='ew', pady=(20, 0))
+
     RoundedButton(bulk_action_frame, text="Add all", command=window.state_controller.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='left')
     RoundedButton(bulk_action_frame, text="Remove all", command=window.state_controller.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='right')
-    RoundedButton(bulk_action_frame, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2').pack()
+
+    if include_save_button:
+        RoundedButton(bulk_action_frame, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2').pack()

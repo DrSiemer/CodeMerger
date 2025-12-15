@@ -37,7 +37,6 @@ class Step2ConceptView(tk.Frame):
                 if not content: return []
                 return json.loads(content)
         except (FileNotFoundError, json.JSONDecodeError) as e:
-            # Fail silently or log if needed, but don't crash
             return []
 
     def show_initial_view(self):
@@ -73,6 +72,29 @@ class Step2ConceptView(tk.Frame):
         else:
             self.generate_btn.set_state('disabled')
 
+    def _get_base_project_content(self):
+        base_path = self.project_data.get("base_project_path", tk.StringVar()).get()
+        base_files = self.project_data.get("base_project_files", [])
+
+        if not base_path or not base_files:
+            return ""
+
+        content_blocks = []
+        content_blocks.append("\n### Example Project Code (For Reference Only)\n")
+        content_blocks.append("The user has provided an example project. You may refer to this for context on their coding style or architecture preferences, but do NOT copy it directly.\n")
+
+        for file_info in base_files:
+            rel_path = file_info['path']
+            full_path = os.path.join(base_path, rel_path)
+            try:
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    file_content = f.read()
+                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n{file_content}\n```\n")
+            except Exception:
+                pass
+
+        return "\n".join(content_blocks)
+
     def handle_prompt_generation(self):
         user_goal = self.goal_text.get("1.0", 'end-1c')
         if not user_goal.strip() or user_goal.strip() == DEFAULT_GOAL_TEXT:
@@ -87,6 +109,8 @@ class Step2ConceptView(tk.Frame):
              messagebox.showerror("Error", f"Concept template not found at {template_path}", parent=self)
              return
 
+        example_code = self._get_base_project_content()
+
         prompt = f"""Based on the following user goal, expand it into a full project concept document. Use the provided template as a strict guide for the structure.
 
 ### User Goal
@@ -98,9 +122,11 @@ class Step2ConceptView(tk.Frame):
 {concept_template}
 ```
 
+{example_code}
+
 ### Instructions
 1.  Fill in every section of the template that is relevant to the user's goal.
-2.  If a section from the template is not applicable (e.g., 'Backend Schema' for a purely client-side application like a particle simulation), omit that section from the output.
+2.  If a section from the template is not applicable, omit that section from the output.
 3.  Interpret the user's goal to generate plausible details for features, principles, and the data synchronization strategy.
 4.  Return *only* the generated markdown content for the new `concept.md` file, without any extra explanations or pleasantries.
 """

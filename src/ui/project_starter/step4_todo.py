@@ -37,6 +37,29 @@ class Step4TodoView(tk.Frame):
         except (FileNotFoundError, json.JSONDecodeError) as e:
             return []
 
+    def _get_base_project_content(self):
+        base_path = self.project_data.get("base_project_path", tk.StringVar()).get()
+        base_files = self.project_data.get("base_project_files", [])
+
+        if not base_path or not base_files:
+            return ""
+
+        content_blocks = []
+        content_blocks.append("\n### Example Project Code (For Reference Only)\n")
+        content_blocks.append("The user has provided an example project structure. Use this to inform the tasks, especially regarding file structure and configuration.\n")
+
+        for file_info in base_files:
+            rel_path = file_info['path']
+            full_path = os.path.join(base_path, rel_path)
+            try:
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    file_content = f.read()
+                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n{file_content}\n```\n")
+            except Exception:
+                pass
+
+        return "\n".join(content_blocks)
+
     def _generate_prompt(self):
         concept_md = self.project_data.get("concept_md")
         stack = self.project_data["stack"].get()
@@ -53,6 +76,8 @@ class Step4TodoView(tk.Frame):
             messagebox.showerror("Error", f"Reference file not found: {template_path}", parent=self)
             return None
 
+        example_code = self._get_base_project_content()
+
         prompt = f"""Based on the following project `concept.md` and technical stack, generate a detailed `todo.md` file. Use the provided `todo.md` template as a strict guide for the structure and phases.
 
 ### Tech Stack
@@ -66,6 +91,8 @@ class Step4TodoView(tk.Frame):
 ### TODO Template (`/reference/todo.md`)```markdown
 {todo_template}
 ```
+
+{example_code}
 
 ### Instructions
 1.  Read the `concept.md` to understand the project's goals, features, and technical details.

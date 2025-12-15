@@ -12,6 +12,7 @@ class Step5GenerateView(tk.Frame):
     def __init__(self, parent, project_data, create_project_callback):
         super().__init__(parent, bg=c.DARK_BG)
         self.create_project_callback = create_project_callback
+        self.project_data = project_data
 
         prompt = self._generate_master_prompt(project_data)
         if not prompt:
@@ -58,6 +59,29 @@ class Step5GenerateView(tk.Frame):
         else:
             self.create_button.set_state('disabled')
 
+    def _get_base_project_content(self):
+        base_path = self.project_data.get("base_project_path", tk.StringVar()).get()
+        base_files = self.project_data.get("base_project_files", [])
+
+        if not base_path or not base_files:
+            return ""
+
+        content_blocks = []
+        content_blocks.append("\n### Example Project Code (For Reference Only)\n")
+        content_blocks.append("The user has provided an example project. You must NOT copy this code directly. Use it ONLY as a cheatsheet for syntax, patterns, and structure.\n")
+
+        for file_info in base_files:
+            rel_path = file_info['path']
+            full_path = os.path.join(base_path, rel_path)
+            try:
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    file_content = f.read()
+                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n{file_content}\n```\n")
+            except Exception:
+                pass
+
+        return "\n".join(content_blocks)
+
     def _generate_master_prompt(self, project_data):
         name = project_data['name'].get()
         stack = project_data['stack'].get()
@@ -87,6 +111,8 @@ class Step5GenerateView(tk.Frame):
         prompt_content += f"--- File: `todo.md` ---\n"
         prompt_content += f"```markdown\n{todo_md}\n```\n\n"
 
+        example_code = self._get_base_project_content()
+
         prompt = f"""You are a senior software developer creating a project boilerplate. Your task is to take the user's requirements and the provided template files and generate a complete, ready-to-use project structure. Adhere strictly to the provided file formats.
 
 ### User Requirements
@@ -97,6 +123,9 @@ CodeStack: "{stack}"
 
 ### Provided Files
 {prompt_content}
+
+{example_code}
+
 ### Core Instructions
 1.  **Selection & Renaming:** Analyze the `CodeStack` to select the single most appropriate `go_*.bat` file (e.g. `go_python.bat` for python, `go_nodejs.bat` for node). Rename this file to `go.bat` in your output.
 2.  **Exclusion:** You must **NOT** include the unused `go_*.bat` files in your final response. The output should only contain the single selected and renamed `go.bat` file.

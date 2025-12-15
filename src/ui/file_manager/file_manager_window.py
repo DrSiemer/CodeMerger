@@ -52,7 +52,7 @@ class FileManagerWindow(Toplevel):
         self.state_controller = FileManagerStateController(self)
         self.order_request_handler = OrderRequestHandler(self)
 
-        setup_file_manager_ui(self)
+        setup_file_manager_ui(self, include_save_button=True)
         self.create_handlers()
 
         self.filter_text = StringVar()

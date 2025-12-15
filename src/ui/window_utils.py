@@ -58,6 +58,8 @@ def _get_default_geometry_for_window(window_class_name):
         return c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
     if window_class_name == 'InstructionsWindow':
         return c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY
+    if window_class_name == 'ProjectStarterDialog':
+        return c.PROJECT_STARTER_GEOMETRY
     # Return None if no specific default is found for this window type
     return None
 
@@ -113,7 +115,11 @@ def position_window(window):
         y = parent_y + (parent_h - win_h) // 2
 
     # --- Step 2: Constrain the position to be fully on-screen ---
-    mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area((x, y))
+    # We use the parent window to identify the correct monitor.
+    # This prevents the window from snapping to the adjacent monitor if the calculated
+    # top-left coordinates 'bleed' into it.
+    target_for_monitor_detection = parent if parent else (x, y)
+    mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area(target_for_monitor_detection)
 
     # Apply buffers to prevent spawning behind the taskbar or against the screen edges.
     mon_bottom -= 50

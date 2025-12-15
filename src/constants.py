@@ -9,7 +9,8 @@ STATUS_FADE_SECONDS = 5
 GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"
 
 # --- File System ---
-SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json'}
+# Added explicit directories to ignore for performance (node_modules, .git, .venv, etc)
+SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode'}
 START_WORK_FILENAME = "_start.txt"
 
 # --- Logging ---
@@ -57,7 +58,7 @@ FILETYPES_WINDOW_DEFAULT_GEOMETRY = "330x550"
 INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY = "700x500"
 DIRECTORY_DIALOG_WIDTH = 450
 TITLE_EDIT_DIALOG_WIDTH = 400
-PROJECT_STARTER_GEOMETRY = "900x700"
+PROJECT_STARTER_GEOMETRY = "1000x750" # Slightly increased height for better file manager view
 
 # --- UI Color Palette (dark to light) ---
 
