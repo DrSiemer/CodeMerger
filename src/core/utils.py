@@ -263,6 +263,12 @@ def parse_gitignore(base_dir):
                         gitignore_data.append((Path(root), patterns))
             except (IOError, OSError):
                 pass
+
+        # Prune ignored directories to stop os.walk from entering them.
+        # This prevents scanning massive folders like node_modules.
+        if gitignore_data:
+            dirs[:] = [d for d in dirs if not is_ignored(os.path.join(root, d), base_dir, gitignore_data)]
+
     return gitignore_data
 
 def is_ignored(path, base_dir, gitignore_data):
