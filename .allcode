@@ -184,10 +184,10 @@
         },
         {
           "path": "src/ui/window_utils.py",
-          "mtime": 1763047286.0333323,
-          "hash": "790fd9255c539074f3e1cfec57d02f9550d639a6",
-          "tokens": 1272,
-          "lines": 135
+          "mtime": 1765815591.9418058,
+          "hash": "48d6e997a482decafa64e5e671635e2d06a7d7f0",
+          "tokens": 1350,
+          "lines": 141
         },
         {
           "path": "src/ui/tooltip.py",
@@ -380,10 +380,10 @@
         },
         {
           "path": "src/ui/project_starter/step2_concept.py",
-          "mtime": 1765813802.2738533,
-          "hash": "dbd5ff2301171eec3e8c180c373569790c4c695c",
-          "tokens": 3746,
-          "lines": 329
+          "mtime": 1765899292.3080156,
+          "hash": "908e9e1fc6e6c20a273ad8015e2b84e49fa6def5",
+          "tokens": 3870,
+          "lines": 340
         },
         {
           "path": "src/ui/project_starter/step3_todo.py",
@@ -408,10 +408,10 @@
         },
         {
           "path": "src/ui/project_starter/wizard_dialog.py",
-          "mtime": 1765814363.8379176,
-          "hash": "0bc2884a39706fb4e9ab00932421c39619f8e999",
-          "tokens": 3524,
-          "lines": 391
+          "mtime": 1765815591.9418058,
+          "hash": "f7d987df9ecd424e8b4f948c2732fcd0c53829c2",
+          "tokens": 3280,
+          "lines": 364
         },
         {
           "path": "src/ui/directory_dialog.py",
@@ -702,17 +702,17 @@
         },
         {
           "path": "src/ui/project_starter/wizard_state.py",
-          "mtime": 1765813802.2728531,
-          "hash": "1d500b0d2d6d5206e965f9dbcc2ed2f39e2aca2e",
-          "tokens": 1149,
-          "lines": 119
+          "mtime": 1765899292.3080156,
+          "hash": "2383c3214f7c4322eb4cd54311e468af3fe74f99",
+          "tokens": 1128,
+          "lines": 125
         },
         {
           "path": "src/ui/project_starter/wizard_validator.py",
-          "mtime": 1765809969.8229373,
-          "hash": "bd56fc9bfa6cd04227997b4b438d9fcc18e5e252",
-          "tokens": 339,
-          "lines": 45
+          "mtime": 1765899292.3090136,
+          "hash": "e31c1efd2026935cdab7aae371a7fc54a769fe61",
+          "tokens": 378,
+          "lines": 50
         },
         {
           "path": "src/ui/project_starter/step3_stack.py",
@@ -723,16 +723,16 @@
         },
         {
           "path": "src/ui/project_starter/step4_todo.py",
-          "mtime": 1765813802.2738533,
-          "hash": "2de7e459ba5f245c13c8c8380375feb1cfb4be31",
-          "tokens": 3303,
-          "lines": 295
+          "mtime": 1765899292.3090136,
+          "hash": "d95547004f5fcc14b700eb9934f4def25df0d2a2",
+          "tokens": 3426,
+          "lines": 306
         },
         {
           "path": "src/ui/project_starter/step5_generate.py",
-          "mtime": 1765813802.2738533,
-          "hash": "683002cc89df19eb94adce9a41bd8586abaf527f",
-          "tokens": 1977,
+          "mtime": 1765815591.9408064,
+          "hash": "f2500a9e25ea1c8b34ccf2ddeda2e8db69e53437",
+          "tokens": 1982,
           "lines": 156
         },
         {

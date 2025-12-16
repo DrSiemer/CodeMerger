@@ -28,16 +28,18 @@ def validate_step(step, state_data):
             return False, "Invalid Path", f"The parent folder path is invalid.\nError: {e}"
 
     elif step == 2:
+        return True, "", ""
+
+    elif step == 3:
         concept = state_data["concept_md"]
         if not concept:
             return False, "Error", "The concept document cannot be empty."
 
-    elif step == 3:
-        stack = state_data["stack"].get()
-        if not stack:
-            return False, "Error", "You must define a code stack."
-
     elif step == 4:
+        # The Stack step is now optional.
+        return True, "", ""
+
+    elif step == 5:
         todo = state_data["todo_md"]
         if not todo:
             return False, "Error", "The TODO plan cannot be empty."

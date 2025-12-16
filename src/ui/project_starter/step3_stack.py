@@ -50,12 +50,15 @@ class Step3StackView(tk.Frame):
         button_frame.columnconfigure(1, weight=1) # Spacer
 
         # Save button (Bottom Left) - Hidden initially
-        self.save_exp_btn = RoundedButton(button_frame, text="Save Changes", command=self._save_experience, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        self.save_exp_btn = RoundedButton(button_frame, text="Save as Default", command=self._save_experience, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         # We pack/grid it later in _on_exp_change
 
         # Generate button (Bottom Right)
         self.generate_btn = RoundedButton(button_frame, text="Generate Stack Recommendation", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         self.generate_btn.pack(side='right')
+
+        # Run check for safety
+        self._on_exp_change()
 
     def _on_exp_change(self, event=None):
         current_text = self.experience_text.get("1.0", "end-1c")
@@ -67,11 +70,16 @@ class Step3StackView(tk.Frame):
 
     def _save_experience(self):
         new_exp = self.experience_text.get("1.0", "end-1c")
+
+        # If there is existing saved experience, verify before overwriting
+        if self.saved_experience.strip() and new_exp.strip() != self.saved_experience.strip():
+             if not messagebox.askyesno("Overwrite Default", "This will overwrite your existing default experience settings.\n\nAre you sure?", parent=self):
+                 return
+
         self.app_config['user_experience'] = new_exp
         save_config(self.app_config)
         self.saved_experience = new_exp
         self.save_exp_btn.pack_forget()
-        # Button disappearance confirms save
 
     def handle_prompt_generation(self):
         concept = self.project_data.get("concept_md", "")

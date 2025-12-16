@@ -113,12 +113,16 @@ class Step5GenerateView(tk.Frame):
 
         example_code = self._get_base_project_content()
 
+        # Build the User Requirements block, conditionally including the stack
+        user_reqs = f'ProjectName: "{name}"\n'
+        if stack:
+            user_reqs += f'CodeStack: "{stack}"\n'
+
         prompt = f"""You are a senior software developer creating a project boilerplate. Your task is to take the user's requirements and the provided template files and generate a complete, ready-to-use project structure. Adhere strictly to the provided file formats.
 
 ### User Requirements
 ```yaml
-ProjectName: "{name}"
-CodeStack: "{stack}"
+{user_reqs}
 ```
 
 ### Provided Files
