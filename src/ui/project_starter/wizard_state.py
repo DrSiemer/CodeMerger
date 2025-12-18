@@ -93,24 +93,22 @@ class WizardState:
         self.max_accessible_step = 1
 
         if has_details:
-            self.max_accessible_step = 2
-
-            # Step 2 (Base Files) is optional.
-            # If we have data for subsequent steps, we should unlock them.
+            # Step 1 done. Step 2 (Base Files) is optional.
+            # Step 3 (Concept) is the next mandatory step, so we allow access up to 3 immediately.
+            self.max_accessible_step = 3
 
             if has_concept:
-                self.max_accessible_step = 3
+                self.max_accessible_step = 4 # Unlock Stack
                 if has_stack:
-                    self.max_accessible_step = 4
+                    self.max_accessible_step = 5 # Unlock Todo
                     if has_todo:
-                        self.max_accessible_step = 6 # Jump to Generate if all previous are done
+                        self.max_accessible_step = 6 # Unlock Generate
 
     def update_from_view(self, view):
         """Extracts data from the current view widget to update the state model."""
         if not view or not view.winfo_exists(): return
 
         # Step 1 data is bound to StringVars, updated automatically
-        # Base Files step updates project_data directly via internal callbacks, but we can verify here
         if hasattr(view, 'save_state'):
              view.save_state() # For BaseFilesView
 
@@ -122,3 +120,6 @@ class WizardState:
             self.project_data["stack"].set(view.get_stack_content())
         elif hasattr(view, 'get_todo_content'):
             self.project_data["todo_md"] = view.get_todo_content()
+
+        # Recalculate progress immediately after fetching data from view
+        self._recalc_progress()

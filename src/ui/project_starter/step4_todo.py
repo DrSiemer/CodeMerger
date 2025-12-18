@@ -175,6 +175,9 @@ class Step4TodoView(tk.Frame):
 
         self.editor_text = ScrollableText(self.editor_frame, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.editor_text.insert("1.0", content)
+        # Bind key release to update state immediately
+        self.editor_text.text_widget.bind('<KeyRelease>', self._sync_editor_to_state)
+
         self.markdown_renderer = MarkdownRenderer(self.editor_frame)
 
         self._toggle_view(self.view_switch.get_state())
@@ -182,7 +185,14 @@ class Step4TodoView(tk.Frame):
         if self.questions and self.questions_frame_visible:
             self._create_question_prompter(self)
 
+        self._sync_editor_to_state() # Trigger initial validation
         self.wizard_controller._update_navigation_controls()
+
+    def _sync_editor_to_state(self, event=None):
+        """Updates the project data and triggers validation check."""
+        content = self.editor_text.get("1.0", "end-1c").strip()
+        self.project_data["todo_md"] = content
+        self.wizard_controller.update_nav_state()
 
     def is_editor_visible(self):
         return self.editor_is_active
