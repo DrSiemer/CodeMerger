@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Frame, Label, font as tkFont
 from ... import constants as c
+from .rounded_button import RoundedButton
 
 class ProfileNavigator(Frame):
     """
@@ -15,12 +16,14 @@ class ProfileNavigator(Frame):
         self.font = tkFont.Font(family=c.FONT_NORMAL[0], size=c.FONT_NORMAL[1])
 
         # --- Widgets ---
-        button_font = (c.FONT_FAMILY_PRIMARY, 16, 'bold')
-        self.prev_button = tk.Button(
+        button_font = (c.FONT_FAMILY_PRIMARY, 12, 'bold')
+
+        self.prev_button = RoundedButton(
             self, text="<", font=button_font,
             bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR,
-            activebackground=c.DARK_BG, activeforeground=c.BTN_BLUE,
-            command=self._on_prev, relief='flat', bd=0, cursor='hand2'
+            command=self._on_prev,
+            width=24, height=28, radius=6,
+            cursor='hand2'
         )
 
         self.label_container = Frame(self, bg=c.DARK_BG)
@@ -29,14 +32,15 @@ class ProfileNavigator(Frame):
         self.profile_label = Label(
             self.label_container, text="", font=self.font,
             bg=c.DARK_BG, fg=c.TEXT_COLOR,
-            anchor='w'
+            anchor='c'
         )
 
-        self.next_button = tk.Button(
+        self.next_button = RoundedButton(
             self, text=">", font=button_font,
             bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR,
-            activebackground=c.DARK_BG, activeforeground=c.BTN_BLUE,
-            command=self._on_next, relief='flat', bd=0, cursor='hand2'
+            command=self._on_next,
+            width=24, height=28, radius=6,
+            cursor='hand2'
         )
 
         self.prev_button.pack(side='left', padx=(0, 0))

@@ -63,7 +63,7 @@ def setup_ui(app):
     ToolTip(app.folder_icon_label, "Open project folder\nCtrl+Click: Copy path\nCtrl+Alt+Click: Open console", delay=500)
 
     # --- Top-Level Buttons (Row 1) ---
-    app.top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20, height=32)
+    app.top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20, height=30)
     app.top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
     app.top_buttons_container.grid_propagate(False)
     app.top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
