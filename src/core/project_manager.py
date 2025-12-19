@@ -1,6 +1,6 @@
 import os
 from .project_config import ProjectConfig
-from .utils import parse_gitignore, get_file_hash, get_token_count_for_text, load_config
+from .utils import parse_gitignore
 from .file_scanner import get_all_matching_files
 
 class ProjectManager:
@@ -20,41 +20,9 @@ class ProjectManager:
         )
         project_config.known_files = all_project_files
 
-        # Auto-add files to selection for new projects
-        selection = []
-        total_tokens = 0
-        app_config = load_config()
-        token_count_enabled = app_config.get('token_count_enabled', True)
-
-        for rel_path in all_project_files:
-            full_path = os.path.join(project_config.base_dir, rel_path)
-            try:
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-
-                mtime = os.path.getmtime(full_path)
-                file_hash = get_file_hash(full_path)
-
-                if token_count_enabled:
-                    tokens = get_token_count_for_text(content)
-                    lines = content.count('\n') + 1
-                else:
-                    tokens, lines = 0, 0
-
-                if file_hash is not None:
-                    selection.append({
-                        'path': rel_path,
-                        'mtime': mtime,
-                        'hash': file_hash,
-                        'tokens': tokens,
-                        'lines': lines
-                    })
-                    total_tokens += tokens
-            except OSError:
-                pass
-
-        project_config.selected_files = selection
-        project_config.total_tokens = total_tokens
+        # Start with an empty selection for new projects
+        project_config.selected_files = []
+        project_config.total_tokens = 0
 
     def load_project(self, path):
         """
