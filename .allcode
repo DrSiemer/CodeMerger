@@ -47,7 +47,8 @@
           "mtime": 1765462247.8215585,
           "hash": "3565e59ae77321938a117c1114094aac1db5ff19",
           "tokens": 1903,
-          "lines": 246
+          "lines": 246,
+          "ignore_tokens": false
         },
         {
           "path": "run.py",
@@ -96,7 +97,8 @@
           "mtime": 1765813314.1285555,
           "hash": "0bf3ff4d745121ac961ccf8d0a8e0320ffbc5d95",
           "tokens": 3071,
-          "lines": 357
+          "lines": 357,
+          "ignore_tokens": false
         },
         {
           "path": "src/app_state.py",
@@ -110,7 +112,8 @@
           "mtime": 1763047285.945928,
           "hash": "f06520eec89c14be19c8d70395683a9cb6053812",
           "tokens": 2871,
-          "lines": 317
+          "lines": 317,
+          "ignore_tokens": false
         },
         {
           "path": "src/core/project_manager.py",
@@ -240,17 +243,17 @@
         },
         {
           "path": "src/ui/widgets/profile_navigator.py",
-          "mtime": 1762434765.5327795,
-          "hash": "6c577982d069802c7e21974612c80aae7f59a185",
-          "tokens": 810,
-          "lines": 99
+          "mtime": 1766135135.987358,
+          "hash": "7a9c2fc373770ae43cb272e55ea0cb858bcc6b74",
+          "tokens": 800,
+          "lines": 103
         },
         {
           "path": "src/ui/file_manager/data_controller.py",
-          "mtime": 1762434765.4973032,
-          "hash": "8577c0522045f452433d9bf2f8b9719110521a21",
-          "tokens": 770,
-          "lines": 81
+          "mtime": 1766135365.8308165,
+          "hash": "a1666ecbc647402763960a6f40bf126e347efd38",
+          "tokens": 785,
+          "lines": 82
         },
         {
           "path": "src/ui/file_manager/selection_data_manager.py",
@@ -268,10 +271,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_ui.py",
-          "mtime": 1758720729.249796,
-          "hash": "3b17fd95c3149bba0c43e399ca8cf55b349aee4f",
-          "tokens": 812,
-          "lines": 63
+          "mtime": 1766135365.8308165,
+          "hash": "1d5af3a65a047419d3ee8f57e723410f506b4638",
+          "tokens": 903,
+          "lines": 77
         },
         {
           "path": "src/ui/file_manager/ui_controller.py",
@@ -289,10 +292,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1763628517.543246,
-          "hash": "34de885270f6c14135527ba9be853fec37743f4b",
-          "tokens": 2007,
-          "lines": 208
+          "mtime": 1766135365.8308165,
+          "hash": "282d82722947722a2d0a34552c9ceb9ea578ae6d",
+          "tokens": 2197,
+          "lines": 226
         },
         {
           "path": "src/ui/file_manager/state_controller.py",
@@ -380,10 +383,10 @@
         },
         {
           "path": "src/ui/project_starter/step2_concept.py",
-          "mtime": 1765899292.3080156,
-          "hash": "908e9e1fc6e6c20a273ad8015e2b84e49fa6def5",
-          "tokens": 3870,
-          "lines": 340
+          "mtime": 1765901723.9297612,
+          "hash": "3ad835c91ab7a11da3253aeea3b30220cb33eba7",
+          "tokens": 3845,
+          "lines": 338
         },
         {
           "path": "src/ui/project_starter/step3_todo.py",
@@ -569,8 +572,8 @@
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1763982324.6680064,
-          "hash": "674e48b8191d01f26e764284adcaf6a7bd9b7151",
+          "mtime": 1766135135.9823568,
+          "hash": "3997eab1fdea47ba717346ca8adf0c7dbccea5e5",
           "tokens": 2871,
           "lines": 186
         },
@@ -709,31 +712,31 @@
         },
         {
           "path": "src/ui/project_starter/wizard_validator.py",
-          "mtime": 1765899292.3090136,
-          "hash": "e31c1efd2026935cdab7aae371a7fc54a769fe61",
-          "tokens": 378,
-          "lines": 50
+          "mtime": 1765901800.4568758,
+          "hash": "30b0aa5db79506b15ebd54effe3da15fdb64c74c",
+          "tokens": 337,
+          "lines": 47
         },
         {
           "path": "src/ui/project_starter/step3_stack.py",
-          "mtime": 1763982324.5008,
-          "hash": "8a21c7f03b9f358a8806299a00033dcb53fcd837",
-          "tokens": 2596,
-          "lines": 226
+          "mtime": 1765901761.9530165,
+          "hash": "890df427662d95e9b3ccaf17841c51fa417aaa36",
+          "tokens": 2670,
+          "lines": 234
         },
         {
           "path": "src/ui/project_starter/step4_todo.py",
-          "mtime": 1765899292.3090136,
-          "hash": "d95547004f5fcc14b700eb9934f4def25df0d2a2",
-          "tokens": 3426,
-          "lines": 306
+          "mtime": 1765901776.863473,
+          "hash": "98a856771236e7d908b00ec314c6d7edf806fa8c",
+          "tokens": 3412,
+          "lines": 305
         },
         {
           "path": "src/ui/project_starter/step5_generate.py",
-          "mtime": 1765815591.9408064,
-          "hash": "f2500a9e25ea1c8b34ccf2ddeda2e8db69e53437",
-          "tokens": 1982,
-          "lines": 156
+          "mtime": 1765901478.2732892,
+          "hash": "85ab9431c26772af68d231e633e7ea129cb7d4dd",
+          "tokens": 2025,
+          "lines": 160
         },
         {
           "path": "src/ui/project_starter/step_base_files.py",
@@ -743,7 +746,7 @@
           "lines": 253
         }
       ],
-      "total_tokens": 123710,
+      "total_tokens": 126100,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

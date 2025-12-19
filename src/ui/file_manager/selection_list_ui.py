@@ -40,7 +40,11 @@ class SelectionListUI:
 
         min_tokens, max_tokens = 0, c.TOKEN_COLOR_RANGE_MIN_MAX
         if self.token_count_enabled:
-            token_counts = [f.get('tokens', 0) for f in items_to_display if f.get('tokens', -1) >= 0]
+            # Filter out ignored files when calculating the range to prevent large files from skewing the gradient
+            token_counts = [
+                f.get('tokens', 0) for f in items_to_display
+                if f.get('tokens', -1) >= 0 and not f.get('ignore_tokens', False)
+            ]
             if token_counts:
                 min_tokens = min(token_counts)
                 max_tokens = max(max(token_counts), c.TOKEN_COLOR_RANGE_MIN_MAX)
@@ -52,9 +56,18 @@ class SelectionListUI:
             right_col_text, right_col_color = "", c.TEXT_SUBTLE_COLOR
             if self.token_count_enabled:
                 token_count = file_info.get('tokens', -1)
-                right_col_text = str(token_count) if token_count >= 0 else "?"
+                is_ignored = file_info.get('ignore_tokens', False)
+
                 if token_count >= 0:
-                    right_col_color = self._get_color_for_token_count(token_count, min_tokens, max_tokens)
+                    if is_ignored:
+                        right_col_text = f"[{token_count}]"
+                        right_col_color = "#666666"
+                    else:
+                        right_col_text = str(token_count)
+                        right_col_color = self._get_color_for_token_count(token_count, min_tokens, max_tokens)
+                else:
+                    right_col_text = "?"
+
             display_items.append({'left': display_text, 'right': right_col_text, 'right_fg': right_col_color, 'data': path})
 
         if is_reorder:
