@@ -13,6 +13,7 @@ from ..core.updater import Updater
 from .ui_builder import setup_ui
 from .file_monitor import FileMonitor
 from ..core.project_manager import ProjectManager
+from ..core.unreal_client import UnrealClient
 from .assets import assets
 from .app_window_parts.button_state_manager import ButtonStateManager
 from .app_window_parts.status_bar_manager import StatusBarManager
@@ -50,6 +51,7 @@ class App(Tk):
 
         # Core Components
         self.app_state = AppState()
+        self.unreal_client = UnrealClient()
         self.view_manager = ViewManager(self)
         self.updater = Updater(self, self.app_state, self.app_version)
         self.project_manager = ProjectManager(lambda: self.file_extensions)

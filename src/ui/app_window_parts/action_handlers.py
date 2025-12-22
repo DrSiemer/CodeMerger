@@ -18,6 +18,7 @@ from ...core.clipboard import copy_project_to_clipboard
 from ...core import change_applier
 from ...core.project_config import _calculate_font_color
 from ...core.utils import get_file_hash, get_token_count_for_text
+from ...core.unreal_scripts import GET_SELECTED_BLUEPRINTS_SCRIPT
 
 class ActionHandlers:
     def __init__(self, app):
@@ -80,21 +81,11 @@ class ActionHandlers:
                 original_intro = project_config.intro_text
 
                 project_config.intro_text = start_content
-                # Keeping existing outro or blank? Usually prompts are self-contained.
-                # Let's keep the outro if defined, as it contains formatting rules.
-
-                status_message = copy_project_to_clipboard(
-                    parent=app,
-                    base_dir=project_config.base_dir,
-                    project_config=project_config,
-                    use_wrapper=True,
-                    copy_merged_prompt="",
-                    scan_secrets_enabled=app.app_state.scan_for_secrets
-                )
+                
+                self._perform_copy_with_config(project_config, use_wrapper=True, copy_merged_prompt="")
 
                 # Restore
                 project_config.intro_text = original_intro
-                app.status_var.set(status_message)
 
             except IOError as e:
                 app.show_error_dialog("Error", f"Could not read '{c.START_WORK_FILENAME}': {e}")
@@ -261,25 +252,40 @@ class ActionHandlers:
 
     def _perform_copy(self, use_wrapper: bool):
         app = self.app
-        base_dir = app.active_dir.get()
-        if not os.path.isdir(base_dir):
-            app.show_error_dialog("Error", "Please select a valid project folder first")
-            app.status_var.set("Error: Invalid project folder")
-            return
-
         project_config = app.project_manager.get_current_project()
         if not project_config:
             app.status_var.set("Error: No active project.")
             return
+        self._perform_copy_with_config(project_config, use_wrapper, app.app_state.copy_merged_prompt)
 
+    def _perform_copy_with_config(self, project_config, use_wrapper, copy_merged_prompt):
+        app = self.app
+        base_dir = project_config.base_dir
+        
         status_message = copy_project_to_clipboard(
             parent=app,
             base_dir=base_dir,
             project_config=project_config,
             use_wrapper=use_wrapper,
-            copy_merged_prompt=app.app_state.copy_merged_prompt,
+            copy_merged_prompt=copy_merged_prompt,
             scan_secrets_enabled=app.app_state.scan_for_secrets
         )
+
+        # --- Unreal Engine Integration Injection ---
+        if app.unreal_client.is_connected() and app.include_unreal_var.get():
+            app.status_var.set("Fetching Blueprint data from Unreal...")
+            app.update_idletasks()
+            
+            bp_json = app.unreal_client.run_script(GET_SELECTED_BLUEPRINTS_SCRIPT)
+            
+            if bp_json:
+                clipboard_content = pyperclip.paste()
+                ue_block = f"\n\n--- Unreal Engine Blueprints (Selected) ---\n```json\n{bp_json}\n```"
+                pyperclip.copy(clipboard_content + ue_block)
+                status_message += " + UE Data"
+            else:
+                status_message += " (UE Fetch Failed)"
+
         app.status_var.set(status_message)
 
     def manage_files(self):

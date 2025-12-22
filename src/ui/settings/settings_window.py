@@ -11,6 +11,7 @@ from .file_manager_settings import FileManagerSettingsFrame
 from .prompts_settings import PromptsSettingsFrame
 from .editor_settings import EditorSettingsFrame
 from .wizard_settings import WizardSettingsFrame
+from .unreal_settings import UnrealSettingsFrame
 from ... import constants as c
 from ..window_utils import position_window, save_window_geometry
 
@@ -44,7 +45,9 @@ class SettingsWindow(Toplevel):
             'token_count_enabled': BooleanVar(value=self.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
             'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT))),
-            'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', ''))
+            'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', '')),
+            'unreal_integration_enabled': BooleanVar(value=self.config.get('unreal_integration_enabled', False)),
+            'unreal_port': StringVar(value=str(self.config.get('unreal_port', 6766)))
         }
 
     def _init_styles(self):
@@ -85,6 +88,9 @@ class SettingsWindow(Toplevel):
         self.prompts_frame = PromptsSettingsFrame(content_frame, self.config, on_toggle=None)
         self.prompts_frame.pack(fill='x', expand=True)
 
+        unreal_settings = UnrealSettingsFrame(content_frame, self.vars)
+        unreal_settings.pack(fill='x', expand=True)
+
         editor_settings = EditorSettingsFrame(content_frame, self.vars)
         editor_settings.pack(fill='x', expand=True)
 
@@ -109,7 +115,6 @@ class SettingsWindow(Toplevel):
         self._close_and_save_geometry()
 
     def save_and_close(self):
-        # The main config object is still the one loaded at the start
         config = self.config
         prompt_values = self.prompts_frame.get_values()
 
@@ -119,6 +124,7 @@ class SettingsWindow(Toplevel):
         config['token_count_enabled'] = self.vars['token_count_enabled'].get()
         config['enable_compact_mode_on_minimize'] = self.vars['enable_compact_mode_on_minimize'].get()
         config['default_parent_folder'] = self.vars['default_parent_folder'].get()
+        config['unreal_integration_enabled'] = self.vars['unreal_integration_enabled'].get()
         config.update(prompt_values)
 
         try:
@@ -131,6 +137,11 @@ class SettingsWindow(Toplevel):
             config['add_all_warning_threshold'] = int(add_all_val) if add_all_val else c.ADD_ALL_WARNING_THRESHOLD_DEFAULT
         except ValueError:
             config['add_all_warning_threshold'] = c.ADD_ALL_WARNING_THRESHOLD_DEFAULT
+
+        try:
+            config['unreal_port'] = int(self.vars['unreal_port'].get())
+        except ValueError:
+            config['unreal_port'] = 6766
 
         save_config(config)
         save_setting('AutomaticUpdates', self.vars['check_for_updates'].get())

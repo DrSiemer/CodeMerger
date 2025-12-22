@@ -1,4 +1,4 @@
-from tkinter import Frame, Label, font as tkFont
+from tkinter import Frame, Label, font as tkFont, BooleanVar, Checkbutton
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 from .widgets.profile_navigator import ProfileNavigator
@@ -52,6 +52,12 @@ def setup_ui(app):
     right_frame.grid(row=0, column=2, sticky='e')
     right_frame.grid_rowconfigure(0, weight=1) # Center items vertically in the row
 
+    # Unreal Connection Status
+    # FIX: Do not use .pack() here, as this frame uses grid() for other icons
+    app.unreal_status_label = Label(right_frame, text="UE ●", fg="#555555", bg=c.TOP_BAR_BG, font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), cursor="hand2")
+    app.unreal_status_label.bind("<ButtonRelease-1>", lambda e: app.project_actions.attempt_unreal_connection())
+    app.unreal_status_tooltip = ToolTip(app.unreal_status_label, text="Unreal Engine Disconnected\n(Click to reconnect)")
+    
     # New files warning icon
     app.new_files_label = Label(right_frame, image=assets.new_files_icon, bg=c.TOP_BAR_BG, cursor="hand2")
     app.new_files_label.bind("<ButtonRelease-1>", app.action_handlers.on_new_files_click)
@@ -91,7 +97,6 @@ def setup_ui(app):
     ToolTip(app.delete_profile_button, "Delete the current profile", delay=500)
 
     # --- Start Work Button ---
-    # Placed in Column 1 of middle_container, initially hidden/shown by ButtonStateManager
     app.start_work_button = Label(app.middle_container, image=assets.start_work_icon, bg=c.DARK_BG, cursor="hand2")
     app.start_work_button.bind("<ButtonRelease-1>", app.action_handlers.start_work_on_click)
     app.start_work_button.bind("<Enter>", lambda e: app.start_work_button.config(image=assets.start_work_active_icon))
@@ -119,8 +124,7 @@ def setup_ui(app):
     center_frame.grid_columnconfigure(0, weight=1)
     app.center_frame = center_frame
 
-    # A container for the icon buttons, placed in the main central frame.
-    # It sticks to the bottom-right corner.
+    # Bottom Right Icons
     app.bottom_buttons_container = Frame(center_frame, bg=c.DARK_BG)
     app.bottom_buttons_container.grid(row=0, column=0, sticky='se', padx=20, pady=(0, 18))
 
@@ -132,7 +136,7 @@ def setup_ui(app):
     app.settings_button.pack(side='top', pady=(10, 0))
     ToolTip(app.settings_button, "Settings", delay=500)
 
-    # This frame holds the actions box. Its alignment is controlled by the responsive layout function.
+    # Main Action Box
     app.main_content_frame = Frame(center_frame, bg=c.DARK_BG)
     app.main_content_frame.grid(row=0, column=0, sticky='') # Starts centered
     app.main_content_frame.grid_rowconfigure(0, weight=1)
@@ -141,13 +145,31 @@ def setup_ui(app):
     app.wrapper_box = Frame(app.main_content_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
     app.wrapper_box.grid(row=0, column=0, sticky='s') # Aligns to the bottom of its cell
 
+    # Ensure these are packed initially so ButtonStateManager can manage them
     app.wrapper_box_title = Label(app.wrapper_box, text="Actions", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, pady=2)
+    app.wrapper_box_title.pack(pady=(10, 5))
 
     app.no_project_label = Label(app.wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
+    # no_project_label is managed by ButtonStateManager, usually packed when inactive
 
     app.button_grid_frame = Frame(app.wrapper_box, bg=c.DARK_BG)
+    app.button_grid_frame.pack(pady=(5, 18), padx=30)
     app.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
+
+    # Unreal Toggle (Initially hidden)
+    app.include_unreal_var = BooleanVar(value=True)
+    app.unreal_toggle = Checkbutton(
+        app.wrapper_box, 
+        text="Include Selected Blueprints", 
+        variable=app.include_unreal_var,
+        bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, 
+        activebackground=c.DARK_BG, activeforeground=c.TEXT_COLOR,
+        selectcolor=c.DARK_BG,
+        font=(c.FONT_FAMILY_PRIMARY, 9)
+    )
+    # Pack it above buttons, logic in button_state_manager handles visibility
+    app.unreal_toggle.pack_forget()
 
     copy_button_height = 60
     app.paste_changes_button = RoundedButton(app.button_grid_frame, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, command=None, cursor='hand2')

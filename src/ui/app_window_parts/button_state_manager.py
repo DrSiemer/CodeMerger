@@ -44,7 +44,9 @@ class ButtonStateManager:
             app.start_work_button.grid_remove()
 
         if is_dir_active:
-            app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))
+            # FIX: Use column 2 to make space for Unreal Status (column 1)
+            app.folder_icon_label.grid(row=0, column=2, sticky='e', padx=(10, 0))
+            
             # Generate the masked logo image and apply it to the label
             app.masked_logo_tk = app.assets.create_masked_logo(app.project_color)
             app.color_swatch.config(image=app.masked_logo_tk, bg=c.TOP_BAR_BG)
