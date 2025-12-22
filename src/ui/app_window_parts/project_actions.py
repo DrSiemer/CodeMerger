@@ -134,7 +134,8 @@ class ProjectActions:
             return
 
         def connect_thread():
-            success = app.unreal_client.connect(timeout=2.0)
+            # Increased timeout to 5.0 to give the UDP retry loop time to work
+            success = app.unreal_client.connect(timeout=5.0)
             app.after(0, lambda: self._update_unreal_ui(success))
             
         app.status_var.set("Connecting to Unreal Engine...")
