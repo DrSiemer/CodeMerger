@@ -49,7 +49,7 @@ class SelectionListController:
             if 0 <= index < len(self.ordered_selection):
                 path = self.ordered_selection[index].get('path')
                 if path:
-                    request_string = f"`{path}` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality and functionality. End your output with clear instructions on how to check if everything still works as it should."
+                    request_string = f"`{path}` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality. End your output with clear instructions on how to check if everything still works as it should."
                     pyperclip.copy(request_string)
                     self.parent.status_var.set(f"Copied breakup request for '{os.path.basename(path)}'")
                     return "break"
