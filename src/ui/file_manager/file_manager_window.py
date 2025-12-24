@@ -157,18 +157,18 @@ class FileManagerWindow(Toplevel):
                 if node['type'] == 'dir':
                     _insert_nodes(item_id, node.get('children', []))
                 else: # file
-                    self.tree_handler.update_checkbox_display(item_id)
+                    self.tree_handler.update_item_visuals(item_id)
         _insert_nodes('', tree_data)
 
     def on_selection_list_changed(self):
-        self.tree_handler.update_all_checkboxes()
+        self.tree_handler.update_all_visuals()
         self.update_all_button_states()
         self.data_controller.run_token_recalculation()
         self.ui_controller.update_active_folder_tooltip()
 
     def on_file_toggled(self, path):
         self.selection_handler.toggle_file(path)
-        self.tree_handler.update_checkbox_display(self.path_to_item_id.get(path))
+        self.tree_handler.update_item_visuals(self.path_to_item_id.get(path))
         self.update_all_button_states()
         self.sync_highlights()
 

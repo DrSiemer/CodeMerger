@@ -32,22 +32,52 @@ class FileTreeHandler:
             if info.get('type') == 'dir' and self.tree.item(item_id, 'open')
         ]
 
-    def update_checkbox_display(self, item_id):
-        """Updates the text of a tree item to show a checked or unchecked box"""
+    def update_item_visuals(self, item_id, current_selection_paths=None):
+        """
+        Updates the text (checkbox) and visual style (greyout) of a tree item.
+        Applies 'selected_grey' tag if a file is selected or a folder is fully selected.
+        """
         item_info = self.item_map.get(item_id, {})
-        if item_info.get('type') != 'file':
-            return
+        item_type = item_info.get('type')
+        if not item_type: return
 
-        path = item_info['path']
-        is_checked = self.is_selected(path)
-        check_char = "☑" if is_checked else "☐"
-        self.tree.item(item_id, text=f"{check_char} {os.path.basename(path)}")
+        if current_selection_paths is None:
+            # Create the set for O(1) lookup
+            current_selection_paths = {f['path'] for f in self.parent.selection_handler.ordered_selection}
 
-    def update_all_checkboxes(self):
-        """Iterates through all file items and updates their checkbox state"""
-        for item_id, info in self.item_map.items():
-            if info.get('type') == 'file':
-                self.update_checkbox_display(item_id)
+        tags = list(self.tree.item(item_id, 'tags'))
+        is_grey = False
+
+        if item_type == 'file':
+            path = item_info['path']
+            is_checked = path in current_selection_paths
+            check_char = "☑" if is_checked else "☐"
+            self.tree.item(item_id, text=f"{check_char} {os.path.basename(path)}")
+            if is_checked:
+                is_grey = True
+
+        elif item_type == 'dir':
+            # Check if all files in the subtree are selected
+            files_in_subtree = self._get_all_files_in_subtree(item_id)
+            if files_in_subtree and all(p in current_selection_paths for p in files_in_subtree):
+                is_grey = True
+
+        # Apply or remove the grey tag
+        if is_grey:
+            if 'selected_grey' not in tags:
+                tags.append('selected_grey')
+        else:
+            if 'selected_grey' in tags:
+                tags.remove('selected_grey')
+
+        self.tree.item(item_id, tags=tags)
+
+    def update_all_visuals(self):
+        """Iterates through all items in the tree and updates their visual state."""
+        # Calculate selection set once for performance
+        current_selection_paths = {f['path'] for f in self.parent.selection_handler.ordered_selection}
+        for item_id in self.item_map:
+            self.update_item_visuals(item_id, current_selection_paths)
 
     def handle_tree_deselection_click(self, event):
         """Deselects a tree item if a click occurs in an empty area"""

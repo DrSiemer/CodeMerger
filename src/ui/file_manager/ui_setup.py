@@ -137,6 +137,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
 
     window.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
     window.tree.tag_configure('new_file_highlight', foreground="#40C040")
+    window.tree.tag_configure('selected_grey', foreground=c.TEXT_SUBTLE_COLOR)
 
     # ===============================
     # === WIDGETS FOR RIGHT PANEL ===
