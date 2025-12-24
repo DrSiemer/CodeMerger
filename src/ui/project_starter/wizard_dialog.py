@@ -233,7 +233,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
         step = self.state.current_step
 
-        # Pre-check dependencies
+        # Pre-check dependencies (simplified for dynamic flow)
         if step > 3 and not self.state.project_data["concept_md"]:
              messagebox.showerror("Concept Missing", "Complete Concept step first.", parent=self)
              self._go_to_step(3); return
@@ -353,9 +353,12 @@ class ProjectStarterDialog(tk.Toplevel):
             intro = conf.get('default_intro_prompt', c.DEFAULT_INTRO_PROMPT).replace('REPLACE_ME', project_name)
             outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
 
-            self.app.project_manager.create_project_with_defaults(full_path, intro, outro)
+            normalized_files = [f.replace('\\', '/') for f in files]
+
+            self.app.project_manager.create_project_with_defaults(full_path, intro, outro, initial_selected_files=normalized_files)
             self.state.reset()
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
+            self.app.after(100, self.app.show_and_raise)
 
         SuccessView(self.content_frame, project_name, files, on_start_work, parent_folder).pack(expand=True, fill="both")

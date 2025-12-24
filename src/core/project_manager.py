@@ -51,11 +51,10 @@ class ProjectManager:
 
         return self.project_config, status_message
 
-    def create_project_with_defaults(self, path, intro_text, outro_text):
+    def create_project_with_defaults(self, path, intro_text, outro_text, initial_selected_files=None):
         """
         Initializes a new project configuration at the specified path with default prompts.
-        This is used by the wizard to ensure files are scanned and defaults are set
-        before the project is fully loaded.
+        Optionally sets the initial selected files (merge list).
         """
         if not path or not os.path.isdir(path):
             return
@@ -63,6 +62,13 @@ class ProjectManager:
         config = ProjectConfig(path)
         # Populate file list using the centralized logic
         self._populate_new_project_files(config)
+
+        # If specific files were requested (e.g. from Wizard), set them now.
+        # The ProjectConfig.load() logic will later convert these plain paths
+        # into the full dictionary format with tokens/hashes.
+        if initial_selected_files:
+            config.selected_files = initial_selected_files
+
         # Apply custom prompts
         config.intro_text = intro_text
         config.outro_text = outro_text
