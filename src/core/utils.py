@@ -71,6 +71,7 @@ def _create_and_get_default_config():
         'default_intro_prompt': DEFAULT_INTRO_PROMPT,
         'default_outro_prompt': DEFAULT_OUTRO_PROMPT,
         'token_count_enabled': TOKEN_COUNT_ENABLED_DEFAULT,
+        'token_limit': 0,
         'enable_compact_mode_on_minimize': True,
         'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT,
         'user_lists': {
@@ -144,6 +145,8 @@ def load_config():
                 config['token_count_enabled'] = config.pop('line_count_enabled')
             if 'token_count_enabled' not in config:
                 config['token_count_enabled'] = TOKEN_COUNT_ENABLED_DEFAULT
+            if 'token_limit' not in config:
+                config['token_limit'] = 0
             if 'line_count_threshold' in config:
                 config.pop('line_count_threshold')
             if 'token_count_threshold' in config:

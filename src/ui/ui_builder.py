@@ -72,6 +72,7 @@ def setup_ui(app):
     # Column 0: Manage Files Button
     app.manage_files_button = RoundedButton(app.top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
+    app.manage_files_tooltip = ToolTip(app.manage_files_button, text="Manage project files")
 
     # Column 1: Middle Container (Profiles + Start Button)
     app.middle_container = Frame(app.top_buttons_container, bg=c.DARK_BG)

@@ -32,6 +32,17 @@ class ButtonStateManager:
 
         app.manage_files_button.set_state(dir_dependent_state)
 
+        # Update Manage Files button appearance based on token limit
+        token_limit = app.app_state.config.get('token_limit', 0)
+        current_tokens = project_config.total_tokens if project_config else 0
+
+        if is_dir_active and token_limit > 0 and current_tokens > token_limit:
+            app.manage_files_button.config(bg=c.WARN, fg='#FFFFFF') # Red bg
+            app.manage_files_tooltip.text = f"Token limit exceeded!\nCurrent: {current_tokens:,}\nLimit: {token_limit:,}"
+        else:
+            app.manage_files_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+            app.manage_files_tooltip.text = "Manage project files"
+
         # --- Check for Start Work File ---
         has_start_file = False
         if is_dir_active:

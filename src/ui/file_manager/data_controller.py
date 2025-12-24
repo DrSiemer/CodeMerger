@@ -68,7 +68,14 @@ class FileManagerDataController:
             if total_tokens >= 0:
                 formatted_tokens = f"{total_tokens:,}".replace(',', '.')
                 details_text = f"({num_files} {file_text} selected, {formatted_tokens} tokens)"
-                if total_tokens > c.TOKEN_THRESHOLD_WARNING:
+
+                # Check thresholds
+                token_limit = self.window.app_state.config.get('token_limit', 0)
+
+                if token_limit > 0 and total_tokens > token_limit:
+                    label_fg = c.WARN
+                    tooltip_text = f"Token limit exceeded! (Limit: {token_limit:,})"
+                elif total_tokens > c.TOKEN_THRESHOLD_WARNING:
                     label_fg = c.WARN
                     tooltip_text = c.TOKEN_THRESHOLD_WARNING_TEXT
             else:

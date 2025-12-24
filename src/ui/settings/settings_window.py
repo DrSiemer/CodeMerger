@@ -42,6 +42,7 @@ class SettingsWindow(Toplevel):
             'enable_new_file_check': BooleanVar(value=self.config.get('enable_new_file_check', True)),
             'new_file_check_interval': StringVar(value=str(self.config.get('new_file_check_interval', 5))),
             'token_count_enabled': BooleanVar(value=self.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)),
+            'token_limit': StringVar(value=str(self.config.get('token_limit', 0) if self.config.get('token_limit', 0) != 0 else "")),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
             'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT))),
             'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', ''))
@@ -125,6 +126,12 @@ class SettingsWindow(Toplevel):
             config['new_file_check_interval'] = int(self.vars['new_file_check_interval'].get())
         except ValueError:
             config['new_file_check_interval'] = 5
+
+        try:
+            limit_val = self.vars['token_limit'].get().strip()
+            config['token_limit'] = int(limit_val) if limit_val else 0
+        except ValueError:
+            config['token_limit'] = 0
 
         try:
             add_all_val = self.vars['add_all_warning_threshold'].get()

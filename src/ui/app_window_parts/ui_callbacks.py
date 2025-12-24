@@ -9,6 +9,7 @@ class UICallbacks:
         app = self.app
         app.app_state.reload()
         app.file_monitor.start()
+        app.button_manager.update_button_states()
         app.status_var.set("Settings updated")
 
     def on_directory_selected(self, new_dir):
