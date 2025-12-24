@@ -154,8 +154,10 @@ class FileManagerWindow(Toplevel):
                 item_id = self.tree.insert(parent_id, 'end', text=node['name'], open=is_open, tags=tags)
                 self.item_map[item_id] = {'path': node['path'], 'type': node['type']}
                 self.path_to_item_id[node['path']] = item_id
+
                 if node['type'] == 'dir':
                     _insert_nodes(item_id, node.get('children', []))
+                    self.tree_handler.update_item_visuals(item_id)
                 else: # file
                     self.tree_handler.update_item_visuals(item_id)
         _insert_nodes('', tree_data)

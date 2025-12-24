@@ -59,10 +59,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1766574889.7248256,
-          "hash": "fe784f90a04ae332fd755299a506ef47d609b184",
-          "tokens": 1674,
-          "lines": 159
+          "mtime": 1766585757.2138946,
+          "hash": "2b03ff5cd6988b550f851ab205c945bef17ce8e4",
+          "tokens": 1733,
+          "lines": 162
         },
         {
           "path": "src/core/paths.py",
@@ -355,10 +355,10 @@
         },
         {
           "path": "src/ui/file_manager/file_tree_handler.py",
-          "mtime": 1766585058.8750908,
-          "hash": "3ed6b3a27a3becf211fecb618ca1479555114590",
-          "tokens": 1763,
-          "lines": 199
+          "mtime": 1766586048.0981317,
+          "hash": "fae35016a96b9b40ce97d41c20d8c1b2ad2dc7bc",
+          "tokens": 1978,
+          "lines": 221
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
@@ -390,10 +390,10 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1766585058.8750908,
-          "hash": "4665dd850bd4db8b3b2eedce3b13fae14dfdb984",
-          "tokens": 1937,
-          "lines": 213
+          "mtime": 1766585886.3140912,
+          "hash": "2cb49192401a1a54dcb106fd2fcadbc2abafb8ba",
+          "tokens": 1964,
+          "lines": 216
         },
         {
           "path": "src/ui/settings/collapsible_section.py",
@@ -488,10 +488,10 @@
         },
         {
           "path": "src/ui/project_starter/step_base_files.py",
-          "mtime": 1766585058.876091,
-          "hash": "8e697211f37bef7f405ba0aade813df6c2376501",
-          "tokens": 2517,
-          "lines": 253
+          "mtime": 1766585886.3140912,
+          "hash": "21b2dbe46aae79bf49a276d7cf15ad934cf80c83",
+          "tokens": 2538,
+          "lines": 255
         },
         {
           "path": "src/ui/project_starter/step2_concept.py",
@@ -746,12 +746,15 @@
           "lines": 14
         }
       ],
-      "total_tokens": 127061,
+      "total_tokens": 127383,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- start your response with a concise but clear explanation of what your changes will achieve\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
         ".github",
         ".github/workflows",
+        "assets",
+        "assets/boilerplate",
+        "assets/reference",
         "src",
         "src/core",
         "src/ui",

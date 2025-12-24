@@ -11,6 +11,9 @@ GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/late
 # --- File System ---
 # Added explicit directories to ignore for performance (node_modules, .git, .venv, etc)
 SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode'}
+# Files that should be treated as "selected" when calculating if a parent folder should be greyed out,
+# preventing them from keeping a folder "bright" if they are the only unselected files.
+FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
 START_WORK_FILENAME = "_start.txt"
 
 # --- Logging ---

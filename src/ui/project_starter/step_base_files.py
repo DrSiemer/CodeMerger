@@ -180,6 +180,7 @@ class StepBaseFilesView(tk.Frame):
                 self.path_to_item_id[node['path']] = item_id
                 if node['type'] == 'dir':
                     _insert_nodes(item_id, node.get('children', []))
+                    self.tree_handler.update_item_visuals(item_id)
                 else:
                     self.tree_handler.update_item_visuals(item_id)
         _insert_nodes('', tree_data)

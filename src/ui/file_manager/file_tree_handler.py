@@ -35,7 +35,9 @@ class FileTreeHandler:
     def update_item_visuals(self, item_id, current_selection_paths=None):
         """
         Updates the text (checkbox) and visual style (greyout) of a tree item.
-        Applies 'selected_grey' tag if a file is selected or a folder is fully selected.
+        Applies 'selected_grey' tag if:
+        1. A file is selected OR is in the ignore list (e.g. __init__.py).
+        2. A folder has all its 'relevant' files selected (ignoring files in the list).
         """
         item_info = self.item_map.get(item_id, {})
         item_type = item_info.get('type')
@@ -50,19 +52,39 @@ class FileTreeHandler:
 
         if item_type == 'file':
             path = item_info['path']
+            filename = os.path.basename(path)
             is_checked = path in current_selection_paths
+
             check_char = "☑" if is_checked else "☐"
-            self.tree.item(item_id, text=f"{check_char} {os.path.basename(path)}")
-            if is_checked:
+            self.tree.item(item_id, text=f"{check_char} {filename}")
+
+            # File is grey if selected OR if it's in the ignore list (e.g. __init__.py)
+            if is_checked or filename in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS:
                 is_grey = True
 
         elif item_type == 'dir':
-            # Check if all files in the subtree are selected
             files_in_subtree = self._get_all_files_in_subtree(item_id)
-            if files_in_subtree and all(p in current_selection_paths for p in files_in_subtree):
-                is_grey = True
 
-        # Apply or remove the grey tag
+            if not files_in_subtree:
+                # Folder contains no files (empty or only dirs).
+                # Consider it "complete" (grey) so it doesn't draw attention.
+                is_grey = True
+            else:
+                # Filter down to only files that actually matter for "completeness"
+                relevant_files = [
+                    p for p in files_in_subtree
+                    if os.path.basename(p) not in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS
+                ]
+
+                if not relevant_files:
+                    # Folder contains ONLY ignored files (e.g. only __init__.py).
+                    # It is visually complete.
+                    is_grey = True
+                else:
+                    # Folder is grey only if ALL relevant files are selected.
+                    is_grey = all(p in current_selection_paths for p in relevant_files)
+
+        # Apply or remove the grey tag based on the logic above
         if is_grey:
             if 'selected_grey' not in tags:
                 tags.append('selected_grey')
