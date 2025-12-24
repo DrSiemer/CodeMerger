@@ -87,25 +87,24 @@ class WizardState:
         """Determines how far the user can navigate based on completed data."""
         has_details = bool(self.project_data["name"].get() and self.project_data["parent_folder"].get())
         has_concept = bool(self.project_data["concept_md"])
-        has_stack = bool(self.project_data["stack"].get())
+        # has_stack = bool(self.project_data["stack"].get()) # Stack is now optional
         has_todo = bool(self.project_data["todo_md"])
 
         self.max_accessible_step = 1
 
         if has_details:
-            # Step 1 done. Step 2 (Base Files) is optional.
-            # Step 3 (Concept) is the next mandatory step, so we allow access up to 3 immediately.
+            # Step 1 done. Step 2 (Base Files) is optional
+            # Step 3 (Concept) is the next mandatory step, so we allow access up to 3 immediately
             self.max_accessible_step = 3
 
             if has_concept:
-                self.max_accessible_step = 4 # Unlock Stack
-                if has_stack:
-                    self.max_accessible_step = 5 # Unlock Todo
-                    if has_todo:
-                        self.max_accessible_step = 6 # Unlock Generate
+                # Concept done. Step 4 (Stack) is optional, so we unlock Step 5 (Todo)
+                self.max_accessible_step = 5
+                if has_todo:
+                    self.max_accessible_step = 6 # Unlock Generate
 
     def update_from_view(self, view):
-        """Extracts data from the current view widget to update the state model."""
+        """Extracts data from the current view widget to update the state model"""
         if not view or not view.winfo_exists(): return
 
         # Step 1 data is bound to StringVars, updated automatically

@@ -233,13 +233,10 @@ class ProjectStarterDialog(tk.Toplevel):
 
         step = self.state.current_step
 
-        # Pre-check dependencies (simplified for dynamic flow)
+        # Pre-check dependencies
         if step > 3 and not self.state.project_data["concept_md"]:
              messagebox.showerror("Concept Missing", "Complete Concept step first.", parent=self)
              self._go_to_step(3); return
-        if step > 4 and not self.state.project_data["stack"].get():
-             messagebox.showerror("Stack Missing", "Complete Code Stack step first.", parent=self)
-             self._go_to_step(4); return
         if step == 6 and not self.state.project_data["todo_md"]:
              messagebox.showerror("Content Missing", "Complete TODO step first.", parent=self)
              self._go_to_step(5); return

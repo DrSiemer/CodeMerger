@@ -131,7 +131,7 @@ class Step5GenerateView(tk.Frame):
 {example_code}
 
 ### Core Instructions
-1.  **Selection & Renaming:** Analyze the `CodeStack` to select the single most appropriate `go_*.bat` file (e.g. `go_python.bat` for python, `go_nodejs.bat` for node). Rename this file to `go.bat` in your output.
+1.  **Selection & Renaming:** Analyze the `CodeStack` (or infer from `concept.md` if unspecified) to select the single most appropriate `go_*.bat` file (e.g. `go_python.bat` for python, `go_nodejs.bat` for node). Rename this file to `go.bat` in your output.
 2.  **Exclusion:** You must **NOT** include the unused `go_*.bat` files in your final response. The output should only contain the single selected and renamed `go.bat` file.
 3.  Using the User Requirements (`ProjectName`, `CodeStack`) and the provided `concept.md`, intelligently populate the placeholders in the boilerplate `README.md` and `_start.txt`.
 4.  In `README.md`, generate a plausible 'Prerequisites' and 'Running the Project' section based on the `CodeStack` description.
