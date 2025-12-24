@@ -1,9 +1,13 @@
 [
-  "Review this project plan. Is the breakdown into phases logical? Would you suggest a different order or grouping of tasks?",
-  "Are there any major tasks or dependencies missing from this plan? For example, what about authentication, user management, or error handling?",
-  "Assess the realism of this plan. Which phase or task do you predict will be the most difficult or time-consuming and why?",
-  "Identify the 'critical path' in this plan. Which tasks must be completed before others can start, and what are the key milestones?",
-  "Suggest specific, measurable success criteria for each 'Testing Point' in the plan.",
-  "Does this plan adequately address non-functional requirements like performance, security, and scalability? If not, what should be added?",
-  "How could this plan be simplified to deliver a Minimum Viable Product (MVP) faster? Which tasks could be moved to a 'Future Enhancements' section?"
+  "Evaluate the overall structure of this plan. Does the task breakdown move from uncertainty to certainty (exploration → validation → implementation), or would a different sequencing reduce risk earlier?",
+  "Identify any implicit assumptions in this plan (technical, product, or user-related). Which of these assumptions should be validated early, and how could the plan reflect that?",
+  "Are all tasks phrased in a way that makes their outcome observable or verifiable? Highlight any items that are vague or outcome-ambiguous and suggest clearer formulations.",
+  "Analyze task dependencies. Which tasks genuinely require prior completion of others, and which could be decoupled or parallelized to speed up progress?",
+  "Which parts of the plan are best suited for rapid prototyping or spike solutions? Suggest where short-lived experiments could replace full implementations initially.",
+  "For each planned testing or review point, define what decision it should enable (e.g., proceed, revise, discard). Are there missing decision checkpoints?",
+  "Assess whether feedback loops are frequent enough. Where should the plan explicitly incorporate validation through tests, prototypes, benchmarks, or user feedback?",
+  "Examine the scope of the initial delivery. What is the smallest coherent version of this project that would meaningfully reduce uncertainty or prove feasibility?",
+  "Does the plan distinguish between reversible decisions (easy to change later) and irreversible or costly ones? How could high-impact decisions be deferred or de-risked?",
+  "Review the plan for long-term maintainability risks. Are there areas where early shortcuts would create disproportionate future cost, and should they be addressed earlier?",
+  "If requirements change mid-development, which parts of this plan are most fragile? Suggest ways to restructure tasks to localize or limit the impact of change."
 ]
