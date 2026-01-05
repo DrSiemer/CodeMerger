@@ -2,6 +2,7 @@ from tkinter import Toplevel, Frame, Label, Entry, StringVar
 from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
+from .window_utils import position_window
 
 class TitleEditDialog(Toplevel):
     def __init__(self, parent, title, prompt, initialvalue="", max_length=None):
@@ -43,21 +44,14 @@ class TitleEditDialog(Toplevel):
         self.bind("<Return>", self.on_ok)
         self.bind("<Escape>", self.on_cancel)
 
-        # Set a fixed width, calculate height, and center on parent
+        # Set a fixed width and calculate height
         self.update_idletasks()
         required_height = self.winfo_reqheight()
         self.geometry(f"{c.TITLE_EDIT_DIALOG_WIDTH}x{required_height}")
         self.resizable(False, False)
 
-        parent_x = self.parent.winfo_rootx()
-        parent_y = self.parent.winfo_rooty()
-        parent_w = self.parent.winfo_width()
-        parent_h = self.parent.winfo_height()
-        win_w = c.TITLE_EDIT_DIALOG_WIDTH
-        win_h = required_height
-        x = parent_x + (parent_w - win_w) // 2
-        y = parent_y + (parent_h - win_h) // 2
-        self.geometry(f"+{x}+{y}")
+        # Ensure the window is fully on-screen and centered relative to parent
+        position_window(self)
 
         self.deiconify()
         self.entry.focus_set()

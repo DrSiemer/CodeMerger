@@ -3,6 +3,7 @@ from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
 from .style_manager import apply_dark_theme
+from .window_utils import position_window
 
 class NewProfileDialog(Toplevel):
     def __init__(self, parent, existing_profile_names):
@@ -57,11 +58,8 @@ class NewProfileDialog(Toplevel):
         self.geometry(f"{dialog_width}x{required_height}")
         self.resizable(False, False)
 
-        parent_x, parent_y = self.parent.winfo_rootx(), self.parent.winfo_rooty()
-        parent_w, parent_h = self.parent.winfo_width(), self.parent.winfo_height()
-        x = parent_x + (parent_w - dialog_width) // 2
-        y = parent_y + (parent_h - required_height) // 2
-        self.geometry(f"+{x}+{y}")
+        # Ensure the window is fully on-screen and centered relative to parent
+        position_window(self)
 
         self.deiconify()
         self.entry.focus_set()
