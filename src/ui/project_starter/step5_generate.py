@@ -1,7 +1,7 @@
 import os
 import re
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 from ... import constants as c
 from ...core.paths import BOILERPLATE_DIR
 from ...core.utils import strip_markdown_wrapper
@@ -42,19 +42,33 @@ class Step5GenerateView(tk.Frame):
         self.llm_result_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.llm_result_text.grid(row=6, column=0, pady=10, sticky="nsew")
 
+        # Options Frame
+        options_frame = tk.Frame(self, bg=c.DARK_BG)
+        options_frame.grid(row=7, column=0, sticky="w", pady=(0, 10))
+
+        # Include base project reference option (only if base project path exists)
+        if self.project_data["base_project_path"].get():
+            ref_check = ttk.Checkbutton(
+                options_frame,
+                text="Include base project merge list in 'project_reference.md' (reference only)",
+                variable=self.project_data["include_base_reference"],
+                style='Dark.TCheckbutton'
+            )
+            ref_check.pack(anchor="w")
+
         # Bind to text changes to validate input
         self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_input)
         self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_input)
 
         self.create_button = RoundedButton(self, text="Create Project Files", command=self.on_create_project, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
-        self.create_button.grid(row=7, column=0, pady=10, sticky="ew")
+        self.create_button.grid(row=8, column=0, pady=10, sticky="ew")
         self.create_button.set_state('disabled')
 
     def _validate_input(self, event=None):
-        """Checks if the input contains at least one valid file block."""
+        """Checks if the input contains at least one valid file block with footer."""
         content = self.llm_result_text.get("1.0", "end-1c")
-        # Simple regex check for the file header pattern
-        if re.search(r"--- File: `.+?` ---", content):
+        # Check for both header and the required footer
+        if re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content:
             self.create_button.set_state('normal')
         else:
             self.create_button.set_state('disabled')
@@ -118,7 +132,7 @@ class Step5GenerateView(tk.Frame):
         if stack:
             user_reqs += f'CodeStack: "{stack}"\n'
 
-        prompt = f"""You are a senior software developer creating a project boilerplate. Your task is to take the user's requirements and the provided template files and generate a complete, ready-to-use project structure. Adhere strictly to the provided file formats.
+        prompt = f"""You are a senior software developer creating a project boilerplate. Your task is to take the user's requirements and the provided template files and generate a complete, ready-to-use project structure.
 
 ### User Requirements
 ```yaml
@@ -131,12 +145,17 @@ class Step5GenerateView(tk.Frame):
 {example_code}
 
 ### Core Instructions
-1.  **Selection & Renaming:** Analyze the `CodeStack` (or infer from `concept.md` if unspecified) to select the single most appropriate `go_*.bat` file (e.g. `go_python.bat` for python, `go_nodejs.bat` for node). Rename this file to `go.bat` in your output.
-2.  **Exclusion:** You must **NOT** include the unused `go_*.bat` files in your final response. The output should only contain the single selected and renamed `go.bat` file.
-3.  Using the User Requirements (`ProjectName`, `CodeStack`) and the provided `concept.md`, intelligently populate the placeholders in the boilerplate `README.md` and `_start.txt`.
-4.  In `README.md`, generate a plausible 'Prerequisites' and 'Running the Project' section based on the `CodeStack` description.
-5.  Infer the 'Primary Data Entity' from the Goal and `ProjectName` (e.g., 'book' for a book tracker) and update the schema in `concept.md` accordingly (e.g., rename the `[primary_resource]` table).
-6.  Return the complete, modified source code for every file in the final package, including the populated `_start.txt`, following the exact `--- File: ... ---` format.
+1.  **Selection & Renaming:** Select the appropriate `go_*.bat` file and rename it to `go.bat`. DO NOT include unused batch files.
+2.  **Formatting (CRITICAL):** You MUST wrap every file in the exact following format:
+    --- File: `path/to/file.ext` ---
+
+```language
+    [content]
+    ```
+    --- End of file ---
+3.  Populate placeholders in `README.md` and `_start.txt` using the `ProjectName` and `CodeStack`.
+4.  Infer the 'Primary Data Entity' to update the schema in `concept.md`.
+5.  Return the complete source code for every file, ensuring the "End of file" footer is present for every single block.
 """
         return prompt
 
@@ -157,4 +176,5 @@ class Step5GenerateView(tk.Frame):
 
         # Clean wrapper if present
         llm_output = strip_markdown_wrapper(raw_content)
-        self.create_project_callback(llm_output)
+        # Pass the output and the toggle state to the wizard controller
+        self.create_project_callback(llm_output, self.project_data["include_base_reference"].get())

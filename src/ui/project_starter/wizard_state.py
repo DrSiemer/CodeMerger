@@ -20,7 +20,8 @@ class WizardState:
             "concept_md": "",
             "todo_md": "",
             "base_project_path": tk.StringVar(),
-            "base_project_files": [] # List of file info dicts
+            "base_project_files": [], # List of file info dicts
+            "include_base_reference": tk.BooleanVar(value=True) # New option
         }
 
         # Setup auto-save triggers for UI-bound variables
@@ -39,7 +40,8 @@ class WizardState:
             "concept_md": self.project_data.get("concept_md", ""),
             "todo_md": self.project_data.get("todo_md", ""),
             "base_project_path": self.project_data["base_project_path"].get(),
-            "base_project_files": self.project_data["base_project_files"]
+            "base_project_files": self.project_data["base_project_files"],
+            "include_base_reference": self.project_data["include_base_reference"].get()
         }
 
     def save(self, *args):
@@ -67,6 +69,9 @@ class WizardState:
         self.project_data["base_project_path"].set(loaded_data.get("base_project_path", ""))
         self.project_data["base_project_files"] = loaded_data.get("base_project_files", [])
 
+        # Load the boolean reference option
+        self.project_data["include_base_reference"].set(loaded_data.get("include_base_reference", True))
+
         self._recalc_progress()
 
     def reset(self):
@@ -79,6 +84,7 @@ class WizardState:
         self.project_data["todo_md"] = ""
         self.project_data["base_project_path"].set("")
         self.project_data["base_project_files"] = []
+        self.project_data["include_base_reference"].set(True)
         session_manager.clear_default_session()
         self.current_step = 1
         self.max_accessible_step = 1
@@ -87,7 +93,6 @@ class WizardState:
         """Determines how far the user can navigate based on completed data."""
         has_details = bool(self.project_data["name"].get() and self.project_data["parent_folder"].get())
         has_concept = bool(self.project_data["concept_md"])
-        # has_stack = bool(self.project_data["stack"].get()) # Stack is now optional
         has_todo = bool(self.project_data["todo_md"])
 
         self.max_accessible_step = 1

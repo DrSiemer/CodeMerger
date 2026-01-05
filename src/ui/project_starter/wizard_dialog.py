@@ -29,6 +29,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.parent = parent
         self.app = app
 
+        # Initialize the state manager
         self.state = wizard_state.WizardState(default_parent_folder)
 
         self.title("Project Starter Wizard")
@@ -118,6 +119,47 @@ class ProjectStarterDialog(tk.Toplevel):
         self.content_frame = tk.Frame(main_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
         self.content_frame.pack(expand=True, fill="both", side="top")
 
+    def create_project(self, llm_output, include_base_reference=False):
+        """Processes the LLM output and creates the actual files on disk."""
+        if not llm_output.strip():
+            messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
+            return
+
+        project_name = self.state.project_data["name"].get()
+        parent_folder = self.state.project_data["parent_folder"].get()
+
+        # 1. Prepare Directory
+        success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name)
+        if not success:
+            if "already exists" in msg:
+                if messagebox.askyesno("Warning", f"{msg} Overwrite?", parent=self):
+                    success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name, overwrite=True)
+                else: return
+
+            if not success:
+                messagebox.showerror("Error", msg, parent=self)
+                return
+
+        # 2. Write Files from LLM
+        success, files_created, msg = generator.parse_and_write_files(project_path, llm_output)
+        if not success:
+            messagebox.showerror("Error", msg, parent=self)
+            return
+
+        # 3. Optional: Write Base Project Reference
+        if include_base_reference:
+            base_path = self.state.project_data["base_project_path"].get()
+            base_files = self.state.project_data["base_project_files"]
+            if generator.write_base_reference_file(project_path, base_path, base_files):
+                files_created.append("project_reference.md")
+
+        # 4. Save Config to new project
+        self.state.update_from_view(self.current_view)
+        self.state.save()
+        session_manager.save_session_data(self.state.get_dict(), project_path / "project-starter.json")
+
+        self._display_success_screen(project_path.name, files_created, parent_folder)
+
     def _get_active_steps(self):
         """Returns the list of active step IDs based on whether a base project is selected."""
         steps = [1]
@@ -127,23 +169,21 @@ class ProjectStarterDialog(tk.Toplevel):
         return steps
 
     def _refresh_tabs(self):
+        if not self.tabs_frame: return
         for t in self.tabs: t.destroy()
         self.tabs = []
 
         active_steps = self._get_active_steps()
-
         for i, step_id in enumerate(active_steps):
             name = self.steps_map[step_id]
-            label = f"{i+1}. {name}" # Display index 1..N
             tab = RoundedButton(
                 self.tabs_frame,
                 command=lambda s=step_id: self._go_to_step(s),
-                text=label, font=c.FONT_NORMAL, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT,
+                text=f"{i+1}. {name}", font=c.FONT_NORMAL, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT,
                 height=32, radius=6, hollow=True, cursor="hand2"
             )
             tab.pack(side="left", padx=(0, 5), fill='x', expand=True)
             self.tabs.append(tab)
-
         self._update_tab_styles()
 
     def on_base_project_selected(self, path):
@@ -163,7 +203,6 @@ class ProjectStarterDialog(tk.Toplevel):
             parent=self
         )
         if not filepath: return
-
         self.state.update_from_view(self.current_view)
         self.state.load(filepath)
         self.state.save()
@@ -199,27 +238,15 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def _go_to_step(self, target_step_id):
         if target_step_id == self.state.current_step: return
-
         self.state.update_from_view(self.current_view)
         self.state.save()
 
-        # Validate if moving forward (conceptually, though users can jump tabs)
-        # We rely on max_accessible_step to control forward movement
         if target_step_id > self.state.current_step:
             is_valid, err_title, err_msg = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
             if not is_valid:
                 messagebox.showerror(err_title, err_msg, parent=self)
                 return
-
-            # If we just finished step 2 (base files), and we haven't selected anything, warn?
-            # Nah, base files are optional.
-
             self.state.max_accessible_step = max(self.state.max_accessible_step, target_step_id)
-
-        if target_step_id > self.state.max_accessible_step:
-            # allow jumping to valid next steps
-            # Actually logic should be: is everything BEFORE target_step valid?
-            pass
 
         self.state.current_step = target_step_id
         self._show_current_step_view()
@@ -232,8 +259,6 @@ class ProjectStarterDialog(tk.Toplevel):
         view_frame.pack(expand=True, fill="both")
 
         step = self.state.current_step
-
-        # Pre-check dependencies (simplified for dynamic flow)
         if step > 3 and not self.state.project_data["concept_md"]:
              messagebox.showerror("Concept Missing", "Complete Concept step first.", parent=self)
              self._go_to_step(3); return
@@ -279,67 +304,26 @@ class ProjectStarterDialog(tk.Toplevel):
                 can_reset = self.current_view.is_editor_visible()
 
         if can_reset: self.start_over_button.pack()
-
-        # Trigger validation state for Next button
         self.update_nav_state()
 
     def update_nav_state(self):
-        """Checks the current step's validity and enables/disables the Next button."""
         if self.state.current_step != 6:
-            # Pass validation for Step 2 (Base Files) as it is optional always
             if self.state.current_step == 2:
                 self.next_button.set_state('normal')
                 return
-
             is_valid, _, _ = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
             self.next_button.set_state('normal' if is_valid else 'disabled')
 
     def _update_tab_styles(self):
         active_steps = self._get_active_steps()
-
         for i, tab in enumerate(self.tabs):
             step_id = active_steps[i]
             is_active = (step_id == self.state.current_step)
-            # Simplified accessibility: if step ID <= max_accessible, it's clickable
-            is_accessible = (step_id <= self.state.max_accessible_step) or (step_id == 2) # Base Files always accessible if visible
-
+            is_accessible = (step_id <= self.state.max_accessible_step) or (step_id == 2)
             tab.set_state('normal' if is_accessible else 'disabled')
             tab.config(hollow=(not is_active),
                       bg=(c.BTN_BLUE if is_active else c.BTN_GRAY_BG),
                       fg=(c.BTN_BLUE_TEXT if is_active else (c.TEXT_COLOR if is_accessible else c.BTN_GRAY_TEXT)))
-
-    def create_project(self, llm_output):
-        if not llm_output.strip():
-            messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
-            return
-
-        project_name = self.state.project_data["name"].get()
-        parent_folder = self.state.project_data["parent_folder"].get()
-
-        # 1. Prepare Directory
-        success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name)
-        if not success:
-            if "already exists" in msg:
-                if messagebox.askyesno("Warning", f"{msg} Overwrite?", parent=self):
-                    success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name, overwrite=True)
-                else: return
-
-            if not success:
-                messagebox.showerror("Error", msg, parent=self)
-                return
-
-        # 2. Write Files
-        success, files_created, msg = generator.parse_and_write_files(project_path, llm_output)
-        if not success:
-            messagebox.showerror("Error", msg, parent=self)
-            return
-
-        # 3. Save Config to new project
-        self.state.update_from_view(self.current_view)
-        self.state.save()
-        session_manager.save_session_data(self.state.get_dict(), project_path / "project-starter.json")
-
-        self._display_success_screen(project_path.name, files_created, parent_folder)
 
     def _display_success_screen(self, project_name, files, parent_folder):
         for w in self.content_frame.winfo_children(): w.destroy()
@@ -347,14 +331,11 @@ class ProjectStarterDialog(tk.Toplevel):
 
         def on_start_work():
             full_path = str(Path(parent_folder) / project_name)
-            # Load defaults
             from ...core.utils import load_config
             conf = load_config()
             intro = conf.get('default_intro_prompt', c.DEFAULT_INTRO_PROMPT).replace('REPLACE_ME', project_name)
             outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
-
             normalized_files = [f.replace('\\', '/') for f in files]
-
             self.app.project_manager.create_project_with_defaults(full_path, intro, outro, initial_selected_files=normalized_files)
             self.state.reset()
             self.app.ui_callbacks.on_directory_selected(full_path)

@@ -1,7 +1,9 @@
 import re
 import shutil
 import logging
+import os
 from pathlib import Path
+from ...core.merger import get_language_from_path
 
 log = logging.getLogger("CodeMerger")
 
@@ -37,10 +39,16 @@ def prepare_project_directory(parent_folder, project_name, overwrite=False):
 def parse_and_write_files(project_path, llm_output):
     """
     Parses the LLM response for file blocks and writes them to the project path.
-    Returns: (success: bool, files_created: list, message: str)
+    Matches the robust format: --- File: `path` ---
+```content``` --- End of file ---
     """
-    # Regex to find --- File: `path` --- blocks
-    file_pattern = re.compile(r"--- File: `(.+?)` ---\s*```.*?$(.*?)```", re.MULTILINE | re.DOTALL)
+    # Robust regex to find blocks specifically terminated by "--- End of file ---"
+    # This prevents the parser from breaking if the file content itself contains backticks.
+    file_pattern = re.compile(
+        r'--- File: `([^\n`]+)` ---\s*```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
+        re.DOTALL
+    )
+
     matches = file_pattern.finditer(llm_output)
 
     files_created = []
@@ -49,19 +57,63 @@ def parse_and_write_files(project_path, llm_output):
     for match in matches:
         found_any = True
         file_path_str, content = match.groups()
-        # Remove 'boilerplate/' prefix if the LLM kept it from the source context
-        clean_rel_path = file_path_str.replace("boilerplate/", "")
+
+        # Cleanup potential prefixing from LLM
+        clean_rel_path = file_path_str.replace("boilerplate/", "").strip().replace('\\', '/')
         relative_path = Path(clean_rel_path)
         full_path = project_path / relative_path
 
         try:
+            # Security check: Ensure we stay within project path
+            if not os.path.normpath(str(full_path)).startswith(os.path.normpath(str(project_path))):
+                log.warning(f"Skipped file outside project: {file_path_str}")
+                continue
+
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            full_path.write_text(content.lstrip(), encoding="utf-8")
+            # Normalize line endings to avoid space-padding issues
+            sanitized_content = "\n".join([line.rstrip() for line in content.splitlines()])
+            full_path.write_text(sanitized_content, encoding="utf-8")
             files_created.append(str(relative_path))
         except Exception as e:
             log.error(f"Failed to write file {relative_path}: {e}")
 
     if not found_any:
-        return False, [], "Could not find any files to create in the LLM output. Ensure the format is correct."
+        return False, [], "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---'."
 
     return True, files_created, ""
+
+def write_base_reference_file(project_path, base_path, base_files):
+    """
+    Creates a project_reference.md file containing all files from the base project's merge list.
+    """
+    if not base_path or not base_files:
+        return False
+
+    output_blocks = []
+    output_blocks.append(f"# Base Project Reference\n\nThis file contains the code from the base project: `{base_path}`\n")
+
+    for file_info in base_files:
+        rel_path = file_info['path']
+        full_path = os.path.join(base_path, rel_path)
+        if not os.path.isfile(full_path):
+            continue
+
+        try:
+            with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
+                content = f.read()
+
+            language = get_language_from_path(rel_path)
+            # Exact format required by the parser
+            output_blocks.append(f"--- File: `{rel_path}` ---\n\n```{language}\n{content}\n```\n\n--- End of file ---")
+        except Exception as e:
+            log.error(f"Failed to read base file {rel_path} for reference: {e}")
+
+    final_content = "\n\n".join(output_blocks)
+    ref_file_path = project_path / "project_reference.md"
+
+    try:
+        ref_file_path.write_text(final_content, encoding="utf-8")
+        return True
+    except Exception as e:
+        log.error(f"Failed to write project_reference.md: {e}")
+        return False
