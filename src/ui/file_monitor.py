@@ -6,63 +6,46 @@ from ..core.merger import recalculate_token_count
 
 class FileMonitor:
     """
-    Manages the periodic check for new and deleted files in the active project.
+    Manages periodic checks for new and deleted files.
+    Maintains independent 'unknown' state for each project profile.
     """
     def __init__(self, app):
         self.app = app
         self._check_job = None
-        self.newly_detected_files = []
+        self.newly_detected_files = [] # Files 'new' to the CURRENT active profile
 
     def start(self):
-        """
-        Starts or restarts the *periodic* check for new files.
-        The initial scan is now handled separately during project load.
-        """
-        self.stop() # Ensure any existing job is cancelled before starting a new one
-
-        self._update_warning_ui() # Update UI based on any initial scan results
+        self.stop()
+        self._update_warning_ui()
 
         is_dir_active = self.app.project_manager.get_current_project() is not None
         if self.app.app_state.config.get('enable_new_file_check', True) and is_dir_active:
-            # Schedule the *first periodic* check to run after the configured interval.
             interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
             self._schedule_next_check(interval_sec * 1000)
 
     def stop(self):
-        """Stops the currently running file check job."""
         if self._check_job:
             self.app.after_cancel(self._check_job)
             self._check_job = None
 
     def _schedule_next_check(self, interval_ms):
-        """Schedules the next execution of the file check."""
         self._check_job = self.app.after(interval_ms, self.perform_new_file_check)
 
     def perform_initial_scan(self):
-        """
-        Performs a single, synchronous scan for new/deleted files.
-        This is intended to be called once during project loading.
-        It does NOT schedule subsequent checks.
-        """
-        self.newly_detected_files = [] # Reset before scan
+        self.newly_detected_files = []
         self.perform_new_file_check(schedule_next=False)
 
     def perform_new_file_check(self, schedule_next=True):
-        """
-        Scans for new and deleted files and updates the state accordingly.
-        Also schedules the next check if requested.
-        """
         project_config = self.app.project_manager.get_current_project()
         if not project_config:
             self.stop()
             return
 
         base_dir = project_config.base_dir
-
         if not os.path.isdir(base_dir):
             self.stop()
-            self.app.status_var.set(f"Project directory '{os.path.basename(base_dir)}' no longer exists. Monitoring stopped.")
-            self.app.set_active_dir_display(None)
+            self.app.status_var.set(f"Project directory '{os.path.basename(base_dir)}' no longer exists.")
+            self.app.ui_callbacks.on_directory_selected(None)
             return
 
         all_project_files = get_all_matching_files(
@@ -74,61 +57,74 @@ class FileMonitor:
         current_set = set(all_project_files)
         known_set = set(project_config.known_files)
 
-        # --- Check for and handle deleted files ---
+        config_changed = False
+
+        # --- 1. Handle Deleted Files ---
         deleted_files = known_set - current_set
-
         if deleted_files:
+            # Remove from global known list
             project_config.known_files = list(known_set - deleted_files)
-            original_selection_count = len(project_config.selected_files)
-            project_config.selected_files = [f for f in project_config.selected_files if f['path'] not in deleted_files]
 
-            if len(project_config.selected_files) != original_selection_count:
-                project_config.total_tokens = 0
+            # Remove from all profiles' selections and unknown lists
+            for p_name, p_data in project_config.profiles.items():
+                orig_selection = len(p_data.get('selected_files', []))
+                p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] not in deleted_files]
+                p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f not in deleted_files]
 
+                if len(p_data['selected_files']) != orig_selection:
+                    p_data['total_tokens'] = 0 # Force recalc
+
+            config_changed = True
+            self.app.status_var.set(f"Cleaned {len(deleted_files)} missing file(s).")
+
+        # --- 2. Handle Brand New Files (to the whole project) ---
+        brand_new_files = current_set - set(project_config.known_files)
+        if brand_new_files:
+            # Update global list
+            project_config.known_files.extend(list(brand_new_files))
+
+            # Add to the 'unknown' list of EVERY profile
+            for p_data in project_config.profiles.values():
+                p_unknown = set(p_data.get('unknown_files', []))
+                p_unknown.update(brand_new_files)
+                p_data['unknown_files'] = sorted(list(p_unknown))
+
+            config_changed = True
+
+        if config_changed:
             project_config.save()
-            self.app.status_var.set(f"Cleaned {len(deleted_files)} missing file(s) from '{project_config.project_name}'.")
 
-        # --- Check for new files ---
-        new_files = list(current_set - known_set)
-        if sorted(new_files) != sorted(self.newly_detected_files):
-            self.newly_detected_files = new_files
+        # --- 3. Update UI based on active profile's unknown list ---
+        # The 'newly_detected_files' is simply what the active profile hasn't seen.
+        profile_unknown = project_config.unknown_files
+        if sorted(profile_unknown) != sorted(self.newly_detected_files):
+            self.newly_detected_files = profile_unknown
             self._update_warning_ui()
 
-        # Reschedule the next check if applicable
         if schedule_next:
             interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
             self._schedule_next_check(interval_sec * 1000)
 
     def get_newly_detected_files_and_reset(self):
-        """
-        Returns the list of newly detected files and immediately clears the internal
-        list and UI warning. This is called when opening the FileManager.
-        """
+        """Returns new files for active profile and clears its unknown list."""
         files_to_highlight = self.newly_detected_files[:]
         project_config = self.app.project_manager.get_current_project()
+
         if files_to_highlight and project_config:
-            # Add the new files to the project's known list immediately
-            # This prevents them from being detected as "new" again.
-            project_config.known_files.extend(files_to_highlight)
-            project_config.known_files = sorted(list(set(project_config.known_files)))
+            # Clear only the active profile's unknown list
+            project_config.unknown_files = []
             project_config.save()
 
-            # Reset the internal state and UI
             self.newly_detected_files = []
             self._update_warning_ui()
 
         return files_to_highlight
 
     def _update_warning_ui(self):
-        """Shows or hides the new file warning icon and updates tooltips."""
         file_count = len(self.newly_detected_files)
-        project_config = self.app.project_manager.get_current_project()
-        project_name = project_config.project_name if project_config else ""
-
         if file_count > 0:
             file_str_verb = "file was" if file_count == 1 else "files were"
-            tooltip_text = f"{file_count} new {file_str_verb} found.\nClick to manage, Ctrl+Click to add all to merge order."
-            self.app.new_files_tooltip.text = tooltip_text
+            self.app.new_files_tooltip.text = f"{file_count} new {file_str_verb} found.\nClick to manage, Ctrl+Click to add all."
             if not self.app.new_files_label.winfo_ismapped():
                 self.app.new_files_label.grid(row=0, column=0, sticky='e', padx=(10, 0))
             self.app.manage_files_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
@@ -138,6 +134,6 @@ class FileMonitor:
 
         if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
             if file_count > 0:
-                self.app.view_manager.compact_mode_window.show_warning(file_count, project_name)
+                self.app.view_manager.compact_mode_window.show_warning(file_count, "")
             else:
-                self.app.view_manager.compact_mode_window.hide_warning(project_name)
+                self.app.view_manager.compact_mode_window.hide_warning("")

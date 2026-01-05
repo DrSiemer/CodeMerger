@@ -16,11 +16,7 @@ def _get_file_hash(full_path):
         return None
 
 def _generate_random_color():
-    """
-    Generates a random, visually pleasing hex color string.
-    The color is generated in the HSV space with controlled saturation and
-    value to avoid overly bright or dark colors, then converted to RGB and hex.
-    """
+    """Generates a random, visually pleasing hex color string."""
     hue = random.random()
     saturation = random.uniform(0.5, 0.7)
     value = random.uniform(0.6, 0.8)
@@ -33,16 +29,16 @@ def _calculate_font_color(hex_color):
     try:
         hex_color = hex_color.lstrip('#')
         r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-        # Using the luminance formula to determine brightness
-        # A threshold of 150 is used for better visual comfort, favoring light text.
         luminance = (0.299 * r + 0.587 * g + 0.114 * b)
         return 'dark' if luminance > FONT_LUMINANCE_THRESHOLD else 'light'
     except (ValueError, IndexError):
-        return 'light' # Default to light text on error
+        return 'light'
 
 class ProjectConfig:
     """
-    Manages loading and saving the .allcode configuration for a project directory
+    Manages loading and saving the .allcode configuration for a project directory.
+    Tracking for 'New Files' is now profile-specific via the 'unknown_files' list,
+    while 'known_files' remains global to the project to avoid duplication.
     """
     def __init__(self, base_dir):
         self.base_dir = base_dir
@@ -50,21 +46,16 @@ class ProjectConfig:
         self.project_name = os.path.basename(self.base_dir)
         self.project_color = COMPACT_MODE_BG_COLOR
         self.project_font_color = 'light'
-        self.known_files = []
+        self.known_files = [] # Global to project
 
         self.profiles = {}
         self.active_profile_name = "Default"
 
     @staticmethod
     def read_project_display_info(base_dir):
-        """
-        Performs a lightweight read of .allcode just for display purposes,
-        avoiding the expensive file system validation of a full load().
-        Returns a tuple of (project_name, project_color).
-        """
         allcode_path = os.path.join(base_dir, '.allcode')
-        project_name = os.path.basename(base_dir) # Default
-        project_color = COMPACT_MODE_BG_COLOR # Default
+        project_name = os.path.basename(base_dir)
+        project_color = COMPACT_MODE_BG_COLOR
 
         if not os.path.isfile(allcode_path):
             return project_name, project_color
@@ -79,7 +70,6 @@ class ProjectConfig:
                 if color_value and isinstance(color_value, str) and re.match(r'^#[0-9a-fA-F]{6}$', color_value):
                         project_color = color_value
         except (json.JSONDecodeError, IOError):
-            # On error, just return the defaults.
             pass
 
         return project_name, project_color
@@ -97,10 +87,11 @@ class ProjectConfig:
             "total_tokens": 0,
             "intro_text": "",
             "outro_text": "",
-            "expanded_dirs": []
+            "expanded_dirs": [],
+            "unknown_files": [] # Files that haven't been 'seen' by this profile yet
         }
 
-    # These properties are for backward compatibility and convenience.
+    # Redirect properties to the active profile
     @property
     def selected_files(self):
         return self.get_active_profile().get('selected_files', [])
@@ -135,20 +126,21 @@ class ProjectConfig:
 
     @property
     def expanded_dirs(self):
-        # Return as a set for consistency with old implementation
         return set(self.get_active_profile().get('expanded_dirs', []))
 
     @expanded_dirs.setter
     def expanded_dirs(self, value):
-        # Store as a sorted list for stable JSON output
         self.get_active_profile()['expanded_dirs'] = sorted(list(value))
 
+    @property
+    def unknown_files(self):
+        return self.get_active_profile().get('unknown_files', [])
+
+    @unknown_files.setter
+    def unknown_files(self, value):
+        self.get_active_profile()['unknown_files'] = sorted(list(set(value)))
+
     def load(self):
-        """
-        Loads the .allcode config, handles migration from old format, and
-        cleans out any references to files that no longer exist.
-        Returns True if the file list was modified during the cleaning process.
-        """
         data = {}
         config_was_updated = False
         files_were_cleaned_globally = False
@@ -167,11 +159,9 @@ class ProjectConfig:
                                 data = json.loads(json_content)
                                 config_was_updated = True
         except (json.JSONDecodeError, IOError):
-            pass # Treat corrupt/unreadable files as empty
+            pass
 
-        # --- Load project-level settings ---
         self.project_name = data.get('project_name', os.path.basename(self.base_dir))
-        original_known_files = data.get('known_files', [])
         color_value = data.get('project_color')
         font_color_value = data.get('project_font_color')
 
@@ -188,20 +178,16 @@ class ProjectConfig:
         else:
             self.project_font_color = font_color_value
 
-        # --- Handle Profile Migration and Loading ---
+        # Handle Profile Loading
         if 'profiles' in data and isinstance(data['profiles'], dict):
-            # New format, load profiles directly
             self.profiles = data.get('profiles', {})
             self.active_profile_name = data.get('active_profile', 'Default')
-            if not self.profiles: # Handle empty profiles dict
+            if not self.profiles:
                 self.profiles['Default'] = self._create_empty_profile()
                 self.active_profile_name = 'Default'
                 config_was_updated = True
-            if self.active_profile_name not in self.profiles:
-                self.active_profile_name = list(self.profiles.keys())[0]
-                config_was_updated = True
         else:
-            # Old format, migrate to new structure
+            # Migration from legacy flat format
             config_was_updated = True
             default_profile = self._create_empty_profile()
             default_profile['intro_text'] = data.get('intro_text', '')
@@ -212,14 +198,32 @@ class ProjectConfig:
             self.profiles = {'Default': default_profile}
             self.active_profile_name = 'Default'
 
-        # --- Clean known_files (project-level) ---
-        cleaned_known_files = [f for f in original_known_files if os.path.isfile(os.path.join(self.base_dir, f))]
-        self.known_files = cleaned_known_files
-        if len(cleaned_known_files) < len(original_known_files):
+        # Global Known Files Migration/Extraction
+        # We try to get 'known_files' from root first.
+        # If it's missing, we check if it was mistakenly placed inside profiles (from previousTurn).
+        all_found_known = set(data.get('known_files', []))
+        for p_data in self.profiles.values():
+            if 'known_files' in p_data:
+                all_found_known.update(p_data.pop('known_files', []))
+                config_was_updated = True
+            # Ensure every profile has an 'unknown_files' list
+            if 'unknown_files' not in p_data:
+                p_data['unknown_files'] = []
+                config_was_updated = True
+
+        # Clean known_files (project-level)
+        self.known_files = [f for f in all_found_known if os.path.isfile(os.path.join(self.base_dir, f))]
+        if len(self.known_files) < len(all_found_known):
             config_was_updated = True
 
-        # --- Clean selected_files within each profile ---
+        # Clean selected_files and unknown_files within each profile
         for profile_name, profile_data in self.profiles.items():
+            # Clean unknown_files
+            orig_unknown = profile_data.get('unknown_files', [])
+            profile_data['unknown_files'] = [f for f in orig_unknown if os.path.isfile(os.path.join(self.base_dir, f))]
+            if len(profile_data['unknown_files']) < len(orig_unknown):
+                config_was_updated = True
+
             files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
             if files_cleaned_in_profile:
                 files_were_cleaned_globally = True
@@ -232,7 +236,6 @@ class ProjectConfig:
         return files_were_cleaned_globally
 
     def _clean_profile_files(self, profile_data):
-        """Cleans file lists for a single profile. Returns (bool_cleaned, bool_updated)."""
         profile_was_updated = False
         original_selection = profile_data.get('selected_files', [])
         is_new_format = original_selection and isinstance(original_selection[0], dict) and 'path' in original_selection[0]
@@ -265,16 +268,10 @@ class ProjectConfig:
             profile_data['total_tokens'] = sum(f.get('tokens', 0) for f in cleaned_selection)
             profile_was_updated = True
 
-        # Ensure expanded_dirs is a list for JSON
-        if isinstance(profile_data.get('expanded_dirs'), set):
-            profile_data['expanded_dirs'] = sorted(list(profile_data['expanded_dirs']))
-            profile_was_updated = True
-
         return files_were_cleaned, profile_was_updated
 
     def save(self):
-        """Saves the configuration to the .allcode file"""
-        # Build the dictionary in the desired order to control the JSON output
+        """Saves configuration with known_files at the root."""
         final_data = {
             "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
             "project_name": self.project_name,
@@ -292,16 +289,18 @@ class ProjectConfig:
 
     def create_new_profile(self, new_name, copy_files, copy_instructions):
         if new_name in self.profiles:
-            return False # Profile already exists
+            return False
 
         if copy_files or copy_instructions:
             source_profile = self.get_active_profile()
+            # Deep copy the file selection to prevent shared memory references
             new_profile = {
-                "selected_files": source_profile.get('selected_files', []) if copy_files else [],
+                "selected_files": [dict(f) for f in source_profile.get('selected_files', [])] if copy_files else [],
                 "total_tokens": source_profile.get('total_tokens', 0) if copy_files else 0,
                 "intro_text": source_profile.get('intro_text', '') if copy_instructions else '',
                 "outro_text": source_profile.get('outro_text', '') if copy_instructions else '',
-                "expanded_dirs": source_profile.get('expanded_dirs', []) if copy_files else []
+                "expanded_dirs": source_profile.get('expanded_dirs', [])[:] if copy_files else [],
+                "unknown_files": source_profile.get('unknown_files', [])[:] if copy_files else []
             }
         else:
             new_profile = self._create_empty_profile()
@@ -310,7 +309,6 @@ class ProjectConfig:
         return True
 
     def delete_profile(self, profile_name_to_delete):
-        """Deletes a profile if it exists and is not the default profile."""
         if profile_name_to_delete == "Default" or profile_name_to_delete not in self.profiles:
             return False
         del self.profiles[profile_name_to_delete]

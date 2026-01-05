@@ -109,10 +109,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1763047285.945928,
-          "hash": "f06520eec89c14be19c8d70395683a9cb6053812",
-          "tokens": 2871,
-          "lines": 317,
+          "mtime": 1767619362.9010553,
+          "hash": "46b6f611b5e7d66396a58acc295423e1f940bd2a",
+          "tokens": 2837,
+          "lines": 315,
           "ignore_tokens": false
         },
         {
@@ -446,24 +446,24 @@
         },
         {
           "path": "src/ui/custom_error_dialog.py",
-          "mtime": 1762434765.4963021,
-          "hash": "09aa2222934edf1ac5f4eaf0d7cbbec702156fb2",
-          "tokens": 528,
-          "lines": 56
+          "mtime": 1767616203.4467118,
+          "hash": "5cb9345544813a0dff72087c27246c6466e70caa",
+          "tokens": 468,
+          "lines": 52
         },
         {
           "path": "src/ui/title_edit_dialog.py",
-          "mtime": 1761819740.1185825,
-          "hash": "ce530b9c079ab9cba0f403313eecde4c86944b06",
-          "tokens": 771,
-          "lines": 77
+          "mtime": 1767616203.4467118,
+          "hash": "74aac55b4d927198f5a4e0a6ce981967f2ff81a4",
+          "tokens": 688,
+          "lines": 71
         },
         {
           "path": "src/ui/new_profile_dialog.py",
-          "mtime": 1763047286.0170493,
-          "hash": "db2f9a7cca3ae5e22a4c57ab1e74c59306c96f4b",
-          "tokens": 915,
-          "lines": 88
+          "mtime": 1767616203.4467118,
+          "hash": "022ca579dfde8d746613f914df5eeef2ee598ec3",
+          "tokens": 857,
+          "lines": 86
         },
         {
           "path": "src/ui/multiline_input_dialog.py",
@@ -537,17 +537,17 @@
         },
         {
           "path": "src/ui/app_window_parts/profile_actions.py",
-          "mtime": 1763047285.94993,
-          "hash": "440a85d3f43209ff9b01961db8b4ffe63f02fef3",
-          "tokens": 871,
-          "lines": 108
+          "mtime": 1767619605.6596098,
+          "hash": "44e38ee2892344808baac3c60ab7cb71db2ade6d",
+          "tokens": 1066,
+          "lines": 133
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1763982324.3250046,
-          "hash": "66618a1b2daeed2d1f59b0fb262340576937ba6e",
-          "tokens": 3341,
-          "lines": 417
+          "mtime": 1767619523.9613955,
+          "hash": "d3bb2348e48fd6b846a734d9f9e28662f6fb291d",
+          "tokens": 3388,
+          "lines": 419
         },
         {
           "path": "src/ui/app_window_parts/event_handlers.py",
@@ -558,17 +558,17 @@
         },
         {
           "path": "src/ui/file_monitor.py",
-          "mtime": 1763047286.0150495,
-          "hash": "5e7d91ad782519c8c9f22602c913ab900f8c7006",
-          "tokens": 1267,
-          "lines": 143
+          "mtime": 1767619362.9010553,
+          "hash": "285577e06a64ee6b391c9db6a219e7526455a36e",
+          "tokens": 1230,
+          "lines": 139
         },
         {
           "path": "src/ui/view_manager.py",
-          "mtime": 1765462078.6877594,
-          "hash": "975b49e355389c660d8d3ea8e7a3b0d7c163613e",
-          "tokens": 2224,
-          "lines": 222
+          "mtime": 1767616671.5573807,
+          "hash": "4f9c11f18950fb96c522b610bbbedec7bcd7a30f",
+          "tokens": 2356,
+          "lines": 242
         },
         {
           "path": "src/ui/ui_builder.py",
@@ -739,7 +739,7 @@
           "lines": 160
         }
       ],
-      "total_tokens": 124829,
+      "total_tokens": 124931,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n\nDo NOT:\n- remove my original comments\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -753,7 +753,8 @@
         "src/ui/project_starter",
         "src/ui/settings",
         "src/ui/widgets"
-      ]
+      ],
+      "unknown_files": []
     }
   },
   "known_files": [

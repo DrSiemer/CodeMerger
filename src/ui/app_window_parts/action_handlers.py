@@ -312,12 +312,14 @@ class ActionHandlers:
             self.manage_files()
 
     def add_new_files_to_merge_order(self):
+        """Adds current unknown files to the merge order for the active profile."""
         app = self.app
         project_config = app.project_manager.get_current_project()
         if not project_config:
             return
 
-        new_files = app.file_monitor.get_newly_detected_files_and_reset()
+        # Use the monitor's list which reflects the active profile's unknowns
+        new_files = list(app.file_monitor.newly_detected_files)
 
         if not new_files:
             app.status_var.set("No new files to add.")
@@ -326,19 +328,19 @@ class ActionHandlers:
         current_selection_paths = {f['path'] for f in project_config.selected_files}
         files_to_add = [path for path in new_files if path not in current_selection_paths]
 
-        if not files_to_add:
-            app.status_var.set("New files are already in the merge list.")
-            return
+        if files_to_add:
+            for path in files_to_add:
+                new_entry = self._calculate_stats_for_file(path)
+                if new_entry:
+                    project_config.selected_files.append(new_entry)
 
-        for path in files_to_add:
-            new_entry = self._calculate_stats_for_file(path)
-            if new_entry:
-                project_config.selected_files.append(new_entry)
+            project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+            app.status_var.set(f"Added {len(files_to_add)} new file(s) to merge order.")
+        else:
+            app.status_var.set("New files already acknowledged.")
 
-        project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
-        project_config.save()
-
-        app.status_var.set(f"Added {len(files_to_add)} new file(s) to merge order.")
+        # This method clears the active profile's unknown list and updates the UI
+        app.file_monitor.get_newly_detected_files_and_reset()
         app.button_manager.update_button_states()
 
     def _calculate_stats_for_file(self, path):
