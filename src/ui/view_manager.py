@@ -30,17 +30,17 @@ class ViewManager:
         """
         Called when the main window is unmapped (minimized).
         """
-        # The 'iconic' state is the definitive sign of minimization. This event
-        # often fires right before the state officially becomes 'iconic'.
+        # Only start transition if we are in normal state and setting is enabled.
         if self.current_state == self.STATE_NORMAL and self.main_window.app_state.enable_compact_mode_on_minimize:
-            # Use 'after' to let the OS finish its state change before we interfere.
-            # This check now explicitly verifies the window is minimized ('iconic') before
-            # transitioning, preventing modal dialogs from causing the effect.
+            # We use a small delay to ensure the OS has finished processing the
+            # minimization state before we attempt to deiconify and animate.
             def check_and_transition():
-                if self.main_window.state() == 'iconic':
+                # Double-check state inside the timer to prevent race conditions
+                # causing double animations.
+                if self.current_state == self.STATE_NORMAL and self.main_window.state() == 'iconic':
                     self.transition_to_compact()
 
-            self.main_window.after(10, check_and_transition)
+            self.main_window.after(50, check_and_transition)
 
     def on_main_window_restored(self, event=None):
         """
@@ -53,7 +53,8 @@ class ViewManager:
         """
         A dedicated method for when the user closes the compact window directly.
         """
-        self.transition_to_normal()
+        if self.current_state == self.STATE_COMPACT:
+            self.transition_to_normal()
 
     def on_compact_mode_moved(self):
         """Callback executed when the compact mode window is moved by the user."""
@@ -68,8 +69,12 @@ class ViewManager:
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
         """Helper method to animate the main window's geometry and alpha with easing."""
+        if not self.main_window.winfo_exists():
+            return
+
         elapsed = time.time() - start_time
         progress = min(1.0, elapsed / duration)
+        # Cubic easing for smoother start/stop
         eased_progress = progress * progress * (3.0 - 2.0 * progress)
 
         start_x, start_y, start_w, start_h = start_geom
@@ -81,12 +86,13 @@ class ViewManager:
         curr_h = int(start_h + (end_h - start_h) * eased_progress)
 
         alpha = 1.0 - progress if is_shrinking else progress
-        if not is_shrinking and alpha == 0.0: alpha = 0.01
+        # Ensure window is never quite 0 alpha while visible to avoid some OS glitches
+        if not is_shrinking and alpha < 0.01: alpha = 0.01
 
-        self.main_window.geometry(f"{max(1, curr_w)}x{max(1, curr_h)}+{curr_x}+{curr_y}")
         try:
+            self.main_window.geometry(f"{max(1, curr_w)}x{max(1, curr_h)}+{curr_x}+{curr_y}")
             self.main_window.attributes("-alpha", alpha)
-        except Toplevel.TclError:
+        except Exception:
             pass
 
         if progress < 1.0:
@@ -97,7 +103,8 @@ class ViewManager:
     def _on_animation_complete(self, is_shrinking, final_geom):
         """Handles state changes after an animation finishes."""
         if is_shrinking:
-            # Restore main window to full size before minimizing for Windows taskbar preview
+            # Restore main window to full size/buffer before officially hiding it.
+            # This ensures the taskbar thumbnail reflects the full app, not a shrunken sliver.
             if self.main_window_geom:
                 w, h, x, y = self.main_window_geom[2], self.main_window_geom[3], self.main_window_geom[0], self.main_window_geom[1]
                 self.main_window.geometry(f"{w}x{h}+{x}+{y}")
@@ -107,6 +114,7 @@ class ViewManager:
             self.main_window.iconify()
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.deiconify()
+                self.compact_mode_window.lift()
             self.current_state = self.STATE_COMPACT
         else:
             self.main_window.geometry(f"{final_geom[2]}x{final_geom[3]}+{final_geom[0]}+{final_geom[1]}")
@@ -124,27 +132,29 @@ class ViewManager:
 
         self.current_state = self.STATE_SHRINKING
 
-        # The key to overriding the OS animation: de-iconify the window but make it
-        # transparent immediately so it's not visible to the user.
+        # Capture current geometry immediately before we start messing with transparency/state
+        self.main_window_geom = (
+            self.main_window.winfo_x(), self.main_window.winfo_y(),
+            self.main_window.winfo_width(), self.main_window.winfo_height()
+        )
+
+        # Make transparent and deiconify to take control of the animation
         self.main_window.attributes("-alpha", 0.0)
         self.main_window.deiconify()
 
-        # A small delay gives the window manager time to process deiconify
-        # before we start our own animation, preventing visual glitches.
         self.main_window.after(c.ANIMATION_START_DELAY_MS, self._start_shrink_animation)
 
     def _start_shrink_animation(self):
         """The actual animation logic for shrinking."""
-        if self.main_window_geom:
-            start_geom = self.main_window_geom
-        else:
-            start_geom = (self.main_window.winfo_x(), self.main_window.winfo_y(), self.main_window.winfo_width(), self.main_window.winfo_height())
+        if not self.main_window.winfo_exists(): return
 
-        # Make window visible again to start the fade-out animation.
+        start_geom = self.main_window_geom
         self.main_window.attributes("-alpha", 1.0)
         self.main_window.minsize(1, 1)
 
         self._prepare_compact_mode_window()
+        # Force the compact window to calculate its dimensions so we have an accurate target
+        self.compact_mode_window.update_idletasks()
         widget_w = self.compact_mode_window.winfo_reqwidth()
         widget_h = self.compact_mode_window.winfo_reqheight()
 
@@ -154,8 +164,9 @@ class ViewManager:
             target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
         else:
             mon_x, mon_y, mon_right, mon_bottom = get_monitor_work_area(self.main_window)
-
             main_x, main_y, main_w, _ = start_geom
+
+            # Default placement: Top right of the main window area
             ideal_x, ideal_y = main_x + main_w - widget_w - 20, main_y + 20
             margin = 10
 
@@ -163,7 +174,11 @@ class ViewManager:
             target_y = max(mon_y + margin, min(ideal_y, mon_bottom - widget_h - margin))
 
         end_geom = (target_x, target_y, widget_w, widget_h)
+
+        # Position the compact window but keep it hidden until animation is done
         self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
+        self.compact_mode_window.withdraw()
+
         self._animate_window(time.time(), c.ANIMATION_DURATION_SECONDS, start_geom, end_geom, is_shrinking=True)
 
     def transition_to_normal(self):
@@ -178,10 +193,16 @@ class ViewManager:
 
         self.current_state = self.STATE_GROWING
 
+        # Save last known good position
         self.compact_mode_last_x = self.compact_mode_window.winfo_x()
         self.compact_mode_last_y = self.compact_mode_window.winfo_y()
 
         start_geom = (self.compact_mode_last_x, self.compact_mode_last_y, self.compact_mode_window.winfo_width(), self.compact_mode_window.winfo_height())
+
+        # Fallback if main geometry was lost
+        if not self.main_window_geom:
+            self.main_window_geom = (100, 100, 660, 360)
+
         end_geom = self.main_window_geom
 
         self.compact_mode_window.withdraw()
@@ -219,4 +240,3 @@ class ViewManager:
         )
         self.main_window.file_monitor._update_warning_ui()
         self.compact_mode_window.withdraw()
-        self.compact_mode_window.update_idletasks()
