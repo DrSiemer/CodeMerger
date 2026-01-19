@@ -78,7 +78,6 @@ class CompactMode(tk.Toplevel):
         self.close_button.pack(side='right', padx=(0, 1))
 
         # --- Button Container (Body) ---
-        # [FIX] pady=0 here, and we handle the specific gaps on the buttons themselves
         button_container = tk.Frame(self.main_container, bg=c.DARK_BG, padx=4, pady=0)
         button_container.pack(fill='x', side='top')
 
@@ -97,7 +96,6 @@ class CompactMode(tk.Toplevel):
             command=None,
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        # [FIX] pady=(4, 2) creates a 4px gap at the top and 2px at the bottom
         self.copy_button.pack(fill='x', pady=(4, 2))
 
         self.paste_button = RoundedButton(
@@ -106,8 +104,6 @@ class CompactMode(tk.Toplevel):
             command=None,
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        # [FIX] pady=(2, 4) creates a 2px gap at the top and 4px at the bottom
-        # This results in 4px total between buttons and 4px at the outer edges
         self.paste_button.pack(fill='x', pady=(2, 4))
 
         # Override the command with specific bindings for ctrl-click

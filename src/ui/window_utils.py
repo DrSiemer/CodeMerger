@@ -100,8 +100,8 @@ def position_window(window):
         else:
             # If no default string exists, trust the window's self-calculated size.
             window.update_idletasks()
-            win_w = window.winfo_width()
-            win_h = window.winfo_height()
+            win_w = window.winfo_reqwidth()
+            win_h = window.winfo_reqheight()
             if win_w <= 1 or win_h <= 1: # Absolute fallback
                 win_w, win_h = 600, 400
 

@@ -230,7 +230,12 @@ class ActionHandlers:
         if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-        PasteChangesDialog(app, project_config.base_dir, app.status_var, initial_content=initial_content)
+
+        dialog_parent = app
+        if app.view_manager.current_state == 'compact' and app.view_manager.compact_mode_window and app.view_manager.compact_mode_window.winfo_exists():
+            dialog_parent = app.view_manager.compact_mode_window
+
+        PasteChangesDialog(dialog_parent, project_config.base_dir, app.status_var, initial_content=initial_content)
 
     def on_paste_click(self, event):
         self.app.paste_changes_button._draw(self.app.paste_changes_button.click_color)

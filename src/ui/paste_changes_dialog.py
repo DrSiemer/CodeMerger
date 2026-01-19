@@ -110,7 +110,12 @@ class PasteChangesDialog(Toplevel):
         if success:
             self.status_var.set(final_message)
             if creations:
-                self.parent.file_monitor.perform_new_file_check()
+                logical_app = self.parent
+                while logical_app and not hasattr(logical_app, 'file_monitor'):
+                    logical_app = logical_app.master
+
+                if logical_app and hasattr(logical_app, 'file_monitor'):
+                    logical_app.file_monitor.perform_new_file_check()
             self.destroy()
         else:
             CustomErrorDialog(self, title="File Write Error", message=final_message)
