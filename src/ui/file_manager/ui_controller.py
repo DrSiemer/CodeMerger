@@ -129,7 +129,7 @@ class FileManagerUIController:
         is_fully_selected = subtree_paths_set.issubset(current_selection_paths)
 
         action_text = "remove" if is_fully_selected else "add"
-        return f"Alt+Click to {action_text} all files in this folder"
+        return f"Double-click to {action_text} all files in this folder"
 
     def _show_folder_tooltip(self, event, item_id):
         self._hide_folder_tooltip()

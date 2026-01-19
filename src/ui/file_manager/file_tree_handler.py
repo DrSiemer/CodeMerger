@@ -16,11 +16,9 @@ class FileTreeHandler:
         self.is_selected = is_selected_callback
         self.on_toggle = on_toggle_callback
 
-        self.last_tree_click_time = 0
-        self.last_clicked_item_id = None
-
+        # Bind events
         self.tree.bind('<Button-1>', self.handle_tree_click)
-        self.tree.bind('<Alt-Button-1>', self.handle_alt_click)
+        self.tree.bind('<Double-1>', self.handle_double_click)
         self.tree.bind('<Return>', self.toggle_selection_for_selected) # For accessibility
         self.tree.bind('<<TreeviewSelect>>', self.on_tree_selection_change)
         self.tree.bind("<Button-1>", self.handle_tree_deselection_click, add='+')
@@ -139,43 +137,19 @@ class FileTreeHandler:
             self.action_button.config(text="Toggle Selection")
 
     def handle_tree_click(self, event):
-        """Detects a double-click on the same treeview item"""
+        """Standard click handler to manage focus and manual click tracking."""
+        # Selection is handled natively by the widget. We just ensure it has focus.
+        self.tree.focus_set()
+
+    def handle_double_click(self, event):
+        """
+        Handles native double-click event. Toggles files or folders
+        and blocks the default tree expansion/collapse behavior.
+        """
         item_id = self.tree.identify_row(event.y)
-        current_time = time.time()
-        time_diff = current_time - self.last_tree_click_time
-
-        if time_diff < c.DOUBLE_CLICK_INTERVAL_SECONDS and item_id and item_id == self.last_clicked_item_id:
-            self._toggle_item(item_id) # Toggle the specific item that was double-clicked
-            self.last_tree_click_time = 0
-            self.last_clicked_item_id = None
-        else:
-            self.last_tree_click_time = current_time
-            self.last_clicked_item_id = item_id
-
-    def handle_alt_click(self, event):
-        """Handles an Alt+Click event on the tree, adding or removing all files in a folder."""
-        item_id = self.tree.identify_row(event.y)
-        if not item_id:
-            return
-
-        item_info = self.item_map.get(item_id, {})
-        if item_info.get('type') == 'dir':
-            files_in_subtree = self._get_all_files_in_subtree(item_id)
-            if not files_in_subtree:
-                return "break"
-
-            current_selection_paths = {f['path'] for f in self.parent.selection_handler.ordered_selection}
-            subtree_paths_set = set(files_in_subtree)
-
-            # If all files in the folder are already selected, remove them. Otherwise, add them.
-            if subtree_paths_set.issubset(current_selection_paths):
-                self.parent.selection_handler.remove_files(files_in_subtree)
-            else:
-                # Only add files that are not already in the selection
-                paths_to_add = [p for p in files_in_subtree if p not in current_selection_paths]
-                self.parent.selection_handler.add_files(paths_to_add)
-
-            return "break" # Prevent other bindings from firing
+        if item_id:
+            self._toggle_item(item_id)
+        return "break"
 
     def _get_all_files_in_subtree(self, parent_id):
         """Recursively collects all file paths under a given directory node in the tree."""
@@ -213,9 +187,26 @@ class FileTreeHandler:
         return all_tree_files
 
     def _toggle_item(self, item_id):
-        """Toggles a single file item based on its ID."""
+        """Toggles a single file or an entire folder's contents."""
         if not item_id:
             return
         item_info = self.item_map.get(item_id, {})
-        if item_info.get('type') == 'file':
+        item_type = item_info.get('type')
+
+        if item_type == 'file':
             self.on_toggle(item_info['path'])
+        elif item_type == 'dir':
+            files_in_subtree = self._get_all_files_in_subtree(item_id)
+            if not files_in_subtree:
+                return
+
+            current_selection_paths = {f['path'] for f in self.parent.selection_handler.ordered_selection}
+            subtree_paths_set = set(files_in_subtree)
+
+            # If all files in the folder are already selected, remove them. Otherwise, add them.
+            if subtree_paths_set.issubset(current_selection_paths):
+                self.parent.selection_handler.remove_files(files_in_subtree)
+            else:
+                # Only add files that are not already in the selection
+                paths_to_add = [p for p in files_in_subtree if p not in current_selection_paths]
+                self.parent.selection_handler.add_files(paths_to_add)
