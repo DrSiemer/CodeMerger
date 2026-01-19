@@ -159,12 +159,12 @@ class CompactMode(tk.Toplevel):
             self.copy_button._draw(self.copy_button.hover_color)
             is_ctrl = (event.state & 0x0004)
             if is_ctrl:
-                self.parent.action_handlers.copy_merged_code()
+                self.parent.action_handlers.copy_merged_code(self.copy_button)
             else:
                 if self.show_wrapped_button:
-                    self.parent.action_handlers.copy_wrapped_code()
+                    self.parent.action_handlers.copy_wrapped_code(self.copy_button)
                 else:
-                    self.parent.action_handlers.copy_merged_code()
+                    self.parent.action_handlers.copy_merged_code(self.copy_button)
         else:
             self.copy_button._draw(self.copy_button.base_color)
 

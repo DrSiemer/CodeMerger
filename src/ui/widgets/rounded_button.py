@@ -37,6 +37,8 @@ class RoundedButton(tk.Canvas):
         self.radius = radius
         self.command = command
         self.is_enabled = True
+        self.is_loading = False
+        self._pre_loading_text = ""
 
         # Increase the canvas size for hollow buttons to compensate for the border
         if self.hollow:
@@ -70,6 +72,21 @@ class RoundedButton(tk.Canvas):
         self.bind("<ButtonRelease-1>", self._on_release)
         self.bind("<Configure>", self._on_resize)
         self._draw(self.base_color)
+
+    def set_loading(self, is_loading, loading_text="Merging"):
+        """
+        Toggles a loading state. Disables the button and changes text.
+        """
+        if self.is_loading == is_loading:
+            return
+
+        self.is_loading = is_loading
+        if is_loading:
+            self._pre_loading_text = self.text
+            # Use configure to handle text change and state change (which triggers redraw)
+            self.configure(text=loading_text, state='disabled')
+        else:
+            self.configure(text=self._pre_loading_text, state='normal')
 
     def _on_resize(self, event=None):
         if self.winfo_width() != self._last_draw_width:

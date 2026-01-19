@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import pyperclip
+import time
 from tkinter import messagebox, colorchooser
 
 from ... import constants as c
@@ -80,8 +81,10 @@ class ActionHandlers:
                 original_intro = project_config.intro_text
 
                 project_config.intro_text = start_content
-                # Keeping existing outro or blank? Usually prompts are self-contained.
-                # Let's keep the outro if defined, as it contains formatting rules.
+
+                # Manual loading trigger for the specific UI button if visible
+                # Note: start_work is an image label, so we don't have a loading state for it specifically.
+                # We just use the status bar.
 
                 status_message = copy_project_to_clipboard(
                     parent=app,
@@ -230,12 +233,7 @@ class ActionHandlers:
         if not project_config:
             messagebox.showerror("Error", "Please select a valid project folder first")
             return
-
-        dialog_parent = app
-        if app.view_manager.current_state == 'compact' and app.view_manager.compact_mode_window and app.view_manager.compact_mode_window.winfo_exists():
-            dialog_parent = app.view_manager.compact_mode_window
-
-        PasteChangesDialog(dialog_parent, project_config.base_dir, app.status_var, initial_content=initial_content)
+        PasteChangesDialog(app, project_config.base_dir, app.status_var, initial_content=initial_content)
 
     def on_paste_click(self, event):
         self.app.paste_changes_button._draw(self.app.paste_changes_button.click_color)
@@ -258,13 +256,13 @@ class ActionHandlers:
         app = self.app
         FiletypesManagerWindow(app, on_close_callback=app.ui_callbacks.reload_active_extensions)
 
-    def copy_merged_code(self):
-        self._perform_copy(use_wrapper=False)
+    def copy_merged_code(self, button=None):
+        self._perform_copy(use_wrapper=False, button=button)
 
-    def copy_wrapped_code(self):
-        self._perform_copy(use_wrapper=True)
+    def copy_wrapped_code(self, button=None):
+        self._perform_copy(use_wrapper=True, button=button)
 
-    def _perform_copy(self, use_wrapper: bool):
+    def _perform_copy(self, use_wrapper: bool, button=None):
         app = self.app
         base_dir = app.active_dir.get()
         if not os.path.isdir(base_dir):
@@ -277,15 +275,31 @@ class ActionHandlers:
             app.status_var.set("Error: No active project.")
             return
 
-        status_message = copy_project_to_clipboard(
-            parent=app,
-            base_dir=base_dir,
-            project_config=project_config,
-            use_wrapper=use_wrapper,
-            copy_merged_prompt=app.app_state.copy_merged_prompt,
-            scan_secrets_enabled=app.app_state.scan_for_secrets
-        )
-        app.status_var.set(status_message)
+        # Attempt to auto-detect button if none provided (e.g. from keyboard shortcut)
+        if button is None:
+            if app.view_manager.current_state == 'compact' and app.view_manager.compact_mode_window:
+                button = app.view_manager.compact_mode_window.copy_button
+            else:
+                button = app.copy_wrapped_button if use_wrapper else app.copy_merged_button
+
+        # Visual feedback: set button to loading
+        if button:
+            button.set_loading(True, "Merging")
+            app.update() # Force UI refresh to show loading state
+
+        try:
+            status_message = copy_project_to_clipboard(
+                parent=app,
+                base_dir=base_dir,
+                project_config=project_config,
+                use_wrapper=use_wrapper,
+                copy_merged_prompt=app.app_state.copy_merged_prompt,
+                scan_secrets_enabled=app.app_state.scan_for_secrets
+            )
+            app.status_var.set(status_message)
+        finally:
+            if button:
+                button.set_loading(False)
 
     def manage_files(self):
         app = self.app
