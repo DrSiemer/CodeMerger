@@ -18,7 +18,8 @@ class CompactMode(tk.Toplevel):
         self.show_wrapped_button = show_wrapped_button
 
         # --- Style and Layout Constants ---
-        BAR_AND_BORDER_COLOR = instance_color
+        BAR_COLOR = instance_color
+        BORDER_COLOR = "#CCCCCC"
         BORDER_WIDTH = c.COMPACT_MODE_BORDER_WIDTH
         MOVE_BAR_HEIGHT = c.COMPACT_MODE_MOVE_BAR_HEIGHT
         text_hex_color = c.TEXT_COLOR if font_color_name == 'light' else '#000000'
@@ -26,20 +27,24 @@ class CompactMode(tk.Toplevel):
         # --- Window Configuration ---
         self.overrideredirect(True)
         self.attributes('-topmost', True)
-        self.config(bg=BAR_AND_BORDER_COLOR, padx=BORDER_WIDTH, pady=BORDER_WIDTH)
+        self.config(bg=BORDER_COLOR, padx=BORDER_WIDTH, pady=BORDER_WIDTH)
 
         # --- Internal State for Dragging ---
         self._offset_x = 0
         self._offset_y = 0
 
-        # --- Move Bar (for dragging and double-click) ---
-        self.move_bar = tk.Frame(self, height=MOVE_BAR_HEIGHT, bg=BAR_AND_BORDER_COLOR, cursor="fleur")
+        # Main internal container
+        self.main_container = tk.Frame(self, bg=c.DARK_BG)
+        self.main_container.pack(fill='both', expand=True)
+
+        # --- Move Bar (Header) ---
+        self.move_bar = tk.Frame(self.main_container, height=MOVE_BAR_HEIGHT, bg=BAR_COLOR, cursor="fleur")
         self.move_bar.pack(fill='x', side='top')
 
         # --- App Icon ---
         self.app_icon_image = self.parent.assets.compact_icon_tk
         if self.app_icon_image:
-            self.app_icon_label = tk.Label(self.move_bar, image=self.app_icon_image, bg=BAR_AND_BORDER_COLOR)
+            self.app_icon_label = tk.Label(self.move_bar, image=self.app_icon_image, bg=BAR_COLOR)
             self.app_icon_label.pack(side='left', padx=(2, 1), pady=3)
 
         # --- Project title abbreviation logic ---
@@ -61,26 +66,26 @@ class CompactMode(tk.Toplevel):
             no_space_title = project_name.replace(' ', '')
             title_abbr = no_space_title[:max_len]
 
-        self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_AND_BORDER_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
+        self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
         self.title_label.pack(side='left', padx=(0, 4))
 
         # --- Right-aligned icons container ---
-        self.right_icons_frame = tk.Frame(self.move_bar, bg=BAR_AND_BORDER_COLOR)
+        self.right_icons_frame = tk.Frame(self.move_bar, bg=BAR_COLOR)
         self.right_icons_frame.pack(side='right')
 
         # --- Close Button ---
-        self.close_button = tk.Label(self.right_icons_frame, image=self.parent.assets.compact_mode_close_image, bg=BAR_AND_BORDER_COLOR, cursor="hand2")
+        self.close_button = tk.Label(self.right_icons_frame, image=self.parent.assets.compact_mode_close_image, bg=BAR_COLOR, cursor="hand2")
         self.close_button.pack(side='right', padx=(0, 1))
 
-        # --- Button Container ---
-        button_container = tk.Frame(self, bg=c.DARK_BG, padx=4, pady=2)
-        button_container.pack(fill='both', expand=True, pady=(1, 0))
+        # --- Button Container (Body) ---
+        # [FIX] pady=0 here, and we handle the specific gaps on the buttons themselves
+        button_container = tk.Frame(self.main_container, bg=c.DARK_BG, padx=4, pady=0)
+        button_container.pack(fill='x', side='top')
 
         button_font = c.FONT_COMPACT_BUTTON
         button_height = 24
         button_radius = 4
         button_fg = '#FFFFFF'
-        button_padding = {'pady': 2}
 
         # Unified copy button
         copy_button_text = "Copy" if self.show_wrapped_button else "Copy Code Only"
@@ -89,18 +94,21 @@ class CompactMode(tk.Toplevel):
         self.copy_button = RoundedButton(
             button_container, text=copy_button_text, font=button_font,
             bg=copy_button_bg, fg=copy_button_fg,
-            command=None, # Use custom bindings
+            command=None,
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        self.copy_button.pack(fill='x', expand=True, **button_padding)
+        # [FIX] pady=(4, 2) creates a 4px gap at the top and 2px at the bottom
+        self.copy_button.pack(fill='x', pady=(4, 2))
 
         self.paste_button = RoundedButton(
             button_container, text="Paste", font=button_font,
             bg=c.BTN_GREEN, fg=button_fg,
-            command=None, # We use custom bindings instead
+            command=None,
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        self.paste_button.pack(fill='x', expand=True, **button_padding)
+        # [FIX] pady=(2, 4) creates a 2px gap at the top and 4px at the bottom
+        # This results in 4px total between buttons and 4px at the outer edges
+        self.paste_button.pack(fill='x', pady=(2, 4))
 
         # Override the command with specific bindings for ctrl-click
         self.copy_button.bind("<Button-1>", self.on_copy_click)
@@ -108,7 +116,7 @@ class CompactMode(tk.Toplevel):
         self.copy_button.bind("<ButtonRelease-1>", self.on_copy_release)
 
         self.paste_button.bind("<Button-1>", self.on_paste_click)
-        self.paste_button.unbind("<ButtonRelease-1>") # remove the original release binding
+        self.paste_button.unbind("<ButtonRelease-1>")
         self.paste_button.bind("<ButtonRelease-1>", self.on_paste_release)
 
         # --- Bindings ---
@@ -120,7 +128,6 @@ class CompactMode(tk.Toplevel):
         self.title_label.bind("<B1-Motion>", self.on_drag)
         self.title_label.bind("<ButtonRelease-1>", self.on_release_drag)
         self.title_label.bind("<Double-Button-1>", self.close_window)
-        # Bind dragging to the icon container as well
         self.right_icons_frame.bind("<ButtonPress-1>", self.on_press_drag)
         self.right_icons_frame.bind("<B1-Motion>", self.on_drag)
         self.right_icons_frame.bind("<ButtonRelease-1>", self.on_release_drag)
@@ -152,7 +159,6 @@ class CompactMode(tk.Toplevel):
         self.copy_button._draw(self.copy_button.click_color)
 
     def on_copy_release(self, event):
-        # Verify the release is within the button
         if 0 <= event.x <= self.copy_button.winfo_width() and 0 <= event.y <= self.copy_button.winfo_height():
             self.copy_button._draw(self.copy_button.hover_color)
             is_ctrl = (event.state & 0x0004)
@@ -167,13 +173,10 @@ class CompactMode(tk.Toplevel):
             self.copy_button._draw(self.copy_button.base_color)
 
     def on_paste_click(self, event):
-        # This re-implements the click visual from RoundedButton
         self.paste_button._draw(self.paste_button.click_color)
 
     def on_paste_release(self, event):
-        # Verify the release is within the button
         if 0 <= event.x <= self.paste_button.winfo_width() and 0 <= event.y <= self.paste_button.winfo_height():
-            # This re-implements the release visual and command logic
             self.paste_button._draw(self.paste_button.hover_color)
             is_ctrl = (event.state & 0x0004)
             if is_ctrl:
@@ -184,20 +187,14 @@ class CompactMode(tk.Toplevel):
             self.paste_button._draw(self.paste_button.base_color)
 
     def _exit_and_open_file_manager(self):
-        # This will start the animation to restore the main window.
         self.close_callback()
-        # Schedule the file manager to open after the animation is likely complete.
         self.parent.after(int(c.ANIMATION_DURATION_SECONDS * 1000) + 50, self.parent.action_handlers.manage_files)
 
     def on_new_files_release(self, event):
         if self.new_files_button:
-            # Verify the release is within the button
             if 0 <= event.x <= self.new_files_button.winfo_width() and 0 <= event.y <= self.new_files_button.winfo_height():
-                # Visual feedback for the button release
                 self.new_files_button._draw(self.new_files_button.hover_color)
                 self.hide_tooltip()
-
-                # Command logic
                 is_ctrl = (event.state & 0x0004)
                 if is_ctrl:
                     self.parent.action_handlers.add_new_files_to_merge_order()
@@ -219,10 +216,8 @@ class CompactMode(tk.Toplevel):
                 cursor="hand2"
             )
             self.new_files_button.pack(side='left', padx=(0, 2))
-            # Override the button's default bindings to handle Ctrl-click
             self.new_files_button.unbind("<ButtonRelease-1>")
             self.new_files_button.bind("<ButtonRelease-1>", self.on_new_files_release)
-            # Add tooltip
             tooltip_text = "New files found.\nClick: Open manager\nCtrl+Click: Add all to merge"
             self.new_files_button.bind("<Enter>", lambda e, text=tooltip_text: self.show_tooltip(text))
             self.new_files_button.bind("<Leave>", self.hide_tooltip)
@@ -251,10 +246,8 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window = None
 
     def close_window(self, event=None):
-        # Verify bounds if event is provided
         if event and not (0 <= event.x <= event.widget.winfo_width() and 0 <= event.y <= event.widget.winfo_height()):
             return
-
         if event and (event.state & 0x0004):
             self.parent.event_handlers.on_app_close()
         elif self.close_callback:
