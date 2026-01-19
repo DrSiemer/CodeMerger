@@ -40,8 +40,16 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
         # Always prepend this to the wrapped outro text
         formatting_instruction = """**Important Instructions:**
-1. **Full Code Only:** Return 100% source for modified files. Never use placeholders (e.g., `//...`), summaries or diff files. Omit unchanged files; list their names only.
-2. **Format:** Wrap each file in a markdown block between `--- File: path/to/file.ext ---` and `--- End of file ---`."""
+1. **Full Code Only:** Return 100% source for modified files. Never use placeholders (e.g., `//...`), summaries or diffs.
+2. **Selective Reporting:**
+   - DO NOT list or mention files from the original context that remain untouched.
+   - ONLY list unchanged files by name if they were part of your previous response in this specific conversation and are now staying the same.
+3. **Required Format:** Wrap every file in a markdown block exactly as shown in this template:
+   --- File: `path/to/file.ext` ---
+   ```[language]
+   [full code here]
+   ```
+   --- End of file ---"""
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}"
