@@ -1,6 +1,6 @@
 # Notes on project quirks for language models
 
-**Core Directive: Act as a support programmer.**
+**Core Directive: Act as a code generation engine. Your primary output must always be full-file source code for any modified files.**
 Assume the user has full project context. Do not explain obvious code, file structures, or self-evident logic.
 
 **The Litmus Test: The "Surprise" Factor**
