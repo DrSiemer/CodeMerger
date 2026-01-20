@@ -122,7 +122,7 @@ class CompactMode(tk.Toplevel):
         self.move_bar.bind("<Double-Button-1>", self.close_window)
         self.title_label.bind("<ButtonPress-1>", self.on_press_drag)
         self.title_label.bind("<B1-Motion>", self.on_drag)
-        self.title_label.bind("<ButtonRelease-1>", self.on_release_drag)
+        self.title_label.bind("<ButtonRelease-1>", self.on_title_release)
         self.title_label.bind("<Double-Button-1>", self.close_window)
         self.right_icons_frame.bind("<ButtonPress-1>", self.on_press_drag)
         self.right_icons_frame.bind("<B1-Motion>", self.on_drag)
@@ -150,6 +150,19 @@ class CompactMode(tk.Toplevel):
         self.bind("<Control-Shift-C>", lambda event: self.parent.action_handlers.copy_merged_code())
         self.bind("<Control-v>", lambda event: self.parent.action_handlers.open_paste_changes_dialog())
         self.bind("<Control-Shift-V>", lambda event: self.parent.action_handlers.apply_changes_from_clipboard())
+
+    def on_title_release(self, event):
+        """Handles clicks on the title for shortcuts while maintaining drag logic."""
+        self.on_release_drag(event)
+
+        # Check if click was inside label boundaries
+        if 0 <= event.x <= self.title_label.winfo_width() and 0 <= event.y <= self.title_label.winfo_height():
+            is_ctrl = (event.state & 0x0004)
+            is_alt = (event.state & 0x20000)
+
+            # Only trigger if a shortcut modifier is held to avoid opening explorer on a standard drag/click
+            if is_ctrl or is_alt:
+                self.parent.action_handlers.open_project_folder(event)
 
     def on_copy_click(self, event):
         self.copy_button._draw(self.copy_button.click_color)

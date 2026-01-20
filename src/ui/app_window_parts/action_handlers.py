@@ -183,23 +183,23 @@ class ActionHandlers:
         is_ctrl_pressed = event and (event.state & 0x0004)
         is_alt_pressed = event and (event.state & 0x20000)
 
-        # Priority 1: Ctrl + Alt -> Open Console
-        if is_ctrl_pressed and is_alt_pressed:
+        # Priority 1: Alt -> Open Console
+        if is_alt_pressed:
             try:
                 if sys.platform == "win32":
                     creationflags = subprocess.CREATE_NEW_CONSOLE
                     subprocess.Popen('cmd.exe', cwd=project_path, creationflags=creationflags)
-                    app.status_var.set("Opened console in project folder")
+                    app.helpers.show_compact_toast("Opened console in project folder")
                 else:
                     app.status_var.set("Feature only available on Windows.")
             except Exception as e:
                 app.show_error_dialog("Error", f"Could not open console: {e}")
             return
 
-        # Priority 2: Ctrl only -> Copy Path
+        # Priority 2: Ctrl -> Copy Path
         if is_ctrl_pressed:
             pyperclip.copy(project_path.replace('/', '\\'))
-            app.status_var.set("Copied project path to clipboard")
+            app.helpers.show_compact_toast("Copied project path to clipboard")
             return
 
         # Priority 3: No modifiers -> Open in File Explorer
