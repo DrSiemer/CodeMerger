@@ -40,16 +40,21 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
         # Always prepend this to the wrapped outro text
         formatting_instruction = """**Important Instructions:**
-1. **Full Code Only:** Return 100% source for modified files. Never use placeholders (e.g., `//...`), summaries or diffs.
-2. **Selective Reporting:**
-   - DO NOT list or mention files from the original context that remain untouched.
-   - ONLY list unchanged files by name if they were part of your previous response in this specific conversation and are now staying the same.
+1. **Full Code / Total Rewrite:** Return 100% source for modified files. Treat every change as a request to rewrite the entire file from scratch. Using `// ...`, `/* remains unchanged */`, or any form of omission is a critical failure. I do not have the original files open; if you truncate, I cannot use the code.
+2. **Strict Change Detection:**
+   - Compare your final code against the original input.
+   - If the code is **byte-for-byte identical**, **DO NOT output the file**.
+   - You are allowed to list unchanged files by name, if they were part of your previous response in this specific conversation.
 3. **Required Format:** Wrap every file in a markdown block exactly as shown in this template:
    --- File: `path/to/file.ext` ---
    ```[language]
    [full code here]
    ```
-   --- End of file ---"""
+   --- End of file ---
+4. **Post-Code Summary** Immediately AFTER the final code block, you must include a text section titled ### Summary & Verification containing:
+   - A bulleted list of logic and UI changes.
+   - A specific list of actions the user must take to verify the changes.
+5. Inform the user about files that should be removed if your changes make them obsolete."""
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}"
