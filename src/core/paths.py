@@ -57,6 +57,7 @@ LOGO_MASK_SMALL_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask_small.png')
 
 # Path to the new files warning icon
 NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
+NEW_FILES_MANY_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles_many.png')
 
 # Path to the folder icon
 FOLDER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder.png')

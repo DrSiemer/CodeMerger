@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 
@@ -16,6 +17,7 @@ class CompactMode(tk.Toplevel):
         self.tooltip_window = None
         self.new_files_button = None
         self.show_wrapped_button = show_wrapped_button
+        self.current_new_file_count = 0
 
         # --- Style and Layout Constants ---
         BAR_COLOR = instance_color
@@ -206,6 +208,10 @@ class CompactMode(tk.Toplevel):
                 self.hide_tooltip()
                 is_ctrl = (event.state & 0x0004)
                 if is_ctrl:
+                    if self.current_new_file_count > 20:
+                        if not messagebox.askyesno("Confirm Add All", f"You are about to add {self.current_new_file_count} files to the merge list.\n\nAre you sure?", parent=self):
+                            self.new_files_button._draw(self.new_files_button.base_color)
+                            return
                     self.parent.action_handlers.add_new_files_to_merge_order()
                 else:
                     self._exit_and_open_file_manager()
@@ -213,14 +219,23 @@ class CompactMode(tk.Toplevel):
                 self.new_files_button._draw(self.new_files_button.base_color)
 
     def show_warning(self, file_count, project_name):
+        self.current_new_file_count = file_count
+        bg_color = self.move_bar.cget('bg')
+
+        # Select the appropriate icon based on the threshold
+        if file_count > 20:
+            icon_image = self.parent.assets.new_files_many_compact_pil
+        else:
+            icon_image = self.parent.assets.new_files_compact_pil
+
         if not self.new_files_button:
             self.new_files_button = RoundedButton(
                 self.right_icons_frame,
                 command=None,
-                image=self.parent.assets.new_files_compact_pil,
-                bg=self.move_bar.cget('bg'),
-                width=18,
-                height=12,
+                image=icon_image,
+                bg=bg_color,
+                width=20,
+                height=14,
                 radius=3,
                 cursor="hand2"
             )
@@ -230,6 +245,26 @@ class CompactMode(tk.Toplevel):
             tooltip_text = "New files found.\nClick: Open manager\nCtrl+Click: Add all to merge"
             self.new_files_button.bind("<Enter>", lambda e, text=tooltip_text: self.show_tooltip(text))
             self.new_files_button.bind("<Leave>", self.hide_tooltip)
+        else:
+            # If the button exists but the image requirement changed (e.g. crossed threshold), recreate it
+            if self.new_files_button.image != icon_image:
+                self.new_files_button.destroy()
+                self.new_files_button = RoundedButton(
+                    self.right_icons_frame,
+                    command=None,
+                    image=icon_image,
+                    bg=bg_color,
+                    width=20,
+                    height=14,
+                    radius=3,
+                    cursor="hand2"
+                )
+                self.new_files_button.pack(side='left', padx=(0, 2))
+                self.new_files_button.unbind("<ButtonRelease-1>")
+                self.new_files_button.bind("<ButtonRelease-1>", self.on_new_files_release)
+                tooltip_text = "New files found.\nClick: Open manager\nCtrl+Click: Add all to merge"
+                self.new_files_button.bind("<Enter>", lambda e, text=tooltip_text: self.show_tooltip(text))
+                self.new_files_button.bind("<Leave>", self.hide_tooltip)
 
     def hide_warning(self, project_name):
         if self.new_files_button:

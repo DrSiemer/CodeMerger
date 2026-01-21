@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageTk, ImageColor
 from ..core.paths import (
-    TRASH_ICON_PATH, NEW_FILES_ICON_PATH, DEFAULTS_ICON_PATH,
+    TRASH_ICON_PATH, NEW_FILES_ICON_PATH, NEW_FILES_MANY_ICON_PATH, DEFAULTS_ICON_PATH,
     LOGO_MASK_PATH, LOGO_MASK_SMALL_PATH, ICON_PATH,
     COMPACT_MODE_CLOSE_ICON_PATH,
     FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
@@ -23,7 +23,8 @@ class AppAssets:
         self.compact_icon_pil = self._load_image(ICON_PATH, (12, 12))
         self.trash_icon_pil = self._load_image(TRASH_ICON_PATH, (18, 18))
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
-        self.new_files_compact_pil = self._load_image(NEW_FILES_ICON_PATH, (12, 12))
+        self.new_files_compact_pil = self._load_image(NEW_FILES_ICON_PATH, (14, 14))
+        self.new_files_many_compact_pil = self._load_image(NEW_FILES_MANY_ICON_PATH, (14, 14))
         self.defaults_pil = self._load_image(DEFAULTS_ICON_PATH, (24, 24))
         self.folder_icon_pil = self._load_image(FOLDER_ICON_PATH, (28, 22))
         self.folder_reveal_pil = self._load_image(FOLDER_REVEAL_ICON_PATH)
