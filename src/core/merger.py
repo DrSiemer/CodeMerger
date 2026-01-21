@@ -50,7 +50,8 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    ```[language]
    [full code here]
    ```
-   --- End of file ---"""
+   --- End of file ---
+4. Inform the user about files that should be removed if your changes make them obsolete."""
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}"
