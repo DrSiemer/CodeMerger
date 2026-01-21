@@ -8,6 +8,7 @@ class FileMonitor:
     """
     Manages periodic checks for new and deleted files.
     Maintains independent 'unknown' state for each project profile.
+    Also monitors the configuration file for external changes (e.g. git branch switch).
     """
     def __init__(self, app):
         self.app = app
@@ -40,6 +41,29 @@ class FileMonitor:
         if not project_config:
             self.stop()
             return
+
+        # --- 0. Check for external config changes (e.g. git switch) ---
+        if project_config.has_external_changes():
+            try:
+                # Reload the config from disk to avoid overwriting it with stale state
+                project_config.load()
+
+                # Notify UI of the reload
+                self.app.status_var.set("Reloaded project settings due to external change.")
+                self.app.profile_actions.update_profile_selector_ui()
+                self.app.button_manager.update_button_states()
+
+                # Reset local detection state to avoid false positives against old config
+                self.newly_detected_files = list(project_config.unknown_files)
+                self._update_warning_ui()
+
+            except Exception as e:
+                # If load fails (e.g. file locked or corrupt), skip this scan cycle
+                print(f"Error reloading config: {e}")
+                if schedule_next:
+                    interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
+                    self._schedule_next_check(interval_sec * 1000)
+                return
 
         base_dir = project_config.base_dir
         if not os.path.isdir(base_dir):

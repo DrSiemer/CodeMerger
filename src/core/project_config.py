@@ -50,6 +50,7 @@ class ProjectConfig:
 
         self.profiles = {}
         self.active_profile_name = "Default"
+        self._last_mtime = 0
 
     @staticmethod
     def read_project_display_info(base_dir):
@@ -147,6 +148,8 @@ class ProjectConfig:
 
         try:
             if os.path.isfile(self.allcode_path):
+                # Capture mtime immediately before reading to track this version
+                self._last_mtime = os.path.getmtime(self.allcode_path)
                 with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     content = f.read()
                     if content:
@@ -199,8 +202,6 @@ class ProjectConfig:
             self.active_profile_name = 'Default'
 
         # Global Known Files Migration/Extraction
-        # We try to get 'known_files' from root first.
-        # If it's missing, we check if it was mistakenly placed inside profiles (from previousTurn).
         all_found_known = set(data.get('known_files', []))
         for p_data in self.profiles.values():
             if 'known_files' in p_data:
@@ -283,6 +284,19 @@ class ProjectConfig:
         }
         with open(self.allcode_path, 'w', encoding='utf-8') as f:
             json.dump(final_data, f, indent=2)
+
+        # Update timestamp to prevent detecting self-save as an external change
+        if os.path.isfile(self.allcode_path):
+            self._last_mtime = os.path.getmtime(self.allcode_path)
+
+    def has_external_changes(self):
+        """Checks if the .allcode file has been modified on disk since last load/save."""
+        if not os.path.isfile(self.allcode_path):
+            return False
+        try:
+            return os.path.getmtime(self.allcode_path) != self._last_mtime
+        except OSError:
+            return False
 
     def get_profile_names(self):
         return sorted(list(self.profiles.keys()))

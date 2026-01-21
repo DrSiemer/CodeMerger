@@ -77,6 +77,9 @@ class App(Tk):
         self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
         self.bind("<Configure>", self.event_handlers.on_window_configure)
 
+        # When app regains focus, immediately check if config changed on disk
+        self.bind("<FocusIn>", self._on_focus_in)
+
         # Keyboard shortcuts
         self.bind("<Control-c>", lambda event: self.action_handlers.copy_wrapped_code())
         self.bind("<Control-Shift-C>", lambda event: self.action_handlers.copy_merged_code())
@@ -111,6 +114,15 @@ class App(Tk):
         self.deiconify()
         self.lift()
         self.focus_force()
+
+    def _on_focus_in(self, event):
+        """Called when the application window gains focus."""
+        # Only act if the main window itself received focus (not a child widget)
+        # or if it is a general activation event.
+        if event.widget == self and self.project_manager.get_current_project():
+            # Trigger an immediate file check without scheduling a new loop
+            # This will detect config changes and reload if needed.
+            self.file_monitor.perform_new_file_check(schedule_next=False)
 
     def _run_update_cleanup(self):
         if not os.path.exists(UPDATE_CLEANUP_FILE_PATH):
