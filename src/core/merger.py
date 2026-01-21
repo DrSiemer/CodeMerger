@@ -51,7 +51,10 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    [full code here]
    ```
    --- End of file ---
-4. Inform the user about files that should be removed if your changes make them obsolete."""
+4. **Post-Code Summary** Immediately AFTER the final code block, you must include a text section titled ### Summary & Verification containing:
+   - A bulleted list of logic and UI changes.
+   - A specific list of actions the user must take to verify the changes.
+5. Inform the user about files that should be removed if your changes make them obsolete."""
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}"
