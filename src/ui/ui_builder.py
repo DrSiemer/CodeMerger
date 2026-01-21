@@ -146,6 +146,21 @@ def setup_ui(app):
 
     app.no_project_label = Label(app.wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
 
+    # --- Cleanup Comments Label (Replaces Button) ---
+    app.cleanup_comments_button = Label(
+        app.wrapper_box,
+        text="//",
+        font=(c.FONT_FAMILY_PRIMARY, 10, 'bold'),
+        bg=c.DARK_BG,
+        fg="#555555", # Dark gray, similar to border color
+        cursor='hand2',
+        padx=5, pady=2
+    )
+    app.cleanup_comments_button.bind("<ButtonRelease-1>", app.action_handlers.copy_comment_cleanup_prompt)
+    app.cleanup_comments_button.bind("<Enter>", lambda e: app.cleanup_comments_button.config(fg=c.TEXT_COLOR))
+    app.cleanup_comments_button.bind("<Leave>", lambda e: app.cleanup_comments_button.config(fg="#555555"))
+    ToolTip(app.cleanup_comments_button, "Copy prompt to clean up comments and remove tags", delay=500)
+
     app.button_grid_frame = Frame(app.wrapper_box, bg=c.DARK_BG)
     app.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")

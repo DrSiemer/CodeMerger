@@ -74,12 +74,14 @@ class ButtonStateManager:
             app.copy_merged_button.set_state('disabled')
             app.copy_wrapped_button.set_state('disabled')
             app.paste_changes_button.set_state('disabled')
+            app.cleanup_comments_button.place_forget()
         else:
             app.no_project_label.pack_forget()
             app.wrapper_box_title.pack(pady=(10, 5))
             app.button_grid_frame.pack(pady=(5, 18), padx=30)
             app.wrapper_text_button.set_state('normal')
             app.paste_changes_button.set_state('normal')
+            app.cleanup_comments_button.place(relx=1.0, y=14, anchor='ne', x=-22)
 
             copy_buttons_state = 'disabled'
             has_wrapper_text = False

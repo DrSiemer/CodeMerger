@@ -38,6 +38,17 @@ DEFAULT_INTRO_PROMPT = 'Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n'
 DEFAULT_OUTRO_PROMPT =  "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
 TOKEN_THRESHOLD_WARNING_TEXT = "You are close to the current maximum tokens\nfor currently available language models"
 
+COMMENT_CLEANUP_PROMPT = """It is time to clean up code comments. Remove all LLM tags (e.g., [MODIFIED], [FIX]), transient feedback, and changelogs. Git handles history; the code shouldn't.
+
+Directive: Optimize the code for a new programmer. Assume they understand standard CSS/JS syntax; do not explain what the code is doing, only why it exists if it is non-obvious.
+
+1. Remove Redundancy: Delete comments that explain the obvious or simply restate the code in English (e.g., "Submit button" above a <button>, or "No clicks" next to pointer-events: none).
+2. Keep Structure: Retain section headers (e.g., "Navigation", "API Logic") that help file navigation.
+3. Keep Context: Retain comments that explain the "why" behind complex business logic or workarounds for browser bugs, but clean up the wording.
+4. Clean Tags: Remove the [TAG] prefix. If the comment remains useful without the tag, keep it; otherwise, delete it.
+
+Do not change code, only comments."""
+
 # --- UI Theming & Configuration ---
 PROJECT_TITLE_MAX_LENGTH = 64
 COMPACT_MODE_PROJECT_TITLE_MAX_LENGTH = 8

@@ -29,6 +29,13 @@ class ActionHandlers:
         if event is None: return True
         return 0 <= event.x <= event.widget.winfo_width() and 0 <= event.y <= event.widget.winfo_height()
 
+    def copy_comment_cleanup_prompt(self, event=None):
+        """Copies the standard comment cleanup instruction prompt to the clipboard."""
+        if not self._is_valid_click(event): return
+
+        pyperclip.copy(c.COMMENT_CLEANUP_PROMPT)
+        self.app.helpers.show_compact_toast("Copied comment cleanup prompt")
+
     def open_project_starter(self, event=None):
         if not self._is_valid_click(event): return
 

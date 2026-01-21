@@ -66,17 +66,17 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1768913411.2963958,
-          "hash": "4a09cb3bca6848cfd20c2bcc4a756da332edbeb7",
-          "tokens": 1713,
-          "lines": 162
+          "mtime": 1769025962.1716099,
+          "hash": "58b34fd4fe981f90e7714230463592f85fc06201",
+          "tokens": 1942,
+          "lines": 173
         },
         {
           "path": "src/core/paths.py",
-          "mtime": 1766574889.7458253,
-          "hash": "f9c55d42e1c19beac68199addeaa9be10ab0db21",
-          "tokens": 1088,
-          "lines": 110
+          "mtime": 1769025295.295914,
+          "hash": "b2f5ab7f4636df093653a75355b22c9a5521155f",
+          "tokens": 1110,
+          "lines": 111
         },
         {
           "path": "src/core/logger.py",
@@ -131,10 +131,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1768913418.7668755,
-          "hash": "76345e92b37dc93f16d40fac41300107143d610a",
-          "tokens": 816,
-          "lines": 98
+          "mtime": 1769025520.242877,
+          "hash": "581f6f8b656d876929cfb4d28de3b12826aa01b5",
+          "tokens": 943,
+          "lines": 103
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -166,10 +166,10 @@
         },
         {
           "path": "src/ui/assets.py",
-          "mtime": 1766576421.3118076,
-          "hash": "cafecf0db9bf846bdd32bb8b837ec5bfdaa793e6",
-          "tokens": 2112,
-          "lines": 166
+          "mtime": 1769025441.5942173,
+          "hash": "d8fb2adac04f824e0d667068e671b64c9e03857c",
+          "tokens": 2145,
+          "lines": 167
         },
         {
           "path": "src/ui/font_utils.py",
@@ -488,10 +488,10 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1769024951.5467353,
-          "hash": "c66cc49a461c89800940e7762531ed8f929e8d67",
-          "tokens": 3042,
-          "lines": 289
+          "mtime": 1769025441.5942173,
+          "hash": "5d960dcf75ec583b246302d13cbbac42f83f92ca",
+          "tokens": 3259,
+          "lines": 311
         },
         {
           "path": "updater_gui.py",
@@ -516,10 +516,10 @@
         },
         {
           "path": "src/ui/app_window_parts/button_state_manager.py",
-          "mtime": 1768913411.331796,
-          "hash": "01b90479179eb1e0b9997fd4baa05ad5873c2cfb",
-          "tokens": 1125,
-          "lines": 115
+          "mtime": 1769025962.173162,
+          "hash": "06865501d915273ce1675f468d97e30e7465b2ed",
+          "tokens": 1159,
+          "lines": 117
         },
         {
           "path": "src/ui/app_window_parts/ui_callbacks.py",
@@ -544,10 +544,10 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1768913842.9810598,
-          "hash": "6494d452ef689c9c3856a086fa0d5ab44d13bbe1",
-          "tokens": 3553,
-          "lines": 438
+          "mtime": 1769025962.1716099,
+          "hash": "6dda54b0386097a89aa58038b1372c3eae12cc37",
+          "tokens": 3619,
+          "lines": 445
         },
         {
           "path": "src/ui/app_window_parts/event_handlers.py",
@@ -572,10 +572,10 @@
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1768913842.9820633,
-          "hash": "e4ee63479ae5af0588251a6a0023b67d506a3a01",
-          "tokens": 2888,
-          "lines": 187
+          "mtime": 1769025962.1726449,
+          "hash": "db0c369709bd53bde0a8e0fddb08c5769c76db41",
+          "tokens": 3013,
+          "lines": 203
         },
         {
           "path": "src/ui/app_window.py",
