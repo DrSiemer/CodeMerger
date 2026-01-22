@@ -35,9 +35,3 @@ A lightweight, [describe your application's category, e.g., productivity, social
 - **Source of Truth:** The [backend/client] is the single source of truth for all data. The UI updates based on responses from the authoritative source
 - **Data Flow:** Describe how data gets from the server to the client. Is it through polling, a push-based service (like WebSockets), or simple request-response?
 - **Conflict Resolution:** Explain how the system will handle potential conflicts. For example, if two users try to edit the same resource at once, how is that resolved? Often, the "source of truth" principle is sufficient, where the first-to-arrive action wins and the second is rejected
-
----
-
-## Backend Schema
-
-Define the required schema if your project needs a database.
