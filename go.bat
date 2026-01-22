@@ -36,6 +36,8 @@ goto :eof
 
 :DefaultAction
     echo Starting CodeMerger application...
+    REM Set environment variable to disable instance detection for dev launches
+    set CM_DEV_MODE=1
     python -m %START_SCRIPT%
     goto :eof
 

@@ -19,7 +19,12 @@ def is_another_instance_running():
     """
     Checks if another instance of CodeMerger is currently running.
     Checks for the executable name if frozen, or the module name if running from source.
+    Returns False if the CM_DEV_MODE environment variable is set.
     """
+    # Skip check if launched via go.bat (dev mode)
+    if os.environ.get('CM_DEV_MODE') == '1':
+        return False
+
     current_pid = os.getpid()
     try:
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
