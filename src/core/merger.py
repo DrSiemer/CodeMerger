@@ -39,22 +39,35 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         outro_text = project_config.outro_text
 
         # Always prepended to the wrapped outro text
-        formatting_instruction = """**Important Instructions:**
-1. **Overwrite Constraint (No Truncation):** My tool replaces files with your code blocks. Any logic shrunken with comments (e.g., `// ...` or `/* unchanged */`) is permanently deleted from my project. You MUST return the full, complete contents for every modified file.
-2. **Strict Change Detection:**
-   - Compare your final code against the original input.
-   - If the code is **byte-for-byte identical**, **DO NOT output the file**.
-   - You are allowed to list unchanged files by name, if they were part of your previous response in this specific conversation.
-3. **Required Format:** Wrap every file in a markdown block exactly as shown in this template:
+        formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
+
+1. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
+   - You MUST provide the **FULL, COMPLETE source code** for every file you modify.
+   - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
+   - Any missing lines will result in the permanent deletion of that code from my project. Truncation is a failure to follow instructions and causes data loss.
+
+2. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
+   - ONLY output files that have actually been modified.
+   - If a file's final code is **byte-for-byte identical** to the original input provided in this prompt, **DO NOT** include it in your output.
+   - You may list names of unchanged files at the end of your response, but do not wrap them in code blocks.
+
+3. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
+   - Every modified file MUST be wrapped exactly like this template:
    --- File: `path/to/file.ext` ---
-   ```[language]
+   ```[language_id]
    [full code here]
    ```
    --- End of file ---
-4. **Post-Code Summary** Immediately AFTER the final code block, you must include a text section titled ### Summary & Verification containing:
-   - A bulleted list of logic and UI changes.
-   - A specific list of actions the user must take to verify the changes.
-5. Inform the user about files that should be removed if your changes make them obsolete."""
+
+4. **VERIFICATION SUMMARY (POST-CODE):**
+   - Immediately following the final "--- End of file ---" marker, include a section titled:
+   ### Summary & Verification
+   - **Logic Changes:** Bulleted list of behavioral/algorithmic changes.
+   - **UI Changes:** Bulleted list of visual/layout modifications.
+   - **Verification Steps:** A clear list of actions I must take to test these specific changes.
+
+5. **FILE OPERATIONS:**
+   - If your modifications make certain existing files obsolete, explicitly state: "DELETE FILE: `path/to/obsolete_file.ext`" in the Summary section."""
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}"
