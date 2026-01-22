@@ -20,23 +20,19 @@ class Step1DetailsView(tk.Frame):
         form_grid.grid_columnconfigure(1, weight=1)
 
         # Row 0: Project Name
-        tk.Label(form_grid, text="Project Name:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+        name_label_frame = tk.Frame(form_grid, bg=c.DARK_BG)
+        name_label_frame.grid(row=0, column=0, sticky="nw", padx=5, pady=5)
+
+        tk.Label(name_label_frame, text="Project Name:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
+        tk.Label(name_label_frame, text="(used for folder name)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=(c.FONT_FAMILY_PRIMARY, 8)).pack(anchor="w")
+
         tk.Entry(form_grid, textvariable=self.project_data["name"], width=50, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief="flat", font=c.FONT_NORMAL).grid(row=0, column=1, padx=5, pady=5, ipady=4, sticky="ew")
-
-        # Row 1: Parent Folder
-        tk.Label(form_grid, text="Parent Folder:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).grid(row=1, column=0, sticky="w", padx=5, pady=5)
-        folder_frame = tk.Frame(form_grid, bg=c.DARK_BG)
-        folder_frame.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
-        folder_frame.grid_columnconfigure(0, weight=1)
-
-        tk.Entry(folder_frame, textvariable=self.project_data["parent_folder"], bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief="flat", font=c.FONT_NORMAL).grid(row=0, column=0, ipady=4, sticky="ew")
-        RoundedButton(folder_frame, text="Browse", command=self._browse_folder, height=28, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2").grid(row=0, column=1, padx=(5, 0))
 
         # Divider
         tk.Frame(self, height=1, bg=c.WRAPPER_BORDER).pack(fill='x', pady=20)
 
         # Base Project Section
-        tk.Label(self, text="Or start from an existing project:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(anchor="w", pady=(0, 5))
+        tk.Label(self, text="Or start from an existing project (optional):", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(anchor="w", pady=(0, 5))
 
         base_frame = tk.Frame(self, bg=c.DARK_BG)
         base_frame.pack(fill='x', anchor='w')
@@ -48,11 +44,6 @@ class Step1DetailsView(tk.Frame):
 
         # Update label if path already exists
         self._update_base_label()
-
-    def _browse_folder(self):
-        folder_selected = filedialog.askdirectory()
-        if folder_selected:
-            self.project_data["parent_folder"].set(folder_selected)
 
     def _select_base_project(self):
         folder_selected = filedialog.askdirectory(title="Select Base Project")

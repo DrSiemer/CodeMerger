@@ -13,19 +13,9 @@ def validate_step(step, state_data):
     """
     if step == 1:
         project_name = state_data["name"].get()
-        parent_folder = state_data["parent_folder"].get()
 
-        if not all([project_name, parent_folder]):
-            return False, "Error", "Project Name and Parent Folder are required."
-
-        try:
-            path_obj = Path(parent_folder)
-            if not path_obj.exists():
-                return False, "Invalid Path", f"The parent folder does not exist:\n{parent_folder}"
-            if not path_obj.is_dir():
-                return False, "Invalid Path", f"The path is not a directory:\n{parent_folder}"
-        except Exception as e:
-            return False, "Invalid Path", f"The parent folder path is invalid.\nError: {e}"
+        if not project_name:
+            return False, "Error", "Project Name is required."
 
     elif step == 2:
         return True, "", ""
@@ -43,5 +33,20 @@ def validate_step(step, state_data):
         todo = state_data["todo_md"]
         if not todo:
             return False, "Error", "The TODO plan cannot be empty."
+
+    elif step == 6:
+        # Validate parent folder here, right before generation
+        parent_folder = state_data["parent_folder"].get()
+        if not parent_folder:
+             return False, "Error", "Parent Folder is required."
+
+        try:
+            path_obj = Path(parent_folder)
+            if not path_obj.exists():
+                return False, "Invalid Path", f"The parent folder does not exist:\n{parent_folder}"
+            if not path_obj.is_dir():
+                return False, "Invalid Path", f"The path is not a directory:\n{parent_folder}"
+        except Exception as e:
+            return False, "Invalid Path", f"The parent folder path is invalid.\nError: {e}"
 
     return True, "", ""

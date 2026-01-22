@@ -25,27 +25,25 @@ def prepare_project_directory(parent_folder, project_name, overwrite=False):
             try:
                 shutil.rmtree(project_path)
             except Exception as e:
-                return False, project_path, f"Failed to delete existing folder: {e}"
+                return False, project_path, "Failed to delete existing folder: " + str(e)
         else:
             return False, project_path, "Project folder already exists."
 
     try:
         project_path.mkdir(parents=True, exist_ok=True)
     except Exception as e:
-        return False, project_path, f"Failed to create project directory: {e}"
+        return False, project_path, "Failed to create project directory: " + str(e)
 
     return True, project_path, ""
 
 def parse_and_write_files(project_path, llm_output):
     """
     Parses the LLM response for file blocks and writes them to the project path.
-    Matches the robust format: --- File: `path` ---
-```content``` --- End of file ---
+    Uses a more robust regex to handle whitespace variations.
     """
-    # Robust regex to find blocks specifically terminated by "--- End of file ---"
-    # This prevents the parser from breaking if the file content itself contains backticks.
+    # This regex is more forgiving with newlines and spaces between markers
     file_pattern = re.compile(
-        r'--- File: `([^\n`]+)` ---\s*```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
+        r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+--- End of file ---',
         re.DOTALL
     )
 
@@ -66,16 +64,16 @@ def parse_and_write_files(project_path, llm_output):
         try:
             # Security check: Ensure we stay within project path
             if not os.path.normpath(str(full_path)).startswith(os.path.normpath(str(project_path))):
-                log.warning(f"Skipped file outside project: {file_path_str}")
+                log.warning("Skipped file outside project: " + file_path_str)
                 continue
 
             full_path.parent.mkdir(parents=True, exist_ok=True)
-            # Normalize line endings to avoid space-padding issues
+            # Normalize line endings
             sanitized_content = "\n".join([line.rstrip() for line in content.splitlines()])
             full_path.write_text(sanitized_content, encoding="utf-8")
             files_created.append(str(relative_path))
         except Exception as e:
-            log.error(f"Failed to write file {relative_path}: {e}")
+            log.error("Failed to write file " + str(relative_path) + ": " + str(e))
 
     if not found_any:
         return False, [], "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---'."
@@ -90,7 +88,7 @@ def write_base_reference_file(project_path, base_path, base_files):
         return False
 
     output_blocks = []
-    output_blocks.append(f"# Base Project Reference\n\nThis file contains the code from the base project: `{base_path}`\n")
+    output_blocks.append("# Base Project Reference\n\nThis file contains the code from the base project: `" + base_path + "`\n")
 
     for file_info in base_files:
         rel_path = file_info['path']
@@ -103,10 +101,16 @@ def write_base_reference_file(project_path, base_path, base_files):
                 content = f.read()
 
             language = get_language_from_path(rel_path)
-            # Exact format required by the parser
-            output_blocks.append(f"--- File: `{rel_path}` ---\n\n```{language}\n{content}\n```\n\n--- End of file ---")
+            block = [
+                "--- File: `" + rel_path + "` ---",
+                "```" + language,
+                content,
+                "```",
+                "--- End of file ---"
+            ]
+            output_blocks.append("\n".join(block))
         except Exception as e:
-            log.error(f"Failed to read base file {rel_path} for reference: {e}")
+            log.error("Failed to read base file " + rel_path + " for reference: " + str(e))
 
     final_content = "\n\n".join(output_blocks)
     ref_file_path = project_path / "project_reference.md"
@@ -115,5 +119,5 @@ def write_base_reference_file(project_path, base_path, base_files):
         ref_file_path.write_text(final_content, encoding="utf-8")
         return True
     except Exception as e:
-        log.error(f"Failed to write project_reference.md: {e}")
+        log.error("Failed to write project_reference.md: " + str(e))
         return False

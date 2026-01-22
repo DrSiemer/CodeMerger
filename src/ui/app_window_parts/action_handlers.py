@@ -46,9 +46,8 @@ class ActionHandlers:
             return
 
         default_parent = app.app_state.config.get('default_parent_folder', '')
-        if not default_parent or not os.path.isdir(default_parent):
-             # Fallback to user's Desktop directory if not set
-             default_parent = os.path.join(os.path.expanduser("~"), "Desktop")
+        if default_parent and not os.path.isdir(default_parent):
+             default_parent = ''
 
         app.project_starter_window = ProjectStarterDialog(app, app, default_parent)
 

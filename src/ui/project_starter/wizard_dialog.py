@@ -41,8 +41,6 @@ class ProjectStarterDialog(tk.Toplevel):
         self.geometry(c.PROJECT_STARTER_GEOMETRY)
         self.minsize(900, 700)
         self.configure(bg=c.DARK_BG)
-        # IMPORTANT: Removing transient to allow native Windows maximize/minimize controls
-        # self.transient(parent)
         self.grab_set()
 
         apply_dark_theme(self)
@@ -121,6 +119,12 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def create_project(self, llm_output, include_base_reference=False):
         """Processes the LLM output and creates the actual files on disk."""
+        # Validate the current step (6) before proceeding to force folder selection
+        is_valid, err_title, err_msg = wizard_validator.validate_step(6, self.state.project_data)
+        if not is_valid:
+            messagebox.showerror(err_title, err_msg, parent=self)
+            return
+
         if not llm_output.strip():
             messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
             return
@@ -215,6 +219,8 @@ class ProjectStarterDialog(tk.Toplevel):
             self.current_view.handle_reset()
             self.state.update_from_view(self.current_view)
             self.state.save()
+            # Explicitly refresh navigation because the view state changed
+            self.update_nav_state()
 
     def _clear_session_data(self):
         if messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh?", parent=self):
@@ -307,12 +313,41 @@ class ProjectStarterDialog(tk.Toplevel):
         self.update_nav_state()
 
     def update_nav_state(self):
-        if self.state.current_step != 6:
-            if self.state.current_step == 2:
-                self.next_button.set_state('normal')
-                return
-            is_valid, _, _ = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
-            self.next_button.set_state('normal' if is_valid else 'disabled')
+        """Updates the visual state and text of the Next button based on phase validity."""
+        if self.state.current_step == 6:
+            return
+
+        # Default text reset
+        self.next_button.config(text="Next >")
+
+        # Step 2 (Base Files) is optional
+        if self.state.current_step == 2:
+            self.next_button.set_state('normal')
+            self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+            return
+
+        # Step 4 (Stack) is optional but uses "Skip" text if empty
+        if self.state.current_step == 4:
+            stack_val = self.state.project_data["stack"].get()
+            if not stack_val.strip():
+                # Blue "Skip" button
+                self.next_button.config(text="Skip", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+            else:
+                # Green "Next" button
+                self.next_button.config(text="Next >", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+            self.next_button.set_state('normal')
+            return
+
+        # Standard Step Validation (1, 3, 5)
+        is_valid, _, _ = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
+
+        if is_valid:
+            self.next_button.set_state('normal')
+            self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+        else:
+            self.next_button.set_state('disabled')
+            # Reset to default blue when disabled
+            self.next_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
     def _update_tab_styles(self):
         active_steps = self._get_active_steps()
