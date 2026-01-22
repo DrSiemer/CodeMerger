@@ -40,22 +40,4 @@ A lightweight, [describe your application's category, e.g., productivity, social
 
 ## Backend Schema
 
-Define the primary database tables or data structures needed for your application.
-
-**Table: `users`**
-| Field | Type | Description |
-|---|---|---|
-| id | `INTEGER` | Primary key |
-| email | `VARCHAR` | User's unique email |
-| name | `VARCHAR` | User's display name |
-| created_at | `TIMESTAMP` | Timestamp of creation |
-
-**Table: `[primary_resource]` (e.g., posts, tasks, items)**
-| Field | Type | Description |
-|---|---|---|
-| id | `INTEGER` | Primary key |
-| user_id | `INTEGER` | Foreign key to `users.id` |
-| title | `VARCHAR` | The title of the resource |
-| status | `VARCHAR` | e.g., 'pending', 'active', 'archived' |
-| created_at | `TIMESTAMP` | Timestamp of creation |
-| last_modified | `TIMESTAMP` | Timestamp of the last update |
+Define the required schema if your project needs a database.
