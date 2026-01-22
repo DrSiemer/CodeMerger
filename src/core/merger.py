@@ -38,9 +38,9 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         intro_text = project_config.intro_text
         outro_text = project_config.outro_text
 
-        # Always prepend this to the wrapped outro text
+        # Always prepended to the wrapped outro text
         formatting_instruction = """**Important Instructions:**
-1. **Full Code / Total Rewrite:** Return 100% source for modified files. Treat every change as a request to rewrite the entire file from scratch. Using `// ...`, `/* remains unchanged */`, or any form of omission is a critical failure. I do not have the original files open; if you truncate, I cannot use the code.
+1. **Overwrite Constraint (No Truncation):** My tool replaces files with your code blocks. Any logic shrunken with comments (e.g., `// ...` or `/* unchanged */`) is permanently deleted from my project. You MUST return the full, complete contents for every modified file.
 2. **Strict Change Detection:**
    - Compare your final code against the original input.
    - If the code is **byte-for-byte identical**, **DO NOT output the file**.
