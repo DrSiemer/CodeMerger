@@ -3,6 +3,8 @@ import json
 import fnmatch
 import hashlib
 import tiktoken
+import psutil
+import sys
 from pathlib import Path
 from ..core.paths import (
     CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
@@ -12,6 +14,35 @@ from ..constants import (
     TOKEN_COUNT_ENABLED_DEFAULT,
     ADD_ALL_WARNING_THRESHOLD_DEFAULT
 )
+
+def is_another_instance_running():
+    """
+    Checks if another instance of CodeMerger is currently running.
+    Checks for the executable name if frozen, or the module name if running from source.
+    """
+    current_pid = os.getpid()
+    try:
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            try:
+                # Skip the current process
+                if proc.info['pid'] == current_pid:
+                    continue
+
+                # Check for frozen executable (Windows)
+                if getattr(sys, 'frozen', False):
+                    if proc.info['name'] and proc.info['name'].lower() == "codemerger.exe":
+                        return True
+                # Check for running from source
+                else:
+                    cmdline = proc.info.get('cmdline')
+                    if cmdline and any("src.codemerger" in arg for arg in cmdline):
+                        return True
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue
+    except Exception:
+        # Fallback to False if psutil fails for any reason
+        return False
+    return False
 
 def strip_markdown_wrapper(text):
     """

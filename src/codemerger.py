@@ -3,7 +3,12 @@ import sys
 import logging
 from tkinter import Tk, messagebox
 from .ui.app_window import App
-from .core.utils import load_active_file_extensions, load_app_version, update_and_get_new_filetypes
+from .core.utils import (
+    load_active_file_extensions,
+    load_app_version,
+    update_and_get_new_filetypes,
+    is_another_instance_running
+)
 from .core.logger import setup_logging
 from .ui.new_filetypes_dialog import NewFiletypesDialog
 
@@ -13,6 +18,9 @@ def main():
 
     try:
         newly_added_filetypes = update_and_get_new_filetypes()
+
+        # Check if another instance is already running
+        another_instance_active = is_another_instance_running()
 
         # Check for command-line arguments
         initial_project_path = None
@@ -31,7 +39,8 @@ def main():
             file_extensions=loaded_extensions,
             app_version=app_version,
             initial_project_path=initial_project_path,
-            newly_added_filetypes=newly_added_filetypes
+            newly_added_filetypes=newly_added_filetypes,
+            is_second_instance=another_instance_active
         )
         app.mainloop()
     except Exception as e:

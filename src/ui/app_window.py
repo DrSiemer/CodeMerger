@@ -27,7 +27,7 @@ from .app_window_parts.helpers import AppHelpers
 log = logging.getLogger("CodeMerger")
 
 class App(Tk):
-    def __init__(self, file_extensions, app_version="", initial_project_path=None, newly_added_filetypes=None):
+    def __init__(self, file_extensions, app_version="", initial_project_path=None, newly_added_filetypes=None, is_second_instance=False):
         super().__init__()
         self.withdraw()
         self._run_update_cleanup()
@@ -100,16 +100,28 @@ class App(Tk):
         self.status_bar_manager = StatusBarManager(self, self.status_bar, self.status_var)
 
         # Project Loading Logic
+        # If this is a second instance and we aren't opening a specific path from the shell,
+        # we ignore the last active project and force the directory selector.
+        force_selector = is_second_instance and initial_project_path is None
+
         if initial_project_path and os.path.isdir(initial_project_path):
             self.app_state.update_active_dir(initial_project_path)
             self.project_actions.set_active_dir_display(initial_project_path)
+        elif force_selector:
+            # Don't load any project, prepare for selector
+            self.project_actions.set_active_dir_display(None, set_status=False)
         else:
+            # Standard launch: load the last used project
             self.project_actions.set_active_dir_display(self.app_state.active_directory)
 
         self.after(1500, self.updater.check_for_updates)
 
         if newly_added_filetypes:
             self.after(500, lambda: NewFiletypesDialog(self, newly_added_filetypes))
+
+        # If we need to force the selector, schedule it to open after the main window is ready
+        if force_selector:
+            self.after(100, self.action_handlers.open_change_directory_dialog)
 
         self.deiconify()
         self.lift()
