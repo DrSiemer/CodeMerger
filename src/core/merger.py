@@ -42,7 +42,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
 
 1. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
-   - You MUST provide the **FULL, COMPLETE source code** for every file you modify.
+   - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
    - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
    - Any missing lines will result in the permanent deletion of that code from my project. Truncation is a failure to follow instructions and causes data loss.
 
