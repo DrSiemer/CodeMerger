@@ -754,12 +754,15 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": []
+      "unknown_files": [
+        "TODO.md"
+      ]
     }
   },
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
+    "TODO.md",
     "assets/boilerplate/README.md",
     "assets/boilerplate/_start.txt",
     "assets/boilerplate/go_docker.bat",
