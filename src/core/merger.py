@@ -52,12 +52,14 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - You may list names of unchanged files at the end of your response, but do not wrap them in code blocks.
 
 3. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
-   - Every modified file MUST be wrapped exactly like this template:
+   - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
    --- File: `path/to/file.ext` ---
    ```[language_id]
    [full code here]
    ```
    --- End of file ---
+
+   - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block. Omitting it will break my automated file applier.
 
 4. **VERIFICATION SUMMARY (POST-CODE):**
    - Immediately following the final "--- End of file ---" marker, include a section titled:
