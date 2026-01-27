@@ -223,6 +223,10 @@ class SegmentedReviewer(Frame):
             self.editor.grid_forget()
             self.renderer.grid_forget()
 
+            # Ensure editor is enabled so delete works.
+            # (If coming from a signed-off segment, the editor was disabled)
+            self.editor.text_widget.config(state="normal")
+
             # Clear editor buffer
             self.editor.delete("1.0", "end")
 

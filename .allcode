@@ -66,10 +66,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1769025962.1716099,
-          "hash": "58b34fd4fe981f90e7714230463592f85fc06201",
-          "tokens": 1942,
-          "lines": 173
+          "mtime": 1769531705.5502963,
+          "hash": "6cbef510a2abefc98ce131402a1e48607ae501ee",
+          "tokens": 2209,
+          "lines": 208
         },
         {
           "path": "src/core/paths.py",
@@ -236,10 +236,10 @@
         },
         {
           "path": "src/ui/widgets/markdown_renderer.py",
-          "mtime": 1766574889.97595,
-          "hash": "0c9de9cf0b2b322279e4d7db927c8319434df5cc",
-          "tokens": 1273,
-          "lines": 113
+          "mtime": 1769545238.9137068,
+          "hash": "ae9db3fdd980ee832a6bd219d0bb8f7c18ad25bf",
+          "tokens": 1370,
+          "lines": 119
         },
         {
           "path": "src/ui/widgets/profile_navigator.py",
@@ -383,10 +383,10 @@
         },
         {
           "path": "src/ui/project_starter/step2_concept.py",
-          "mtime": 1769167949.6844819,
-          "hash": "97d743f7c94a7ec2e3424a9b4b6ca3bba75f72c7",
-          "tokens": 3448,
-          "lines": 276
+          "mtime": 1769544619.564409,
+          "hash": "2f0f03c128748ac9ae6e2b19ee78263f951e9285",
+          "tokens": 2379,
+          "lines": 217
         },
         {
           "path": "src/ui/project_starter/step3_todo.py",
@@ -544,10 +544,10 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1769167949.6585028,
-          "hash": "0d66d7dabe03280324cf447729ac40c6b0b65da8",
-          "tokens": 3594,
-          "lines": 444
+          "mtime": 1769545238.9147105,
+          "hash": "77fc8c82089e2f2966b2ce9f777f2396b77ecd1c",
+          "tokens": 3574,
+          "lines": 443
         },
         {
           "path": "src/ui/app_window_parts/event_handlers.py",
@@ -677,17 +677,17 @@
         },
         {
           "path": "assets/reference/concept_questions.json",
-          "mtime": 1766574889.6688473,
-          "hash": "ecdd3aa0b6c76cbc8e7036a5111475c84883c1d9",
-          "tokens": 304,
-          "lines": 13
+          "mtime": 1769531594.4825013,
+          "hash": "aa50e371179585a1a80c9a4163939e386e2b21f4",
+          "tokens": 368,
+          "lines": 42
         },
         {
           "path": "assets/reference/todo_questions.json",
-          "mtime": 1766574889.6798484,
-          "hash": "96921b128efdb8a357d34f2d9deefff5c7ff9585",
-          "tokens": 359,
-          "lines": 14
+          "mtime": 1769531594.4825013,
+          "hash": "feebf5355e153d85e488205f42a6b84f79f57008",
+          "tokens": 354,
+          "lines": 51
         },
         {
           "path": "src/ui/project_starter/session_manager.py",
@@ -705,17 +705,17 @@
         },
         {
           "path": "src/ui/project_starter/wizard_state.py",
-          "mtime": 1768913411.4473107,
-          "hash": "711c4e27b65b51dfadc2e0cdc7255f198c6440fd",
-          "tokens": 1191,
-          "lines": 129
+          "mtime": 1769544509.6473176,
+          "hash": "1b625b5ab9e11958ebd51fdc2396dda581f230e1",
+          "tokens": 1442,
+          "lines": 164
         },
         {
           "path": "src/ui/project_starter/wizard_validator.py",
-          "mtime": 1769167949.7285104,
-          "hash": "7fef7e6baab20ef0be23098a4b76c60e8af3b75a",
-          "tokens": 366,
-          "lines": 52
+          "mtime": 1769543198.9872735,
+          "hash": "615927514c023a4a2ad834f0a12d91e9227e28b3",
+          "tokens": 559,
+          "lines": 68
         },
         {
           "path": "src/ui/project_starter/step3_stack.py",
@@ -726,34 +726,34 @@
         },
         {
           "path": "src/ui/project_starter/step4_todo.py",
-          "mtime": 1769528339.321934,
-          "hash": "120be0dbf755082d6a16dfba99eba55284803676",
-          "tokens": 3141,
-          "lines": 254
+          "mtime": 1769544619.564409,
+          "hash": "4f4ac7124979004810094d170a54a8b2e125901c",
+          "tokens": 2463,
+          "lines": 225
         },
         {
           "path": "src/ui/project_starter/step5_generate.py",
-          "mtime": 1769167949.7114997,
-          "hash": "a5e579f67a65d330ebdcbc67933651eda9dd7868",
-          "tokens": 2038,
-          "lines": 156
+          "mtime": 1769536784.291765,
+          "hash": "e23c37970107b76223fde32e19b4f03c32811f30",
+          "tokens": 1801,
+          "lines": 148
         },
         {
           "path": "src/ui/project_starter/segment_manager.py",
-          "mtime": 1769531594.481502,
-          "hash": "1d2610d53ae7742b7eddaea8606f25cad2ff58b6",
+          "mtime": 1769550033.8612614,
+          "hash": "72bb19231d6c91656f13d01efb25b44e1f8ec67f",
           "tokens": 670,
           "lines": 88
         },
         {
           "path": "src/ui/project_starter/widgets/segmented_reviewer.py",
-          "mtime": 1769531594.481502,
-          "hash": "2f13cfd50a3092f1dc2987cc31af2cdf7645c6b4",
-          "tokens": 2913,
-          "lines": 285
+          "mtime": 1769550288.9916048,
+          "hash": "45fc40c99798a274bb57b243d5bbc8edf935d441",
+          "tokens": 4035,
+          "lines": 392
         }
       ],
-      "total_tokens": 0,
+      "total_tokens": 131530,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
