@@ -6,7 +6,7 @@ A simple app for developers that prefer to stay in control and want to avoid wor
 ![Main application window](./dev/screenshot_01c.png "The main application window")
 
 
-I recommend using this with [Gemini 2.5 Pro](https://aistudio.google.com/prompts/new_chat), because there you currently get a very large context length with high rate limits for free.
+I recommend using this with [Gemini](https://aistudio.google.com/prompts/new_chat?model=gemini-3-flash-preview), because there you currently get a very large context length with high rate limits for free.
 
 
 ## Download
