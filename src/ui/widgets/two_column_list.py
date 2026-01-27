@@ -17,6 +17,7 @@ class TwoColumnList(tk.Canvas):
         self.right_col_width = right_col_width
         self.scrollbar = None
         self.last_clicked_index = None
+        self._fade_job = None
         self.bind("<ButtonPress-1>", self._on_click)
         self.bind("<MouseWheel>", self._on_mousewheel)
         self.bind("<Configure>", self._on_resize)
@@ -93,6 +94,62 @@ class TwoColumnList(tk.Canvas):
             if not self.scrollbar.winfo_ismapped(): self.scrollbar.grid()
         else:
             if self.scrollbar.winfo_ismapped(): self.scrollbar.grid_remove()
+
+    def animate_pulse(self):
+        """Blinks the text items out and fades them back in to provide visual feedback."""
+        if self._fade_job:
+            self.after_cancel(self._fade_job)
+
+        # Capture intended target states for text elements
+        targets = []
+        for i, item in enumerate(self.items):
+            item_path = item.get('data')
+            if not item_path or item_path not in self.item_id_map: continue
+
+            left_target = c.BTN_BLUE_TEXT if i in self.selected_indices else c.TEXT_COLOR
+            right_target = item.get('right_fg', c.TEXT_SUBTLE_COLOR)
+
+            targets.append({
+                'ids': self.item_id_map[item_path],
+                'left': left_target,
+                'right': right_target
+            })
+
+        # Step 1: Blink out (set to background color)
+        for t in targets:
+            self.itemconfig(t['ids']['left'], fill=c.TEXT_INPUT_BG)
+            self.itemconfig(t['ids']['right'], fill=c.TEXT_INPUT_BG)
+
+        def hex_to_rgb(h):
+            h = h.lstrip('#')
+            return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+        def rgb_to_hex(rgb):
+            return '#%02x%02x%02x' % rgb
+
+        def mix(rgb_start, rgb_end, p):
+            return tuple(int(rgb_start[i] + (rgb_end[i] - rgb_start[i]) * p) for i in range(3))
+
+        bg_rgb = hex_to_rgb(c.TEXT_INPUT_BG)
+
+        # Step 2: Fade back in
+        def step(frame, total_frames):
+            if not self.winfo_exists(): return
+            progress = frame / total_frames
+
+            for t in targets:
+                left_rgb = mix(bg_rgb, hex_to_rgb(t['left']), progress)
+                right_rgb = mix(bg_rgb, hex_to_rgb(t['right']), progress)
+                self.itemconfig(t['ids']['left'], fill=rgb_to_hex(left_rgb))
+                self.itemconfig(t['ids']['right'], fill=rgb_to_hex(right_rgb))
+
+            if frame < total_frames:
+                self._fade_job = self.after(20, step, frame + 1, total_frames)
+            else:
+                self._fade_job = None
+                self._update_styles()
+
+        self.after(50, step, 1, 12)
 
     def _update_styles(self):
         """

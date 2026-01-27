@@ -3,20 +3,20 @@ import pyperclip
 from tkinter import messagebox
 from ...core.merger import generate_output_string
 from ..multiline_input_dialog import MultilineInputDialog
+from ... import constants as c
 
 class OrderRequestHandler:
     """Handles the logic for creating and applying file order requests."""
     def __init__(self, fm_window):
         self.window = fm_window
         self.order_request_click_job = None
+        self._btn_fade_job = None
 
     def handle_click(self, event=None):
         """Manages single, double, and ctrl-clicks for the order request button."""
-        # Detect Ctrl modifier (state mask 0x0004)
         is_ctrl = event and (event.state & 0x0004)
 
         if is_ctrl:
-            # Instant Action: Paste from clipboard immediately
             if self.order_request_click_job:
                 self.window.after_cancel(self.order_request_click_job)
                 self.order_request_click_job = None
@@ -29,7 +29,6 @@ class OrderRequestHandler:
             self._apply_reorder(pasted_text)
             return "break"
 
-        # Standard double-click detection logic
         if self.order_request_click_job:
             self.window.after_cancel(self.order_request_click_job)
             self.order_request_click_job = None
@@ -38,6 +37,43 @@ class OrderRequestHandler:
             self.order_request_click_job = self.window.after(300, self._copy_request)
 
         return "break"
+
+    def _animate_button_press(self):
+        """Flashes the button background and fades it back to normal."""
+        if self._btn_fade_job:
+            self.window.after_cancel(self._btn_fade_job)
+
+        btn = self.window.order_request_button
+        start_color = c.SUBTLE_HIGHLIGHT_COLOR
+        end_color = c.DARK_BG
+
+        def hex_to_rgb(h):
+            h = h.lstrip('#')
+            return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+        def rgb_to_hex(rgb):
+            return '#%02x%02x%02x' % rgb
+
+        def mix(rgb_start, rgb_end, p):
+            return tuple(int(rgb_start[i] + (rgb_end[i] - rgb_start[i]) * p) for i in range(3))
+
+        rgb_start = hex_to_rgb(start_color)
+        rgb_end = hex_to_rgb(end_color)
+
+        def step(frame, total_frames):
+            if not btn.winfo_exists(): return
+            progress = frame / total_frames
+            current_rgb = mix(rgb_start, rgb_end, progress)
+            btn.config(bg=rgb_to_hex(current_rgb))
+
+            if frame < total_frames:
+                self._btn_fade_job = self.window.after(25, step, frame + 1, total_frames)
+            else:
+                btn.config(bg=end_color)
+                self._btn_fade_job = None
+
+        btn.config(bg=start_color)
+        self.window.after(50, step, 1, 10)
 
     def _copy_request(self):
         """Copies a formatted order request with full file content to the clipboard."""
@@ -68,17 +104,16 @@ class OrderRequestHandler:
         pyperclip.copy(final_string)
         self.window.status_var.set("Order request with file content copied to clipboard.")
 
+        # Trigger the visual feedback on the button
+        self._animate_button_press()
+
     def _apply_reorder(self, pasted_text=None):
-        """
-        Processes a new file order and updates the list.
-        If pasted_text is provided, it bypasses the manual input dialog.
-        """
+        """Processes a new file order and updates the list."""
         current_selection = self.window.selection_handler.ordered_selection
         if not current_selection:
             self.window.status_var.set("Merge order is empty, nothing to reorder.")
             return
 
-        # Use provided text or open dialog if None
         if pasted_text is None:
             dialog = MultilineInputDialog(
                 parent=self.window,
@@ -118,6 +153,6 @@ class OrderRequestHandler:
         path_map = {f['path']: f for f in current_selection}
         new_ordered_selection = [path_map[p] for p in new_order_list]
         self.window.selection_handler.data_manager.ordered_selection = new_ordered_selection
-        self.window.selection_handler.ui_manager.update_list_display(new_ordered_selection, is_reorder=True)
+        self.window.selection_handler.ui_manager.update_list_display(new_ordered_selection, is_reorder=True, animate=True)
         self.window.selection_handler.on_change()
         self.window.status_var.set("File merge order updated successfully.")

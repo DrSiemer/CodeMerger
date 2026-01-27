@@ -32,7 +32,7 @@ class SelectionListUI:
         self.show_full_paths = not self.show_full_paths
         return self.show_full_paths
 
-    def update_list_display(self, ordered_selection, is_reorder=False, filter_text=""):
+    def update_list_display(self, ordered_selection, is_reorder=False, filter_text="", animate=False):
         """Refreshes the merge order list."""
         items_to_display = ordered_selection
         if filter_text:
@@ -74,3 +74,6 @@ class SelectionListUI:
             self.listbox.reorder_and_update(display_items)
         else:
             self.listbox.set_items(display_items)
+
+        if animate:
+            self.listbox.animate_pulse()
