@@ -1,12 +1,42 @@
-[
-  "What specific user problem does this concept aim to solve, and for which user segment? Is the problem clearly defined in terms of pain, frequency, and impact?",
-  "Which aspects of the concept lack sufficient specificity (inputs, outputs, constraints, success criteria), and where is additional detail required to enable implementation decisions?",
-  "Do the stated goals, features, and constraints form a coherent and internally consistent system? Identify any logical tensions and explain their implications.",
-  "Describe the primary user workflow end to end. Does each step logically follow from the previous one, and are there any missing transitions or decision points?",
-  "What critical assumptions must hold true for this concept to succeed (technical, behavioral, data-related)? Which assumption is most fragile, and how could it be validated early?",
-  "Which part of the concept presents the highest architectural or technical risk, and why? Suggest an alternative design or phased approach to mitigate this risk.",
-  "If reduced to its smallest testable form, which capabilities are strictly essential to validate the core value proposition, and which can be deferred?",
-  "What meaningfully differentiates this concept from existing solutions or common patterns, and are any features insufficiently justified by user value?",
-  "How could this concept fail under real-world conditions (user error, incomplete data, degraded performance), and how should the system behave in those cases?",
-  "What is the smallest independently useful capability that could be delivered early, and how would feedback from it inform subsequent iterations?"
-]
+{
+  "problem_statement": {
+    "label": "Problem & Audience",
+    "questions": [
+      "Is the target audience clearly defined in terms of pain, frequency, and impact?",
+      "Does the problem statement specifically address *why* this solution is needed now?",
+      "Are the inputs and outputs of the core problem clearly identified?"
+    ]
+  },
+  "core_principles": {
+    "label": "Core Principles",
+    "questions": [
+      "Do these principles conflict with each other? If so, which one takes precedence?",
+      "Are these principles actionable constraints, or just vague marketing terms?",
+      "How do these principles guide the technical architecture?"
+    ]
+  },
+  "key_features": {
+    "label": "Key Features",
+    "questions": [
+      "Is each feature strictly necessary to solve the core problem?",
+      "Are there features here that belong in a 'Phase 2' or 'Future' list instead?",
+      "Is the scope of each feature defined well enough to be estimable?"
+    ]
+  },
+  "user_flows": {
+    "label": "User Actions & Flows",
+    "questions": [
+      "Does the primary workflow have a clear beginning, middle, and end?",
+      "Are there missing transitions or decision points in the flow?",
+      "How does the system handle failure states (e.g., errors, empty data) in this flow?"
+    ]
+  },
+  "tech_constraints": {
+    "label": "Data & Tech Constraints",
+    "questions": [
+      "Is the 'Source of Truth' clearly defined for data synchronization?",
+      "Are there any implicit technical assumptions that need to be validated early?",
+      "Does the conflict resolution strategy handle edge cases (e.g., offline mode)?"
+    ]
+  }
+}

@@ -21,18 +21,34 @@ def validate_step(step, state_data):
         return True, "", ""
 
     elif step == 3:
-        concept = state_data["concept_md"]
-        if not concept:
-            return False, "Error", "The concept document cannot be empty."
+        # Strict Check: If segments exist, ALL must be signed off
+        segments = state_data.get("concept_segments", {})
+        if segments:
+            signoffs = state_data.get("concept_signoffs", {})
+            # Check if every key in segments has a True value in signoffs
+            if not all(signoffs.get(k) for k in segments.keys()):
+                return False, "Incomplete", "Please review and sign off on all concept segments."
+        else:
+            # Fallback: Just check if content exists (legacy or manual paste)
+            concept = state_data.get("concept_md", "")
+            if not concept:
+                return False, "Error", "The concept document cannot be empty."
 
     elif step == 4:
-        # The Stack step is now optional.
+        # The Stack step is optional.
         return True, "", ""
 
     elif step == 5:
-        todo = state_data["todo_md"]
-        if not todo:
-            return False, "Error", "The TODO plan cannot be empty."
+        # Strict Check: If segments exist, ALL must be signed off
+        segments = state_data.get("todo_segments", {})
+        if segments:
+            signoffs = state_data.get("todo_signoffs", {})
+            if not all(signoffs.get(k) for k in segments.keys()):
+                return False, "Incomplete", "Please review and sign off on all TODO phases."
+        else:
+            todo = state_data.get("todo_md", "")
+            if not todo:
+                return False, "Error", "The TODO plan cannot be empty."
 
     elif step == 6:
         # Validate parent folder here, right before generation

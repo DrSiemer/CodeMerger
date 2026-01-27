@@ -49,6 +49,41 @@ Directive: Optimize the code for a new programmer. Assume they understand standa
 
 Do not change code, only comments."""
 
+# --- Project Starter Wizard Constants ---
+DELIMITER_TEMPLATE = "<<SECTION: {name}>>"
+
+# Concept Generation Segments
+# Keys are internal identifiers, Values are the display names used in Prompts and UI
+CONCEPT_SEGMENTS = {
+    "problem_statement": "Problem & Audience",
+    "core_principles": "Core Principles",
+    "key_features": "Key Features",
+    "user_flows": "User Actions & Flows",
+    "tech_constraints": "Data & Tech Constraints"
+}
+
+# Defines the logical order for the Concept document
+CONCEPT_ORDER = [
+    "problem_statement", "core_principles", "key_features", "user_flows", "tech_constraints"
+]
+
+# TODO Generation Phases
+# These correspond to the checkboxes in the TODO configuration step
+TODO_PHASES = {
+    "setup": "Environment Setup",
+    "database": "Database & Schema",
+    "api": "API & Backend",
+    "frontend": "Frontend & UI",
+    "logic": "Core Logic & Actions",
+    "polish": "Automation & Polish",
+    "deployment": "Deployment"
+}
+
+# Logical order for the TODO document
+TODO_ORDER = [
+    "setup", "database", "api", "frontend", "logic", "polish", "deployment"
+]
+
 # --- UI Theming & Configuration ---
 PROJECT_TITLE_MAX_LENGTH = 64
 COMPACT_MODE_PROJECT_TITLE_MAX_LENGTH = 8

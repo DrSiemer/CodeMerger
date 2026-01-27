@@ -45,6 +45,9 @@ class ActionHandlers:
             app.project_starter_window.focus_force()
             return
 
+        # Clear project UI to "No project selected" state before launching wizard
+        app.project_actions._clear_project_ui()
+
         default_parent = app.app_state.config.get('default_parent_folder', '')
         if default_parent and not os.path.isdir(default_parent):
              default_parent = ''
@@ -87,10 +90,6 @@ class ActionHandlers:
                 original_intro = project_config.intro_text
 
                 project_config.intro_text = start_content
-
-                # Manual loading trigger for the specific UI button if visible
-                # Note: start_work is an image label, so we don't have a loading state for it specifically.
-                # We just use the status bar.
 
                 status_message = copy_project_to_clipboard(
                     parent=app,

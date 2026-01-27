@@ -1,13 +1,51 @@
-[
-  "Evaluate the overall structure of this plan. Does the task breakdown move from uncertainty to certainty (exploration → validation → implementation), or would a different sequencing reduce risk earlier?",
-  "Identify any implicit assumptions in this plan (technical, product, or user-related). Which of these assumptions should be validated early, and how could the plan reflect that?",
-  "Are all tasks phrased in a way that makes their outcome observable or verifiable? Highlight any items that are vague or outcome-ambiguous and suggest clearer formulations.",
-  "Analyze task dependencies. Which tasks genuinely require prior completion of others, and which could be decoupled or parallelized to speed up progress?",
-  "Which parts of the plan are best suited for rapid prototyping or spike solutions? Suggest where short-lived experiments could replace full implementations initially.",
-  "For each planned testing or review point, define what decision it should enable (e.g., proceed, revise, discard). Are there missing decision checkpoints?",
-  "Assess whether feedback loops are frequent enough. Where should the plan explicitly incorporate validation through tests, prototypes, benchmarks, or user feedback?",
-  "Examine the scope of the initial delivery. What is the smallest coherent version of this project that would meaningfully reduce uncertainty or prove feasibility?",
-  "Does the plan distinguish between reversible decisions (easy to change later) and irreversible or costly ones? How could high-impact decisions be deferred or de-risked?",
-  "Review the plan for long-term maintainability risks. Are there areas where early shortcuts would create disproportionate future cost, and should they be addressed earlier?",
-  "If requirements change mid-development, which parts of this plan are most fragile? Suggest ways to restructure tasks to localize or limit the impact of change."
-]
+{
+  "setup": {
+    "label": "Environment Setup",
+    "questions": [
+        "Does the setup include a 'Hello World' verification for the full stack?",
+        "Are all necessary tools (DB, Languages, Docker) explicitly listed?"
+    ]
+  },
+  "database": {
+    "label": "Database & Schema",
+    "questions": [
+        "Does the schema support all Key Features defined in the Concept?",
+        "Are migrations or schema management tools included in the tasks?"
+    ]
+  },
+  "api": {
+    "label": "API & Backend",
+    "questions": [
+        "Are the CRUD endpoints comprehensive enough for the User Flows?",
+        "Is authentication and authorization included if required?"
+    ]
+  },
+  "frontend": {
+    "label": "Frontend & UI",
+    "questions": [
+        "Do the UI tasks cover all visual states (Loading, Error, Empty)?",
+        "Is the connection to the backend explicitly tested in these tasks?"
+    ]
+  },
+  "logic": {
+    "label": "Core Logic",
+    "questions": [
+        "Are complex business rules broken down into testable units?",
+        "Does this phase connect the UI to the real data (replacing mocks)?"
+    ]
+  },
+  "polish": {
+    "label": "Polish",
+    "questions": [
+        "Are there tasks for error handling and user feedback notifications?",
+        "Does this include UI refinement and consistency checks?"
+    ]
+  },
+  "deployment": {
+    "label": "Deployment",
+    "questions": [
+        "Are build and optimization steps included?",
+        "Is environment configuration (secrets, variables) handled safely?"
+    ]
+  }
+}

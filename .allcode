@@ -131,10 +131,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1769167949.629848,
-          "hash": "ae84c23e9db58d60ce185370edf5840a35ee3995",
-          "tokens": 1060,
-          "lines": 116
+          "mtime": 1769529577.7831035,
+          "hash": "12558afca729c79bd40fe0b4c1dbb2b8e7c8d2f1",
+          "tokens": 1186,
+          "lines": 122
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -719,17 +719,17 @@
         },
         {
           "path": "src/ui/project_starter/step3_stack.py",
-          "mtime": 1769167949.693905,
-          "hash": "1c6d872f49f4e048c0d7473573e3776138db448b",
-          "tokens": 2120,
-          "lines": 159
+          "mtime": 1769528339.3209329,
+          "hash": "e5af739a0d06d0d80b348914befbb9284afbf3f3",
+          "tokens": 2196,
+          "lines": 163
         },
         {
           "path": "src/ui/project_starter/step4_todo.py",
-          "mtime": 1769167949.7039034,
-          "hash": "7117acaa7b3ba8b779ea51624c0105bb4a5ca055",
-          "tokens": 3046,
-          "lines": 249
+          "mtime": 1769528339.321934,
+          "hash": "120be0dbf755082d6a16dfba99eba55284803676",
+          "tokens": 3141,
+          "lines": 254
         },
         {
           "path": "src/ui/project_starter/step5_generate.py",
@@ -737,9 +737,23 @@
           "hash": "a5e579f67a65d330ebdcbc67933651eda9dd7868",
           "tokens": 2038,
           "lines": 156
+        },
+        {
+          "path": "src/ui/project_starter/segment_manager.py",
+          "mtime": 1769531594.481502,
+          "hash": "1d2610d53ae7742b7eddaea8606f25cad2ff58b6",
+          "tokens": 670,
+          "lines": 88
+        },
+        {
+          "path": "src/ui/project_starter/widgets/segmented_reviewer.py",
+          "mtime": 1769531594.481502,
+          "hash": "2f13cfd50a3092f1dc2987cc31af2cdf7645c6b4",
+          "tokens": 2913,
+          "lines": 285
         }
       ],
-      "total_tokens": 127665,
+      "total_tokens": 0,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -754,15 +768,12 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": [
-        "TODO.md"
-      ]
+      "unknown_files": []
     }
   },
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
-    "TODO.md",
     "assets/boilerplate/README.md",
     "assets/boilerplate/_start.txt",
     "assets/boilerplate/go_docker.bat",
@@ -838,6 +849,7 @@
     "src/ui/paste_changes_dialog.py",
     "src/ui/project_starter/__init__.py",
     "src/ui/project_starter/generator.py",
+    "src/ui/project_starter/segment_manager.py",
     "src/ui/project_starter/session_manager.py",
     "src/ui/project_starter/step1_details.py",
     "src/ui/project_starter/step2_concept.py",
@@ -848,6 +860,7 @@
     "src/ui/project_starter/step5_generate.py",
     "src/ui/project_starter/step_base_files.py",
     "src/ui/project_starter/success_view.py",
+    "src/ui/project_starter/widgets/segmented_reviewer.py",
     "src/ui/project_starter/wizard_dialog.py",
     "src/ui/project_starter/wizard_state.py",
     "src/ui/project_starter/wizard_validator.py",

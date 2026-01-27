@@ -12,10 +12,12 @@ class MarkdownRenderer(tk.Frame):
     """
     A custom markdown renderer using a standard tk.Text widget to provide
     reliable layout, styling, and scrolling.
+    Accepts base_font_size to scale text for better readability.
     """
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, base_font_size=10, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.config(bg=c.TEXT_INPUT_BG)
+        self.base_font_size = base_font_size
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -23,7 +25,7 @@ class MarkdownRenderer(tk.Frame):
         if MARKDOWN2_INSTALLED:
             self.text_widget = tk.Text(
                 self, wrap=tk.WORD, bd=0, highlightthickness=0,
-                padx=10, pady=10, font=(c.FONT_FAMILY_PRIMARY, 10),
+                padx=15, pady=15, font=(c.FONT_FAMILY_PRIMARY, self.base_font_size),
                 bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
             )
             self.text_widget.grid(row=0, column=0, sticky="nsew")
@@ -33,12 +35,12 @@ class MarkdownRenderer(tk.Frame):
             self.text_widget.configure(yscrollcommand=self.scrollbar.set)
 
             # --- Tag Configurations for Markdown Elements ---
-            self.text_widget.tag_configure("h1", font=c.FONT_LARGE_BOLD, spacing1=10, spacing3=5)
-            self.text_widget.tag_configure("h2", font=c.FONT_H2, spacing1=8, spacing3=4)
-            self.text_widget.tag_configure("h3", font=c.FONT_H3, spacing1=6, spacing3=3)
-            self.text_widget.tag_configure("bold", font=(c.FONT_FAMILY_PRIMARY, 10, 'bold'))
-            self.text_widget.tag_configure("italic", font=(c.FONT_FAMILY_PRIMARY, 10, 'italic'))
-            self.text_widget.tag_configure("code", background=c.DARK_BG, font=("Courier", 9), relief="sunken", borderwidth=1)
+            self.text_widget.tag_configure("h1", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 12, 'bold'), spacing1=15, spacing3=10)
+            self.text_widget.tag_configure("h2", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 6, 'bold'), spacing1=12, spacing3=8)
+            self.text_widget.tag_configure("h3", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 2, 'bold'), spacing1=10, spacing3=5)
+            self.text_widget.tag_configure("bold", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'bold'))
+            self.text_widget.tag_configure("italic", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'italic'))
+            self.text_widget.tag_configure("code", background=c.DARK_BG, font=("Courier New", self.base_font_size - 1), relief="sunken", borderwidth=1)
 
         else:
             error_message = "Markdown rendering disabled. Please install 'markdown2'."
@@ -53,6 +55,10 @@ class MarkdownRenderer(tk.Frame):
 
         self.text_widget.config(state=tk.NORMAL)
         self.text_widget.delete("1.0", tk.END)
+
+        if not markdown_text:
+            self.text_widget.config(state=tk.DISABLED)
+            return
 
         for line in markdown_text.split('\n'):
             if line.startswith("# "):
