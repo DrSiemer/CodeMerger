@@ -297,6 +297,9 @@ class SegmentedReviewer(Frame):
             self.editor.grid(row=0, column=0, sticky="nsew")
             self.view_btn.config(text="Render", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
+            # Clear text selection before rendering to avoid stuck selections
+            self.editor.text_widget.tag_remove("sel", "1.0", "end")
+
             content = self.editor.get("1.0", "end-1c")
             self.renderer.set_markdown(content)
             self.editor.grid_forget()
