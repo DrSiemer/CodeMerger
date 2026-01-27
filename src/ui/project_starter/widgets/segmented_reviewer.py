@@ -18,7 +18,7 @@ class SidebarItem(Frame):
 
         # Alignment: Overview (Full Text) is the parent. Segments are children.
         if not is_overview:
-            # Bullet indicator for segments
+            # Bullet indicator for segments (Uses Unicode Black Circle)
             self.indicator = Label(self, text="●", font=("Arial", 12), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR)
             self.indicator.pack(side="left", padx=(15, 5))
             text_padx = (0, 10)
@@ -80,6 +80,7 @@ class SidebarItem(Frame):
     def _update_status_icon(self, *args):
         if not self.status_var or self.is_overview: return
         if self.status_var.get():
+            # Uses Unicode Check Mark
             self.indicator.config(text="✓", fg=c.BTN_GREEN)
         else:
             self.indicator.config(text="●", fg=c.TEXT_SUBTLE_COLOR)
@@ -201,6 +202,33 @@ class SegmentedReviewer(Frame):
 
         # Larger Render Font (14)
         self.renderer = MarkdownRenderer(self.display_container, base_font_size=14)
+        # Bind double-click to enable edit mode from markdown view
+        self.renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
+
+    def _on_renderer_double_click(self, event):
+        """
+        Handles double-click on the markdown renderer.
+        Switches to edit mode and attempts to place cursor at the clicked line.
+        """
+        # If edit mode is locked (e.g. signed off), do nothing
+        if self.revert_btn.winfo_ismapped():
+            return
+
+        # 1. Capture the index from the rendered widget
+        try:
+            click_index = self.renderer.text_widget.index(f"@{event.x},{event.y}")
+        except Exception:
+            click_index = "1.0"
+
+        # 2. Switch to Edit Mode
+        self._toggle_view(force_render=False) # is_raw_mode -> True
+
+        # 3. Apply position to Editor
+        # Note: Line mapping is approximate because renderer hides markdown syntax
+        self.editor.update_idletasks()
+        self.editor.text_widget.mark_set("insert", click_index)
+        self.editor.text_widget.see(click_index)
+        self.editor.text_widget.focus_set()
 
     def _navigate(self, key):
         if self.is_loading_nav: return
