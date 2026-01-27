@@ -38,7 +38,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         intro_text = project_config.intro_text
         outro_text = project_config.outro_text
 
-        # Always prepended to the wrapped outro text
+        # Always prepended to the merged code block via final_parts
         formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
 
 1. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
@@ -54,7 +54,8 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 3. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
    --- File: `path/to/file.ext` ---
-   ```[language_id]
+
+```[language_id]
    [full code here]
    ```
    --- End of file ---
@@ -71,10 +72,13 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 5. **FILE OPERATIONS:**
    - If your modifications make certain existing files obsolete, explicitly state: "DELETE FILE: `path/to/obsolete_file.ext`" in the Summary section."""
 
+        # Important reminder on the absolute end
+        automation_warning = "Again: I am using an automated script to apply your changes. If you provide snippets, diffs, or truncated code, my script will crash and I will lose work. You MUST provide the full file content for every modified file."
+
         if outro_text:
-            final_outro = f"{formatting_instruction}\n\n{outro_text}"
+            final_outro = f"{formatting_instruction}\n\n{outro_text}\n\n{automation_warning}"
         else:
-            final_outro = formatting_instruction
+            final_outro = f"{formatting_instruction}\n\n{automation_warning}"
 
         final_parts = [f"# {project_title}"]
         if intro_text:
