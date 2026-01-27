@@ -154,7 +154,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
     window.order_request_button = Button(
         title_frame,
         image=assets.order_request_icon,
-        command=window.order_request_handler.handle_click,
+        command=None,
         bg=c.DARK_BG,
         activebackground=c.SUBTLE_HIGHLIGHT_COLOR,
         relief='flat',
@@ -162,7 +162,8 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
         cursor='hand2'
     )
     window.order_request_button.grid(row=0, column=2, sticky='e', padx=(5,0))
-    ToolTip(window.order_request_button, "Single-click: Copy order request to clipboard.\nDouble-click: Paste new order from clipboard.")
+    window.order_request_button.bind("<Button-1>", window.order_request_handler.handle_click)
+    ToolTip(window.order_request_button, "Single-click: Copy order request\nDouble-click: Paste new order via dialog\nCtrl-click: Paste new order instantly")
 
     window.toggle_paths_button = Button(title_frame, image=assets.paths_icon, command=window.ui_controller.toggle_full_path_view, bg=c.DARK_BG, activebackground=c.SUBTLE_HIGHLIGHT_COLOR, relief='flat', bd=0, cursor='hand2')
     window.toggle_paths_button.grid(row=0, column=3, sticky='e', padx=(5,0))

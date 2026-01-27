@@ -11,13 +11,33 @@ class OrderRequestHandler:
         self.order_request_click_job = None
 
     def handle_click(self, event=None):
-        """Manages single and double clicks for the order request button."""
+        """Manages single, double, and ctrl-clicks for the order request button."""
+        # Detect Ctrl modifier (state mask 0x0004)
+        is_ctrl = event and (event.state & 0x0004)
+
+        if is_ctrl:
+            # Instant Action: Paste from clipboard immediately
+            if self.order_request_click_job:
+                self.window.after_cancel(self.order_request_click_job)
+                self.order_request_click_job = None
+
+            pasted_text = pyperclip.paste()
+            if not pasted_text or not pasted_text.strip():
+                self.window.status_var.set("Clipboard is empty.")
+                return "break"
+
+            self._apply_reorder(pasted_text)
+            return "break"
+
+        # Standard double-click detection logic
         if self.order_request_click_job:
             self.window.after_cancel(self.order_request_click_job)
             self.order_request_click_job = None
             self._apply_reorder()
         else:
             self.order_request_click_job = self.window.after(300, self._copy_request)
+
+        return "break"
 
     def _copy_request(self):
         """Copies a formatted order request with full file content to the clipboard."""
@@ -48,19 +68,25 @@ class OrderRequestHandler:
         pyperclip.copy(final_string)
         self.window.status_var.set("Order request with file content copied to clipboard.")
 
-    def _apply_reorder(self):
-        """Opens a dialog to paste a new file order and updates the list."""
+    def _apply_reorder(self, pasted_text=None):
+        """
+        Processes a new file order and updates the list.
+        If pasted_text is provided, it bypasses the manual input dialog.
+        """
         current_selection = self.window.selection_handler.ordered_selection
         if not current_selection:
             self.window.status_var.set("Merge order is empty, nothing to reorder.")
             return
 
-        dialog = MultilineInputDialog(
-            parent=self.window,
-            title="Update Merge Order",
-            prompt="Paste the language model response containing the new file order."
-        )
-        pasted_text = dialog.result
+        # Use provided text or open dialog if None
+        if pasted_text is None:
+            dialog = MultilineInputDialog(
+                parent=self.window,
+                title="Update Merge Order",
+                prompt="Paste the language model response containing the new file order."
+            )
+            pasted_text = dialog.result
+
         if not pasted_text:
             return
 
