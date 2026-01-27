@@ -14,7 +14,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 
 **DO NOT:**
 
-- **Do not log routine bug fixes.** A fix for incorrect window parenting is standard development, not a project quirk.
+- **Do not log routine bug fixes.** A fix for a common logic error is standard development, not a project quirk.
 - **Do not log standard implementation patterns.** Using a specific design pattern or a common programming idiom is expected.
 - **Do not write summaries** of the project, architecture, or individual file functions.
 - **Do not explain basic concepts** or write long paragraphs.
@@ -77,6 +77,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/ui/compact_mode.py`: The new files warning icon is composited onto the button's base PIL images at runtime to avoid needing separate asset files for every state. Dragging is implemented manually by tracking mouse offsets on a dedicated move bar.
 - `src/ui/custom_widgets.py`: The `RoundedButton` is drawn using Pillow with 4x supersampling for anti-aliasing. Font selection is OS-aware to find `segoeui.ttf` on Windows. It redraws on `<Configure>` to support responsive layouts.
 - `src/ui/file_manager/file_manager_window.py`: Token recalculation is debounced using `after(250, ...)` to prevent performance issues when rapidly adding/removing many files.
+- `src/ui/file_manager/file_manager_window.py`: On Windows, the minimize button is disabled/greyed out via Win32 API (`WS_MINIMIZEBOX`). This uses `after(10, ...)` and the `wm_frame()` handle to ensure the style is applied to the correct OS window wrapper after mapping.
 - `src/ui/file_manager/file_tree_handler.py`: Double-click is detected manually using `time.time()` because the standard `<Double-Button-1>` event behavior was inconsistent across different widget states.
 - `src/ui/file_monitor.py`: The `start()` method triggers an immediate file scan upon project activation and then uses `app.after()` for subsequent periodic checks.
 - `src/ui/status_bar_manager.py`: When the status is updated, it cancels any pending fade animation. After a 4.5-second delay, it kicks off a 0.5-second animation that interpolates the text color to the background color, creating a smooth fade-out.

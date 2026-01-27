@@ -1,4 +1,5 @@
 import tkinter as tk
+import sys
 from tkinter import Toplevel, StringVar
 from ...core.utils import parse_gitignore
 from .file_tree_builder import build_file_tree_data
@@ -74,8 +75,44 @@ class FileManagerWindow(Toplevel):
         self._position_window()
         self.deiconify()
 
+        # --- Disable Minimize Button (Windows Only) ---
+        if sys.platform == "win32":
+            # We use after(10) to ensure the window is mapped and has a frame handle
+            self.after(10, self._disable_minimize_button)
+
         if self.newly_detected_files:
             self.ui_controller.expand_and_scroll_to_new_files()
+
+    def _disable_minimize_button(self):
+        """
+        Uses Win32 API to disable the minimize button.
+        Uses the wm_frame() to get the actual OS wrapper handle.
+        """
+        try:
+            import ctypes
+            # Get the handle for the window frame
+            hwnd_str = self.wm_frame()
+            if not hwnd_str:
+                return
+
+            # Convert hex string (e.g. '0x12345') to integer
+            hwnd = int(hwnd_str, 16)
+
+            # Win32 Constants
+            GWL_STYLE = -16
+            WS_MINIMIZEBOX = 0x00020000
+
+            # Update the style to remove the minimize box bit
+            user32 = ctypes.windll.user32
+            current_style = user32.GetWindowLongW(hwnd, GWL_STYLE)
+            if current_style:
+                new_style = current_style & ~WS_MINIMIZEBOX
+                user32.SetWindowLongW(hwnd, GWL_STYLE, new_style)
+
+                # Force refresh of the title bar buttons
+                user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0, 0x0027)
+        except (ValueError, Exception):
+            pass
 
     def show_error_dialog(self, title, message):
         # Instantiate the dialog with this window as the parent to keep focus.
