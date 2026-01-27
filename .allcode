@@ -9,17 +9,17 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1766574889.5609472,
-          "hash": "64baa24c4b3d786ecbc6e01fc73e04eed614792f",
-          "tokens": 1765,
+          "mtime": 1769526602.2531426,
+          "hash": "9b15c34d523b4e92c8c14eaa929ed16b63df349f",
+          "tokens": 1769,
           "lines": 109
         },
         {
           "path": "llm.md",
-          "mtime": 1768914177.3893514,
-          "hash": "879fc466df56dc61389555f4e0a1c0e5d7a2afd6",
-          "tokens": 2298,
-          "lines": 94
+          "mtime": 1769526358.274175,
+          "hash": "916720bd20738dce9f97cbff71a523f29e699e86",
+          "tokens": 2363,
+          "lines": 95
         },
         {
           "path": "requirements.txt",
@@ -222,10 +222,10 @@
         },
         {
           "path": "src/ui/widgets/two_column_list.py",
-          "mtime": 1763552558.3275335,
-          "hash": "164e61cb9090c6af5242227f54f9ffb1a9086aa4",
-          "tokens": 2009,
-          "lines": 213
+          "mtime": 1769527190.3903048,
+          "hash": "06aa24aca6892f49cadbf7fcb67374b743b24036",
+          "tokens": 2513,
+          "lines": 270
         },
         {
           "path": "src/ui/widgets/switch_button.py",
@@ -271,10 +271,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_ui.py",
-          "mtime": 1766574889.8443396,
-          "hash": "4cc539449bfc7e3fc3284908c8b7b32e915a3fbe",
-          "tokens": 891,
-          "lines": 76
+          "mtime": 1769527190.3903048,
+          "hash": "6ec50d86de84e3406f7cd352fd058a98fd5d249b",
+          "tokens": 904,
+          "lines": 79
         },
         {
           "path": "src/ui/file_manager/ui_controller.py",
@@ -306,24 +306,24 @@
         },
         {
           "path": "src/ui/file_manager/order_request_handler.py",
-          "mtime": 1766574882.9036965,
-          "hash": "177ef2359d96f05f06ff315df535de551e572bc2",
-          "tokens": 951,
-          "lines": 97
+          "mtime": 1769527469.5832846,
+          "hash": "e9f3fb6de882d43de1bfd9f5e62159a2877143c9",
+          "tokens": 1429,
+          "lines": 158
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
-          "mtime": 1768913411.3869238,
-          "hash": "ce18f860a8a665060598ff9811d3a8a21280c59a",
-          "tokens": 3258,
-          "lines": 217
+          "mtime": 1769527111.4949794,
+          "hash": "413e5e8d15866002935d8ff65e8b60ee3a839637",
+          "tokens": 3275,
+          "lines": 218
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1768913411.3769221,
-          "hash": "e34f6dc3ceaacc0100cfe9695b3f962d3fd1ba3c",
-          "tokens": 1948,
-          "lines": 215
+          "mtime": 1769526386.700777,
+          "hash": "33704da9a3c464c842762b47da34910867b47d42",
+          "tokens": 2255,
+          "lines": 252
         },
         {
           "path": "src/ui/settings/collapsible_section.py",
@@ -739,7 +739,7 @@
           "lines": 156
         }
       ],
-      "total_tokens": 126278,
+      "total_tokens": 127665,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
