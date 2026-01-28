@@ -161,8 +161,6 @@ class Step2ConceptView(tk.Frame):
         header.pack(side='top', fill="x", pady=(0, 5))
         tk.Label(header, text="Review Concept Segments", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
-        RoundedButton(header, text="Restart", command=self.handle_reset, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2").pack(side="right")
-
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
 
         data_keys = set(self.project_data["concept_segments"].keys())
