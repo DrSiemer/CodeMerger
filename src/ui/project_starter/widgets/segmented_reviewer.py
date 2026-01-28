@@ -135,10 +135,17 @@ class SidebarItem(Frame):
 
     def set_disabled(self, disabled):
         self.is_disabled = disabled
+
         if disabled:
-            fg = c.BTN_GRAY_TEXT
+            fg = "#666666" # Clearly disabled gray
             cursor = "arrow"
             self._unbind_events()
+            # If item was selected, visually deselect it immediately
+            if self.is_selected:
+                self.is_selected = False
+                self.config(bg=c.DARK_BG)
+                self.label.config(bg=c.DARK_BG)
+                self.indicator.config(bg=c.DARK_BG)
         else:
             fg = c.TEXT_COLOR
             cursor = "hand2"
@@ -198,6 +205,9 @@ class SegmentedReviewer(Frame):
 
         self._build_ui()
 
+        # Ensure initial state of "Full Text" button is correct based on data
+        self._update_overview_availability()
+
         # Determine start key
         start_key = "overview"
         if self.segment_keys:
@@ -208,7 +218,6 @@ class SegmentedReviewer(Frame):
                     break
 
             if all(self.signoff_vars[k].get() for k in self.segment_keys):
-                self._update_overview_availability()
                 start_key = "overview"
 
         self._navigate(start_key)
@@ -617,6 +626,7 @@ Your task is to rewrite the *unsigned* draft sections to be consistent with thes
                     self.sidebar_items[key].set_updated(True)
                 updated_count += 1
 
+        # Silent success, visual cues only (orange dots)
         if updated_count == 0:
             messagebox.showinfo("Info", "No matching segments found to update.")
 
