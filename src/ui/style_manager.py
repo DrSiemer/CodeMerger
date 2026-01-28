@@ -26,6 +26,19 @@ def apply_dark_theme(window):
         indicatorrelief=[('pressed', 'sunken'), ('!pressed', 'flat')]
     )
 
+    # --- Large Checkbutton Style (Used in Wizard) ---
+    s.configure('Large.TCheckbutton',
+        background=c.DARK_BG,
+        foreground=c.TEXT_COLOR,
+        font=c.FONT_H3,
+        padding=(0, 5, 0, 5)
+    )
+    s.map('Large.TCheckbutton',
+        background=[('active', c.DARK_BG)],
+        indicatorcolor=[('selected', c.BTN_BLUE), ('!selected', c.TEXT_INPUT_BG)],
+        indicatorrelief=[('pressed', 'sunken'), ('!pressed', 'flat')]
+    )
+
     # --- Combobox Style ---
     s.configure('Dark.TCombobox',
         fieldbackground=c.TEXT_INPUT_BG,

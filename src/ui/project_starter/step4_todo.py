@@ -21,7 +21,6 @@ class Step4TodoView(tk.Frame):
         self.questions_map = self._load_questions()
         self.editor_is_active = False
         self.generation_mode_active = False
-        self.config_mode_active = False
 
         self.has_segments = bool(self.project_data.get("todo_segments"))
 
@@ -30,7 +29,7 @@ class Step4TodoView(tk.Frame):
         elif self.project_data.get("todo_md"):
             self.show_editor_view()
         else:
-            self.show_config_view()
+            self.show_generation_view()
 
     def _load_questions(self):
         questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
@@ -55,73 +54,54 @@ class Step4TodoView(tk.Frame):
             except Exception: pass
         return "\n".join(content_blocks)
 
-    def show_config_view(self):
-        self._clear_frame()
-        self.config_mode_active = True
-        self.editor_is_active = False
-        self.generation_mode_active = False
-
-        tk.Label(self, text="Configure TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 5))
-        tk.Label(self, text="Select the phases required for this project.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='top', anchor="w", pady=(0, 15))
-
-        self.check_vars = {}
-        saved_phases = set(self.project_data.get("todo_phases", []))
-        if not saved_phases:
-            saved_phases = set(c.TODO_PHASES.keys())
-
-        grid_frame = tk.Frame(self, bg=c.DARK_BG)
-        grid_frame.pack(fill="both", expand=True, padx=20)
-
-        row = 0; col = 0
-        for key in c.TODO_ORDER:
-            label = c.TODO_PHASES.get(key, key)
-            var = tk.BooleanVar(value=(key in saved_phases))
-            self.check_vars[key] = var
-            ttk.Checkbutton(grid_frame, text=label, variable=var, style='Dark.TCheckbutton').grid(row=row, column=col, sticky="w", pady=5, padx=10)
-            col += 1
-            if col > 1:
-                col = 0; row += 1
-
-        btn_container = tk.Frame(self, bg=c.DARK_BG)
-        btn_container.pack(side='bottom', fill='x', pady=15)
-        btn_gen = RoundedButton(btn_container, text="Generate Prompt", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
-        btn_gen.pack(side='right')
-        ToolTip(btn_gen, "Create a prompt to generate a detailed task list for selected phases", delay=500)
-
     def _get_prompt(self):
-        selected_phases = [k for k in c.TODO_ORDER if self.check_vars[k].get()]
-        self.project_data["todo_phases"] = selected_phases
-
+        # 1. Concept
         concept_md = self.project_data.get("concept_md")
         if not concept_md and self.project_data.get("concept_segments"):
             c_map_const = {k: v for k,v in c.CONCEPT_SEGMENTS.items()}
             concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c_map_const)
 
+        # 2. Stack
         stack = self.project_data["stack"].get()
+
+        # 3. Base Code (if any)
         example_code = self._get_base_project_content()
-        friendly_map = {k: v for k, v in c.TODO_PHASES.items() if k in selected_phases}
-        segment_instructions = SegmentManager.build_prompt_instructions(selected_phases, friendly_map)
+
+        # 4. Template
+        template_path = os.path.join(REFERENCE_DIR, "todo.md")
+        try:
+            with open(template_path, 'r', encoding='utf-8') as f:
+                todo_template = f.read()
+        except Exception:
+            todo_template = "(Template not found)"
+
+        # 5. Section headers for SegmentManager
+        # We provide the list of valid headers so LLM knows what tags to use.
+        valid_headers = [v for k, v in c.TODO_PHASES.items()]
+        headers_str = ", ".join([f'"{h}"' for h in valid_headers])
 
         parts = [
-            "Based on the following project Concept and Stack, generate a detailed TODO plan.",
+            "You are a Technical Project Manager.",
+            "Based on the following project Concept and Tech Stack, create a detailed TODO plan.",
             "\n### Tech Stack\n" + stack,
             "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
             example_code,
-            "\n### Format Instructions",
-            segment_instructions,
-            "\n### Core Instructions",
-            "1. Break down each phase into specific, actionable checkboxes (e.g. - [ ] Task).",
-            "2. Be technical. Mention specific libraries or files where appropriate."
+            "\n### Reference Template (Standard TODO List)\n```markdown\n" + todo_template + "\n```",
+            "\n### Instructions",
+            "1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).",
+            "2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').",
+            "3. **Format:** You MUST output the plan using specific section tags for the phases you decide to include.",
+            f"   - Use `<<SECTION: Phase Name>>` followed by the content.",
+            f"   - Allowed Phase Names: {headers_str}.",
+            "   - **Do not** output sections for phases you decided to skip."
         ]
         return "\n".join(parts)
 
-    def handle_prompt_generation(self):
-        prompt = self._get_prompt()
-        self.show_generation_view(prompt)
+    def show_generation_view(self, prompt=None):
+        if prompt is None:
+            prompt = self._get_prompt()
 
-    def show_generation_view(self, prompt):
         self._clear_frame()
-        self.config_mode_active = False
         self.generation_mode_active = True
         self.wizard_controller._update_navigation_controls()
 
@@ -130,10 +110,6 @@ class Step4TodoView(tk.Frame):
         btn_proc = RoundedButton(btn_container, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         btn_proc.pack(side='right')
         ToolTip(btn_proc, "Parse the LLM's TODO response and open the reviewer", delay=500)
-
-        btn_back = RoundedButton(btn_container, text="< Back to Config", command=self.show_config_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=30, cursor="hand2")
-        btn_back.pack(side='left')
-        ToolTip(btn_back, "Return to phase selection", delay=500)
 
         tk.Label(self, text="Generate TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
 
@@ -179,7 +155,6 @@ class Step4TodoView(tk.Frame):
         self._clear_frame()
         self.editor_is_active = True
         self.generation_mode_active = False
-        self.config_mode_active = False
 
         header = tk.Frame(self, bg=c.DARK_BG)
         header.pack(side='top', fill="x", pady=(0, 5))
@@ -207,14 +182,14 @@ class Step4TodoView(tk.Frame):
         self.wizard_controller._update_navigation_controls()
 
     def is_step_in_progress(self):
-        return self.editor_is_active or self.generation_mode_active or self.config_mode_active
+        return self.editor_is_active or self.generation_mode_active
 
     def handle_reset(self):
         if messagebox.askyesno("Confirm", "Are you sure you want to start over? Current plan will be lost.", parent=self):
             self.project_data["todo_segments"].clear()
             self.project_data["todo_signoffs"].clear()
             self.project_data["todo_md"] = ""
-            self.show_config_view()
+            self.show_generation_view()
             self.wizard_controller._update_navigation_controls()
 
     def get_assembled_content(self):

@@ -79,6 +79,17 @@ TODO_PHASES = {
     "deployment": "Deployment"
 }
 
+# Detailed descriptions for the TODO configuration UI
+TODO_DESCRIPTIONS = {
+    "setup": "Project initialization, folder structure, and basic 'go' automation scripts.",
+    "database": "Data modeling, schema implementation, migrations, and initial seed data.",
+    "api": "Server-side routes, controllers, business logic, and API documentation.",
+    "frontend": "User interface components, layout, client-side routing, and styling.",
+    "logic": "State management, complex algorithms, and third-party integrations.",
+    "polish": "Error handling, animations, responsive design, and final code cleanup.",
+    "deployment": "Production builds, environment variables, and hosting configuration."
+}
+
 # Logical order for the TODO document
 TODO_ORDER = [
     "setup", "database", "api", "frontend", "logic", "polish", "deployment"

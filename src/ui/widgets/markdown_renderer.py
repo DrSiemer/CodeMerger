@@ -27,6 +27,7 @@ class MarkdownRenderer(tk.Frame):
                 self, wrap=tk.WORD, bd=0, highlightthickness=0,
                 padx=15, pady=15, font=(c.FONT_FAMILY_PRIMARY, self.base_font_size),
                 bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
+                spacing2=6, spacing1=4, spacing3=4
             )
             self.text_widget.grid(row=0, column=0, sticky="nsew")
 
@@ -35,12 +36,12 @@ class MarkdownRenderer(tk.Frame):
             self.text_widget.configure(yscrollcommand=self.scrollbar.set)
 
             # --- Tag Configurations for Markdown Elements ---
-            self.text_widget.tag_configure("h1", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 12, 'bold'), spacing1=15, spacing3=10)
-            self.text_widget.tag_configure("h2", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 6, 'bold'), spacing1=12, spacing3=8)
-            self.text_widget.tag_configure("h3", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 2, 'bold'), spacing1=10, spacing3=5)
+            self.text_widget.tag_configure("h1", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 12, 'bold'), spacing1=20, spacing3=10)
+            self.text_widget.tag_configure("h2", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 6, 'bold'), spacing1=16, spacing3=8)
+            self.text_widget.tag_configure("h3", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 2, 'bold'), spacing1=12, spacing3=5)
             self.text_widget.tag_configure("bold", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'bold'))
             self.text_widget.tag_configure("italic", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'italic'))
-            self.text_widget.tag_configure("code", background=c.DARK_BG, font=("Courier New", self.base_font_size - 1), relief="sunken", borderwidth=1)
+            self.text_widget.tag_configure("code", foreground="#DEB887", font=("Courier New", self.base_font_size - 1))
 
         else:
             error_message = "Markdown rendering disabled. Please install 'markdown2'."
@@ -72,15 +73,25 @@ class MarkdownRenderer(tk.Frame):
                 indent, checked, text = match.groups()
                 checkbox = '☑' if checked.lower() == 'x' else '☐'
                 indent_level = len(indent) // 2
-                tag_name = f"indent_{indent_level}"
-                self.text_widget.tag_configure(tag_name, lmargin1=25 + indent_level * 20, lmargin2=25 + indent_level * 20)
+                tag_name = f"checkbox_indent_{indent_level}"
+
+                # Hanging indent calculation for Checkboxes
+                base_indent = 25 + indent_level * 20
+                hanging_indent = base_indent + 22
+
+                self.text_widget.tag_configure(tag_name, lmargin1=base_indent, lmargin2=hanging_indent, spacing1=4)
                 self.text_widget.insert(tk.END, f"{checkbox} {text.strip()}\n", tag_name)
             elif re.match(r'^\s*[-*]\s', line):
                 match = re.match(r'^(\s*)[-*]\s(.*)', line)
                 indent, text = match.groups()
                 indent_level = len(indent) // 2
                 tag_name = f"bullet_indent_{indent_level}"
-                self.text_widget.tag_configure(tag_name, lmargin1=25 + indent_level * 20, lmargin2=25 + indent_level * 20)
+
+                # Hanging indent calculation for Bullets
+                base_indent = 25 + indent_level * 20
+                hanging_indent = base_indent + 15
+
+                self.text_widget.tag_configure(tag_name, lmargin1=base_indent, lmargin2=hanging_indent, spacing1=4)
                 self.text_widget.insert(tk.END, f"• {text.strip()}\n", tag_name)
             else:
                 self.text_widget.insert(tk.END, f"{line}\n")
@@ -113,7 +124,15 @@ class MarkdownRenderer(tk.Frame):
 
             match_end_index = self.text_widget.index(f"{match_start}+{len(full_match_text)}c")
 
+            # Capture existing layout tags (e.g. checkbox_indent_0) to preserve indentation
+            # We filter out 'sel' to avoid carrying over selection highlights unintentionally
+            existing_tags = [t for t in self.text_widget.tag_names(match_start) if t != 'sel']
+
             self.text_widget.delete(match_start, match_end_index)
-            self.text_widget.insert(match_start, content_text, tag)
+
+            # Combine existing layout tags with the new styling tag
+            final_tags = tuple(existing_tags) + (tag,)
+
+            self.text_widget.insert(match_start, content_text, final_tags)
 
             start_index = self.text_widget.index(f"{match_start}+{len(content_text)}c")

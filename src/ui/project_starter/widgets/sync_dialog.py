@@ -58,7 +58,6 @@ class SyncUnsignedDialog(Toplevel):
         btn_frame = Frame(main_frame, bg=c.DARK_BG)
         btn_frame.grid(row=6, column=0, sticky="e")
 
-        # Cancel button does not have a tooltip [MODIFIED]
         btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
         btn_cancel.pack(side="left", padx=(0, 10))
 

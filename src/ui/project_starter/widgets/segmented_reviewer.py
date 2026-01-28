@@ -134,7 +134,7 @@ class SegmentedReviewer(Frame):
         self.editor = ScrollableText(self.display_container, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_DEFAULT)
         self.editor.text_widget.bind("<KeyRelease>", self._on_text_change)
 
-        self.renderer = MarkdownRenderer(self.display_container, base_font_size=14)
+        self.renderer = MarkdownRenderer(self.display_container, base_font_size=11)
         self.renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
 
     def _on_renderer_double_click(self, event):
