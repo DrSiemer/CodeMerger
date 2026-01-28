@@ -193,7 +193,6 @@ class SegmentedReviewer(Frame):
         self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
         self.view_btn.pack(side="left", padx=(10, 0))
 
-        # Initialize tooltip once for this segment's view button
         self.view_btn_tooltip = ToolTip(self.view_btn, "", delay=500)
 
         self._update_questions_panel(key)
@@ -208,10 +207,8 @@ class SegmentedReviewer(Frame):
             self.renderer.grid_forget()
             self.editor.grid(row=0, column=0, sticky="nsew")
             self.view_btn.config(text="Render", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-            # Update existing tooltip text
             if hasattr(self, 'view_btn_tooltip'):
                 self.view_btn_tooltip.text = "Switch to stylized Markdown preview"
-                # Force refresh if visible [FIXED]
                 if self.view_btn_tooltip.tooltip_window:
                     self.view_btn_tooltip.hide_tooltip()
                     self.view_btn_tooltip.show_tooltip()
@@ -221,10 +218,8 @@ class SegmentedReviewer(Frame):
             self.editor.grid_forget()
             self.renderer.grid(row=0, column=0, sticky="nsew")
             self.view_btn.config(text="Edit", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-            # Update existing tooltip text
             if hasattr(self, 'view_btn_tooltip'):
                 self.view_btn_tooltip.text = "Switch to raw text editor"
-                # Force refresh if visible [FIXED]
                 if self.view_btn_tooltip.tooltip_window:
                     self.view_btn_tooltip.hide_tooltip()
                     self.view_btn_tooltip.show_tooltip()
@@ -253,9 +248,16 @@ class SegmentedReviewer(Frame):
         lbl.pack(fill="x", pady=(5, 10))
         self._refresh_q_text(lbl, q_list, pb, nb)
 
-        copy_btn = RoundedButton(self.questions_panel, text="Copy Context & Question", command=lambda: self._copy_q_context(q_list[self.current_question_index], copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=26, cursor="hand2")
-        copy_btn.pack(anchor="w")
+        btn_row = Frame(self.questions_panel, bg=c.STATUS_BG)
+        btn_row.pack(anchor="w")
+
+        copy_btn = RoundedButton(btn_row, text="Copy Context & Question", command=lambda: self._copy_q_context(q_list[self.current_question_index], copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=26, cursor="hand2")
+        copy_btn.pack(side="left")
         ToolTip(copy_btn, "Copy a prompt containing the current segment text and this question", delay=500)
+
+        paste_btn = RoundedButton(btn_row, text="Paste Response", command=lambda: self._paste_q_response(paste_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=26, cursor="hand2")
+        paste_btn.pack(side="left", padx=(10, 0))
+        ToolTip(paste_btn, "Process the LLM's response from your clipboard and apply changes to segments", delay=500)
 
     def _refresh_q_text(self, lbl, q_list, pb, nb):
         idx = self.current_question_index
@@ -280,13 +282,33 @@ class SegmentedReviewer(Frame):
 
         current_txt = self.editor.get("1.0", "end-1c").strip()
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
-        prompt = f"### Context\n{context}\n### Focus: {current_name}\n{current_txt}\n\n### Question\n{question}\n\nInstruction: Focus ONLY on the segment '{current_name}'."
+
+        prompt = f"### Context\n{context}\n### Focus: {current_name}\n{current_txt}\n\n### Question\n{question}\n\n" \
+                 f"Instruction: Focus ONLY on the segment '{current_name}'. " \
+                 f"You MUST return the updated text for this segment wrapped in the following tag:\n" \
+                 f"<<SECTION: {current_name}>>\n[Full updated content here]"
+
         try:
             self.clipboard_clear()
             self.clipboard_append(prompt)
             btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
             self.after(2000, lambda: btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
         except tk.TclError: messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
+
+    def _paste_q_response(self, btn):
+        """Retrieves clipboard content and applies changes to the segments."""
+        try:
+            text = self.selection_get(selection='CLIPBOARD')
+            if not text or not text.strip():
+                messagebox.showwarning("Clipboard Empty", "The clipboard does not contain any text.", parent=self)
+                return
+
+            self._apply_sync_results(text)
+
+            btn.config(text="Applied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+            self.after(2000, lambda: btn.config(text="Paste Response", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not process clipboard content: {e}", parent=self)
 
     def _show_overview(self):
         self.title_label.config(text="Full Text Overview")
@@ -296,8 +318,6 @@ class SegmentedReviewer(Frame):
         self.is_raw_mode = tk.BooleanVar(value=False)
         self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
         self.view_btn.pack(side="right")
-
-        # Initialize tooltip once for the overview view button
         self.view_btn_tooltip = ToolTip(self.view_btn, "", delay=500)
 
         self.editor.delete("1.0", "end")
@@ -377,11 +397,27 @@ class SegmentedReviewer(Frame):
         for key, content in mapped.items():
             if key in self.segments_data and not self.signoff_vars[key].get():
                 self.segments_data[key] = content
+
+                # If the updated key is the one we are looking at, refresh the UI immediately
                 if key == self.active_key:
-                    self.editor.delete("1.0", "end"); self.editor.insert("1.0", content)
-                elif key in self.sidebar_items: self.sidebar_items[key].set_updated(True)
+                    self.editor.text_widget.config(state="normal")
+                    self.editor.delete("1.0", "end")
+                    self.editor.insert("1.0", content)
+
+                    # Update the Markdown renderer if we are currently in Rendered mode
+                    if not self.is_raw_mode.get():
+                        self.renderer.set_markdown(content)
+
+                elif key in self.sidebar_items:
+                    self.sidebar_items[key].set_updated(True)
+
                 updated_count += 1
-        if updated_count == 0: messagebox.showinfo("Info", "No matching segments found.")
+
+        if updated_count > 0 and self.on_change_callback:
+            self.on_change_callback()
+
+        if updated_count == 0:
+            messagebox.showinfo("Info", "No matching segments found.")
 
     def get_assembled_content(self):
         full_text = SegmentManager.assemble_document(self.segments_data, self.segment_keys, self.friendly_names_map)

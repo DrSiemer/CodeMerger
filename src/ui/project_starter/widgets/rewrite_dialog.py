@@ -67,7 +67,6 @@ class RewriteUnsignedDialog(Toplevel):
         btn_frame = Frame(main_frame, bg=c.DARK_BG)
         btn_frame.grid(row=7, column=0, sticky="e")
 
-        # Cancel button does not have a tooltip [MODIFIED]
         btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
         btn_cancel.pack(side="left", padx=(0, 10))
 
@@ -123,7 +122,20 @@ class RewriteUnsignedDialog(Toplevel):
         friendly_map = {k: names.get(k, k) for k in targets}
         target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
 
-        prompt = f"You are a Project Editor.\nThe user has provided a global instruction to modify the project plan.\nYour task is to update all *unsigned* drafts to comply with this instruction.\n\n### User Instruction\n{instruction}\n\n### Locked Sections (Reference Only - DO NOT CHANGE)\n{ ''.join(reference_blocks) if reference_blocks else '(None)' }\n\n### Drafts to Update\n{ ''.join(target_blocks) }\n\n### Instructions\n1. Review the User Instruction.\n2. Rewrite the 'Drafts to Update' to incorporate this instruction.\n3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.\n4. {target_instructions}\n5. Output ONLY the updated Drafts."
+        # Reinforced prompt logic to make sure LLM knows it targets ALL unsigned drafts, including the active one
+        prompt = f"You are a Project Editor.\n" \
+                 f"The user has provided a global instruction to modify the project plan.\n" \
+                 f"Your task is to update ALL *unsigned* drafts listed below to comply with this instruction.\n\n" \
+                 f"### User Instruction\n{instruction}\n\n" \
+                 f"### Locked Sections (Reference Only - DO NOT CHANGE)\n{ ''.join(reference_blocks) if reference_blocks else '(None)' }\n\n" \
+                 f"### Drafts to Update (ALL of these must be processed)\n{ ''.join(target_blocks) }\n\n" \
+                 f"### Instructions\n" \
+                 f"1. Review the User Instruction.\n" \
+                 f"2. Rewrite every segment in the 'Drafts to Update' list to incorporate this instruction.\n" \
+                 f"3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.\n" \
+                 f"4. {target_instructions}\n" \
+                 f"5. Output ONLY the updated Drafts."
+
         try:
             self.clipboard_clear()
             self.clipboard_append(prompt)
