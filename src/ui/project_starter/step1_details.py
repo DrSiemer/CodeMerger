@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 from ... import constants as c
 from ..widgets.rounded_button import RoundedButton
+from ..tooltip import ToolTip
 
 class Step1DetailsView(tk.Frame):
     def __init__(self, parent, project_data, wizard_controller=None):
@@ -37,7 +38,9 @@ class Step1DetailsView(tk.Frame):
         base_frame = tk.Frame(self, bg=c.DARK_BG)
         base_frame.pack(fill='x', anchor='w')
 
-        RoundedButton(base_frame, text="Select base project", command=self._select_base_project, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2").pack(side='left')
+        self.base_btn = RoundedButton(base_frame, text="Select base project", command=self._select_base_project, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
+        self.base_btn.pack(side='left')
+        ToolTip(self.base_btn, "Pick an existing folder to use its merge list as a reference", delay=500)
 
         self.base_path_label = tk.Label(base_frame, text="No base project selected", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
         self.base_path_label.pack(side='left', padx=10)

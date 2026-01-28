@@ -15,6 +15,7 @@ from .step_base_files import StepBaseFilesView
 from .success_view import SuccessView
 from ..window_utils import position_window
 from . import session_manager, generator, wizard_state, wizard_validator
+from ..tooltip import ToolTip
 
 log = logging.getLogger("CodeMerger")
 
@@ -93,25 +94,34 @@ class ProjectStarterDialog(tk.Toplevel):
         right_header_frame.pack(side="right")
 
         if self.app.assets.trash_icon_image:
-             RoundedButton(
+             btn_clear = RoundedButton(
                 right_header_frame, command=self._clear_session_data,
                 image=self.app.assets.trash_icon_image,
                 bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, width=32, height=32, radius=6, cursor="hand2"
-            ).pack(side="right", padx=(0, 0))
+            )
+             btn_clear.pack(side="right", padx=(0, 0))
+             ToolTip(btn_clear, "Clear all wizard progress and start fresh", delay=500)
 
-        RoundedButton(
+        btn_load = RoundedButton(
             right_header_frame, text="Load Config", command=self.load_config_from_dialog,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
             height=32, radius=6, cursor="hand2"
-        ).pack(side="right", padx=(0, 10))
+        )
+        btn_load.pack(side="right", padx=(0, 10))
+        ToolTip(btn_load, "Load a previously saved project configuration file", delay=500)
 
         # --- Footer Nav ---
         self.nav_frame = tk.Frame(main_frame, bg=c.DARK_BG)
         self.nav_frame.pack(fill="x", pady=(10, 0), side="bottom")
 
         self.prev_button = RoundedButton(self.nav_frame, text="< Prev", command=self._go_to_prev_step, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
+        ToolTip(self.prev_button, "Go back to the previous step", delay=500)
+
         self.start_over_button = RoundedButton(self.nav_frame, text="Reset this step", command=self._start_over, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
+        ToolTip(self.start_over_button, "Clear the inputs for the current step", delay=500)
+
         self.next_button = RoundedButton(self.nav_frame, text="Next >", command=self._go_to_next_step, height=30, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor="hand2")
+        self.next_tooltip = ToolTip(self.next_button, "Validate current inputs and proceed", delay=500)
 
         # --- Main Content ---
         self.content_frame = tk.Frame(main_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
@@ -187,6 +197,7 @@ class ProjectStarterDialog(tk.Toplevel):
                 height=32, radius=6, hollow=True, cursor="hand2"
             )
             tab.pack(side="left", padx=(0, 5), fill='x', expand=True)
+            ToolTip(tab, f"Jump to {name} step", delay=500)
             self.tabs.append(tab)
         self._update_tab_styles()
 
@@ -324,6 +335,7 @@ class ProjectStarterDialog(tk.Toplevel):
         if self.state.current_step == 2:
             self.next_button.set_state('normal')
             self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+            self.next_tooltip.text = "Skip or confirm base files and proceed"
             return
 
         # Step 4 (Stack) is optional but uses "Skip" text if empty
@@ -332,9 +344,11 @@ class ProjectStarterDialog(tk.Toplevel):
             if not stack_val.strip():
                 # Blue "Skip" button
                 self.next_button.config(text="Skip", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+                self.next_tooltip.text = "Proceed without defining a specific stack"
             else:
                 # Green "Next" button
                 self.next_button.config(text="Next >", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+                self.next_tooltip.text = "Confirm stack and proceed to TODO plan"
             self.next_button.set_state('normal')
             return
 
@@ -344,10 +358,12 @@ class ProjectStarterDialog(tk.Toplevel):
         if is_valid:
             self.next_button.set_state('normal')
             self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+            self.next_tooltip.text = "Move to the next step"
         else:
             self.next_button.set_state('disabled')
             # Reset to default blue when disabled
             self.next_button.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+            self.next_tooltip.text = "Please complete the required fields to continue"
 
     def _update_tab_styles(self):
         active_steps = self._get_active_steps()

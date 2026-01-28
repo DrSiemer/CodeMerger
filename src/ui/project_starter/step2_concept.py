@@ -11,6 +11,7 @@ from ..widgets.scrollable_text import ScrollableText
 from ..widgets.switch_button import SwitchButton
 from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
+from ..tooltip import ToolTip
 
 DEFAULT_GOAL_TEXT = "The plan is to build a..."
 
@@ -63,6 +64,7 @@ class Step2ConceptView(tk.Frame):
         btn_container.pack(side='bottom', fill='x', pady=10)
         self.generate_btn = RoundedButton(btn_container, text="Generate Concept Prompt", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         self.generate_btn.pack(side='right')
+        ToolTip(self.generate_btn, "Create a structured prompt for your LLM based on this goal", delay=500)
 
         tk.Label(self, text="Describe Your Goal", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 5))
         tk.Label(self, text="Briefly describe what you want to build.", wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").pack(side='top', anchor="w", pady=(0, 10))
@@ -110,7 +112,9 @@ class Step2ConceptView(tk.Frame):
 
         btn_container = tk.Frame(self, bg=c.DARK_BG)
         btn_container.pack(side='bottom', fill='x', pady=10)
-        RoundedButton(btn_container, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").pack(side='right')
+        btn_process = RoundedButton(btn_container, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        btn_process.pack(side='right')
+        ToolTip(btn_process, "Parse the LLM's response and open the segmented editor", delay=500)
 
         tk.Label(self, text="Generate Concept", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
 
@@ -119,6 +123,7 @@ class Step2ConceptView(tk.Frame):
         tk.Label(instr_frame, text="1. Copy prompt", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
         copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clip(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
         copy_btn.pack(side='left', padx=15)
+        ToolTip(copy_btn, "Copy the prompt to your clipboard for use with an LLM", delay=500)
 
         tk.Label(self, text="2. Paste LLM Response (with tags)", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 0))
         self.llm_response_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)

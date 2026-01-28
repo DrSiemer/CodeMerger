@@ -10,6 +10,7 @@ from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from .generator import sanitize_project_name
 from .segment_manager import SegmentManager
+from ..tooltip import ToolTip
 
 class Step5GenerateView(tk.Frame):
     def __init__(self, parent, project_data, create_project_callback):
@@ -30,6 +31,7 @@ class Step5GenerateView(tk.Frame):
         tk.Label(prompt_header, text="1. Review and Copy the Master Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
         copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
         copy_btn.pack(side="right")
+        ToolTip(copy_btn, "Copy the final master prompt to clipboard", delay=500)
 
         tk.Label(self, text="Review, edit if needed, and then copy the master prompt to paste into your preferred Large Language Model.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=2, column=0, sticky="w")
 
@@ -50,6 +52,7 @@ class Step5GenerateView(tk.Frame):
         self.create_button = RoundedButton(self, text="Create Project Files", command=self.on_create_project, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
         self.create_button.grid(row=7, column=0, pady=10, sticky="ew")
         self.create_button.set_state('disabled')
+        ToolTip(self.create_button, "Initialize your project folder and write files to disk", delay=500)
 
         # Additional options
         if self.project_data["base_project_path"].get():

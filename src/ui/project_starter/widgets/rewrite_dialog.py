@@ -5,6 +5,7 @@ from ...widgets.rounded_button import RoundedButton
 from ...widgets.scrollable_text import ScrollableText
 from ...window_utils import position_window
 from ..segment_manager import SegmentManager
+from ...tooltip import ToolTip
 
 class RewriteUnsignedDialog(Toplevel):
     """
@@ -54,6 +55,7 @@ class RewriteUnsignedDialog(Toplevel):
         self.copy_btn = RoundedButton(copy_frame, text="Generate & Copy Prompt", command=self._generate_and_copy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=200, height=28, radius=4, cursor="hand2")
         self.copy_btn.pack(side="right")
         self.copy_btn.set_state("disabled") # Initially disabled
+        ToolTip(self.copy_btn, "Create and copy a prompt to modify all unlocked drafts based on your instruction", delay=500)
 
         # --- Section 2: Paste Response ---
         Label(main_frame, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=5, column=0, sticky="nw", pady=(0, 5))
@@ -65,8 +67,13 @@ class RewriteUnsignedDialog(Toplevel):
         btn_frame = Frame(main_frame, bg=c.DARK_BG)
         btn_frame.grid(row=7, column=0, sticky="e")
 
-        RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2").pack(side="left", padx=(0, 10))
-        RoundedButton(btn_frame, text="Apply Changes", command=self._on_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2").pack(side="left")
+        # Cancel button does not have a tooltip [MODIFIED]
+        btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
+        btn_cancel.pack(side="left", padx=(0, 10))
+
+        btn_apply = RoundedButton(btn_frame, text="Apply Changes", command=self._on_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
+        btn_apply.pack(side="left")
+        ToolTip(btn_apply, "Update the project drafts with the pasted response", delay=500)
 
     def _update_copy_button_state(self, event=None):
         content = self.instruction_text.get("1.0", "end-1c").strip()
@@ -116,26 +123,7 @@ class RewriteUnsignedDialog(Toplevel):
         friendly_map = {k: names.get(k, k) for k in targets}
         target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
 
-        prompt = f"""You are a Project Editor.
-The user has provided a global instruction to modify the project plan.
-Your task is to update all *unsigned* drafts to comply with this instruction.
-
-### User Instruction
-{instruction}
-
-### Locked Sections (Reference Only - DO NOT CHANGE)
-{ "".join(reference_blocks) if reference_blocks else "(None)" }
-
-### Drafts to Update
-{ "".join(target_blocks) }
-
-### Instructions
-1. Review the User Instruction.
-2. Rewrite the "Drafts to Update" to incorporate this instruction.
-3. Ensure consistency with "Locked Sections" (if any), but do not modify them.
-4. {target_instructions}
-5. Output ONLY the updated Drafts.
-"""
+        prompt = f"You are a Project Editor.\nThe user has provided a global instruction to modify the project plan.\nYour task is to update all *unsigned* drafts to comply with this instruction.\n\n### User Instruction\n{instruction}\n\n### Locked Sections (Reference Only - DO NOT CHANGE)\n{ ''.join(reference_blocks) if reference_blocks else '(None)' }\n\n### Drafts to Update\n{ ''.join(target_blocks) }\n\n### Instructions\n1. Review the User Instruction.\n2. Rewrite the 'Drafts to Update' to incorporate this instruction.\n3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.\n4. {target_instructions}\n5. Output ONLY the updated Drafts."
         try:
             self.clipboard_clear()
             self.clipboard_append(prompt)

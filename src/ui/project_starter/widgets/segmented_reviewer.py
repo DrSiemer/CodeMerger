@@ -76,6 +76,7 @@ class SegmentedReviewer(Frame):
 
         ov_item = SidebarItem(self.sidebar_frame, "Full Text", True, command=lambda: self._navigate("overview"))
         ov_item.pack(fill="x")
+        ToolTip(ov_item, "View and edit the entire document as one piece", delay=500)
         self.sidebar_items["overview"] = ov_item
 
         Frame(self.sidebar_frame, bg=c.WRAPPER_BORDER, height=1).pack(fill="x", pady=5)
@@ -88,6 +89,7 @@ class SegmentedReviewer(Frame):
                 command=lambda k=key: self._navigate(k)
             )
             item.pack(fill="x")
+            ToolTip(item, f"Navigate to {name}", delay=500)
             self.sidebar_items[key] = item
 
         # Content Area
@@ -114,8 +116,10 @@ class SegmentedReviewer(Frame):
 
         self.signoff_btn = RoundedButton(self.footer_buttons_frame, text="Sign Off & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=160, cursor="hand2")
         self.signoff_btn.pack(side="right")
+        ToolTip(self.signoff_btn, "Lock this section and move to the next incomplete part", delay=500)
 
         self.revert_btn = RoundedButton(self.footer_buttons_frame, text="Unlock to Edit", command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2")
+        ToolTip(self.revert_btn, "Release the sign-off to make further changes to this section", delay=500)
 
         self.sync_btn = RoundedButton(self.footer_buttons_frame, text="Sync Unsigned", command=self._open_sync_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2")
         ToolTip(self.sync_btn, "Propagates your changes to other unlocked sections to maintain consistency.\n(Only affects sections that are not signed off)", delay=500)
@@ -189,6 +193,9 @@ class SegmentedReviewer(Frame):
         self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
         self.view_btn.pack(side="left", padx=(10, 0))
 
+        # Initialize tooltip once for this segment's view button
+        self.view_btn_tooltip = ToolTip(self.view_btn, "", delay=500)
+
         self._update_questions_panel(key)
         self._toggle_view(force_render=True)
         self._update_footer_state(key)
@@ -201,12 +208,26 @@ class SegmentedReviewer(Frame):
             self.renderer.grid_forget()
             self.editor.grid(row=0, column=0, sticky="nsew")
             self.view_btn.config(text="Render", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+            # Update existing tooltip text
+            if hasattr(self, 'view_btn_tooltip'):
+                self.view_btn_tooltip.text = "Switch to stylized Markdown preview"
+                # Force refresh if visible [FIXED]
+                if self.view_btn_tooltip.tooltip_window:
+                    self.view_btn_tooltip.hide_tooltip()
+                    self.view_btn_tooltip.show_tooltip()
         else:
             self.editor.text_widget.tag_remove("sel", "1.0", "end")
             self.renderer.set_markdown(self.editor.get("1.0", "end-1c"))
             self.editor.grid_forget()
             self.renderer.grid(row=0, column=0, sticky="nsew")
             self.view_btn.config(text="Edit", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+            # Update existing tooltip text
+            if hasattr(self, 'view_btn_tooltip'):
+                self.view_btn_tooltip.text = "Switch to raw text editor"
+                # Force refresh if visible [FIXED]
+                if self.view_btn_tooltip.tooltip_window:
+                    self.view_btn_tooltip.hide_tooltip()
+                    self.view_btn_tooltip.show_tooltip()
 
     def _update_questions_panel(self, key):
         for w in self.questions_panel.winfo_children(): w.destroy()
@@ -234,6 +255,7 @@ class SegmentedReviewer(Frame):
 
         copy_btn = RoundedButton(self.questions_panel, text="Copy Context & Question", command=lambda: self._copy_q_context(q_list[self.current_question_index], copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=26, cursor="hand2")
         copy_btn.pack(anchor="w")
+        ToolTip(copy_btn, "Copy a prompt containing the current segment text and this question", delay=500)
 
     def _refresh_q_text(self, lbl, q_list, pb, nb):
         idx = self.current_question_index
@@ -274,6 +296,10 @@ class SegmentedReviewer(Frame):
         self.is_raw_mode = tk.BooleanVar(value=False)
         self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
         self.view_btn.pack(side="right")
+
+        # Initialize tooltip once for the overview view button
+        self.view_btn_tooltip = ToolTip(self.view_btn, "", delay=500)
+
         self.editor.delete("1.0", "end")
         self.editor.insert("1.0", SegmentManager.assemble_document(self.segments_data, self.segment_keys, self.friendly_names_map))
         self._toggle_view(force_render=True)
@@ -332,20 +358,7 @@ class SegmentedReviewer(Frame):
             ref_context_str = "\n### Locked Sections (Reference Only)\n" + "\n".join([f"--- Locked Section: {self.friendly_names_map.get(k, k)} ---\n{self.segments_data.get(k, '')}\n" for k in references])
 
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
-        prompt = f"""You are a Consistency Engine. The user has modified section **{current_name}**.
-Update *unsigned* drafts to match these changes, respecting *locked* sections.
-
-### New Source of Truth: {current_name}
-```
-{self.segments_data[self.active_key]}
-```
-{ref_context_str}
-### Drafts to Update
-{target_context_str}
-
-### Instructions
-1. {SegmentManager.build_prompt_instructions(targets, self.friendly_names_map)}
-"""
+        prompt = f"You are a Consistency Engine. The user has modified section **{current_name}**.\nUpdate *unsigned* drafts to match these changes, respecting *locked* sections.\n\n### New Source of Truth: {current_name}\n```\n{self.segments_data[self.active_key]}\n```\n{ref_context_str}\n### Drafts to Update\n{target_context_str}\n\n### Instructions\n1. {SegmentManager.build_prompt_instructions(targets, self.friendly_names_map)}"
         SyncUnsignedDialog(self, prompt, self._apply_sync_results)
 
     def _open_rewrite_dialog(self):

@@ -2,6 +2,7 @@ import tkinter as tk
 from pathlib import Path
 from ... import constants as c
 from ..widgets.rounded_button import RoundedButton
+from ..tooltip import ToolTip
 
 class SuccessView(tk.Frame):
     def __init__(self, parent, project_folder_name, files_created, on_start_work_callback, parent_folder):
@@ -33,4 +34,6 @@ class SuccessView(tk.Frame):
             listbox.insert(tk.END, f)
         listbox.pack(expand=True, fill="both", pady=5)
 
-        RoundedButton(self, text="Open Project in CodeMerger", command=on_start_work_callback, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2").pack(pady=20)
+        btn_open = RoundedButton(self, text="Open Project in CodeMerger", command=on_start_work_callback, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
+        btn_open.pack(pady=20)
+        ToolTip(btn_open, "Activate this project and close the wizard", delay=500)

@@ -6,6 +6,7 @@ from ... import constants as c
 from ...core.utils import save_config, load_config
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
+from ..tooltip import ToolTip
 
 class Step3StackView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
@@ -34,7 +35,11 @@ class Step3StackView(tk.Frame):
         btn_container = tk.Frame(self, bg=c.DARK_BG)
         btn_container.pack(side='bottom', fill="x", pady=15)
         self.save_exp_btn = RoundedButton(btn_container, text="Save as Default", command=self._save_experience, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
-        RoundedButton(btn_container, text="Generate Stack Recommendation", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").pack(side='right')
+        ToolTip(self.save_exp_btn, "Save this experience text to your application settings for future projects", delay=500)
+
+        btn_gen = RoundedButton(btn_container, text="Generate Stack Recommendation", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        btn_gen.pack(side='right')
+        ToolTip(btn_gen, "Ask the LLM to recommend a technology stack based on your concept and experience", delay=500)
 
         # TOP CONTENT
         header_text = "Edit your known languages, frameworks, and environment details." if self.saved_experience.strip() else "List your known languages, frameworks, and environment details."
@@ -83,7 +88,9 @@ class Step3StackView(tk.Frame):
         # ACTION BUTTON AT BOTTOM
         btn_container = tk.Frame(self, bg=c.DARK_BG)
         btn_container.pack(side='bottom', fill='x', pady=10)
-        RoundedButton(btn_container, text="Process Response", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").pack(side='right')
+        btn_proc = RoundedButton(btn_container, text="Process Response", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        btn_proc.pack(side='right')
+        ToolTip(btn_proc, "Parse the LLM's recommended stack list", delay=500)
 
         # TOP CONTENT
         tk.Label(self, text="Generate Stack", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
@@ -95,6 +102,7 @@ class Step3StackView(tk.Frame):
         tk.Label(instr_frame, text="1. Copy prompt and paste it into your LLM.", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
         copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
         copy_btn.pack(side='left', padx=15)
+        ToolTip(copy_btn, "Copy the prompt to your clipboard", delay=500)
 
         tk.Label(self, text="2. Paste Stack Recommendation below", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 5))
         self.llm_response_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
