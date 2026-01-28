@@ -534,12 +534,13 @@ class SegmentedReviewer(Frame):
         self.editor.insert("1.0", content)
 
         # Build Header Controls
-        self.rewrite_btn = RoundedButton(self.header_controls, text="Rewrite unsigned", command=self._open_rewrite_dialog, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
-        self.rewrite_btn.pack(side="left")
-        ToolTip(self.rewrite_btn, "Give an instruction to modify all unsigned segments at once.\n(e.g., 'Remove the chat feature' or 'Use PostgreSQL')", delay=500)
-
         self.q_btn = RoundedButton(self.header_controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
-        self.q_btn.pack(side="left", padx=(10, 0))
+        self.q_btn.pack(side="left")
+        ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
+
+        self.rewrite_btn = RoundedButton(self.header_controls, text="Rewrite unsigned", command=self._open_rewrite_dialog, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
+        self.rewrite_btn.pack(side="left", padx=(10, 0))
+        ToolTip(self.rewrite_btn, "Give an instruction to modify all unsigned segments at once.\n(e.g., 'Remove the chat feature' or 'Use PostgreSQL')", delay=500)
 
         self.is_raw_mode = tk.BooleanVar(value=False)
         self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
@@ -618,7 +619,7 @@ class SegmentedReviewer(Frame):
         current_txt = self.editor.get("1.0", "end-1c").strip()
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
 
-        prompt = f"### Context\n{context}\n### Focus: {current_name}\n{current_txt}\n### Question\n{question}\n\nInstruction: Focus ONLY on the segment '{current_name}'."
+        prompt = f"### Context\n{context}\n### Focus: {current_name}\n{current_txt}\n\n### Question\n{question}\n\nInstruction: Focus ONLY on the segment '{current_name}'."
         try:
             self.clipboard_clear()
             self.clipboard_append(prompt)
