@@ -1,11 +1,81 @@
 import tkinter as tk
 import pyperclip
-from tkinter import Frame, Label, Text, messagebox
+from tkinter import Frame, Label, Text, messagebox, Toplevel
 from .... import constants as c
 from ...widgets.rounded_button import RoundedButton
 from ...widgets.scrollable_text import ScrollableText
 from ...widgets.markdown_renderer import MarkdownRenderer
+from ...window_utils import position_window
+from ...tooltip import ToolTip
 from ..segment_manager import SegmentManager
+
+class SyncUnsignedDialog(Toplevel):
+    """
+    A dialog to handle the prompt generation and response parsing for propagating changes.
+    """
+    def __init__(self, parent, prompt, on_apply_callback):
+        super().__init__(parent)
+        self.parent = parent
+        self.withdraw()
+        self.prompt = prompt
+        self.on_apply_callback = on_apply_callback
+        self.result = None
+
+        self.title("Sync Unsigned Segments")
+        self.configure(bg=c.DARK_BG)
+        self.transient(parent)
+        self.grab_set()
+
+        self._build_ui()
+
+        self.geometry("600x600")
+        self.minsize(500, 500)
+        position_window(self)
+        self.deiconify()
+
+    def _build_ui(self):
+        main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
+        main_frame.pack(fill="both", expand=True)
+        main_frame.grid_rowconfigure(3, weight=1)
+        main_frame.grid_columnconfigure(0, weight=1)
+
+        # Header
+        Label(main_frame, text="Propagate Changes", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 10))
+        Label(main_frame, text="Update other unsigned segments to match your recent changes.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=1, column=0, sticky="w", pady=(0, 15))
+
+        # Step 1: Copy Prompt
+        step1_frame = Frame(main_frame, bg=c.DARK_BG)
+        step1_frame.grid(row=2, column=0, sticky="ew", pady=(0, 5))
+        Label(step1_frame, text="1. Copy Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+        copy_btn = RoundedButton(step1_frame, text="Copy", command=lambda: self._copy_prompt(copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        copy_btn.pack(side="right")
+
+        # Step 2: Paste Response
+        Label(main_frame, text="2. Paste Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=4, column=0, sticky="w", pady=(15, 5))
+
+        self.response_text = ScrollableText(main_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.response_text.grid(row=5, column=0, sticky="nsew", pady=(0, 15))
+
+        # Actions
+        btn_frame = Frame(main_frame, bg=c.DARK_BG)
+        btn_frame.grid(row=6, column=0, sticky="e")
+
+        RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2").pack(side="left", padx=(0, 10))
+        RoundedButton(btn_frame, text="Apply Changes", command=self._on_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2").pack(side="left")
+
+    def _copy_prompt(self, btn):
+        pyperclip.copy(self.prompt)
+        btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+        self.after(2000, lambda: btn.config(text="Copy", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+
+    def _on_apply(self):
+        content = self.response_text.get("1.0", "end-1c").strip()
+        if not content:
+            messagebox.showwarning("Input Required", "Please paste the LLM response first.", parent=self)
+            return
+
+        self.on_apply_callback(content)
+        self.destroy()
 
 class SidebarItem(Frame):
     def __init__(self, parent, text, is_overview, status_var=None, command=None):
@@ -13,6 +83,7 @@ class SidebarItem(Frame):
         self.command = command
         self.is_selected = False
         self.is_disabled = False
+        self.is_updated = False # Indicates content was changed via sync but not viewed
         self.status_var = status_var
         self.is_overview = is_overview
 
@@ -77,12 +148,25 @@ class SidebarItem(Frame):
         self.label.config(fg=fg, cursor=cursor)
         self.indicator.config(fg=fg, cursor=cursor)
 
+    def set_updated(self, updated):
+        """Marks the item as having pending changes from a sync operation."""
+        # Don't show updated status if the item is signed off or disabled
+        if self.is_disabled or (self.status_var and self.status_var.get()):
+            return
+        self.is_updated = updated
+        self._update_status_icon()
+
     def _update_status_icon(self, *args):
         if not self.status_var or self.is_overview: return
+
         if self.status_var.get():
-            # Uses Unicode Check Mark
+            # Signed Off: Green Check
             self.indicator.config(text="✓", fg=c.BTN_GREEN)
+        elif self.is_updated:
+            # Updated / Attention Needed: Orange Dot
+            self.indicator.config(text="●", fg=c.ATTENTION)
         else:
+            # Default: Gray Dot
             self.indicator.config(text="●", fg=c.TEXT_SUBTLE_COLOR)
 
 class SegmentedReviewer(Frame):
@@ -182,10 +266,20 @@ class SegmentedReviewer(Frame):
         # Footer (Packed first to ensure visibility)
         self.footer = Frame(self.main_view_container, bg=c.DARK_BG)
         self.footer.pack(side="bottom", fill="x", pady=(10, 0))
-        self.signoff_btn = RoundedButton(self.footer, text="Sign Off & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=160, cursor="hand2")
+
+        # Footer buttons container
+        self.footer_buttons_frame = Frame(self.footer, bg=c.DARK_BG)
+        self.footer_buttons_frame.pack(fill='x', expand=True)
+
+        # Right-aligned buttons
+        self.signoff_btn = RoundedButton(self.footer_buttons_frame, text="Sign Off & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=160, cursor="hand2")
         self.signoff_btn.pack(side="right")
 
-        self.revert_btn = RoundedButton(self.footer, text="Unlock to Edit", command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2")
+        # Left-aligned buttons
+        self.revert_btn = RoundedButton(self.footer_buttons_frame, text="Unlock to Edit", command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2")
+
+        self.sync_btn = RoundedButton(self.footer_buttons_frame, text="Sync Unsigned", command=self._open_sync_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2")
+        ToolTip(self.sync_btn, "Propagates your changes to other unlocked sections to maintain consistency.\n(Only affects sections that are not signed off)", delay=500)
 
         # Questions Panel
         self.questions_panel = Frame(self.main_view_container, bg=c.STATUS_BG, padx=10, pady=10)
@@ -257,6 +351,10 @@ class SegmentedReviewer(Frame):
 
             # Clear editor buffer
             self.editor.delete("1.0", "end")
+
+            # Reset updated status if visiting that segment
+            if key in self.sidebar_items:
+                self.sidebar_items[key].set_updated(False)
 
             if key == "overview":
                 self._show_overview()
@@ -366,6 +464,7 @@ class SegmentedReviewer(Frame):
         self.title_label.config(text="Full Text Overview")
         self.signoff_btn.pack_forget()
         self.revert_btn.pack_forget()
+        self.sync_btn.pack_forget()
 
         self.is_raw_mode = tk.BooleanVar(value=False)
         self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
@@ -389,11 +488,29 @@ class SegmentedReviewer(Frame):
         is_signed = self.signoff_vars[target_key].get()
         if is_signed:
             self.signoff_btn.pack_forget()
-            self.revert_btn.pack(side="right")
+            self.sync_btn.pack_forget()
+            self.revert_btn.pack(side="left", padx=(0, 10))
             self.editor.text_widget.config(state="disabled", bg=c.DARK_BG)
         else:
             self.revert_btn.pack_forget()
             self.signoff_btn.pack(side="right")
+
+            # Logic for Sync Button visibility
+            # Can only sync if:
+            # 1. Current segment has content
+            # 2. There are OTHER segments that are NOT signed off
+            other_unsigned = any(
+                not self.signoff_vars[k].get()
+                for k in self.segment_keys
+                if k != target_key
+            )
+            has_content = bool(self.segments_data.get(target_key, "").strip())
+
+            if other_unsigned and has_content:
+                self.sync_btn.pack(side="left")
+            else:
+                self.sync_btn.pack_forget()
+
             self.editor.text_widget.config(state="normal", bg=c.TEXT_INPUT_BG)
 
     def _sign_off(self):
@@ -417,6 +534,91 @@ class SegmentedReviewer(Frame):
         self.signoff_vars[self.active_key].set(False)
         self._update_footer_state()
         self._update_overview_availability()
+
+    def _open_sync_dialog(self):
+        # Save current content first
+        current_content = self.editor.get("1.0", "end-1c").strip()
+        self.segments_data[self.active_key] = current_content
+
+        # Identify segments
+        targets = []
+        references = []
+
+        for k in self.segment_keys:
+            if k == self.active_key:
+                continue
+
+            if self.signoff_vars[k].get():
+                references.append(k)
+            else:
+                targets.append(k)
+
+        if not targets:
+            messagebox.showinfo("Nothing to Sync", "All other segments are signed off.")
+            return
+
+        # Build Prompt
+        friendly_map = {k: self.friendly_names_map.get(k, k) for k in targets}
+        target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
+
+        # Build Context Blocks
+        target_context_blocks = []
+        for t_key in targets:
+            t_name = friendly_map[t_key]
+            t_content = self.segments_data.get(t_key, "")
+            target_context_blocks.append(f"--- Current Draft: {t_name} ---\n{t_content}\n")
+        target_context_str = "\n".join(target_context_blocks)
+
+        reference_context_str = ""
+        if references:
+            ref_blocks = []
+            for r_key in references:
+                r_name = self.friendly_names_map.get(r_key, r_key)
+                r_content = self.segments_data.get(r_key, "")
+                ref_blocks.append(f"--- Locked Section: {r_name} ---\n{r_content}\n")
+            reference_context_str = "\n### Locked Sections (Reference Only - DO NOT CHANGE)\n" + "\n".join(ref_blocks)
+
+        current_name = self.friendly_names_map.get(self.active_key, self.active_key)
+
+        prompt = f"""You are a Consistency Engine. The user has modified the section **{current_name}**.
+Your task is to rewrite the *unsigned* draft sections to be consistent with these changes, while respecting the *locked* sections.
+
+### New Content: {current_name} (Source of Truth)
+```
+{current_content}
+```
+{reference_context_str}
+### Drafts to Update (Rewrite these)
+{target_context_str}
+
+### Instructions
+1. Review the "Drafts to Update".
+2. Rewrite them to align with the logic/facts in "{current_name}" and the "Locked Sections" (if any).
+3. Preserve existing details in the drafts unless they conflict.
+4. {target_instructions}
+5. Do NOT output content for the Locked Sections. Only output the Drafts.
+"""
+        SyncUnsignedDialog(self, prompt, self._apply_sync_results)
+
+    def _apply_sync_results(self, llm_output):
+        parsed = SegmentManager.parse_segments(llm_output)
+        if not parsed:
+            messagebox.showerror("Error", "Could not parse segments from response.")
+            return
+
+        mapped = SegmentManager.map_parsed_segments_to_keys(parsed, self.friendly_names_map)
+
+        updated_count = 0
+        for key, content in mapped.items():
+            # Only update if the key is actually in our segments and is unsigned
+            if key in self.segments_data and key != self.active_key and not self.signoff_vars[key].get():
+                self.segments_data[key] = content
+                if key in self.sidebar_items:
+                    self.sidebar_items[key].set_updated(True)
+                updated_count += 1
+
+        if updated_count == 0:
+            messagebox.showinfo("Info", "No matching segments found to update.")
 
     def get_assembled_content(self):
         full_text = SegmentManager.assemble_document(self.segments_data, self.segment_keys, self.friendly_names_map)
