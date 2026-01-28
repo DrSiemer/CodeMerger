@@ -751,9 +751,30 @@
           "hash": "0aa05b91f077e0c3d5833a1261dbda055792150f",
           "tokens": 8356,
           "lines": 816
+        },
+        {
+          "path": "src/ui/project_starter/widgets/rewrite_dialog.py",
+          "mtime": 1769612804.5882745,
+          "hash": "647fe07de69aae04bc2da936b461843bb9be8808",
+          "tokens": 1601,
+          "lines": 154
+        },
+        {
+          "path": "src/ui/project_starter/widgets/sidebar_item.py",
+          "mtime": 1769612804.587274,
+          "hash": "5df3407826277c799188a9507ac896061b434f8f",
+          "tokens": 901,
+          "lines": 102
+        },
+        {
+          "path": "src/ui/project_starter/widgets/sync_dialog.py",
+          "mtime": 1769612804.5882745,
+          "hash": "7cffb1665e330cd3b36f16da6e184e1895f903de",
+          "tokens": 944,
+          "lines": 78
         }
       ],
-      "total_tokens": 135747,
+      "total_tokens": 139193,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -860,7 +881,10 @@
     "src/ui/project_starter/step5_generate.py",
     "src/ui/project_starter/step_base_files.py",
     "src/ui/project_starter/success_view.py",
+    "src/ui/project_starter/widgets/rewrite_dialog.py",
     "src/ui/project_starter/widgets/segmented_reviewer.py",
+    "src/ui/project_starter/widgets/sidebar_item.py",
+    "src/ui/project_starter/widgets/sync_dialog.py",
     "src/ui/project_starter/wizard_dialog.py",
     "src/ui/project_starter/wizard_state.py",
     "src/ui/project_starter/wizard_validator.py",
