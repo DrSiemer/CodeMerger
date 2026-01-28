@@ -94,7 +94,8 @@ class Step2ConceptView(tk.Frame):
             segment_instructions,
             "\n### Core Instructions",
             "1. Fill in every section with specific details relevant to the user's goal.",
-            "2. Ensure the 'User Flows' section covers the complete lifecycle of the main data entity."
+            "2. Ensure the 'User Flows' section covers the complete lifecycle of the main data entity.",
+            "3. **Readability & Formatting:** Use frequent line breaks and short paragraphs to avoid dense blocks of text. Utilize Markdown elements (bullet points, bolding) to ensure the document is highly readable and visually structured."
         ]
         return "\n".join(parts)
 
