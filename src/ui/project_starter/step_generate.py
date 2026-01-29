@@ -12,7 +12,7 @@ from .generator import sanitize_project_name
 from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
 
-class Step5GenerateView(tk.Frame):
+class GenerateView(tk.Frame):
     def __init__(self, parent, project_data, create_project_callback, wizard_controller):
         super().__init__(parent, bg=c.DARK_BG)
         self.create_project_callback = create_project_callback

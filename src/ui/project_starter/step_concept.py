@@ -15,7 +15,7 @@ from ..tooltip import ToolTip
 
 DEFAULT_GOAL_TEXT = "The plan is to build a..."
 
-class Step2ConceptView(tk.Frame):
+class ConceptView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
         self.wizard_controller = wizard_controller
@@ -135,7 +135,7 @@ class Step2ConceptView(tk.Frame):
         instr_frame = tk.Frame(self, bg=c.DARK_BG)
         instr_frame.pack(side='top', fill="x", pady=(0, 10))
         tk.Label(instr_frame, text="1. Copy prompt", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
-        copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clip(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
+        copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
         copy_btn.pack(side='left', padx=15)
         ToolTip(copy_btn, "Copy the prompt to your clipboard for use with an LLM", delay=500)
 
@@ -147,7 +147,7 @@ class Step2ConceptView(tk.Frame):
         )
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
 
-    def _copy_to_clip(self, button, text):
+    def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)
         button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
         self.after(2000, lambda: button.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))

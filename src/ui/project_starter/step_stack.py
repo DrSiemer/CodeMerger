@@ -8,7 +8,7 @@ from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from ..tooltip import ToolTip
 
-class Step3StackView(tk.Frame):
+class StackView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
         self.wizard_controller = wizard_controller

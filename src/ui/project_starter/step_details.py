@@ -4,7 +4,7 @@ from ... import constants as c
 from ..widgets.rounded_button import RoundedButton
 from ..tooltip import ToolTip
 
-class Step1DetailsView(tk.Frame):
+class DetailsView(tk.Frame):
     def __init__(self, parent, project_data, wizard_controller=None):
         super().__init__(parent, bg=c.DARK_BG)
         self.project_data = project_data

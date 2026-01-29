@@ -12,7 +12,7 @@ from ..widgets.switch_button import SwitchButton
 from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
 
-class Step4TodoView(tk.Frame):
+class TodoView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
         self.wizard_controller = wizard_controller

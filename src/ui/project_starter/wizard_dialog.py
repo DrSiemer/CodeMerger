@@ -6,11 +6,11 @@ from tkinter import messagebox, filedialog
 from ... import constants as c
 from ..widgets.rounded_button import RoundedButton
 from ..style_manager import apply_dark_theme
-from .step1_details import Step1DetailsView
-from .step2_concept import Step2ConceptView
-from .step3_stack import Step3StackView
-from .step4_todo import Step4TodoView
-from .step5_generate import Step5GenerateView
+from .step_details import DetailsView
+from .step_concept import ConceptView
+from .step_stack import StackView
+from .step_todo import TodoView
+from .step_generate import GenerateView
 from .step_base_files import StepBaseFilesView
 from .success_view import SuccessView
 from ..window_utils import position_window
@@ -307,17 +307,17 @@ class ProjectStarterDialog(tk.Toplevel):
              self._go_to_step(5); return
 
         if step == 1:
-            self.current_view = Step1DetailsView(view_frame, self.state.project_data, wizard_controller=self)
+            self.current_view = DetailsView(view_frame, self.state.project_data, wizard_controller=self)
         elif step == 2:
             self.current_view = StepBaseFilesView(view_frame, self, self.state.project_data)
         elif step == 3:
-            self.current_view = Step2ConceptView(view_frame, self, self.state.project_data)
+            self.current_view = ConceptView(view_frame, self, self.state.project_data)
         elif step == 4:
-            self.current_view = Step3StackView(view_frame, self, self.state.project_data)
+            self.current_view = StackView(view_frame, self, self.state.project_data)
         elif step == 5:
-            self.current_view = Step4TodoView(view_frame, self, self.state.project_data)
+            self.current_view = TodoView(view_frame, self, self.state.project_data)
         elif step == 6:
-            self.current_view = Step5GenerateView(view_frame, self.state.project_data, self.create_project, wizard_controller=self)
+            self.current_view = GenerateView(view_frame, self.state.project_data, self.create_project, wizard_controller=self)
 
         if self.current_view:
             self.current_view.pack(expand=True, fill="both")
