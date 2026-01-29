@@ -285,10 +285,6 @@ class SegmentedReviewer(Frame):
         copy_btn.pack(side="left")
         ToolTip(copy_btn, "Copy a prompt containing the current segment text and this question", delay=500)
 
-        paste_btn = RoundedButton(btn_row, text="Paste Response", command=lambda: self._paste_q_response(paste_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=26, cursor="hand2")
-        paste_btn.pack(side="left", padx=(10, 0))
-        ToolTip(paste_btn, "Process the LLM's response from your clipboard and apply changes to segments", delay=500)
-
     def _refresh_q_text(self, lbl, q_list, pb, nb):
         idx = self.current_question_index
         lbl.config(text=q_list[idx])
@@ -325,8 +321,7 @@ class SegmentedReviewer(Frame):
 
         prompt = f"### Context\n{context}\n### Focus: {current_name}\n{current_txt}\n\n### Question\n{question}\n\n" \
                  f"Instruction: Focus ONLY on the segment '{current_name}'. " \
-                 f"You MUST return the updated text for this segment wrapped in the following tag:\n" \
-                 f"<<SECTION: {current_name}>>\n[Full updated content here]"
+                 f"Please answer the question or provide critical feedback regarding this segment. Do NOT rewrite the text."
 
         try:
             self.clipboard_clear()
@@ -334,21 +329,6 @@ class SegmentedReviewer(Frame):
             btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
             self.after(2000, lambda: btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
         except tk.TclError: messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
-
-    def _paste_q_response(self, btn):
-        """Retrieves clipboard content and applies changes to the segments."""
-        try:
-            text = self.selection_get(selection='CLIPBOARD')
-            if not text or not text.strip():
-                messagebox.showwarning("Clipboard Empty", "The clipboard does not contain any text.", parent=self)
-                return
-
-            self._apply_sync_results(text)
-
-            btn.config(text="Applied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-            self.after(2000, lambda: btn.config(text="Paste Response", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not process clipboard content: {e}", parent=self)
 
     def _show_overview(self):
         self.title_label.config(text="Full Text Overview")
