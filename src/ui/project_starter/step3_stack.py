@@ -95,9 +95,6 @@ class Step3StackView(tk.Frame):
         # TOP CONTENT
         tk.Label(self, text="Generate Stack", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
 
-        # Tip for new conversation
-        tk.Label(self, text="💡 Tip: Always start a new conversation in your LLM when pasting prompts from CodeMerger.", font=c.FONT_NORMAL, bg=c.DARK_BG, fg=c.NOTE, justify="left", anchor="w").pack(side='top', fill='x', pady=(0, 10))
-
         instr_frame = tk.Frame(self, bg=c.DARK_BG); instr_frame.pack(side='top', fill="x", pady=(0, 10))
         tk.Label(instr_frame, text="1. Copy prompt and paste it into your LLM.", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
         copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")

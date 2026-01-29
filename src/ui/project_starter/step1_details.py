@@ -48,6 +48,14 @@ class Step1DetailsView(tk.Frame):
         # Update label if path already exists
         self._update_base_label()
 
+        # --- Tips Section at Bottom ---
+        tips_frame = tk.Frame(self, bg=c.DARK_BG)
+        tips_frame.pack(side="bottom", fill="x", anchor="w", pady=(40, 0))
+
+        tk.Label(tips_frame, text="💡 LLM Best Practices", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.NOTE).pack(anchor="w", pady=(0, 2))
+        tk.Label(tips_frame, text="- Always start a new conversation when pasting prompts from CodeMerger.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
+        tk.Label(tips_frame, text="- Ensure code blocks are wrapped in triple backticks (```).", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
+
     def _select_base_project(self):
         folder_selected = filedialog.askdirectory(title="Select Base Project")
         if folder_selected:
