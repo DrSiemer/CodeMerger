@@ -31,6 +31,7 @@ class SegmentedReviewer(Frame):
         self.current_question_index = 0
         self.is_loading_nav = False # Prevents overwrite race conditions
         self.current_segment_original_text = "" # Tracks content state for sync button logic
+        self.questions_visible = False # Track visibility state across segments
 
         self.signoff_vars = {}
         for key in self.segment_keys:
@@ -203,7 +204,7 @@ class SegmentedReviewer(Frame):
         self.q_btn.pack(side="left")
         ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
 
-        # UPDATED: Renamed to "Rewrite", used FONT_BOLD, but kept height manageable
+        # Rewrite button: Bigger font, simple "Rewrite" text, blue color
         self.rewrite_btn = RoundedButton(
             self.header_controls,
             text="Rewrite",
@@ -226,6 +227,7 @@ class SegmentedReviewer(Frame):
         self._update_questions_panel(key)
         self._toggle_view(force_render=True)
         self._update_footer_state(key)
+        self._apply_questions_visibility()
 
     def _toggle_view(self, force_render=False):
         if force_render: self.is_raw_mode.set(False)
@@ -294,12 +296,22 @@ class SegmentedReviewer(Frame):
         nb.set_state("normal" if idx < len(q_list)-1 else "disabled")
 
     def _toggle_questions(self):
-        if self.questions_panel.winfo_ismapped():
+        self.questions_visible = not self.questions_visible
+        self._apply_questions_visibility()
+
+    def _apply_questions_visibility(self):
+        # Ensure q_btn exists (it might not in overview mode, though _show_segment creates it)
+        if not hasattr(self, 'q_btn') or not self.q_btn.winfo_exists():
+            self.questions_panel.pack_forget()
+            return
+
+        if self.questions_visible:
+            if not self.questions_panel.winfo_ismapped():
+                self.questions_panel.pack(side="top", fill="x", before=self.display_container, pady=(0, 10))
+            self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+        else:
             self.questions_panel.pack_forget()
             self.q_btn.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-        else:
-            self.questions_panel.pack(side="top", fill="x", before=self.display_container, pady=(0, 10))
-            self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
     def _copy_q_context(self, question, btn):
         context = ""

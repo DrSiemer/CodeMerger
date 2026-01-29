@@ -19,7 +19,11 @@ class Step4TodoView(tk.Frame):
         self.project_data = project_data
 
         self.todo_content = self.project_data.get("todo_md", "")
+
+        # Initialize questions_map before loading questions to prevent AttributeError
+        self.questions_map = {}
         self.questions = self._load_questions()
+
         self.current_question_index = 0
         self.questions_frame_visible = True
         self.editor_is_active = False
@@ -54,9 +58,13 @@ class Step4TodoView(tk.Frame):
                 if not content: return []
                 # Check if it's the new format (dict of objects) or old (list)
                 data = json.loads(content)
-                if isinstance(data, list): return data
-                # If dict, we just need questions for the legacy view, but for segmented view
-                # the reviewer handles it. This might need refactoring if we fully drop legacy.
+                if isinstance(data, list):
+                    return data
+                elif isinstance(data, dict):
+                    # Populate the map for the SegmentedReviewer and assembly logic
+                    self.questions_map = data
+                    # Return empty list for the legacy self.questions used by manual mode
+                    return []
                 return []
         except (FileNotFoundError, json.JSONDecodeError) as e:
             return []
