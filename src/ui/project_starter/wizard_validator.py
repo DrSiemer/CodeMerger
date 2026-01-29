@@ -21,34 +21,28 @@ def validate_step(step, state_data):
         return True, "", ""
 
     elif step == 3:
-        # Strict Check: If segments exist, ALL must be signed off
+        # Step 3 (Concept) is valid only if merged.
         segments = state_data.get("concept_segments", {})
         if segments:
-            signoffs = state_data.get("concept_signoffs", {})
-            # Check if every key in segments has a True value in signoffs
-            if not all(signoffs.get(k) for k in segments.keys()):
-                return False, "Incomplete", "Please review and sign off on all concept segments."
-        else:
-            # Fallback: Just check if content exists (legacy or manual paste)
-            concept = state_data.get("concept_md", "")
-            if not concept:
-                return False, "Error", "The concept document cannot be empty."
+            return False, "Merge Required", "You must merge the concept segments into a final document before proceeding."
+
+        concept = state_data.get("concept_md", "")
+        if not concept:
+            return False, "Error", "The concept document cannot be empty."
 
     elif step == 4:
         # The Stack step is optional.
         return True, "", ""
 
     elif step == 5:
-        # Strict Check: If segments exist, ALL must be signed off
+        # Step 5 (TODO) is valid only if merged.
         segments = state_data.get("todo_segments", {})
         if segments:
-            signoffs = state_data.get("todo_signoffs", {})
-            if not all(signoffs.get(k) for k in segments.keys()):
-                return False, "Incomplete", "Please review and sign off on all TODO phases."
-        else:
-            todo = state_data.get("todo_md", "")
-            if not todo:
-                return False, "Error", "The TODO plan cannot be empty."
+            return False, "Merge Required", "You must merge the TODO plan into a final document before proceeding."
+
+        todo = state_data.get("todo_md", "")
+        if not todo:
+            return False, "Error", "The TODO plan cannot be empty."
 
     elif step == 6:
         # Validate parent folder here, right before generation

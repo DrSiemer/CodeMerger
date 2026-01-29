@@ -15,9 +15,9 @@ from .sync_dialog import SyncUnsignedDialog
 class SegmentedReviewer(Frame):
     """
     A widget that presents content in segments with a sidebar for navigation,
-    sign-off capability, and a full overview mode.
+    sign-off capability, and a final merge trigger.
     """
-    def __init__(self, parent, segment_keys, friendly_names_map, segments_data, signoffs_data, questions_map=None, on_change_callback=None):
+    def __init__(self, parent, segment_keys, friendly_names_map, segments_data, signoffs_data, questions_map=None, on_change_callback=None, on_merge_callback=None):
         super().__init__(parent, bg=c.DARK_BG)
         self.segment_keys = segment_keys
         self.friendly_names_map = friendly_names_map
@@ -25,6 +25,7 @@ class SegmentedReviewer(Frame):
         self.signoffs_data = signoffs_data
         self.questions_map = questions_map or {}
         self.on_change_callback = on_change_callback
+        self.on_merge_callback = on_merge_callback
 
         self.active_key = None
         self.sidebar_items = {}
@@ -41,21 +42,17 @@ class SegmentedReviewer(Frame):
             self.signoff_vars[key] = bv
 
         self._build_ui()
-        self._update_overview_availability()
 
-        # Determine start key
-        start_key = "overview"
-        if self.segment_keys:
-            start_key = self.segment_keys[0]
+        # Determine start key: find first unsigned, or default to first
+        start_key = self.segment_keys[0] if self.segment_keys else None
+        if start_key:
             for key in self.segment_keys:
                 if not self.signoff_vars[key].get():
                     start_key = key
                     break
 
-            if all(self.signoff_vars[k].get() for k in self.segment_keys):
-                start_key = "overview"
-
-        self._navigate(start_key)
+        if start_key:
+            self._navigate(start_key)
 
     def refresh_fonts(self, size):
         if hasattr(self, 'editor') and self.editor.winfo_exists():
@@ -65,29 +62,18 @@ class SegmentedReviewer(Frame):
 
     def _on_signoff_var_change(self, key, var):
         self.signoffs_data[key] = var.get()
-        self._update_overview_availability()
         if self.on_change_callback:
             self.on_change_callback()
 
-    def _update_overview_availability(self):
-        if not self.segment_keys: return
-        all_signed = all(self.signoff_vars[k].get() for k in self.segment_keys)
-        ov_item = self.sidebar_items.get("overview")
-        if ov_item:
-            ov_item.set_disabled(not all_signed)
+        # When external signoff changes (e.g. from sidebar), update footer buttons immediately
+        if key == self.active_key:
+            self._update_footer_state()
 
     def _build_ui(self):
         # Sidebar
         self.sidebar_frame = Frame(self, bg=c.DARK_BG, width=220)
         self.sidebar_frame.pack(side="left", fill="y", padx=(0, 10))
         self.sidebar_frame.pack_propagate(False)
-
-        ov_item = SidebarItem(self.sidebar_frame, "Full Text", True, command=lambda: self._navigate("overview"))
-        ov_item.pack(fill="x")
-        ToolTip(ov_item, "View and edit the entire document as one piece", delay=500)
-        self.sidebar_items["overview"] = ov_item
-
-        Frame(self.sidebar_frame, bg=c.WRAPPER_BORDER, height=1).pack(fill="x", pady=5)
 
         for key in self.segment_keys:
             name = self.friendly_names_map.get(key, key)
@@ -122,8 +108,8 @@ class SegmentedReviewer(Frame):
         self.footer_buttons_frame = Frame(self.footer, bg=c.DARK_BG)
         self.footer_buttons_frame.pack(fill='x', expand=True)
 
+        # Footer Buttons
         self.signoff_btn = RoundedButton(self.footer_buttons_frame, text="Sign Off & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=160, cursor="hand2")
-        self.signoff_btn.pack(side="right")
         ToolTip(self.signoff_btn, "Lock this section and move to the next incomplete part", delay=500)
 
         self.revert_btn = RoundedButton(self.footer_buttons_frame, text="Unlock to Edit", command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2")
@@ -131,6 +117,10 @@ class SegmentedReviewer(Frame):
 
         self.sync_btn = RoundedButton(self.footer_buttons_frame, text="Sync Unsigned", command=self._open_sync_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2")
         ToolTip(self.sync_btn, "Propagates your changes to other unlocked sections to maintain consistency.\n(Only affects sections that are not signed off)", delay=500)
+
+        # Merge Button (Initially hidden, appears when all sections are signed)
+        self.merge_btn = RoundedButton(self.footer_buttons_frame, text="Merge Segments", command=self._handle_final_merge, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=160, cursor="hand2")
+        ToolTip(self.merge_btn, "Finalize all segments and merge them into a single document", delay=500)
 
         self.questions_panel = Frame(self.main_view_container, bg=c.STATUS_BG, padx=10, pady=10)
 
@@ -168,7 +158,7 @@ class SegmentedReviewer(Frame):
         self.is_loading_nav = True
 
         try:
-            if self.active_key and self.active_key != "overview" and self.active_key in self.segments_data:
+            if self.active_key and self.active_key in self.segments_data:
                 self.segments_data[self.active_key] = self.editor.get("1.0", "end-1c").strip()
 
             self.active_key = None
@@ -185,9 +175,7 @@ class SegmentedReviewer(Frame):
             if key in self.sidebar_items:
                 self.sidebar_items[key].set_updated(False)
 
-            if key == "overview": self._show_overview()
-            else: self._show_segment(key)
-
+            self._show_segment(key)
             self.active_key = key
         finally:
             self.is_loading_nav = False
@@ -296,7 +284,7 @@ class SegmentedReviewer(Frame):
         self._apply_questions_visibility()
 
     def _apply_questions_visibility(self):
-        # Ensure q_btn exists (it might not in overview mode, though _show_segment creates it)
+        # Ensure q_btn exists
         if not hasattr(self, 'q_btn') or not self.q_btn.winfo_exists():
             self.questions_panel.pack_forget()
             return
@@ -330,32 +318,34 @@ class SegmentedReviewer(Frame):
             self.after(2000, lambda: btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
         except tk.TclError: messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
 
-    def _show_overview(self):
-        self.title_label.config(text="Full Text Overview")
-        self.signoff_btn.pack_forget()
-        self.revert_btn.pack_forget()
-        self.sync_btn.pack_forget()
-        self.is_raw_mode = tk.BooleanVar(value=False)
-        self.view_btn = RoundedButton(self.header_controls, text="Edit", command=self._toggle_view, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
-        self.view_btn.pack(side="right")
-        self.view_btn_tooltip = ToolTip(self.view_btn, "", delay=500)
-
-        self.editor.delete("1.0", "end")
-        self.editor.insert("1.0", SegmentManager.assemble_document(self.segments_data, self.segment_keys, self.friendly_names_map))
-        self._toggle_view(force_render=True)
-
     def _on_text_change(self, event=None):
         if self.is_loading_nav or self.active_key is None: return
-        if self.active_key != "overview":
-            current_text = self.editor.get("1.0", "end-1c").strip()
-            self.segments_data[self.active_key] = current_text
-            if self.on_change_callback: self.on_change_callback()
-            self._update_sync_button_visibility(current_text)
+        current_text = self.editor.get("1.0", "end-1c").strip()
+        self.segments_data[self.active_key] = current_text
+        if self.on_change_callback: self.on_change_callback()
+        self._update_sync_button_visibility(current_text)
 
     def _update_footer_state(self, key=None):
         target_key = key or self.active_key
-        if target_key == "overview" or not target_key: return
+        if not target_key: return
+
         is_signed = self.signoff_vars[target_key].get()
+        all_signed = all(self.signoff_vars[k].get() for k in self.segment_keys)
+
+        if all_signed:
+            # If all are signed, show Merge Button in the main slot
+            self.signoff_btn.pack_forget()
+            self.sync_btn.pack_forget()
+            self.merge_btn.pack(side="right")
+
+            # Allow reversion even if all are signed
+            self.revert_btn.pack(side="left", padx=(0, 10))
+            self.editor.text_widget.config(state="disabled", bg=c.DARK_BG)
+            return
+
+        # Not all signed: Hide Merge button
+        self.merge_btn.pack_forget()
+
         if is_signed:
             self.signoff_btn.pack_forget()
             self.sync_btn.pack_forget()
@@ -369,7 +359,7 @@ class SegmentedReviewer(Frame):
 
     def _update_sync_button_visibility(self, current_text):
         target_key = self.active_key
-        if not target_key or target_key == "overview": return
+        if not target_key: return
 
         is_signed = self.signoff_vars[target_key].get()
         if is_signed:
@@ -386,20 +376,49 @@ class SegmentedReviewer(Frame):
             self.sync_btn.pack_forget()
 
     def _sign_off(self):
+        # Save current state before proceeding
         self.segments_data[self.active_key] = self.editor.get("1.0", "end-1c").strip()
         self.signoff_vars[self.active_key].set(True)
+        # Footer update handles hiding SignOff and showing Merge/Revert logic
         self._update_footer_state()
-        self._update_overview_availability()
+
+        # Check for next unsigned segment to navigate to
+        next_key = None
         current_idx = self.segment_keys.index(self.active_key)
+
+        # 1. Search forward
         for i in range(current_idx + 1, len(self.segment_keys)):
             if not self.signoff_vars[self.segment_keys[i]].get():
-                self._navigate(self.segment_keys[i]); return
-        if all(self.signoff_vars[k].get() for k in self.segment_keys): self._navigate("overview")
+                next_key = self.segment_keys[i]
+                break
+
+        # 2. Search from beginning if not found
+        if not next_key:
+            for i in range(0, current_idx):
+                if not self.signoff_vars[self.segment_keys[i]].get():
+                    next_key = self.segment_keys[i]
+                    break
+
+        if next_key:
+            self._navigate(next_key)
+
+    def _handle_final_merge(self):
+        if not self.on_merge_callback:
+            return
+
+        # Confirm with user first
+        if not messagebox.askyesno("Confirm Merge", "Merge all segments into a single document?\n\nThis cannot be undone.", parent=self):
+            return
+
+        # Assemble full text
+        full_text = SegmentManager.assemble_document(self.segments_data, self.segment_keys, self.friendly_names_map)
+
+        # Pass full text to parent handler to switch views
+        self.on_merge_callback(full_text)
 
     def _revert_draft(self):
         self.signoff_vars[self.active_key].set(False)
         self._update_footer_state()
-        self._update_overview_availability()
 
     def _open_sync_dialog(self):
         self.segments_data[self.active_key] = self.editor.get("1.0", "end-1c").strip()

@@ -40,17 +40,19 @@ class WizardState:
         c_segs = self.project_data.get("concept_segments", {})
         t_segs = self.project_data.get("todo_segments", {})
 
-        concept_md_to_save = self.project_data.get("concept_md", "") if not c_segs else ""
-        todo_md_to_save = self.project_data.get("todo_md", "") if not t_segs else ""
+        c_md = self.project_data.get("concept_md", "")
+        t_md = self.project_data.get("todo_md", "")
 
+        # Logic Fix: If Markdown text exists, prioritize saving it.
+        # This ensures that once 'Merge' is clicked, the result is captured.
         return {
             "current_step": self.current_step,
             "name": self.project_data["name"].get(),
             "parent_folder": self.project_data["parent_folder"].get(),
             "stack": self.project_data["stack"].get(),
             "goal": self.project_data.get("goal", ""),
-            "concept_md": concept_md_to_save,
-            "todo_md": todo_md_to_save,
+            "concept_md": c_md,
+            "todo_md": t_md,
             "base_project_path": self.project_data["base_project_path"].get(),
             "base_project_files": self.project_data["base_project_files"],
             "include_base_reference": self.project_data["include_base_reference"].get(),
@@ -75,20 +77,16 @@ class WizardState:
         self.project_data["base_project_files"] = loaded_data.get("base_project_files", [])
         self.project_data["include_base_reference"].set(loaded_data.get("include_base_reference", True))
 
+        # Load Concept
         self.project_data["concept_segments"] = loaded_data.get("concept_segments", {})
         self.project_data["concept_signoffs"] = loaded_data.get("concept_signoffs", {})
-        if self.project_data["concept_segments"]:
-            self.project_data["concept_md"] = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
-        else:
-            self.project_data["concept_md"] = loaded_data.get("concept_md", "")
+        self.project_data["concept_md"] = loaded_data.get("concept_md", "")
 
+        # Load TODO
         self.project_data["todo_phases"] = loaded_data.get("todo_phases", [])
         self.project_data["todo_segments"] = loaded_data.get("todo_segments", {})
         self.project_data["todo_signoffs"] = loaded_data.get("todo_signoffs", {})
-        if self.project_data["todo_segments"]:
-            self.project_data["todo_md"] = SegmentManager.assemble_document(self.project_data["todo_segments"], c.TODO_ORDER, c.TODO_PHASES)
-        else:
-            self.project_data["todo_md"] = loaded_data.get("todo_md", "")
+        self.project_data["todo_md"] = loaded_data.get("todo_md", "")
 
         # Recalc validity to set the initial accessible step
         self._recalc_progress()
@@ -123,22 +121,12 @@ class WizardState:
         has_details = bool(self.project_data["name"].get())
 
         c_segs = self.project_data.get("concept_segments", {})
-        c_signs = self.project_data.get("concept_signoffs", {})
-        has_concept = False
-        if c_segs:
-            if all(c_signs.get(k) for k in c_segs.keys()):
-                has_concept = True
-        elif self.project_data.get("concept_md"):
-            has_concept = True
+        # Concept is complete ONLY if segments are cleared (merged) AND text exists
+        has_concept = (not c_segs) and bool(self.project_data.get("concept_md"))
 
         t_segs = self.project_data.get("todo_segments", {})
-        t_signs = self.project_data.get("todo_signoffs", {})
-        has_todo = False
-        if t_segs:
-            if all(t_signs.get(k) for k in t_segs.keys()):
-                has_todo = True
-        elif self.project_data.get("todo_md"):
-            has_todo = True
+        # TODO is complete ONLY if segments are cleared (merged) AND text exists
+        has_todo = (not t_segs) and bool(self.project_data.get("todo_md"))
 
         # Determine target max based on validity
         target_max = 1
@@ -149,10 +137,7 @@ class WizardState:
                 if has_todo:
                     target_max = 6
 
-        # NAVIGATION PROTECTION:
         # We only update max_accessible_step if the new calculated max is HIGHER.
-        # This prevents tabs from "locking" if the user navigates backward into
-        # a step that is in an intermediate state (e.g. they unsign a segment).
         if target_max > self.max_accessible_step:
             self.max_accessible_step = target_max
 
@@ -166,9 +151,20 @@ class WizardState:
         if hasattr(view, 'get_stack_content'):
             self.project_data["stack"].set(view.get_stack_content())
         if hasattr(view, 'get_assembled_content'):
-            content, _, _ = view.get_assembled_content()
+            content, segments, signoffs = view.get_assembled_content()
             view_type = str(type(view))
-            if "Concept" in view_type: self.project_data["concept_md"] = content
-            elif "Todo" in view_type: self.project_data["todo_md"] = content
+
+            # FIX: Only update if we actually got content or if segments are present.
+            # This prevents accidental wipes during view transitions.
+            if "Concept" in view_type:
+                if content or segments:
+                    self.project_data["concept_md"] = content
+                    self.project_data["concept_segments"] = segments
+                    self.project_data["concept_signoffs"] = signoffs
+            elif "Todo" in view_type:
+                if content or segments:
+                    self.project_data["todo_md"] = content
+                    self.project_data["todo_segments"] = segments
+                    self.project_data["todo_signoffs"] = signoffs
 
         self._recalc_progress()

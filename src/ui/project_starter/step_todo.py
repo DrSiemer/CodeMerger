@@ -8,9 +8,9 @@ from ...core.utils import strip_markdown_wrapper
 from ..widgets.markdown_renderer import MarkdownRenderer
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
-from ..widgets.switch_button import SwitchButton
 from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
+from ..tooltip import ToolTip
 
 class TodoView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
@@ -28,13 +28,16 @@ class TodoView(tk.Frame):
         self.questions_frame_visible = True
         self.editor_is_active = False
 
+        # State for merged view toggle
+        self.is_raw_mode = False
+
         self.has_segments = bool(self.project_data.get("todo_segments"))
 
         if self.has_segments:
             self.show_editor_view()
         elif self.todo_content:
             # Fallback for manual or legacy content
-            self.show_legacy_editor_view(self.todo_content)
+            self.show_merged_view(self.todo_content)
         else:
             self.show_generation_view()
 
@@ -64,6 +67,7 @@ class TodoView(tk.Frame):
                     # Populate the map for the SegmentedReviewer and assembly logic
                     self.questions_map = data
                     # Return empty list for the legacy self.questions used by manual mode
+                    # Manual/Merged mode questions will be set explicitly
                     return []
                 return []
         except (FileNotFoundError, json.JSONDecodeError) as e:
@@ -185,12 +189,11 @@ class TodoView(tk.Frame):
         if not parsed_segments:
             self.todo_content = content
             self.project_data["todo_md"] = content
-            self.show_legacy_editor_view(content)
+            self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
+            self.show_merged_view(content)
             return
 
         # Map friendly names back to internal keys if possible
-        # For TODOs, the constants map internal keys to friendly names. We need the reverse.
-        # c.TODO_PHASES = { "setup": "Environment Setup", ... }
         friendly_to_key = {v.lower(): k for k,v in c.TODO_PHASES.items()}
         mapped_segments = {}
 
@@ -221,7 +224,6 @@ class TodoView(tk.Frame):
         tk.Label(header, text="Review TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
         # Questions for TODO are loaded differently, we might need a map
-        # c.TODO_PHASES keys match the keys in todo_questions.json if we use the JSON file.
         questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
         try:
             with open(questions_path, "r", encoding="utf-8") as f:
@@ -245,31 +247,60 @@ class TodoView(tk.Frame):
             segments_data=self.project_data["todo_segments"],
             signoffs_data=self.project_data["todo_signoffs"],
             questions_map=q_map,
-            on_change_callback=self.wizard_controller.update_nav_state
+            on_change_callback=self.wizard_controller.update_nav_state,
+            on_merge_callback=self.handle_merge
         )
         self.reviewer.pack(fill="both", expand=True, pady=5)
         self.wizard_controller._update_navigation_controls()
 
-    def show_legacy_editor_view(self, content):
+    def handle_merge(self, full_text):
+        """
+        Transitions the view to a single full-text editor (merged state).
+        Clears segments and performs an immediate hard-save and lock-update.
+        """
+        self.project_data["todo_segments"].clear()
+        self.project_data["todo_signoffs"].clear()
+        self.project_data["todo_md"] = full_text
+
+        # Sync the Wizard State immediately to unlock the 'Next' button Logic
+        self.wizard_controller.state.update_from_view(self)
+        self.wizard_controller.state.save()
+
+        # Set generic questions for the full text
+        self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
+        self.show_merged_view(full_text)
+
+    def show_merged_view(self, content):
         self._clear_frame()
         self.editor_is_active = True
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=0)
+        self.grid_rowconfigure(1, weight=0) # Questions (dynamic)
+        self.grid_rowconfigure(2, weight=1) # Editor (expands)
         self.grid_columnconfigure(0, weight=1)
 
         header_frame = tk.Frame(self, bg=c.DARK_BG)
         header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        tk.Label(header_frame, text="Edit Your TODO Plan (Legacy Mode)", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+        tk.Label(header_frame, text="Edit Your TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
-        action_buttons_frame = tk.Frame(header_frame, bg=c.DARK_BG)
-        action_buttons_frame.pack(side="right")
-        tk.Label(action_buttons_frame, text="Raw", font=c.FONT_NORMAL, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(0,5))
-        self.view_switch = SwitchButton(action_buttons_frame, command=self._toggle_view, initial_state=False)
-        self.view_switch.pack(side='left')
-        tk.Label(action_buttons_frame, text="Rendered", font=c.FONT_NORMAL, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).pack(side='left', padx=(5,10))
+        controls = tk.Frame(header_frame, bg=c.DARK_BG)
+        controls.pack(side="right")
 
+        # Questions Toggle (if available)
+        if self.questions:
+             self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
+             self.q_btn.pack(side="left", padx=(0,10))
+
+        # View Switch Button
+        self.view_btn = RoundedButton(controls, text="Edit", command=self._toggle_view_mode, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
+        self.view_btn.pack(side="left", padx=(0, 0))
+        self.view_btn_tooltip = ToolTip(self.view_btn, "Switch to raw text editor", delay=500)
+
+        # Questions Container
+        self.questions_container = tk.Frame(self, bg=c.DARK_BG)
+        self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+
+        # Editor Frame
         self.editor_frame = tk.Frame(self, bg=c.DARK_BG)
-        self.editor_frame.grid(row=1, column=0, sticky="nsew")
+        self.editor_frame.grid(row=2, column=0, sticky="nsew")
         self.editor_frame.grid_rowconfigure(0, weight=1)
         self.editor_frame.grid_columnconfigure(0, weight=1)
 
@@ -279,53 +310,87 @@ class TodoView(tk.Frame):
             on_zoom=self.wizard_controller.adjust_font_size
         )
         self.editor_text.insert("1.0", content)
+        # Bind text change for saving
+        self.editor_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("todo_md", self.editor_text.get("1.0", "end-1c").strip()))
+
         self.markdown_renderer = MarkdownRenderer(
             self.editor_frame,
             base_font_size=self.wizard_controller.font_size,
             on_zoom=self.wizard_controller.adjust_font_size
         )
 
-        self._toggle_view(self.view_switch.get_state())
-
-        if self.questions and self.questions_frame_visible:
-            self._create_question_prompter(self)
+        # Default to Rendered View
+        self.is_raw_mode = False
+        self._apply_view_mode()
 
         self.wizard_controller._update_navigation_controls()
 
     def is_editor_visible(self):
         return self.editor_is_active
 
-    def _toggle_view(self, is_rendered):
-        if is_rendered:
-            self.editor_text.grid_forget()
-            markdown_content = self.editor_text.get("1.0", "end-1c")
-            self.markdown_renderer.set_markdown(markdown_content)
-            self.markdown_renderer.grid(row=0, column=0, sticky="nsew")
-        else:
+    def _toggle_view_mode(self):
+        self.is_raw_mode = not self.is_raw_mode
+        self._apply_view_mode()
+
+    def _apply_view_mode(self):
+        if self.is_raw_mode:
             self.markdown_renderer.grid_forget()
             self.editor_text.grid(row=0, column=0, sticky="nsew")
 
-    def _create_question_prompter(self, parent):
-        self.questions_frame = tk.Frame(parent, bg=c.STATUS_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-        self.questions_frame.grid(row=2, column=0, sticky="ew", pady=(10, 0))
-        content = tk.Frame(self.questions_frame, bg=c.STATUS_BG, padx=10, pady=10)
+            self.view_btn.config(text="Render", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+            self.view_btn_tooltip.text = "Switch to stylized Markdown preview"
+        else:
+            current_text = self.editor_text.get("1.0", "end-1c")
+            self.markdown_renderer.set_markdown(current_text)
+            self.editor_text.grid_forget()
+            self.markdown_renderer.grid(row=0, column=0, sticky="nsew")
+
+            self.view_btn.config(text="Edit", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+            self.view_btn_tooltip.text = "Switch to raw text editor"
+
+        if self.view_btn_tooltip.tooltip_window:
+             self.view_btn_tooltip.hide_tooltip()
+             self.view_btn_tooltip.show_tooltip()
+
+    def _toggle_questions(self):
+        self.questions_frame_visible = not self.questions_frame_visible
+        if self.questions_frame_visible:
+            self._create_question_prompter()
+            self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+        else:
+            for widget in self.questions_container.winfo_children():
+                widget.destroy()
+            self.q_btn.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+
+    def _create_question_prompter(self):
+        if self.questions_container.winfo_children(): return
+
+        panel = tk.Frame(self.questions_container, bg=c.STATUS_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
+        panel.pack(fill='x', expand=True)
+
+        content = tk.Frame(panel, bg=c.STATUS_BG, padx=10, pady=10)
         content.pack(fill='x', expand=True)
-        self.question_label = tk.Label(content, text="", wraplength=500, justify="left", anchor="w", font=c.FONT_NORMAL, bg=c.STATUS_BG, fg=c.TEXT_COLOR)
+
+        self.question_label = tk.Label(content, text="", wraplength=600, justify="left", anchor="w", font=c.FONT_NORMAL, bg=c.STATUS_BG, fg=c.TEXT_COLOR)
         self.question_label.pack(side='left', fill='x', expand=True)
+
         actions_frame = tk.Frame(content, bg=c.STATUS_BG)
         actions_frame.pack(side='left', padx=(10,0))
+
         nav_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
-        nav_frame.pack()
+        nav_frame.pack(anchor='e')
         self.prev_question_button = RoundedButton(nav_frame, text="<", command=self._show_prev_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
         self.prev_question_button.pack(side="left")
         self.next_question_button = RoundedButton(nav_frame, text=">", command=self._show_next_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
         self.next_question_button.pack(side="left", padx=2)
-        bottom_actions = tk.Frame(actions_frame, bg=c.STATUS_BG)
-        bottom_actions.pack(pady=(2,0))
-        copy_btn = RoundedButton(bottom_actions, text="Copy", command=lambda: self._copy_question_prompt(copy_btn), width=40, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        copy_btn.pack(side='left')
-        remove_btn = RoundedButton(bottom_actions, text='X', command=self._remove_current_question, width=24, height=24, font=(c.FONT_SMALL_BUTTON[0], 10, 'bold'), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        remove_btn.pack(side='left', padx=2)
+
+        copy_btn_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
+        copy_btn_frame.pack(anchor='e', pady=(5, 0))
+
+        copy_btn = RoundedButton(copy_btn_frame, text="Copy Context & Question", command=lambda: self._copy_question_prompt(copy_btn), width=160, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
+        copy_btn.pack(side="right")
+        ToolTip(copy_btn, "Copy the full text and this question, asking for feedback (no rewrite)", delay=500)
+
         self._update_question_display()
 
     def _update_question_display(self):
@@ -348,36 +413,16 @@ class TodoView(tk.Frame):
         try:
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
-            prompt_text = f"""Please act as a senior project manager and provide critical feedback on the following project plan.
 
-### Your Task
-{current_question}
+            prompt_text = f"### Full TODO Plan\n```markdown\n{todo_content}\n```\n\n### Question\n{current_question}\n\nInstruction: Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
 
----
-
-### Project TODO Plan
-```markdown
-{todo_content}
-```"""
             self.clipboard_clear()
             self.clipboard_append(prompt_text)
-            original_text = button.text
-            original_bg = button.original_bg_color
+
             button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-            self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
+            self.after(2000, lambda: button.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, state='normal'))
         except Exception as e:
             messagebox.showerror("Error", f"Could not copy to clipboard: {e}", parent=self)
-
-    def _remove_current_question(self):
-        if not self.questions or not hasattr(self, 'questions_frame') or not self.questions_frame.winfo_exists(): return
-        del self.questions[self.current_question_index]
-        if not self.questions:
-            self.questions_frame_visible = False
-            self.questions_frame.destroy()
-            return
-        if self.current_question_index >= len(self.questions):
-            self.current_question_index = len(self.questions) - 1
-        self._update_question_display()
 
     def handle_reset(self):
         if messagebox.askyesno("Confirm", "Are you sure you want to start over? Current plan will be lost.", parent=self):
@@ -393,6 +438,10 @@ class TodoView(tk.Frame):
             self.wizard_controller._update_navigation_controls()
 
     def get_assembled_content(self):
+        # FIX: If segments are empty (merged mode), return the existing flat MD
+        if not self.project_data.get("todo_segments"):
+            return self.project_data.get("todo_md", ""), {}, {}
+
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
         full_text = SegmentManager.assemble_document(
             self.project_data["todo_segments"],
