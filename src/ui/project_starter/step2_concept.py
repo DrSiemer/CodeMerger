@@ -31,6 +31,15 @@ class Step2ConceptView(tk.Frame):
         else:
             self.show_initial_view()
 
+    def refresh_fonts(self):
+        """Updates font sizes for all active text/renderer widgets."""
+        if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
+            self.goal_text.set_font_size(self.wizard_controller.font_size)
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+            self.llm_response_text.set_font_size(self.wizard_controller.font_size)
+        if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
+            self.reviewer.refresh_fonts(self.wizard_controller.font_size)
+
     def _load_questions(self):
         questions_path = os.path.join(REFERENCE_DIR, "concept_questions.json")
         try:
@@ -69,7 +78,11 @@ class Step2ConceptView(tk.Frame):
         tk.Label(self, text="Describe Your Goal", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 5))
         tk.Label(self, text="Briefly describe what you want to build.", wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").pack(side='top', anchor="w", pady=(0, 10))
 
-        self.goal_text = ScrollableText(self, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.goal_text = ScrollableText(
+            self, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
+            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
+            on_zoom=self.wizard_controller.adjust_font_size
+        )
         self.goal_text.pack(side='top', fill="both", expand=True, pady=5)
 
         existing_goal = self.project_data.get("goal", "").strip()
@@ -127,7 +140,11 @@ class Step2ConceptView(tk.Frame):
         ToolTip(copy_btn, "Copy the prompt to your clipboard for use with an LLM", delay=500)
 
         tk.Label(self, text="2. Paste LLM Response (with tags)", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 0))
-        self.llm_response_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.llm_response_text = ScrollableText(
+            self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
+            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
+            on_zoom=self.wizard_controller.adjust_font_size
+        )
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
 
     def _copy_to_clip(self, button, text):

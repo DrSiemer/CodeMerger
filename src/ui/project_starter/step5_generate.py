@@ -13,23 +13,26 @@ from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
 
 class Step5GenerateView(tk.Frame):
-    def __init__(self, parent, project_data, create_project_callback):
+    def __init__(self, parent, project_data, create_project_callback, wizard_controller):
         super().__init__(parent, bg=c.DARK_BG)
         self.create_project_callback = create_project_callback
         self.project_data = project_data
-        self._trace_ids = []
+        self.wizard_controller = wizard_controller
+        self._trace_ids = [] # Track traces for cleanup
 
         prompt = self._generate_master_prompt(project_data)
 
         self.grid_columnconfigure(0, weight=1)
 
+        # We assign equal weight to both text areas so they divide
+        # the remaining vertical space 50/50.
         self.grid_rowconfigure(6, weight=1)
         self.grid_rowconfigure(8, weight=1)
 
-        # Header
+        # 0. Header
         tk.Label(self, text="Finalize and Generate", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, pady=(0, 10), sticky="w")
 
-        # Destination Folder Section
+        # 1. Destination Folder Section
         dest_label_frame = tk.Frame(self, bg=c.DARK_BG)
         dest_label_frame.grid(row=1, column=0, sticky="ew", pady=(0, 5))
         tk.Label(dest_label_frame, text="1. Select Parent Folder for the project", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
@@ -43,7 +46,7 @@ class Step5GenerateView(tk.Frame):
         browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
         browse_btn.pack(side='left', padx=(5, 0))
 
-        # Path Preview
+        # 2. Path Preview
         self.preview_container = tk.Frame(self, bg=c.STATUS_BG, padx=10, pady=8)
         self.preview_container.grid(row=3, column=0, sticky="ew", pady=(5, 10))
 
@@ -51,7 +54,7 @@ class Step5GenerateView(tk.Frame):
         self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, wraplength=700, justify='left')
         self.preview_path_label.pack(anchor='w', pady=(2, 0))
 
-        # Prompt Copy Section
+        # 3. Prompt Copy Section
         prompt_header = tk.Frame(self, bg=c.DARK_BG)
         prompt_header.grid(row=4, column=0, pady=(5, 5), sticky="ew")
         tk.Label(prompt_header, text="2. Review and Copy the Master Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
@@ -62,20 +65,28 @@ class Step5GenerateView(tk.Frame):
 
         tk.Label(self, text="Review and copy the prompt to paste into your LLM.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=5, column=0, sticky="w")
 
-        self.prompt_text = ScrollableText(self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, insertbackground=c.TEXT_COLOR)
+        self.prompt_text = ScrollableText(
+            self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
+            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
+            on_zoom=self.wizard_controller.adjust_font_size
+        )
         self.prompt_text.insert(tk.END, prompt)
         self.prompt_text.grid(row=6, column=0, pady=(5, 10), sticky="nsew")
 
-        # Response Section
+        # 4. Response Section
         tk.Label(self, text="3. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=7, column=0, pady=(5, 5), sticky="w")
 
-        self.llm_result_text = ScrollableText(self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.llm_result_text = ScrollableText(
+            self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
+            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
+            on_zoom=self.wizard_controller.adjust_font_size
+        )
         self.llm_result_text.grid(row=8, column=0, pady=(0, 10), sticky="nsew")
 
         self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_input)
         self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_input)
 
-        # Footer
+        # 5. Footer
         footer_frame = tk.Frame(self, bg=c.DARK_BG)
         footer_frame.grid(row=9, column=0, sticky="ew", pady=(5, 0))
 
@@ -92,6 +103,12 @@ class Step5GenerateView(tk.Frame):
         self._trace_ids = [("parent_folder", t1), ("name", t2)]
 
         self._update_preview_path()
+
+    def refresh_fonts(self):
+        if hasattr(self, 'prompt_text') and self.prompt_text.winfo_exists():
+            self.prompt_text.set_font_size(self.wizard_controller.font_size)
+        if hasattr(self, 'llm_result_text') and self.llm_result_text.winfo_exists():
+            self.llm_result_text.set_font_size(self.wizard_controller.font_size)
 
     def destroy(self):
         """Cleanup traces when the view is destroyed to prevent TclErrors."""

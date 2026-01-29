@@ -55,6 +55,12 @@ class SegmentedReviewer(Frame):
 
         self._navigate(start_key)
 
+    def refresh_fonts(self, size):
+        if hasattr(self, 'editor') and self.editor.winfo_exists():
+            self.editor.set_font_size(size)
+        if hasattr(self, 'renderer') and self.renderer.winfo_exists():
+            self.renderer.set_font_size(size)
+
     def _on_signoff_var_change(self, key, var):
         self.signoffs_data[key] = var.get()
         self._update_overview_availability()
@@ -131,10 +137,18 @@ class SegmentedReviewer(Frame):
         self.display_container.grid_rowconfigure(0, weight=1)
         self.display_container.grid_columnconfigure(0, weight=1)
 
-        self.editor = ScrollableText(self.display_container, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_DEFAULT)
+        self.editor = ScrollableText(
+            self.display_container, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
+            font=(c.FONT_FAMILY_PRIMARY, self.master.wizard_controller.font_size),
+            on_zoom=self.master.wizard_controller.adjust_font_size
+        )
         self.editor.text_widget.bind("<KeyRelease>", self._on_text_change)
 
-        self.renderer = MarkdownRenderer(self.display_container, base_font_size=11)
+        self.renderer = MarkdownRenderer(
+            self.display_container,
+            base_font_size=self.master.wizard_controller.font_size,
+            on_zoom=self.master.wizard_controller.adjust_font_size
+        )
         self.renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
 
     def _on_renderer_double_click(self, event):

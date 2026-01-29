@@ -11,13 +11,13 @@ except ImportError:
 class MarkdownRenderer(tk.Frame):
     """
     A custom markdown renderer using a standard tk.Text widget to provide
-    reliable layout, styling, and scrolling.
-    Accepts base_font_size to scale text for better readability.
+    reliable layout, styling, and scrolling. Includes auto-hiding scrollbar.
     """
-    def __init__(self, parent, base_font_size=10, *args, **kwargs):
+    def __init__(self, parent, base_font_size=10, on_zoom=None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.config(bg=c.TEXT_INPUT_BG)
         self.base_font_size = base_font_size
+        self.on_zoom = on_zoom
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -32,17 +32,16 @@ class MarkdownRenderer(tk.Frame):
             self.text_widget.grid(row=0, column=0, sticky="nsew")
 
             self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.text_widget.yview, style="Vertical.TScrollbar")
-            self.scrollbar.grid(row=0, column=1, sticky="ns")
+
+            # Initial configuration
             self.text_widget.configure(yscrollcommand=self.scrollbar.set)
+            self._configure_tags()
 
-            # --- Tag Configurations for Markdown Elements ---
-            self.text_widget.tag_configure("h1", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 12, 'bold'), spacing1=20, spacing3=10)
-            self.text_widget.tag_configure("h2", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 6, 'bold'), spacing1=16, spacing3=8)
-            self.text_widget.tag_configure("h3", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 2, 'bold'), spacing1=12, spacing3=5)
-            self.text_widget.tag_configure("bold", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'bold'))
-            self.text_widget.tag_configure("italic", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'italic'))
-            self.text_widget.tag_configure("code", foreground="#DEB887", font=("Courier New", self.base_font_size - 1))
+            # Bindings for Scrollbar Management
+            self.text_widget.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar))
 
+            # Zoom binding
+            self.text_widget.bind("<Control-MouseWheel>", self._on_mousewheel_zoom)
         else:
             error_message = "Markdown rendering disabled. Please install 'markdown2'."
             self.error_label = tk.Label(
@@ -50,6 +49,54 @@ class MarkdownRenderer(tk.Frame):
                 fg=c.TEXT_SUBTLE_COLOR, bg=c.DARK_BG, wraplength=400
             )
             self.error_label.grid(row=0, column=0)
+
+    def _manage_scrollbar(self):
+        """
+        Checks if the content is taller than the frame.
+        Shows scrollbar if needed, hides it if not.
+        """
+        if not MARKDOWN2_INSTALLED: return
+
+        # Get the current scroll position (0.0 to 1.0)
+        top_fraction, bottom_fraction = self.text_widget.yview()
+
+        # We need a scrollbar if we can't see the top (scrolled down)
+        # OR we can't see the bottom (content too long)
+        is_needed = top_fraction > 0.0 or bottom_fraction < 1.0
+        is_visible = self.scrollbar.winfo_ismapped()
+
+        if is_needed and not is_visible:
+            self.scrollbar.grid(row=0, column=1, sticky="ns")
+        elif not is_needed and is_visible:
+            self.scrollbar.grid_forget()
+
+    def _configure_tags(self):
+        """Configures or re-configures font tags based on current base_font_size."""
+        # Update base font
+        self.text_widget.configure(font=(c.FONT_FAMILY_PRIMARY, self.base_font_size))
+
+        # Update headers relative to base size
+        self.text_widget.tag_configure("h1", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 12, 'bold'), spacing1=20, spacing3=10)
+        self.text_widget.tag_configure("h2", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 6, 'bold'), spacing1=16, spacing3=8)
+        self.text_widget.tag_configure("h3", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size + 2, 'bold'), spacing1=12, spacing3=5)
+        self.text_widget.tag_configure("bold", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'bold'))
+        self.text_widget.tag_configure("italic", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'italic'))
+        self.text_widget.tag_configure("code", foreground="#DEB887", font=("Courier New", self.base_font_size - 1))
+
+        # Recalculate scrollbar after font change affects height
+        self.after_idle(self._manage_scrollbar)
+
+    def _on_mousewheel_zoom(self, event):
+        if self.on_zoom:
+            delta = 1 if event.delta > 0 else -1
+            self.on_zoom(delta)
+            return "break"
+
+    def set_font_size(self, size):
+        """Updates the base font size and refreshes all tags."""
+        if not MARKDOWN2_INSTALLED: return
+        self.base_font_size = size
+        self._configure_tags()
 
     def set_markdown(self, markdown_text):
         if not MARKDOWN2_INSTALLED: return
@@ -59,6 +106,7 @@ class MarkdownRenderer(tk.Frame):
 
         if not markdown_text:
             self.text_widget.config(state=tk.DISABLED)
+            self.after_idle(self._manage_scrollbar) # Check on empty
             return
 
         for line in markdown_text.split('\n'):
@@ -75,7 +123,6 @@ class MarkdownRenderer(tk.Frame):
                 indent_level = len(indent) // 2
                 tag_name = f"checkbox_indent_{indent_level}"
 
-                # Hanging indent calculation for Checkboxes
                 base_indent = 25 + indent_level * 20
                 hanging_indent = base_indent + 22
 
@@ -87,7 +134,6 @@ class MarkdownRenderer(tk.Frame):
                 indent_level = len(indent) // 2
                 tag_name = f"bullet_indent_{indent_level}"
 
-                # Hanging indent calculation for Bullets
                 base_indent = 25 + indent_level * 20
                 hanging_indent = base_indent + 15
 
@@ -104,6 +150,9 @@ class MarkdownRenderer(tk.Frame):
         self._apply_format_and_hide_symbols(r"`(.*?)`", "code")
 
         self.text_widget.config(state=tk.DISABLED)
+
+        # Check scrollbar after content is loaded
+        self.after_idle(self._manage_scrollbar)
 
     def _apply_format_and_hide_symbols(self, pattern, tag):
         start_index = "1.0"

@@ -33,6 +33,9 @@ class ProjectStarterDialog(tk.Toplevel):
         # Initialize the state manager
         self.state = wizard_state.WizardState()
 
+        # Font Scaling State (Unified)
+        self.font_size = c.FONT_NORMAL[1] # Default 12
+
         self.title("Project Starter Wizard")
         if parent.iconbitmap():
             try:
@@ -77,6 +80,20 @@ class ProjectStarterDialog(tk.Toplevel):
         self.focus_force()
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.bind("<Control-0>", self.reset_zoom)
+
+    def reset_zoom(self, event=None):
+        """Resets font size to default."""
+        self.font_size = c.FONT_NORMAL[1]
+        if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
+            self.current_view.refresh_fonts()
+
+    def adjust_font_size(self, delta):
+        """Adjusts the font size for all wizard components simultaneously."""
+        new_size = self.font_size + delta
+        self.font_size = max(8, min(new_size, 40))
+        if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
+            self.current_view.refresh_fonts()
 
     def _build_ui(self):
         main_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
@@ -256,6 +273,7 @@ class ProjectStarterDialog(tk.Toplevel):
     def _go_to_step(self, target_step_id):
         if target_step_id == self.state.current_step: return
 
+        # Prevent jumping to locked steps via tab clicks
         is_accessible = (target_step_id <= self.state.max_accessible_step) or (target_step_id == 2)
         if not is_accessible:
             return
@@ -299,7 +317,7 @@ class ProjectStarterDialog(tk.Toplevel):
         elif step == 5:
             self.current_view = Step4TodoView(view_frame, self, self.state.project_data)
         elif step == 6:
-            self.current_view = Step5GenerateView(view_frame, self.state.project_data, self.create_project)
+            self.current_view = Step5GenerateView(view_frame, self.state.project_data, self.create_project, wizard_controller=self)
 
         if self.current_view:
             self.current_view.pack(expand=True, fill="both")
