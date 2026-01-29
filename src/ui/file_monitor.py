@@ -45,8 +45,18 @@ class FileMonitor:
         # --- 0. Check for external config changes (e.g. git switch) ---
         if project_config.has_external_changes():
             try:
+                # Capture current known files from memory before reload.
+                # If we switch to a branch where .allcode is empty/fresh, we don't want to lose
+                # our "seen" files history, otherwise everything shows up as NEW.
+                current_memory_known = set(project_config.known_files)
+
                 # Reload the config from disk to avoid overwriting it with stale state
                 project_config.load()
+
+                # Merge memory back into the loaded config
+                if current_memory_known:
+                    merged_known = set(project_config.known_files) | current_memory_known
+                    project_config.known_files = sorted(list(merged_known))
 
                 # Notify UI of the reload
                 self.app.status_var.set("Reloaded project settings due to external change.")
@@ -84,6 +94,8 @@ class FileMonitor:
         config_changed = False
 
         # --- 1. Handle Deleted Files ---
+        # This logic handles actual deletions safely. Files are only removed from 'known_files'
+        # if the filesystem scan confirms they are missing from 'current_set'.
         deleted_files = known_set - current_set
         if deleted_files:
             # Remove from global known list

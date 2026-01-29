@@ -212,18 +212,16 @@ class ProjectConfig:
                 p_data['unknown_files'] = []
                 config_was_updated = True
 
-        # Clean known_files (project-level)
-        self.known_files = [f for f in all_found_known if os.path.isfile(os.path.join(self.base_dir, f))]
-        if len(self.known_files) < len(all_found_known):
-            config_was_updated = True
+        # Load known_files (project-level) WITHOUT strict existence check
+        # We rely on FileMonitor to clean up deleted files later.
+        # This prevents mass deletion of known files if the drive/folder is temporarily inaccessible during load.
+        self.known_files = sorted(list(all_found_known))
 
         # Clean selected_files and unknown_files within each profile
         for profile_name, profile_data in self.profiles.items():
-            # Clean unknown_files
-            orig_unknown = profile_data.get('unknown_files', [])
-            profile_data['unknown_files'] = [f for f in orig_unknown if os.path.isfile(os.path.join(self.base_dir, f))]
-            if len(profile_data['unknown_files']) < len(orig_unknown):
-                config_was_updated = True
+            # Standardize unknown_files list
+            orig_unknown = set(profile_data.get('unknown_files', []))
+            profile_data['unknown_files'] = sorted(list(orig_unknown))
 
             files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
             if files_cleaned_in_profile:
@@ -244,6 +242,8 @@ class ProjectConfig:
         cleaned_selection = []
         if not is_new_format:
             if original_selection: profile_was_updated = True
+            # Legacy migration MUST read files to calculate initial tokens/hash.
+            # If files are missing during migration, they are skipped. This is acceptable for legacy upgrade.
             for f_path in original_selection:
                 full_path = os.path.join(self.base_dir, f_path)
                 if os.path.isfile(full_path):
@@ -256,11 +256,13 @@ class ProjectConfig:
                         cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
                     except OSError: continue
         else:
+            # Standard load: Do NOT check for file existence here.
+            # Preserving entries allows the UI to handle "missing" files gracefully or
+            # recover them if they reappear (network share glitches, git switching).
             for f_info in original_selection:
-                if os.path.isfile(os.path.join(self.base_dir, f_info['path'])):
-                    if 'tokens' not in f_info or 'lines' not in f_info:
-                        profile_was_updated = True
-                    cleaned_selection.append(f_info)
+                if 'tokens' not in f_info or 'lines' not in f_info:
+                    profile_was_updated = True
+                cleaned_selection.append(f_info)
 
         profile_data['selected_files'] = cleaned_selection
         files_were_cleaned = len(cleaned_selection) < len(original_selection)
