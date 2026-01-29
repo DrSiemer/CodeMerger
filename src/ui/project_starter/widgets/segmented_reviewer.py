@@ -30,6 +30,7 @@ class SegmentedReviewer(Frame):
         self.sidebar_items = {}
         self.current_question_index = 0
         self.is_loading_nav = False # Prevents overwrite race conditions
+        self.current_segment_original_text = "" # Tracks content state for sync button logic
 
         self.signoff_vars = {}
         for key in self.segment_keys:
@@ -193,13 +194,26 @@ class SegmentedReviewer(Frame):
     def _show_segment(self, key):
         name = self.friendly_names_map.get(key, key)
         self.title_label.config(text=name)
-        self.editor.insert("1.0", self.segments_data.get(key, ""))
+
+        # Capture original content for sync logic
+        self.current_segment_original_text = self.segments_data.get(key, "")
+        self.editor.insert("1.0", self.current_segment_original_text)
 
         self.q_btn = RoundedButton(self.header_controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
         self.q_btn.pack(side="left")
         ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
 
-        self.rewrite_btn = RoundedButton(self.header_controls, text="Rewrite unsigned", command=self._open_rewrite_dialog, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
+        # UPDATED: Renamed to "Rewrite", used FONT_BOLD, but kept height manageable
+        self.rewrite_btn = RoundedButton(
+            self.header_controls,
+            text="Rewrite",
+            command=self._open_rewrite_dialog,
+            bg=c.BTN_BLUE,
+            fg=c.BTN_BLUE_TEXT,
+            font=c.FONT_BOLD,
+            height=24,
+            cursor="hand2"
+        )
         self.rewrite_btn.pack(side="left", padx=(10, 0))
         ToolTip(self.rewrite_btn, "Give an instruction to modify all unsigned segments at once.", delay=500)
 
@@ -341,8 +355,10 @@ class SegmentedReviewer(Frame):
     def _on_text_change(self, event=None):
         if self.is_loading_nav or self.active_key is None: return
         if self.active_key != "overview":
-            self.segments_data[self.active_key] = self.editor.get("1.0", "end-1c").strip()
+            current_text = self.editor.get("1.0", "end-1c").strip()
+            self.segments_data[self.active_key] = current_text
             if self.on_change_callback: self.on_change_callback()
+            self._update_sync_button_visibility(current_text)
 
     def _update_footer_state(self, key=None):
         target_key = key or self.active_key
@@ -356,10 +372,26 @@ class SegmentedReviewer(Frame):
         else:
             self.revert_btn.pack_forget()
             self.signoff_btn.pack(side="right")
-            other_unsigned = any(not self.signoff_vars[k].get() for k in self.segment_keys if k != target_key)
-            if other_unsigned and bool(self.segments_data.get(target_key, "").strip()): self.sync_btn.pack(side="left")
-            else: self.sync_btn.pack_forget()
+            self._update_sync_button_visibility(self.segments_data.get(target_key, "").strip())
             self.editor.text_widget.config(state="normal", bg=c.TEXT_INPUT_BG)
+
+    def _update_sync_button_visibility(self, current_text):
+        target_key = self.active_key
+        if not target_key or target_key == "overview": return
+
+        is_signed = self.signoff_vars[target_key].get()
+        if is_signed:
+            self.sync_btn.pack_forget()
+            return
+
+        other_unsigned = any(not self.signoff_vars[k].get() for k in self.segment_keys if k != target_key)
+        has_changes = current_text != self.current_segment_original_text
+
+        if other_unsigned and has_changes and current_text:
+            if not self.sync_btn.winfo_ismapped():
+                self.sync_btn.pack(side="left")
+        else:
+            self.sync_btn.pack_forget()
 
     def _sign_off(self):
         self.segments_data[self.active_key] = self.editor.get("1.0", "end-1c").strip()
