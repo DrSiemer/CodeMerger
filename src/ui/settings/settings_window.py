@@ -10,7 +10,6 @@ from .application_settings import ApplicationSettingsFrame
 from .file_manager_settings import FileManagerSettingsFrame
 from .prompts_settings import PromptsSettingsFrame
 from .editor_settings import EditorSettingsFrame
-from .wizard_settings import WizardSettingsFrame
 from ... import constants as c
 from ..window_utils import position_window, save_window_geometry
 
@@ -44,8 +43,7 @@ class SettingsWindow(Toplevel):
             'token_count_enabled': BooleanVar(value=self.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)),
             'token_limit': StringVar(value=str(self.config.get('token_limit', 0) if self.config.get('token_limit', 0) != 0 else "")),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
-            'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT))),
-            'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', ''))
+            'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT)))
         }
 
     def _init_styles(self):
@@ -89,9 +87,6 @@ class SettingsWindow(Toplevel):
         editor_settings = EditorSettingsFrame(content_frame, self.vars)
         editor_settings.pack(fill='x', expand=True)
 
-        wizard_settings = WizardSettingsFrame(content_frame, self.vars)
-        wizard_settings.pack(fill='x', expand=True)
-
         # --- Action Buttons (Outside scroll area) ---
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=1, column=0, sticky='ew', padx=20, pady=(0, 20))
@@ -119,7 +114,6 @@ class SettingsWindow(Toplevel):
         config['enable_new_file_check'] = self.vars['enable_new_file_check'].get()
         config['token_count_enabled'] = self.vars['token_count_enabled'].get()
         config['enable_compact_mode_on_minimize'] = self.vars['enable_compact_mode_on_minimize'].get()
-        config['default_parent_folder'] = self.vars['default_parent_folder'].get()
         config.update(prompt_values)
 
         try:

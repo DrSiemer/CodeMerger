@@ -17,53 +17,128 @@ class Step5GenerateView(tk.Frame):
         super().__init__(parent, bg=c.DARK_BG)
         self.create_project_callback = create_project_callback
         self.project_data = project_data
+        self._trace_ids = []
 
         prompt = self._generate_master_prompt(project_data)
 
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(3, weight=1)
-        self.grid_rowconfigure(6, weight=1)
 
+        self.grid_rowconfigure(6, weight=1)
+        self.grid_rowconfigure(8, weight=1)
+
+        # Header
         tk.Label(self, text="Finalize and Generate", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, pady=(0, 10), sticky="w")
 
+        # Destination Folder Section
+        dest_label_frame = tk.Frame(self, bg=c.DARK_BG)
+        dest_label_frame.grid(row=1, column=0, sticky="ew", pady=(0, 5))
+        tk.Label(dest_label_frame, text="1. Select Parent Folder for the project", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+
+        folder_select_frame = tk.Frame(self, bg=c.DARK_BG)
+        folder_select_frame.grid(row=2, column=0, sticky="ew", pady=(0, 5))
+
+        self.folder_entry = tk.Entry(folder_select_frame, textvariable=self.project_data["parent_folder"], bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
+        self.folder_entry.pack(side='left', fill='x', expand=True, ipady=4)
+
+        browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
+        browse_btn.pack(side='left', padx=(5, 0))
+
+        # Path Preview
+        self.preview_container = tk.Frame(self, bg=c.STATUS_BG, padx=10, pady=8)
+        self.preview_container.grid(row=3, column=0, sticky="ew", pady=(5, 10))
+
+        tk.Label(self.preview_container, text="A new folder will be created:", font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.STATUS_BG, fg=c.TEXT_COLOR).pack(anchor='w')
+        self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, wraplength=700, justify='left')
+        self.preview_path_label.pack(anchor='w', pady=(2, 0))
+
+        # Prompt Copy Section
         prompt_header = tk.Frame(self, bg=c.DARK_BG)
-        prompt_header.grid(row=1, column=0, pady=(0, 5), sticky="ew")
-        tk.Label(prompt_header, text="1. Review and Copy the Master Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
-        copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        prompt_header.grid(row=4, column=0, pady=(5, 5), sticky="ew")
+        tk.Label(prompt_header, text="2. Review and Copy the Master Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+
+        copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
         copy_btn.pack(side="right")
         ToolTip(copy_btn, "Copy the final master prompt to clipboard", delay=500)
 
-        tk.Label(self, text="Review, edit if needed, and then copy the master prompt to paste into your preferred Large Language Model.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=2, column=0, sticky="w")
+        tk.Label(self, text="Review and copy the prompt to paste into your LLM.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=5, column=0, sticky="w")
 
-        self.prompt_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, insertbackground=c.TEXT_COLOR)
+        self.prompt_text = ScrollableText(self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL, insertbackground=c.TEXT_COLOR)
         self.prompt_text.insert(tk.END, prompt)
-        self.prompt_text.grid(row=3, column=0, pady=10, sticky="nsew")
+        self.prompt_text.grid(row=6, column=0, pady=(5, 10), sticky="nsew")
 
-        tk.Label(self, text="2. Paste the Result", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=4, column=0, pady=(10, 5), sticky="w")
-        tk.Label(self, text="Paste the full, unmodified response from the LLM into the text area below.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=5, column=0, sticky="w")
+        # Response Section
+        tk.Label(self, text="3. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=7, column=0, pady=(5, 5), sticky="w")
 
-        self.llm_result_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
-        self.llm_result_text.grid(row=6, column=0, pady=10, sticky="nsew")
+        self.llm_result_text = ScrollableText(self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.llm_result_text.grid(row=8, column=0, pady=(0, 10), sticky="nsew")
 
-        # Bind to text changes to validate input
         self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_input)
         self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_input)
 
-        self.create_button = RoundedButton(self, text="Create Project Files", command=self.on_create_project, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
-        self.create_button.grid(row=7, column=0, pady=10, sticky="ew")
-        self.create_button.set_state('disabled')
-        ToolTip(self.create_button, "Initialize your project folder and write files to disk", delay=500)
+        # Footer
+        footer_frame = tk.Frame(self, bg=c.DARK_BG)
+        footer_frame.grid(row=9, column=0, sticky="ew", pady=(5, 0))
 
-        # Additional options
         if self.project_data["base_project_path"].get():
-            ttk.Checkbutton(self, text="Include base project merge list in 'project_reference.md'", variable=self.project_data["include_base_reference"], style='Dark.TCheckbutton').grid(row=8, column=0, sticky='w')
+            ttk.Checkbutton(footer_frame, text="Include base project reference", variable=self.project_data["include_base_reference"], style='Dark.TCheckbutton').pack(side="left")
+
+        self.create_button = RoundedButton(footer_frame, text="Create Project Files", command=self.on_create_project, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, height=40, width=250, cursor="hand2")
+        self.create_button.pack(side="right")
+        self.create_button.set_state('disabled')
+
+        # Setup preview path tracking with IDs for cleanup
+        t1 = self.project_data["parent_folder"].trace_add("write", self._update_preview_path)
+        t2 = self.project_data["name"].trace_add("write", self._update_preview_path)
+        self._trace_ids = [("parent_folder", t1), ("name", t2)]
+
+        self._update_preview_path()
+
+    def destroy(self):
+        """Cleanup traces when the view is destroyed to prevent TclErrors."""
+        for var_name, trace_id in self._trace_ids:
+            try:
+                self.project_data[var_name].trace_remove("write", trace_id)
+            except Exception:
+                pass
+        super().destroy()
+
+    def _update_preview_path(self, *args):
+        """Safely updates the preview path label if the widget still exists."""
+        if not self.winfo_exists():
+            return
+
+        parent = self.project_data["parent_folder"].get().strip()
+        name = self.project_data["name"].get().strip()
+
+        if not hasattr(self, 'preview_path_label') or not self.preview_path_label.winfo_exists():
+            return
+
+        if not parent or not name:
+            self.preview_path_label.config(text="[Incomplete details - please set Name and Parent Folder]", fg=c.TEXT_SUBTLE_COLOR)
+            return
+
+        sanitized_name = sanitize_project_name(name)
+        full_path = os.path.join(parent, sanitized_name)
+        self.preview_path_label.config(text=full_path, fg=c.BTN_BLUE)
+
+    def _browse_folder(self):
+        folder = filedialog.askdirectory(parent=self)
+        if folder:
+            self.project_data["parent_folder"].set(folder)
 
     def _validate_input(self, event=None):
         content = self.llm_result_text.get("1.0", "end-1c")
-        if re.search(r"--- File: `.+?` ---", content):
+        if re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content:
             self.create_button.set_state('normal')
         else:
             self.create_button.set_state('disabled')
+
+    def _copy_prompt_to_clipboard(self, button, text):
+        content = self.prompt_text.get('1.0', 'end-1c')
+        pyperclip.copy(content)
+        original_text = button.text
+        button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+        self.after(2000, lambda: button.config(text=original_text, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
 
     def _get_base_project_content(self):
         base_path = self.project_data.get("base_project_path", tk.StringVar()).get()
@@ -75,9 +150,9 @@ class Step5GenerateView(tk.Frame):
             rel_path = file_info['path']
             full_path = os.path.join(base_path, rel_path)
             try:
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                     content = f.read()
-                content_blocks.append("--- File: `" + rel_path + "` ---\n```\n" + content + "\n```\n")
+                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n{content}\n```\n")
             except Exception: pass
         return "\n".join(content_blocks)
 
@@ -85,26 +160,8 @@ class Step5GenerateView(tk.Frame):
         name = project_data['name'].get()
         stack = project_data['stack'].get()
 
-        # Assemble Content from Segments
-        concept = ""
-        if project_data.get("concept_segments"):
-            concept = SegmentManager.assemble_document(
-                project_data["concept_segments"],
-                c.CONCEPT_ORDER,
-                c.CONCEPT_SEGMENTS
-            )
-        else:
-            concept = project_data.get("concept_md", "")
-
-        todo = ""
-        if project_data.get("todo_segments"):
-            todo = SegmentManager.assemble_document(
-                project_data["todo_segments"],
-                c.TODO_ORDER,
-                c.TODO_PHASES
-            )
-        else:
-            todo = project_data.get("todo_md", "")
+        concept = SegmentManager.assemble_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if project_data.get("concept_segments") else project_data.get("concept_md", "")
+        todo = SegmentManager.assemble_document(project_data["todo_segments"], c.TODO_ORDER, c.TODO_PHASES) if project_data.get("todo_segments") else project_data.get("todo_md", "")
 
         boilerplate_files = ["README.md", "llm.md", "release.bat", "version.txt", "go_docker.bat", "go_nodejs.bat", "go_python.bat", "_start.txt"]
         prompt_content = ""
@@ -112,14 +169,14 @@ class Step5GenerateView(tk.Frame):
             path = os.path.join(BOILERPLATE_DIR, filename)
             try:
                 with open(path, 'r', encoding='utf-8') as f:
-                    prompt_content += "--- File: `boilerplate/" + filename + "` ---\n```\n" + f.read() + "\n```\n\n"
+                    prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n\n"
             except Exception: pass
 
         example_code = self._get_base_project_content()
 
         parts = [
-            "You are a senior developer creating a boilerplate for: " + name,
-            "Stack: " + stack,
+            f"You are a senior developer creating a boilerplate for: {name}",
+            f"Stack: {stack}",
             "\n### Provided Files\n" + prompt_content,
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
             "\n### TODO Plan\n```markdown\n" + todo + "\n```",
@@ -137,15 +194,7 @@ class Step5GenerateView(tk.Frame):
         ]
         return "\n".join(parts)
 
-    def _copy_prompt_to_clipboard(self, button):
-        prompt_content = self.prompt_text.get('1.0', 'end-1c')
-        self.clipboard_clear()
-        self.clipboard_append(prompt_content)
-        original_text = button.text
-        original_bg = button.original_bg_color
-        button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-        self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
-
     def on_create_project(self):
         raw = self.llm_result_text.get("1.0", "end-1c").strip()
-        if raw: self.create_project_callback(strip_markdown_wrapper(raw), self.project_data["include_base_reference"].get())
+        if raw:
+            self.create_project_callback(strip_markdown_wrapper(raw), self.project_data["include_base_reference"].get())

@@ -94,7 +94,6 @@ def _create_and_get_default_config():
     config = {
         'active_directory': '',
         'default_editor': '',
-        'default_parent_folder': '',
         'user_experience': '',
         'scan_for_secrets': False,
         'last_update_check': None,
@@ -154,8 +153,8 @@ def load_config():
                 raise ValueError("Config is missing 'filetypes' key.")
             if 'default_editor' not in config:
                 config['default_editor'] = ''
-            if 'default_parent_folder' not in config:
-                config['default_parent_folder'] = ''
+            if 'default_parent_folder' in config:
+                config.pop('default_parent_folder')
             if 'user_experience' not in config:
                 config['user_experience'] = ''
             if 'scan_for_secrets' not in config:

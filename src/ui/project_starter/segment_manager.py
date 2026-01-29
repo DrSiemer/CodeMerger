@@ -36,7 +36,6 @@ class SegmentManager:
         Uses regex to find <<SECTION: Name>> followed by content.
         """
         # Regex to find <<SECTION: Name>> followed by content until the next section or end of string
-        # re.DOTALL allows . to match newlines
         pattern = re.compile(r'<<SECTION:\s*(.*?)>>\s*(.*?)(?=<<SECTION:|$)', re.DOTALL)
 
         matches = pattern.findall(text)
@@ -53,19 +52,20 @@ class SegmentManager:
     @staticmethod
     def map_parsed_segments_to_keys(parsed_data, friendly_names_map):
         """
-        Converts the dict { "Friendly Name": "Content" } to { "key": "Content" }
-        based on the provided mapping. Keys not in the map are kept as is.
+        Converts the dict { "Name": "Content" } to { "internal_key": "Content" }.
+        Uses robust matching to handle whitespace and case sensitivity.
         """
-        # Invert map: Name -> Key
-        name_to_key = {v: k for k, v in friendly_names_map.items()}
+        norm_to_key = {v.strip().lower(): k for k, v in friendly_names_map.items()}
 
         keyed_data = {}
         for name, content in parsed_data.items():
-            key = name_to_key.get(name)
+            norm_name = name.strip().lower()
+            key = norm_to_key.get(norm_name)
+
             if key:
                 keyed_data[key] = content
             else:
-                # Fallback for hallucinated or mismatched section names
+                # If no mapping found, use the name as provided (fallback)
                 keyed_data[name] = content
         return keyed_data
 
@@ -73,10 +73,6 @@ class SegmentManager:
     def assemble_document(segments_dict, order_keys, friendly_names_map):
         """
         Joins segments into a single Markdown document with headers.
-        Args:
-            segments_dict (dict): The content { key: content }.
-            order_keys (list): The order in which to assemble the keys.
-            friendly_names_map (dict): Mapping to use for the Markdown headers.
         """
         doc_parts = []
         for key in order_keys:

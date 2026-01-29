@@ -48,11 +48,7 @@ class ActionHandlers:
         # Clear project UI to "No project selected" state before launching wizard
         app.project_actions._clear_project_ui()
 
-        default_parent = app.app_state.config.get('default_parent_folder', '')
-        if default_parent and not os.path.isdir(default_parent):
-             default_parent = ''
-
-        app.project_starter_window = ProjectStarterDialog(app, app, default_parent)
+        app.project_starter_window = ProjectStarterDialog(app, app)
 
     def start_work_on_click(self, event):
         """Handles click (copy) and alt-click (delete) on the Start Work button."""

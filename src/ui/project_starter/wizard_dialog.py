@@ -24,14 +24,14 @@ class ProjectStarterDialog(tk.Toplevel):
     A wizard dialog for bootstrapping new software projects.
     Delegates state to WizardState and validation to WizardValidator.
     """
-    def __init__(self, parent, app, default_parent_folder):
+    def __init__(self, parent, app):
         super().__init__(parent)
         self.withdraw()
         self.parent = parent
         self.app = app
 
         # Initialize the state manager
-        self.state = wizard_state.WizardState(default_parent_folder)
+        self.state = wizard_state.WizardState()
 
         self.title("Project Starter Wizard")
         if parent.iconbitmap():
@@ -255,6 +255,11 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def _go_to_step(self, target_step_id):
         if target_step_id == self.state.current_step: return
+
+        is_accessible = (target_step_id <= self.state.max_accessible_step) or (target_step_id == 2)
+        if not is_accessible:
+            return
+
         self.state.update_from_view(self.current_view)
         self.state.save()
 
