@@ -25,7 +25,7 @@ class TodoView(tk.Frame):
         self.questions = self._load_questions()
 
         self.current_question_index = 0
-        self.questions_frame_visible = True
+        self.questions_frame_visible = False  # Changed to False by default
         self.editor_is_active = False
 
         # State for merged view toggle
@@ -37,6 +37,9 @@ class TodoView(tk.Frame):
             self.show_editor_view()
         elif self.todo_content:
             # Fallback for manual or legacy content
+            # Ensure generic questions are available for the merged view if specific ones aren't loaded
+            if not self.questions:
+                self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
             self.show_merged_view(self.todo_content)
         else:
             self.show_generation_view()
@@ -294,7 +297,19 @@ class TodoView(tk.Frame):
 
         # Questions Container
         self.questions_container = tk.Frame(self, bg=c.DARK_BG)
-        self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+
+        # Initial grid state based on visibility flag
+        if self.questions_frame_visible:
+            self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+            # Also ensure it's populated
+            if not self.questions_container.winfo_children():
+                self._create_question_prompter()
+                # Update button style since it's active
+                if hasattr(self, 'q_btn'):
+                    self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+        else:
+            # Ensure it is removed if starting hidden (though usually True by default)
+            self.questions_container.grid_remove()
 
         # Editor Frame
         self.editor_frame = tk.Frame(self, bg=c.DARK_BG)
@@ -353,9 +368,13 @@ class TodoView(tk.Frame):
     def _toggle_questions(self):
         self.questions_frame_visible = not self.questions_frame_visible
         if self.questions_frame_visible:
+            # Re-grid the container
+            self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
             self._create_question_prompter()
             self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
+            # Remove from grid so row 2 can reclaim space
+            self.questions_container.grid_remove()
             for widget in self.questions_container.winfo_children():
                 widget.destroy()
             self.q_btn.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
@@ -409,10 +428,20 @@ class TodoView(tk.Frame):
 
     def _copy_question_prompt(self, button):
         try:
+            # Retrieve Concept Content for context
+            concept_md = self.project_data.get("concept_md")
+            if not concept_md and self.project_data.get("concept_segments"):
+                c_map_const = {k: v for k,v in c.CONCEPT_SEGMENTS.items()}
+                concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c_map_const)
+
+            concept_section = ""
+            if concept_md:
+                concept_section = f"### Project Concept\n```markdown\n{concept_md}\n```\n\n"
+
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
 
-            prompt_text = f"### Full TODO Plan\n```markdown\n{todo_content}\n```\n\n### Question\n{current_question}\n\nInstruction: Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
+            prompt_text = f"{concept_section}### Full TODO Plan\n```markdown\n{todo_content}\n```\n\n### Question\n{current_question}\n\nInstruction: Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
 
             self.clipboard_clear()
             self.clipboard_append(prompt_text)
@@ -430,7 +459,7 @@ class TodoView(tk.Frame):
             self.todo_content = ""
             # Reload questions
             self.questions = self._load_questions()
-            self.questions_frame_visible = True
+            self.questions_frame_visible = False
             self.current_question_index = 0
             self.show_generation_view()
             self.wizard_controller._update_navigation_controls()
