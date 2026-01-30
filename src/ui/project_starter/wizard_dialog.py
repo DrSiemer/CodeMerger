@@ -119,6 +119,14 @@ class ProjectStarterDialog(tk.Toplevel):
              btn_clear.pack(side="right", padx=(0, 0))
              ToolTip(btn_clear, "Clear all wizard progress and start fresh", delay=500)
 
+        btn_save = RoundedButton(
+            right_header_frame, text="Save Config", command=self.save_config_to_dialog,
+            bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
+            height=32, radius=6, cursor="hand2"
+        )
+        btn_save.pack(side="right", padx=(0, 10))
+        ToolTip(btn_save, "Save current project configuration to a file", delay=500)
+
         btn_load = RoundedButton(
             right_header_frame, text="Load Config", command=self.load_config_from_dialog,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
@@ -226,6 +234,25 @@ class ProjectStarterDialog(tk.Toplevel):
         self.state.update_from_view(self.current_view)
         self.state.save()
         self.destroy()
+
+    def save_config_to_dialog(self):
+        """Prompts user to save a copy of the current configuration session."""
+        self.state.update_from_view(self.current_view)
+        project_name = self.state.project_data["name"].get().strip()
+        initial_file = f"{project_name}.json" if project_name else "project-config.json"
+
+        filepath = filedialog.asksaveasfilename(
+            title="Save Project Configuration",
+            defaultextension=".json",
+            initialfile=initial_file,
+            filetypes=[("JSON files", "*.json")],
+            parent=self
+        )
+        if not filepath:
+            return
+
+        session_manager.save_session_data(self.state.get_dict(), filepath)
+        messagebox.showinfo("Success", f"Configuration saved to:\n{filepath}", parent=self)
 
     def load_config_from_dialog(self):
         filepath = filedialog.askopenfilename(
