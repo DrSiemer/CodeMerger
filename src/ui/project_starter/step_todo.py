@@ -42,8 +42,6 @@ class TodoView(tk.Frame):
             self.show_generation_view()
 
     def refresh_fonts(self):
-        if hasattr(self, 'prompt_area') and self.prompt_area.winfo_exists():
-            self.prompt_area.set_font_size(self.wizard_controller.font_size)
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
             self.llm_response_text.set_font_size(self.wizard_controller.font_size)
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
@@ -132,15 +130,14 @@ class TodoView(tk.Frame):
         ]
         return "\n".join(parts)
 
-    def _copy_prompt_to_clipboard(self, button):
-        if hasattr(self, 'prompt_area') and self.prompt_area.winfo_exists():
-            prompt_content = self.prompt_area.get('1.0', 'end-1c')
-            self.clipboard_clear()
-            self.clipboard_append(prompt_content)
-            original_text = button.text
-            original_bg = button.original_bg_color
-            button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-            self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
+    def _copy_prompt_to_clipboard(self, button, text):
+        prompt_content = text
+        self.clipboard_clear()
+        self.clipboard_append(prompt_content)
+        original_text = button.text
+        original_bg = button.original_bg_color
+        button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
+        self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
 
     def show_generation_view(self, prompt=None):
         if prompt is None:
@@ -148,33 +145,30 @@ class TodoView(tk.Frame):
 
         self._clear_frame()
         self.editor_is_active = False
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(3, weight=1)
+        self.grid_rowconfigure(2, weight=1) # Response area expands
         self.grid_columnconfigure(0, weight=1)
 
+        # Row 0: Header and Copy Button
         prompt_header = tk.Frame(self, bg=c.DARK_BG)
-        prompt_header.grid(row=0, column=0, pady=(0, 5), sticky="ew")
+        prompt_header.grid(row=0, column=0, pady=(0, 10), sticky="ew")
         tk.Label(prompt_header, text="1. Copy Prompt for LLM", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
-        copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
-        copy_btn.pack(side='right')
 
-        self.prompt_area = ScrollableText(
-            self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
-        )
-        self.prompt_area.insert("1.0", prompt)
-        self.prompt_area.grid(row=1, column=0, sticky='nsew')
+        copy_btn = RoundedButton(prompt_header, text="Copy Prompt", command=lambda: self._copy_prompt_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        copy_btn.pack(side='left', padx=15)
 
-        tk.Label(self, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=2, column=0, pady=(10, 5), sticky="w")
+        # Row 1: Label for Input
+        tk.Label(self, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=1, column=0, pady=(10, 5), sticky="w")
+
+        # Row 2: Input Field
         self.llm_response_text = ScrollableText(
             self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
             font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
             on_zoom=self.wizard_controller.adjust_font_size
         )
-        self.llm_response_text.grid(row=3, column=0, sticky='nsew')
+        self.llm_response_text.grid(row=2, column=0, sticky='nsew')
 
-        RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").grid(row=4, column=0, pady=(10,0), sticky="e")
+        # Row 3: Action Button
+        RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").grid(row=3, column=0, pady=(10,0), sticky="e")
 
     def handle_llm_response(self):
         raw_content = self.llm_response_text.get("1.0", "end-1c").strip()
@@ -190,6 +184,7 @@ class TodoView(tk.Frame):
             self.todo_content = content
             self.project_data["todo_md"] = content
             self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
+            self.wizard_controller.state.save() # Ensure persist even in fallback
             self.show_merged_view(content)
             return
 
@@ -212,6 +207,9 @@ class TodoView(tk.Frame):
         self.project_data["todo_signoffs"].clear()
         for k in mapped_segments.keys():
             self.project_data["todo_signoffs"][k] = False
+
+        # CRITICAL FIX: Save state immediately after processing to persist new segments
+        self.wizard_controller.state.save()
 
         self.show_editor_view()
 
