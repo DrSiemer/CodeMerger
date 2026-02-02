@@ -180,14 +180,25 @@ class GenerateView(tk.Frame):
         concept = SegmentManager.assemble_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if project_data.get("concept_segments") else project_data.get("concept_md", "")
         todo = SegmentManager.assemble_document(project_data["todo_segments"], c.TODO_ORDER, c.TODO_PHASES) if project_data.get("todo_segments") else project_data.get("todo_md", "")
 
-        boilerplate_files = ["README.md", "llm.md", "release.bat", "version.txt", "go_docker.bat", "go_nodejs.bat", "go_python.bat", "_start.txt"]
+        # DYNAMICALLY LOAD ALL FILES IN BOILERPLATE DIRECTORY
         prompt_content = ""
-        for filename in boilerplate_files:
-            path = os.path.join(BOILERPLATE_DIR, filename)
-            try:
-                with open(path, 'r', encoding='utf-8') as f:
-                    prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n\n"
-            except Exception: pass
+        try:
+            # List all files, ignoring OS-specific junk files
+            files = sorted([
+                f for f in os.listdir(BOILERPLATE_DIR)
+                if os.path.isfile(os.path.join(BOILERPLATE_DIR, f))
+                and f not in {'.DS_Store', 'Thumbs.db'}
+            ])
+
+            for filename in files:
+                path = os.path.join(BOILERPLATE_DIR, filename)
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n\n"
+                except Exception:
+                    pass
+        except Exception:
+            prompt_content = "Error loading boilerplate files."
 
         example_code = self._get_base_project_content()
 

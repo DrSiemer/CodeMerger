@@ -1,0 +1,30 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# CodeMerger
+.allcode
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment variables
+.env
+
+# Personal preference
+/2do.txt
