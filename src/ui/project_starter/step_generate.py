@@ -145,7 +145,12 @@ class GenerateView(tk.Frame):
 
     def _validate_input(self, event=None):
         content = self.llm_result_text.get("1.0", "end-1c")
-        if re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content:
+        # Validate that we have file blocks AND the strict pitch tag pair
+        has_files = re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content
+        # STRICT Check: Must find the closing tag
+        has_pitch = re.search(r"<<PITCH>>.*?<<PITCH>>", content, re.DOTALL)
+
+        if has_files and has_pitch:
             self.create_button.set_state('normal')
         else:
             self.create_button.set_state('disabled')
@@ -187,7 +192,7 @@ class GenerateView(tk.Frame):
             files = sorted([
                 f for f in os.listdir(BOILERPLATE_DIR)
                 if os.path.isfile(os.path.join(BOILERPLATE_DIR, f))
-                and f not in {'.DS_Store', 'Thumbs.db'}
+                and f not in {'.DS_Store', 'Thumbs.db', '_start.txt'} # Explicitly exclude _start.txt just in case it exists
             ])
 
             for filename in files:
@@ -210,9 +215,11 @@ class GenerateView(tk.Frame):
             "\n### TODO Plan\n```markdown\n" + todo + "\n```",
             example_code,
             "\n### Core Instructions",
-            "1. Select the appropriate `go_*.bat` and rename it to `go.bat`.",
-            "2. Populate placeholders in `README.md` and `_start.txt`.",
-            "3. Return the complete source code for every file using this exact format:",
+            "1. **Select & Rename:** Select the appropriate `go_*.bat` script for the stack and rename it to `go.bat`.",
+            "2. **Populate Placeholders:** Fill in the placeholders in `README.md` based on the concept.",
+            "3. **BOILERPLATE ONLY:** DO NOT implement any of the actual tasks, code, or features described in the TODO plan yet. Your job is ONLY to set up the skeleton/infrastructure (README, batch scripts, config files). Do NOT create source files (like *.js, *.py, *.css) unless they are explicitly part of the standard boilerplate provided above.",
+            "4. **Short Description:** At the start of your response, provide a short, one-sentence description (noun phrase) of exactly what this project is (e.g., 'a Python-based CLI tool for image processing'). This description must grammatically fit into the sentence 'We are working on [PITCH].' Wrap this description in `<<PITCH>>` tags. **You MUST close the tag with `<<PITCH>>`. Example: `<<PITCH>>a new CLI tool<<PITCH>>`. Failure to close this tag will break the parser.**",
+            "5. **Output Format:** Return the complete source code for every file you are modifying or creating using this exact format:",
             "--- File: `path/to/file.ext` ---",
             "```language",
             "[content]",
@@ -224,5 +231,13 @@ class GenerateView(tk.Frame):
 
     def on_create_project(self):
         raw = self.llm_result_text.get("1.0", "end-1c").strip()
-        if raw:
-            self.create_project_callback(strip_markdown_wrapper(raw), self.project_data["include_base_reference"].get())
+        if not raw: return
+
+        # Strict Regex: Will only match if closing tag exists
+        pitch_match = re.search(r"<<PITCH>>(.*?)<<PITCH>>", raw, re.DOTALL)
+        project_pitch = pitch_match.group(1).strip() if pitch_match else "a new project"
+
+        # Now get file content
+        content = strip_markdown_wrapper(raw)
+
+        self.create_project_callback(content, self.project_data["include_base_reference"].get(), project_pitch)
