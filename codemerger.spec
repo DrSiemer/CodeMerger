@@ -1,12 +1,38 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
+import sys
+
+# --- Tcl/Tk Path Discovery Helper ---
+def get_tcl_tk_paths():
+    """Locates the Tcl and Tk library directories in the current Python environment."""
+    prefixes = [sys.prefix, getattr(sys, 'base_prefix', sys.prefix)]
+    tcl_tk_datas = []
+
+    for prefix in prefixes:
+        tcl_root = os.path.join(prefix, 'tcl')
+        if os.path.exists(tcl_root):
+            for entry in os.listdir(tcl_root):
+                full_path = os.path.join(tcl_root, entry)
+                if os.path.isdir(full_path):
+                    if entry.startswith('tcl8'):
+                        tcl_tk_datas.append((full_path, 'tcl'))
+                    elif entry.startswith('tk8'):
+                        tcl_tk_datas.append((full_path, 'tk'))
+
+            if tcl_tk_datas:
+                return tcl_tk_datas
+    return []
 
 # --- Main Application Analysis ---
-# The ('assets', 'assets') tuple recursively includes assets/boilerplate and assets/reference
 app_data_files = [
     ('assets', 'assets'),
     ('default_filetypes.json', '.'),
     ('version.txt', '.')
 ]
+
+# Explicitly add Tcl/Tk data to the bundle
+app_data_files.extend(get_tcl_tk_paths())
+
 app_icon_path = 'assets/icon.ico'
 install_icon_path = 'assets/install.ico'
 
