@@ -10,7 +10,7 @@ from ..file_manager.file_manager_window import FileManagerWindow
 from ..filetypes_manager import FiletypesManagerWindow
 from ..settings.settings_window import SettingsWindow
 from ..instructions_window import InstructionsWindow
-from ..directory_dialog import DirectoryDialog
+from ..project_selector_dialog import ProjectSelectorDialog
 from ..title_edit_dialog import TitleEditDialog
 from ..paste_changes_dialog import PasteChangesDialog
 from ..new_profile_dialog import NewProfileDialog
@@ -107,14 +107,14 @@ class ActionHandlers:
         app = self.app
         project_config = app.project_manager.get_current_project()
         if not project_config:
-            self.open_change_directory_dialog()
+            self.open_project_selector()
             return
 
         if app.title_click_job:
             app.after_cancel(app.title_click_job)
             app.title_click_job = None
 
-        app.title_click_job = app.after(250, self.open_change_directory_dialog)
+        app.title_click_job = app.after(250, self.open_project_selector)
 
     def edit_project_title(self, event=None):
         app = self.app
@@ -143,10 +143,10 @@ class ActionHandlers:
             project_config.save()
             app.status_var.set(f"Project title changed to '{new_name}'")
 
-    def open_change_directory_dialog(self):
+    def open_project_selector(self):
         app = self.app
         app.app_state._prune_recent_projects()
-        DirectoryDialog(
+        ProjectSelectorDialog(
             parent=app,
             app_bg_color=app.app_bg_color,
             recent_projects=app.app_state.recent_projects,

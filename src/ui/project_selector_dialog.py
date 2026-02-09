@@ -13,7 +13,7 @@ from ..core.paths import ICON_PATH
 from .window_utils import save_window_geometry, get_monitor_work_area
 from .assets import assets
 
-class DirectoryDialog(Toplevel):
+class ProjectSelectorDialog(Toplevel):
     """
     A dialog window for selecting a recent or new project directory.
     Features a scrollable list and a filter.
@@ -42,7 +42,7 @@ class DirectoryDialog(Toplevel):
         self.configure(bg=self.app_bg_color)
         self.resizable(False, False)
 
-        self.dialog_width = c.DIRECTORY_DIALOG_WIDTH
+        self.dialog_width = c.PROJECT_SELECTOR_WIDTH
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(2, weight=1)

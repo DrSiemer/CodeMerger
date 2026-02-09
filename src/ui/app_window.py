@@ -121,7 +121,7 @@ class App(Tk):
 
         # If we need to force the selector, schedule it to open after the main window is ready
         if force_selector:
-            self.after(100, self.action_handlers.open_change_directory_dialog)
+            self.after(100, self.action_handlers.open_project_selector)
 
         self.deiconify()
         self.lift()

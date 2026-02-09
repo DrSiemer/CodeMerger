@@ -110,7 +110,7 @@ def setup_ui(app):
     app.project_starter_button.bind("<ButtonRelease-1>", app.action_handlers.open_project_starter)
     ToolTip(app.project_starter_button, "New Project Wizard", delay=500)
 
-    app.select_project_button = RoundedButton(right_controls_frame, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_change_directory_dialog, cursor='hand2')
+    app.select_project_button = RoundedButton(right_controls_frame, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_project_selector, cursor='hand2')
     app.select_project_button.pack(side='left')
 
     # --- Center Content Area (Row 2) ---
