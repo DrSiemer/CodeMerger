@@ -216,7 +216,7 @@ class GenerateView(tk.Frame):
             example_code,
             "\n### Core Instructions",
             "1. **Select & Rename:** Select the appropriate `go_*.bat` script for the stack and rename it to `go.bat`.",
-            "2. **Populate Placeholders:** Fill in the placeholders in `README.md` based on the concept.",
+            "2. **Mandatory README:** You MUST output the `README.md` file. Populate it (or create it) with the project title, the pitch, and specific setup steps derived from the stack.",
             "3. **BOILERPLATE ONLY:** DO NOT implement any of the actual tasks, code, or features described in the TODO plan yet. Your job is ONLY to set up the skeleton/infrastructure (README, batch scripts, config files). Do NOT create source files (like *.js, *.py, *.css) unless they are explicitly part of the standard boilerplate provided above.",
             "4. **Short Description:** At the start of your response, provide a short, one-sentence description (noun phrase) of exactly what this project is (e.g., 'a Python-based CLI tool for image processing'). This description must grammatically fit into the sentence 'We are working on [PITCH].' Wrap this description in `<<PITCH>>` tags. **You MUST close the tag with `<<PITCH>>`. Example: `<<PITCH>>a new CLI tool<<PITCH>>`. Failure to close this tag will break the parser.**",
             "5. **Output Format:** Return the complete source code for every file you are modifying or creating using this exact format:",
