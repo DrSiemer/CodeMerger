@@ -54,6 +54,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     """
     # --- Pre-processing for common LLM formatting errors ---
 
+    # Ensure there is a newline between the header and the code block
     markdown_text = re.sub(r'(--- File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
 
     lines = markdown_text.split('\n')
@@ -68,10 +69,14 @@ def parse_and_plan_changes(base_dir, markdown_text):
         else:
             processed_lines.append(line)
     markdown_text = '\n'.join(processed_lines)
+
+    # Ensure there is a newline between the closing backticks and the footer
     markdown_text = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text)
 
+    # Robust regex: handles \r\n, varying whitespace, and avoids being tripped up by content
+    # We look for the File header, the opening backticks, the content, the closing backticks, and the footer.
     file_blocks = re.findall(
-        r'--- File: `([^\n`]+)` ---\s*```[^\n]*\n(.*?)\n```\s*\n--- End of file ---',
+        r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+--- End of file ---',
         markdown_text,
         re.DOTALL
     )
@@ -111,7 +116,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
             files_to_create[full_path] = content
 
     if not files_to_update and not files_to_create:
-        # This case should be rare if file_blocks is not empty, but it's a good safeguard
         return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
 
     if files_to_create:

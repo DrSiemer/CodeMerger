@@ -3,11 +3,10 @@ import json
 import fnmatch
 import hashlib
 import tiktoken
-import psutil
 import sys
 from pathlib import Path
 from ..core.paths import (
-    CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH
+    CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH, PERSISTENT_DATA_DIR
 )
 from ..constants import (
     DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT,
@@ -15,39 +14,69 @@ from ..constants import (
     ADD_ALL_WARNING_THRESHOLD_DEFAULT
 )
 
+# Global reference to hold the lock/mutex for the lifetime of the application
+_instance_lock = None
+
 def is_another_instance_running():
     """
     Checks if another instance of CodeMerger is currently running.
-    Checks for the executable name if frozen, or the module name if running from source.
+    Uses a Named Mutex on Windows and a file lock on POSIX systems.
+    This is significantly faster than iterating through process lists.
     Returns False if the CM_DEV_MODE environment variable is set.
     """
+    global _instance_lock
+
     # Skip check if launched via go.bat (dev mode)
     if os.environ.get('CM_DEV_MODE') == '1':
         return False
 
-    current_pid = os.getpid()
-    try:
-        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
-            try:
-                # Skip the current process
-                if proc.info['pid'] == current_pid:
-                    continue
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            kernel32 = ctypes.windll.kernel32
 
-                # Check for frozen executable (Windows)
-                if getattr(sys, 'frozen', False):
-                    if proc.info['name'] and proc.info['name'].lower() == "codemerger.exe":
-                        return True
-                # Check for running from source
-                else:
-                    cmdline = proc.info.get('cmdline')
-                    if cmdline and any("src.codemerger" in arg for arg in cmdline):
-                        return True
-            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                continue
-    except Exception:
-        # Fallback to False if psutil fails for any reason
-        return False
-    return False
+            # Unique name for the mutex
+            mutex_name = "Global\\CodeMerger_Instance_Mutex_C06CFB28"
+
+            # CreateMutexW returns a handle. If it fails, it returns 0.
+            # (security_attributes, initial_owner, name)
+            _instance_lock = kernel32.CreateMutexW(None, False, mutex_name)
+
+            if not _instance_lock:
+                return False
+
+            # Check if the mutex already existed (ERROR_ALREADY_EXISTS = 183)
+            last_error = kernel32.GetLastError()
+            if last_error == 183:
+                return True
+
+            return False
+        except Exception:
+            # Fallback if ctypes fails
+            return False
+    else:
+        # POSIX implementation using fcntl file locking
+        try:
+            import fcntl
+
+            lock_file_path = os.path.join(PERSISTENT_DATA_DIR, 'app.lock')
+
+            # Ensure directory exists
+            if not os.path.exists(PERSISTENT_DATA_DIR):
+                os.makedirs(PERSISTENT_DATA_DIR, exist_ok=True)
+
+            # Create/Open the lock file
+            _instance_lock = open(lock_file_path, 'w')
+
+            try:
+                # Try to acquire an exclusive lock without blocking (LOCK_NB)
+                fcntl.lockf(_instance_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return False
+            except (IOError, BlockingIOError):
+                # If we get an error, the file is already locked by another instance
+                return True
+        except Exception:
+            return False
 
 def strip_markdown_wrapper(text):
     """

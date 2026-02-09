@@ -65,6 +65,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/core/change_applier.py`: A persistent generative flaw was identified where the model repeatedly produced `lines.strip()` instead of the correct `lines[1].strip()`, causing an `AttributeError`. This is a form of pattern-matching failure where a high-probability (but incorrect) code pattern overrides the specific analytical correction. The fix is to embed explicit, high-priority comments (e.g., `// DO NOT REMOVE [index]`) directly in the code to act as a hard constraint during generation.
 - `src/core/logger.py`: Centralizes application logging using the `rich` library for formatted console output and a `RotatingFileHandler` for persistent log files. It also sets a global exception hook to ensure all unhandled exceptions are logged.
 - `src/core/utils.py`: `parse_gitignore` modifies the `dirs` list of `os.walk` in-place using `is_ignored`. This prevents the walker from traversing into ignored directories (like `node_modules`), drastically improving load times.
+- `src/core/utils.py`: Replaced `psutil` process iteration with a Named Mutex (Windows) and `fcntl` lock file (POSIX) for single-instance detection. This avoids the high startup cost of scanning the system process table.
 
 ### User Interface (`src/ui`)
 

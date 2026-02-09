@@ -7,6 +7,7 @@ import json
 from ..core.project_config import ProjectConfig
 from .widgets.rounded_button import RoundedButton
 from .widgets.scrollable_frame import ScrollableFrame
+
 from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import save_window_geometry, get_monitor_work_area
@@ -15,7 +16,7 @@ from .assets import assets
 class DirectoryDialog(Toplevel):
     """
     A dialog window for selecting a recent or new project directory.
-    Features a scrollable list and a search filter.
+    Features a scrollable list and a filter.
     """
     def __init__(self, parent, app_bg_color, recent_projects, on_select_callback, on_remove_callback):
         super().__init__(parent)
@@ -50,14 +51,14 @@ class DirectoryDialog(Toplevel):
         self.info_label = Label(self, text=message, padx=20, pady=10, bg=self.app_bg_color, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.info_label.grid(row=0, column=0, sticky='ew', pady=(5, 0))
 
-        # --- Search Bar ---
-        self.search_frame = Frame(self, bg=c.DARK_BG, padx=20)
-        self.search_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
-        Label(self.search_frame, text="Search:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left')
-        self.search_var = StringVar()
-        search_entry = Entry(self.search_frame, textvariable=self.search_var, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
-        search_entry.pack(side='left', fill='x', expand=True, padx=(5,0), ipady=3)
-        self.search_var.trace_add('write', self._filter_projects)
+        # --- Filter Bar ---
+        self.filter_frame = Frame(self, bg=c.DARK_BG, padx=20)
+        self.filter_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
+        Label(self.filter_frame, text="Filter:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left')
+        self.filter_var = StringVar()
+        self.filter_entry = Entry(self.filter_frame, textvariable=self.filter_var, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
+        self.filter_entry.pack(side='left', fill='x', expand=True, padx=(5,0), ipady=3)
+        self.filter_var.trace_add('write', self._filter_projects)
 
         # --- Scrollable List Container ---
         self.list_container = Frame(self, bg=self.app_bg_color)
@@ -112,7 +113,9 @@ class DirectoryDialog(Toplevel):
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
         self.bind('<Configure>', self._on_drag)
         self.deiconify()
-        search_entry.focus_set()
+
+        if self.filter_frame.winfo_ismapped():
+            self.filter_entry.focus_set()
 
     def _on_drag(self, event):
         """Updates the stored position when the window is moved by the user."""
@@ -121,7 +124,7 @@ class DirectoryDialog(Toplevel):
             self.current_y = self.winfo_y()
 
     def _filter_projects(self, *args):
-        query = self.search_var.get().lower()
+        query = self.filter_var.get().lower()
         filtered_list = [
             path for path in self.recent_projects
             if not query or query in os.path.basename(path).lower() or query in path.lower()
@@ -160,6 +163,18 @@ class DirectoryDialog(Toplevel):
             widget.destroy()
         self.project_widgets.clear()
 
+        # Update filter bar visibility: Hide if user has less than 5 projects total
+        if len(self.recent_projects) >= 5:
+            if not self.filter_frame.winfo_ismapped():
+                self.filter_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
+        else:
+            if self.filter_frame.winfo_ismapped():
+                self.filter_frame.grid_forget()
+                # Clear filter when hidden to avoid being stuck in a filtered state
+                if self.filter_var.get():
+                    self.filter_var.set("")
+                    return # Trace will trigger re-populate
+
         for path in project_list:
             entry_frame = self._create_recent_dir_entry(path)
             self.project_widgets.append(entry_frame)
@@ -169,12 +184,16 @@ class DirectoryDialog(Toplevel):
     def _adjust_height(self):
         self.update_idletasks()
 
-        if self.non_list_height == 0:
-            h_info = self.info_label.winfo_reqheight()
-            h_search = self.search_frame.winfo_reqheight()
-            h_button = self.browse_btn.winfo_reqheight()
-            total_padding = 5 + 10 + 20 + 20
-            self.non_list_height = h_info + h_search + h_button + total_padding
+        h_info = self.info_label.winfo_reqheight()
+        h_filter = self.filter_frame.winfo_reqheight() if self.filter_frame.winfo_ismapped() else 0
+        h_button = self.browse_btn.winfo_reqheight()
+
+        # Calculate base non-list height including padding
+        # info_label: pady=(5,0) -> 5
+        # filter_frame: pady=(0,10) -> 10 if mapped
+        # browse_btn: pady=20 -> 40 (top/bottom)
+        padding = 5 + (10 if self.filter_frame.winfo_ismapped() else 0) + 40
+        self.non_list_height = h_info + h_filter + h_button + padding
 
         num_items = len(self.project_widgets)
         list_items_height = 0

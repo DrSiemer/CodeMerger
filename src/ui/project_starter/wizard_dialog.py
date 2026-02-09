@@ -152,7 +152,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.content_frame = tk.Frame(main_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
         self.content_frame.pack(expand=True, fill="both", side="top")
 
-    def create_project(self, llm_output, include_base_reference=False):
+    def create_project(self, llm_output, include_base_reference=False, project_pitch="a new project"):
         """Processes the LLM output and creates the actual files on disk."""
         # Validate the current step (6) before proceeding to force folder selection
         is_valid, err_title, err_msg = wizard_validator.validate_step(6, self.state.project_data)
@@ -164,15 +164,16 @@ class ProjectStarterDialog(tk.Toplevel):
             messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
             return
 
-        project_name = self.state.project_data["name"].get()
+        # Keep the raw, user-entered name for the .allcode configuration
+        raw_project_name = self.state.project_data["name"].get()
         parent_folder = self.state.project_data["parent_folder"].get()
 
-        # 1. Prepare Directory
-        success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name)
+        # 1. Prepare Directory (Uses sanitized name for the folder)
+        success, project_path, msg = generator.prepare_project_directory(parent_folder, raw_project_name)
         if not success:
             if "already exists" in msg:
                 if messagebox.askyesno("Warning", f"{msg} Overwrite?", parent=self):
-                    success, project_path, msg = generator.prepare_project_directory(parent_folder, project_name, overwrite=True)
+                    success, project_path, msg = generator.prepare_project_directory(parent_folder, raw_project_name, overwrite=True)
                 else: return
 
             if not success:
@@ -192,10 +193,34 @@ class ProjectStarterDialog(tk.Toplevel):
             if generator.write_base_reference_file(project_path, base_path, base_files):
                 files_created.append("project_reference.md")
 
-        # 4. Save Config to new project
+        # 4. Save Config to new project folder
         self.state.update_from_view(self.current_view)
         self.state.save()
         session_manager.save_session_data(self.state.get_dict(), project_path / "project-starter.json")
+
+        # 5. CREATE .ALLCODE IMMEDIATELY
+        from ...core.utils import load_config
+        conf = load_config()
+
+        # Construct the custom intro text using the pitch
+        intro = f"We are working on {project_pitch}.\n\nYour task is to start development, by following the plan laid out in `todo.md`. Pick up and check off steps from this whenever you are not fixing issues reported by the user."
+        outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
+
+        # Filter the files list: Exclude .gitignore and project-starter.json from the active merge list
+        normalized_files = []
+        for f in files_created:
+             norm = f.replace('\\', '/')
+             if os.path.basename(norm) not in ['.gitignore', 'project-starter.json']:
+                 normalized_files.append(norm)
+
+        # Generate .allcode with the raw project name
+        self.app.project_manager.create_project_with_defaults(
+            str(project_path),
+            raw_project_name,
+            intro,
+            outro,
+            initial_selected_files=normalized_files
+        )
 
         self._display_success_screen(project_path.name, files_created, parent_folder)
 
@@ -432,12 +457,6 @@ class ProjectStarterDialog(tk.Toplevel):
 
         def on_start_work():
             full_path = str(Path(parent_folder) / project_name)
-            from ...core.utils import load_config
-            conf = load_config()
-            intro = conf.get('default_intro_prompt', c.DEFAULT_INTRO_PROMPT).replace('REPLACE_ME', project_name)
-            outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
-            normalized_files = [f.replace('\\', '/') for f in files]
-            self.app.project_manager.create_project_with_defaults(full_path, intro, outro, initial_selected_files=normalized_files)
             self.state.reset()
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
