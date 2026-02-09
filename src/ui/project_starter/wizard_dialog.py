@@ -15,6 +15,7 @@ from .step_base_files import StepBaseFilesView
 from .success_view import SuccessView
 from ..window_utils import position_window
 from . import session_manager, generator, wizard_state, wizard_validator
+from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
 
 log = logging.getLogger("CodeMerger")
@@ -168,7 +169,7 @@ class ProjectStarterDialog(tk.Toplevel):
         raw_project_name = self.state.project_data["name"].get()
         parent_folder = self.state.project_data["parent_folder"].get()
 
-        # 1. Prepare Directory (Uses sanitized name for the folder)
+        # Prepare Directory (Uses sanitized name for the folder)
         success, project_path, msg = generator.prepare_project_directory(parent_folder, raw_project_name)
         if not success:
             if "already exists" in msg:
@@ -180,25 +181,53 @@ class ProjectStarterDialog(tk.Toplevel):
                 messagebox.showerror("Error", msg, parent=self)
                 return
 
-        # 2. Write Files from LLM
+        # Write Files from LLM
         success, files_created, msg = generator.parse_and_write_files(project_path, llm_output)
         if not success:
             messagebox.showerror("Error", msg, parent=self)
             return
 
-        # 3. Optional: Write Base Project Reference
+        # Add concept.md and todo.md
+        try:
+            # Concept
+            concept_segs = self.state.project_data.get("concept_segments")
+            if concept_segs:
+                concept_content = SegmentManager.assemble_document(concept_segs, c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
+            else:
+                concept_content = self.state.project_data.get("concept_md", "")
+
+            if concept_content:
+                (project_path / "concept.md").write_text(concept_content, encoding="utf-8")
+                files_created.append("concept.md")
+
+            # Todo
+            todo_segs = self.state.project_data.get("todo_segments")
+            if todo_segs:
+                todo_content = SegmentManager.assemble_document(todo_segs, c.TODO_ORDER, c.TODO_PHASES)
+            else:
+                todo_content = self.state.project_data.get("todo_md", "")
+
+            if todo_content:
+                (project_path / "todo.md").write_text(todo_content, encoding="utf-8")
+                files_created.append("todo.md")
+
+        except Exception as e:
+            log.error(f"Failed to write mandatory files: {e}")
+            messagebox.showwarning("Warning", f"Could not write concept.md or todo.md: {e}", parent=self)
+
+        # Optional: Write Base Project Reference
         if include_base_reference:
             base_path = self.state.project_data["base_project_path"].get()
             base_files = self.state.project_data["base_project_files"]
             if generator.write_base_reference_file(project_path, base_path, base_files):
                 files_created.append("project_reference.md")
 
-        # 4. Save Config to new project folder
+        # Save Config to new project folder
         self.state.update_from_view(self.current_view)
         self.state.save()
         session_manager.save_session_data(self.state.get_dict(), project_path / "project-starter.json")
 
-        # 5. CREATE .ALLCODE IMMEDIATELY
+        # Create .allcode
         from ...core.utils import load_config
         conf = load_config()
 
