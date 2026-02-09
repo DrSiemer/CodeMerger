@@ -64,8 +64,17 @@ class InstructionsWindow(Toplevel):
         button_frame.grid(row=4, column=0, sticky='ew', pady=(10, 0))
 
         config = load_config()
-        default_intro = config.get('default_intro_prompt', '').strip()
-        default_outro = config.get('default_outro_prompt', '').strip()
+
+        # Defensive check for list types if config was previously corrupted by trailing commas
+        default_intro = config.get('default_intro_prompt', '')
+        if isinstance(default_intro, (list, tuple)):
+            default_intro = "\n".join(default_intro)
+        default_intro = default_intro.strip()
+
+        default_outro = config.get('default_outro_prompt', '')
+        if isinstance(default_outro, (list, tuple)):
+            default_outro = "\n".join(default_outro)
+        default_outro = default_outro.strip()
 
         if assets.defaults_icon and (default_intro or default_outro):
             self.defaults_button = Label(button_frame, image=assets.defaults_icon, bg=c.DARK_BG, cursor="hand2")
@@ -81,8 +90,15 @@ class InstructionsWindow(Toplevel):
         self.save_button.pack(side='right')
 
         # --- Populate Text Fields ---
-        self.intro_text.insert('1.0', self.project_config.intro_text)
-        self.outro_text.insert('1.0', self.project_config.outro_text)
+        # Handle existing project config data defensively
+        curr_intro = self.project_config.intro_text
+        if isinstance(curr_intro, (list, tuple)): curr_intro = "\n".join(curr_intro)
+
+        curr_outro = self.project_config.outro_text
+        if isinstance(curr_outro, (list, tuple)): curr_outro = "\n".join(curr_outro)
+
+        self.intro_text.insert('1.0', curr_intro)
+        self.outro_text.insert('1.0', curr_outro)
 
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
@@ -104,7 +120,10 @@ class InstructionsWindow(Toplevel):
 
         config = load_config()
         default_intro = config.get('default_intro_prompt', '')
+        if isinstance(default_intro, (list, tuple)): default_intro = "\n".join(default_intro)
+
         default_outro = config.get('default_outro_prompt', '')
+        if isinstance(default_outro, (list, tuple)): default_outro = "\n".join(default_outro)
 
         self.intro_text.delete('1.0', 'end')
         self.intro_text.insert('1.0', default_intro)

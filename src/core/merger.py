@@ -35,8 +35,15 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
     if use_wrapper:
         project_title = project_config.project_name
+
+        # Defensive string coercion for fields that might have been corrupted by bad defaults
         intro_text = project_config.intro_text
+        if isinstance(intro_text, (list, tuple)):
+            intro_text = "\n".join(intro_text)
+
         outro_text = project_config.outro_text
+        if isinstance(outro_text, (list, tuple)):
+            outro_text = "\n".join(outro_text)
 
         # Always prepended to the merged code block via final_parts
         formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
