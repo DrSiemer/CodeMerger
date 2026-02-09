@@ -1,3 +1,10 @@
+Notes
+
+- Keep this code as separated from the main application code as possible; not everybody will want to use it
+- The process should offer an easy way to converse about a particular segment to help them understand (similar to how asking questions is set up in the Project Wizard)
+
+
+
 # Feature Concept: Guided Implementation Mode ("Learning Mode")
 
 ## 1. The Core Concept
