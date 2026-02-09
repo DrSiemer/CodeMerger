@@ -182,42 +182,33 @@ class DirectoryDialog(Toplevel):
         self._adjust_height()
 
     def _adjust_height(self):
+        """
+        Calculates and applies the height of the inner scrollable area
+        and allows the window to naturally shrink-wrap around all content.
+        """
+        num_items = len(self.project_widgets)
+
+        # Determine row height (default to 38 if not yet rendered)
+        item_h = 38
+        if num_items > 0:
+            self.update_idletasks()
+            item_h = self.project_widgets[0].winfo_reqheight() + 6 # req + padding
+
+        # 1. Set the specific height for the Canvas (cap at 10 rows)
+        list_h = min(num_items, 10) * item_h
+        self.scroll_frame.canvas.config(height=list_h)
+
+        # 2. Tell the window to reset its geometry calculation
+        self.geometry("")
         self.update_idletasks()
 
-        h_info = self.info_label.winfo_reqheight()
-        h_filter = self.filter_frame.winfo_reqheight() if self.filter_frame.winfo_ismapped() else 0
-        h_button = self.browse_btn.winfo_reqheight()
+        # 3. Get the calculated natural height
+        win_w, win_h = self.dialog_width, self.winfo_reqheight()
 
-        # Calculate base non-list height including padding
-        # info_label: pady=(5,0) -> 5
-        # filter_frame: pady=(0,10) -> 10 if mapped
-        # browse_btn: pady=20 -> 40 (top/bottom)
-        padding = 5 + (10 if self.filter_frame.winfo_ismapped() else 0) + 40
-        self.non_list_height = h_info + h_filter + h_button + padding
-
-        num_items = len(self.project_widgets)
-        list_items_height = 0
-        if num_items > 0:
-            first_item = self.project_widgets[0]
-            first_item.update_idletasks()
-            item_height = first_item.winfo_reqheight() + 6
-            max_visible_items = 10
-            visible_items = min(num_items, max_visible_items)
-            list_items_height = visible_items * item_height
-
-        final_height = self.non_list_height + list_items_height
-
-        MIN_DIALOG_HEIGHT = 150
-        if final_height < MIN_DIALOG_HEIGHT:
-            final_height = MIN_DIALOG_HEIGHT
-
+        # 4. Final Position and screen constraint
         x, y = self.current_x, self.current_y
-
-        win_w, win_h = self.dialog_width, final_height
         mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area((x, y))
-
         mon_bottom -= 50; mon_right -= 20; mon_left += 10; mon_top += 10
-
         if x + win_w > mon_right: x = mon_right - win_w
         if y + win_h > mon_bottom: y = mon_bottom - win_h
         if x < mon_left: x = mon_left
@@ -338,3 +329,7 @@ class DirectoryDialog(Toplevel):
 
         if not self.recent_projects:
             self.info_label.config(text="Browse for a project folder to get started")
+
+    def _close_and_save_geometry(self):
+        save_window_geometry(self)
+        self.destroy()
