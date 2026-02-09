@@ -43,8 +43,6 @@ class WizardState:
         c_md = self.project_data.get("concept_md", "")
         t_md = self.project_data.get("todo_md", "")
 
-        # Logic Fix: If Markdown text exists, prioritize saving it.
-        # This ensures that once 'Merge' is clicked, the result is captured.
         return {
             "current_step": self.current_step,
             "name": self.project_data["name"].get(),
@@ -64,6 +62,7 @@ class WizardState:
         }
 
     def save(self, *args):
+        self._recalc_progress()
         session_manager.save_session_data(self.get_dict())
 
     def load(self, filepath=None):
