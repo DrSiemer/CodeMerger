@@ -22,11 +22,14 @@ def main():
         # Check if another instance is already running
         another_instance_active = is_another_instance_running()
 
-        # Check for command-line arguments
+        # --- Command-line Argument Parsing ---
         initial_project_path = None
-        if len(sys.argv) > 1:
-            # The first argument (sys.argv[1]) is the path passed from the context menu
-            initial_project_path = sys.argv[1]
+
+        # Simple parsing for flags and paths
+        cmd_args = sys.argv[1:]
+
+        if cmd_args:
+            initial_project_path = cmd_args[0]
             log.info(f"Received initial project path from command line: {initial_project_path}")
 
         # Load app version

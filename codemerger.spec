@@ -23,13 +23,8 @@ def get_tcl_tk_datas():
             if tcl_dir and tk_dir:
                 tcl_path = os.path.join(tcl_root, tcl_dir)
                 tk_path = os.path.join(tcl_root, tk_dir)
-
-                # --- FIX: Map the CONTENTS directly to the hook-expected folders ---
-                # By mapping to '_tcl_data' instead of '_tcl_data/tcl8.6',
-                # we ensure init.tcl is found at _internal/_tcl_data/init.tcl
                 tcl_tk_datas.append((tcl_path, '_tcl_data'))
                 tcl_tk_datas.append((tk_path, '_tk_data'))
-
                 os.environ['TCL_LIBRARY'] = tcl_path
                 os.environ['TK_LIBRARY'] = tk_path
                 return tcl_tk_datas

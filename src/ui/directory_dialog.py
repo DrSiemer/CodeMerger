@@ -207,6 +207,10 @@ class DirectoryDialog(Toplevel):
 
         final_height = self.non_list_height + list_items_height
 
+        MIN_DIALOG_HEIGHT = 150
+        if final_height < MIN_DIALOG_HEIGHT:
+            final_height = MIN_DIALOG_HEIGHT
+
         x, y = self.current_x, self.current_y
 
         win_w, win_h = self.dialog_width, final_height
