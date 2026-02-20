@@ -13,8 +13,6 @@ from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
 from ..tooltip import ToolTip
 
-DEFAULT_GOAL_TEXT = "The plan is to build a..."
-
 class ConceptView(tk.Frame):
     def __init__(self, parent, wizard_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
@@ -100,7 +98,7 @@ class ConceptView(tk.Frame):
         self.goal_text.pack(side='top', fill="both", expand=True, pady=5)
 
         existing_goal = self.project_data.get("goal", "").strip()
-        self.goal_text.insert("1.0", existing_goal if existing_goal else DEFAULT_GOAL_TEXT)
+        self.goal_text.insert("1.0", existing_goal if existing_goal else c.WIZARD_CONCEPT_DEFAULT_GOAL)
         self.goal_text.text_widget.bind("<KeyRelease>", self._update_goal_state)
         self._update_button_state()
 
@@ -110,7 +108,7 @@ class ConceptView(tk.Frame):
 
     def _update_button_state(self, event=None):
         content = self.project_data.get("goal", "").strip()
-        self.generate_btn.set_state('normal' if content and content != DEFAULT_GOAL_TEXT else 'disabled')
+        self.generate_btn.set_state('normal' if content and content != c.WIZARD_CONCEPT_DEFAULT_GOAL else 'disabled')
 
     def _get_prompt(self):
         user_goal = self.project_data.get("goal", "")
@@ -118,15 +116,12 @@ class ConceptView(tk.Frame):
         segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
         parts = [
-            "Based on the following user goal, generate a full project concept document.",
+            c.WIZARD_CONCEPT_PROMPT_INTRO,
             "\n### User Goal\n```\n" + user_goal.strip() + "\n```",
             self._get_base_project_content(),
             "\n### Format Instructions",
             segment_instructions,
-            "\n### Core Instructions",
-            "1. Fill in every section with specific details relevant to the user's goal.",
-            "2. Ensure the 'User Flows' section covers the complete lifecycle of the main data entity.",
-            "3. **Readability & Formatting:** Use frequent line breaks and short paragraphs to avoid dense blocks of text. Utilize Markdown elements (bullet points, bolding) to ensure the document is highly readable and visually structured."
+            c.WIZARD_CONCEPT_PROMPT_CORE_INSTR
         ]
         return "\n".join(parts)
 
@@ -386,7 +381,14 @@ class ConceptView(tk.Frame):
             full_text = self.editor_text.get("1.0", "end-1c").strip()
             current_q = self.questions[self.current_question_index]
 
-            prompt = f"### Full Concept\n```markdown\n{full_text}\n```\n\n### Question\n{current_q}\n\nInstruction: Please answer the question or provide critical feedback regarding the concept. Do NOT rewrite the text."
+            prompt = c.WIZARD_QUESTION_PROMPT_TEMPLATE.format(
+                context_label="Full Concept",
+                context_content="```markdown\n" + full_text + "\n```",
+                focus_name="Concept",
+                focus_content="(Overview above)",
+                question=current_q,
+                instruction_suffix="Please answer the question or provide critical feedback regarding the concept. Do NOT rewrite the text."
+            )
 
             self.clipboard_clear()
             self.clipboard_append(prompt)

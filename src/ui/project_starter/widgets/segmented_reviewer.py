@@ -307,9 +307,14 @@ class SegmentedReviewer(Frame):
         current_txt = self.editor.get("1.0", "end-1c").strip()
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
 
-        prompt = f"### Context\n{context}\n### Focus: {current_name}\n{current_txt}\n\n### Question\n{question}\n\n" \
-                 f"Instruction: Focus ONLY on the segment '{current_name}'. " \
-                 f"Please answer the question or provide critical feedback regarding this segment. Do NOT rewrite the text."
+        prompt = c.WIZARD_QUESTION_PROMPT_TEMPLATE.format(
+            context_label="Context",
+            context_content=context,
+            focus_name=current_name,
+            focus_content=current_txt,
+            question=question,
+            instruction_suffix=f"Focus ONLY on the segment '{current_name}'. Please answer the question or provide critical feedback regarding this segment. Do NOT rewrite the text."
+        )
 
         try:
             self.clipboard_clear()
@@ -442,7 +447,15 @@ class SegmentedReviewer(Frame):
             ref_context_str = "\n### Locked Sections (Reference Only)\n" + "\n".join([f"--- Locked Section: {self.friendly_names_map.get(k, k)} ---\n{self.segments_data.get(k, '')}\n" for k in references])
 
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
-        prompt = f"You are a Consistency Engine. The user has modified section **{current_name}**.\nUpdate *unsigned* drafts to match these changes, respecting *locked* sections.\n\n### New Source of Truth: {current_name}\n```\n{self.segments_data[self.active_key]}\n```\n{ref_context_str}\n### Drafts to Update\n{target_context_str}\n\n### Instructions\n1. {SegmentManager.build_prompt_instructions(targets, self.friendly_names_map)}"
+
+        prompt = c.WIZARD_SYNC_PROMPT_TEMPLATE.format(
+            current_name=current_name,
+            content=self.segments_data[self.active_key],
+            ref_context=ref_context_str,
+            target_context=target_context_str,
+            target_instructions=SegmentManager.build_prompt_instructions(targets, self.friendly_names_map)
+        )
+
         SyncUnsignedDialog(self, prompt, self._apply_sync_results)
 
     def _open_rewrite_dialog(self):

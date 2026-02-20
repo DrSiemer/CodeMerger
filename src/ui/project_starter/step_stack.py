@@ -124,10 +124,10 @@ class StackView(tk.Frame):
         concept = self.project_data.get("concept_md", "")
         experience = self.project_data.get("stack_experience", "")
         parts = [
-            "Based on the project concept and the developer's experience, recommend the best technical stack for this project.",
+            c.WIZARD_STACK_PROMPT_INTRO,
             "\n### Developer Experience\n```\n" + (experience if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
-            "\n### Instructions\n1. Analyze requirements against known skills.\n2. Return the recommended stack as a raw JSON list of strings.\n   - Example: [\"Python 3.10\", \"Flask\"]\n3. Return ONLY the JSON."
+            c.WIZARD_STACK_PROMPT_INSTR
         ]
         return "\n".join(parts)
 

@@ -122,19 +122,13 @@ class RewriteUnsignedDialog(Toplevel):
         friendly_map = {k: names.get(k, k) for k in targets}
         target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
 
-        # Reinforced prompt logic to make sure LLM knows it targets ALL unsigned drafts, including the active one
-        prompt = f"You are a Project Editor.\n" \
-                 f"The user has provided a global instruction to modify the project plan.\n" \
-                 f"Your task is to update ALL *unsigned* drafts listed below to comply with this instruction.\n\n" \
-                 f"### User Instruction\n{instruction}\n\n" \
-                 f"### Locked Sections (Reference Only - DO NOT CHANGE)\n{ ''.join(reference_blocks) if reference_blocks else '(None)' }\n\n" \
-                 f"### Drafts to Update (ALL of these must be processed)\n{ ''.join(target_blocks) }\n\n" \
-                 f"### Instructions\n" \
-                 f"1. Review the User Instruction.\n" \
-                 f"2. Rewrite every segment in the 'Drafts to Update' list to incorporate this instruction.\n" \
-                 f"3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.\n" \
-                 f"4. {target_instructions}\n" \
-                 f"5. Output ONLY the updated Drafts."
+        # Template from Constants
+        prompt = c.WIZARD_REWRITE_PROMPT_TEMPLATE.format(
+            instruction=instruction,
+            references=''.join(reference_blocks) if reference_blocks else '(None)',
+            targets=''.join(target_blocks),
+            target_instructions=target_instructions
+        )
 
         try:
             self.clipboard_clear()

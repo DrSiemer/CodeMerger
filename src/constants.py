@@ -56,7 +56,6 @@ Do not change code, only comments."""
 DELIMITER_TEMPLATE = "<<SECTION: {name}>>"
 
 # Concept Generation Segments
-# Keys are internal identifiers, Values are the display names used in Prompts and UI
 CONCEPT_SEGMENTS = {
     "problem_statement": "Problem & Audience",
     "core_principles": "Core Principles",
@@ -65,13 +64,11 @@ CONCEPT_SEGMENTS = {
     "tech_constraints": "Data & Tech Constraints"
 }
 
-# Defines the logical order for the Concept document
 CONCEPT_ORDER = [
     "problem_statement", "core_principles", "key_features", "user_flows", "tech_constraints"
 ]
 
 # TODO Generation Phases
-# These correspond to the checkboxes in the TODO configuration step
 TODO_PHASES = {
     "setup": "Environment Setup",
     "database": "Database & Schema",
@@ -97,6 +94,100 @@ TODO_DESCRIPTIONS = {
 TODO_ORDER = [
     "setup", "database", "api", "frontend", "logic", "polish", "deployment"
 ]
+
+# --- Project Starter Wizard Prompt Templates ---
+WIZARD_CONCEPT_DEFAULT_GOAL = "The plan is to build a..."
+WIZARD_CONCEPT_PROMPT_INTRO = "Based on the following user goal, generate a full project concept document."
+WIZARD_CONCEPT_PROMPT_CORE_INSTR = """
+### Core Instructions
+1. Fill in every section with specific details relevant to the user's goal.
+2. Ensure the 'User Flows' section covers the complete lifecycle of the main data entity.
+3. **Readability & Formatting:** Use frequent line breaks and short paragraphs to avoid dense blocks of text. Utilize Markdown elements (bullet points, bolding) to ensure the document is highly readable and visually structured.
+"""
+
+WIZARD_STACK_PROMPT_INTRO = "Based on the project concept and the developer's experience, recommend the best technical stack for this project."
+WIZARD_STACK_PROMPT_INSTR = """
+### Instructions
+1. Analyze requirements against known skills.
+2. Return the recommended stack as a raw JSON list of strings.
+   - Example: ["Python 3.10", "Flask"]
+3. Return ONLY the JSON.
+"""
+
+WIZARD_TODO_PROMPT_INTRO = """You are a Technical Project Manager.
+Based on the following project Concept and Tech Stack, create a detailed TODO plan."""
+
+WIZARD_TODO_PROMPT_INSTR = """
+### Instructions
+1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).
+2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').
+3. **Format:** You MUST output the plan using specific section tags for the phases you decide to include.
+   - Use `<<SECTION: Phase Name>>` followed by the content.
+   - Allowed Phase Names: {headers_str}.
+   - **Do not** output sections for phases you decided to skip.
+"""
+
+WIZARD_GENERATE_MASTER_INTRO = "You are a senior developer creating a boilerplate for: {name}\nStack: {stack}"
+WIZARD_GENERATE_MASTER_INSTR = """
+### Core Instructions
+1. **Select & Rename:** Select the appropriate `go_*.bat` script for the stack and rename it to `go.bat`.
+2. **Mandatory README:** You MUST output the `README.md` file. Populate it (or create it) with the project title, the pitch, and specific setup steps derived from the stack.
+3. **BOILERPLATE ONLY:** DO NOT implement any of the actual tasks, code, or features described in the TODO plan yet. Your job is ONLY to set up the skeleton/infrastructure (README, batch scripts, config files). Do NOT create source files (like *.js, *.py, *.css) unless they are explicitly part of the standard boilerplate provided above.
+4. **Short Description:** At the start of your response, provide a short, one-sentence description (noun phrase) of exactly what this project is (e.g., 'a Python-based CLI tool for image processing'). This description must grammatically fit into the sentence 'We are working on [PITCH].' Wrap this description in `<<PITCH>>` tags. **You MUST close the tag with `<<PITCH>>`. Example: `<<PITCH>>a new CLI tool<<PITCH>>`. Failure to close this tag will break the parser.**
+5. **Output Format:** Return the complete source code for every file you are modifying or creating using this exact format:
+--- File: `path/to/file.ext` ---
+```language
+[content]
+```
+--- End of file ---
+
+CRITICAL: Do NOT omit the '--- End of file ---' marker for any block.
+"""
+
+WIZARD_REWRITE_PROMPT_TEMPLATE = """You are a Project Editor.
+The user has provided a global instruction to modify the project plan.
+Your task is to update ALL *unsigned* drafts listed below to comply with this instruction.
+
+### User Instruction
+{instruction}
+
+### Locked Sections (Reference Only - DO NOT CHANGE)
+{references}
+
+### Drafts to Update (ALL of these must be processed)
+{targets}
+
+### Instructions
+1. Review the User Instruction.
+2. Rewrite every segment in the 'Drafts to Update' list to incorporate this instruction.
+3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.
+4. {target_instructions}
+5. Output ONLY the updated Drafts."""
+
+WIZARD_SYNC_PROMPT_TEMPLATE = """You are a Consistency Engine. The user has modified section **{current_name}**.
+Update *unsigned* drafts to match these changes, respecting *locked* sections.
+
+### New Source of Truth: {current_name}
+```
+{content}
+```
+{ref_context}
+### Drafts to Update
+{target_context}
+
+### Instructions
+1. {target_instructions}"""
+
+WIZARD_QUESTION_PROMPT_TEMPLATE = """### {context_label}
+{context_content}
+
+### Focus: {focus_name}
+{focus_content}
+
+### Question
+{question}
+
+Instruction: {instruction_suffix}"""
 
 # --- UI Theming & Configuration ---
 PROJECT_TITLE_MAX_LENGTH = 64

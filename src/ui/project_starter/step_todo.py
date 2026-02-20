@@ -119,19 +119,12 @@ class TodoView(tk.Frame):
         headers_str = ", ".join([f'"{h}"' for h in valid_headers])
 
         parts = [
-            "You are a Technical Project Manager.",
-            "Based on the following project Concept and Tech Stack, create a detailed TODO plan.",
+            c.WIZARD_TODO_PROMPT_INTRO,
             "\n### Tech Stack\n" + stack,
             "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
             example_code,
             "\n### Reference Template (Standard TODO List)\n```markdown\n" + todo_template + "\n```",
-            "\n### Instructions",
-            "1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).",
-            "2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').",
-            "3. **Format:** You MUST output the plan using specific section tags for the phases you decide to include.",
-            f"   - Use `<<SECTION: Phase Name>>` followed by the content.",
-            f"   - Allowed Phase Names: {headers_str}.",
-            "   - **Do not** output sections for phases you decided to skip."
+            c.WIZARD_TODO_PROMPT_INSTR.format(headers_str=headers_str)
         ]
         return "\n".join(parts)
 
@@ -431,11 +424,17 @@ class TodoView(tk.Frame):
                 c_map_const = {k: v for k,v in c.CONCEPT_SEGMENTS.items()}
                 concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c_map_const)
 
-            concept_section = f"### Project Concept\n```markdown\n{concept_md}\n```\n\n" if concept_md else ""
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
 
-            prompt_text = f"{concept_section}### Full TODO Plan\n```markdown\n{todo_content}\n```\n\n### Question\n{current_question}\n\nInstruction: Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
+            prompt_text = c.WIZARD_QUESTION_PROMPT_TEMPLATE.format(
+                context_label="Project Concept",
+                context_content="```markdown\n" + (concept_md or "No concept provided") + "\n```",
+                focus_name="Full TODO Plan",
+                focus_content="```markdown\n" + todo_content + "\n```",
+                question=current_question,
+                instruction_suffix="Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
+            )
 
             self.clipboard_clear()
             self.clipboard_append(prompt_text)

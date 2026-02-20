@@ -200,14 +200,16 @@ class GenerateView(tk.Frame):
             files = sorted([
                 f for f in os.listdir(BOILERPLATE_DIR)
                 if os.path.isfile(os.path.join(BOILERPLATE_DIR, f))
-                and f not in {'.DS_Store', 'Thumbs.db', '_start.txt'} # Explicitly exclude _start.txt just in case it exists
+                and f not in {'.DS_Store', 'Thumbs.db', '_start.txt'}
             ])
 
             for filename in files:
                 path = os.path.join(BOILERPLATE_DIR, filename)
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
-                        prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n\n"
+                        # ADDED: Include the '--- End of file ---' marker for consistency
+                        # This teaches the LLM the correct response format by example.
+                        prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n--- End of file ---\n\n"
                 except Exception:
                     pass
         except Exception:
@@ -216,24 +218,12 @@ class GenerateView(tk.Frame):
         example_code = self._get_base_project_content()
 
         parts = [
-            f"You are a senior developer creating a boilerplate for: {name}",
-            f"Stack: {stack}",
+            c.WIZARD_GENERATE_MASTER_INTRO.format(name=name, stack=stack),
             "\n### Provided Files\n" + prompt_content,
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
             "\n### TODO Plan\n```markdown\n" + todo + "\n```",
             example_code,
-            "\n### Core Instructions",
-            "1. **Select & Rename:** Select the appropriate `go_*.bat` script for the stack and rename it to `go.bat`.",
-            "2. **Mandatory README:** You MUST output the `README.md` file. Populate it (or create it) with the project title, the pitch, and specific setup steps derived from the stack.",
-            "3. **BOILERPLATE ONLY:** DO NOT implement any of the actual tasks, code, or features described in the TODO plan yet. Your job is ONLY to set up the skeleton/infrastructure (README, batch scripts, config files). Do NOT create source files (like *.js, *.py, *.css) unless they are explicitly part of the standard boilerplate provided above.",
-            "4. **Short Description:** At the start of your response, provide a short, one-sentence description (noun phrase) of exactly what this project is (e.g., 'a Python-based CLI tool for image processing'). This description must grammatically fit into the sentence 'We are working on [PITCH].' Wrap this description in `<<PITCH>>` tags. **You MUST close the tag with `<<PITCH>>`. Example: `<<PITCH>>a new CLI tool<<PITCH>>`. Failure to close this tag will break the parser.**",
-            "5. **Output Format:** Return the complete source code for every file you are modifying or creating using this exact format:",
-            "--- File: `path/to/file.ext` ---",
-            "```language",
-            "[content]",
-            "```",
-            "--- End of file ---",
-            "\nCRITICAL: Do NOT omit the '--- End of file ---' marker for any block."
+            c.WIZARD_GENERATE_MASTER_INSTR
         ]
         return "\n".join(parts)
 

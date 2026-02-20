@@ -37,10 +37,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1771596147.796182,
-          "hash": "8f5275252e1ebcf3713b459e0ebe87997d04f53e",
-          "tokens": 2402,
-          "lines": 223
+          "mtime": 1771597821.6511538,
+          "hash": "e5d4912fabb391cc6d3301ef8e4dddd3d5639485",
+          "tokens": 3454,
+          "lines": 314
         },
         {
           "path": "default_filetypes.json",
@@ -487,10 +487,10 @@
         },
         {
           "path": "src/ui/project_starter/widgets/rewrite_dialog.py",
-          "mtime": 1770647141.2145858,
-          "hash": "54dbffa300d9266eeab96777cc53f14f1ecb0723",
-          "tokens": 1772,
-          "lines": 154
+          "mtime": 1771597505.5406137,
+          "hash": "3f59a5f28b265cce7c1848897a9725ad1afe44b4",
+          "tokens": 1579,
+          "lines": 148
         },
         {
           "path": "src/ui/project_starter/widgets/sync_dialog.py",
@@ -501,10 +501,10 @@
         },
         {
           "path": "src/ui/project_starter/widgets/segmented_reviewer.py",
-          "mtime": 1770647141.2155857,
-          "hash": "003184a30054e540845ff2f3c942102fef48e1bc",
-          "tokens": 5139,
-          "lines": 481
+          "mtime": 1771597505.5416145,
+          "hash": "eb90c00f0e8d45f59783d5704eb7e018c01e10d5",
+          "tokens": 5170,
+          "lines": 501
         },
         {
           "path": "src/ui/project_starter/step_details.py",
@@ -522,31 +522,31 @@
         },
         {
           "path": "src/ui/project_starter/step_concept.py",
-          "mtime": 1771591728.7831821,
-          "hash": "4e6eaadbd5bb319cd23e0d6f6f4779ed8e1e4ee1",
-          "tokens": 5049,
-          "lines": 451
+          "mtime": 1771597505.5396085,
+          "hash": "3855da34f30e8cb7b06995bce8b44460b33e9d59",
+          "tokens": 5011,
+          "lines": 458
         },
         {
           "path": "src/ui/project_starter/step_stack.py",
-          "mtime": 1771592433.9266202,
-          "hash": "7698b962fd92037cbd3891bab486778c9d1c0f79",
-          "tokens": 3045,
+          "mtime": 1771597505.5396085,
+          "hash": "9c84557f4183d2934d073f29530cfb59ce7740f1",
+          "tokens": 2989,
           "lines": 247
         },
         {
           "path": "src/ui/project_starter/step_todo.py",
-          "mtime": 1771591728.7841818,
-          "hash": "631addfdc6f05dbbeb1fb5ce287ab6eddf940fc7",
-          "tokens": 5399,
-          "lines": 503
+          "mtime": 1771597505.5406137,
+          "hash": "f047e5ce246e15f6e46ee4224d6bb0bab7842526",
+          "tokens": 5071,
+          "lines": 488
         },
         {
           "path": "src/ui/project_starter/step_generate.py",
-          "mtime": 1771591728.7841818,
-          "hash": "370c1d670f17b9b3e1fdcc418a9fb14abab6db89",
-          "tokens": 3264,
-          "lines": 256
+          "mtime": 1771597505.5406137,
+          "hash": "bc4f13e6b41e9a0f7400c26f73ae735138c2d60c",
+          "tokens": 2909,
+          "lines": 244
         },
         {
           "path": "src/ui/project_starter/success_view.py",
@@ -710,13 +710,6 @@
           "lines": 61
         },
         {
-          "path": "assets/boilerplate/2do.txt",
-          "mtime": 1770647141.062056,
-          "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-          "tokens": 0,
-          "lines": 1
-        },
-        {
           "path": "run.py",
           "mtime": 1758726639.7019978,
           "hash": "0171f0345556bf0145d65b50baf26e2a40af3bfb",
@@ -767,7 +760,7 @@
           "lines": 84
         }
       ],
-      "total_tokens": 147051,
+      "total_tokens": 0,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -791,7 +784,6 @@
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
-    "assets/boilerplate/2do.txt",
     "assets/boilerplate/README.md",
     "assets/boilerplate/go_docker.bat",
     "assets/boilerplate/go_nodejs.bat",
