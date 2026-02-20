@@ -120,18 +120,17 @@ def setup_ui(app):
     center_frame.grid_columnconfigure(0, weight=1)
     app.center_frame = center_frame
 
-    # A container for the icon buttons, placed in the main central frame.
-    # It sticks to the bottom-right corner.
+    # Icon buttons
     app.bottom_buttons_container = Frame(center_frame, bg=c.DARK_BG)
     app.bottom_buttons_container.grid(row=0, column=0, sticky='se', padx=20, pady=(0, 18))
 
-    app.filetypes_button = Label(app.bottom_buttons_container, image=assets.filetypes_icon, bg=c.DARK_BG, cursor='hand2')
-    app.filetypes_button.pack(side='top')
-    ToolTip(app.filetypes_button, "Manage Filetypes", delay=500)
-
     app.settings_button = Label(app.bottom_buttons_container, image=assets.settings_icon, bg=c.DARK_BG, cursor='hand2')
-    app.settings_button.pack(side='top', pady=(10, 0))
+    app.settings_button.pack(side='top')
     ToolTip(app.settings_button, "Settings", delay=500)
+
+    app.filetypes_button = Label(app.bottom_buttons_container, image=assets.filetypes_icon, bg=c.DARK_BG, cursor='hand2')
+    app.filetypes_button.pack(side='top', pady=(10, 0))
+    ToolTip(app.filetypes_button, "Manage Filetypes", delay=500)
 
     # This frame holds the actions box. Its alignment is controlled by the responsive layout function.
     app.main_content_frame = Frame(center_frame, bg=c.DARK_BG)
