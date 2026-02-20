@@ -6,6 +6,7 @@ from tkinter import messagebox, Toplevel, Label
 from ... import constants as c
 from .selection_data_manager import SelectionDataManager
 from .selection_list_ui import SelectionListUI
+from ...core.utils import is_ignored
 
 class SelectionListController:
     """
@@ -69,11 +70,17 @@ class SelectionListController:
 
     def set_initial_selection(self, selection_list):
         self.data_manager.set_initial_selection(selection_list)
-        self.ui_manager.update_list_display(self.ordered_selection)
+        self._update_and_notify()
 
     def _update_and_notify(self, is_reorder=False):
         """Helper to refresh the UI display and invoke the parent callback."""
-        self.ui_manager.update_list_display(self.ordered_selection, is_reorder=is_reorder)
+        self.ui_manager.update_list_display(
+            self.ordered_selection,
+            base_dir=self.base_dir,
+            file_extensions=self.parent.file_extensions,
+            gitignore_patterns=self.parent.gitignore_patterns,
+            is_reorder=is_reorder
+        )
         self.on_change()
 
     def toggle_file(self, path):
@@ -151,11 +158,18 @@ class SelectionListController:
         self.update_button_states()
 
     def filter_list(self, filter_text):
-        self.ui_manager.update_list_display(self.ordered_selection, is_reorder=False, filter_text=filter_text.lower())
+        self.ui_manager.update_list_display(
+            self.ordered_selection,
+            base_dir=self.base_dir,
+            file_extensions=self.parent.file_extensions,
+            gitignore_patterns=self.parent.gitignore_patterns,
+            is_reorder=False,
+            filter_text=filter_text.lower()
+        )
 
     def toggle_full_path_view(self):
         self.ui_manager.toggle_full_path_view()
-        self.ui_manager.update_list_display(self.ordered_selection, is_reorder=False)
+        self._update_and_notify()
 
     def open_selected_file(self, event=None):
         indices = self.listbox.curselection()
@@ -196,18 +210,49 @@ class SelectionListController:
         if not path: return
 
         is_over_token_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
-        tooltip_text = None
+        tooltip_text = ""
+
+        # --- Base Path Tooltip (if truncated) ---
+        if not self.ui_manager.show_full_paths:
+            basename = os.path.basename(path)
+            full_path_display = path.replace('/', os.sep)
+            if basename != full_path_display:
+                tooltip_text = full_path_display
+
+        # --- Filter Reason Hint ---
+        hidden_reasons = []
+        if is_ignored(os.path.join(self.base_dir, path), self.base_dir, self.parent.gitignore_patterns):
+            hidden_reasons.append("the .gitignore filter")
+
+        filename = os.path.basename(path)
+        file_ext = os.path.splitext(filename.lower())[1]
+        extensions = {ext for ext in self.parent.file_extensions if ext.startswith('.')}
+        exact_filenames = {ext for ext in self.parent.file_extensions if not ext.startswith('.')}
+        if not (file_ext in extensions or filename.lower() in exact_filenames):
+            hidden_reasons.append("the filetype filter")
+
+        if hidden_reasons:
+            hint = f"Normally hidden by {' and '.join(hidden_reasons)}."
+            if tooltip_text:
+                tooltip_text += f"\n\n{hint}"
+            else:
+                tooltip_text = hint
+
+        # --- Token Stats Tooltip ---
         if is_over_token_area and self.ui_manager.token_count_enabled:
             tokens, lines = item_info.get('tokens', -1), item_info.get('lines', -1)
-            is_ignored = item_info.get('ignore_tokens', False)
+            is_ignored_token = item_info.get('ignore_tokens', False)
+            stats_text = ""
             if tokens >= 0:
-                tooltip_text = f"{tokens} tokens, {lines} lines"
-                if is_ignored:
-                    tooltip_text += "\n(Ignored in coloring)"
-                tooltip_text += "\nCtrl+Click to copy breakup request\nAlt+Click to toggle ignore"
-        elif not self.ui_manager.show_full_paths:
-            basename, full_path_display = os.path.basename(path), path.replace('/', os.sep)
-            if basename != full_path_display: tooltip_text = full_path_display
+                stats_text = f"{tokens} tokens, {lines} lines"
+                if is_ignored_token:
+                    stats_text += "\n(Ignored in coloring)"
+                stats_text += "\nCtrl+Click to copy breakup request\nAlt+Click to toggle ignore"
+
+            if tooltip_text:
+                tooltip_text += f"\n\n{stats_text}"
+            else:
+                tooltip_text = stats_text
 
         if not tooltip_text: return
 

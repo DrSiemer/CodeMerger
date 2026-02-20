@@ -82,10 +82,19 @@ class FileMonitor:
             self.app.ui_callbacks.on_directory_selected(None)
             return
 
+        # Collect paths that MUST be checked for existence regardless of filters.
+        # This ensures files added to the merge order (possibly by disabling filters)
+        # are not treated as "deleted" just because the filter is re-enabled.
+        force_include_paths = set()
+        for p_data in project_config.profiles.values():
+             for f in p_data.get('selected_files', []):
+                 force_include_paths.add(f['path'])
+
         all_project_files = get_all_matching_files(
             base_dir=base_dir,
             file_extensions=self.app.file_extensions,
-            gitignore_patterns=parse_gitignore(base_dir)
+            gitignore_patterns=parse_gitignore(base_dir),
+            always_include_paths=force_include_paths
         )
 
         current_set = set(all_project_files)
@@ -94,24 +103,43 @@ class FileMonitor:
         config_changed = False
 
         # --- 1. Handle Deleted Files ---
-        # This logic handles actual deletions safely. Files are only removed from 'known_files'
-        # if the filesystem scan confirms they are missing from 'current_set'.
-        deleted_files = known_set - current_set
-        if deleted_files:
-            # Remove from global known list
-            project_config.known_files = list(known_set - deleted_files)
+        # The file scanner respects .gitignore and filetype filters.
+        # However, because we passed 'force_include_paths' above, any file that is
+        # currently selected will be present in 'current_set' if it physically exists.
+        missing_from_scan = known_set - current_set
+
+        truly_deleted_files = set()
+
+        if missing_from_scan:
+            for rel_path in missing_from_scan:
+                full_path = os.path.join(base_dir, rel_path)
+                # Check for physical existence.
+                if not os.path.exists(full_path):
+                    truly_deleted_files.add(rel_path)
+
+        if truly_deleted_files:
+            # Remove ONLY the files that are confirmed deleted from disk
+            project_config.known_files = list(known_set - truly_deleted_files)
 
             # Remove from all profiles' selections and unknown lists
             for p_name, p_data in project_config.profiles.items():
                 orig_selection = len(p_data.get('selected_files', []))
-                p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] not in deleted_files]
-                p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f not in deleted_files]
+
+                p_data['selected_files'] = [
+                    f for f in p_data.get('selected_files', [])
+                    if f['path'] not in truly_deleted_files
+                ]
+
+                p_data['unknown_files'] = [
+                    f for f in p_data.get('unknown_files', [])
+                    if f not in truly_deleted_files
+                ]
 
                 if len(p_data['selected_files']) != orig_selection:
                     p_data['total_tokens'] = 0 # Force recalc
 
             config_changed = True
-            self.app.status_var.set(f"Cleaned {len(deleted_files)} missing file(s).")
+            self.app.status_var.set(f"Cleaned {len(truly_deleted_files)} missing file(s).")
 
         # --- 2. Handle Brand New Files (to the whole project) ---
         brand_new_files = current_set - set(project_config.known_files)

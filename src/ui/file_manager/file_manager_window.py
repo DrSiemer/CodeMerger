@@ -56,6 +56,12 @@ class FileManagerWindow(Toplevel):
         setup_file_manager_ui(self, include_save_button=True)
         self.create_handlers()
 
+        # Register visual tags for the tree
+        self.tree.tag_configure('filtered_file_highlight', foreground=c.TEXT_FILTERED_COLOR)
+        self.tree.tag_configure('subtle_highlight', background=c.SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
+        self.tree.tag_configure('new_file_highlight', foreground="#40C040")
+        self.tree.tag_configure('selected_grey', foreground=c.TEXT_SUBTLE_COLOR)
+
         self.filter_text = StringVar()
         self.filter_entry.config(textvariable=self.filter_text)
         self.filter_text.trace_add('write', self.ui_controller.apply_filter)
@@ -227,8 +233,13 @@ class FileManagerWindow(Toplevel):
         self.selection_handler.update_button_states()
 
     def sync_highlights(self):
+        # We target specifically the highlight tag, but preserve others like purple coloring
         for item_id in self.tree.tag_has('subtle_highlight'):
-            self.tree.item(item_id, tags=())
+            current_tags = list(self.tree.item(item_id, 'tags'))
+            if 'subtle_highlight' in current_tags:
+                current_tags.remove('subtle_highlight')
+            self.tree.item(item_id, tags=tuple(current_tags))
+
         self.merge_order_list.clear_highlights()
         selected_path, source = (None, None)
         if self.tree.selection():
@@ -246,7 +257,10 @@ class FileManagerWindow(Toplevel):
             except ValueError: pass
         elif source == self.merge_order_list and selected_path in self.path_to_item_id:
             item_id = self.path_to_item_id[selected_path]
-            self.tree.item(item_id, tags=('subtle_highlight',))
+            current_tags = list(self.tree.item(item_id, 'tags'))
+            if 'subtle_highlight' not in current_tags:
+                current_tags.append('subtle_highlight')
+            self.tree.item(item_id, tags=tuple(current_tags))
             self.tree.see(item_id)
 
         self.ui_controller.refresh_hover_icon()

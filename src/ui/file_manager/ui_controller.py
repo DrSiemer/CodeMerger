@@ -102,7 +102,12 @@ class FileManagerUIController:
 
         if item_id:
             item_info = self.window.item_map.get(item_id, {})
-            if item_info.get('type') == 'dir':
+
+            # --- Special Tooltip for Normally Filtered Files ---
+            if 'hidden_reason' in item_info:
+                 self.folder_tooltip_job = self.window.after(400, lambda e=event, msg=item_info['hidden_reason']: self._show_generic_tooltip(e, msg))
+            # --- Standard Folder Tooltip ---
+            elif item_info.get('type') == 'dir':
                 self.hovered_folder_id = item_id
                 self.folder_tooltip_job = self.window.after(500, lambda e=event, iid=item_id: self._show_folder_tooltip(e, iid))
 
@@ -130,6 +135,18 @@ class FileManagerUIController:
 
         action_text = "remove" if is_fully_selected else "add"
         return f"Double-click to {action_text} all files in this folder"
+
+    def _show_generic_tooltip(self, event, message):
+        """Shows a simple tooltip with a custom message."""
+        self._hide_folder_tooltip()
+        x, y = event.x_root + 15, event.y_root + 10
+        self.folder_tooltip_window = Toplevel(self.window)
+        self.folder_tooltip_window.wm_overrideredirect(True)
+        self.folder_tooltip_window.wm_geometry(f"+{x}+{y}")
+        self.folder_tooltip_label = Label(self.folder_tooltip_window, text=message, justify='left',
+                      background=c.TOP_BAR_BG, fg=c.TEXT_COLOR, relief='solid', borderwidth=1,
+                      font=c.FONT_TOOLTIP)
+        self.folder_tooltip_label.pack(ipadx=4, ipady=2)
 
     def _show_folder_tooltip(self, event, item_id):
         self._hide_folder_tooltip()

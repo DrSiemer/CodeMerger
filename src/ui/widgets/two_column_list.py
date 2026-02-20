@@ -106,7 +106,7 @@ class TwoColumnList(tk.Canvas):
             item_path = item.get('data')
             if not item_path or item_path not in self.item_id_map: continue
 
-            left_target = c.BTN_BLUE_TEXT if i in self.selected_indices else c.TEXT_COLOR
+            left_target = c.BTN_BLUE_TEXT if i in self.selected_indices else item.get('left_fg', c.TEXT_COLOR)
             right_target = item.get('right_fg', c.TEXT_SUBTLE_COLOR)
 
             targets.append({
@@ -165,7 +165,7 @@ class TwoColumnList(tk.Canvas):
             if i in self.selected_indices: bg_color = c.BTN_BLUE
             elif i in self.highlighted_indices: bg_color = c.SUBTLE_HIGHLIGHT_COLOR
 
-            left_fg = c.BTN_BLUE_TEXT if i in self.selected_indices else c.TEXT_COLOR
+            left_fg = c.BTN_BLUE_TEXT if i in self.selected_indices else item.get('left_fg', c.TEXT_COLOR)
             right_fg = item.get('right_fg', c.TEXT_SUBTLE_COLOR)
 
             self.itemconfig(ids['bg'], fill=bg_color)
@@ -189,7 +189,8 @@ class TwoColumnList(tk.Canvas):
         for i, item in enumerate(self.items):
             y = i * self.row_height
             bg_rect = self.create_rectangle(0, y, width, y + self.row_height, outline="")
-            left_text = self.create_text(5, y + self.row_height / 2, anchor='w', text=item.get('left', ''), font=self.left_col_font)
+            l_color = item.get('left_fg', c.TEXT_COLOR)
+            left_text = self.create_text(5, y + self.row_height / 2, anchor='w', text=item.get('left', ''), font=self.left_col_font, fill=l_color)
             right_text = self.create_text(width - 5, y + self.row_height / 2, anchor='e', text=item.get('right', ''), font=self.right_col_font)
             # Use the unique file path as the key
             item_path = item.get('data')

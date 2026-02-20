@@ -1,11 +1,12 @@
 import os
 import time
 from ... import constants as c
+from ...core.utils import is_ignored
 
 class FileTreeHandler:
     """
     Manages the file tree view in the FileManagerWindow, including population,
-    event handling, and visual state
+    event handling, and visual state.
     """
     def __init__(self, parent, tree_widget, action_button, item_map, path_to_item_id, is_selected_callback, on_toggle_callback):
         self.parent = parent
@@ -32,7 +33,8 @@ class FileTreeHandler:
 
     def update_item_visuals(self, item_id, current_selection_paths=None):
         """
-        Updates the text (checkbox) and visual style (greyout) of a tree item.
+        Updates the text (checkbox) and visual style of a tree item.
+        Applies 'filtered_file_highlight' if a file is normally hidden by filters.
         Applies 'selected_grey' tag if:
         1. A file is selected OR is in the ignore list (e.g. __init__.py).
         2. A folder has all its 'relevant' files selected (ignoring files in the list).
@@ -46,7 +48,10 @@ class FileTreeHandler:
             current_selection_paths = {f['path'] for f in self.parent.selection_handler.ordered_selection}
 
         tags = list(self.tree.item(item_id, 'tags'))
-        is_grey = False
+
+        # Clear existing visual tags to start fresh
+        for t in ['selected_grey', 'filtered_file_highlight']:
+            if t in tags: tags.remove(t)
 
         if item_type == 'file':
             path = item_info['path']
@@ -56,9 +61,31 @@ class FileTreeHandler:
             check_char = "☑" if is_checked else "☐"
             self.tree.item(item_id, text=f"{check_char} {filename}")
 
-            # File is grey if selected OR if it's in the ignore list (e.g. __init__.py)
-            if is_checked or filename in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS:
-                is_grey = True
+            # --- Check Normal Filter Status ---
+            hidden_reasons = []
+
+            # 1. Check Gitignore
+            if is_ignored(os.path.join(self.parent.base_dir, path), self.parent.base_dir, self.parent.gitignore_patterns):
+                hidden_reasons.append("the .gitignore filter")
+
+            # 2. Check Extension Filter
+            file_name_lower = filename.lower()
+            file_ext = os.path.splitext(file_name_lower)[1]
+            extensions = {ext for ext in self.parent.file_extensions if ext.startswith('.')}
+            exact_filenames = {ext for ext in self.parent.file_extensions if not ext.startswith('.')}
+
+            if not (file_ext in extensions or file_name_lower in exact_filenames):
+                hidden_reasons.append("the filetype filter")
+
+            if hidden_reasons:
+                tags.append('filtered_file_highlight')
+                reason_str = " and ".join(hidden_reasons)
+                item_info['hidden_reason'] = f"This file would normally be hidden by {reason_str}."
+            else:
+                item_info.pop('hidden_reason', None)
+                # Apply grey out only if it's NOT a filtered highlight
+                if is_checked or filename in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS:
+                    tags.append('selected_grey')
 
         elif item_type == 'dir':
             files_in_subtree = self._get_all_files_in_subtree(item_id)
@@ -66,7 +93,7 @@ class FileTreeHandler:
             if not files_in_subtree:
                 # Folder contains no files (empty or only dirs).
                 # Consider it "complete" (grey) so it doesn't draw attention.
-                is_grey = True
+                tags.append('selected_grey')
             else:
                 # Filter down to only files that actually matter for "completeness"
                 relevant_files = [
@@ -77,18 +104,11 @@ class FileTreeHandler:
                 if not relevant_files:
                     # Folder contains ONLY ignored files (e.g. only __init__.py).
                     # It is visually complete.
-                    is_grey = True
+                    tags.append('selected_grey')
                 else:
                     # Folder is grey only if ALL relevant files are selected.
-                    is_grey = all(p in current_selection_paths for p in relevant_files)
-
-        # Apply or remove the grey tag based on the logic above
-        if is_grey:
-            if 'selected_grey' not in tags:
-                tags.append('selected_grey')
-        else:
-            if 'selected_grey' in tags:
-                tags.remove('selected_grey')
+                    if all(p in current_selection_paths for p in relevant_files):
+                        tags.append('selected_grey')
 
         self.tree.item(item_id, tags=tags)
 

@@ -153,6 +153,16 @@ class OrderRequestHandler:
         path_map = {f['path']: f for f in current_selection}
         new_ordered_selection = [path_map[p] for p in new_order_list]
         self.window.selection_handler.data_manager.ordered_selection = new_ordered_selection
-        self.window.selection_handler.ui_manager.update_list_display(new_ordered_selection, is_reorder=True, animate=True)
+
+        # Pass missing positional arguments required by SelectionListUI.update_list_display
+        self.window.selection_handler.ui_manager.update_list_display(
+            new_ordered_selection,
+            base_dir=self.window.base_dir,
+            file_extensions=self.window.file_extensions,
+            gitignore_patterns=self.window.gitignore_patterns,
+            is_reorder=True,
+            animate=True
+        )
+
         self.window.selection_handler.on_change()
         self.window.status_var.set("File merge order updated successfully.")

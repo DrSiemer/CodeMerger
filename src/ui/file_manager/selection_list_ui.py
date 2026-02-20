@@ -1,5 +1,6 @@
 import os
 from ... import constants as c
+from ...core.utils import is_ignored
 
 class SelectionListUI:
     def __init__(self, list_widget, token_count_enabled):
@@ -32,11 +33,15 @@ class SelectionListUI:
         self.show_full_paths = not self.show_full_paths
         return self.show_full_paths
 
-    def update_list_display(self, ordered_selection, is_reorder=False, filter_text="", animate=False):
+    def update_list_display(self, ordered_selection, base_dir, file_extensions, gitignore_patterns, is_reorder=False, filter_text="", animate=False):
         """Refreshes the merge order list."""
         items_to_display = ordered_selection
         if filter_text:
             items_to_display = [item for item in ordered_selection if filter_text in item['path'].lower()]
+
+        # Prepare filter logic data
+        extensions = {ext for ext in file_extensions if ext.startswith('.')}
+        exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
 
         min_tokens, max_tokens = 0, c.TOKEN_COLOR_RANGE_MIN_MAX
         if self.token_count_enabled:
@@ -52,14 +57,28 @@ class SelectionListUI:
         display_items = []
         for file_info in items_to_display:
             path = file_info['path']
-            display_text = path if self.show_full_paths else os.path.basename(path)
+            file_name = os.path.basename(path)
+            display_text = path if self.show_full_paths else file_name
+
+            # --- Filter Check Logic ---
+            file_name_lower = file_name.lower()
+            file_ext = os.path.splitext(file_name_lower)[1]
+
+            is_valid_ext = file_ext in extensions or file_name_lower in exact_filenames
+            is_git_ignored = is_ignored(os.path.join(base_dir, path), base_dir, gitignore_patterns)
+
+            # If it's ignored by Git OR has an unsupported extension, it's "filtered"
+            is_filtered = is_git_ignored or (not is_valid_ext)
+            left_col_color = c.TEXT_FILTERED_COLOR if is_filtered else c.TEXT_COLOR
+            # --------------------------
+
             right_col_text, right_col_color = "", c.TEXT_SUBTLE_COLOR
             if self.token_count_enabled:
                 token_count = file_info.get('tokens', -1)
-                is_ignored = file_info.get('ignore_tokens', False)
+                is_ignored_token = file_info.get('ignore_tokens', False)
 
                 if token_count >= 0:
-                    if is_ignored:
+                    if is_ignored_token:
                         right_col_text = f"[{token_count}]"
                         right_col_color = "#666666"
                     else:
@@ -68,7 +87,13 @@ class SelectionListUI:
                 else:
                     right_col_text = "?"
 
-            display_items.append({'left': display_text, 'right': right_col_text, 'right_fg': right_col_color, 'data': path})
+            display_items.append({
+                'left': display_text,
+                'left_fg': left_col_color,
+                'right': right_col_text,
+                'right_fg': right_col_color,
+                'data': path
+            })
 
         if is_reorder:
             self.listbox.reorder_and_update(display_items)
