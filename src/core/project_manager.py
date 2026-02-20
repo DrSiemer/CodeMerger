@@ -1,5 +1,5 @@
 import os
-from .project_config import ProjectConfig
+from .project_config import ProjectConfig, _calculate_font_color
 from .utils import parse_gitignore
 from .file_scanner import get_all_matching_files
 
@@ -51,7 +51,7 @@ class ProjectManager:
 
         return self.project_config, status_message
 
-    def create_project_with_defaults(self, path, project_name, intro_text, outro_text, initial_selected_files=None):
+    def create_project_with_defaults(self, path, project_name, intro_text, outro_text, initial_selected_files=None, project_color=None):
         """
         Initializes a new project configuration at the specified path with default prompts.
         Optionally sets the initial selected files (merge list).
@@ -63,12 +63,34 @@ class ProjectManager:
         # Apply the "normal" project name provided by the user
         config.project_name = project_name
 
+        # Apply recommended color if provided by LLM
+        if project_color:
+            config.project_color = project_color
+            config.project_font_color = _calculate_font_color(project_color)
+
         # Populate file list using the centralized logic
         self._populate_new_project_files(config)
 
         # If specific files were requested (e.g. from Wizard), set them now.
         if initial_selected_files:
-            config.selected_files = initial_selected_files
+            # Defensive check: Ensure items are dicts with 'path' keys
+            processed_selection = []
+            new_paths = set()
+
+            for item in initial_selected_files:
+                if isinstance(item, str):
+                    path_str = item
+                    processed_selection.append({'path': path_str})
+                    new_paths.add(path_str)
+                elif isinstance(item, dict) and 'path' in item:
+                    processed_selection.append(item)
+                    new_paths.add(item['path'])
+
+            config.selected_files = processed_selection
+
+            # CRITICAL: Ensure these files are added to known_files so they
+            # don't trigger "New File" alerts immediately upon opening.
+            config.known_files = sorted(list(set(config.known_files) | new_paths))
 
         # Apply custom prompts
         config.intro_text = intro_text

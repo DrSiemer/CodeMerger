@@ -39,11 +39,12 @@ def prepare_project_directory(parent_folder, project_name, overwrite=False):
 def parse_and_write_files(project_path, llm_output):
     """
     Parses the LLM response for file blocks and writes them to the project path.
-    Uses a more robust regex to handle whitespace variations.
+    Uses a more robust regex to handle whitespace variations and short files.
     """
-    # This regex is more forgiving with newlines and spaces between markers
+    # IMPROVED REGEX: The '\n?' before '```' makes the trailing newline optional.
+    # This prevents the parser from failing on short files like 2do.txt.
     file_pattern = re.compile(
-        r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+--- End of file ---',
+        r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n?```\s*[\r\n]+--- End of file ---',
         re.DOTALL
     )
 
@@ -70,6 +71,8 @@ def parse_and_write_files(project_path, llm_output):
             full_path.parent.mkdir(parents=True, exist_ok=True)
             # Normalize line endings
             sanitized_content = "\n".join([line.rstrip() for line in content.splitlines()])
+
+            # This overwrites any pre-copied boilerplate files if the LLM included them
             full_path.write_text(sanitized_content, encoding="utf-8")
             files_created.append(str(relative_path))
         except Exception as e:

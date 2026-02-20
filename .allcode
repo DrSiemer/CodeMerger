@@ -452,10 +452,10 @@
         },
         {
           "path": "src/ui/project_starter/generator.py",
-          "mtime": 1770647141.211586,
-          "hash": "0b08ee3b76885070628113f3e8f19fd06d171df5",
-          "tokens": 988,
-          "lines": 123
+          "mtime": 1771600395.5472312,
+          "hash": "8e80227d7674dba621ce5fc93ef31cd3399db7bd",
+          "tokens": 1037,
+          "lines": 126
         },
         {
           "path": "src/ui/project_starter/wizard_state.py",
@@ -543,10 +543,10 @@
         },
         {
           "path": "src/ui/project_starter/step_generate.py",
-          "mtime": 1771597505.5406137,
-          "hash": "bc4f13e6b41e9a0f7400c26f73ae735138c2d60c",
-          "tokens": 2909,
-          "lines": 244
+          "mtime": 1771600395.5472312,
+          "hash": "974f0c060059648b87b0e9eba9ecd6edea8f2e10",
+          "tokens": 2935,
+          "lines": 246
         },
         {
           "path": "src/ui/project_starter/success_view.py",
@@ -557,10 +557,10 @@
         },
         {
           "path": "src/ui/project_starter/wizard_dialog.py",
-          "mtime": 1771591703.9399407,
-          "hash": "009f024a9067bbf93965771d810dce98f44418ae",
-          "tokens": 4537,
-          "lines": 494
+          "mtime": 1771600548.8906977,
+          "hash": "49ee6eca878840cee3046cdfe41a3e7d026fc977",
+          "tokens": 4456,
+          "lines": 425
         },
         {
           "path": "src/ui/compact_status.py",
@@ -710,6 +710,13 @@
           "lines": 61
         },
         {
+          "path": "assets/boilerplate/2do.txt",
+          "mtime": 1771599532.1431673,
+          "hash": "8fafba17805c815f5a0536c59e33bf5a133379d7",
+          "tokens": 5,
+          "lines": 3
+        },
+        {
           "path": "run.py",
           "mtime": 1758726639.7019978,
           "hash": "0171f0345556bf0145d65b50baf26e2a40af3bfb",
@@ -760,7 +767,7 @@
           "lines": 84
         }
       ],
-      "total_tokens": 0,
+      "total_tokens": 147163,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -784,6 +791,7 @@
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
+    "assets/boilerplate/2do.txt",
     "assets/boilerplate/README.md",
     "assets/boilerplate/go_docker.bat",
     "assets/boilerplate/go_nodejs.bat",
