@@ -49,8 +49,12 @@ class StackView(tk.Frame):
         # ACTION BUTTON AT BOTTOM
         btn_container = tk.Frame(self, bg=c.DARK_BG)
         btn_container.pack(side='bottom', fill="x", pady=15)
-        self.save_exp_btn = RoundedButton(btn_container, text="Save as Default", command=self._save_experience, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
-        ToolTip(self.save_exp_btn, "Save this experience text to your application settings for future projects", delay=500)
+
+        self.save_exp_btn = RoundedButton(btn_container, text="Save as Default", command=self._save_experience, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=30, cursor="hand2")
+        ToolTip(self.save_exp_btn, "Save this text as your application-wide default for future projects", delay=500)
+
+        self.load_exp_btn = RoundedButton(btn_container, text="Load Default", command=self._load_default_experience, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=30, cursor="hand2")
+        ToolTip(self.load_exp_btn, "Replace the text below with your saved default experience", delay=500)
 
         btn_gen = RoundedButton(btn_container, text="Generate Stack Recommendation", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         btn_gen.pack(side='right')
@@ -79,16 +83,42 @@ class StackView(tk.Frame):
         # Update state variable so navigating away preserves the draft
         self.project_data["stack_experience"] = current_val
 
+        # Toggle Save Button: Only if current text is different from global default
         if current_val != global_default:
-            if not self.save_exp_btn.winfo_ismapped(): self.save_exp_btn.pack(side='left')
-        else: self.save_exp_btn.pack_forget()
+            if not self.save_exp_btn.winfo_ismapped():
+                self.save_exp_btn.pack(side='left')
+        else:
+            self.save_exp_btn.pack_forget()
+
+        # Toggle Load Button: Only if there is a default AND it's different from current
+        if global_default and current_val != global_default:
+            if not self.load_exp_btn.winfo_ismapped():
+                self.load_exp_btn.pack(side='left', padx=(10, 0))
+        else:
+            self.load_exp_btn.pack_forget()
 
     def _save_experience(self):
-        new_exp = self.experience_text.get("1.0", "end-1c")
+        new_exp = self.experience_text.get("1.0", "end-1c").strip()
         self.app_config['user_experience'] = new_exp
         save_config(self.app_config)
-        # Update local tracking of the default
         self.save_exp_btn.pack_forget()
+        self.load_exp_btn.pack_forget()
+
+    def _load_default_experience(self):
+        global_default = self.app_config.get('user_experience', '').strip()
+        current_val = self.experience_text.get("1.0", "end-1c").strip()
+
+        if not global_default:
+            return
+
+        if current_val:
+            warning = "This will overwrite the information you have typed in.\n\nAre you sure you want to load your default stack experience?"
+            if not messagebox.askyesno("Overwrite Warning", warning, parent=self):
+                return
+
+        self.experience_text.delete("1.0", "end")
+        self.experience_text.insert("1.0", global_default)
+        self._on_exp_change()
 
     def _get_prompt(self):
         concept = self.project_data.get("concept_md", "")
