@@ -25,8 +25,9 @@ class TodoView(tk.Frame):
         self.questions = self._load_questions()
 
         self.current_question_index = 0
-        self.questions_frame_visible = False  # Changed to False by default
+        self.questions_frame_visible = False
         self.editor_is_active = False
+        self.generation_mode_active = False
 
         # State for merged view toggle
         self.is_raw_mode = False
@@ -71,7 +72,6 @@ class TodoView(tk.Frame):
                     # Populate the map for the SegmentedReviewer and assembly logic
                     self.questions_map = data
                     # Return empty list for the legacy self.questions used by manual mode
-                    # Manual/Merged mode questions will be set explicitly
                     return []
                 return []
         except (FileNotFoundError, json.JSONDecodeError) as e:
@@ -115,7 +115,6 @@ class TodoView(tk.Frame):
             todo_template = "(Template not found)"
 
         # 5. Section headers for SegmentManager
-        # We provide the list of valid headers so LLM knows what tags to use.
         valid_headers = [v for k, v in c.TODO_PHASES.items()]
         headers_str = ", ".join([f'"{h}"' for h in valid_headers])
 
@@ -151,6 +150,7 @@ class TodoView(tk.Frame):
 
         self._clear_frame()
         self.editor_is_active = False
+        self.generation_mode_active = True
         self.grid_rowconfigure(2, weight=1) # Response area expands
         self.grid_columnconfigure(0, weight=1)
 
@@ -189,27 +189,22 @@ class TodoView(tk.Frame):
         content = strip_markdown_wrapper(raw_content)
         parsed_segments = SegmentManager.parse_segments(content)
 
-        # Fallback to legacy editor if no segments found (e.g. LLM ignored instructions)
+        # Fallback to legacy editor if no segments found
         if not parsed_segments:
             self.todo_content = content
             self.project_data["todo_md"] = content
             self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
-            self.wizard_controller.state.save() # Ensure persist even in fallback
             self.show_merged_view(content)
             return
 
-        # Map friendly names back to internal keys if possible
+        # Map friendly names back to internal keys
         friendly_to_key = {v.lower(): k for k,v in c.TODO_PHASES.items()}
         mapped_segments = {}
 
         for name, text in parsed_segments.items():
-            # Try exact match, then lower case match
             key = friendly_to_key.get(name.lower())
-            if key:
-                mapped_segments[key] = text
-            else:
-                # Store as custom key if not found in standard set
-                mapped_segments[name] = text
+            if key: mapped_segments[key] = text
+            else: mapped_segments[name] = text
 
         self.project_data["todo_segments"].clear()
         self.project_data["todo_segments"].update(mapped_segments)
@@ -218,7 +213,8 @@ class TodoView(tk.Frame):
         for k in mapped_segments.keys():
             self.project_data["todo_signoffs"][k] = False
 
-        # CRITICAL FIX: Save state immediately after processing to persist new segments
+        # CRITICAL: Clear merged Markdown when moving back to segments
+        self.project_data["todo_md"] = ""
         self.project_data["todo_llm_response"] = "" # Clear buffer
         self.wizard_controller.state.save()
 
@@ -227,22 +223,21 @@ class TodoView(tk.Frame):
     def show_editor_view(self):
         self._clear_frame()
         self.editor_is_active = True
+        self.generation_mode_active = False
 
         header = tk.Frame(self, bg=c.DARK_BG)
         header.pack(side='top', fill="x", pady=(0, 5))
         tk.Label(header, text="Review TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
-        # Questions for TODO are loaded differently, we might need a map
+        # Questions for TODO
         questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
         try:
             with open(questions_path, "r", encoding="utf-8") as f:
                 q_map = json.loads(f.read())
         except Exception: q_map = {}
 
-        # Ensure we have data keys
         data_keys = set(self.project_data["todo_segments"].keys())
         ordered_keys = [k for k in c.TODO_ORDER if k in data_keys]
-        # Append any custom/unknown keys at the end
         ordered_keys += [k for k in data_keys if k not in ordered_keys]
 
         if not ordered_keys:
@@ -282,6 +277,7 @@ class TodoView(tk.Frame):
     def show_merged_view(self, content):
         self._clear_frame()
         self.editor_is_active = True
+        self.generation_mode_active = False
         self.grid_rowconfigure(1, weight=0) # Questions (dynamic)
         self.grid_rowconfigure(2, weight=1) # Editor (expands)
         self.grid_columnconfigure(0, weight=1)
@@ -293,7 +289,7 @@ class TodoView(tk.Frame):
         controls = tk.Frame(header_frame, bg=c.DARK_BG)
         controls.pack(side="right")
 
-        # Questions Toggle (if available)
+        # Questions Toggle
         if self.questions:
              self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
              self.q_btn.pack(side="left", padx=(0,10))
@@ -306,17 +302,13 @@ class TodoView(tk.Frame):
         # Questions Container
         self.questions_container = tk.Frame(self, bg=c.DARK_BG)
 
-        # Initial grid state based on visibility flag
         if self.questions_frame_visible:
             self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
-            # Also ensure it's populated
             if not self.questions_container.winfo_children():
                 self._create_question_prompter()
-                # Update button style since it's active
                 if hasattr(self, 'q_btn'):
                     self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
-            # Ensure it is removed if starting hidden (though usually True by default)
             self.questions_container.grid_remove()
 
         # Editor Frame
@@ -376,12 +368,10 @@ class TodoView(tk.Frame):
     def _toggle_questions(self):
         self.questions_frame_visible = not self.questions_frame_visible
         if self.questions_frame_visible:
-            # Re-grid the container
             self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
             self._create_question_prompter()
             self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
         else:
-            # Remove from grid so row 2 can reclaim space
             self.questions_container.grid_remove()
             for widget in self.questions_container.winfo_children():
                 widget.destroy()
@@ -436,16 +426,12 @@ class TodoView(tk.Frame):
 
     def _copy_question_prompt(self, button):
         try:
-            # Retrieve Concept Content for context
             concept_md = self.project_data.get("concept_md")
             if not concept_md and self.project_data.get("concept_segments"):
                 c_map_const = {k: v for k,v in c.CONCEPT_SEGMENTS.items()}
                 concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c_map_const)
 
-            concept_section = ""
-            if concept_md:
-                concept_section = f"### Project Concept\n```markdown\n{concept_md}\n```\n\n"
-
+            concept_section = f"### Project Concept\n```markdown\n{concept_md}\n```\n\n" if concept_md else ""
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
 
@@ -466,7 +452,8 @@ class TodoView(tk.Frame):
             self.project_data["todo_md"] = ""
             self.project_data["todo_llm_response"] = ""
             self.todo_content = ""
-            # Reload questions
+            self.editor_is_active = False
+            self.generation_mode_active = False
             self.questions = self._load_questions()
             self.questions_frame_visible = False
             self.current_question_index = 0
@@ -479,7 +466,6 @@ class TodoView(tk.Frame):
         return {}
 
     def get_assembled_content(self):
-        # FIX: If segments are empty (merged mode), return the existing flat MD
         if not self.project_data.get("todo_segments"):
             return self.project_data.get("todo_md", ""), {}, {}
 

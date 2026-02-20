@@ -182,7 +182,9 @@ class ConceptView(tk.Frame):
         parsed_segments = SegmentManager.parse_segments(content)
 
         if not parsed_segments:
-            messagebox.showwarning("Parsing Error", "Could not find any <<SECTION: ...>> tags.", parent=self)
+            # Fallback to merged view if tags are missing
+            self.project_data["concept_md"] = content
+            self.show_merged_view(content)
             return
 
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
@@ -195,6 +197,8 @@ class ConceptView(tk.Frame):
         for k in mapped_segments.keys():
             self.project_data["concept_signoffs"][k] = False
 
+        # CRITICAL: Clear merged Markdown when moving back to segments
+        self.project_data["concept_md"] = ""
         self.project_data["concept_llm_response"] = "" # Clear the buffer on success
         self.show_editor_view()
 
@@ -317,7 +321,6 @@ class ConceptView(tk.Frame):
     def _apply_view_mode(self):
         if self.is_raw_mode:
             # Switch to Editor
-            self.renderer_content = self.editor_text.get("1.0", "end-1c") # Sync content if needed later
             self.markdown_renderer.grid_forget()
             self.editor_text.grid(row=0, column=0, sticky="nsew")
 
@@ -418,6 +421,8 @@ class ConceptView(tk.Frame):
             self.project_data["concept_signoffs"].clear()
             self.project_data["concept_md"] = ""
             self.project_data["concept_llm_response"] = ""
+            self.editor_is_active = False
+            self.generation_mode_active = False
             self.show_initial_view()
             self.wizard_controller._update_navigation_controls()
 
