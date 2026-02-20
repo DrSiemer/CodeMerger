@@ -14,7 +14,11 @@ class StackView(tk.Frame):
         self.wizard_controller = wizard_controller
         self.project_data = project_data
         self.app_config = load_config()
-        self.saved_experience = self.app_config.get('user_experience', '')
+
+        # Load from state if it exists, otherwise fall back to global default
+        state_exp = self.project_data.get("stack_experience", "").strip()
+        self.saved_experience = state_exp if state_exp else self.app_config.get('user_experience', '')
+
         self.stack_content = self.project_data["stack"].get()
 
         self.editor_is_active = False
@@ -50,7 +54,8 @@ class StackView(tk.Frame):
         ToolTip(btn_gen, "Ask the LLM to recommend a technology stack based on your concept and experience", delay=500)
 
         # TOP CONTENT
-        header_text = "Edit your known languages, frameworks, and environment details." if self.saved_experience.strip() else "List your known languages, frameworks, and environment details."
+        global_default = self.app_config.get('user_experience', '').strip()
+        header_text = "Edit your known languages, frameworks, and environment details." if global_default else "List your known languages, frameworks, and environment details."
         tk.Label(self, text="Your Experience & Environment", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 5))
         tk.Label(self, text=header_text, wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").pack(side='top', anchor="w", pady=(0, 10))
 
@@ -65,7 +70,13 @@ class StackView(tk.Frame):
         self._on_exp_change()
 
     def _on_exp_change(self, event=None):
-        if self.experience_text.get("1.0", "end-1c").strip() != self.saved_experience.strip():
+        current_val = self.experience_text.get("1.0", "end-1c").strip()
+        global_default = self.app_config.get('user_experience', '').strip()
+
+        # Update state variable so navigating away preserves the draft
+        self.project_data["stack_experience"] = current_val
+
+        if current_val != global_default:
             if not self.save_exp_btn.winfo_ismapped(): self.save_exp_btn.pack(side='left')
         else: self.save_exp_btn.pack_forget()
 
@@ -73,7 +84,7 @@ class StackView(tk.Frame):
         new_exp = self.experience_text.get("1.0", "end-1c")
         self.app_config['user_experience'] = new_exp
         save_config(self.app_config)
-        self.saved_experience = new_exp
+        # Update local tracking of the default
         self.save_exp_btn.pack_forget()
 
     def _get_prompt(self):
@@ -172,6 +183,7 @@ class StackView(tk.Frame):
     def handle_reset(self):
         if tk.messagebox.askyesno("Confirm", "Reset stack selection?", parent=self):
             self.project_data["stack"].set("")
+            self.project_data["stack_experience"] = ""
             self.show_initial_view()
             self.wizard_controller._update_navigation_controls()
 
@@ -183,6 +195,11 @@ class StackView(tk.Frame):
             lines = [line.strip() for line in raw_text.split('\n') if line.strip()]
             return ", ".join(lines)
         return self.project_data["stack"].get()
+
+    def get_experience_content(self):
+        if hasattr(self, 'experience_text') and self.experience_text.winfo_exists():
+            return self.experience_text.get("1.0", "end-1c").strip()
+        return self.project_data.get("stack_experience", "")
 
     def _clear_frame(self):
         for widget in self.winfo_children(): widget.destroy()

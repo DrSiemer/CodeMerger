@@ -17,6 +17,7 @@ class WizardState:
             "name": tk.StringVar(),
             "parent_folder": tk.StringVar(value=""),
             "stack": tk.StringVar(),
+            "stack_experience": "",
             "goal": "",
             "concept_md": "",
             "todo_md": "",
@@ -48,6 +49,7 @@ class WizardState:
             "name": self.project_data["name"].get(),
             "parent_folder": self.project_data["parent_folder"].get(),
             "stack": self.project_data["stack"].get(),
+            "stack_experience": self.project_data.get("stack_experience", ""),
             "goal": self.project_data.get("goal", ""),
             "concept_md": c_md,
             "todo_md": t_md,
@@ -71,6 +73,7 @@ class WizardState:
         loaded_parent = loaded_data.get("parent_folder", "")
         self.project_data["parent_folder"].set(loaded_parent if loaded_parent and os.path.isdir(loaded_parent) else "")
         self.project_data["stack"].set(loaded_data.get("stack", ""))
+        self.project_data["stack_experience"] = loaded_data.get("stack_experience", "")
         self.project_data["goal"] = loaded_data.get("goal", "")
         self.project_data["base_project_path"].set(loaded_data.get("base_project_path", ""))
         self.project_data["base_project_files"] = loaded_data.get("base_project_files", [])
@@ -100,6 +103,7 @@ class WizardState:
         self.project_data["name"].set("")
         self.project_data["parent_folder"].set("")
         self.project_data["stack"].set("")
+        self.project_data["stack_experience"] = ""
         self.project_data["goal"] = ""
         self.project_data["concept_md"] = ""
         self.project_data["todo_md"] = ""
@@ -149,6 +153,8 @@ class WizardState:
             self.project_data["goal"] = view.get_goal_content()
         if hasattr(view, 'get_stack_content'):
             self.project_data["stack"].set(view.get_stack_content())
+        if hasattr(view, 'get_experience_content'):
+            self.project_data["stack_experience"] = view.get_experience_content()
         if hasattr(view, 'get_assembled_content'):
             content, segments, signoffs = view.get_assembled_content()
             view_type = str(type(view))
