@@ -43,17 +43,6 @@ class ButtonStateManager:
             app.manage_files_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
             app.manage_files_tooltip.text = "Manage project files"
 
-        # --- Check for Start Work File ---
-        has_start_file = False
-        if is_dir_active:
-            start_file_path = os.path.join(active_dir_path, c.START_WORK_FILENAME)
-            has_start_file = os.path.exists(start_file_path)
-
-        if has_start_file:
-            app.start_work_button.grid(row=0, column=1, padx=(10, 0))
-        else:
-            app.start_work_button.grid_remove()
-
         if is_dir_active:
             app.folder_icon_label.grid(row=0, column=1, sticky='e', padx=(10, 0))
             # Generate the masked logo image and apply it to the label

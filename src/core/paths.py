@@ -101,8 +101,6 @@ FILETYPES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes_activ
 # --- Project Starter Icons ---
 PROJECT_STARTER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter.png')
 PROJECT_STARTER_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter_active.png')
-START_WORK_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_start.png')
-START_WORK_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_start_active.png')
 
 # Windows Registry path
 REGISTRY_KEY_PATH = r"Software\CodeMerger"

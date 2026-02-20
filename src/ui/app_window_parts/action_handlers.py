@@ -50,59 +50,6 @@ class ActionHandlers:
 
         app.project_starter_window = ProjectStarterDialog(app, app)
 
-    def start_work_on_click(self, event):
-        """Handles click (copy) and alt-click (delete) on the Start Work button."""
-        if not self._is_valid_click(event): return
-
-        app = self.app
-        project_config = app.project_manager.get_current_project()
-        if not project_config:
-            return
-
-        start_file_path = os.path.join(project_config.base_dir, c.START_WORK_FILENAME)
-        if not os.path.exists(start_file_path):
-            app.status_var.set(f"File '{c.START_WORK_FILENAME}' not found.")
-            app.button_manager.update_button_states()
-            return
-
-        is_alt = (event.state & 0x20000) or (event.state & 131072) # Windows/Linux Alt mask
-
-        if is_alt:
-            # Delete file
-            if messagebox.askyesno("Delete File", f"Delete '{c.START_WORK_FILENAME}' from the project?", parent=app):
-                try:
-                    os.remove(start_file_path)
-                    app.status_var.set(f"Deleted '{c.START_WORK_FILENAME}'.")
-                    app.button_manager.update_button_states()
-                except OSError as e:
-                    app.show_error_dialog("Error", f"Could not delete file: {e}")
-        else:
-            # Perform Copy with Instructions using _start.txt as intro
-            try:
-                with open(start_file_path, 'r', encoding='utf-8') as f:
-                    start_content = f.read()
-
-                # Temporarily override the config intro/outro
-                original_intro = project_config.intro_text
-
-                project_config.intro_text = start_content
-
-                status_message = copy_project_to_clipboard(
-                    parent=app,
-                    base_dir=project_config.base_dir,
-                    project_config=project_config,
-                    use_wrapper=True,
-                    copy_merged_prompt="",
-                    scan_secrets_enabled=app.app_state.scan_for_secrets
-                )
-
-                # Restore
-                project_config.intro_text = original_intro
-                app.status_var.set(status_message)
-
-            except IOError as e:
-                app.show_error_dialog("Error", f"Could not read '{c.START_WORK_FILENAME}': {e}")
-
     def handle_title_click(self, event=None):
         app = self.app
         project_config = app.project_manager.get_current_project()

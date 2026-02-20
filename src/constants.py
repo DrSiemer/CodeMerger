@@ -14,7 +14,6 @@ SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json', 'node_
 # Files that should be treated as "selected" when calculating if a parent folder should be greyed out,
 # preventing them from keeping a folder "bright" if they are the only unselected files.
 FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
-START_WORK_FILENAME = "_start.txt"
 
 # --- Logging ---
 LOG_FILENAME = "codemerger.log"

@@ -8,7 +8,7 @@ from ..core.paths import (
     EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH,
     GIT_FILES_ICON_PATH, GIT_FILES_ACTIVE_ICON_PATH,
     SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH,
-    PROJECT_STARTER_ICON_PATH, PROJECT_STARTER_ACTIVE_ICON_PATH, START_WORK_ICON_PATH, START_WORK_ACTIVE_ICON_PATH
+    PROJECT_STARTER_ICON_PATH, PROJECT_STARTER_ACTIVE_ICON_PATH
 )
 
 class AppAssets:
@@ -43,8 +43,6 @@ class AppAssets:
         # New Project Starter Icons
         self.project_starter_pil = self._load_image(PROJECT_STARTER_ICON_PATH, (28, 28))
         self.project_starter_active_pil = self._load_image(PROJECT_STARTER_ACTIVE_ICON_PATH, (28, 28))
-        self.start_work_pil = self._load_image(START_WORK_ICON_PATH, (28, 28))
-        self.start_work_active_pil = self._load_image(START_WORK_ACTIVE_ICON_PATH, (28, 28))
 
         self.compact_mode_close_pil = self._load_image(COMPACT_MODE_CLOSE_ICON_PATH)
 
@@ -69,8 +67,6 @@ class AppAssets:
         self.filetypes_icon_active = None
         self.project_starter_icon = None
         self.project_starter_active_icon = None
-        self.start_work_icon = None
-        self.start_work_active_icon = None
 
     def load_tk_images(self):
         """
@@ -96,8 +92,6 @@ class AppAssets:
         self.filetypes_icon_active = self._pil_to_photoimage(self.filetypes_icon_active_pil)
         self.project_starter_icon = self._pil_to_photoimage(self.project_starter_pil)
         self.project_starter_active_icon = self._pil_to_photoimage(self.project_starter_active_pil)
-        self.start_work_icon = self._pil_to_photoimage(self.start_work_pil)
-        self.start_work_active_icon = self._pil_to_photoimage(self.start_work_active_pil)
 
     def create_masked_logo(self, color_hex):
         """Creates a PhotoImage by using the logo's alpha channel as a mask for the project color."""

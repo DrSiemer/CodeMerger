@@ -74,11 +74,10 @@ def setup_ui(app):
     app.manage_files_button.grid(row=0, column=0, sticky='w')
     app.manage_files_tooltip = ToolTip(app.manage_files_button, text="Manage project files")
 
-    # Column 1: Middle Container (Profiles + Start Button)
+    # Column 1: Middle Container (Profiles)
     app.middle_container = Frame(app.top_buttons_container, bg=c.DARK_BG)
     app.middle_container.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
     app.middle_container.columnconfigure(0, weight=0) # Profile Frame
-    app.middle_container.columnconfigure(1, weight=0) # Start Button
 
     # --- Profile Management Frame ---
     app.profile_frame = Frame(app.middle_container, bg=c.DARK_BG)
@@ -90,14 +89,6 @@ def setup_ui(app):
     ToolTip(app.add_profile_button, "Create an additional project profile", delay=500)
     app.delete_profile_button = RoundedButton(app.profile_frame, text="-", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.profile_actions.delete_current_profile, cursor='hand2', width=20, height=28, hollow=True)
     ToolTip(app.delete_profile_button, "Delete the current profile", delay=500)
-
-    # --- Start Work Button ---
-    # Placed in Column 1 of middle_container, initially hidden/shown by ButtonStateManager
-    app.start_work_button = Label(app.middle_container, image=assets.start_work_icon, bg=c.DARK_BG, cursor="hand2")
-    app.start_work_button.bind("<ButtonRelease-1>", app.action_handlers.start_work_on_click)
-    app.start_work_button.bind("<Enter>", lambda e: app.start_work_button.config(image=assets.start_work_active_icon))
-    app.start_work_button.bind("<Leave>", lambda e: app.start_work_button.config(image=assets.start_work_icon))
-    ToolTip(app.start_work_button, "Start Work: Copy code with '_start.txt' instructions\nAlt+Click to delete start file", delay=500)
 
     # Column 2: Right Controls (Wizard + Select Project)
     right_controls_frame = Frame(app.top_buttons_container, bg=c.DARK_BG)
