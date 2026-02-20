@@ -17,13 +17,19 @@ class WizardState:
             "name": tk.StringVar(),
             "parent_folder": tk.StringVar(value=""),
             "stack": tk.StringVar(),
-            "stack_experience": "",
+            "stack_experience": "", # Persistent draft of the experience text
             "goal": "",
             "concept_md": "",
             "todo_md": "",
             "base_project_path": tk.StringVar(),
             "base_project_files": [],
             "include_base_reference": tk.BooleanVar(value=True),
+
+            # LLM Response Buffers (Persistent drafts to prevent data loss on navigation)
+            "concept_llm_response": "",
+            "stack_llm_response": "",
+            "todo_llm_response": "",
+            "generate_llm_response": "",
 
             "concept_segments": {},
             "concept_signoffs": {},
@@ -56,6 +62,13 @@ class WizardState:
             "base_project_path": self.project_data["base_project_path"].get(),
             "base_project_files": self.project_data["base_project_files"],
             "include_base_reference": self.project_data["include_base_reference"].get(),
+
+            # Persist the raw LLM response buffers
+            "concept_llm_response": self.project_data.get("concept_llm_response", ""),
+            "stack_llm_response": self.project_data.get("stack_llm_response", ""),
+            "todo_llm_response": self.project_data.get("todo_llm_response", ""),
+            "generate_llm_response": self.project_data.get("generate_llm_response", ""),
+
             "concept_segments": c_segs,
             "concept_signoffs": self.project_data.get("concept_signoffs", {}),
             "todo_phases": self.project_data.get("todo_phases", []),
@@ -79,6 +92,12 @@ class WizardState:
         self.project_data["base_project_files"] = loaded_data.get("base_project_files", [])
         self.project_data["include_base_reference"].set(loaded_data.get("include_base_reference", True))
 
+        # Restore response buffers
+        self.project_data["concept_llm_response"] = loaded_data.get("concept_llm_response", "")
+        self.project_data["stack_llm_response"] = loaded_data.get("stack_llm_response", "")
+        self.project_data["todo_llm_response"] = loaded_data.get("todo_llm_response", "")
+        self.project_data["generate_llm_response"] = loaded_data.get("generate_llm_response", "")
+
         # Load Concept
         self.project_data["concept_segments"] = loaded_data.get("concept_segments", {})
         self.project_data["concept_signoffs"] = loaded_data.get("concept_signoffs", {})
@@ -100,6 +119,10 @@ class WizardState:
             self.current_step = self.max_accessible_step
 
     def reset(self):
+        # Clear response buffers
+        for key in ["concept_llm_response", "stack_llm_response", "todo_llm_response", "generate_llm_response"]:
+            self.project_data[key] = ""
+
         self.project_data["name"].set("")
         self.project_data["parent_folder"].set("")
         self.project_data["stack"].set("")
@@ -155,6 +178,14 @@ class WizardState:
             self.project_data["stack"].set(view.get_stack_content())
         if hasattr(view, 'get_experience_content'):
             self.project_data["stack_experience"] = view.get_experience_content()
+
+        # Capture raw LLM responses/input from any view that provides them
+        if hasattr(view, 'get_llm_response_content'):
+            response_data = view.get_llm_response_content()
+            for key, val in response_data.items():
+                if key in self.project_data:
+                    self.project_data[key] = val
+
         if hasattr(view, 'get_assembled_content'):
             content, segments, signoffs = view.get_assembled_content()
             view_type = str(type(view))

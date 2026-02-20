@@ -27,6 +27,9 @@ class StackView(tk.Frame):
         if self.stack_content:
             display_content = "\n".join([s.strip() for s in self.stack_content.split(',') if s.strip()])
             self.show_editor_view(display_content)
+        elif self.project_data.get("stack_llm_response"):
+            # Restore state where response was pasted but not yet processed
+            self.show_generation_view(self._get_prompt())
         else:
             self.show_initial_view()
 
@@ -89,7 +92,7 @@ class StackView(tk.Frame):
 
     def _get_prompt(self):
         concept = self.project_data.get("concept_md", "")
-        experience = self.experience_text.get("1.0", "end-1c")
+        experience = self.project_data.get("stack_experience", "")
         parts = [
             "Based on the project concept and the developer's experience, recommend the best technical stack for this project.",
             "\n### Developer Experience\n```\n" + (experience if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
@@ -131,6 +134,10 @@ class StackView(tk.Frame):
             on_zoom=self.wizard_controller.adjust_font_size
         )
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
+        self.llm_response_text.insert("1.0", self.project_data.get("stack_llm_response", ""))
+
+        # Sync input area to state to prevent data loss on navigation
+        self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("stack_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
 
     def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)
@@ -146,6 +153,7 @@ class StackView(tk.Frame):
             json_str = raw_content[start_idx:end_idx+1].replace("'", '"')
             stack_list = json.loads(json_str)
             self.project_data["stack"].set(", ".join(stack_list))
+            self.project_data["stack_llm_response"] = "" # Clear buffer on success
             self.show_editor_view("\n".join(stack_list))
         except Exception:
             tk.messagebox.showerror("Error", "Could not parse JSON list.", parent=self)
@@ -184,6 +192,7 @@ class StackView(tk.Frame):
         if tk.messagebox.askyesno("Confirm", "Reset stack selection?", parent=self):
             self.project_data["stack"].set("")
             self.project_data["stack_experience"] = ""
+            self.project_data["stack_llm_response"] = ""
             self.show_initial_view()
             self.wizard_controller._update_navigation_controls()
 
@@ -197,9 +206,12 @@ class StackView(tk.Frame):
         return self.project_data["stack"].get()
 
     def get_experience_content(self):
-        if hasattr(self, 'experience_text') and self.experience_text.winfo_exists():
-            return self.experience_text.get("1.0", "end-1c").strip()
         return self.project_data.get("stack_experience", "")
+
+    def get_llm_response_content(self):
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+            return {"stack_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()}
+        return {}
 
     def _clear_frame(self):
         for widget in self.winfo_children(): widget.destroy()

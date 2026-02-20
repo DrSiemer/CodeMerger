@@ -27,10 +27,17 @@ class ConceptView(tk.Frame):
         # State for merged view toggle
         self.is_raw_mode = False
 
+        # State tracking for UI transition
+        self.editor_is_active = False
+        self.generation_mode_active = False
+
         if self.has_segments:
             self.show_editor_view()
         elif self.project_data.get("concept_md"):
             self.show_merged_view(self.project_data.get("concept_md"))
+        elif self.project_data.get("concept_llm_response"):
+            # If we have an unprocessed response, return to that view
+            self.show_generation_view(self._get_prompt())
         else:
             self.show_initial_view()
 
@@ -94,15 +101,19 @@ class ConceptView(tk.Frame):
 
         existing_goal = self.project_data.get("goal", "").strip()
         self.goal_text.insert("1.0", existing_goal if existing_goal else DEFAULT_GOAL_TEXT)
-        self.goal_text.text_widget.bind("<KeyRelease>", self._update_button_state)
+        self.goal_text.text_widget.bind("<KeyRelease>", self._update_goal_state)
+        self._update_button_state()
+
+    def _update_goal_state(self, event=None):
+        self.project_data["goal"] = self.goal_text.get("1.0", "end-1c").strip()
         self._update_button_state()
 
     def _update_button_state(self, event=None):
-        content = self.goal_text.get("1.0", "end-1c").strip()
+        content = self.project_data.get("goal", "").strip()
         self.generate_btn.set_state('normal' if content and content != DEFAULT_GOAL_TEXT else 'disabled')
 
     def _get_prompt(self):
-        user_goal = self.goal_text.get("1.0", 'end-1c')
+        user_goal = self.project_data.get("goal", "")
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
         segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
@@ -153,6 +164,10 @@ class ConceptView(tk.Frame):
             on_zoom=self.wizard_controller.adjust_font_size
         )
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
+        self.llm_response_text.insert("1.0", self.project_data.get("concept_llm_response", ""))
+
+        # Sync input area to state to prevent data loss on navigation
+        self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("concept_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
 
     def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)
@@ -180,6 +195,7 @@ class ConceptView(tk.Frame):
         for k in mapped_segments.keys():
             self.project_data["concept_signoffs"][k] = False
 
+        self.project_data["concept_llm_response"] = "" # Clear the buffer on success
         self.show_editor_view()
 
     def show_editor_view(self):
@@ -401,6 +417,7 @@ class ConceptView(tk.Frame):
             self.project_data["concept_segments"].clear()
             self.project_data["concept_signoffs"].clear()
             self.project_data["concept_md"] = ""
+            self.project_data["concept_llm_response"] = ""
             self.show_initial_view()
             self.wizard_controller._update_navigation_controls()
 
@@ -408,6 +425,11 @@ class ConceptView(tk.Frame):
         if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
             return self.goal_text.get("1.0", "end-1c").strip()
         return self.project_data.get("goal", "")
+
+    def get_llm_response_content(self):
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+            return {"concept_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()}
+        return {}
 
     def get_assembled_content(self):
         # FIX: If segments are empty (merged mode), return the existing flat MD

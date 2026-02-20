@@ -83,8 +83,11 @@ class GenerateView(tk.Frame):
         )
         self.llm_result_text.grid(row=8, column=0, pady=(0, 10), sticky="nsew")
 
-        self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_input)
-        self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_input)
+        # Restore buffer if present
+        self.llm_result_text.insert("1.0", self.project_data.get("generate_llm_response", ""))
+
+        self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_and_sync)
+        self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_and_sync)
 
         # 5. Footer
         footer_frame = tk.Frame(self, bg=c.DARK_BG)
@@ -103,6 +106,7 @@ class GenerateView(tk.Frame):
         self._trace_ids = [("parent_folder", t1), ("name", t2)]
 
         self._update_preview_path()
+        self._validate_and_sync() # Initial state check
 
     def refresh_fonts(self):
         if hasattr(self, 'prompt_text') and self.prompt_text.winfo_exists():
@@ -143,8 +147,12 @@ class GenerateView(tk.Frame):
         if folder:
             self.project_data["parent_folder"].set(folder)
 
-    def _validate_input(self, event=None):
+    def _validate_and_sync(self, event=None):
         content = self.llm_result_text.get("1.0", "end-1c")
+
+        # Save to buffer for persistence
+        self.project_data["generate_llm_response"] = content.strip()
+
         # Validate that we have file blocks AND the strict pitch tag pair
         has_files = re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content
         # STRICT Check: Must find the closing tag
@@ -174,7 +182,7 @@ class GenerateView(tk.Frame):
             try:
                 with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                     content = f.read()
-                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n{content}\n```\n")
+                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n" + content + "\n```\n")
             except Exception: pass
         return "\n".join(content_blocks)
 
@@ -241,3 +249,8 @@ class GenerateView(tk.Frame):
         content = strip_markdown_wrapper(raw)
 
         self.create_project_callback(content, self.project_data["include_base_reference"].get(), project_pitch)
+
+    def get_llm_response_content(self):
+        if hasattr(self, 'llm_result_text') and self.llm_result_text.winfo_exists():
+            return {"generate_llm_response": self.llm_result_text.get("1.0", "end-1c").strip()}
+        return {}

@@ -41,6 +41,9 @@ class TodoView(tk.Frame):
             if not self.questions:
                 self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
             self.show_merged_view(self.todo_content)
+        elif self.project_data.get("todo_llm_response"):
+            # Restore state where response was pasted but not yet processed
+            self.show_generation_view(self._get_prompt())
         else:
             self.show_generation_view()
 
@@ -169,6 +172,10 @@ class TodoView(tk.Frame):
             on_zoom=self.wizard_controller.adjust_font_size
         )
         self.llm_response_text.grid(row=2, column=0, sticky='nsew')
+        self.llm_response_text.insert("1.0", self.project_data.get("todo_llm_response", ""))
+
+        # Sync input area to state to prevent data loss on navigation
+        self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("todo_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
 
         # Row 3: Action Button
         RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").grid(row=3, column=0, pady=(10,0), sticky="e")
@@ -212,6 +219,7 @@ class TodoView(tk.Frame):
             self.project_data["todo_signoffs"][k] = False
 
         # CRITICAL FIX: Save state immediately after processing to persist new segments
+        self.project_data["todo_llm_response"] = "" # Clear buffer
         self.wizard_controller.state.save()
 
         self.show_editor_view()
@@ -456,6 +464,7 @@ class TodoView(tk.Frame):
             self.project_data["todo_segments"].clear()
             self.project_data["todo_signoffs"].clear()
             self.project_data["todo_md"] = ""
+            self.project_data["todo_llm_response"] = ""
             self.todo_content = ""
             # Reload questions
             self.questions = self._load_questions()
@@ -463,6 +472,11 @@ class TodoView(tk.Frame):
             self.current_question_index = 0
             self.show_generation_view()
             self.wizard_controller._update_navigation_controls()
+
+    def get_llm_response_content(self):
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+            return {"todo_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()}
+        return {}
 
     def get_assembled_content(self):
         # FIX: If segments are empty (merged mode), return the existing flat MD
