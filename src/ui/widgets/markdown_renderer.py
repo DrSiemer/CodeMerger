@@ -13,7 +13,7 @@ class MarkdownRenderer(tk.Frame):
     A custom markdown renderer using a standard tk.Text widget to provide
     reliable layout, styling, and scrolling. Includes auto-hiding scrollbar.
     """
-    def __init__(self, parent, base_font_size=10, on_zoom=None, *args, **kwargs):
+    def __init__(self, parent, base_font_size=10, on_zoom=None, height=None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.config(bg=c.TEXT_INPUT_BG)
         self.base_font_size = base_font_size
@@ -23,12 +23,16 @@ class MarkdownRenderer(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
 
         if MARKDOWN2_INSTALLED:
-            self.text_widget = tk.Text(
-                self, wrap=tk.WORD, bd=0, highlightthickness=0,
-                padx=15, pady=15, font=(c.FONT_FAMILY_PRIMARY, self.base_font_size),
-                bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR,
-                spacing2=6, spacing1=4, spacing3=4
-            )
+            text_kwargs = {
+                'wrap': tk.WORD, 'bd': 0, 'highlightthickness': 0,
+                'padx': 15, 'pady': 15, 'font': (c.FONT_FAMILY_PRIMARY, self.base_font_size),
+                'bg': c.TEXT_INPUT_BG, 'fg': c.TEXT_COLOR,
+                'spacing2': 6, 'spacing1': 4, 'spacing3': 4
+            }
+            if height:
+                text_kwargs['height'] = height
+
+            self.text_widget = tk.Text(self, **text_kwargs)
             self.text_widget.grid(row=0, column=0, sticky="nsew")
 
             self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.text_widget.yview, style="Vertical.TScrollbar")

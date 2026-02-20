@@ -11,6 +11,7 @@ from ..widgets.scrollable_text import ScrollableText
 from ..widgets.markdown_renderer import MarkdownRenderer
 from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
+from .widgets.rewrite_dialog import RewriteUnsignedDialog
 from ..tooltip import ToolTip
 
 class ConceptView(tk.Frame):
@@ -270,6 +271,11 @@ class ConceptView(tk.Frame):
         self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
         self.q_btn.pack(side="left", padx=(0,10))
 
+        # ADDED: Rewrite Button for Merged View
+        self.rewrite_btn = RoundedButton(controls, text="Rewrite", command=self._open_merged_rewrite_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, height=24, cursor="hand2")
+        self.rewrite_btn.pack(side="left", padx=(0, 10))
+        ToolTip(self.rewrite_btn, "Instructional rewrite of the entire document with change notes.", delay=500)
+
         # Single toggle button for View Mode
         self.view_btn = RoundedButton(controls, text="Edit", command=self._toggle_view_mode, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
         self.view_btn.pack(side="left", padx=(0, 0))
@@ -304,6 +310,29 @@ class ConceptView(tk.Frame):
         self._apply_view_mode()
 
         self.wizard_controller._update_navigation_controls()
+
+    def _open_merged_rewrite_dialog(self):
+        current_text = self.editor_text.get("1.0", "end-1c").strip()
+        context_data = {
+            'keys': ['full_content'],
+            'names': {'full_content': 'Full Concept'},
+            'data': {'full_content': current_text}
+        }
+        RewriteUnsignedDialog(self, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
+
+    def _apply_merged_rewrite_results(self, new_text):
+        if not new_text: return
+        clean_text = strip_markdown_wrapper(new_text)
+
+        self.editor_text.text_widget.config(state="normal")
+        self.editor_text.delete("1.0", "end")
+        self.editor_text.insert("1.0", clean_text)
+        self.project_data["concept_md"] = clean_text
+
+        if not self.is_raw_mode:
+            self.markdown_renderer.set_markdown(clean_text)
+
+        self.wizard_controller.update_nav_state()
 
     def _on_merged_text_change(self, event=None):
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():

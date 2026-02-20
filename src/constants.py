@@ -147,7 +147,12 @@ CRITICAL: Do NOT omit the '--- End of file ---' marker for any block.
 
 WIZARD_REWRITE_PROMPT_TEMPLATE = """You are a Project Editor.
 The user has provided a global instruction to modify the project plan.
-Your task is to update ALL *unsigned* drafts listed below to comply with this instruction.
+Your task is to update the drafts listed below to comply with this instruction.
+
+### Summary Requirement
+You MUST start your response with a brief summary and explanation of what you changed and why. 
+Wrap this summary in `<<NOTES>>` tags.
+Example: <<NOTES>>I updated the database schema to include a 'status' field and revised the user flow accordingly.<<NOTES>>
 
 ### User Instruction
 {instruction}
@@ -155,15 +160,15 @@ Your task is to update ALL *unsigned* drafts listed below to comply with this in
 ### Locked Sections (Reference Only - DO NOT CHANGE)
 {references}
 
-### Drafts to Update (ALL of these must be processed)
+### Content to Update
 {targets}
 
 ### Instructions
 1. Review the User Instruction.
-2. Rewrite every segment in the 'Drafts to Update' list to incorporate this instruction.
+2. Rewrite the content in the 'Content to Update' section to incorporate this instruction.
 3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.
 4. {target_instructions}
-5. Output ONLY the updated Drafts."""
+5. Output the summary in `<<NOTES>>`, followed by the updated content."""
 
 WIZARD_SYNC_PROMPT_TEMPLATE = """You are a Consistency Engine. The user has modified section **{current_name}**.
 Update *unsigned* drafts to match these changes, respecting *locked* sections.
@@ -213,7 +218,8 @@ FILETYPES_WINDOW_DEFAULT_GEOMETRY = "330x550"
 INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY = "700x500"
 PROJECT_SELECTOR_WIDTH = 450
 TITLE_EDIT_DIALOG_WIDTH = 400
-PROJECT_STARTER_GEOMETRY = "1000x750" # Slightly increased height for better file manager view
+PROJECT_STARTER_GEOMETRY = "1000x750"
+NOTES_DIALOG_DEFAULT_GEOMETRY = "600x350"
 
 # --- UI Color Palette (dark to light) ---
 

@@ -1,25 +1,28 @@
 import tkinter as tk
 from tkinter import Frame, Label, messagebox, Toplevel
+import re
 from .... import constants as c
 from ...widgets.rounded_button import RoundedButton
 from ...widgets.scrollable_text import ScrollableText
 from ...window_utils import position_window
 from ..segment_manager import SegmentManager
 from ...tooltip import ToolTip
+from .notes_dialog import NotesDisplayDialog
 
 class RewriteUnsignedDialog(Toplevel):
     """
     A dialog that allows the user to input a specific instruction to rewrite
-    all unsigned segments, generates the prompt, and accepts the result.
+    all unsigned segments (or a full document), generates the prompt, and accepts the result.
     """
-    def __init__(self, parent, segment_context_data, on_apply_callback):
+    def __init__(self, parent, segment_context_data, on_apply_callback, is_merged_mode=False):
         super().__init__(parent)
         self.parent = parent
         self.segment_context = segment_context_data # Dict containing keys, names, data, signoffs
         self.on_apply_callback = on_apply_callback
+        self.is_merged_mode = is_merged_mode
         self.withdraw()
 
-        self.title("Rewrite Unsigned Segments")
+        self.title("Rewrite Content" if is_merged_mode else "Rewrite Unsigned Segments")
         self.configure(bg=c.DARK_BG)
         self.transient(parent)
         self.grab_set()
@@ -38,8 +41,11 @@ class RewriteUnsignedDialog(Toplevel):
         main_frame.grid_columnconfigure(0, weight=1)
 
         # Header
-        Label(main_frame, text="Rewrite Unsigned Segments", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 5))
-        Label(main_frame, text="Provide an instruction to modify all unsigned segments at once.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=1, column=0, sticky="w", pady=(0, 15))
+        title_text = "Rewrite Document" if self.is_merged_mode else "Rewrite Unsigned Segments"
+        desc_text = "Provide an instruction to modify the content. You will see a summary of changes first."
+
+        Label(main_frame, text=title_text, font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 5))
+        Label(main_frame, text=desc_text, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=1, column=0, sticky="w", pady=(0, 15))
 
         # --- Section 1: User Instruction ---
         Label(main_frame, text="1. Your Instruction", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=2, column=0, sticky="w", pady=(0, 5))
@@ -55,7 +61,7 @@ class RewriteUnsignedDialog(Toplevel):
         self.copy_btn = RoundedButton(copy_frame, text="Generate & Copy Prompt", command=self._generate_and_copy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=200, height=28, radius=4, cursor="hand2")
         self.copy_btn.pack(side="right")
         self.copy_btn.set_state("disabled") # Initially disabled
-        ToolTip(self.copy_btn, "Create and copy a prompt to modify all unlocked drafts based on your instruction", delay=500)
+        ToolTip(self.copy_btn, "Create and copy a prompt to modify the drafts based on your instruction", delay=500)
 
         # --- Section 2: Paste Response ---
         Label(main_frame, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=5, column=0, sticky="nw", pady=(0, 5))
@@ -91,36 +97,43 @@ class RewriteUnsignedDialog(Toplevel):
         keys = self.segment_context['keys']
         names = self.segment_context['names']
         data = self.segment_context['data']
-        signoffs = self.segment_context['signoffs']
+        signoffs = self.segment_context.get('signoffs', {})
 
         targets = []
         references = []
 
-        for k in keys:
-            if signoffs[k]:
-                references.append(k)
-            else:
-                targets.append(k)
+        if self.is_merged_mode:
+            # Treating full document as a single target block
+            targets = ["full_content"]
+            target_blocks = [f"--- Content ---\n{data.get('full_content', '')}"]
+            reference_blocks = []
+            target_instructions = "Return the complete updated Markdown document."
+        else:
+            for k in keys:
+                if signoffs.get(k, False):
+                    references.append(k)
+                else:
+                    targets.append(k)
 
-        if not targets:
-            messagebox.showinfo("Info", "All segments are signed off. Nothing to rewrite.")
-            return
+            if not targets:
+                messagebox.showinfo("Info", "All segments are signed off. Nothing to rewrite.")
+                return
 
-        # Build Prompt Blocks
-        target_blocks = []
-        for t in targets:
-            name = names.get(t, t)
-            content = data.get(t, "")
-            target_blocks.append(f"--- Draft: {name} ---\n{content}\n")
+            # Build Prompt Blocks
+            target_blocks = []
+            for t in targets:
+                name = names.get(t, t)
+                content = data.get(t, "")
+                target_blocks.append(f"--- Draft: {name} ---\n{content}\n")
 
-        reference_blocks = []
-        for r in references:
-            name = names.get(r, r)
-            content = data.get(r, "")
-            reference_blocks.append(f"--- Locked Section: {name} ---\n{content}\n")
+            reference_blocks = []
+            for r in references:
+                name = names.get(r, r)
+                content = data.get(r, "")
+                reference_blocks.append(f"--- Locked Section: {name} ---\n{content}\n")
 
-        friendly_map = {k: names.get(k, k) for k in targets}
-        target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
+            friendly_map = {k: names.get(k, k) for k in targets}
+            target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
 
         # Template from Constants
         prompt = c.WIZARD_REWRITE_PROMPT_TEMPLATE.format(
@@ -139,10 +152,20 @@ class RewriteUnsignedDialog(Toplevel):
             messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
 
     def _on_apply(self):
-        content = self.response_text.get("1.0", "end-1c").strip()
-        if not content:
+        raw_content = self.response_text.get("1.0", "end-1c").strip()
+        if not raw_content:
             messagebox.showwarning("Input Required", "Please paste the LLM response first.", parent=self)
             return
 
-        self.on_apply_callback(content)
+        # 1. Extract Notes
+        notes_match = re.search(r"<<NOTES>>(.*?)<<NOTES>>", raw_content, re.DOTALL)
+        notes = notes_match.group(1).strip() if notes_match else ""
+
+        # 2. Extract remaining content (all content minus the notes block)
+        clean_content = re.sub(r"<<NOTES>>.*?<<NOTES>>", "", raw_content, flags=re.DOTALL).strip()
+
+        if notes:
+            NotesDisplayDialog(self, notes)
+
+        self.on_apply_callback(clean_content)
         self.destroy()

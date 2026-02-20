@@ -60,6 +60,8 @@ def _get_default_geometry_for_window(window_class_name):
         return c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY
     if window_class_name == 'ProjectStarterDialog':
         return c.PROJECT_STARTER_GEOMETRY
+    if window_class_name == 'NotesDisplayDialog':
+        return c.NOTES_DIALOG_DEFAULT_GEOMETRY
     # Return None if no specific default is found for this window type
     return None
 
