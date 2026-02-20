@@ -27,6 +27,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 *(Use this section to log corrections to my own behavior, so I don't repeat mistakes. This is separate from code logic.)*
 
 - **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
+- **Full File Requirement:** Always provide the full content of the file being modified. Snippets or partial updates are strictly forbidden as they break the user's automated application scripts.
 
 ---
 
@@ -69,6 +70,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 
 ### User Interface (`src/ui`)
 
+- **Tkinter/Tcl Sequence Formatting**: Passing a Python list or tuple to a Tkinter widget (like `Text` or `Label`) causes the string to be rendered with leading/trailing curly braces `{}`. This happens because Tcl interprets Python sequences as Tcl lists. Always use defensive coercion: `text = "\n".join(val) if isinstance(val, (list, tuple)) else val` before inserting into widgets.
 - **General Dialog Focus**: In several dialog windows (`PasteChangesDialog`, `NewProfileDialog`, etc.), the call to `.focus_set()` on an input widget was moved to *after* the `.deiconify()` call. Setting focus before the window is visible is unreliable and was causing input fields to not receive focus on launch. Adding `.lift()` and `.focus_force()` to the `PasteChangesDialog` was also done for extra robustness.
 - `src/ui/app_window.py`: In `apply_changes_from_clipboard()`, the project's base directory for creating new file paths must be accessed via `project_manager.get_current_project().base_dir`. Accessing it directly on the `App` instance (`self.base_dir`) causes an `AttributeError` because the `App` class does not store this state directly.
 - `src/ui/app_window.py`: On startup, `_run_update_cleanup()` safely removes temporary installer files from any previous update. It then calls `lift()` and `focus_force()` to ensure the main window gets focus, which is particularly important when relaunched by the installer.

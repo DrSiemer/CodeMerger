@@ -44,7 +44,13 @@ class CollapsibleTextSection(Frame):
         # --- State and Bindings ---
         self.is_expanded = BooleanVar(value=False)
         self.default_text = default_text
-        self.text_widget.insert('1.0', initial_text)
+
+        # Sanitize initial_text to prevent Tcl brace artifacts if it's a list/tuple
+        display_text = initial_text
+        if isinstance(display_text, (list, tuple)):
+            display_text = "\n".join(display_text)
+
+        self.text_widget.insert('1.0', display_text)
 
         self.icon_label.bind("<Button-1>", self.toggle_section)
         title_label.bind("<Button-1>", self.toggle_section)
@@ -65,7 +71,13 @@ class CollapsibleTextSection(Frame):
     def reset_text(self):
         """Resets the text widget to its default value."""
         self.text_widget.delete('1.0', 'end')
-        self.text_widget.insert('1.0', self.default_text)
+
+        # Sanitize default_text to prevent Tcl brace artifacts
+        text_to_insert = self.default_text
+        if isinstance(text_to_insert, (list, tuple)):
+            text_to_insert = "\n".join(text_to_insert)
+
+        self.text_widget.insert('1.0', text_to_insert)
 
     def get_text(self):
         """Returns the current content of the text widget."""
