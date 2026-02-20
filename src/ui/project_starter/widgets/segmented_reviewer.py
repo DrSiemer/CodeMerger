@@ -332,6 +332,13 @@ class SegmentedReviewer(Frame):
         is_signed = self.signoff_vars[target_key].get()
         all_signed = all(self.signoff_vars[k].get() for k in self.segment_keys)
 
+        # Enforcement: If current segment is signed, force Render and hide Edit toggle
+        if is_signed:
+            self._toggle_view(force_render=True)
+            if hasattr(self, 'view_btn'): self.view_btn.pack_forget()
+        else:
+            if hasattr(self, 'view_btn'): self.view_btn.pack(side="left", padx=(10, 0))
+
         if all_signed:
             # If all are signed, show Merge Button in the main slot
             self.signoff_btn.pack_forget()
