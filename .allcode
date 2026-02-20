@@ -37,10 +37,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1771597821.6511538,
-          "hash": "e5d4912fabb391cc6d3301ef8e4dddd3d5639485",
-          "tokens": 3454,
-          "lines": 314
+          "mtime": 1771603981.4670773,
+          "hash": "d7da2044fb82ca7066199808104b54a36548dea0",
+          "tokens": 3566,
+          "lines": 321
         },
         {
           "path": "default_filetypes.json",
@@ -102,10 +102,10 @@
         },
         {
           "path": "src/core/project_manager.py",
-          "mtime": 1770647141.1588316,
-          "hash": "12bfb8f220dc094e016d9cb073632f5a79f46e57",
-          "tokens": 629,
-          "lines": 80
+          "mtime": 1771602043.0598567,
+          "hash": "1e857c0114d04a62a11b8deeedc510e0f7ed4627",
+          "tokens": 814,
+          "lines": 102
         },
         {
           "path": "src/core/merger.py",
@@ -165,10 +165,10 @@
         },
         {
           "path": "src/ui/window_utils.py",
-          "mtime": 1768828784.3191652,
-          "hash": "4398349ea6eac1a75e6db7db9390a031fb0afc1e",
-          "tokens": 1352,
-          "lines": 141
+          "mtime": 1771604136.0172782,
+          "hash": "646cc8746fe627bf006d1a97e03c679e707f1190",
+          "tokens": 1373,
+          "lines": 143
         },
         {
           "path": "src/ui/tooltip.py",
@@ -214,10 +214,10 @@
         },
         {
           "path": "src/ui/widgets/markdown_renderer.py",
-          "mtime": 1770647141.2245088,
-          "hash": "39a7efe0ccc8df5e534341acafec9152d5bb8f1f",
-          "tokens": 1923,
-          "lines": 187
+          "mtime": 1771604136.0172782,
+          "hash": "1a716b58ef6dd84e612462e7352bef1f4766e29c",
+          "tokens": 1971,
+          "lines": 191
         },
         {
           "path": "src/ui/widgets/profile_navigator.py",
@@ -487,10 +487,10 @@
         },
         {
           "path": "src/ui/project_starter/widgets/rewrite_dialog.py",
-          "mtime": 1771597505.5406137,
-          "hash": "3f59a5f28b265cce7c1848897a9725ad1afe44b4",
-          "tokens": 1579,
-          "lines": 148
+          "mtime": 1771603269.8086648,
+          "hash": "4adf283617837ef3b8269b8616675c03c9be1d01",
+          "tokens": 1836,
+          "lines": 171
         },
         {
           "path": "src/ui/project_starter/widgets/sync_dialog.py",
@@ -522,10 +522,10 @@
         },
         {
           "path": "src/ui/project_starter/step_concept.py",
-          "mtime": 1771597505.5396085,
-          "hash": "3855da34f30e8cb7b06995bce8b44460b33e9d59",
-          "tokens": 5011,
-          "lines": 458
+          "mtime": 1771603269.8086648,
+          "hash": "56085c1175643744177026db4b2695fe536e3542",
+          "tokens": 5323,
+          "lines": 487
         },
         {
           "path": "src/ui/project_starter/step_stack.py",
@@ -536,10 +536,10 @@
         },
         {
           "path": "src/ui/project_starter/step_todo.py",
-          "mtime": 1771597505.5406137,
-          "hash": "f047e5ce246e15f6e46ee4224d6bb0bab7842526",
-          "tokens": 5071,
-          "lines": 488
+          "mtime": 1771603269.8086648,
+          "hash": "939edb850306005bc1c48e1206b2833ddc8916c6",
+          "tokens": 5380,
+          "lines": 517
         },
         {
           "path": "src/ui/project_starter/step_generate.py",
@@ -557,10 +557,10 @@
         },
         {
           "path": "src/ui/project_starter/wizard_dialog.py",
-          "mtime": 1771600548.8906977,
-          "hash": "49ee6eca878840cee3046cdfe41a3e7d026fc977",
-          "tokens": 4456,
-          "lines": 425
+          "mtime": 1771602262.6969702,
+          "hash": "569e9e4024a8d69793c19a6d54820dfaac590848",
+          "tokens": 4467,
+          "lines": 430
         },
         {
           "path": "src/ui/compact_status.py",
@@ -768,10 +768,10 @@
         },
         {
           "path": "src/ui/project_starter/widgets/notes_dialog.py",
-          "mtime": 1771603269.8086648,
-          "hash": "c6f85b84d774fade3a41e672b0198023903dad7c",
-          "tokens": 340,
-          "lines": 37
+          "mtime": 1771604136.0172782,
+          "hash": "763d648ed095aab484f7e765b02b7fed3412544b",
+          "tokens": 482,
+          "lines": 49
         }
       ],
       "total_tokens": 147503,
