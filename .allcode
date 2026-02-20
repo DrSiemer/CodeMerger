@@ -16,10 +16,10 @@
         },
         {
           "path": "llm.md",
-          "mtime": 1770647141.127354,
-          "hash": "c8b47208bed66de0e697ad796df84f441a0c4ddd",
-          "tokens": 2413,
-          "lines": 96
+          "mtime": 1771591209.0596507,
+          "hash": "dd746c733c4b4727cf7a54554ccdf4a2f0d2369c",
+          "tokens": 2535,
+          "lines": 98
         },
         {
           "path": "requirements.txt",
@@ -44,7 +44,7 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1770655256.8613222,
+          "mtime": 1771591209.0596507,
           "hash": "0a13f4e31d4a3fc2c82719ec8fffc24d365022f4",
           "tokens": 2400,
           "lines": 223
@@ -263,7 +263,7 @@
         },
         {
           "path": "src/ui/project_selector_dialog.py",
-          "mtime": 1770655256.8613222,
+          "mtime": 1771591209.0778244,
           "hash": "0034e0ca4ffc2c822bd2525d1662632c31d792d9",
           "tokens": 3211,
           "lines": 335
@@ -298,10 +298,10 @@
         },
         {
           "path": "src/ui/settings/collapsible_section.py",
-          "mtime": 1761212693.1163194,
-          "hash": "28224c26509f2ac8364b404850023532547ee65e",
-          "tokens": 660,
-          "lines": 72
+          "mtime": 1771591209.0788224,
+          "hash": "e619d0d3bd2cc5035994d0e2d7b7fd4abea28cc0",
+          "tokens": 754,
+          "lines": 84
         },
         {
           "path": "src/ui/settings/application_settings.py",
@@ -473,10 +473,10 @@
         },
         {
           "path": "src/ui/project_starter/wizard_state.py",
-          "mtime": 1770647141.216586,
-          "hash": "6165a52832f77fb41f9b99b77f93707f0a42d81f",
-          "tokens": 1543,
-          "lines": 169
+          "mtime": 1771591728.7831821,
+          "hash": "79200b468fb61d3b9681370c12d624b6324f3d87",
+          "tokens": 1952,
+          "lines": 206
         },
         {
           "path": "src/ui/project_starter/wizard_validator.py",
@@ -529,31 +529,31 @@
         },
         {
           "path": "src/ui/project_starter/step_concept.py",
-          "mtime": 1770647141.2125862,
-          "hash": "24e46b09cd64ad036b931fc08168505fd84678be",
-          "tokens": 4782,
-          "lines": 429
+          "mtime": 1771591728.7831821,
+          "hash": "4e6eaadbd5bb319cd23e0d6f6f4779ed8e1e4ee1",
+          "tokens": 5049,
+          "lines": 451
         },
         {
           "path": "src/ui/project_starter/step_stack.py",
-          "mtime": 1770647141.213586,
-          "hash": "af7d06fff137efa8936a9613e76948d9c25b1962",
-          "tokens": 2409,
-          "lines": 188
+          "mtime": 1771591728.7831821,
+          "hash": "2c9a3116d0976acfb5b0c5f0333fa89b1491974b",
+          "tokens": 2734,
+          "lines": 217
         },
         {
           "path": "src/ui/project_starter/step_todo.py",
-          "mtime": 1770647141.2145858,
-          "hash": "a899e47e4e1b1ace8e94a4831c51fadc959a50dc",
-          "tokens": 5190,
-          "lines": 489
+          "mtime": 1771591728.7841818,
+          "hash": "631addfdc6f05dbbeb1fb5ce287ab6eddf940fc7",
+          "tokens": 5399,
+          "lines": 503
         },
         {
           "path": "src/ui/project_starter/step_generate.py",
-          "mtime": 1770647141.213586,
-          "hash": "508a88501925134e74b5fc562de371de3a4b7cb4",
-          "tokens": 3134,
-          "lines": 243
+          "mtime": 1771591728.7841818,
+          "hash": "370c1d670f17b9b3e1fdcc418a9fb14abab6db89",
+          "tokens": 3264,
+          "lines": 256
         },
         {
           "path": "src/ui/project_starter/success_view.py",
@@ -564,8 +564,8 @@
         },
         {
           "path": "src/ui/project_starter/wizard_dialog.py",
-          "mtime": 1770647141.216586,
-          "hash": "41f33e64a65a698fda2fe41a18c699424e9e1828",
+          "mtime": 1771591703.9399407,
+          "hash": "009f024a9067bbf93965771d810dce98f44418ae",
           "tokens": 4537,
           "lines": 494
         },
@@ -613,7 +613,7 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1770655256.8613222,
+          "mtime": 1771591209.0778244,
           "hash": "086cf865f640abc8e7388599b003b28db035081a",
           "tokens": 3539,
           "lines": 439
@@ -641,14 +641,14 @@
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1770655256.8613222,
-          "hash": "f25828bc1a4cd89e9ae114407ae00f2929a70015",
-          "tokens": 3058,
-          "lines": 202
+          "mtime": 1771591309.1526215,
+          "hash": "17b160d09ebe5e56b79c91af26f00f9340b55f7b",
+          "tokens": 3037,
+          "lines": 201
         },
         {
           "path": "src/ui/app_window.py",
-          "mtime": 1770655256.8623254,
+          "mtime": 1771591209.0728238,
           "hash": "0406b4d02176928e3d8d05e169ee6674b754dd0a",
           "tokens": 1553,
           "lines": 177
@@ -703,13 +703,6 @@
           "lines": 61
         },
         {
-          "path": "assets/boilerplate/_start.txt",
-          "mtime": 1768828778.6831536,
-          "hash": "ae90131d4f085b1fcb12b72ad32a31757cac3f95",
-          "tokens": 90,
-          "lines": 9
-        },
-        {
           "path": "codemerger.spec",
           "mtime": 1770651319.8754888,
           "hash": "e09375e860fc155600c35948936af7463b0a96b7",
@@ -760,7 +753,7 @@
           "lines": 232
         }
       ],
-      "total_tokens": 144727,
+      "total_tokens": 143336,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -784,7 +777,6 @@
     ".github/workflows/release.yml",
     "README.md",
     "assets/boilerplate/README.md",
-    "assets/boilerplate/_start.txt",
     "assets/boilerplate/go_docker.bat",
     "assets/boilerplate/go_nodejs.bat",
     "assets/boilerplate/go_python.bat",

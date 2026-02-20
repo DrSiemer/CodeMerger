@@ -232,7 +232,7 @@ class ProjectStarterDialog(tk.Toplevel):
         conf = load_config()
 
         # Construct the custom intro text using the pitch
-        intro = f"We are working on {project_pitch}.\n\nYour task is to start development, by following the plan laid out in `todo.md`. Pick up and check off steps from this whenever you are not fixing issues reported by the user."
+        intro = f"We are working on {project_pitch}.\n\nYour task is to continue development, by following the plan laid out in `todo.md`. Pick up and check off steps from this whenever you are not fixing issues reported by the user."
         outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
 
         # Filter the files list: Exclude .gitignore and project-starter.json from the active merge list
