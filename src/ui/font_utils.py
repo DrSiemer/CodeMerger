@@ -1,6 +1,7 @@
 import os
 import sys
 from PIL import ImageFont
+from functools import lru_cache
 
 # --- Robust Font Finding Logic ---
 WINDOWS_FONT_MAP = {
@@ -10,10 +11,14 @@ WINDOWS_FONT_MAP = {
     "arial": ["arial.ttf", "arialbd.ttf"],
 }
 FONT_FALLBACK_ORDER = ["Calibri", "Helvetica", "Arial"]
+
+@lru_cache(maxsize=128)
 def get_pil_font(font_tuple):
     """
     Tries to find and load a requested font, with a prioritized list of
     fallbacks for cross-platform compatibility.
+    Uses lru_cache to prevent repeated disk I/O when loading fonts for
+    high-frequency UI drawing operations.
     """
     requested_family, font_size, *_ = font_tuple
     # Create a dynamic search list, starting with the requested font

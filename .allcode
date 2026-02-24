@@ -151,10 +151,10 @@
         },
         {
           "path": "src/ui/font_utils.py",
-          "mtime": 1763552558.3259327,
-          "hash": "cf147eaf00c2e39406b48e8548da9191156daf53",
-          "tokens": 444,
-          "lines": 44
+          "mtime": 1771932843.2112339,
+          "hash": "44b332e2f9efc8a584820685f7ce05164348d241",
+          "tokens": 483,
+          "lines": 49
         },
         {
           "path": "src/ui/style_manager.py",
