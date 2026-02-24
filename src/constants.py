@@ -22,7 +22,7 @@ LOG_BACKUP_COUNT = 3
 
 # --- Behavioral Magic Numbers ---
 TOKEN_THRESHOLD_WARNING = 800000
-ANTIALIASING_SCALE_FACTOR = 4
+ANTIALIASING_SCALE_FACTOR = 2
 FONT_LUMINANCE_THRESHOLD = 150
 
 # --- Timing (in seconds or milliseconds) ---
