@@ -48,6 +48,11 @@ class App(Tk):
         self.loading_animation_job = None
         self.project_starter_window = None
 
+        # Lazy Layout variables
+        self._lazy_timer = None
+        self._is_lazy_hiding = False
+        self._last_size = (0, 0)
+
         # Core Components
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
@@ -75,7 +80,7 @@ class App(Tk):
         self.protocol("WM_DELETE_WINDOW", self.event_handlers.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
         self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
-        self.bind("<Configure>", self.event_handlers.on_window_configure)
+        self.bind("<Configure>", self._on_configure)
 
         # When app regains focus, immediately check if config changed on disk
         self.bind("<FocusIn>", self._on_focus_in)
@@ -126,6 +131,58 @@ class App(Tk):
         self.deiconify()
         self.lift()
         self.focus_force()
+
+    def _on_configure(self, event):
+        """
+        Custom handler for <Configure> to implement 'Lazy Layout' resizing.
+        Hides UI on drag-resize and restores after a debounce period to avoid lag.
+        """
+        if event.widget != self:
+            return
+
+        # Distinguish between window movement and size change
+        new_size = (event.width, event.height)
+        if self._last_size == new_size:
+            # Only moved, allow normal move-tracking behavior
+            self.event_handlers.on_window_configure(event)
+            return
+
+        self._last_size = new_size
+
+        # Don't trigger lazy hiding if we are already in compact mode or animating
+        if self.view_manager.current_state != 'normal':
+            self.event_handlers.on_window_configure(event)
+            return
+
+        # Step 1: Hide heavy UI components immediately
+        if not self._is_lazy_hiding:
+            self._start_lazy_layout()
+
+        # Step 2: Debounce the restore operation
+        if self._lazy_timer:
+            self.after_cancel(self._lazy_timer)
+
+        self._lazy_timer = self.after(c.LAZY_LAYOUT_DELAY_MS, self._end_lazy_layout)
+
+        # Continue with standard configure checks (like monitor updates)
+        self.event_handlers.on_window_configure(event)
+
+    def _start_lazy_layout(self):
+        """Immediately hides content areas to stop layout thrashing during resize."""
+        self._is_lazy_hiding = True
+        self.top_buttons_container.grid_remove()
+        self.center_frame.grid_remove()
+        self.status_bar.grid_remove()
+
+    def _end_lazy_layout(self):
+        """Restores heavy UI components after resizing has stopped."""
+        self.top_buttons_container.grid()
+        self.center_frame.grid()
+        self.status_bar.grid()
+        self._is_lazy_hiding = False
+        self._lazy_timer = None
+        # Force one final layout calculation
+        self.update_idletasks()
 
     def _on_focus_in(self, event):
         """Called when the application window gains focus."""

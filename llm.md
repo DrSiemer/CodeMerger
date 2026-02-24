@@ -56,6 +56,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 ### Architectural
 
 - **Global UI Changes**: Component variations must be implemented via optional parameters to avoid creating visual side effects in other parts of the UI.
+- **Lazy Layout (Resize Workaround)**: Tkinter triggers recursive layout calculations on every pixel move during window resizing, which blocks the UI thread in complex layouts. The workaround in `src/ui/app_window.py` detects a resize event, immediately calls `grid_remove()` on all heavy content containers, and uses a 250ms debounced timer to restore them. This ensures the window frame tracks the mouse perfectly during drag operations.
 
 ### Core Logic (`src/core`)
 
