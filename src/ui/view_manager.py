@@ -120,6 +120,10 @@ class ViewManager:
             self.main_window.geometry(f"{final_geom[2]}x{final_geom[3]}+{final_geom[0]}+{final_geom[1]}")
             self.main_window.attributes("-alpha", 1.0)
             self.main_window.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
+
+            # --- Lazy Layout: Restore UI content after animation finishes ---
+            self.main_window._end_lazy_layout()
+
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.destroy()
                 self.compact_mode_window = None
@@ -131,6 +135,9 @@ class ViewManager:
             return
 
         self.current_state = self.STATE_SHRINKING
+
+        # --- Lazy Layout: Hide UI content immediately to prevent lag during animation ---
+        self.main_window._start_lazy_layout()
 
         # Capture current geometry immediately before we start messing with transparency/state
         self.main_window_geom = (
@@ -192,6 +199,9 @@ class ViewManager:
             return
 
         self.current_state = self.STATE_GROWING
+
+        # --- Lazy Layout: Ensure content is hidden during growth to maintain performance ---
+        self.main_window._start_lazy_layout()
 
         # Save last known good position
         self.compact_mode_last_x = self.compact_mode_window.winfo_x()
