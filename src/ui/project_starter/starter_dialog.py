@@ -36,6 +36,9 @@ class ProjectStarterDialog(tk.Toplevel):
         self.parent = parent
         self.app = app
 
+        # Flag to track if a project was finished, preventing restoration of old project
+        self.finished_successfully = False
+
         # Initialize the state manager
         self.state = starter_state.StarterState()
 
@@ -281,6 +284,13 @@ class ProjectStarterDialog(tk.Toplevel):
     def on_closing(self):
         self.state.update_from_view(self.current_view)
         self.state.save()
+
+        # If the dialog is closed without creating a project, reactivate the previous project
+        if not self.finished_successfully:
+            last_path = getattr(self.app, '_last_project_path', None)
+            if last_path:
+                self.app.project_actions.set_active_dir_display(last_path)
+
         self.destroy()
 
     def save_config_to_dialog(self):
@@ -419,6 +429,7 @@ class ProjectStarterDialog(tk.Toplevel):
             tab.config(hollow=(not is_active), bg=(c.BTN_BLUE if is_active else c.BTN_GRAY_BG), fg=(c.BTN_BLUE_TEXT if is_active else (c.TEXT_COLOR if is_accessible else c.BTN_GRAY_TEXT)))
 
     def _display_success_screen(self, project_name, files, parent_folder):
+        self.finished_successfully = True
         for w in self.content_frame.winfo_children(): w.destroy()
         self.nav_frame.pack_forget()
         def on_start_work():

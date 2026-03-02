@@ -45,6 +45,14 @@ class ActionHandlers:
             app.project_starter_window.focus_force()
             return
 
+        # Store the current project path before clearing the UI so it can be restored
+        # if the user cancels the Project Starter.
+        current_path = app.active_dir.get()
+        if current_path and os.path.isdir(current_path):
+            app._last_project_path = current_path
+        else:
+            app._last_project_path = None
+
         # Clear project UI to "No project selected" state before launching starter
         app.project_actions._clear_project_ui()
 
