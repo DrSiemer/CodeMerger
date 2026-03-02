@@ -1,6 +1,6 @@
 import os
 import tkinter as tk
-from tkinter import messagebox, ttk
+from tkinter import messagebox, ttk, filedialog
 from ...core.project_config import ProjectConfig
 from ...core.utils import parse_gitignore
 from ... import constants as c
@@ -20,6 +20,43 @@ class StepBaseFilesView(tk.Frame):
         self.project_data = project_data
         self.app = wizard_controller.app
         self.base_dir = project_data["base_project_path"].get()
+        self.selection_handler = None  # Initialize to None for safety
+
+        # Check existence immediately
+        if not self.base_dir or not os.path.isdir(self.base_dir):
+            self._init_error_ui()
+        else:
+            self._init_file_manager_ui()
+
+    def _init_error_ui(self):
+        """Displays a friendly error message when the base directory is missing."""
+        # Clean up existing widgets
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+
+        container = tk.Frame(self, bg=c.DARK_BG)
+        container.grid(row=0, column=0)
+
+        tk.Label(container, text="Base files not found", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.WARN).pack(pady=(0, 10))
+        tk.Label(container, text=f"The directory could not be found:\n{self.base_dir}", bg=c.DARK_BG, fg=c.TEXT_COLOR, justify="center").pack(pady=(0, 20))
+
+        RoundedButton(container, text="Select a different folder", command=self._browse_new_folder, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor="hand2").pack()
+
+    def _browse_new_folder(self):
+        folder_selected = filedialog.askdirectory(title="Select Base Project", parent=self)
+        if folder_selected:
+            self.project_data["base_project_path"].set(folder_selected)
+            self.base_dir = folder_selected
+            self._init_file_manager_ui()
+
+    def _init_file_manager_ui(self):
+        """Initializes the full file manager UI for a valid directory."""
+        # Clean up any existing widgets (e.g., error UI)
+        for widget in self.winfo_children():
+            widget.destroy()
 
         # Mock/Proxy attributes expected by FileManager controllers
         self.status_var = tk.StringVar()
@@ -37,10 +74,7 @@ class StepBaseFilesView(tk.Frame):
 
         # Initialize Project Config (Read-Only usage)
         self.project_config = ProjectConfig(self.base_dir)
-        self.project_config.load() # Load existing .allcode if present
-
-        # Handle Profile Selection if needed
-        self._check_profiles()
+        self.project_config.load()  # Load existing .allcode if present
 
         # Restore previous selection from wizard state if available, else use project config
         saved_files = self.project_data["base_project_files"]
@@ -52,7 +86,10 @@ class StepBaseFilesView(tk.Frame):
 
         # Setup UI
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(0, weight=0)  # Header
+        self.grid_rowconfigure(1, weight=0)  # Description
+        self.grid_rowconfigure(2, weight=1)  # Main FM
+        self.grid_rowconfigure(3, weight=0)  # Status bar
 
         header_frame = tk.Frame(self, bg=c.DARK_BG)
         header_frame.grid(row=0, column=0, sticky='ew', pady=(10, 5), padx=10)
@@ -60,6 +97,9 @@ class StepBaseFilesView(tk.Frame):
 
         self.profile_selector_frame = tk.Frame(header_frame, bg=c.DARK_BG)
         self.profile_selector_frame.pack(side='right')
+
+        # Handle Profile Selection if needed
+        self._check_profiles()
 
         tk.Label(self, text="Choose files from the existing project to use as a reference. These will be included in the context for the LLM.", wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").grid(row=1, column=0, sticky='w', padx=10)
 
@@ -76,8 +116,6 @@ class StepBaseFilesView(tk.Frame):
         self.order_request_handler = OrderRequestHandler(self)
 
         # Setup File Manager UI within fm_frame
-        # Pass self.fm_frame as the container so UI elements are packed into it,
-        # while 'self' (the View) remains the controller object holding attributes.
         setup_file_manager_ui(self, container=self.fm_frame, include_save_button=False)
 
         self.create_handlers()
@@ -121,7 +159,9 @@ class StepBaseFilesView(tk.Frame):
 
     def save_state(self):
         """Updates the wizard state with the current selection."""
-        self.project_data["base_project_files"] = self.selection_handler.ordered_selection
+        # Guard against saving if in error state (selection_handler is None)
+        if self.selection_handler:
+            self.project_data["base_project_files"] = self.selection_handler.ordered_selection
 
     # --- Methods mimicking FileManagerWindow ---
     def create_handlers(self):
