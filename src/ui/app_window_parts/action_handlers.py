@@ -14,7 +14,7 @@ from ..project_selector_dialog import ProjectSelectorDialog
 from ..title_edit_dialog import TitleEditDialog
 from ..paste_changes_dialog import PasteChangesDialog
 from ..new_profile_dialog import NewProfileDialog
-from ..project_starter.wizard_dialog import ProjectStarterDialog
+from ..project_starter.starter_dialog import ProjectStarterDialog
 from ...core.clipboard import copy_project_to_clipboard
 from ...core import change_applier
 from ...core.project_config import _calculate_font_color
@@ -45,7 +45,7 @@ class ActionHandlers:
             app.project_starter_window.focus_force()
             return
 
-        # Clear project UI to "No project selected" state before launching wizard
+        # Clear project UI to "No project selected" state before launching starter
         app.project_actions._clear_project_ui()
 
         app.project_starter_window = ProjectStarterDialog(app, app)

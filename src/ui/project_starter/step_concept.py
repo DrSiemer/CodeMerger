@@ -15,9 +15,9 @@ from .widgets.rewrite_dialog import RewriteUnsignedDialog
 from ..tooltip import ToolTip
 
 class ConceptView(tk.Frame):
-    def __init__(self, parent, wizard_controller, project_data):
+    def __init__(self, parent, starter_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
-        self.wizard_controller = wizard_controller
+        self.starter_controller = starter_controller
         self.project_data = project_data
 
         self.questions_map = self._load_questions()
@@ -43,15 +43,15 @@ class ConceptView(tk.Frame):
     def refresh_fonts(self):
         """Updates font sizes for all active text/renderer widgets."""
         if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
-            self.goal_text.set_font_size(self.wizard_controller.font_size)
+            self.goal_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            self.llm_response_text.set_font_size(self.wizard_controller.font_size)
+            self.llm_response_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
-            self.reviewer.refresh_fonts(self.wizard_controller.font_size)
+            self.reviewer.refresh_fonts(self.starter_controller.font_size)
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            self.editor_text.set_font_size(self.wizard_controller.font_size)
+            self.editor_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'markdown_renderer') and self.markdown_renderer.winfo_exists():
-            self.markdown_renderer.set_font_size(self.wizard_controller.font_size)
+            self.markdown_renderer.set_font_size(self.starter_controller.font_size)
 
     def _load_questions(self):
         questions_path = os.path.join(REFERENCE_DIR, "concept_questions.json")
@@ -93,13 +93,13 @@ class ConceptView(tk.Frame):
 
         self.goal_text = ScrollableText(
             self, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.goal_text.pack(side='top', fill="both", expand=True, pady=5)
 
         existing_goal = self.project_data.get("goal", "").strip()
-        self.goal_text.insert("1.0", existing_goal if existing_goal else c.WIZARD_CONCEPT_DEFAULT_GOAL)
+        self.goal_text.insert("1.0", existing_goal if existing_goal else c.STARTER_CONCEPT_DEFAULT_GOAL)
         self.goal_text.text_widget.bind("<KeyRelease>", self._update_goal_state)
         self._update_button_state()
 
@@ -109,7 +109,7 @@ class ConceptView(tk.Frame):
 
     def _update_button_state(self, event=None):
         content = self.project_data.get("goal", "").strip()
-        self.generate_btn.set_state('normal' if content and content != c.WIZARD_CONCEPT_DEFAULT_GOAL else 'disabled')
+        self.generate_btn.set_state('normal' if content and content != c.STARTER_CONCEPT_DEFAULT_GOAL else 'disabled')
 
     def _get_prompt(self):
         user_goal = self.project_data.get("goal", "")
@@ -117,12 +117,12 @@ class ConceptView(tk.Frame):
         segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
         parts = [
-            c.WIZARD_CONCEPT_PROMPT_INTRO,
+            c.STARTER_CONCEPT_PROMPT_INTRO,
             "\n### User Goal\n```\n" + user_goal.strip() + "\n```",
             self._get_base_project_content(),
             "\n### Format Instructions",
             segment_instructions,
-            c.WIZARD_CONCEPT_PROMPT_CORE_INSTR
+            c.STARTER_CONCEPT_PROMPT_CORE_INSTR
         ]
         return "\n".join(parts)
 
@@ -136,7 +136,7 @@ class ConceptView(tk.Frame):
         self._clear_frame()
         self.editor_is_active = False
         self.generation_mode_active = True
-        self.wizard_controller._update_navigation_controls()
+        self.starter_controller._update_navigation_controls()
 
         btn_container = tk.Frame(self, bg=c.DARK_BG)
         btn_container.pack(side='bottom', fill='x', pady=10)
@@ -156,8 +156,8 @@ class ConceptView(tk.Frame):
         tk.Label(self, text="2. Paste LLM Response (with tags)", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 0))
         self.llm_response_text = ScrollableText(
             self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
         self.llm_response_text.insert("1.0", self.project_data.get("concept_llm_response", ""))
@@ -224,11 +224,11 @@ class ConceptView(tk.Frame):
             segments_data=self.project_data["concept_segments"],
             signoffs_data=self.project_data["concept_signoffs"],
             questions_map=self.questions_map,
-            on_change_callback=self.wizard_controller.update_nav_state,
+            on_change_callback=self.starter_controller.update_nav_state,
             on_merge_callback=self.handle_merge
         )
         self.reviewer.pack(fill="both", expand=True, pady=5)
-        self.wizard_controller._update_navigation_controls()
+        self.starter_controller._update_navigation_controls()
 
     def handle_merge(self, full_text):
         """
@@ -239,9 +239,9 @@ class ConceptView(tk.Frame):
         self.project_data["concept_signoffs"].clear()
         self.project_data["concept_md"] = full_text
 
-        # Sync the Wizard State immediately to unlock the 'Next' button Logic
-        self.wizard_controller.state.update_from_view(self)
-        self.wizard_controller.state.save()
+        # Sync the Starter State immediately to unlock the 'Next' button Logic
+        self.starter_controller.state.update_from_view(self)
+        self.starter_controller.state.save()
 
         self.show_merged_view(full_text)
 
@@ -293,23 +293,23 @@ class ConceptView(tk.Frame):
 
         self.editor_text = ScrollableText(
             self.editor_frame, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.editor_text.insert("1.0", content)
         self.editor_text.text_widget.bind("<KeyRelease>", self._on_merged_text_change)
 
         self.markdown_renderer = MarkdownRenderer(
             self.editor_frame,
-            base_font_size=self.wizard_controller.font_size,
-            on_zoom=self.wizard_controller.adjust_font_size
+            base_font_size=self.starter_controller.font_size,
+            on_zoom=self.starter_controller.adjust_font_size
         )
 
         # Default to Rendered View
         self.is_raw_mode = False
         self._apply_view_mode()
 
-        self.wizard_controller._update_navigation_controls()
+        self.starter_controller._update_navigation_controls()
 
     def _open_merged_rewrite_dialog(self):
         current_text = self.editor_text.get("1.0", "end-1c").strip()
@@ -332,7 +332,7 @@ class ConceptView(tk.Frame):
         if not self.is_raw_mode:
             self.markdown_renderer.set_markdown(clean_text)
 
-        self.wizard_controller.update_nav_state()
+        self.starter_controller.update_nav_state()
 
     def _on_merged_text_change(self, event=None):
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
@@ -410,7 +410,7 @@ class ConceptView(tk.Frame):
             full_text = self.editor_text.get("1.0", "end-1c").strip()
             current_q = self.questions[self.current_question_index]
 
-            prompt = c.WIZARD_QUESTION_PROMPT_TEMPLATE.format(
+            prompt = c.STARTER_QUESTION_PROMPT_TEMPLATE.format(
                 context_label="Full Concept",
                 context_content="```markdown\n" + full_text + "\n```",
                 focus_name="Concept",
@@ -455,7 +455,7 @@ class ConceptView(tk.Frame):
             self.editor_is_active = False
             self.generation_mode_active = False
             self.show_initial_view()
-            self.wizard_controller._update_navigation_controls()
+            self.starter_controller._update_navigation_controls()
 
     def get_goal_content(self):
         if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():

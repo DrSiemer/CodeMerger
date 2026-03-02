@@ -10,6 +10,7 @@ from .application_settings import ApplicationSettingsFrame
 from .file_manager_settings import FileManagerSettingsFrame
 from .prompts_settings import PromptsSettingsFrame
 from .editor_settings import EditorSettingsFrame
+from .starter_settings import StarterSettingsFrame
 from ... import constants as c
 from ..window_utils import position_window, save_window_geometry
 
@@ -43,7 +44,8 @@ class SettingsWindow(Toplevel):
             'token_count_enabled': BooleanVar(value=self.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)),
             'token_limit': StringVar(value=str(self.config.get('token_limit', 0) if self.config.get('token_limit', 0) != 0 else "")),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
-            'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT)))
+            'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT))),
+            'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', ''))
         }
 
     def _init_styles(self):
@@ -84,6 +86,9 @@ class SettingsWindow(Toplevel):
         self.prompts_frame = PromptsSettingsFrame(content_frame, self.config, on_toggle=None)
         self.prompts_frame.pack(fill='x', expand=True)
 
+        starter_settings = StarterSettingsFrame(content_frame, self.vars)
+        starter_settings.pack(fill='x', expand=True)
+
         editor_settings = EditorSettingsFrame(content_frame, self.vars)
         editor_settings.pack(fill='x', expand=True)
 
@@ -114,6 +119,7 @@ class SettingsWindow(Toplevel):
         config['enable_new_file_check'] = self.vars['enable_new_file_check'].get()
         config['token_count_enabled'] = self.vars['token_count_enabled'].get()
         config['enable_compact_mode_on_minimize'] = self.vars['enable_compact_mode_on_minimize'].get()
+        config['default_parent_folder'] = self.vars['default_parent_folder'].get()
         config.update(prompt_values)
 
         try:

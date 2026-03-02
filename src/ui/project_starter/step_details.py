@@ -5,10 +5,10 @@ from ..widgets.rounded_button import RoundedButton
 from ..tooltip import ToolTip
 
 class DetailsView(tk.Frame):
-    def __init__(self, parent, project_data, wizard_controller=None):
+    def __init__(self, parent, project_data, starter_controller=None):
         super().__init__(parent, bg=c.DARK_BG)
         self.project_data = project_data
-        self.wizard_controller = wizard_controller # Access to wizard methods
+        self.starter_controller = starter_controller # Access to starter methods
         self.config(padx=10, pady=10)
 
         tk.Label(self, text="Project Details", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(pady=10, anchor="w")
@@ -61,8 +61,8 @@ class DetailsView(tk.Frame):
         if folder_selected:
             self.project_data["base_project_path"].set(folder_selected)
             self._update_base_label()
-            if self.wizard_controller:
-                self.wizard_controller.on_base_project_selected(folder_selected)
+            if self.starter_controller:
+                self.starter_controller.on_base_project_selected(folder_selected)
 
     def _update_base_label(self):
         path = self.project_data["base_project_path"].get()

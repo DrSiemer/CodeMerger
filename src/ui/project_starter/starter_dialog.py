@@ -19,7 +19,7 @@ from .step_generate import GenerateView
 from .step_base_files import StepBaseFilesView
 from .success_view import SuccessView
 from ..window_utils import position_window
-from . import session_manager, generator, wizard_state, wizard_validator
+from . import session_manager, generator, starter_state, starter_validator
 from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
 
@@ -27,8 +27,8 @@ log = logging.getLogger("CodeMerger")
 
 class ProjectStarterDialog(tk.Toplevel):
     """
-    A wizard dialog for bootstrapping new software projects.
-    Delegates state to WizardState and validation to WizardValidator.
+    A dialog for bootstrapping new software projects.
+    Delegates state to StarterState and validation to starter_validator.
     """
     def __init__(self, parent, app):
         super().__init__(parent)
@@ -37,12 +37,12 @@ class ProjectStarterDialog(tk.Toplevel):
         self.app = app
 
         # Initialize the state manager
-        self.state = wizard_state.WizardState()
+        self.state = starter_state.StarterState()
 
         # Font Scaling State (Unified)
         self.font_size = c.FONT_NORMAL[1] # Default 12
 
-        self.title("Project Starter Wizard")
+        self.title("Project Starter")
         if parent.iconbitmap():
             try:
                 self.iconbitmap(parent.iconbitmap())
@@ -95,7 +95,7 @@ class ProjectStarterDialog(tk.Toplevel):
             self.current_view.refresh_fonts()
 
     def adjust_font_size(self, delta):
-        """Adjusts the font size for all wizard components simultaneously."""
+        """Adjusts the font size for all starter components simultaneously."""
         new_size = self.font_size + delta
         self.font_size = max(8, min(new_size, 40))
         if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
@@ -123,7 +123,7 @@ class ProjectStarterDialog(tk.Toplevel):
                 bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, width=32, height=32, radius=6, cursor="hand2"
             )
              btn_clear.pack(side="right", padx=(0, 0))
-             ToolTip(btn_clear, "Clear all wizard progress and start fresh", delay=500)
+             ToolTip(btn_clear, "Clear all starter progress and start fresh", delay=500)
 
         btn_save = RoundedButton(
             right_header_frame, text="Save Config", command=self.save_config_to_dialog,
@@ -160,7 +160,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def create_project(self, llm_output, include_base_reference=False, project_pitch="a new project"):
         """Processes the LLM output and creates the actual files on disk."""
-        is_valid, err_title, err_msg = wizard_validator.validate_step(6, self.state.project_data)
+        is_valid, err_title, err_msg = starter_validator.validate_step(6, self.state.project_data)
         if not is_valid:
             messagebox.showerror(err_title, err_msg, parent=self)
             return
@@ -196,7 +196,7 @@ class ProjectStarterDialog(tk.Toplevel):
             messagebox.showerror("Error", msg, parent=self)
             return
 
-        # 1. Add concept.md and todo.md from the Wizard state
+        # 1. Add concept.md and todo.md from the Starter state
         try:
             concept_segs = self.state.project_data.get("concept_segments")
             concept_content = SegmentManager.assemble_document(concept_segs, c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if concept_segs else self.state.project_data.get("concept_md", "")
@@ -212,7 +212,7 @@ class ProjectStarterDialog(tk.Toplevel):
         except Exception as e:
             log.error(f"Failed to write mandatory documentation files: {e}")
 
-        # 2. Save the Wizard config into the project folder for future reloading
+        # 2. Save the Starter config into the project folder for future reloading
         try:
             config_data = self.state.get_dict()
             starter_json_path = project_path / "project-starter.json"
@@ -336,7 +336,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.state.update_from_view(self.current_view)
         self.state.save()
         if target_step_id > self.state.current_step:
-            is_valid, err_title, err_msg = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
+            is_valid, err_title, err_msg = starter_validator.validate_step(self.state.current_step, self.state.project_data)
             if not is_valid:
                 messagebox.showerror(err_title, err_msg, parent=self)
                 return
@@ -356,12 +356,12 @@ class ProjectStarterDialog(tk.Toplevel):
         if step == 6 and not self.state.project_data["todo_md"]:
              messagebox.showerror("Content Missing", "Complete TODO step first.", parent=self)
              self._go_to_step(5); return
-        if step == 1: self.current_view = DetailsView(view_frame, self.state.project_data, wizard_controller=self)
+        if step == 1: self.current_view = DetailsView(view_frame, self.state.project_data, starter_controller=self)
         elif step == 2: self.current_view = StepBaseFilesView(view_frame, self, self.state.project_data)
         elif step == 3: self.current_view = ConceptView(view_frame, self, self.state.project_data)
         elif step == 4: self.current_view = StackView(view_frame, self, self.state.project_data)
         elif step == 5: self.current_view = TodoView(view_frame, self, self.state.project_data)
-        elif step == 6: self.current_view = GenerateView(view_frame, self.state.project_data, self.create_project, wizard_controller=self)
+        elif step == 6: self.current_view = GenerateView(view_frame, self.state.project_data, self.create_project, starter_controller=self)
         if self.current_view: self.current_view.pack(expand=True, fill="both")
         self._update_tab_styles()
         self._update_navigation_controls()
@@ -399,7 +399,7 @@ class ProjectStarterDialog(tk.Toplevel):
                 self.next_tooltip.text = "Confirm stack and proceed to TODO plan"
             self.next_button.set_state('normal')
             return
-        is_valid, _, _ = wizard_validator.validate_step(self.state.current_step, self.state.project_data)
+        is_valid, _, _ = starter_validator.validate_step(self.state.current_step, self.state.project_data)
         if is_valid:
             self.next_button.set_state('normal')
             self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)

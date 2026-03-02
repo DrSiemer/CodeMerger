@@ -9,9 +9,9 @@ from ..widgets.scrollable_text import ScrollableText
 from ..tooltip import ToolTip
 
 class StackView(tk.Frame):
-    def __init__(self, parent, wizard_controller, project_data):
+    def __init__(self, parent, starter_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
-        self.wizard_controller = wizard_controller
+        self.starter_controller = starter_controller
         self.project_data = project_data
         self.app_config = load_config()
 
@@ -35,11 +35,11 @@ class StackView(tk.Frame):
 
     def refresh_fonts(self):
         if hasattr(self, 'experience_text') and self.experience_text.winfo_exists():
-            self.experience_text.set_font_size(self.wizard_controller.font_size)
+            self.experience_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            self.llm_response_text.set_font_size(self.wizard_controller.font_size)
+            self.llm_response_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'stack_editor') and self.stack_editor.winfo_exists():
-            self.stack_editor.set_font_size(self.wizard_controller.font_size)
+            self.stack_editor.set_font_size(self.starter_controller.font_size)
 
     def show_initial_view(self):
         self._clear_frame()
@@ -68,8 +68,8 @@ class StackView(tk.Frame):
 
         self.experience_text = ScrollableText(
             self, height=6, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.experience_text.pack(side='top', fill="both", expand=True, pady=5)
         self.experience_text.insert("1.0", self.saved_experience)
@@ -124,10 +124,10 @@ class StackView(tk.Frame):
         concept = self.project_data.get("concept_md", "")
         experience = self.project_data.get("stack_experience", "")
         parts = [
-            c.WIZARD_STACK_PROMPT_INTRO,
+            c.STARTER_STACK_PROMPT_INTRO,
             "\n### Developer Experience\n```\n" + (experience if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
-            c.WIZARD_STACK_PROMPT_INSTR
+            c.STARTER_STACK_PROMPT_INSTR
         ]
         return "\n".join(parts)
 
@@ -139,7 +139,7 @@ class StackView(tk.Frame):
         self._clear_frame()
         self.editor_is_active = False
         self.generation_mode_active = True
-        self.wizard_controller._update_navigation_controls()
+        self.starter_controller._update_navigation_controls()
 
         # ACTION BUTTON AT BOTTOM
         btn_container = tk.Frame(self, bg=c.DARK_BG)
@@ -160,8 +160,8 @@ class StackView(tk.Frame):
         tk.Label(self, text="2. Paste Stack Recommendation below", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 5))
         self.llm_response_text = ScrollableText(
             self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
         self.llm_response_text.insert("1.0", self.project_data.get("stack_llm_response", ""))
@@ -200,23 +200,23 @@ class StackView(tk.Frame):
         # CENTER CONTENT
         self.stack_editor = ScrollableText(
             self, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.stack_editor.pack(side='top', fill="both", expand=True, pady=5)
         self.stack_editor.insert("1.0", content)
         self.stack_editor.text_widget.bind('<KeyRelease>', self._sync_editor_to_state)
 
-        # Trigger Wizard UI Update
-        self.wizard_controller._update_navigation_controls()
-        self.wizard_controller.update_nav_state()
+        # Trigger Starter UI Update
+        self.starter_controller._update_navigation_controls()
+        self.starter_controller.update_nav_state()
 
     def _sync_editor_to_state(self, event=None):
         if hasattr(self, 'stack_editor') and self.stack_editor.winfo_exists():
             raw_text = self.stack_editor.get("1.0", "end-1c")
             lines = [line.strip() for line in raw_text.split('\n') if line.strip()]
             self.project_data["stack"].set(", ".join(lines))
-        self.wizard_controller.update_nav_state()
+        self.starter_controller.update_nav_state()
 
     def handle_reset(self):
         if tk.messagebox.askyesno("Confirm", "Reset stack selection?", parent=self):
@@ -224,7 +224,7 @@ class StackView(tk.Frame):
             self.project_data["stack_experience"] = ""
             self.project_data["stack_llm_response"] = ""
             self.show_initial_view()
-            self.wizard_controller._update_navigation_controls()
+            self.starter_controller._update_navigation_controls()
 
     def is_step_in_progress(self): return self.editor_is_active or self.generation_mode_active
 

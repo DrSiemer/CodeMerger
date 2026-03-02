@@ -4,9 +4,9 @@ from . import session_manager
 from ... import constants as c
 from .segment_manager import SegmentManager
 
-class WizardState:
+class StarterState:
     """
-    Manages the data and progress state of the Project Wizard.
+    Manages the data and progress state of the Project Starter.
     Handles persistence via the session_manager.
     """
     def __init__(self):

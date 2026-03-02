@@ -77,7 +77,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Double-click the move bar or click the close button to exit compact mode and restore the main window. **Ctrl-clicking** the close button will exit the application immediately.
 
 
-![Settings](./dev/screenshot_04a.jpg "Project Wizard")
+![Settings](./dev/screenshot_04a.jpg "Project Starter")
 
 
 ### Settings

@@ -13,11 +13,11 @@ from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
 
 class GenerateView(tk.Frame):
-    def __init__(self, parent, project_data, create_project_callback, wizard_controller):
+    def __init__(self, parent, project_data, create_project_callback, starter_controller):
         super().__init__(parent, bg=c.DARK_BG)
         self.create_project_callback = create_project_callback
         self.project_data = project_data
-        self.wizard_controller = wizard_controller
+        self.starter_controller = starter_controller
         self._trace_ids = [] # Track traces for cleanup
 
         prompt = self._generate_master_prompt(project_data)
@@ -67,8 +67,8 @@ class GenerateView(tk.Frame):
 
         self.prompt_text = ScrollableText(
             self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.prompt_text.insert(tk.END, prompt)
         self.prompt_text.grid(row=6, column=0, pady=(5, 10), sticky="nsew")
@@ -78,8 +78,8 @@ class GenerateView(tk.Frame):
 
         self.llm_result_text = ScrollableText(
             self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.llm_result_text.grid(row=8, column=0, pady=(0, 10), sticky="nsew")
 
@@ -110,9 +110,9 @@ class GenerateView(tk.Frame):
 
     def refresh_fonts(self):
         if hasattr(self, 'prompt_text') and self.prompt_text.winfo_exists():
-            self.prompt_text.set_font_size(self.wizard_controller.font_size)
+            self.prompt_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'llm_result_text') and self.llm_result_text.winfo_exists():
-            self.llm_result_text.set_font_size(self.wizard_controller.font_size)
+            self.llm_result_text.set_font_size(self.starter_controller.font_size)
 
     def destroy(self):
         """Cleanup traces when the view is destroyed to prevent TclErrors."""
@@ -218,12 +218,12 @@ class GenerateView(tk.Frame):
         example_code = self._get_base_project_content()
 
         parts = [
-            c.WIZARD_GENERATE_MASTER_INTRO.format(name=name, stack=stack),
+            c.STARTER_GENERATE_MASTER_INTRO.format(name=name, stack=stack),
             "\n### Provided Files\n" + prompt_content,
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
             "\n### TODO Plan\n```markdown\n" + todo + "\n```",
             example_code,
-            c.WIZARD_GENERATE_MASTER_INSTR
+            c.STARTER_GENERATE_MASTER_INSTR
         ]
         return "\n".join(parts)
 

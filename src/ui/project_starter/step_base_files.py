@@ -14,11 +14,11 @@ from ..file_manager.order_request_handler import OrderRequestHandler
 from ..widgets.rounded_button import RoundedButton
 
 class StepBaseFilesView(tk.Frame):
-    def __init__(self, parent, wizard_controller, project_data):
+    def __init__(self, parent, starter_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
-        self.wizard_controller = wizard_controller
+        self.starter_controller = starter_controller
         self.project_data = project_data
-        self.app = wizard_controller.app
+        self.app = starter_controller.app
         self.base_dir = project_data["base_project_path"].get()
         self.selection_handler = None  # Initialize to None for safety
 
@@ -76,7 +76,7 @@ class StepBaseFilesView(tk.Frame):
         self.project_config = ProjectConfig(self.base_dir)
         self.project_config.load()  # Load existing .allcode if present
 
-        # Restore previous selection from wizard state if available, else use project config
+        # Restore previous selection from starter state if available, else use project config
         saved_files = self.project_data["base_project_files"]
         if saved_files:
             self.project_config.selected_files = saved_files
@@ -158,7 +158,7 @@ class StepBaseFilesView(tk.Frame):
         self.status_var.set(f"Loaded profile: {new_profile}")
 
     def save_state(self):
-        """Updates the wizard state with the current selection."""
+        """Updates the starter state with the current selection."""
         # Guard against saving if in error state (selection_handler is None)
         if self.selection_handler:
             self.project_data["base_project_files"] = self.selection_handler.ordered_selection
@@ -281,7 +281,7 @@ class StepBaseFilesView(tk.Frame):
         messagebox.showerror(title, message, parent=self)
 
     def _close_and_save_geometry(self):
-        pass # Not applicable for wizard view
+        pass # Not applicable for starter view
 
     def _update_sash_cover_position(self, event=None):
         try:

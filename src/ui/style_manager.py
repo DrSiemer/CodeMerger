@@ -26,7 +26,7 @@ def apply_dark_theme(window):
         indicatorrelief=[('pressed', 'sunken'), ('!pressed', 'flat')]
     )
 
-    # --- Large Checkbutton Style (Used in Wizard) ---
+    # --- Large Checkbutton Style (Used in Project Starter) ---
     s.configure('Large.TCheckbutton',
         background=c.DARK_BG,
         foreground=c.TEXT_COLOR,

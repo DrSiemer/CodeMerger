@@ -90,7 +90,7 @@ def setup_ui(app):
     app.delete_profile_button = RoundedButton(app.profile_frame, text="-", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.profile_actions.delete_current_profile, cursor='hand2', width=20, height=28, hollow=True)
     ToolTip(app.delete_profile_button, "Delete the current profile", delay=500)
 
-    # Column 2: Right Controls (Wizard + Select Project)
+    # Column 2: Right Controls (Project Starter + Select Project)
     right_controls_frame = Frame(app.top_buttons_container, bg=c.DARK_BG)
     right_controls_frame.grid(row=0, column=2, sticky='e')
 
@@ -99,7 +99,7 @@ def setup_ui(app):
     app.project_starter_button.bind("<Enter>", lambda e: app.project_starter_button.config(image=assets.project_starter_active_icon))
     app.project_starter_button.bind("<Leave>", lambda e: app.project_starter_button.config(image=assets.project_starter_icon))
     app.project_starter_button.bind("<ButtonRelease-1>", app.action_handlers.open_project_starter)
-    ToolTip(app.project_starter_button, "New Project Wizard", delay=500)
+    ToolTip(app.project_starter_button, "Project Starter", delay=500)
 
     app.select_project_button = RoundedButton(right_controls_frame, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_project_selector, cursor='hand2')
     app.select_project_button.pack(side='left')

@@ -3,9 +3,9 @@ from tkinter import Frame, Label, Entry, filedialog
 from ..widgets.rounded_button import RoundedButton
 from ... import constants as c
 
-class WizardSettingsFrame(Frame):
+class StarterSettingsFrame(Frame):
     """
-    Settings section for the New Project Wizard.
+    Settings section for the Project Starter.
     """
     def __init__(self, parent, vars, **kwargs):
         super().__init__(parent, bg=c.DARK_BG, **kwargs)
@@ -13,7 +13,7 @@ class WizardSettingsFrame(Frame):
         self._create_widgets()
 
     def _create_widgets(self):
-        Label(self, text="New Project Wizard", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
+        Label(self, text="Project Starter", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
         container = Frame(self, bg=c.DARK_BG)
         container.pack(fill='x', expand=True)
 

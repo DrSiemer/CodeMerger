@@ -14,9 +14,9 @@ from .widgets.rewrite_dialog import RewriteUnsignedDialog
 from ..tooltip import ToolTip
 
 class TodoView(tk.Frame):
-    def __init__(self, parent, wizard_controller, project_data):
+    def __init__(self, parent, starter_controller, project_data):
         super().__init__(parent, bg=c.DARK_BG)
-        self.wizard_controller = wizard_controller
+        self.starter_controller = starter_controller
         self.project_data = project_data
 
         self.todo_content = self.project_data.get("todo_md", "")
@@ -51,13 +51,13 @@ class TodoView(tk.Frame):
 
     def refresh_fonts(self):
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            self.llm_response_text.set_font_size(self.wizard_controller.font_size)
+            self.llm_response_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            self.editor_text.set_font_size(self.wizard_controller.font_size)
+            self.editor_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'markdown_renderer') and self.markdown_renderer.winfo_exists():
-            self.markdown_renderer.set_font_size(self.wizard_controller.font_size)
+            self.markdown_renderer.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
-            self.reviewer.refresh_fonts(self.wizard_controller.font_size)
+            self.reviewer.refresh_fonts(self.starter_controller.font_size)
 
     def _load_questions(self):
         questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
@@ -120,12 +120,12 @@ class TodoView(tk.Frame):
         headers_str = ", ".join([f'"{h}"' for h in valid_headers])
 
         parts = [
-            c.WIZARD_TODO_PROMPT_INTRO,
+            c.STARTER_TODO_PROMPT_INTRO,
             "\n### Tech Stack\n" + stack,
             "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
             example_code,
             "\n### Reference Template (Standard TODO List)\n```markdown\n" + todo_template + "\n```",
-            c.WIZARD_TODO_PROMPT_INSTR.format(headers_str=headers_str)
+            c.STARTER_TODO_PROMPT_INSTR.format(headers_str=headers_str)
         ]
         return "\n".join(parts)
 
@@ -162,8 +162,8 @@ class TodoView(tk.Frame):
         # Row 2: Input Field
         self.llm_response_text = ScrollableText(
             self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.llm_response_text.grid(row=2, column=0, sticky='nsew')
         self.llm_response_text.insert("1.0", self.project_data.get("todo_llm_response", ""))
@@ -210,7 +210,7 @@ class TodoView(tk.Frame):
         # CRITICAL: Clear merged Markdown when moving back to segments
         self.project_data["todo_md"] = ""
         self.project_data["todo_llm_response"] = "" # Clear buffer
-        self.wizard_controller.state.save()
+        self.starter_controller.state.save()
 
         self.show_editor_view()
 
@@ -245,11 +245,11 @@ class TodoView(tk.Frame):
             segments_data=self.project_data["todo_segments"],
             signoffs_data=self.project_data["todo_signoffs"],
             questions_map=q_map,
-            on_change_callback=self.wizard_controller.update_nav_state,
+            on_change_callback=self.starter_controller.update_nav_state,
             on_merge_callback=self.handle_merge
         )
         self.reviewer.pack(fill="both", expand=True, pady=5)
-        self.wizard_controller._update_navigation_controls()
+        self.starter_controller._update_navigation_controls()
 
     def handle_merge(self, full_text):
         """
@@ -260,9 +260,9 @@ class TodoView(tk.Frame):
         self.project_data["todo_signoffs"].clear()
         self.project_data["todo_md"] = full_text
 
-        # Sync the Wizard State immediately to unlock the 'Next' button Logic
-        self.wizard_controller.state.update_from_view(self)
-        self.wizard_controller.state.save()
+        # Sync the Starter State immediately to unlock the 'Next' button Logic
+        self.starter_controller.state.update_from_view(self)
+        self.starter_controller.state.save()
 
         # Set generic questions for the full text
         self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
@@ -318,8 +318,8 @@ class TodoView(tk.Frame):
 
         self.editor_text = ScrollableText(
             self.editor_frame, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.wizard_controller.font_size),
-            on_zoom=self.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
+            on_zoom=self.starter_controller.adjust_font_size
         )
         self.editor_text.insert("1.0", content)
         # Bind text change for saving
@@ -327,15 +327,15 @@ class TodoView(tk.Frame):
 
         self.markdown_renderer = MarkdownRenderer(
             self.editor_frame,
-            base_font_size=self.wizard_controller.font_size,
-            on_zoom=self.wizard_controller.adjust_font_size
+            base_font_size=self.starter_controller.font_size,
+            on_zoom=self.starter_controller.adjust_font_size
         )
 
         # Default to Rendered View
         self.is_raw_mode = False
         self._apply_view_mode()
 
-        self.wizard_controller._update_navigation_controls()
+        self.starter_controller._update_navigation_controls()
 
     def _open_merged_rewrite_dialog(self):
         current_text = self.editor_text.get("1.0", "end-1c").strip()
@@ -358,7 +358,7 @@ class TodoView(tk.Frame):
         if not self.is_raw_mode:
             self.markdown_renderer.set_markdown(clean_text)
 
-        self.wizard_controller.update_nav_state()
+        self.starter_controller.update_nav_state()
 
     def is_editor_visible(self):
         return self.editor_is_active
@@ -456,7 +456,7 @@ class TodoView(tk.Frame):
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
 
-            prompt_text = c.WIZARD_QUESTION_PROMPT_TEMPLATE.format(
+            prompt_text = c.STARTER_QUESTION_PROMPT_TEMPLATE.format(
                 context_label="Project Concept",
                 context_content="```markdown\n" + (concept_md or "No concept provided") + "\n```",
                 focus_name="Full TODO Plan",
@@ -486,7 +486,7 @@ class TodoView(tk.Frame):
             self.questions_frame_visible = False
             self.current_question_index = 0
             self.show_generation_view()
-            self.wizard_controller._update_navigation_controls()
+            self.starter_controller._update_navigation_controls()
 
     def get_llm_response_content(self):
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():

@@ -53,7 +53,7 @@ Directive: Optimize the code for a programmer that has never seen this code befo
 
 Do not change code, only comments."""
 
-# --- Project Starter Wizard Constants ---
+# --- Project Starter Constants ---
 DELIMITER_TEMPLATE = "<<SECTION: {name}>>"
 
 # Concept Generation Segments
@@ -96,18 +96,18 @@ TODO_ORDER = [
     "setup", "database", "api", "frontend", "logic", "polish", "deployment"
 ]
 
-# --- Project Starter Wizard Prompt Templates ---
-WIZARD_CONCEPT_DEFAULT_GOAL = "The plan is to build a..."
-WIZARD_CONCEPT_PROMPT_INTRO = "Based on the following user goal, generate a full project concept document."
-WIZARD_CONCEPT_PROMPT_CORE_INSTR = """
+# --- Project Starter Prompt Templates ---
+STARTER_CONCEPT_DEFAULT_GOAL = "The plan is to build a..."
+STARTER_CONCEPT_PROMPT_INTRO = "Based on the following user goal, generate a full project concept document."
+STARTER_CONCEPT_PROMPT_CORE_INSTR = """
 ### Core Instructions
 1. Fill in every section with specific details relevant to the user's goal.
 2. Ensure the 'User Flows' section covers the complete lifecycle of the main data entity.
 3. **Readability & Formatting:** Use frequent line breaks and short paragraphs to avoid dense blocks of text. Utilize Markdown elements (bullet points, bolding) to ensure the document is highly readable and visually structured.
 """
 
-WIZARD_STACK_PROMPT_INTRO = "Based on the project concept and the developer's experience, recommend the best technical stack for this project."
-WIZARD_STACK_PROMPT_INSTR = """
+STARTER_STACK_PROMPT_INTRO = "Based on the project concept and the developer's experience, recommend the best technical stack for this project."
+STARTER_STACK_PROMPT_INSTR = """
 ### Instructions
 1. Analyze requirements against known skills.
 2. Return the recommended stack as a raw JSON list of strings.
@@ -115,10 +115,10 @@ WIZARD_STACK_PROMPT_INSTR = """
 3. Return ONLY the JSON.
 """
 
-WIZARD_TODO_PROMPT_INTRO = """You are a Technical Project Manager.
+STARTER_TODO_PROMPT_INTRO = """You are a Technical Project Manager.
 Based on the following project Concept and Tech Stack, create a detailed TODO plan."""
 
-WIZARD_TODO_PROMPT_INSTR = """
+STARTER_TODO_PROMPT_INSTR = """
 ### Instructions
 1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).
 2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').
@@ -128,8 +128,8 @@ WIZARD_TODO_PROMPT_INSTR = """
    - **Do not** output sections for phases you decided to skip.
 """
 
-WIZARD_GENERATE_MASTER_INTRO = "You are a senior developer creating a boilerplate for: {name}\nStack: {stack}"
-WIZARD_GENERATE_MASTER_INSTR = """
+STARTER_GENERATE_MASTER_INTRO = "You are a senior developer creating a boilerplate for: {name}\nStack: {stack}"
+STARTER_GENERATE_MASTER_INSTR = """
 ### Core Instructions
 1. **Select & Rename:** Select the appropriate `go_*.bat` script for the stack and rename it to `go.bat`.
 2. **Mandatory README:** You MUST output the `README.md` file. Populate it (or create it) with the project title, the pitch, and specific setup steps derived from the stack.
@@ -146,7 +146,7 @@ WIZARD_GENERATE_MASTER_INSTR = """
 CRITICAL: Do NOT omit the '--- End of file ---' marker for any block.
 """
 
-WIZARD_REWRITE_PROMPT_TEMPLATE = """You are a Project Editor.
+STARTER_REWRITE_PROMPT_TEMPLATE = """You are a Project Editor.
 The user has provided a global instruction to modify the project plan.
 Your task is to update the drafts listed below to comply with this instruction.
 
@@ -171,7 +171,7 @@ Example: <<NOTES>>I updated the database schema to include a 'status' field and 
 4. {target_instructions}
 5. Output the summary in `<<NOTES>>`, followed by the updated content."""
 
-WIZARD_SYNC_PROMPT_TEMPLATE = """You are a Consistency Engine. The user has modified section **{current_name}**.
+STARTER_SYNC_PROMPT_TEMPLATE = """You are a Consistency Engine. The user has modified section **{current_name}**.
 Update *unsigned* drafts to match these changes, respecting *locked* sections.
 
 ### New Source of Truth: {current_name}
@@ -185,7 +185,7 @@ Update *unsigned* drafts to match these changes, respecting *locked* sections.
 ### Instructions
 1. {target_instructions}"""
 
-WIZARD_QUESTION_PROMPT_TEMPLATE = """### {context_label}
+STARTER_QUESTION_PROMPT_TEMPLATE = """### {context_label}
 {context_content}
 
 ### Focus: {focus_name}

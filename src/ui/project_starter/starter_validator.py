@@ -2,11 +2,11 @@ from pathlib import Path
 
 def validate_step(step, state_data):
     """
-    Validates the data for a specific wizard step.
+    Validates the data for a specific Project Starter step.
 
     Args:
         step (int): The step number to validate.
-        state_data (dict): The project_data dictionary from WizardState.
+        state_data (dict): The project_data dictionary from StarterState.
 
     Returns:
         tuple: (is_valid, error_title, error_message)
