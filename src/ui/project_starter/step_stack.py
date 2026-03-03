@@ -4,6 +4,7 @@ import pyperclip
 from tkinter import messagebox
 from ... import constants as c
 from ...core.utils import save_config, load_config
+from ...core.prompts import STARTER_STACK_PROMPT_INTRO, STARTER_STACK_PROMPT_INSTR
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from ..tooltip import ToolTip
@@ -124,10 +125,10 @@ class StackView(tk.Frame):
         concept = self.project_data.get("concept_md", "")
         experience = self.project_data.get("stack_experience", "")
         parts = [
-            c.STARTER_STACK_PROMPT_INTRO,
+            STARTER_STACK_PROMPT_INTRO,
             "\n### Developer Experience\n```\n" + (experience if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
-            c.STARTER_STACK_PROMPT_INSTR
+            STARTER_STACK_PROMPT_INSTR
         ]
         return "\n".join(parts)
 

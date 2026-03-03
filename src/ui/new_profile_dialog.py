@@ -4,6 +4,8 @@ from .. import constants as c
 from ..core.paths import ICON_PATH
 from .style_manager import apply_dark_theme
 from .window_utils import position_window
+from .info_manager import attach_info_mode
+from .assets import assets
 
 class NewProfileDialog(Toplevel):
     def __init__(self, parent, existing_profile_names):
@@ -32,13 +34,20 @@ class NewProfileDialog(Toplevel):
         options_frame.pack(fill='x', pady=(15, 0))
 
         self.copy_files_var = BooleanVar(value=False)
-        ttk.Checkbutton(options_frame, text="Copy current file selection", variable=self.copy_files_var, style='Dark.TCheckbutton').pack(anchor='w')
+        self.copy_files_chk = ttk.Checkbutton(options_frame, text="Copy current file selection", variable=self.copy_files_var, style='Dark.TCheckbutton')
+        self.copy_files_chk.pack(anchor='w')
 
         self.copy_instructions_var = BooleanVar(value=False)
-        ttk.Checkbutton(options_frame, text="Copy current instructions", variable=self.copy_instructions_var, style='Dark.TCheckbutton').pack(anchor='w')
+        self.copy_inst_chk = ttk.Checkbutton(options_frame, text="Copy current instructions", variable=self.copy_instructions_var, style='Dark.TCheckbutton')
+        self.copy_inst_chk.pack(anchor='w')
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
-        button_frame.pack(pady=(20, 0), fill='x', anchor='e')
+        button_frame.pack(pady=(20, 0), fill='x')
+
+        # Info Toggle integration
+        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+        self.info_toggle_btn.pack(side='left', padx=(0, 15))
+
         right_buttons_frame = Frame(button_frame, bg=c.DARK_BG)
         right_buttons_frame.pack(side='right')
 
@@ -52,8 +61,21 @@ class NewProfileDialog(Toplevel):
         self.bind("<Escape>", self.on_cancel)
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr.register(self.entry, "profile_name")
+        self.info_mgr.register(self.copy_files_chk, "profile_copy_files")
+        self.info_mgr.register(self.copy_inst_chk, "profile_copy_inst")
+        self.info_mgr.register(ok_button, "profile_create")
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+
         self.update_idletasks()
         required_height = self.winfo_reqheight()
+
+        # Factor in the panel if active on boot
+        if self.parent.app_state.info_mode_active:
+            required_height += c.INFO_PANEL_HEIGHT
+
         dialog_width = 400
         self.geometry(f"{dialog_width}x{required_height}")
         self.resizable(False, False)

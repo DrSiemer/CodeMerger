@@ -1,3 +1,4 @@
+import tkinter as tk
 from tkinter import Frame, Label, font as tkFont
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
@@ -10,7 +11,8 @@ def setup_ui(app):
     # --- Window Grid Configuration ---
     app.columnconfigure(0, weight=1)
     app.rowconfigure(2, weight=1) # Central content row expands vertically
-    app.rowconfigure(3, weight=0) # Status bar row is fixed height
+    app.rowconfigure(3, weight=0) # Status bar row
+    app.rowconfigure(4, weight=0) # Info panel row
 
     # --- Top Bar (Row 0) ---
     top_bar = Frame(app, bg=c.TOP_BAR_BG, padx=20, pady=15)
@@ -177,16 +179,23 @@ def setup_ui(app):
     app.filetypes_button.bind("<Leave>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon), add='+')
     app.filetypes_button.bind("<ButtonRelease-1>", app.action_handlers.open_filetypes_manager)
 
-    # --- Status Bar (Row 3) ---
+    # --- Status Bar Area (Row 3) ---
+    app.status_container = Frame(app, bg=c.STATUS_BG)
+    app.status_container.grid(row=3, column=0, sticky='ew')
+
+    # Toggle button: symmetric padding to clear the corner properly
+    app.info_toggle_btn = Label(app.status_container, image=assets.info_icon, bg=c.STATUS_BG, cursor="hand2")
+    app.info_toggle_btn.pack(side='left', padx=8, pady=4)
+
     app.status_bar = Label(
-        app,
+        app.status_container,
         textvariable=app.status_var,
         relief='flat',
         anchor='w',
         bg=c.STATUS_BG,
         fg=c.STATUS_FG,
         font=c.FONT_STATUS_BAR,
-        padx=20,
         pady=4
     )
-    app.status_bar.grid(row=3, column=0, sticky='ew')
+    # Text starts immediately after the button's padding (now 8px gap total)
+    app.status_bar.pack(side='left', fill='x', expand=True, padx=(0, 20))

@@ -122,7 +122,9 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
 
     filter_container = Frame(tree_actions_frame, bg=c.DARK_BG)
     filter_container.grid(row=0, column=1, sticky='ew', padx=(10, 0))
-    Label(filter_container, text="Filter:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left')
+    # Reference the Label separately for info mode registration
+    window.filter_label = Label(filter_container, text="Filter:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
+    window.filter_label.pack(side='left')
     window.filter_input_frame = Frame(filter_container, bg=c.TEXT_INPUT_BG, highlightthickness=1, highlightbackground=c.TEXT_INPUT_BG)
     window.filter_input_frame.pack(side='left', padx=(5,0), fill='x', expand=True)
     window.filter_entry = Entry(window.filter_input_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL, width=25)
@@ -207,12 +209,18 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
     # ===============================================
     # === BOTTOM BUTTONS (Back in main_frame) =======
     # ===============================================
-    # Bulk actions are always available (if they fit the use case)
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
     bulk_action_frame.grid(row=1, column=0, sticky='ew', pady=(20, 0))
 
-    RoundedButton(bulk_action_frame, text="Add all", command=window.state_controller.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='left')
-    RoundedButton(bulk_action_frame, text="Remove all", command=window.state_controller.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2').pack(side='right')
+    # New: Info Toggle for the File Manager integrated here
+    window.info_toggle_btn = Label(bulk_action_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+    window.info_toggle_btn.pack(side='left', padx=(0, 8))
+
+    window.add_all_btn = RoundedButton(bulk_action_frame, text="Add all", command=window.state_controller.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2')
+    window.add_all_btn.pack(side='left')
+    window.remove_all_btn = RoundedButton(bulk_action_frame, text="Remove all", command=window.state_controller.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2')
+    window.remove_all_btn.pack(side='right')
 
     if include_save_button:
-        RoundedButton(bulk_action_frame, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2').pack()
+        window.save_close_btn = RoundedButton(bulk_action_frame, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
+        window.save_close_btn.pack()

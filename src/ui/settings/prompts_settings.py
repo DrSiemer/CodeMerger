@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import Frame, Label
 from .collapsible_section import CollapsibleTextSection
 from ... import constants as c
+from ...core import prompts as p
 
 class PromptsSettingsFrame(Frame):
     def __init__(self, parent, config, on_toggle, **kwargs):
@@ -16,21 +17,21 @@ class PromptsSettingsFrame(Frame):
 
         self.copy_merged_prompt = CollapsibleTextSection(
             container, '\"Copy Code Only\" Prompt',
-            config.get('copy_merged_prompt', ''), c.DEFAULT_COPY_MERGED_PROMPT,
+            config.get('copy_merged_prompt', ''), p.DEFAULT_COPY_MERGED_PROMPT,
             on_toggle_callback=on_toggle
         )
         self.copy_merged_prompt.pack(fill='x', expand=True, pady=(5, 0))
 
         self.default_intro = CollapsibleTextSection(
             container, 'Default Intro Instructions',
-            config.get('default_intro_prompt', ''), c.DEFAULT_INTRO_PROMPT,
+            config.get('default_intro_prompt', ''), p.DEFAULT_INTRO_PROMPT,
             on_toggle_callback=on_toggle
         )
         self.default_intro.pack(fill='x', expand=True, pady=(5, 0))
 
         self.default_outro = CollapsibleTextSection(
             container, 'Default Outro Instructions',
-            config.get('default_outro_prompt', ''), c.DEFAULT_OUTRO_PROMPT,
+            config.get('default_outro_prompt', ''), p.DEFAULT_OUTRO_PROMPT,
             on_toggle_callback=on_toggle
         )
         self.default_outro.pack(fill='x', expand=True, pady=(5, 0))

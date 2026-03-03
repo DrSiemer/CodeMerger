@@ -8,8 +8,10 @@ from pathlib import Path
 from ..core.paths import (
     CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH, PERSISTENT_DATA_DIR
 )
+from ..core.prompts import (
+    DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT
+)
 from ..constants import (
-    DEFAULT_COPY_MERGED_PROMPT, DEFAULT_INTRO_PROMPT, DEFAULT_OUTRO_PROMPT,
     TOKEN_COUNT_ENABLED_DEFAULT,
     ADD_ALL_WARNING_THRESHOLD_DEFAULT
 )
@@ -118,7 +120,8 @@ def get_file_hash(full_path):
 def _create_and_get_default_config():
     """
     Creates a new config object from the default template, saves it to disk,
-    and returns it. This is the definitive first-run function
+    and returns it. This is the definitive first-run function.
+    Info Mode is active by default on fresh installs.
     """
     config = {
         'active_directory': '',
@@ -135,6 +138,7 @@ def _create_and_get_default_config():
         'token_limit': 0,
         'enable_compact_mode_on_minimize': True,
         'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT,
+        'info_mode_active': True,
         'user_lists': {
             'recent_projects': [],
             'filetypes': []
@@ -156,7 +160,7 @@ def load_config():
     """
     Loads the main application configuration from config.json.
     If the file is missing or corrupt, it's created from the default template.
-    It also handles automatic migration from older config formats.
+    Updates to an existing config set Info Mode to False by default.
     """
     try:
         with open(CONFIG_FILE_PATH, 'r', encoding='utf-8-sig') as f:
@@ -216,6 +220,9 @@ def load_config():
                 config['enable_compact_mode_on_minimize'] = True
             if 'add_all_warning_threshold' not in config:
                 config['add_all_warning_threshold'] = ADD_ALL_WARNING_THRESHOLD_DEFAULT
+            if 'info_mode_active' not in config:
+                config['info_mode_active'] = False
+                migration_occurred = True
 
             # If a migration was performed, save the newly structured config immediately.
             if migration_occurred:

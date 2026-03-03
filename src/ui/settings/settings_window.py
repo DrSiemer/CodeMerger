@@ -1,5 +1,6 @@
 import tkinter as tk
-from tkinter import Toplevel, Frame, StringVar, BooleanVar
+import re
+from tkinter import Toplevel, Frame, StringVar, BooleanVar, Label
 from ...core.utils import load_config, save_config
 from ...core.registry import get_setting, save_setting
 from ...core.paths import ICON_PATH
@@ -13,6 +14,8 @@ from .editor_settings import EditorSettingsFrame
 from .starter_settings import StarterSettingsFrame
 from ... import constants as c
 from ..window_utils import position_window, save_window_geometry
+from ..info_manager import attach_info_mode
+from ..assets import assets
 
 class SettingsWindow(Toplevel):
     def __init__(self, parent, updater, on_close_callback=None):
@@ -30,6 +33,15 @@ class SettingsWindow(Toplevel):
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind('<Escape>', lambda e: self.on_closing())
+
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
+        self.info_mgr.register(self.app_settings, "set_app")
+        self.info_mgr.register(self.fm_settings, "set_fm")
+        self.info_mgr.register(self.prompts_frame, "set_prompts")
+        self.info_mgr.register(self.starter_settings, "set_starter")
+        self.info_mgr.register(self.editor_settings, "set_editor")
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
         self._position_window()
         self.deiconify()
@@ -54,7 +66,16 @@ class SettingsWindow(Toplevel):
     def _init_window(self):
         self.title("Settings")
         self.iconbitmap(ICON_PATH)
-        self.geometry(c.SETTINGS_WINDOW_DEFAULT_GEOMETRY)
+
+        # --- Dynamic Geometry for Boot ---
+        initial_geom = c.SETTINGS_WINDOW_DEFAULT_GEOMETRY
+        if self.parent.app_state.info_mode_active:
+            match = re.match(r"(\d+)x(\d+)", initial_geom)
+            if match:
+                w, h = map(int, match.groups())
+                initial_geom = f"{w}x{h + c.INFO_PANEL_HEIGHT}"
+
+        self.geometry(initial_geom)
         self.minsize(c.SETTINGS_WINDOW_MIN_WIDTH, c.SETTINGS_WINDOW_MIN_HEIGHT)
         self.transient(self.parent)
         self.grab_set()
@@ -77,27 +98,31 @@ class SettingsWindow(Toplevel):
         content_frame.config(padx=20, pady=20)
 
         # --- Instantiate and pack setting sections ---
-        app_settings = ApplicationSettingsFrame(content_frame, self.vars, self.updater)
-        app_settings.pack(fill='x', expand=True)
+        self.app_settings = ApplicationSettingsFrame(content_frame, self.vars, self.updater)
+        self.app_settings.pack(fill='x', expand=True)
 
-        fm_settings = FileManagerSettingsFrame(content_frame, self.vars)
-        fm_settings.pack(fill='x', expand=True)
+        self.fm_settings = FileManagerSettingsFrame(content_frame, self.vars)
+        self.fm_settings.pack(fill='x', expand=True)
 
-        self.prompts_frame = PromptsSettingsFrame(content_frame, self.config, on_toggle=None)
+        self.prompts_frame = PromptsSettingsFrame(content_frame, self.config, on_toggle=self.scroll_frame._on_frame_configure)
         self.prompts_frame.pack(fill='x', expand=True)
 
-        starter_settings = StarterSettingsFrame(content_frame, self.vars)
-        starter_settings.pack(fill='x', expand=True)
+        self.starter_settings = StarterSettingsFrame(content_frame, self.vars)
+        self.starter_settings.pack(fill='x', expand=True)
 
-        editor_settings = EditorSettingsFrame(content_frame, self.vars)
-        editor_settings.pack(fill='x', expand=True)
+        self.editor_settings = EditorSettingsFrame(content_frame, self.vars)
+        self.editor_settings.pack(fill='x', expand=True)
 
         # --- Action Buttons (Outside scroll area) ---
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=1, column=0, sticky='ew', padx=20, pady=(0, 20))
-        button_frame.grid_columnconfigure(0, weight=1)
+        button_frame.grid_columnconfigure(1, weight=1)
+
+        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+        self.info_toggle_btn.grid(row=0, column=0, sticky='w')
+
         save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2')
-        save_button.grid(row=0, column=1, sticky='e')
+        save_button.grid(row=0, column=2, sticky='e')
 
     def _position_window(self):
         position_window(self)

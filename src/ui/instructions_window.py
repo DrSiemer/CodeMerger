@@ -1,4 +1,5 @@
 import os
+import re
 from tkinter import Toplevel, Frame, Label
 from ..core.paths import ICON_PATH
 from .widgets.rounded_button import RoundedButton
@@ -8,6 +9,7 @@ from .tooltip import ToolTip
 from .window_utils import position_window, save_window_geometry
 from .assets import assets
 from .widgets.scrollable_text import ScrollableText
+from .info_manager import attach_info_mode
 
 class InstructionsWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, on_close_callback=None):
@@ -21,7 +23,16 @@ class InstructionsWindow(Toplevel):
         # --- Window Setup ---
         self.title("Set Instructions")
         self.iconbitmap(ICON_PATH)
-        self.geometry(c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY)
+
+        # --- Dynamic Geometry for Boot ---
+        initial_geom = c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY
+        if self.parent.app_state.info_mode_active:
+            match = re.match(r"(\d+)x(\d+)", initial_geom)
+            if match:
+                w, h = map(int, match.groups())
+                initial_geom = f"{w}x{h + c.INFO_PANEL_HEIGHT}"
+
+        self.geometry(initial_geom)
         self.transient(parent)
         self.grab_set()
         self.focus_force()
@@ -63,6 +74,10 @@ class InstructionsWindow(Toplevel):
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=4, column=0, sticky='ew', pady=(10, 0))
 
+        # Info Toggle integration
+        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+        self.info_toggle_btn.pack(side='left', padx=(0, 15))
+
         config = load_config()
 
         # Defensive check for list types if config was previously corrupted by trailing commas
@@ -102,6 +117,15 @@ class InstructionsWindow(Toplevel):
 
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
+
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr.register(self.intro_text, "inst_intro")
+        self.info_mgr.register(self.outro_text, "inst_outro")
+        self.info_mgr.register(self.save_button, "inst_save")
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+        if hasattr(self, 'defaults_button'):
+            self.info_mgr.register(self.defaults_button, "inst_defaults")
 
         self._position_window()
         self.deiconify()

@@ -6,6 +6,7 @@ from tkinter import messagebox, ttk, filedialog
 from ... import constants as c
 from ...core.paths import BOILERPLATE_DIR
 from ...core.utils import strip_markdown_wrapper
+from ...core.prompts import STARTER_GENERATE_MASTER_INTRO, STARTER_GENERATE_MASTER_INSTR
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from .generator import sanitize_project_name
@@ -207,7 +208,7 @@ class GenerateView(tk.Frame):
                 path = os.path.join(BOILERPLATE_DIR, filename)
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
-                        # ADDED: Include the '--- End of file ---' marker for consistency
+                        # Include the '--- End of file ---' marker for consistency
                         # This teaches the LLM the correct response format by example.
                         prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n--- End of file ---\n\n"
                 except Exception:
@@ -218,12 +219,12 @@ class GenerateView(tk.Frame):
         example_code = self._get_base_project_content()
 
         parts = [
-            c.STARTER_GENERATE_MASTER_INTRO.format(name=name, stack=stack),
+            STARTER_GENERATE_MASTER_INTRO.format(name=name, stack=stack),
             "\n### Provided Files\n" + prompt_content,
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
             "\n### TODO Plan\n```markdown\n" + todo + "\n```",
             example_code,
-            c.STARTER_GENERATE_MASTER_INSTR
+            STARTER_GENERATE_MASTER_INSTR
         ]
         return "\n".join(parts)
 

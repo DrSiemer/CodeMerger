@@ -9,6 +9,8 @@ from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from .window_utils import position_window, save_window_geometry
 from .tooltip import ToolTip
+from .info_manager import attach_info_mode
+from .assets import assets
 
 class FiletypesManagerWindow(Toplevel):
     def __init__(self, parent, on_close_callback=None):
@@ -23,7 +25,16 @@ class FiletypesManagerWindow(Toplevel):
         # --- Window Setup ---
         self.title("Manage Filetypes")
         self.iconbitmap(ICON_PATH)
-        self.geometry(c.FILETYPES_WINDOW_DEFAULT_GEOMETRY)
+
+        # --- Dynamic Geometry for Boot ---
+        initial_geom = c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
+        if self.parent.app_state.info_mode_active:
+            match = re.match(r"(\d+)x(\d+)", initial_geom)
+            if match:
+                w, h = map(int, match.groups())
+                initial_geom = f"{w}x{h + c.INFO_PANEL_HEIGHT}"
+
+        self.geometry(initial_geom)
         self.transient(parent)
         self.grab_set()
         self.focus_force()
@@ -53,11 +64,17 @@ class FiletypesManagerWindow(Toplevel):
         self.tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
         self.tree.config(yscrollcommand=self.tree_scroll.set)
 
-        # --- Action Button (Delete or Activate/Deactivate) ---
-        action_button_frame = Frame(main_frame, bg=c.DARK_BG)
-        action_button_frame.grid(row=2, column=0, sticky='ew', pady=(10, 10))
-        self.action_button = RoundedButton(action_button_frame, text="", command=self._on_action_button_click, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2')
-        self.action_button.pack(fill='x', expand=True)
+        # --- Action Button Row ---
+        action_row_frame = Frame(main_frame, bg=c.DARK_BG)
+        action_row_frame.grid(row=2, column=0, sticky='ew', pady=(10, 10))
+        action_row_frame.columnconfigure(1, weight=1)
+
+        # Info Toggle integration
+        self.info_toggle_btn = Label(action_row_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+        self.info_toggle_btn.grid(row=0, column=0, padx=(0, 10))
+
+        self.action_button = RoundedButton(action_row_frame, text="", command=self._on_action_button_click, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2')
+        self.action_button.grid(row=0, column=1, sticky='ew')
         self.action_button_tooltip = ToolTip(self.action_button, text="", delay=500)
 
         # --- Input Section for Adding New Filetypes ---
@@ -93,6 +110,13 @@ class FiletypesManagerWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind('<Escape>', lambda e: self.on_closing())
         self.bind('<Configure>', self._on_resize)
+
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr.register(self.tree, "ft_list")
+        self.info_mgr.register(self.action_button, "ft_action")
+        self.info_mgr.register(input_section_frame, "ft_add")
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
         self.populate_tree()
         self.on_tree_selection_change() # Initial state setup

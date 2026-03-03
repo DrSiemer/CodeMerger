@@ -1,7 +1,8 @@
 import os
 from datetime import datetime
 from .core.utils import load_config, save_config
-from .constants import RECENT_PROJECTS_MAX, DEFAULT_COPY_MERGED_PROMPT
+from .constants import RECENT_PROJECTS_MAX
+from .core.prompts import DEFAULT_COPY_MERGED_PROMPT
 from .core.registry import get_setting
 
 class AppState:
@@ -19,8 +20,31 @@ class AppState:
         self.last_update_check = self.config.get('last_update_check', None)
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', True)
 
+        # Info Mode visibility state
+        self.info_mode_active = self.config.get('info_mode_active', True)
+
+        # List of callbacks to synchronize info mode visibility across windows
+        self._info_observers = []
+
         self._validate_active_dir()
         self._prune_recent_projects()
+
+    def register_info_observer(self, callback):
+        """Registers a callback function to be notified of info mode changes."""
+        if callback not in self._info_observers:
+            self._info_observers.append(callback)
+
+    def toggle_info_mode(self):
+        """Toggles the info mode state and notifies all registered observers."""
+        self.info_mode_active = not self.info_mode_active
+        self.config['info_mode_active'] = self.info_mode_active
+        self._save()
+
+        for observer in self._info_observers:
+            try:
+                observer(self.info_mode_active)
+            except Exception:
+                pass
 
     def _validate_active_dir(self):
         """Checks for existence of the active directory. Resets if not found"""
@@ -48,6 +72,7 @@ class AppState:
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
         self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', True)
+        self.info_mode_active = self.config.get('info_mode_active', True)
         # Reload from registry as well
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)

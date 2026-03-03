@@ -1,4 +1,5 @@
 import os
+import re
 import tkinter as tk
 from tkinter import Toplevel, Frame, Label, filedialog, StringVar, Entry, messagebox
 import sys
@@ -12,6 +13,7 @@ from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import save_window_geometry, get_monitor_work_area
 from .assets import assets
+from .info_manager import attach_info_mode
 
 class ProjectSelectorDialog(Toplevel):
     """
@@ -69,16 +71,30 @@ class ProjectSelectorDialog(Toplevel):
         self.scroll_frame.grid(row=0, column=0, sticky='nsew')
         self.recent_dirs_frame = self.scroll_frame.scrollable_frame
 
+        # --- Footer Section ---
+        footer_frame = Frame(self, bg=self.app_bg_color, padx=20, pady=20)
+        footer_frame.grid(row=3, column=0, sticky='ew')
+        footer_frame.columnconfigure(1, weight=1)
+
+        # Info Toggle integration
+        self.info_toggle_btn = Label(footer_frame, image=assets.info_icon, bg=self.app_bg_color, cursor="hand2")
+        self.info_toggle_btn.grid(row=0, column=0, padx=(0, 15))
+
         # --- "Add Project" Button ---
         self.browse_btn = RoundedButton(
-            self, text="Add project", command=self.browse_for_new_dir,
+            footer_frame, text="Add project", command=self.browse_for_new_dir,
             bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2'
         )
-        self.browse_btn.grid(row=3, column=0, sticky='ew', pady=20, padx=20)
+        self.browse_btn.grid(row=0, column=1, sticky='ew')
 
         # Let the window calculate its size with no list items.
         self.update_idletasks()
         initial_height = self.winfo_reqheight()
+
+        # Accommodate info panel if active on boot
+        if self.parent.app_state.info_mode_active:
+            initial_height += c.INFO_PANEL_HEIGHT
+
         x, y = 0, 0
         saved_geometry = None
 
@@ -107,6 +123,13 @@ class ProjectSelectorDialog(Toplevel):
 
         self.geometry(f"{self.dialog_width}x{initial_height}+{self.current_x}+{self.current_y}")
 
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=4, toggle_btn=self.info_toggle_btn)
+        self.info_mgr.register(self.scroll_frame.canvas, "sel_list")
+        self.info_mgr.register(self.filter_entry, "sel_filter")
+        self.info_mgr.register(self.browse_btn, "sel_browse")
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+
         self._populate_projects(self.recent_projects)
 
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
@@ -119,7 +142,7 @@ class ProjectSelectorDialog(Toplevel):
 
     def _on_drag(self, event):
         """Updates the stored position when the window is moved by the user."""
-        if self.state() == 'normal':
+        if self.state() == 'normal' and event.widget == self:
             self.current_x = self.winfo_x()
             self.current_y = self.winfo_y()
 
@@ -258,6 +281,10 @@ class ProjectSelectorDialog(Toplevel):
             )
             # The button is created but not packed initially. It will be shown on hover.
             buttons_container.trash_button = remove_btn
+
+            # Info Mode integration for the Trash button
+            if hasattr(self, 'info_mgr'):
+                self.info_mgr.register(remove_btn, "sel_remove")
 
         # --- Event Bindings ---
         btn.bind("<ButtonRelease-1>", lambda e, p=path: self.on_project_button_release(e, p))

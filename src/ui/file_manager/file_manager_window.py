@@ -1,6 +1,7 @@
 import tkinter as tk
 import sys
-from tkinter import Toplevel, StringVar
+import re
+from tkinter import Toplevel, StringVar, Frame, Label
 from ...core.utils import parse_gitignore
 from .file_tree_builder import build_file_tree_data
 from .file_tree_handler import FileTreeHandler
@@ -14,6 +15,8 @@ from ... import constants as c
 from ...core.paths import ICON_PATH
 from ..window_utils import position_window, save_window_geometry
 from ..custom_error_dialog import CustomErrorDialog
+from ..info_manager import attach_info_mode
+from ..assets import assets
 
 class FileManagerWindow(Toplevel):
     def __init__(self, parent, project_config, status_var, file_extensions, default_editor, app_state, newly_detected_files=None):
@@ -38,7 +41,16 @@ class FileManagerWindow(Toplevel):
 
         self.title(f"Manage files for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
-        self.geometry(c.FILE_MANAGER_DEFAULT_GEOMETRY)
+
+        # --- Dynamic Geometry for Boot ---
+        initial_geom = c.FILE_MANAGER_DEFAULT_GEOMETRY
+        if self.app_state.info_mode_active:
+            match = re.match(r"(\d+)x(\d+)", initial_geom)
+            if match:
+                w, h = map(int, match.groups())
+                initial_geom = f"{w}x{h + c.INFO_PANEL_HEIGHT}"
+
+        self.geometry(initial_geom)
         self.minsize(c.FILE_MANAGER_MIN_WIDTH, c.FILE_MANAGER_MIN_HEIGHT)
         self.grab_set()
         self.focus_force()
@@ -53,6 +65,7 @@ class FileManagerWindow(Toplevel):
         self.state_controller = FileManagerStateController(self)
         self.order_request_handler = OrderRequestHandler(self)
 
+        # setup_file_manager_ui populates the window's main frame
         setup_file_manager_ui(self, include_save_button=True)
         self.create_handlers()
 
@@ -78,16 +91,55 @@ class FileManagerWindow(Toplevel):
         self.data_controller.run_token_recalculation()
         self.update_all_button_states()
 
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self._register_hover_help()
+
         self._position_window()
         self.deiconify()
 
         # --- Disable Minimize Button (Windows Only) ---
         if sys.platform == "win32":
-            # We use after(10) to ensure the window is mapped and has a frame handle
             self.after(10, self._disable_minimize_button)
 
         if self.newly_detected_files:
             self.ui_controller.expand_and_scroll_to_new_files()
+
+    def _register_hover_help(self):
+        """Attaches detailed help messages to File Manager widgets."""
+        mgr = self.info_mgr
+        mgr.register(self.tree, "fm_tree")
+        mgr.register(self.merge_order_list, "fm_list")
+
+        # Filtering
+        mgr.register(self.filter_label, "fm_filter_text")
+        mgr.register(self.filter_entry, "fm_filter_text")
+        mgr.register(self.toggle_gitignore_button, "fm_filter_git")
+        mgr.register(self.toggle_filter_button, "fm_filter_ext")
+
+        # Reveal Icons (Loop through all state variants)
+        for label in self.folder_icon_labels.values():
+            mgr.register(label, "fm_reveal")
+
+        # Stats and List Tools
+        mgr.register(self.merge_order_details_label, "fm_tokens")
+        mgr.register(self.merge_order_list, "fm_tokens_item")
+        mgr.register(self.order_request_button, "fm_order")
+        mgr.register(self.toggle_paths_button, "fm_list_tools")
+
+        # Sorting priority
+        mgr.register(self.move_to_top_button, "fm_sort_top")
+        mgr.register(self.move_up_button, "fm_sort_up")
+        mgr.register(self.move_down_button, "fm_sort_down")
+        mgr.register(self.move_to_bottom_button, "fm_sort_bottom")
+        mgr.register(self.remove_button, "fm_sort_remove")
+
+        # Bulk actions section
+        mgr.register(self.add_all_btn, "fm_add_all")
+        mgr.register(self.remove_all_btn, "fm_remove_all")
+        mgr.register(self.save_close_btn, "fm_save")
+
+        mgr.register(self.info_toggle_btn, "info_toggle")
 
     def _disable_minimize_button(self):
         """

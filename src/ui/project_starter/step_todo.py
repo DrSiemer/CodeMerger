@@ -5,6 +5,10 @@ from tkinter import messagebox
 from ... import constants as c
 from ...core.paths import REFERENCE_DIR
 from ...core.utils import strip_markdown_wrapper
+from ...core.prompts import (
+    STARTER_TODO_PROMPT_INTRO, STARTER_TODO_PROMPT_INSTR,
+    STARTER_QUESTION_PROMPT_TEMPLATE
+)
 from ..widgets.markdown_renderer import MarkdownRenderer
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
@@ -120,21 +124,21 @@ class TodoView(tk.Frame):
         headers_str = ", ".join([f'"{h}"' for h in valid_headers])
 
         parts = [
-            c.STARTER_TODO_PROMPT_INTRO,
+            STARTER_TODO_PROMPT_INTRO,
             "\n### Tech Stack\n" + stack,
             "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
             example_code,
             "\n### Reference Template (Standard TODO List)\n```markdown\n" + todo_template + "\n```",
-            c.STARTER_TODO_PROMPT_INSTR.format(headers_str=headers_str)
+            STARTER_TODO_PROMPT_INSTR.format(headers_str=headers_str)
         ]
         return "\n".join(parts)
 
     def _copy_prompt_to_clipboard(self, button, text):
         prompt_content = text
-        self.clipboard_clear()
-        self.clipboard_append(prompt_content)
         original_text = button.text
         original_bg = button.original_bg_color
+        self.clipboard_clear()
+        self.clipboard_append(prompt_content)
         button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
         self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
 
@@ -456,7 +460,7 @@ class TodoView(tk.Frame):
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
             current_question = self.questions[self.current_question_index]
 
-            prompt_text = c.STARTER_QUESTION_PROMPT_TEMPLATE.format(
+            prompt_text = STARTER_QUESTION_PROMPT_TEMPLATE.format(
                 context_label="Project Concept",
                 context_content="```markdown\n" + (concept_md or "No concept provided") + "\n```",
                 focus_name="Full TODO Plan",

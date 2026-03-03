@@ -8,7 +8,8 @@ from ..core.paths import (
     EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH,
     GIT_FILES_ICON_PATH, GIT_FILES_ACTIVE_ICON_PATH,
     SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH,
-    PROJECT_STARTER_ICON_PATH, PROJECT_STARTER_ACTIVE_ICON_PATH
+    PROJECT_STARTER_ICON_PATH, PROJECT_STARTER_ACTIVE_ICON_PATH,
+    INFO_ICON_PATH, INFO_ICON_ACTIVE_PATH
 )
 
 class AppAssets:
@@ -40,9 +41,13 @@ class AppAssets:
         self.settings_icon_active_pil = self._load_image(SETTINGS_ICON_ACTIVE_PATH, (30, 30))
         self.filetypes_icon_active_pil = self._load_image(FILETYPES_ICON_ACTIVE_PATH, (30, 30))
 
-        # New Project Starter Icons
+        # Project Starter Icons
         self.project_starter_pil = self._load_image(PROJECT_STARTER_ICON_PATH, (28, 28))
         self.project_starter_active_pil = self._load_image(PROJECT_STARTER_ACTIVE_ICON_PATH, (28, 28))
+
+        # Info Mode Icons
+        self.info_icon_pil = self._load_image(INFO_ICON_PATH, (18, 18))
+        self.info_icon_active_pil = self._load_image(INFO_ICON_ACTIVE_PATH, (18, 18))
 
         self.compact_mode_close_pil = self._load_image(COMPACT_MODE_CLOSE_ICON_PATH)
 
@@ -67,6 +72,8 @@ class AppAssets:
         self.filetypes_icon_active = None
         self.project_starter_icon = None
         self.project_starter_active_icon = None
+        self.info_icon = None
+        self.info_icon_active = None
 
     def load_tk_images(self):
         """
@@ -92,6 +99,8 @@ class AppAssets:
         self.filetypes_icon_active = self._pil_to_photoimage(self.filetypes_icon_active_pil)
         self.project_starter_icon = self._pil_to_photoimage(self.project_starter_pil)
         self.project_starter_active_icon = self._pil_to_photoimage(self.project_starter_active_pil)
+        self.info_icon = self._pil_to_photoimage(self.info_icon_pil)
+        self.info_icon_active = self._pil_to_photoimage(self.info_icon_active_pil)
 
     def create_masked_logo(self, color_hex):
         """Creates a PhotoImage by using the logo's alpha channel as a mask for the project color."""
@@ -144,18 +153,23 @@ class AppAssets:
             return ImageTk.PhotoImage(img)
 
     def _load_image(self, path, resize=None):
+        if not os.path.exists(path):
+            return Image.new('RGBA', resize if resize else (16, 16), (0,0,0,0))
+
         try:
             img = Image.open(path)
             if resize:
                 img = img.resize(resize, Image.Resampling.LANCZOS)
             return img
         except Exception:
-            # Fallback blank image
-            return Image.new('RGB', resize if resize else (16, 16), '#444444')
+            return Image.new('RGBA', resize if resize else (16, 16), (0,0,0,0))
 
     def _pil_to_photoimage(self, pil_image):
         if pil_image:
-            return ImageTk.PhotoImage(pil_image)
+            try:
+                return ImageTk.PhotoImage(pil_image)
+            except Exception:
+                return None
         return None
 
 assets = AppAssets()

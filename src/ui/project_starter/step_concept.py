@@ -6,6 +6,10 @@ from tkinter import messagebox
 from ... import constants as c
 from ...core.paths import REFERENCE_DIR
 from ...core.utils import strip_markdown_wrapper
+from ...core.prompts import (
+    STARTER_CONCEPT_PROMPT_INTRO, STARTER_CONCEPT_PROMPT_CORE_INSTR,
+    STARTER_CONCEPT_DEFAULT_GOAL, STARTER_QUESTION_PROMPT_TEMPLATE
+)
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from ..widgets.markdown_renderer import MarkdownRenderer
@@ -99,7 +103,7 @@ class ConceptView(tk.Frame):
         self.goal_text.pack(side='top', fill="both", expand=True, pady=5)
 
         existing_goal = self.project_data.get("goal", "").strip()
-        self.goal_text.insert("1.0", existing_goal if existing_goal else c.STARTER_CONCEPT_DEFAULT_GOAL)
+        self.goal_text.insert("1.0", existing_goal if existing_goal else STARTER_CONCEPT_DEFAULT_GOAL)
         self.goal_text.text_widget.bind("<KeyRelease>", self._update_goal_state)
         self._update_button_state()
 
@@ -109,7 +113,7 @@ class ConceptView(tk.Frame):
 
     def _update_button_state(self, event=None):
         content = self.project_data.get("goal", "").strip()
-        self.generate_btn.set_state('normal' if content and content != c.STARTER_CONCEPT_DEFAULT_GOAL else 'disabled')
+        self.generate_btn.set_state('normal' if content and content != STARTER_CONCEPT_DEFAULT_GOAL else 'disabled')
 
     def _get_prompt(self):
         user_goal = self.project_data.get("goal", "")
@@ -117,12 +121,12 @@ class ConceptView(tk.Frame):
         segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
         parts = [
-            c.STARTER_CONCEPT_PROMPT_INTRO,
+            STARTER_CONCEPT_PROMPT_INTRO,
             "\n### User Goal\n```\n" + user_goal.strip() + "\n```",
             self._get_base_project_content(),
             "\n### Format Instructions",
             segment_instructions,
-            c.STARTER_CONCEPT_PROMPT_CORE_INSTR
+            STARTER_CONCEPT_PROMPT_CORE_INSTR
         ]
         return "\n".join(parts)
 
@@ -410,7 +414,7 @@ class ConceptView(tk.Frame):
             full_text = self.editor_text.get("1.0", "end-1c").strip()
             current_q = self.questions[self.current_question_index]
 
-            prompt = c.STARTER_QUESTION_PROMPT_TEMPLATE.format(
+            prompt = STARTER_QUESTION_PROMPT_TEMPLATE.format(
                 context_label="Full Concept",
                 context_content="```markdown\n" + full_text + "\n```",
                 focus_name="Concept",

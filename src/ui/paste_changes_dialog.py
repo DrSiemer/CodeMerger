@@ -1,4 +1,5 @@
 import os
+import re
 from tkinter import Toplevel, Frame, Label, messagebox
 from .. import constants as c
 from ..core.paths import ICON_PATH
@@ -7,6 +8,8 @@ from .widgets.scrollable_text import ScrollableText
 from ..core import change_applier
 from .window_utils import position_window
 from .custom_error_dialog import CustomErrorDialog
+from .info_manager import attach_info_mode
+from .assets import assets
 
 class PasteChangesDialog(Toplevel):
     def __init__(self, parent, project_base_dir, status_var, initial_content=None):
@@ -22,6 +25,15 @@ class PasteChangesDialog(Toplevel):
         self.result = None
 
         self.configure(bg=c.DARK_BG)
+
+        # --- Dynamic Geometry for Boot ---
+        initial_w, initial_h = 600, 500
+        if self.parent.app_state.info_mode_active:
+            initial_h += c.INFO_PANEL_HEIGHT
+
+        self.geometry(f"{initial_w}x{initial_h}")
+        self.minsize(500, 400)
+
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
         main_frame.pack(fill='both', expand=True)
         main_frame.grid_rowconfigure(1, weight=1)
@@ -43,17 +55,25 @@ class PasteChangesDialog(Toplevel):
             self.text_widget.insert('1.0', initial_content)
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
-        button_frame.grid(row=2, column=0, pady=(15, 0), sticky='e')
+        button_frame.grid(row=2, column=0, pady=(15, 0), sticky='ew')
+        button_frame.grid_columnconfigure(1, weight=1)
+
+        # Info Toggle integration
+        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+        self.info_toggle_btn.grid(row=0, column=0, sticky='w')
+
+        action_btns_frame = Frame(button_frame, bg=c.DARK_BG)
+        action_btns_frame.grid(row=0, column=1, sticky='e')
 
         ok_button = RoundedButton(
-            button_frame, text="Apply Changes", command=self.on_apply,
+            action_btns_frame, text="Apply Changes", command=self.on_apply,
             bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL,
             width=140, height=30, cursor='hand2'
         )
         ok_button.pack(side='right')
 
         cancel_button = RoundedButton(
-            button_frame, text="Cancel", command=self.on_cancel,
+            action_btns_frame, text="Cancel", command=self.on_cancel,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL,
             width=90, height=30, cursor='hand2'
         )
@@ -62,8 +82,12 @@ class PasteChangesDialog(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         self.bind("<Escape>", self.on_cancel)
 
-        self.geometry("600x500")
-        self.minsize(500, 400)
+        # --- Info Mode Integration ---
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr.register(self.text_widget, "paste_text")
+        self.info_mgr.register(ok_button, "paste_apply")
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+
         position_window(self)
         self.deiconify()
         self.lift()
