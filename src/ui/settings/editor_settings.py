@@ -16,9 +16,20 @@ class EditorSettingsFrame(Frame):
         container = Frame(self, bg=c.DARK_BG)
         container.pack(fill='x', expand=True)
 
-        Entry(container, textvariable=self.editor_path, state='readonly', readonlybackground=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL).pack(side='left', fill='x', expand=True, padx=(0, 10), ipady=4)
-        RoundedButton(container, text="Browse...", command=self._browse_for_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2').pack(side='left', padx=(0, 5))
-        RoundedButton(container, text="Clear", command=self._clear_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2').pack(side='left')
+        self.path_entry = Entry(container, textvariable=self.editor_path, state='readonly', readonlybackground=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
+        self.path_entry.pack(side='left', fill='x', expand=True, padx=(0, 10), ipady=4)
+
+        self.browse_btn = RoundedButton(container, text="Browse...", command=self._browse_for_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2')
+        self.browse_btn.pack(side='left', padx=(0, 5))
+
+        self.clear_btn = RoundedButton(container, text="Clear", command=self._clear_editor, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2')
+        self.clear_btn.pack(side='left')
+
+    def register_info(self, info_mgr):
+        """Registers granular components with Info Mode."""
+        info_mgr.register(self.path_entry, "set_editor_path")
+        info_mgr.register(self.browse_btn, "set_editor_path")
+        info_mgr.register(self.clear_btn, "set_editor_path")
 
     def _browse_for_editor(self):
         file_types = [("Executable files", "*.exe"), ("All files", "*.*")] if os.name == 'nt' else []

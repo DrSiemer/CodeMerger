@@ -36,11 +36,21 @@ class SettingsWindow(Toplevel):
 
         # --- Info Mode Integration ---
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
+
+        # Section summaries
         self.info_mgr.register(self.app_settings, "set_app")
         self.info_mgr.register(self.fm_settings, "set_fm")
         self.info_mgr.register(self.prompts_frame, "set_prompts")
         self.info_mgr.register(self.starter_settings, "set_starter")
         self.info_mgr.register(self.editor_settings, "set_editor")
+
+        # Granular Component registration (delegated to frames)
+        self.app_settings.register_info(self.info_mgr)
+        self.fm_settings.register_info(self.info_mgr)
+        self.prompts_frame.register_info(self.info_mgr)
+        self.starter_settings.register_info(self.info_mgr)
+        self.editor_settings.register_info(self.info_mgr)
+
         self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
         self._position_window()

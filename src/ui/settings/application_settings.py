@@ -23,7 +23,9 @@ class ApplicationSettingsFrame(Frame):
         # File Check Section
         file_check_frame = Frame(container, bg=c.DARK_BG)
         file_check_frame.pack(fill='x', expand=True, pady=(0, 5))
-        ttk.Checkbutton(file_check_frame, text="Periodically check for new project files", variable=self.enable_new_file_check, style='Dark.TCheckbutton', command=self._toggle_interval_selector).pack(anchor='w')
+
+        self.new_file_chk = ttk.Checkbutton(file_check_frame, text="Periodically check for new project files", variable=self.enable_new_file_check, style='Dark.TCheckbutton', command=self._toggle_interval_selector)
+        self.new_file_chk.pack(anchor='w')
 
         interval_frame = Frame(file_check_frame, bg=c.DARK_BG)
         interval_frame.pack(fill='x', padx=(25, 0), pady=(5, 0))
@@ -31,24 +33,41 @@ class ApplicationSettingsFrame(Frame):
         self.interval_label.pack(side='left', padx=(0, 10))
         self.interval_combo = ttk.Combobox(interval_frame, textvariable=self.new_file_check_interval, values=['2', '5', '10', '30', '60'], state='readonly', width=5, style='Dark.TCombobox')
         self.interval_combo.pack(side='left')
-        Label(interval_frame, text="seconds", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(side='left', padx=(5, 0))
+        self.seconds_label = Label(interval_frame, text="seconds", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.seconds_label.pack(side='left', padx=(5, 0))
         self._toggle_interval_selector()
 
         # Secret Scanning
-        ttk.Checkbutton(container, text="Scan for secrets (on each copy)", variable=self.scan_for_secrets, style='Dark.TCheckbutton').pack(anchor='w')
+        self.secrets_chk = ttk.Checkbutton(container, text="Scan for secrets (on each copy)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
+        self.secrets_chk.pack(anchor='w')
 
         # Compact Mode
-        ttk.Checkbutton(container, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton').pack(anchor='w')
+        self.compact_chk = ttk.Checkbutton(container, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton')
+        self.compact_chk.pack(anchor='w')
 
         # Updates
         updates_frame = Frame(container, bg=c.DARK_BG)
         updates_frame.pack(fill='x', expand=True, pady=(10, 0))
-        ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton').pack(side='left')
-        RoundedButton(
+        self.updates_chk = ttk.Checkbutton(updates_frame, text="Automatically check for updates daily", variable=self.check_for_updates, style='Dark.TCheckbutton')
+        self.updates_chk.pack(side='left')
+
+        self.check_now_btn = RoundedButton(
             updates_frame, text="Check Now", command=self.updater.check_for_updates_manual,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
             height=22, radius=4, cursor='hand2'
-        ).pack(side='left', padx=(10, 0))
+        )
+        self.check_now_btn.pack(side='left', padx=(10, 0))
+
+    def register_info(self, info_mgr):
+        """Registers granular components with Info Mode."""
+        info_mgr.register(self.new_file_chk, "set_app_new_file")
+        info_mgr.register(self.interval_label, "set_app_interval")
+        info_mgr.register(self.interval_combo, "set_app_interval")
+        info_mgr.register(self.seconds_label, "set_app_interval")
+        info_mgr.register(self.secrets_chk, "set_app_secrets")
+        info_mgr.register(self.compact_chk, "set_app_compact")
+        info_mgr.register(self.updates_chk, "set_app_updates")
+        info_mgr.register(self.check_now_btn, "set_app_updates")
 
     def _toggle_interval_selector(self):
         new_state = 'normal' if self.enable_new_file_check.get() else 'disabled'

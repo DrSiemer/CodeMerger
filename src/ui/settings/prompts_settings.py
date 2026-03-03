@@ -36,6 +36,12 @@ class PromptsSettingsFrame(Frame):
         )
         self.default_outro.pack(fill='x', expand=True, pady=(5, 0))
 
+    def register_info(self, info_mgr):
+        """Registers collapsible prompt sections with Info Mode."""
+        info_mgr.register(self.copy_merged_prompt, "set_prompt_merged")
+        info_mgr.register(self.default_intro, "set_prompt_intro")
+        info_mgr.register(self.default_outro, "set_prompt_outro")
+
     def get_values(self):
         return {
             'copy_merged_prompt': self.copy_merged_prompt.get_text(),

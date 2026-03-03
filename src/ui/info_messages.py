@@ -118,25 +118,77 @@ INFO_MESSAGES = {
     "fm_remove_all": "Remove All: Clear the entire merge list for the current profile.",
 
     # --- Settings Window ---
-    "set_app": "Application Behavior: Toggle automatic updates, compact mode on minimize, and file system monitoring intervals.",
-    "set_fm": "File Manager Settings: Configure the token counting engine and set thresholds for bulk 'Add All' operations.",
-    "set_prompts": "Default Prompts: Define reusable intro/outro texts that you can quickly load into any project via 'Instructions'.",
-    "set_starter": "Project Starter Config: Set a default root directory where the starter wizard will propose creating new projects.",
-    "set_editor": "Default Editor: Choose a specific code editor to use when double-clicking files. Leave blank to use system defaults.",
+    "set_app": "Various settings related to application behavior.",
+    "set_app_new_file": (
+        "File Monitoring: Monitors your project folder for new files added since your last session. "
+        "Disable this if you do not want new file warnings or do not want to spend resources on it."
+    ),
+    "set_app_interval": (
+        "Check Interval: How frequently CodeMerger scans the disk for changes. Lower values are more "
+        "responsive, but may impact performance on slow drives."
+    ),
+    "set_app_secrets": (
+        "Secret Scanning: Uses 'detect-secrets' to look for API keys or private credentials before you copy. "
+        "Enable this to prevent accidentally sharing sensitive data with the language model."
+    ),
+    "set_app_compact": (
+        "Compact Mode: Automatically switches to the floating Compact window when you minimize the "
+        "main window. Useful for keeping CodeMerger easily accessible while working in your IDE."
+    ),
+    "set_app_updates": (
+        "Automatic Updates: Checks GitHub for a new version once per day."
+    ),
+
+    "set_fm": "Settings that determine the behavior of the File Manager.",
+    "set_fm_tokens": (
+        "Token Counting: Calculates context usage based on the gpt-4 tokenizer. "
+        "Disable this if you want to speed up file indexing in extremely large projects."
+    ),
+    "set_fm_limit": (
+        "Context Limit: Set a target token count (e.g. 200000 for ChatGPT). The token count in the File Manager will "
+        "turn red if you exceed this."
+    ),
+    "set_fm_threshold": (
+        "Add All Safety: A warning threshold for the 'Add All' button. Prevents accidentally adding "
+        "a large amount of files to your merge list."
+    ),
+
+    "set_prompts": "Define your default intro/outro texts.",
+    "set_prompt_merged": (
+        "Default Header: The text prepended when using 'Copy Code Only'. Best used for a short "
+        "instruction, telling the AI to use the code as updated context."
+    ),
+    "set_prompt_intro": (
+        "Global Intro: Generic greeting and mission statement. You can easily load this into a new project "
+        "from the 'Instructions' window, to save time on project setup."
+    ),
+    "set_prompt_outro": (
+        "Global Outro: Put code style instructions here. Ideal for enforcing formatting rules like "
+        "'Always end your output with a clear explanation' across all your AI interactions."
+    ),
+
+    "set_starter": "Settings for the Project Starter tool.",
+    "set_starter_folder": "Default Root: The parent directory where the Project Starter will create new project sub-folders by default.",
+
+    "set_editor": "Overrule the default code editor to use when double-clicking files. Leave blank to use system defaults.",
+    "set_editor_path": (
+        "Editor Path: Provide the path to your code editor's executable (e.g., sublime_text.exe). "
+        "When set, double-clicking files in the manager opens them directly in this application."
+    ),
 
     # --- Instructions Window ---
-    "inst_intro": "Intro Instructions: This text is placed at the very top of your merged code block. Use it to set the immediate goal.",
-    "inst_outro": "Outro Instructions: This text is placed at the bottom. Use it for stylistic rules or recurring constraints.",
-    "inst_defaults": "Load Defaults: Click to wipe the current fields and load the global default prompts you defined in Settings.",
+    "inst_intro": "Intro Instructions: This text is placed at the very top of your merged code block. Use it to introduce your project.",
+    "inst_outro": "Outro Instructions: This text is placed at the bottom. Use it for code style rules or recurring constraints.",
+    "inst_defaults": "Load Defaults: Click to wipe the current fields and load the global default prompts you defined in the Settings.",
     "inst_save": "Save: Commit these instructions to the project's .allcode file. They are profile-specific.",
 
     # --- Filetype Manager ---
-    "ft_list": "Indexed Types: Only files matching these extensions are scanned. Double-click an entry to enable or disable it.",
-    "ft_action": "Contextual Action: Delete custom extensions or toggle the active status of bundled default extensions.",
+    "ft_list": "Indexed Types: Only files matching these extensions are scanned. Double-click to enable or disable.",
+    "ft_action": "Active Toggle: Delete custom extensions or toggle the active status of bundled default extensions.",
     "ft_add": "Add Filetype: Type a new extension (e.g. .py or .js) and a short description to add it to the indexing list.",
 
     # --- Project Selector ---
-    "sel_list": "Recent Projects: Quickly switch to a previous folder. Hover over an entry to see the full path or Ctrl-Click to open folder.",
+    "sel_list": "Recent Projects: Quickly switch to another CodeMerger project. Hover over an entry to see the full path and Ctrl-Click to open it's folder.",
     "sel_filter": "Project Filter: Start typing to narrow down the list by folder name or display title.",
     "sel_browse": "Add Project: Open a directory browser to select a new folder for use with CodeMerger.",
     "sel_remove": "Remove Entry: Take this project off your recent list. This does not delete any files on your computer.",
@@ -146,7 +198,7 @@ INFO_MESSAGES = {
     "paste_apply": "Apply Changes: CodeMerger will parse the code, validate the paths, and overwrite your local files with the new content.",
 
     # --- New Profile Dialog ---
-    "profile_name": "Profile Name: Enter a unique label for this configuration (e.g. 'Frontend' or 'Refactoring').",
+    "profile_name": "Profile Name: Enter a unique label for this configuration (e.g. 'Frontend' or 'Feature Name').",
     "profile_copy_files": "Clone Selection: If checked, the new profile will start with the exact same files selected in your current merge list.",
     "profile_copy_inst": "Clone Instructions: If checked, the new profile will inherit the current custom Intro and Outro instructions.",
     "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk."
