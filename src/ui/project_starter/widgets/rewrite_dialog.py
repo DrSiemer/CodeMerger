@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import Frame, Label, messagebox, Toplevel
 import re
 from .... import constants as c
+from ....core import prompts as p
 from ...widgets.rounded_button import RoundedButton
 from ...widgets.scrollable_text import ScrollableText
 from ...window_utils import position_window
@@ -135,8 +136,7 @@ class RewriteUnsignedDialog(Toplevel):
             friendly_map = {k: names.get(k, k) for k in targets}
             target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
 
-        # Template from Constants
-        prompt = c.WIZARD_REWRITE_PROMPT_TEMPLATE.format(
+        prompt = p.STARTER_REWRITE_PROMPT_TEMPLATE.format(
             instruction=instruction,
             references=''.join(reference_blocks) if reference_blocks else '(None)',
             targets=''.join(target_blocks),

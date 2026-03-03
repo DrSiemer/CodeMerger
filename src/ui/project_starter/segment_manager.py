@@ -36,7 +36,7 @@ class SegmentManager:
         Uses regex to find <<SECTION: Name>> followed by content.
         """
         # Regex to find <<SECTION: Name>> followed by content until the next section or end of string
-        pattern = re.compile(r'<<SECTION:\s*(.*?)>>\s*(.*?)(?=<<SECTION:|$)', re.DOTALL)
+        pattern = re.compile(r'<<SECTION:\s*(.*?)>>\s*(.*?)(?=<<SECTION:|$)', re.DOTALL | re.IGNORECASE)
 
         matches = pattern.findall(text)
         segments = {}
@@ -53,19 +53,33 @@ class SegmentManager:
     def map_parsed_segments_to_keys(parsed_data, friendly_names_map):
         """
         Converts the dict { "Name": "Content" } to { "internal_key": "Content" }.
-        Uses robust matching to handle whitespace and case sensitivity.
+        Uses robust matching to handle whitespace, case sensitivity, and common variations.
         """
-        norm_to_key = {v.strip().lower(): k for k, v in friendly_names_map.items()}
+        def normalize(s):
+            # Remove all non-alphanumeric characters for fuzzy matching
+            # This handles "Problem & Audience" matching "Problem and Audience" or "ProblemAudience"
+            return re.sub(r'[^a-z0-9]', '', s.lower())
+
+        # Map of normalized labels to internal keys
+        norm_label_to_key = {normalize(v): k for k, v in friendly_names_map.items()}
+        # Map of normalized keys to internal keys (backup if LLM uses internal key name)
+        norm_key_to_key = {normalize(k): k for k in friendly_names_map.keys()}
 
         keyed_data = {}
         for name, content in parsed_data.items():
-            norm_name = name.strip().lower()
-            key = norm_to_key.get(norm_name)
+            norm_name = normalize(name)
+
+            # Match against the descriptive label
+            key = norm_label_to_key.get(norm_name)
+
+            # Match against the internal key name
+            if not key:
+                key = norm_key_to_key.get(norm_name)
 
             if key:
                 keyed_data[key] = content
             else:
-                # If no mapping found, use the name as provided (fallback)
+                # If no mapping found, keep the original name to avoid data loss
                 keyed_data[name] = content
         return keyed_data
 

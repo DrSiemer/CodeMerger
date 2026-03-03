@@ -190,8 +190,7 @@ class StarterState:
             content, segments, signoffs = view.get_assembled_content()
             view_type = str(type(view))
 
-            # FIX: Only update if we actually got content or if segments are present.
-            # This prevents accidental wipes during view transitions.
+            # Guard against updating state with empty view initializations
             if "Concept" in view_type:
                 if content or segments:
                     self.project_data["concept_md"] = content

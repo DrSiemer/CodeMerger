@@ -4,6 +4,7 @@ import tkinter as tk
 import pyperclip
 from tkinter import messagebox
 from ... import constants as c
+from ...core import prompts as p
 from ...core.paths import REFERENCE_DIR
 from ...core.utils import strip_markdown_wrapper
 from ...core.prompts import (
@@ -117,6 +118,7 @@ class ConceptView(tk.Frame):
 
     def _get_prompt(self):
         user_goal = self.project_data.get("goal", "")
+        # Use centralized segments mapping for consistent labeling
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
         segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
@@ -150,7 +152,7 @@ class ConceptView(tk.Frame):
 
         tk.Label(self, text="Generate Concept", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
 
-        instr_frame = tk.Frame(self, bg=c.DARK_BG)
+        instr_frame = tk.Frame(self, bg=c.DARK_BG);
         instr_frame.pack(side='top', fill="x", pady=(0, 10))
         tk.Label(instr_frame, text="1. Copy prompt", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
         copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
@@ -274,8 +276,9 @@ class ConceptView(tk.Frame):
 
         self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
         self.q_btn.pack(side="left", padx=(0,10))
+        ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
 
-        # ADDED: Rewrite Button for Merged View
+        # Rewrite Button for Merged View
         self.rewrite_btn = RoundedButton(controls, text="Rewrite", command=self._open_merged_rewrite_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, height=24, cursor="hand2")
         self.rewrite_btn.pack(side="left", padx=(0, 10))
         ToolTip(self.rewrite_btn, "Instructional rewrite of the entire document with change notes.", delay=500)
@@ -414,7 +417,7 @@ class ConceptView(tk.Frame):
             full_text = self.editor_text.get("1.0", "end-1c").strip()
             current_q = self.questions[self.current_question_index]
 
-            prompt = STARTER_QUESTION_PROMPT_TEMPLATE.format(
+            prompt = p.STARTER_QUESTION_PROMPT_TEMPLATE.format(
                 context_label="Full Concept",
                 context_content="```markdown\n" + full_text + "\n```",
                 focus_name="Concept",

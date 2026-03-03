@@ -3,6 +3,7 @@ import json
 import tkinter as tk
 from tkinter import messagebox
 from ... import constants as c
+from ...core import prompts as p
 from ...core.paths import REFERENCE_DIR
 from ...core.utils import strip_markdown_wrapper
 from ...core.prompts import (
@@ -43,7 +44,6 @@ class TodoView(tk.Frame):
             self.show_editor_view()
         elif self.todo_content:
             # Fallback for manual or legacy content
-            # Ensure generic questions are available for the merged view if specific ones aren't loaded
             if not self.questions:
                 self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
             self.show_merged_view(self.todo_content)
@@ -79,7 +79,7 @@ class TodoView(tk.Frame):
                     # Return empty list for the legacy self.questions used by manual mode
                     return []
                 return []
-        except (FileNotFoundError, json.JSONDecodeError) as e:
+        except (FileNotFoundError, json.JSONDecodeError):
             return []
 
     def _get_base_project_content(self):
@@ -102,8 +102,7 @@ class TodoView(tk.Frame):
         # 1. Concept
         concept_md = self.project_data.get("concept_md")
         if not concept_md and self.project_data.get("concept_segments"):
-            c_map_const = {k: v for k,v in c.CONCEPT_SEGMENTS.items()}
-            concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c_map_const)
+            concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
 
         # 2. Stack
         stack = self.project_data["stack"].get()
@@ -159,6 +158,7 @@ class TodoView(tk.Frame):
 
         copy_btn = RoundedButton(prompt_header, text="Copy Prompt", command=lambda: self._copy_prompt_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
         copy_btn.pack(side='left', padx=15)
+        ToolTip(copy_btn, "Copy the prompt to your clipboard", delay=500)
 
         # Row 1: Label for Input
         tk.Label(self, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=1, column=0, pady=(10, 5), sticky="w")
@@ -196,13 +196,8 @@ class TodoView(tk.Frame):
             return
 
         # Map friendly names back to internal keys
-        friendly_to_key = {v.lower(): k for k,v in c.TODO_PHASES.items()}
-        mapped_segments = {}
-
-        for name, text in parsed_segments.items():
-            key = friendly_to_key.get(name.lower())
-            if key: mapped_segments[key] = text
-            else: mapped_segments[name] = text
+        friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
+        mapped_segments = SegmentManager.map_parsed_segments_to_keys(parsed_segments, friendly_map)
 
         self.project_data["todo_segments"].clear()
         self.project_data["todo_segments"].update(mapped_segments)
@@ -228,11 +223,7 @@ class TodoView(tk.Frame):
         tk.Label(header, text="Review TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
         # Questions for TODO
-        questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
-        try:
-            with open(questions_path, "r", encoding="utf-8") as f:
-                q_map = json.loads(f.read())
-        except Exception: q_map = {}
+        friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
 
         data_keys = set(self.project_data["todo_segments"].keys())
         ordered_keys = [k for k in c.TODO_ORDER if k in data_keys]
@@ -245,10 +236,10 @@ class TodoView(tk.Frame):
         self.reviewer = SegmentedReviewer(
             parent=self,
             segment_keys=ordered_keys,
-            friendly_names_map=c.TODO_PHASES,
+            friendly_names_map=friendly_map,
             segments_data=self.project_data["todo_segments"],
             signoffs_data=self.project_data["todo_signoffs"],
-            questions_map=q_map,
+            questions_map=self.questions_map,
             on_change_callback=self.starter_controller.update_nav_state,
             on_merge_callback=self.handle_merge
         )
@@ -291,8 +282,9 @@ class TodoView(tk.Frame):
         if self.questions:
              self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
              self.q_btn.pack(side="left", padx=(0,10))
+             ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
 
-        # ADDED: Rewrite Button for Merged View
+        # Rewrite Button for Merged View
         self.rewrite_btn = RoundedButton(controls, text="Rewrite", command=self._open_merged_rewrite_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, height=24, cursor="hand2")
         self.rewrite_btn.pack(side="left", padx=(0, 10))
         ToolTip(self.rewrite_btn, "Instructional rewrite of the entire plan with change notes.", delay=500)
@@ -454,26 +446,22 @@ class TodoView(tk.Frame):
         try:
             concept_md = self.project_data.get("concept_md")
             if not concept_md and self.project_data.get("concept_segments"):
-                c_map_const = {k: v for k,v in c.CONCEPT_SEGMENTS.items()}
-                concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c_map_const)
-
+                concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
             todo_content = self.editor_text.get("1.0", "end-1c").strip()
-            current_question = self.questions[self.current_question_index]
 
-            prompt_text = STARTER_QUESTION_PROMPT_TEMPLATE.format(
+            prompt_text = p.STARTER_QUESTION_PROMPT_TEMPLATE.format(
                 context_label="Project Concept",
                 context_content="```markdown\n" + (concept_md or "No concept provided") + "\n```",
                 focus_name="Full TODO Plan",
                 focus_content="```markdown\n" + todo_content + "\n```",
-                question=current_question,
+                question=self.questions[self.current_question_index],
                 instruction_suffix="Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
             )
-
             self.clipboard_clear()
             self.clipboard_append(prompt_text)
 
             button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-            self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
+            self.after(2000, lambda: button.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, state='normal'))
         except Exception as e:
             messagebox.showerror("Error", f"Could not copy to clipboard: {e}", parent=self)
 

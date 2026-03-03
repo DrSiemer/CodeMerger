@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Frame, Label, messagebox
 from .... import constants as c
+from ....core import prompts as p
 from ...widgets.rounded_button import RoundedButton
 from ...widgets.scrollable_text import ScrollableText
 from ...widgets.markdown_renderer import MarkdownRenderer
@@ -19,6 +20,7 @@ class SegmentedReviewer(Frame):
     """
     def __init__(self, parent, segment_keys, friendly_names_map, segments_data, signoffs_data, questions_map=None, on_change_callback=None, on_merge_callback=None):
         super().__init__(parent, bg=c.DARK_BG)
+        self.parent = parent # This is the View (e.g. ConceptView)
         self.segment_keys = segment_keys
         self.friendly_names_map = friendly_names_map
         self.segments_data = segments_data
@@ -30,7 +32,7 @@ class SegmentedReviewer(Frame):
         self.active_key = None
         self.sidebar_items = {}
         self.current_question_index = 0
-        self.is_loading_nav = False # Prevents overwrite race conditions
+        self.is_loading_nav = False
         self.current_segment_original_text = "" # Tracks content state for sync button logic
         self.questions_visible = False # Track visibility state across segments
 
@@ -131,15 +133,15 @@ class SegmentedReviewer(Frame):
 
         self.editor = ScrollableText(
             self.display_container, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.master.wizard_controller.font_size),
-            on_zoom=self.master.wizard_controller.adjust_font_size
+            font=(c.FONT_FAMILY_PRIMARY, self.parent.starter_controller.font_size),
+            on_zoom=self.parent.starter_controller.adjust_font_size
         )
         self.editor.text_widget.bind("<KeyRelease>", self._on_text_change)
 
         self.renderer = MarkdownRenderer(
             self.display_container,
-            base_font_size=self.master.wizard_controller.font_size,
-            on_zoom=self.master.wizard_controller.adjust_font_size
+            base_font_size=self.parent.starter_controller.font_size,
+            on_zoom=self.parent.starter_controller.adjust_font_size
         )
         self.renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
 
@@ -307,7 +309,7 @@ class SegmentedReviewer(Frame):
         current_txt = self.editor.get("1.0", "end-1c").strip()
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
 
-        prompt = c.WIZARD_QUESTION_PROMPT_TEMPLATE.format(
+        prompt = p.STARTER_QUESTION_PROMPT_TEMPLATE.format(
             context_label="Context",
             context_content=context,
             focus_name=current_name,
@@ -448,7 +450,7 @@ class SegmentedReviewer(Frame):
 
         current_name = self.friendly_names_map.get(self.active_key, self.active_key)
 
-        prompt = c.WIZARD_SYNC_PROMPT_TEMPLATE.format(
+        prompt = p.STARTER_SYNC_PROMPT_TEMPLATE.format(
             current_name=current_name,
             content=self.segments_data[self.active_key],
             ref_context=ref_context_str,
