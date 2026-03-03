@@ -17,6 +17,7 @@ from ..new_profile_dialog import NewProfileDialog
 from ..project_starter.starter_dialog import ProjectStarterDialog
 from ...core.clipboard import copy_project_to_clipboard
 from ...core import change_applier
+from ...core import prompts as p
 from ...core.project_config import _calculate_font_color
 from ...core.utils import get_file_hash, get_token_count_for_text
 
@@ -33,7 +34,7 @@ class ActionHandlers:
         """Copies the standard comment cleanup instruction prompt to the clipboard."""
         if not self._is_valid_click(event): return
 
-        pyperclip.copy(c.COMMENT_CLEANUP_PROMPT)
+        pyperclip.copy(p.COMMENT_CLEANUP_PROMPT)
         self.app.helpers.show_compact_toast("Copied comment cleanup prompt")
 
     def open_project_starter(self, event=None):
