@@ -67,7 +67,7 @@ class ApplicationSettingsFrame(Frame):
         info_mgr.register(self.secrets_chk, "set_app_secrets")
         info_mgr.register(self.compact_chk, "set_app_compact")
         info_mgr.register(self.updates_chk, "set_app_updates")
-        info_mgr.register(self.check_now_btn, "set_app_updates")
+        info_mgr.register(self.check_now_btn, "set_app_check_now")
 
     def _toggle_interval_selector(self):
         new_state = 'normal' if self.enable_new_file_check.get() else 'disabled'

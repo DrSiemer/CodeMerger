@@ -126,6 +126,7 @@ class FileManagerWindow(Toplevel):
         mgr.register(self.merge_order_list, "fm_tokens_item")
         mgr.register(self.order_request_button, "fm_order")
         mgr.register(self.toggle_paths_button, "fm_list_tools")
+        mgr.register(self.tree_action_button, "fm_tree_action")
 
         # Sorting priority
         mgr.register(self.move_to_top_button, "fm_sort_top")

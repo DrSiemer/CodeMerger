@@ -37,10 +37,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1772545862.855882,
-          "hash": "5cc4b34aba96f3a65def0200c49061d5e2dec97c",
-          "tokens": 1796,
-          "lines": 209
+          "mtime": 1772555638.2948716,
+          "hash": "b45865cb4e76a2fdda779bdac7231bc43cebdd1d",
+          "tokens": 1788,
+          "lines": 208
         },
         {
           "path": "default_filetypes.json",
@@ -291,38 +291,38 @@
         },
         {
           "path": "src/ui/settings/application_settings.py",
-          "mtime": 1772545862.8808837,
-          "hash": "3e1b612ed6354cc8fca009018f09a6f3fc989aa5",
-          "tokens": 789,
-          "lines": 56
+          "mtime": 1772555638.296872,
+          "hash": "59097add5aaf7bfd42bd160e4df9193657f3e75a",
+          "tokens": 979,
+          "lines": 75
         },
         {
           "path": "src/ui/settings/file_manager_settings.py",
-          "mtime": 1772545862.881883,
-          "hash": "3d76b4893e441a9f530ccb99ede8723708985823",
-          "tokens": 669,
-          "lines": 44
+          "mtime": 1772553952.9105527,
+          "hash": "087a7dfd748b13451792725dfb927e557184ec28",
+          "tokens": 838,
+          "lines": 65
         },
         {
           "path": "src/ui/settings/prompts_settings.py",
-          "mtime": 1772545862.881883,
-          "hash": "9ae4216db3744269274894621a92e62fc15b07dc",
-          "tokens": 415,
-          "lines": 44
+          "mtime": 1772553952.9105527,
+          "hash": "1cd7996f7098bdf701cf00d9cffb2c83fae6adae",
+          "tokens": 477,
+          "lines": 50
         },
         {
           "path": "src/ui/settings/editor_settings.py",
-          "mtime": 1772545862.881883,
-          "hash": "fbb1d5e2e744c3f5d2bcc36041dc569e4bc95c4b",
-          "tokens": 392,
-          "lines": 30
+          "mtime": 1772553952.9115527,
+          "hash": "f9b202d837379e0df0783d5d65701fef126a5576",
+          "tokens": 477,
+          "lines": 41
         },
         {
           "path": "src/ui/settings/settings_window.py",
-          "mtime": 1772546144.396448,
-          "hash": "e767fa216a4adb48e288d5e21b82eafc40c7ff6a",
-          "tokens": 1717,
-          "lines": 172
+          "mtime": 1772553952.9095523,
+          "hash": "22ed590813960408dbfd05de9f0cd946d0a78738",
+          "tokens": 1787,
+          "lines": 182
         },
         {
           "path": "src/ui/filetypes_manager.py",
@@ -333,10 +333,10 @@
         },
         {
           "path": "src/ui/file_manager/data_controller.py",
-          "mtime": 1772545862.8838832,
-          "hash": "b25f0846362c9bf67595fbcf17414bb921379adf",
-          "tokens": 832,
-          "lines": 88
+          "mtime": 1772555474.17003,
+          "hash": "3a0c009ca985009b43f8a534dc1ab1be1a39d3d7",
+          "tokens": 802,
+          "lines": 84
         },
         {
           "path": "src/ui/file_manager/selection_data_manager.py",
@@ -403,10 +403,10 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1772549175.0208411,
-          "hash": "a8e7e1e76ee620d0bbd2a6b2572bff0ea2101dc1",
-          "tokens": 2877,
-          "lines": 318
+          "mtime": 1772555638.296872,
+          "hash": "626a5cfe1b52e2d957019953e54f7761ebcca471",
+          "tokens": 2890,
+          "lines": 319
         },
         {
           "path": "assets/reference/concept_questions.json",
@@ -768,24 +768,24 @@
         },
         {
           "path": "src/ui/settings/starter_settings.py",
-          "mtime": 1772545862.9220347,
-          "hash": "c2dc6beb25ba2bb69f1b1bc31677e2bf57ffe793",
-          "tokens": 388,
-          "lines": 40
+          "mtime": 1772553952.9105527,
+          "hash": "32f368e3ecb8ebc7ce83d1aa27798e97d91f5a01",
+          "tokens": 476,
+          "lines": 49
         },
         {
           "path": "src/ui/info_manager.py",
-          "mtime": 1772548448.2130966,
-          "hash": "eb89b609dc7a2f57a4bd2a28ec09370d930f5667",
+          "mtime": 1772555638.2958715,
+          "hash": "b17d7505d2df4d480100c6f4ef3280759d09a02e",
           "tokens": 1474,
           "lines": 178
         },
         {
           "path": "src/ui/info_messages.py",
-          "mtime": 1772552885.1436834,
-          "hash": "cf81fc4daf55dcaa161e737b41f126da072f6fae",
-          "tokens": 2069,
-          "lines": 153
+          "mtime": 1772555697.9619813,
+          "hash": "b4bb813a28aaf0be854a1e61e9c4655cd9efd852",
+          "tokens": 2699,
+          "lines": 213
         },
         {
           "path": "src/core/prompts.py",

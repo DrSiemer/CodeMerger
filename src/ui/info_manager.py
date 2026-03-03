@@ -43,7 +43,7 @@ class InfoManager:
             font=c.FONT_INFO_PANEL, justify="left",
             wraplength=initial_w - 40, anchor="w"
         )
-        self.label.pack(side="left", padx=15, fill="both", expand=True)
+        self.label.pack(side="left", padx=10, fill="both", expand=True)
 
         # --- Tooltip ---
         self.button_tooltip = ToolTip(self.toggle_btn, text="Toggle Info Mode")

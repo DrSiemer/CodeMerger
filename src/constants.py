@@ -154,7 +154,7 @@ FONT_TOOLTIP = (FONT_FAMILY_TOOLTIP, 8, "normal")
 FONT_INFO_PANEL = (FONT_FAMILY_PRIMARY, 10)
 
 # --- Info Mode Config ---
-INFO_PANEL_HEIGHT = 65
+INFO_PANEL_HEIGHT = 80
 
 # --- Data Mappings ---
 LANGUAGE_MAP = {

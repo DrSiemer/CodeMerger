@@ -33,23 +33,23 @@ INFO_MESSAGES = {
     ),
     "copy_code": (
         "Copy Code Only (Ctrl+Shift+C): Merges all selected files with a standard prompt header. "
-        "Useful for providing updated context to an LLM without repeating project goals."
+        "Useful for providing updated context to an LLM without repeating project goals. "
+        "Ctrl-clicking the Adaptive Copy button in Compact mode also triggers this action."
     ),
     "copy_with_instructions": (
         "Copy with Instructions (Ctrl+C): Merges code and wraps it in your custom Intro/Outro. "
-        "Strictly enforces 'No Code Truncation' rules, to ensure the AI returns full file updates."
+        "Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Code Only'."
     ),
     "paste_changes": (
         "Paste Changes (Ctrl+V): Open a review window to process AI responses. CodeMerger reads "
-        "the Markdown and automatically writes suggested changes back to your local files."
+        "the Markdown and automatically writes changes back. Ctrl-click to instantly apply from clipboard."
     ),
     "cleanup": (
         "Comment Cleanup: Copies a specialized prompt, that tells the AI to strip out it's own "
         "transient tags like [FIX] or [MODIFIED], while keeping structural logic comments."
     ),
     "settings": (
-        "Global Settings: Configure secret scanning, application updates, default text editor "
-        "paths, and file monitoring intervals."
+        "Application Settings: Configure application behavior."
     ),
     "filetypes": (
         "Manage Filetypes: Define which file extensions CodeMerger is allowed to index. "
@@ -80,6 +80,9 @@ INFO_MESSAGES = {
         "Available Files: Browse your project structure. Double-click files or folders to add "
         "them to the merge list. Green text indicates newly detected files. Purple text indicates "
         "files in your merge list that would normally be ignored by the Git or extension filters."
+    ),
+    "fm_tree_action": (
+        "Merge Toggle: Adds or removes the currently selected files from the Merge Order list. "
     ),
     "fm_list": (
         "Merge Order: This list determines in what order the code will be presented to the AI. "
@@ -137,6 +140,10 @@ INFO_MESSAGES = {
     ),
     "set_app_updates": (
         "Automatic Updates: Checks GitHub for a new version once per day."
+    ),
+    "set_app_check_now": (
+        "Check Now: Manually trigger an update check to see if a newer version of CodeMerger "
+        "is available on GitHub, bypassing the automatic daily timer."
     ),
 
     "set_fm": "Settings that determine the behavior of the File Manager.",
