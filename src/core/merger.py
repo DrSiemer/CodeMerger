@@ -85,7 +85,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - If your modifications make certain existing files obsolete, explicitly state: "DELETE FILE: `path/to/obsolete_file.ext`" in the Summary section."""
 
         # Important reminder on the absolute end
-        automation_warning = "Again: I am using an automated script to apply your changes. If you provide snippets, diffs, or truncated code, my script will crash and I will lose work. You MUST provide the full file content for every modified file."
+        automation_warning = "Note: This output is processed by a parser. Strict adherence to the format is required for technical compatibility."
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}\n\n{automation_warning}"
