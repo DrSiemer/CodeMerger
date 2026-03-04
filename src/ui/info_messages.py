@@ -250,14 +250,14 @@ INFO_MESSAGES = {
     "starter_gen_create": "Create Files: Write the generated files to disk and initialize the project.",
     "starter_gen_process": (
         "Process Response: Analyze the pasted LLM output. CodeMerger will look for the required "
-        "section tags to populate the editor for the next phase of review."
+        "segment tags to populate the editor for the next phase of review."
     ),
 
-    "starter_seg_nav": "Navigation: Jump between different sections of the document.",
-    "starter_seg_signoff": "Sign Off: Lock this section. When all sections are signed off, you can merge them.",
-    "starter_seg_rewrite": "Rewrite: Give a specific instruction to rewrite this section (or all unsigned sections).",
-    "starter_seg_sync": "Sync: Propagate manual edits from this section to other unsigned sections to keep the document consistent.",
-    "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this section.",
+    "starter_seg_nav": "Navigation: Jump between different segments.",
+    "starter_seg_signoff": "Sign Off: Lock this segment. When all segments are signed off, you can merge them into a single document.",
+    "starter_seg_rewrite": "Rewrite: Provide a specific instruction to rewrite this segment and all unsigned segments.",
+    "starter_seg_sync": "Sync: Propagate manual edits from this segment to other unsigned segments to keep the document consistent.",
+    "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this segment.",
 
     # --- Rewrite Dialog ---
     "rewrite_instruction": (
@@ -265,7 +265,7 @@ INFO_MESSAGES = {
         "For example: 'Change the primary data entity from Projects to Tasks' or 'Use a more formal tone'."
     ),
     "rewrite_copy_prompt": (
-        "Generate Prompt: Compiles your instructions with the current drafts and locked sections. "
+        "Generate Prompt: Compiles your instructions with the current drafts and locked segments. "
         "Clicking this copies the prompt to your clipboard for use with an LLM."
     ),
     "rewrite_response": (
