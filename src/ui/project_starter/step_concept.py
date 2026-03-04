@@ -47,7 +47,8 @@ class ConceptView(tk.Frame):
 
     def register_info(self, info_mgr):
         """Registers step-specific widgets for Info Mode."""
-        if not info_mgr: return
+        if not info_mgr:
+            return
 
         # Describe Goal UI
         if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
@@ -57,7 +58,7 @@ class ConceptView(tk.Frame):
 
         # Generation UI
         if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
-             info_mgr.register(self.copy_btn, "starter_gen_prompt")
+             info_mgr.register(self.copy_btn, "starter_concept_gen")
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
              info_mgr.register(self.llm_response_text, "starter_gen_response")
 
@@ -66,6 +67,10 @@ class ConceptView(tk.Frame):
             self.reviewer.register_info(info_mgr)
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
             info_mgr.register(self.editor_text, "starter_concept_review")
+        if hasattr(self, 'q_btn') and self.q_btn.winfo_exists():
+            info_mgr.register(self.q_btn, "starter_seg_questions")
+        if hasattr(self, 'rewrite_btn') and self.rewrite_btn.winfo_exists():
+            info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
 
     def refresh_fonts(self):
         """Updates font sizes for all active text/renderer widgets."""

@@ -44,7 +44,7 @@ class StackView(tk.Frame):
         if hasattr(self, 'stack_editor') and self.stack_editor.winfo_exists():
             info_mgr.register(self.stack_editor, "starter_stack_edit")
         if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
-             info_mgr.register(self.copy_btn, "starter_gen_prompt")
+             info_mgr.register(self.copy_btn, "starter_stack_gen") # FIXED: Explicit Stack key
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
              info_mgr.register(self.llm_response_text, "starter_gen_response")
 

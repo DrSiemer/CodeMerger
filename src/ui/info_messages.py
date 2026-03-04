@@ -222,18 +222,30 @@ INFO_MESSAGES = {
     "starter_details_base": "Base Project: Optionally select an existing folder to use as a reference. Useful for 'v2' rewrites or analyzing existing code.",
 
     "starter_concept_goal": "User Goal: Briefly describe what you want to build. This is the seed for the AI to generate the full concept.",
-    "starter_concept_gen": "Generate Concept: Sends your goal to the AI to create a detailed features list and user flow.",
+    "starter_concept_gen": (
+        "Generate Concept: Copies a structured prompt to your clipboard. You must paste this into your LLM "
+        "to generate the features list and user flow, then copy the result back here (preferably as Markdown)."
+    ),
     "starter_concept_review": "Concept Editor: Review the generated concept. You can edit the text directly or use the 'Rewrite' button to refine it.",
 
     "starter_stack_exp": "Experience: List your preferred languages and tools. The AI will recommend a stack that matches your skills.",
-    "starter_stack_gen": "Generate Stack: Ask the AI to recommend the best technologies for this specific concept.",
+    "starter_stack_gen": (
+        "Generate Stack: Copies a prompt to your clipboard asking the AI to recommend the best technologies. "
+        "Paste the AI's response back into the input field below."
+    ),
     "starter_stack_edit": "Stack List: The final list of technologies. You can manually edit this list before generating the plan.",
 
-    "starter_todo_gen": "Generate Plan: Create a step-by-step implementation plan (TODO.md) based on the Concept and Stack.",
+    "starter_todo_gen": (
+        "Generate Plan: Copies a prompt to your clipboard to create an implementation plan (TODO.md). "
+        "Paste the AI's response back into the input field below."
+    ),
     "starter_todo_review": "Plan Editor: Review the generated tasks. Ensure no critical features are missing.",
 
     "starter_gen_parent": "Parent Folder: The directory where your new project folder will be created.",
-    "starter_gen_prompt": "Master Prompt: This is the final instruction for the AI. Copy this and paste it into your LLM to generate the boilerplate code.",
+    "starter_gen_prompt": (
+        "Master Prompt: Copies the final boilerplate instruction to your clipboard. Paste this into your LLM "
+        "to generate the initial codebase, then copy the result and paste it into the response field below."
+    ),
     "starter_gen_response": "Paste Response: Paste the AI's output here. The app will parse the file blocks and create the files.",
     "starter_gen_create": "Create Files: Write the generated files to disk and initialize the project.",
 

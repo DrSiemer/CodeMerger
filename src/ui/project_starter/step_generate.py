@@ -117,7 +117,7 @@ class GenerateView(tk.Frame):
         info_mgr.register(self.dest_label, "starter_gen_parent")
         info_mgr.register(self.folder_entry, "starter_gen_parent")
         info_mgr.register(self.browse_btn, "starter_gen_parent")
-        info_mgr.register(self.copy_btn, "starter_gen_prompt")
+        info_mgr.register(self.copy_btn, "starter_gen_prompt") # This IS the Master Prompt
         info_mgr.register(self.llm_result_text, "starter_gen_response")
         info_mgr.register(self.create_button, "starter_gen_create")
 
