@@ -258,6 +258,8 @@ INFO_MESSAGES = {
     "starter_seg_rewrite": "Rewrite: Provide a specific instruction to rewrite this segment and all unsigned segments.",
     "starter_seg_sync": "Sync: Propagate manual edits from this segment to other unsigned segments to keep the document consistent.",
     "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this segment.",
+    "starter_seg_unlock": "Unlock to Edit: Releases the sign-off for the current segment, allowing you to make manual edits or include it in a 'Rewrite' operation.",
+    "starter_seg_merge": "Merge Segments: Finalizes the individual sections and assembles them into a single Markdown document for the next phase of the project.",
 
     "starter_view_toggle": (
         "View Toggle: Switch between a stylized Markdown preview and a raw text editor for manual adjustments. "

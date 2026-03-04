@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from tkinter import messagebox, filedialog
 from ... import constants as c
+from ...core import prompts as p
 from ..widgets.rounded_button import RoundedButton
 from ...core.utils import load_config
 from ...core.paths import BOILERPLATE_DIR
@@ -286,7 +287,7 @@ class ProjectStarterDialog(tk.Toplevel):
         # Create .allcode with custom intro and the filtered list
         conf = load_config()
         intro = f"We are working on {project_pitch}.\n\nYour task is to continue development, by following the plan laid out in `todo.md`. Pick up and check off steps from this whenever you are not fixing issues reported by the user."
-        outro = conf.get('default_outro_prompt', c.DEFAULT_OUTRO_PROMPT)
+        outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []
         # Define files that should exist on disk but NOT be added to the code merge order
