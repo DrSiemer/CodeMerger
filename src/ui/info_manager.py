@@ -64,6 +64,11 @@ class InfoManager:
         self._apply_visibility_ui(self.app_state.info_mode_active)
         self.is_initialized = True
 
+    def clear_active_stack(self):
+        """Forcefully clears the hover stack. Call this before destroying widgets in the Wizard."""
+        self._active_stack = []
+        self._update_display()
+
     def _on_window_resize(self, event=None):
         if self.panel.winfo_ismapped():
             self.label.config(wraplength=self.window.winfo_width() - 40)
@@ -140,6 +145,11 @@ class InfoManager:
 
     def _update_display(self):
         """Refreshes the info text based on the priority stack."""
+        # Filter out destroyed widgets from the stack to prevent help text getting stuck
+        self._active_stack = [
+            (w, k) for (w, k) in self._active_stack if w.winfo_exists()
+        ]
+
         if not self._active_stack:
             self.label.config(text=INFO_MESSAGES["default"], fg=c.TEXT_SUBTLE_COLOR)
             return

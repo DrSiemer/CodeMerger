@@ -45,6 +45,28 @@ class ConceptView(tk.Frame):
         else:
             self.show_initial_view()
 
+    def register_info(self, info_mgr):
+        """Registers step-specific widgets for Info Mode."""
+        if not info_mgr: return
+
+        # Describe Goal UI
+        if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
+            info_mgr.register(self.goal_text, "starter_concept_goal")
+        if hasattr(self, 'generate_btn') and self.generate_btn.winfo_exists():
+            info_mgr.register(self.generate_btn, "starter_concept_gen")
+
+        # Generation UI
+        if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
+             info_mgr.register(self.copy_btn, "starter_gen_prompt")
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+             info_mgr.register(self.llm_response_text, "starter_gen_response")
+
+        # Review UI
+        if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
+            self.reviewer.register_info(info_mgr)
+        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
+            info_mgr.register(self.editor_text, "starter_concept_review")
+
     def refresh_fonts(self):
         """Updates font sizes for all active text/renderer widgets."""
         if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
@@ -107,6 +129,7 @@ class ConceptView(tk.Frame):
         self.goal_text.insert("1.0", existing_goal if existing_goal else STARTER_CONCEPT_DEFAULT_GOAL)
         self.goal_text.text_widget.bind("<KeyRelease>", self._update_goal_state)
         self._update_button_state()
+        self.register_info(self.starter_controller.info_mgr)
 
     def _update_goal_state(self, event=None):
         self.project_data["goal"] = self.goal_text.get("1.0", "end-1c").strip()
@@ -155,9 +178,9 @@ class ConceptView(tk.Frame):
         instr_frame = tk.Frame(self, bg=c.DARK_BG);
         instr_frame.pack(side='top', fill="x", pady=(0, 10))
         tk.Label(instr_frame, text="1. Copy prompt", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
-        copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
-        copy_btn.pack(side='left', padx=15)
-        ToolTip(copy_btn, "Copy the prompt to your clipboard for use with an LLM", delay=500)
+        self.copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
+        self.copy_btn.pack(side='left', padx=15)
+        ToolTip(self.copy_btn, "Copy the prompt to your clipboard for use with an LLM", delay=500)
 
         tk.Label(self, text="2. Paste LLM Response (with tags)", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 0))
         self.llm_response_text = ScrollableText(
@@ -170,6 +193,7 @@ class ConceptView(tk.Frame):
 
         # Sync input area to state to prevent data loss on navigation
         self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("concept_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
+        self.register_info(self.starter_controller.info_mgr)
 
     def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)
@@ -235,6 +259,7 @@ class ConceptView(tk.Frame):
         )
         self.reviewer.pack(fill="both", expand=True, pady=5)
         self.starter_controller._update_navigation_controls()
+        self.register_info(self.starter_controller.info_mgr)
 
     def handle_merge(self, full_text):
         """
@@ -317,6 +342,7 @@ class ConceptView(tk.Frame):
         self._apply_view_mode()
 
         self.starter_controller._update_navigation_controls()
+        self.register_info(self.starter_controller.info_mgr)
 
     def _open_merged_rewrite_dialog(self):
         current_text = self.editor_text.get("1.0", "end-1c").strip()

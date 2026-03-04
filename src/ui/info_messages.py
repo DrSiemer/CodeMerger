@@ -208,5 +208,38 @@ INFO_MESSAGES = {
     "profile_name": "Profile Name: Enter a unique label for this configuration (e.g. 'Frontend' or 'Feature Name').",
     "profile_copy_files": "Clone Selection: If checked, the new profile will start with the exact same files selected in your current merge list.",
     "profile_copy_inst": "Clone Instructions: If checked, the new profile will inherit the current custom Intro and Outro instructions.",
-    "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk."
+    "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk.",
+
+    # --- Project Starter ---
+    "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
+    "starter_nav_next": "Next Step: Proceed to the next phase. Validates current input before moving.",
+    "starter_nav_reset": "Reset Step: Clear the current form or editor to start this specific step over.",
+    "starter_header_save": "Save Config: Export your current project configuration (concept, stack, plan) to a JSON file.",
+    "starter_header_load": "Load Config: Restore a previously saved project configuration.",
+    "starter_header_clear": "Clear All: Completely reset the project starter to the beginning.",
+
+    "starter_details_name": "Project Name: The name of your application. This will be used for the folder name and the README title.",
+    "starter_details_base": "Base Project: Optionally select an existing folder to use as a reference. Useful for 'v2' rewrites or analyzing existing code.",
+
+    "starter_concept_goal": "User Goal: Briefly describe what you want to build. This is the seed for the AI to generate the full concept.",
+    "starter_concept_gen": "Generate Concept: Sends your goal to the AI to create a detailed features list and user flow.",
+    "starter_concept_review": "Concept Editor: Review the generated concept. You can edit the text directly or use the 'Rewrite' button to refine it.",
+
+    "starter_stack_exp": "Experience: List your preferred languages and tools. The AI will recommend a stack that matches your skills.",
+    "starter_stack_gen": "Generate Stack: Ask the AI to recommend the best technologies for this specific concept.",
+    "starter_stack_edit": "Stack List: The final list of technologies. You can manually edit this list before generating the plan.",
+
+    "starter_todo_gen": "Generate Plan: Create a step-by-step implementation plan (TODO.md) based on the Concept and Stack.",
+    "starter_todo_review": "Plan Editor: Review the generated tasks. Ensure no critical features are missing.",
+
+    "starter_gen_parent": "Parent Folder: The directory where your new project folder will be created.",
+    "starter_gen_prompt": "Master Prompt: This is the final instruction for the AI. Copy this and paste it into your LLM to generate the boilerplate code.",
+    "starter_gen_response": "Paste Response: Paste the AI's output here. The app will parse the file blocks and create the files.",
+    "starter_gen_create": "Create Files: Write the generated files to disk and initialize the project.",
+
+    "starter_seg_nav": "Navigation: Jump between different sections of the document.",
+    "starter_seg_signoff": "Sign Off: Lock this section. When all sections are signed off, you can merge them.",
+    "starter_seg_rewrite": "Rewrite: Give a specific instruction to rewrite this section (or all unsigned sections).",
+    "starter_seg_sync": "Sync: Propagate manual edits from this section to other unsigned sections to keep the document consistent.",
+    "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this section."
 }

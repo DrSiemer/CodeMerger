@@ -53,6 +53,22 @@ class TodoView(tk.Frame):
         else:
             self.show_generation_view()
 
+    def register_info(self, info_mgr):
+        """Registers step-specific widgets for Info Mode."""
+        if not info_mgr: return
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+            info_mgr.register(self.llm_response_text, "starter_gen_response")
+        if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
+            self.reviewer.register_info(info_mgr)
+        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
+            info_mgr.register(self.editor_text, "starter_todo_review")
+        if hasattr(self, 'q_btn') and self.q_btn.winfo_exists():
+            info_mgr.register(self.q_btn, "starter_seg_questions")
+        if hasattr(self, 'rewrite_btn') and self.rewrite_btn.winfo_exists():
+            info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
+        if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
+            info_mgr.register(self.copy_btn, "starter_gen_prompt")
+
     def refresh_fonts(self):
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
             self.llm_response_text.set_font_size(self.starter_controller.font_size)
@@ -156,9 +172,9 @@ class TodoView(tk.Frame):
         prompt_header.grid(row=0, column=0, pady=(0, 10), sticky="ew")
         tk.Label(prompt_header, text="1. Copy Prompt for LLM", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
 
-        copy_btn = RoundedButton(prompt_header, text="Copy Prompt", command=lambda: self._copy_prompt_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
-        copy_btn.pack(side='left', padx=15)
-        ToolTip(copy_btn, "Copy the prompt to your clipboard", delay=500)
+        self.copy_btn = RoundedButton(prompt_header, text="Copy Prompt", command=lambda: self._copy_prompt_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        self.copy_btn.pack(side='left', padx=15)
+        ToolTip(self.copy_btn, "Copy the prompt to your clipboard", delay=500)
 
         # Row 1: Label for Input
         tk.Label(self, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=1, column=0, pady=(10, 5), sticky="w")
@@ -177,6 +193,7 @@ class TodoView(tk.Frame):
 
         # Row 3: Action Button
         RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").grid(row=3, column=0, pady=(10,0), sticky="e")
+        self.register_info(self.starter_controller.info_mgr)
 
     def handle_llm_response(self):
         raw_content = self.llm_response_text.get("1.0", "end-1c").strip()
@@ -245,6 +262,7 @@ class TodoView(tk.Frame):
         )
         self.reviewer.pack(fill="both", expand=True, pady=5)
         self.starter_controller._update_navigation_controls()
+        self.register_info(self.starter_controller.info_mgr)
 
     def handle_merge(self, full_text):
         """
@@ -332,6 +350,7 @@ class TodoView(tk.Frame):
         self._apply_view_mode()
 
         self.starter_controller._update_navigation_controls()
+        self.register_info(self.starter_controller.info_mgr)
 
     def _open_merged_rewrite_dialog(self):
         current_text = self.editor_text.get("1.0", "end-1c").strip()

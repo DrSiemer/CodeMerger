@@ -6,7 +6,7 @@ from ...constants import SUBTLE_HIGHLIGHT_COLOR
 from ..assets import assets
 from ..tooltip import ToolTip
 
-def setup_file_manager_ui(window, container=None, include_save_button=True):
+def setup_file_manager_ui(window, container=None, include_save_button=True, bottom_padding=(10, 10), main_padding=10, main_padx=10):
     """
     Creates and packs all the UI widgets for the FileManagerWindow.
 
@@ -15,6 +15,9 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
         container: Optional parent widget to pack the main frame into. If None, 'window' is used as parent.
         include_save_button: Whether to show the 'Save and Close' button (defaults to True).
                              'Add All' and 'Remove All' are now always shown.
+        bottom_padding: Tuple for the bottom frame's pady.
+        main_padding: Top Y padding for the main container.
+        main_padx: X padding for the main container.
     """
     font_config = c.FONT_SMALL_BUTTON
     window.font_small = font.Font(family=font_config[0], size=font_config[1])
@@ -23,7 +26,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
     parent_widget = container if container else window
 
     main_frame = Frame(parent_widget, bg=c.DARK_BG)
-    main_frame.pack(fill='both', expand=True, padx=10, pady=10)
+    main_frame.pack(fill='both', expand=True, padx=main_padx, pady=(main_padding, 0))
     main_frame.grid_rowconfigure(0, weight=1)
     main_frame.grid_rowconfigure(1, weight=0)
     main_frame.grid_columnconfigure(0, weight=1)
@@ -210,7 +213,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True):
     # === BOTTOM BUTTONS (Back in main_frame) =======
     # ===============================================
     bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
-    bulk_action_frame.grid(row=1, column=0, sticky='ew', pady=(20, 0))
+    bulk_action_frame.grid(row=1, column=0, sticky='ews', pady=bottom_padding)
 
     # New: Info Toggle for the File Manager integrated here
     window.info_toggle_btn = Label(bulk_action_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")

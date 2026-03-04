@@ -56,6 +56,15 @@ class SegmentedReviewer(Frame):
         if start_key:
             self._navigate(start_key)
 
+    def register_info(self, info_mgr):
+        info_mgr.register(self.sidebar_frame, "starter_seg_nav")
+        info_mgr.register(self.signoff_btn, "starter_seg_signoff")
+        info_mgr.register(self.sync_btn, "starter_seg_sync")
+        if hasattr(self, 'q_btn'):
+            info_mgr.register(self.q_btn, "starter_seg_questions")
+        if hasattr(self, 'rewrite_btn'):
+            info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
+
     def refresh_fonts(self, size):
         if hasattr(self, 'editor') and self.editor.winfo_exists():
             self.editor.set_font_size(size)

@@ -21,13 +21,14 @@ class DetailsView(tk.Frame):
         form_grid.grid_columnconfigure(1, weight=1)
 
         # Row 0: Project Name
-        name_label_frame = tk.Frame(form_grid, bg=c.DARK_BG)
-        name_label_frame.grid(row=0, column=0, sticky="nw", padx=5, pady=5)
+        self.name_label_frame = tk.Frame(form_grid, bg=c.DARK_BG)
+        self.name_label_frame.grid(row=0, column=0, sticky="nw", padx=5, pady=5)
 
-        tk.Label(name_label_frame, text="Project Name:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
-        tk.Label(name_label_frame, text="(used for folder name)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=(c.FONT_FAMILY_PRIMARY, 8)).pack(anchor="w")
+        tk.Label(self.name_label_frame, text="Project Name:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
+        tk.Label(self.name_label_frame, text="(used for folder name)", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=(c.FONT_FAMILY_PRIMARY, 8)).pack(anchor="w")
 
-        tk.Entry(form_grid, textvariable=self.project_data["name"], width=50, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief="flat", font=c.FONT_NORMAL).grid(row=0, column=1, padx=5, pady=5, ipady=4, sticky="ew")
+        self.name_entry = tk.Entry(form_grid, textvariable=self.project_data["name"], width=50, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief="flat", font=c.FONT_NORMAL)
+        self.name_entry.grid(row=0, column=1, padx=5, pady=5, ipady=4, sticky="ew")
 
         # Divider
         tk.Frame(self, height=1, bg=c.WRAPPER_BORDER).pack(fill='x', pady=20)
@@ -55,6 +56,14 @@ class DetailsView(tk.Frame):
         tk.Label(tips_frame, text="💡 LLM Best Practices", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.NOTE).pack(anchor="w", pady=(0, 2))
         tk.Label(tips_frame, text="- Always start a new conversation when pasting prompts from CodeMerger.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
         tk.Label(tips_frame, text="- Ensure code blocks are wrapped in triple backticks (```).", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
+
+    def register_info(self, info_mgr):
+        """Registers step-specific widgets for Info Mode."""
+        if not info_mgr: return
+        info_mgr.register(self.name_label_frame, "starter_details_name")
+        info_mgr.register(self.name_entry, "starter_details_name")
+        info_mgr.register(self.base_btn, "starter_details_base")
+        info_mgr.register(self.base_path_label, "starter_details_base")
 
     def _select_base_project(self):
         folder_selected = filedialog.askdirectory(title="Select Base Project")

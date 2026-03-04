@@ -36,7 +36,8 @@ class GenerateView(tk.Frame):
         # 1. Destination Folder Section
         dest_label_frame = tk.Frame(self, bg=c.DARK_BG)
         dest_label_frame.grid(row=1, column=0, sticky="ew", pady=(0, 5))
-        tk.Label(dest_label_frame, text="1. Select Parent Folder for the project", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+        self.dest_label = tk.Label(dest_label_frame, text="1. Select Parent Folder for the project", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
+        self.dest_label.pack(side="left")
 
         folder_select_frame = tk.Frame(self, bg=c.DARK_BG)
         folder_select_frame.grid(row=2, column=0, sticky="ew", pady=(0, 5))
@@ -44,8 +45,8 @@ class GenerateView(tk.Frame):
         self.folder_entry = tk.Entry(folder_select_frame, textvariable=self.project_data["parent_folder"], bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
         self.folder_entry.pack(side='left', fill='x', expand=True, ipady=4)
 
-        browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
-        browse_btn.pack(side='left', padx=(5, 0))
+        self.browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
+        self.browse_btn.pack(side='left', padx=(5, 0))
 
         # 2. Path Preview
         self.preview_container = tk.Frame(self, bg=c.STATUS_BG, padx=10, pady=8)
@@ -60,9 +61,9 @@ class GenerateView(tk.Frame):
         prompt_header.grid(row=4, column=0, pady=(5, 5), sticky="ew")
         tk.Label(prompt_header, text="2. Review and Copy the Master Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
-        copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
-        copy_btn.pack(side="right")
-        ToolTip(copy_btn, "Copy the final master prompt to clipboard", delay=500)
+        self.copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        self.copy_btn.pack(side="right")
+        ToolTip(self.copy_btn, "Copy the final master prompt to clipboard", delay=500)
 
         tk.Label(self, text="Review and copy the prompt to paste into your LLM.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=5, column=0, sticky="w")
 
@@ -108,6 +109,17 @@ class GenerateView(tk.Frame):
 
         self._update_preview_path()
         self._validate_and_sync() # Initial state check
+        self.register_info(self.starter_controller.info_mgr)
+
+    def register_info(self, info_mgr):
+        """Registers step-specific widgets for Info Mode."""
+        if not info_mgr: return
+        info_mgr.register(self.dest_label, "starter_gen_parent")
+        info_mgr.register(self.folder_entry, "starter_gen_parent")
+        info_mgr.register(self.browse_btn, "starter_gen_parent")
+        info_mgr.register(self.copy_btn, "starter_gen_prompt")
+        info_mgr.register(self.llm_result_text, "starter_gen_response")
+        info_mgr.register(self.create_button, "starter_gen_create")
 
     def refresh_fonts(self):
         if hasattr(self, 'prompt_text') and self.prompt_text.winfo_exists():

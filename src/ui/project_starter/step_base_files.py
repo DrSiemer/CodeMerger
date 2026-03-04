@@ -28,6 +28,41 @@ class StepBaseFilesView(tk.Frame):
         else:
             self._init_file_manager_ui()
 
+    def register_info(self, info_mgr):
+        """
+        Maps the embedded File Manager widgets to their documentation keys.
+        """
+        if not hasattr(self, 'tree') or not info_mgr:
+            return
+
+        # --- Left Panel (Available Files) ---
+        info_mgr.register(self.tree, "fm_tree")
+        info_mgr.register(self.tree_action_button, "fm_tree_action")
+        info_mgr.register(self.toggle_gitignore_button, "fm_filter_git")
+        info_mgr.register(self.toggle_filter_button, "fm_filter_ext")
+        info_mgr.register(self.filter_entry, "fm_filter_text")
+
+        # Reveal icons
+        for label in self.folder_icon_labels.values():
+            info_mgr.register(label, "fm_reveal")
+
+        # --- Right Panel (Merge Order) ---
+        info_mgr.register(self.merge_order_list, "fm_list")
+        info_mgr.register(self.merge_order_details_label, "fm_tokens")
+        info_mgr.register(self.order_request_button, "fm_order")
+        info_mgr.register(self.toggle_paths_button, "fm_list_tools")
+
+        # Sorting Controls
+        info_mgr.register(self.move_to_top_button, "fm_sort_top")
+        info_mgr.register(self.move_up_button, "fm_sort_up")
+        info_mgr.register(self.remove_button, "fm_sort_remove")
+        info_mgr.register(self.move_down_button, "fm_sort_down")
+        info_mgr.register(self.move_to_bottom_button, "fm_sort_bottom")
+
+        # --- Footer ---
+        info_mgr.register(self.add_all_btn, "fm_add_all")
+        info_mgr.register(self.remove_all_btn, "fm_remove_all")
+
     def _init_error_ui(self):
         """Displays a friendly error message when the base directory is missing."""
         # Clean up existing widgets
@@ -115,14 +150,21 @@ class StepBaseFilesView(tk.Frame):
         self.state_controller = FileManagerStateController(self)
         self.order_request_handler = OrderRequestHandler(self)
 
-        # Setup File Manager UI within fm_frame
-        setup_file_manager_ui(self, container=self.fm_frame, include_save_button=False)
+        # Setup File Manager UI with zero-padding overrides to prevent gaps
+        setup_file_manager_ui(
+            self,
+            container=self.fm_frame,
+            include_save_button=False,
+            bottom_padding=(15, 0),
+            main_padding=0,
+            main_padx=0
+        )
 
         self.create_handlers()
 
-        # Status Bar for this view
+        # Status Bar for this view - use 'ews' to keep it tight
         self.status_label = tk.Label(self, textvariable=self.status_var, bg=c.DARK_BG, fg=c.STATUS_FG, font=c.FONT_STATUS_BAR, anchor='w')
-        self.status_label.grid(row=3, column=0, sticky='ew', padx=10, pady=5)
+        self.status_label.grid(row=3, column=0, sticky='ews', padx=10, pady=0)
 
         # Initial Population
         self.filter_text = tk.StringVar()

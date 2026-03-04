@@ -34,6 +34,20 @@ class StackView(tk.Frame):
         else:
             self.show_initial_view()
 
+    def register_info(self, info_mgr):
+        """Registers widgets for Info Mode."""
+        if not info_mgr: return
+        if hasattr(self, 'experience_text') and self.experience_text.winfo_exists():
+            info_mgr.register(self.experience_text, "starter_stack_exp")
+        if hasattr(self, 'btn_gen') and self.btn_gen.winfo_exists():
+            info_mgr.register(self.btn_gen, "starter_stack_gen")
+        if hasattr(self, 'stack_editor') and self.stack_editor.winfo_exists():
+            info_mgr.register(self.stack_editor, "starter_stack_edit")
+        if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
+             info_mgr.register(self.copy_btn, "starter_gen_prompt")
+        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+             info_mgr.register(self.llm_response_text, "starter_gen_response")
+
     def refresh_fonts(self):
         if hasattr(self, 'experience_text') and self.experience_text.winfo_exists():
             self.experience_text.set_font_size(self.starter_controller.font_size)
@@ -57,9 +71,9 @@ class StackView(tk.Frame):
         self.load_exp_btn = RoundedButton(btn_container, text="Load Default", command=self._load_default_experience, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=30, cursor="hand2")
         ToolTip(self.load_exp_btn, "Replace the text below with your saved default experience", delay=500)
 
-        btn_gen = RoundedButton(btn_container, text="Generate Stack Recommendation", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
-        btn_gen.pack(side='right')
-        ToolTip(btn_gen, "Ask the LLM to recommend a technology stack based on your concept and experience", delay=500)
+        self.btn_gen = RoundedButton(btn_container, text="Generate Stack Recommendation", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        self.btn_gen.pack(side='right')
+        ToolTip(self.btn_gen, "Ask the LLM to recommend a technology stack based on your concept and experience", delay=500)
 
         # TOP CONTENT
         global_default = self.app_config.get('user_experience', '').strip()
@@ -76,6 +90,7 @@ class StackView(tk.Frame):
         self.experience_text.insert("1.0", self.saved_experience)
         self.experience_text.text_widget.bind('<KeyRelease>', self._on_exp_change)
         self._on_exp_change()
+        self.register_info(self.starter_controller.info_mgr)
 
     def _on_exp_change(self, event=None):
         current_val = self.experience_text.get("1.0", "end-1c").strip()
@@ -155,9 +170,9 @@ class StackView(tk.Frame):
         instr_frame = tk.Frame(self, bg=c.DARK_BG);
         instr_frame.pack(side='top', fill="x", pady=(0, 10))
         tk.Label(instr_frame, text="1. Copy prompt and paste it into your LLM.", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
-        copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
-        copy_btn.pack(side='left', padx=15)
-        ToolTip(copy_btn, "Copy the prompt to your clipboard", delay=500)
+        self.copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
+        self.copy_btn.pack(side='left', padx=15)
+        ToolTip(self.copy_btn, "Copy the prompt to your clipboard", delay=500)
 
         tk.Label(self, text="2. Paste Stack Recommendation below", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 5))
         self.llm_response_text = ScrollableText(
@@ -170,6 +185,7 @@ class StackView(tk.Frame):
 
         # Sync input area to state to prevent data loss on navigation
         self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("stack_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
+        self.register_info(self.starter_controller.info_mgr)
 
     def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)
@@ -212,6 +228,7 @@ class StackView(tk.Frame):
         # Trigger Starter UI Update
         self.starter_controller._update_navigation_controls()
         self.starter_controller.update_nav_state()
+        self.register_info(self.starter_controller.info_mgr)
 
     def _sync_editor_to_state(self, event=None):
         if hasattr(self, 'stack_editor') and self.stack_editor.winfo_exists():

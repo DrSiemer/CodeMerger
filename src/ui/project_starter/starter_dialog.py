@@ -22,13 +22,15 @@ from ..window_utils import position_window
 from . import session_manager, generator, starter_state, starter_validator
 from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
+from ..info_manager import attach_info_mode
+from ..assets import assets
 
 log = logging.getLogger("CodeMerger")
 
 class ProjectStarterDialog(tk.Toplevel):
     """
     A dialog for bootstrapping new software projects.
-    Delegates state to StarterState and validation to starter_validator.
+    Uses a 4-row grid system to ensure the Info Panel persists during step transitions.
     """
     def __init__(self, parent, app):
         super().__init__(parent)
@@ -81,6 +83,11 @@ class ProjectStarterDialog(tk.Toplevel):
         self.state.project_data["parent_folder"].trace_add("write", lambda *args: self.update_nav_state())
         self.state.project_data["stack"].trace_add("write", lambda *args: self.update_nav_state())
 
+        # --- Info Mode Integration ---
+        # Fixed Grid Row (3) ensures panel is not destroyed when Step content is replaced
+        self.info_mgr = attach_info_mode(self, self.app.app_state, manager_type='grid', grid_row=3, toggle_btn=self.info_toggle_btn)
+        self._register_static_info()
+
         self._refresh_tabs()
         self._show_current_step_view()
 
@@ -91,75 +98,119 @@ class ProjectStarterDialog(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind("<Control-0>", self.reset_zoom)
 
-    def reset_zoom(self, event=None):
-        """Resets font size to default."""
-        self.font_size = c.FONT_NORMAL[1]
-        if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
-            self.current_view.refresh_fonts()
-
-    def adjust_font_size(self, delta):
-        """Adjusts the font size for all starter components simultaneously."""
-        new_size = self.font_size + delta
-        self.font_size = max(8, min(new_size, 40))
-        if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
-            self.current_view.refresh_fonts()
-
     def _build_ui(self):
-        main_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
-        main_frame.pack(expand=True, fill="both")
+        """Builds a rigid 4-row grid layout."""
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1) # Row 1 is the primary content area (Wizard steps)
 
-        # --- Header & Tabs ---
-        header_frame = tk.Frame(main_frame, bg=c.DARK_BG)
-        header_frame.pack(fill="x", pady=(0, 10), side="top")
+        # --- Row 0: Header (Tabs + Config buttons) ---
+        header_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
+        header_frame.grid(row=0, column=0, sticky="ew")
 
         self.tabs_frame = tk.Frame(header_frame, bg=c.DARK_BG)
         self.tabs_frame.pack(side="left", fill='x', expand=True)
 
-        # --- Header Buttons ---
         right_header_frame = tk.Frame(header_frame, bg=c.DARK_BG)
         right_header_frame.pack(side="right")
 
         if self.app.assets.trash_icon_image:
-             btn_clear = RoundedButton(
+             self.btn_clear = RoundedButton(
                 right_header_frame, command=self._clear_session_data,
                 image=self.app.assets.trash_icon_image,
                 bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, width=32, height=32, radius=6, cursor="hand2"
             )
-             btn_clear.pack(side="right", padx=(0, 0))
-             ToolTip(btn_clear, "Clear all starter progress and start fresh", delay=500)
+             self.btn_clear.pack(side="right", padx=(0, 0))
+             ToolTip(self.btn_clear, "Clear all starter progress and start fresh", delay=500)
 
-        btn_save = RoundedButton(
+        self.btn_save = RoundedButton(
             right_header_frame, text="Save Config", command=self.save_config_to_dialog,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
             height=32, radius=6, cursor="hand2"
         )
-        btn_save.pack(side="right", padx=(0, 10))
-        ToolTip(btn_save, "Save current project configuration to a file", delay=500)
+        self.btn_save.pack(side="right", padx=(0, 10))
+        ToolTip(self.btn_save, "Save current project configuration to a file", delay=500)
 
-        btn_load = RoundedButton(
+        self.btn_load = RoundedButton(
             right_header_frame, text="Load Config", command=self.load_config_from_dialog,
             bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON,
             height=32, radius=6, cursor="hand2"
         )
-        btn_load.pack(side="right", padx=(0, 10))
-        ToolTip(btn_load, "Load a previously saved project configuration file", delay=500)
+        self.btn_load.pack(side="right", padx=(0, 10))
+        ToolTip(self.btn_load, "Load a previously saved project configuration file", delay=500)
 
-        # --- Footer Nav ---
-        self.nav_frame = tk.Frame(main_frame, bg=c.DARK_BG)
-        self.nav_frame.pack(fill="x", pady=(10, 0), side="bottom")
+        # --- Row 1: Main Content ---
+        self.content_frame = tk.Frame(self, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
+        self.content_frame.grid(row=1, column=0, sticky="nsew", padx=10)
+
+        # --- Row 2: Navigation Bar ---
+        self.nav_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
+        self.nav_frame.grid(row=2, column=0, sticky="ew")
+
+        # Info Toggle integration
+        self.info_toggle_btn = tk.Label(self.nav_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+        self.info_toggle_btn.pack(side='left', padx=(0, 15))
 
         self.prev_button = RoundedButton(self.nav_frame, text="< Prev", command=self._go_to_prev_step, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         ToolTip(self.prev_button, "Go back to the previous step", delay=500)
 
-        self.start_over_button = RoundedButton(self.nav_frame, text="Reset this step", command=self._start_over, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
+        self.start_over_button = RoundedButton(self.nav_frame, text="Reset step", command=self._start_over, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         ToolTip(self.start_over_button, "Clear the inputs for the current step", delay=500)
 
         self.next_button = RoundedButton(self.nav_frame, text="Next >", command=self._go_to_next_step, height=30, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         self.next_tooltip = ToolTip(self.next_button, "Validate current inputs and proceed", delay=500)
 
-        # --- Main Content ---
-        self.content_frame = tk.Frame(main_frame, bg=c.DARK_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-        self.content_frame.pack(expand=True, fill="both", side="top")
+        # Row 3 is reserved for the Info Panel (instantiated in __init__)
+
+    def _show_current_step_view(self):
+        """Destroys current step view and instantiates the new one."""
+        # Safety: Clear the hover stack before widgets are destroyed to prevent help text getting stuck
+        if hasattr(self, 'info_mgr'):
+            self.info_mgr.clear_active_stack()
+
+        for widget in self.content_frame.winfo_children():
+            widget.destroy()
+
+        view_frame = tk.Frame(self.content_frame, bg=c.DARK_BG)
+        view_frame.pack(expand=True, fill="both", padx=10, pady=(10, 0))
+
+        step = self.state.current_step
+
+        # Step availability logic
+        if step > 3 and not self.state.project_data["concept_md"]:
+             messagebox.showerror("Concept Missing", "You must complete and merge the Concept document before moving to later steps.", parent=self)
+             self._go_to_step(3)
+             return
+        if step == 6 and not self.state.project_data["todo_md"]:
+             messagebox.showerror("Content Missing", "You must complete and merge the TODO Plan before moving to the Generate step.", parent=self)
+             self._go_to_step(5)
+             return
+
+        if step == 1: self.current_view = DetailsView(view_frame, self.state.project_data, starter_controller=self)
+        elif step == 2: self.current_view = StepBaseFilesView(view_frame, self, self.state.project_data)
+        elif step == 3: self.current_view = ConceptView(view_frame, self, self.state.project_data)
+        elif step == 4: self.current_view = StackView(view_frame, self, self.state.project_data)
+        elif step == 5: self.current_view = TodoView(view_frame, self, self.state.project_data)
+        elif step == 6: self.current_view = GenerateView(view_frame, self.state.project_data, self.create_project, starter_controller=self)
+
+        if self.current_view:
+            self.current_view.pack(expand=True, fill="both")
+            # Link Info Mode to view widgets
+            if hasattr(self.current_view, 'register_info'):
+                self.current_view.register_info(self.info_mgr)
+
+        self._update_tab_styles()
+        self._update_navigation_controls()
+
+    def _register_static_info(self):
+        """Registers the persistent UI elements for Info Mode."""
+        self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+        self.info_mgr.register(self.prev_button, "starter_nav_prev")
+        self.info_mgr.register(self.next_button, "starter_nav_next")
+        self.info_mgr.register(self.start_over_button, "starter_nav_reset")
+        self.info_mgr.register(self.btn_save, "starter_header_save")
+        self.info_mgr.register(self.btn_load, "starter_header_load")
+        if hasattr(self, 'btn_clear'):
+            self.info_mgr.register(self.btn_clear, "starter_header_clear")
 
     def create_project(self, llm_output, include_base_reference=False, project_pitch="a new project"):
         """Processes the LLM output and creates the actual files on disk."""
@@ -354,27 +405,18 @@ class ProjectStarterDialog(tk.Toplevel):
         self.state.current_step = target_step_id
         self._show_current_step_view()
 
-    def _show_current_step_view(self):
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
-        view_frame = tk.Frame(self.content_frame, bg=c.DARK_BG, padx=10, pady=10)
-        view_frame.pack(expand=True, fill="both")
-        step = self.state.current_step
-        if step > 3 and not self.state.project_data["concept_md"]:
-             messagebox.showerror("Concept Missing", "Complete Concept step first.", parent=self)
-             self._go_to_step(3); return
-        if step == 6 and not self.state.project_data["todo_md"]:
-             messagebox.showerror("Content Missing", "Complete TODO step first.", parent=self)
-             self._go_to_step(5); return
-        if step == 1: self.current_view = DetailsView(view_frame, self.state.project_data, starter_controller=self)
-        elif step == 2: self.current_view = StepBaseFilesView(view_frame, self, self.state.project_data)
-        elif step == 3: self.current_view = ConceptView(view_frame, self, self.state.project_data)
-        elif step == 4: self.current_view = StackView(view_frame, self, self.state.project_data)
-        elif step == 5: self.current_view = TodoView(view_frame, self, self.state.project_data)
-        elif step == 6: self.current_view = GenerateView(view_frame, self.state.project_data, self.create_project, starter_controller=self)
-        if self.current_view: self.current_view.pack(expand=True, fill="both")
-        self._update_tab_styles()
-        self._update_navigation_controls()
+    def reset_zoom(self, event=None):
+        """Resets font size to default."""
+        self.font_size = c.FONT_NORMAL[1]
+        if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
+            self.current_view.refresh_fonts()
+
+    def adjust_font_size(self, delta):
+        """Adjusts the font size for all starter components simultaneously."""
+        new_size = self.font_size + delta
+        self.font_size = max(8, min(new_size, 40))
+        if self.current_view and hasattr(self.current_view, 'refresh_fonts'):
+            self.current_view.refresh_fonts()
 
     def _update_navigation_controls(self):
         self.prev_button.pack_forget()
@@ -431,7 +473,7 @@ class ProjectStarterDialog(tk.Toplevel):
     def _display_success_screen(self, project_name, files, parent_folder):
         self.finished_successfully = True
         for w in self.content_frame.winfo_children(): w.destroy()
-        self.nav_frame.pack_forget()
+        self.nav_frame.grid_forget()
         def on_start_work():
             full_path = str(Path(parent_folder) / project_name)
             self.state.reset()
