@@ -375,7 +375,9 @@ class ConceptView(tk.Frame):
             'names': {'full_content': 'Full Concept'},
             'data': {'full_content': current_text}
         }
-        RewriteUnsignedDialog(self, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
+        # Correctly pass app_state
+        app_state = self.starter_controller.app.app_state
+        RewriteUnsignedDialog(self, app_state, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
 
     def _apply_merged_rewrite_results(self, new_text):
         if not new_text: return

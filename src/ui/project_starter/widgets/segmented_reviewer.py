@@ -475,7 +475,9 @@ class SegmentedReviewer(Frame):
             'keys': self.segment_keys, 'names': self.friendly_names_map, 'data': self.segments_data,
             'signoffs': {k: self.signoff_vars[k].get() for k in self.segment_keys}
         }
-        RewriteUnsignedDialog(self, context_data, self._apply_sync_results)
+        # Correctly pass the app_state to the dialog
+        app_state = self.parent.starter_controller.app.app_state
+        RewriteUnsignedDialog(self, app_state, context_data, self._apply_sync_results)
 
     def _apply_sync_results(self, llm_output):
         parsed = SegmentManager.parse_segments(llm_output)

@@ -257,5 +257,22 @@ INFO_MESSAGES = {
     "starter_seg_signoff": "Sign Off: Lock this section. When all sections are signed off, you can merge them.",
     "starter_seg_rewrite": "Rewrite: Give a specific instruction to rewrite this section (or all unsigned sections).",
     "starter_seg_sync": "Sync: Propagate manual edits from this section to other unsigned sections to keep the document consistent.",
-    "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this section."
+    "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this section.",
+
+    # --- Rewrite Dialog ---
+    "rewrite_instruction": (
+        "Modification Instruction: Tell the AI what you want to change in the project drafts. "
+        "For example: 'Change the primary data entity from Projects to Tasks' or 'Use a more formal tone'."
+    ),
+    "rewrite_copy_prompt": (
+        "Generate Prompt: Compiles your instructions with the current drafts and locked sections. "
+        "Clicking this copies the prompt to your clipboard for use with an LLM."
+    ),
+    "rewrite_response": (
+        "Paste Area: Paste the LLM's updated segments here. Ensure the tags like <<SECTION: Name>> are preserved."
+    ),
+    "rewrite_apply": (
+        "Apply Changes: Processes the response and updates the project starter drafts. Any change notes "
+        "provided by the AI in <<NOTES>> tags will be displayed for your review."
+    )
 }

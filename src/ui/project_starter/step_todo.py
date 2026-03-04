@@ -380,7 +380,9 @@ class TodoView(tk.Frame):
             'names': {'full_content': 'Full TODO Plan'},
             'data': {'full_content': current_text}
         }
-        RewriteUnsignedDialog(self, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
+        # Correctly pass app_state
+        app_state = self.starter_controller.app.app_state
+        RewriteUnsignedDialog(self, app_state, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
 
     def _apply_merged_rewrite_results(self, new_text):
         if not new_text: return
@@ -501,7 +503,7 @@ class TodoView(tk.Frame):
             self.clipboard_append(prompt_text)
 
             button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-            self.after(2000, lambda: button.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, state='normal'))
+            self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
         except Exception as e:
             messagebox.showerror("Error", f"Could not copy to clipboard: {e}", parent=self)
 
