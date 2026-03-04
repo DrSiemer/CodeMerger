@@ -48,13 +48,13 @@ class GenerateView(tk.Frame):
         self.browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
         self.browse_btn.pack(side='left', padx=(5, 0))
 
-        # 2. Path Preview
-        self.preview_container = tk.Frame(self, bg=c.STATUS_BG, padx=10, pady=8)
+        # 2. Path Preview (Compact Single Line)
+        self.preview_container = tk.Frame(self, bg=c.STATUS_BG, padx=10, pady=4)
         self.preview_container.grid(row=3, column=0, sticky="ew", pady=(5, 10))
 
-        tk.Label(self.preview_container, text="A new folder will be created:", font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.STATUS_BG, fg=c.TEXT_COLOR).pack(anchor='w')
-        self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, wraplength=700, justify='left')
-        self.preview_path_label.pack(anchor='w', pady=(2, 0))
+        tk.Label(self.preview_container, text="A new folder will be created:", font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.STATUS_BG, fg=c.TEXT_COLOR).pack(side='left')
+        self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, justify='left')
+        self.preview_path_label.pack(side='left', padx=(5, 0))
 
         # 3. Prompt Copy Section
         prompt_header = tk.Frame(self, bg=c.DARK_BG)
