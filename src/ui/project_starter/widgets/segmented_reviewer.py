@@ -64,6 +64,8 @@ class SegmentedReviewer(Frame):
             info_mgr.register(self.q_btn, "starter_seg_questions")
         if hasattr(self, 'rewrite_btn'):
             info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
+        if hasattr(self, 'view_btn'):
+            info_mgr.register(self.view_btn, "starter_view_toggle")
 
     def refresh_fonts(self, size):
         if hasattr(self, 'editor') and self.editor.winfo_exists():

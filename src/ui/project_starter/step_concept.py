@@ -73,6 +73,8 @@ class ConceptView(tk.Frame):
             info_mgr.register(self.q_btn, "starter_seg_questions")
         if hasattr(self, 'rewrite_btn') and self.rewrite_btn.winfo_exists():
             info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
+        if hasattr(self, 'view_btn') and self.view_btn.winfo_exists():
+            info_mgr.register(self.view_btn, "starter_view_toggle")
 
     def refresh_fonts(self):
         """Updates font sizes for all active text/renderer widgets."""

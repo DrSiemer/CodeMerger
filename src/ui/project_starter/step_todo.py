@@ -70,6 +70,8 @@ class TodoView(tk.Frame):
             info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
         if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
             info_mgr.register(self.copy_btn, "starter_todo_gen")
+        if hasattr(self, 'view_btn') and self.view_btn.winfo_exists():
+            info_mgr.register(self.view_btn, "starter_view_toggle")
 
     def refresh_fonts(self):
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():

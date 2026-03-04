@@ -259,6 +259,11 @@ INFO_MESSAGES = {
     "starter_seg_sync": "Sync: Propagate manual edits from this segment to other unsigned segments to keep the document consistent.",
     "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this segment.",
 
+    "starter_view_toggle": (
+        "View Toggle: Switch between a stylized Markdown preview and a raw text editor for manual adjustments. "
+        "Be careful: manual changes could create a conflict with other segments. Use 'Rewrite' to avoid this."
+    ),
+
     # --- Rewrite Dialog ---
     "rewrite_instruction": (
         "Modification Instruction: Tell the AI what you want to change in the project drafts. "
