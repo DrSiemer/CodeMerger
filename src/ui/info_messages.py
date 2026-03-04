@@ -248,6 +248,10 @@ INFO_MESSAGES = {
     ),
     "starter_gen_response": "Paste Response: Paste the AI's output here. The app will parse the file blocks and create the files.",
     "starter_gen_create": "Create Files: Write the generated files to disk and initialize the project.",
+    "starter_gen_process": (
+        "Process Response: Analyze the pasted LLM output. CodeMerger will look for the required "
+        "section tags to populate the editor for the next phase of review."
+    ),
 
     "starter_seg_nav": "Navigation: Jump between different sections of the document.",
     "starter_seg_signoff": "Sign Off: Lock this section. When all sections are signed off, you can merge them.",

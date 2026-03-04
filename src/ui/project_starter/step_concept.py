@@ -61,6 +61,8 @@ class ConceptView(tk.Frame):
              info_mgr.register(self.copy_btn, "starter_concept_gen")
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
              info_mgr.register(self.llm_response_text, "starter_gen_response")
+        if hasattr(self, 'btn_process') and self.btn_process.winfo_exists():
+             info_mgr.register(self.btn_process, "starter_gen_process")
 
         # Review UI
         if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
@@ -174,9 +176,9 @@ class ConceptView(tk.Frame):
 
         btn_container = tk.Frame(self, bg=c.DARK_BG)
         btn_container.pack(side='bottom', fill='x', pady=10)
-        btn_process = RoundedButton(btn_container, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
-        btn_process.pack(side='right')
-        ToolTip(btn_process, "Parse the LLM's response and open the segmented editor", delay=500)
+        self.btn_process = RoundedButton(btn_container, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        self.btn_process.pack(side='right')
+        ToolTip(self.btn_process, "Parse the LLM's response and open the segmented editor", delay=500)
 
         tk.Label(self, text="Generate Concept", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
 
@@ -196,9 +198,26 @@ class ConceptView(tk.Frame):
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
         self.llm_response_text.insert("1.0", self.project_data.get("concept_llm_response", ""))
 
-        # Sync input area to state to prevent data loss on navigation
-        self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("concept_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
+        # Sync input area to state and toggle button availability
+        self.llm_response_text.text_widget.bind("<KeyRelease>", self._on_response_change)
+        self.llm_response_text.text_widget.bind("<<Paste>>", self._on_response_change)
+
+        self._update_process_button_state()
         self.register_info(self.starter_controller.info_mgr)
+
+    def _on_response_change(self, event=None):
+        content = self.llm_response_text.get("1.0", "end-1c").strip()
+        self.project_data["concept_llm_response"] = content
+        self._update_process_button_state()
+
+    def _update_process_button_state(self):
+        content = self.project_data.get("concept_llm_response", "").strip()
+        if content:
+            self.btn_process.set_state('normal')
+            self.btn_process.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+        else:
+            self.btn_process.set_state('disabled')
+            self.btn_process.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
 
     def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)

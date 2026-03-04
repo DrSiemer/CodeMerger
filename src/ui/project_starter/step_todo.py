@@ -58,6 +58,8 @@ class TodoView(tk.Frame):
         if not info_mgr: return
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
             info_mgr.register(self.llm_response_text, "starter_gen_response")
+        if hasattr(self, 'btn_process') and self.btn_process.winfo_exists():
+             info_mgr.register(self.btn_process, "starter_gen_process")
         if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
             self.reviewer.register_info(info_mgr)
         if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
@@ -189,11 +191,30 @@ class TodoView(tk.Frame):
         self.llm_response_text.insert("1.0", self.project_data.get("todo_llm_response", ""))
 
         # Sync input area to state to prevent data loss on navigation
-        self.llm_response_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("todo_llm_response", self.llm_response_text.get("1.0", "end-1c").strip()))
+        self.llm_response_text.text_widget.bind("<KeyRelease>", self._on_response_change)
+        self.llm_response_text.text_widget.bind("<<Paste>>", self._on_response_change)
 
         # Row 3: Action Button
-        RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2").grid(row=3, column=0, pady=(10,0), sticky="e")
+        self.btn_process = RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
+        self.btn_process.grid(row=3, column=0, pady=(10,0), sticky="e")
+        ToolTip(self.btn_process, "Parse the LLM's response and open the segmented editor", delay=500)
+
+        self._update_process_button_state()
         self.register_info(self.starter_controller.info_mgr)
+
+    def _on_response_change(self, event=None):
+        content = self.llm_response_text.get("1.0", "end-1c").strip()
+        self.project_data["todo_llm_response"] = content
+        self._update_process_button_state()
+
+    def _update_process_button_state(self):
+        content = self.project_data.get("todo_llm_response", "").strip()
+        if content:
+            self.btn_process.set_state('normal')
+            self.btn_process.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+        else:
+            self.btn_process.set_state('disabled')
+            self.btn_process.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
 
     def handle_llm_response(self):
         raw_content = self.llm_response_text.get("1.0", "end-1c").strip()
