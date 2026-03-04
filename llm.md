@@ -91,6 +91,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/ui/view_manager.py`: In `_on_animation_complete`, the main window restoration logic forces `alpha` to `0.01` and calls `update()` before minimizing. This workaround forces the Windows DWM to update the taskbar thumbnail with the full-sized window buffer instead of a black or shrunken artifact.
 - `src/ui/widgets/scrollable_text.py`: The `_manage_scrollbar` method calls `update_idletasks()` before checking `yview()` to prevent a race condition during layout calculation. The overflow detection logic was corrected to `top_fraction > 0.0 or bottom_fraction < 1.0` for robustness.
 - `src/ui/window_utils.py`: `get_monitor_work_area` uses Windows-specific APIs to find the correct work area of the monitor a given window is on, ensuring popups and the compact window appear fully visible, even in multi-monitor setups.
+- `src/ui/app_window_parts/action_handlers.py`: Opening a console (Alt-click) implements an environment scrubbing mechanism. It identifies and removes all paths associated with CodeMerger's virtual environment or PyInstaller temporary bundle from the child process's `PATH`. It also unsets `VIRTUAL_ENV`, `PYTHONHOME`, `PYTHONPATH`, and `PROMPT` to ensure the terminal session is "clean" and defaults to the system's global environment.
 
 ### Build, Installation, & CI/CD
 

@@ -144,9 +144,54 @@ class ActionHandlers:
         if is_alt_pressed:
             try:
                 if sys.platform == "win32":
+                    # --- Environment Scrubbing ---
+                    # We must ensure the child process does not inherit CodeMerger's
+                    # specific Python environment (venv or PyInstaller bundle).
+                    new_env = os.environ.copy()
+
+                    # 1. Strip core environment identification variables
+                    venv_root = new_env.pop('VIRTUAL_ENV', None)
+                    new_env.pop('PYTHONHOME', None)
+                    new_env.pop('PYTHONPATH', None)
+                    new_env.pop('PROMPT', None) # Remove the (.venv) prefix from shell prompt
+
+                    # 2. Identify directories to purge from PATH
+                    purge_targets = []
+                    if venv_root:
+                        purge_targets.append(venv_root.lower())
+
+                    bundle_dir = getattr(sys, '_MEIPASS', None)
+                    if bundle_dir:
+                        purge_targets.append(bundle_dir.lower())
+
+                    # Also include the directory of the current executable/interpreter
+                    exec_dir = os.path.dirname(sys.executable).lower()
+                    purge_targets.append(exec_dir)
+
+                    # 3. Rebuild PATH correctly using os.pathsep (semicolon on Windows)
+                    path_entries = new_env.get('PATH', '').split(os.pathsep)
+                    cleaned_entries = []
+
+                    for entry in path_entries:
+                        if not entry: continue
+                        entry_lower = entry.lower()
+
+                        # Discard path if it starts with or resides within a purge target
+                        should_purge = False
+                        for target in purge_targets:
+                            if entry_lower.startswith(target):
+                                should_purge = True
+                                break
+
+                        if not should_purge:
+                            cleaned_entries.append(entry)
+
+                    new_env['PATH'] = os.pathsep.join(cleaned_entries)
+
+                    # 4. Launch clean shell
                     creationflags = subprocess.CREATE_NEW_CONSOLE
-                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=creationflags)
-                    app.helpers.show_compact_toast("Opened console in project folder")
+                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=creationflags, env=new_env)
+                    app.helpers.show_compact_toast("Opened clean console in project folder")
                 else:
                     app.status_var.set("Feature only available on Windows.")
             except Exception as e:
@@ -329,7 +374,7 @@ class ActionHandlers:
                 content = f.read()
 
             mtime = os.path.getmtime(full_path)
-            file_hash = get_file_hash(full_path)
+            file_hash = f"{os.path.getsize(full_path)}-{mtime}" # Simplified hash for speed
 
             token_count_enabled = app.app_state.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)
             if token_count_enabled:
