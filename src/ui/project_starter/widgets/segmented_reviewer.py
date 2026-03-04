@@ -35,6 +35,7 @@ class SegmentedReviewer(Frame):
         self.is_loading_nav = False
         self.current_segment_original_text = "" # Tracks content state for sync button logic
         self.questions_visible = False # Track visibility state across segments
+        self.info_mgr = None # Store reference to re-register transient buttons
 
         self.signoff_vars = {}
         for key in self.segment_keys:
@@ -57,15 +58,29 @@ class SegmentedReviewer(Frame):
             self._navigate(start_key)
 
     def register_info(self, info_mgr):
+        """Registers static components and stores manager for transient button registration."""
+        self.info_mgr = info_mgr
         info_mgr.register(self.sidebar_frame, "starter_seg_nav")
         info_mgr.register(self.signoff_btn, "starter_seg_signoff")
         info_mgr.register(self.sync_btn, "starter_seg_sync")
-        if hasattr(self, 'q_btn'):
-            info_mgr.register(self.q_btn, "starter_seg_questions")
-        if hasattr(self, 'rewrite_btn'):
-            info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
-        if hasattr(self, 'view_btn'):
-            info_mgr.register(self.view_btn, "starter_view_toggle")
+
+        # Register the transient buttons that currently exist for the active segment
+        self._register_transient_info()
+
+    def _register_transient_info(self):
+        """
+        Registers buttons that are destroyed and recreated during navigation.
+        This must be called every time _show_segment is executed.
+        """
+        if not self.info_mgr:
+            return
+
+        if hasattr(self, 'q_btn') and self.q_btn.winfo_exists():
+            self.info_mgr.register(self.q_btn, "starter_seg_questions")
+        if hasattr(self, 'rewrite_btn') and self.rewrite_btn.winfo_exists():
+            self.info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
+        if hasattr(self, 'view_btn') and self.view_btn.winfo_exists():
+            self.info_mgr.register(self.view_btn, "starter_view_toggle")
 
     def refresh_fonts(self, size):
         if hasattr(self, 'editor') and self.editor.winfo_exists():
@@ -229,6 +244,9 @@ class SegmentedReviewer(Frame):
         self._toggle_view(force_render=True)
         self._update_footer_state(key)
         self._apply_questions_visibility()
+
+        # Ensure new buttons are registered with Info Mode immediately after creation
+        self._register_transient_info()
 
     def _toggle_view(self, force_render=False):
         if force_render: self.is_raw_mode.set(False)
