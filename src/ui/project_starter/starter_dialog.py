@@ -81,6 +81,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
         # Add traces to trigger validation updates when data changes
         self.state.project_data["name"].trace_add("write", lambda *args: self.update_nav_state())
+        self.state.project_data["name"].trace_add("write", self._update_window_title)
         self.state.project_data["parent_folder"].trace_add("write", lambda *args: self.update_nav_state())
         self.state.project_data["stack"].trace_add("write", lambda *args: self.update_nav_state())
 
@@ -90,6 +91,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self._register_static_info()
 
         self._refresh_tabs()
+        self._update_window_title()
         self._show_current_step_view()
 
         position_window(self)
@@ -212,6 +214,14 @@ class ProjectStarterDialog(tk.Toplevel):
         self.info_mgr.register(self.btn_load, "starter_header_load")
         if hasattr(self, 'btn_clear'):
             self.info_mgr.register(self.btn_clear, "starter_header_clear")
+
+    def _update_window_title(self, *args):
+        """Updates the dialog window title with the project name if set."""
+        name = self.state.project_data["name"].get().strip()
+        if name:
+            self.title(f"Project Starter - {name}")
+        else:
+            self.title("Project Starter")
 
     def create_project(self, llm_output, include_base_reference=False, project_pitch="a new project"):
         """Processes the LLM output and creates the actual files on disk."""
