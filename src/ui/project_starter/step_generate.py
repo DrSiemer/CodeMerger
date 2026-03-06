@@ -93,7 +93,8 @@ class GenerateView(tk.Frame):
 
         # 5. Footer
         footer_frame = tk.Frame(self, bg=c.DARK_BG)
-        footer_frame.grid(row=9, column=0, sticky="ew", pady=(5, 0))
+        # Added bottom padding (15) to separate the button from the window edge/navigation bar
+        footer_frame.grid(row=9, column=0, sticky="ew", pady=(5, 15))
 
         if self.project_data["base_project_path"].get():
             ttk.Checkbutton(footer_frame, text="Include base project reference", variable=self.project_data["include_base_reference"], style='Dark.TCheckbutton').pack(side="left")
