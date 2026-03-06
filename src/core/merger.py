@@ -52,10 +52,11 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 1. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
    - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
-   - Any missing lines will result in the permanent deletion of that code from my project. Truncation is a failure to follow instructions and causes data loss.
+   - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure.
 
 2. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
+   - NO SILENT REFACTORING: Do not "improve," "clean up," or "simplify" any code that is not directly related to the requested change. Leave unrelated logic and comments untouched.
 
 3. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
    - ONLY output files that have actually been modified.
@@ -78,6 +79,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - Immediately following the final "--- End of file ---" marker, include a section titled:
    ### Summary & Verification
    - **Logic Changes:** Bulleted list of behavioral/algorithmic changes.
+   - **Integrity Confirmation**: Explicitly state: "I have verified that no code or comments have been truncated or accidentally omitted. Every part of the original files has either been preserved exactly or intentionally modified to fulfill the request."
    - **UI Changes:** Bulleted list of visual/layout modifications.
    - **Verification Steps:** A clear list of actions I must take to test these specific changes.
 
