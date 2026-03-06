@@ -20,7 +20,6 @@ class InfoManager:
         self.panel_height = c.INFO_PANEL_HEIGHT
 
         # Force absolute zero padding on the button widget itself to touch window borders
-        # borderwidth=0 and highlightthickness=0 are required to remove the internal 1px gap
         self.toggle_btn.config(borderwidth=0, highlightthickness=0, padx=0, pady=0)
 
         self._active_stack = []
@@ -107,16 +106,26 @@ class InfoManager:
             self.toggle_btn.place(x=0, rely=1.0, y=0, anchor='sw')
 
         self.toggle_btn.lift()
-        self._update_button_icon(is_active)
+        # Like Settings/Filetypes, the resting icon is always the standard one
+        self._update_button_icon(False)
 
-    def _on_button_enter(self, event): self._update_button_icon(True)
-    def _on_button_leave(self, event): self._update_button_icon(self.app_state.info_mode_active)
+    def _on_button_enter(self, event):
+        # On hover, always swap to the active (blue) icon
+        self._update_button_icon(True)
+
+    def _on_button_leave(self, event):
+        # On leave, always return to the standard (gray) icon
+        self._update_button_icon(False)
 
     def _update_button_icon(self, show_active_visuals):
+        """Swaps the PhotoImage on the toggle button label."""
         icon = assets.info_icon_active if show_active_visuals else assets.info_icon
         if icon:
             self.toggle_btn.config(image=icon, text="")
+            # Keep internal reference to prevent garbage collection
             self.toggle_btn.img_ref = icon
+            # Force immediate redraw for responsiveness
+            self.toggle_btn.update_idletasks()
 
     def _update_display(self):
         """Updates the label text and enforces wraplength."""
