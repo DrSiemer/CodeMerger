@@ -74,9 +74,8 @@ class InstructionsWindow(Toplevel):
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=4, column=0, sticky='ew', pady=(10, 0))
 
-        # Info Toggle integration
-        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.pack(side='left', padx=(0, 15))
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
         config = load_config()
 
@@ -94,7 +93,7 @@ class InstructionsWindow(Toplevel):
         if assets.defaults_icon and (default_intro or default_outro):
             self.defaults_button = Label(button_frame, image=assets.defaults_icon, bg=c.DARK_BG, cursor="hand2")
             self.defaults_button.image = assets.defaults_icon
-            self.defaults_button.pack(side='left', padx=(0, 10), anchor='w')
+            self.defaults_button.pack(side='left', padx=(24, 10), anchor='w') # Gap for info button
             self.defaults_button.bind("<ButtonRelease-1>", self.populate_from_defaults)
             ToolTip(self.defaults_button, "Populate fields with default prompts from Settings")
 

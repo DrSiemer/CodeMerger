@@ -11,7 +11,7 @@ from .widgets.scrollable_frame import ScrollableFrame
 
 from .. import constants as c
 from ..core.paths import ICON_PATH
-from .window_utils import save_window_geometry, get_monitor_work_area
+from .window_utils import save_window_geometry, get_monitor_work_area, position_window
 from .assets import assets
 from .info_manager import attach_info_mode
 
@@ -76,16 +76,15 @@ class ProjectSelectorDialog(Toplevel):
         footer_frame.grid(row=3, column=0, sticky='ew')
         footer_frame.columnconfigure(1, weight=1)
 
-        # Info Toggle integration
-        self.info_toggle_btn = Label(footer_frame, image=assets.info_icon, bg=self.app_bg_color, cursor="hand2")
-        self.info_toggle_btn.grid(row=0, column=0, padx=(0, 15))
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=self.app_bg_color, cursor="hand2")
 
         # --- "Add Project" Button ---
         self.browse_btn = RoundedButton(
             footer_frame, text="Add project", command=self.browse_for_new_dir,
             bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2'
         )
-        self.browse_btn.grid(row=0, column=1, sticky='ew')
+        self.browse_btn.grid(row=0, column=1, sticky='ew', padx=(10, 0))
 
         # Let the window calculate its size with no list items.
         self.update_idletasks()

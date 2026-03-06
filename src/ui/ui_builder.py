@@ -183,9 +183,8 @@ def setup_ui(app):
     app.status_container = Frame(app, bg=c.STATUS_BG)
     app.status_container.grid(row=3, column=0, sticky='ew')
 
-    # Toggle button: symmetric padding to clear the corner properly
-    app.info_toggle_btn = Label(app.status_container, image=assets.info_icon, bg=c.STATUS_BG, cursor="hand2")
-    app.info_toggle_btn.pack(side='left', padx=8, pady=4)
+    # Info Toggle: Managed by InfoManager via .place
+    app.info_toggle_btn = Label(app, image=assets.info_icon, bg=c.STATUS_BG, cursor="hand2")
 
     app.status_bar = Label(
         app.status_container,
@@ -197,5 +196,5 @@ def setup_ui(app):
         font=c.FONT_STATUS_BAR,
         pady=4
     )
-    # Text starts immediately after the button's padding (now 8px gap total)
-    app.status_bar.pack(side='left', fill='x', expand=True, padx=(0, 20))
+    # Gap (22px) provided to separate text from the icon in the corner
+    app.status_bar.pack(side='left', fill='x', expand=True, padx=(22, 20))

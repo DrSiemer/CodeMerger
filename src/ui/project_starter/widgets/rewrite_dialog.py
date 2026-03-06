@@ -91,9 +91,8 @@ class RewriteUnsignedDialog(Toplevel):
         footer_frame = Frame(main_frame, bg=c.DARK_BG)
         footer_frame.grid(row=7, column=0, sticky="ew")
 
-        # Info Toggle integration
-        self.info_toggle_btn = Label(footer_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.pack(side='left', padx=(0, 15))
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
         btn_frame = Frame(footer_frame, bg=c.DARK_BG)
         btn_frame.pack(side='right')

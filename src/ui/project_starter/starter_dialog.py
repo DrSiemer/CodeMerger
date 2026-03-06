@@ -10,7 +10,7 @@ from ... import constants as c
 from ...core import prompts as p
 from ..widgets.rounded_button import RoundedButton
 from ...core.utils import load_config
-from ...core.paths import BOILERPLATE_DIR
+from ...core.paths import BOILERPLATE_DIR, ICON_PATH
 from ..style_manager import apply_dark_theme
 from .step_details import DetailsView
 from .step_concept import ConceptView
@@ -49,10 +49,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.font_size = c.FONT_NORMAL[1] # Default 12
 
         self.title("Project Starter")
-        if parent.iconbitmap():
-            try:
-                self.iconbitmap(parent.iconbitmap())
-            except Exception: pass
+        self.iconbitmap(ICON_PATH)
 
         self.geometry(c.PROJECT_STARTER_GEOMETRY)
         self.minsize(900, 700)
@@ -84,6 +81,9 @@ class ProjectStarterDialog(tk.Toplevel):
         self.state.project_data["name"].trace_add("write", self._update_window_title)
         self.state.project_data["parent_folder"].trace_add("write", lambda *args: self.update_nav_state())
         self.state.project_data["stack"].trace_add("write", lambda *args: self.update_nav_state())
+
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = tk.Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
         # --- Info Mode Integration ---
         # Fixed Grid Row (3) ensures panel is not destroyed when Step content is replaced
@@ -149,10 +149,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.nav_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
         self.nav_frame.grid(row=2, column=0, sticky="ew")
 
-        # Info Toggle integration
-        self.info_toggle_btn = tk.Label(self.nav_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.pack(side='left', padx=(0, 15))
-
+        # Spacing for corner info button handled in _update_navigation_controls via padding
         self.prev_button = RoundedButton(self.nav_frame, text="< Prev", command=self._go_to_prev_step, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         ToolTip(self.prev_button, "Go back to the previous step", delay=500)
 
@@ -162,11 +159,8 @@ class ProjectStarterDialog(tk.Toplevel):
         self.next_button = RoundedButton(self.nav_frame, text="Next >", command=self._go_to_next_step, height=30, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         self.next_tooltip = ToolTip(self.next_button, "Validate current inputs and proceed", delay=500)
 
-        # Row 3 is reserved for the Info Panel (instantiated in __init__)
-
     def _show_current_step_view(self):
         """Destroys current step view and instantiates the new one."""
-        # Safety: Clear the hover stack before widgets are destroyed to prevent help text getting stuck
         if hasattr(self, 'info_mgr'):
             self.info_mgr.clear_active_stack()
 
@@ -197,7 +191,6 @@ class ProjectStarterDialog(tk.Toplevel):
 
         if self.current_view:
             self.current_view.pack(expand=True, fill="both")
-            # Link Info Mode to view widgets
             if hasattr(self.current_view, 'register_info'):
                 self.current_view.register_info(self.info_mgr)
 
@@ -240,7 +233,6 @@ class ProjectStarterDialog(tk.Toplevel):
         # Parse recommended color from LLM response
         color_match = re.search(r"<<COLOR>>(.*?)<<COLOR>>", llm_output, re.DOTALL)
         recommended_color = color_match.group(1).strip() if color_match else None
-        # Basic validation: ensure it's a hex code
         if recommended_color and not re.match(r'^#[0-9a-fA-F]{6}$', recommended_color):
             recommended_color = None
 
@@ -300,13 +292,11 @@ class ProjectStarterDialog(tk.Toplevel):
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []
-        # Define files that should exist on disk but NOT be added to the code merge order
         merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt']
 
         for f in files_created:
              norm = f.replace('\\', '/')
              if os.path.basename(norm) not in merge_order_exclusion_list:
-                 # Wrap in the expected dictionary format for initial_selected_files
                  normalized_files.append({'path': norm})
 
         self.app.project_manager.create_project_with_defaults(
@@ -346,13 +336,10 @@ class ProjectStarterDialog(tk.Toplevel):
     def on_closing(self):
         self.state.update_from_view(self.current_view)
         self.state.save()
-
-        # If the dialog is closed without creating a project, reactivate the previous project
         if not self.finished_successfully:
             last_path = getattr(self.app, '_last_project_path', None)
             if last_path:
                 self.app.project_actions.set_active_dir_display(last_path)
-
         self.destroy()
 
     def save_config_to_dialog(self):
@@ -435,7 +422,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.next_button.pack_forget()
         active_steps = self._get_active_steps()
         current_idx = active_steps.index(self.state.current_step)
-        if current_idx > 0: self.prev_button.pack(side="left")
+        if current_idx > 0: self.prev_button.pack(side="left", padx=(24, 0)) # Gap for absolute info button
         if current_idx < len(active_steps) - 1: self.next_button.pack(side="right")
         can_reset = False
         if self.current_view:

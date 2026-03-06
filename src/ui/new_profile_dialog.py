@@ -44,9 +44,8 @@ class NewProfileDialog(Toplevel):
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.pack(pady=(20, 0), fill='x')
 
-        # Info Toggle integration
-        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.pack(side='left', padx=(0, 15))
+        # Info Toggle integration: Managed by InfoManager via .place()
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
         right_buttons_frame = Frame(button_frame, bg=c.DARK_BG)
         right_buttons_frame.pack(side='right')

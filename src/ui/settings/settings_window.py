@@ -34,6 +34,9 @@ class SettingsWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind('<Escape>', lambda e: self.on_closing())
 
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+
         # --- Info Mode Integration ---
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
 
@@ -127,9 +130,6 @@ class SettingsWindow(Toplevel):
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=1, column=0, sticky='ew', padx=20, pady=(0, 20))
         button_frame.grid_columnconfigure(1, weight=1)
-
-        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.grid(row=0, column=0, sticky='w')
 
         save_button = RoundedButton(button_frame, text="Save and Close", command=self.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2')
         save_button.grid(row=0, column=2, sticky='e')

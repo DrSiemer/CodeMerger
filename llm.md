@@ -28,6 +28,10 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 
 - **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
 - **Full File Requirement:** Always provide the full content of the file being modified. Snippets or partial updates are strictly forbidden as they break the user's automated application scripts.
+- **UI Persistence (Regressions):**
+    1. **Treeview background:** Must explicitly set `fieldbackground` in `ttk.Style` to `c.TEXT_INPUT_BG` in `src/ui/file_manager/ui_setup.py`.
+    2. **Info Panel wraplength:** Labels must update `wraplength` on `<Configure>` based on the true window width, or text will be shrunken to the left half.
+    3. **Info Button Padding:** The button must use `borderwidth=0` and `highlightthickness=0` with `place(x=0)` to avoid a 1px gap from the window edge.
 
 ---
 
@@ -92,6 +96,8 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/ui/widgets/scrollable_text.py`: The `_manage_scrollbar` method calls `update_idletasks()` before checking `yview()` to prevent a race condition during layout calculation. The overflow detection logic was corrected to `top_fraction > 0.0 or bottom_fraction < 1.0` for robustness.
 - `src/ui/window_utils.py`: `get_monitor_work_area` uses Windows-specific APIs to find the correct work area of the monitor a given window is on, ensuring popups and the compact window appear fully visible, even in multi-monitor setups.
 - `src/ui/app_window_parts/action_handlers.py`: Opening a console (Alt-click) implements an environment scrubbing mechanism. It identifies and removes all paths associated with CodeMerger's virtual environment or PyInstaller temporary bundle from the child process's `PATH`. It also unsets `VIRTUAL_ENV`, `PYTHONHOME`, `PYTHONPATH`, and `PROMPT` to ensure the terminal session is "clean" and defaults to the system's global environment.
+- **Absolute Corner UI Elements**: The Info Toggle button must touch the window borders exactly. To achieve this, it must use `place()` with `x=0` and either `y=0` or `rely=1.0` with a specific anchor. The widget itself MUST have `borderwidth=0` and `highlightthickness=0` to remove the default 1-2 pixel padding added by Tkinter's internal rendering engine.
+- **Info Panel Text Wrapping**: Because Info Panels are gridded/packed before the window is rendered, `winfo_width()` returns 1 during init. This causes text to wrap into a tiny column. We use a binding on `<Configure>` to dynamically update `wraplength` to `window_width - 40` to ensure text uses the full width of the panel.
 
 ### Build, Installation, & CI/CD
 

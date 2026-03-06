@@ -58,9 +58,8 @@ class PasteChangesDialog(Toplevel):
         button_frame.grid(row=2, column=0, pady=(15, 0), sticky='ew')
         button_frame.grid_columnconfigure(1, weight=1)
 
-        # Info Toggle integration
-        self.info_toggle_btn = Label(button_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.grid(row=0, column=0, sticky='w')
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
         action_btns_frame = Frame(button_frame, bg=c.DARK_BG)
         action_btns_frame.grid(row=0, column=1, sticky='e')

@@ -69,12 +69,11 @@ class FiletypesManagerWindow(Toplevel):
         action_row_frame.grid(row=2, column=0, sticky='ew', pady=(10, 10))
         action_row_frame.columnconfigure(1, weight=1)
 
-        # Info Toggle integration
-        self.info_toggle_btn = Label(action_row_frame, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-        self.info_toggle_btn.grid(row=0, column=0, padx=(0, 10))
+        # Info Toggle: Managed by InfoManager.place
+        self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
         self.action_button = RoundedButton(action_row_frame, text="", command=self._on_action_button_click, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor='hand2')
-        self.action_button.grid(row=0, column=1, sticky='ew')
+        self.action_button.grid(row=0, column=1, sticky='ew', padx=(10, 0))
         self.action_button_tooltip = ToolTip(self.action_button, text="", delay=500)
 
         # --- Input Section for Adding New Filetypes ---
