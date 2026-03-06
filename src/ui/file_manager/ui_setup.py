@@ -6,9 +6,9 @@ from ...constants import SUBTLE_HIGHLIGHT_COLOR
 from ..assets import assets
 from ..tooltip import ToolTip
 
-def setup_file_manager_ui(window, container=None, include_save_button=True, bottom_padding=(10, 10), main_padding=10, main_padx=10):
+def setup_file_manager_ui(window, container=None, include_save_button=True, main_padding=10, main_padx=10):
     """
-    Creates and packs all the UI widgets for the FileManagerWindow.
+    Creates and places all the UI widgets for the FileManagerWindow.
     """
     font_config = c.FONT_SMALL_BUTTON
     window.font_small = font.Font(family=font_config[0], size=font_config[1])
@@ -138,6 +138,10 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, bott
     window.clear_filter_button.bind("<Leave>", lambda e: window.clear_filter_button.config(bg=c.TEXT_INPUT_BG))
     window.clear_filter_button.bind("<ButtonRelease-1>", window.ui_controller.clear_filter)
 
+    # "Add all" button aligned to the far right side of the available files column (row 3)
+    window.add_all_btn = RoundedButton(left_panel, text="Add all", command=window.state_controller.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2')
+    window.add_all_btn.grid(row=3, column=0, columnspan=2, sticky='e', pady=10)
+
     window.tree.tag_configure('subtle_highlight', background=SUBTLE_HIGHLIGHT_COLOR, foreground=c.TEXT_COLOR)
     window.tree.tag_configure('new_file_highlight', foreground="#40C040")
     window.tree.tag_configure('selected_grey', foreground=c.TEXT_SUBTLE_COLOR)
@@ -207,20 +211,18 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, bott
     for btn in [window.move_to_top_button, window.move_up_button, window.remove_button, window.move_down_button, window.move_to_bottom_button]:
         btn.set_state('disabled')
 
-    # ===============================================
-    # === BOTTOM BUTTONS (Back in main_frame) =======
-    # ===============================================
-    bulk_action_frame = Frame(main_frame, bg=c.DARK_BG)
-    bulk_action_frame.grid(row=1, column=0, sticky='ews', pady=bottom_padding)
+    # Combined bottom row for Right Panel (row 3)
+    right_bottom_row = Frame(right_panel, bg=c.DARK_BG)
+    right_bottom_row.grid(row=3, column=0, columnspan=2, sticky='ew', pady=10, padx=(10, 0))
+
+    # "Remove all" button aligned to the left side of the merge list column
+    window.remove_all_btn = RoundedButton(right_bottom_row, text="Remove all", command=window.state_controller.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2')
+    window.remove_all_btn.pack(side='left')
+
+    if include_save_button:
+        # "Save and Close" button moved to the far right of the bottom row
+        window.save_close_btn = RoundedButton(right_bottom_row, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
+        window.save_close_btn.pack(side='right')
 
     # Info Toggle: Managed by InfoManager.place
     window.info_toggle_btn = Label(window, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-
-    window.add_all_btn = RoundedButton(bulk_action_frame, text="Add all", command=window.state_controller.select_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2')
-    window.add_all_btn.pack(side='left', padx=(24, 0)) # Gap for corner info button
-    window.remove_all_btn = RoundedButton(bulk_action_frame, text="Remove all", command=window.state_controller.remove_all_files, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, cursor='hand2')
-    window.remove_all_btn.pack(side='right')
-
-    if include_save_button:
-        window.save_close_btn = RoundedButton(bulk_action_frame, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
-        window.save_close_btn.pack()
