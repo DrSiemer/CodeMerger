@@ -149,7 +149,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.nav_frame = tk.Frame(self, bg=c.DARK_BG, padx=10, pady=10)
         self.nav_frame.grid(row=2, column=0, sticky="ew")
 
-        # Spacing for corner info button handled in _update_navigation_controls via padding
+        # Buttons are packed and ordered in _update_navigation_controls
         self.prev_button = RoundedButton(self.nav_frame, text="< Prev", command=self._go_to_prev_step, height=30, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_BUTTON, cursor="hand2")
         ToolTip(self.prev_button, "Go back to the previous step", delay=500)
 
@@ -417,18 +417,33 @@ class ProjectStarterDialog(tk.Toplevel):
             self.current_view.refresh_fonts()
 
     def _update_navigation_controls(self):
+        """Clears and repacks navigation buttons based on current step status, aligning all to the right."""
         self.prev_button.pack_forget()
         self.start_over_button.pack_forget()
         self.next_button.pack_forget()
+
         active_steps = self._get_active_steps()
         current_idx = active_steps.index(self.state.current_step)
-        if current_idx > 0: self.prev_button.pack(side="left", padx=(24, 0)) # Gap for absolute info button
-        if current_idx < len(active_steps) - 1: self.next_button.pack(side="right")
+
+        # Pack from right to left to keep [Prev] [Reset] [Next] order on the right side
+        if current_idx < len(active_steps) - 1:
+            self.next_button.pack(side="right")
+
         can_reset = False
         if self.current_view:
-            if hasattr(self.current_view, 'is_step_in_progress'): can_reset = self.current_view.is_step_in_progress()
-            elif hasattr(self.current_view, 'is_editor_visible'): can_reset = self.current_view.is_editor_visible()
-        if can_reset: self.start_over_button.pack()
+            if hasattr(self.current_view, 'is_step_in_progress'):
+                can_reset = self.current_view.is_step_in_progress()
+            elif hasattr(self.current_view, 'is_editor_visible'):
+                can_reset = self.current_view.is_editor_visible()
+
+        if can_reset:
+            # Spacing between Reset and Next
+            self.start_over_button.pack(side="right", padx=(0, 10))
+
+        if current_idx > 0:
+            # Spacing between Prev and whatever is to its right
+            self.prev_button.pack(side="right", padx=(0, 10))
+
         self.update_nav_state()
 
     def update_nav_state(self):
