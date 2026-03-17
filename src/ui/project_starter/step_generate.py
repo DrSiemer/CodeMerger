@@ -93,7 +93,6 @@ class GenerateView(tk.Frame):
 
         # 5. Footer
         footer_frame = tk.Frame(self, bg=c.DARK_BG)
-        # Added bottom padding (15) to separate the button from the window edge/navigation bar
         footer_frame.grid(row=9, column=0, sticky="ew", pady=(5, 15))
 
         if self.project_data["base_project_path"].get():
@@ -103,10 +102,20 @@ class GenerateView(tk.Frame):
         self.create_button.pack(side="right")
         self.create_button.set_state('disabled')
 
-        # Setup preview path tracking with IDs for cleanup
+        # Status hint label to explain why the button is disabled
+        self.status_hint_label = tk.Label(footer_frame, text="", font=(c.FONT_FAMILY_PRIMARY, 9, 'italic'), bg=c.DARK_BG, fg=c.NOTE, justify='right')
+        self.status_hint_label.pack(side="right", padx=15)
+
+        # Setup preview path tracking and validation syncing
         t1 = self.project_data["parent_folder"].trace_add("write", self._update_preview_path)
         t2 = self.project_data["name"].trace_add("write", self._update_preview_path)
-        self._trace_ids = [("parent_folder", t1), ("name", t2)]
+        t3 = self.project_data["parent_folder"].trace_add("write", self._validate_and_sync)
+        t4 = self.project_data["name"].trace_add("write", self._validate_and_sync)
+
+        self._trace_ids = [
+            ("parent_folder", t1), ("name", t2),
+            ("parent_folder", t3), ("name", t4)
+        ]
 
         self._update_preview_path()
         self._validate_and_sync() # Initial state check
@@ -161,21 +170,58 @@ class GenerateView(tk.Frame):
         if folder:
             self.project_data["parent_folder"].set(folder)
 
-    def _validate_and_sync(self, event=None):
+    def _validate_and_sync(self, *args):
+        """
+        Validates all inputs for the generation step and toggles button state.
+        Triggered by key release in text area or changes to folder/name variables.
+        Updates the status_hint_label with explanations if requirements aren't met.
+        """
+        if not self.winfo_exists():
+            return
+
         content = self.llm_result_text.get("1.0", "end-1c")
 
         # Save to buffer for persistence
         self.project_data["generate_llm_response"] = content.strip()
 
-        # Validate that we have file blocks AND the strict pitch tag pair
-        has_files = re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content
-        # STRICT Check: Must find the closing tag
-        has_pitch = re.search(r"<<PITCH>>.*?<<PITCH>>", content, re.DOTALL)
+        # 1. Check Project Details
+        project_name = self.project_data["name"].get().strip()
+        if not project_name:
+            self._set_ui_state("disabled", "Missing project name (Step 1)")
+            return
 
-        if has_files and has_pitch:
-            self.create_button.set_state('normal')
-        else:
-            self.create_button.set_state('disabled')
+        parent_folder = self.project_data["parent_folder"].get().strip()
+        if not parent_folder:
+            self._set_ui_state("disabled", "Select a destination folder")
+            return
+
+        if not os.path.isdir(parent_folder):
+            self._set_ui_state("disabled", "Parent folder path is invalid")
+            return
+
+        # 2. Check LLM Content (Files and Pitch tag)
+        if not content.strip():
+             self._set_ui_state("disabled", "Paste the LLM response first")
+             return
+
+        has_files = re.search(r"--- File: `.+?` ---", content) and "--- End of file ---" in content
+        if not has_files:
+            self._set_ui_state("disabled", "No valid file blocks found in response")
+            return
+
+        # STRICT Check: Must find opening and closing tag
+        has_pitch = re.search(r"<<PITCH>>.*?<<PITCH>>", content, re.DOTALL)
+        if not has_pitch:
+            self._set_ui_state("disabled", "Response missing <<PITCH>> tags")
+            return
+
+        # All conditions met
+        self._set_ui_state("normal", "")
+
+    def _set_ui_state(self, state, hint_text):
+        """Helper to sync button state and hint label."""
+        self.create_button.set_state(state)
+        self.status_hint_label.config(text=hint_text)
 
     def _copy_prompt_to_clipboard(self, button, text):
         content = self.prompt_text.get('1.0', 'end-1c')
