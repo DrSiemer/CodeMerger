@@ -6,7 +6,7 @@ from ...constants import SUBTLE_HIGHLIGHT_COLOR
 from ..assets import assets
 from ..tooltip import ToolTip
 
-def setup_file_manager_ui(window, container=None, include_save_button=True, main_padding=10, main_padx=10):
+def setup_file_manager_ui(window, container=None, include_save_button=True, main_padding=10, main_padx=10, bottom_padding=None):
     """
     Creates and places all the UI widgets for the FileManagerWindow.
     """
@@ -16,8 +16,12 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     # Determine the parent widget for the UI components
     parent_widget = container if container else window
 
+    # If bottom_padding is provided by the caller (like the Project Starter), use it.
+    # Otherwise, fallback to the standard top-heavy padding.
+    pady_val = bottom_padding if bottom_padding is not None else (main_padding, 0)
+
     main_frame = Frame(parent_widget, bg=c.DARK_BG)
-    main_frame.pack(fill='both', expand=True, padx=main_padx, pady=(main_padding, 0))
+    main_frame.pack(fill='both', expand=True, padx=main_padx, pady=pady_val)
     main_frame.grid_rowconfigure(0, weight=1)
     main_frame.grid_rowconfigure(1, weight=0)
     main_frame.grid_columnconfigure(0, weight=1)
