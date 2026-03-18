@@ -76,10 +76,11 @@ STARTER_TODO_PROMPT_INSTR = """
 ### Instructions
 1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).
 2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').
-3. **Format:** You MUST output the plan using specific section tags for the phases you decide to include.
-   - Use `<<SECTION: Phase Name>>` followed by the content.
-   - Allowed Phase Names: {headers_str}.
-   - **Do not** output sections for phases you decided to skip.
+3. **Format & Custom Phases:** You MUST output the plan using `<<SECTION: Phase Name>>` followed by content.
+   - Suggested Phase Names: {headers_str}.
+   - **ADDITIONAL PHASES:** You are encouraged to add project-specific phases if the suggested list is insufficient. Simply create a descriptive name for any new section.
+   - **DO NOT** output sections for phases you decided to skip.
+4. **THE DEPLOYMENT ANCHOR (CRITICAL):** Regardless of how many custom phases you add, the "Deployment" phase MUST be the final section of your response. All other phases (suggested or custom) must be placed before it.
 """
 
 STARTER_GENERATE_MASTER_INTRO = "You are a senior developer creating a boilerplate for: {name}\nStack: {stack}"
