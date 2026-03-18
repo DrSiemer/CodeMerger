@@ -8,9 +8,6 @@ Thumbs.db
 .vscode/
 *.swp
 
-# CodeMerger
-.allcode
-
 # Node
 node_modules/
 npm-debug.log
