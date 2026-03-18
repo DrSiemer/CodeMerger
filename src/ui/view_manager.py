@@ -1,16 +1,21 @@
 import time
 import os
+import logging
 from tkinter import messagebox, Toplevel
 from .compact_mode import CompactMode
 from .assets import assets
 from .window_utils import get_monitor_work_area
 from .. import constants as c
 
+log = logging.getLogger("CodeMerger")
+
 class ViewManager:
     """
     Manages the visual state of the application, specifically the
     transition between the full view and compact mode using a state machine
     to animate correctly while avoiding OS window manager race conditions.
+    Preserves compact mode coordinates unless the main window is moved to a
+    different monitor.
     """
     def __init__(self, main_window):
         self.main_window = main_window
@@ -24,20 +29,17 @@ class ViewManager:
         self.compact_mode_window = None
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
+        self.compact_last_monitor_handle = None
         self.main_window_geom = None
 
     def on_main_window_minimized(self, event=None):
         """
         Called when the main window is unmapped (minimized).
         """
-        # Only start transition if we are in normal state and setting is enabled.
         if self.current_state == self.STATE_NORMAL and self.main_window.app_state.enable_compact_mode_on_minimize:
-            # We use a small delay to ensure the OS has finished processing the
-            # minimization state before we attempt to deiconify and animate.
             def check_and_transition():
-                # Double-check state inside the timer to prevent race conditions
-                # causing double animations.
                 if self.current_state == self.STATE_NORMAL and self.main_window.state() == 'iconic':
+                    log.info("Main window minimized. Transitioning to Compact Mode.")
                     self.transition_to_compact()
 
             self.main_window.after(50, check_and_transition)
@@ -47,6 +49,7 @@ class ViewManager:
         Called when the main window is restored (e.g., from the taskbar).
         """
         if self.current_state == self.STATE_COMPACT:
+            log.info("Main window restored. Transitioning to Normal Mode.")
             self.transition_to_normal()
 
     def exit_compact_mode_manually(self):
@@ -54,6 +57,7 @@ class ViewManager:
         A dedicated method for when the user closes the compact window directly.
         """
         if self.current_state == self.STATE_COMPACT:
+            log.info("Exiting Compact Mode via manual close.")
             self.transition_to_normal()
 
     def on_compact_mode_moved(self):
@@ -61,9 +65,11 @@ class ViewManager:
         if self.compact_mode_window and self.compact_mode_window.winfo_exists():
             self.compact_mode_last_x = self.compact_mode_window.winfo_x()
             self.compact_mode_last_y = self.compact_mode_window.winfo_y()
+            log.debug(f"Saved compact mode position: {self.compact_mode_last_x}, {self.compact_mode_last_y}")
 
     def invalidate_compact_mode_position(self):
         """Forgets the last position, forcing recalculation on the next compact transition."""
+        log.info("Invalidating compact mode position memory.")
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
 
@@ -86,7 +92,6 @@ class ViewManager:
         curr_h = int(start_h + (end_h - start_h) * eased_progress)
 
         alpha = 1.0 - progress if is_shrinking else progress
-        # Ensure window is never quite 0 alpha while visible to avoid some OS glitches
         if not is_shrinking and alpha < 0.01: alpha = 0.01
 
         try:
@@ -103,6 +108,7 @@ class ViewManager:
     def _on_animation_complete(self, is_shrinking, final_geom):
         """Handles state changes after an animation finishes."""
         if is_shrinking:
+            log.debug("Shrink animation complete.")
             # Restore main window to full size/buffer before officially hiding it.
             # This ensures the taskbar thumbnail reflects the full app, not a shrunken sliver.
             if self.main_window_geom:
@@ -114,9 +120,13 @@ class ViewManager:
             self.main_window.iconify()
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
                 self.compact_mode_window.deiconify()
+                # Assertion of topmost and lift beats other apps that may have stolen focus.
+                self.compact_mode_window.attributes("-topmost", True)
                 self.compact_mode_window.lift()
+
             self.current_state = self.STATE_COMPACT
         else:
+            log.debug("Growth animation complete.")
             self.main_window.geometry(f"{final_geom[2]}x{final_geom[3]}+{final_geom[0]}+{final_geom[1]}")
             self.main_window.attributes("-alpha", 1.0)
             self.main_window.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
@@ -165,11 +175,19 @@ class ViewManager:
         widget_w = self.compact_mode_window.winfo_reqwidth()
         widget_h = self.compact_mode_window.winfo_reqheight()
 
-        use_saved_position = self.compact_mode_last_x is not None
+        # Decision Engine: Do we use the user's manual placement or recalculate?
+        # We only recalculate if the monitor changed. We ignore main window movement
+        # on the same screen.
+        current_monitor = self.main_window.current_monitor_handle
+
+        monitor_changed = self.compact_last_monitor_handle != current_monitor
+        use_saved_position = self.compact_mode_last_x is not None and not monitor_changed
 
         if use_saved_position:
+            log.info(f"Restoring compact position: {self.compact_mode_last_x}, {self.compact_mode_last_y}")
             target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
         else:
+            log.info("Recalculating compact position (Monitor change or first run).")
             mon_x, mon_y, mon_right, mon_bottom = get_monitor_work_area(self.main_window)
             main_x, main_y, main_w, _ = start_geom
 
@@ -181,6 +199,9 @@ class ViewManager:
             target_y = max(mon_y + margin, min(ideal_y, mon_bottom - widget_h - margin))
 
         end_geom = (target_x, target_y, widget_w, widget_h)
+
+        # Update monitor handle for next time
+        self.compact_last_monitor_handle = current_monitor
 
         # Position the compact window but keep it hidden until animation is done
         self.compact_mode_window.geometry(f"+{target_x}+{target_y}")
@@ -194,6 +215,7 @@ class ViewManager:
             return
 
         if not self.compact_mode_window or not self.compact_mode_window.winfo_exists():
+            log.warning("Compact window missing during restore. Aborting animation.")
             self.current_state = self.STATE_NORMAL
             self.main_window.show_and_raise()
             return
@@ -203,9 +225,10 @@ class ViewManager:
         # --- Lazy Layout: Ensure content is hidden during growth to maintain performance ---
         self.main_window._start_lazy_layout()
 
-        # Save last known good position
+        # Update the saved position before we hide the compact window
         self.compact_mode_last_x = self.compact_mode_window.winfo_x()
         self.compact_mode_last_y = self.compact_mode_window.winfo_y()
+        log.debug(f"Saved compact coordinates before restore: {self.compact_mode_last_x}, {self.compact_mode_last_y}")
 
         start_geom = (self.compact_mode_last_x, self.compact_mode_last_y, self.compact_mode_window.winfo_width(), self.compact_mode_window.winfo_height())
 

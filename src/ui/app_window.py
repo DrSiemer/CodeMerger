@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import logging
 import re
+import time
 from tkinter import Tk, StringVar, Label
 
 from ..app_state import AppState
@@ -50,7 +51,8 @@ class App(Tk):
         self.loading_animation_job = None
         self.project_starter_window = None
 
-        # Lazy Layout variables
+        # Movement and Resize tracking
+        self.last_move_time = 0.0
         self._lazy_timer = None
         self._is_lazy_hiding = False
         self._last_size = (0, 0)
@@ -176,6 +178,7 @@ class App(Tk):
         """
         Custom handler for <Configure> to implement 'Lazy Layout' resizing.
         Hides UI on drag-resize and restores after a debounce period to avoid lag.
+        Also tracks movement time to assist Compact Mode positioning.
         """
         if event.widget != self:
             return
@@ -183,7 +186,11 @@ class App(Tk):
         # Distinguish between window movement and size change
         new_size = (event.width, event.height)
         if self._last_size == new_size:
-            # Only moved, allow normal move-tracking behavior
+            # Only update movement timestamp if we are in a normal, non-animating state.
+            # This prevents restoration/minimization animations from being interpreted as manual moves.
+            if self.view_manager.current_state == self.view_manager.STATE_NORMAL:
+                self.last_move_time = time.time()
+
             self.event_handlers.on_window_configure(event)
             return
 
