@@ -11,7 +11,6 @@ DEFAULT_INTRO_PROMPT = "Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n"
 DEFAULT_OUTRO_PROMPT = """Stylistic Guidelines
 
 DO:
-- end your output with clear instructions on how to check if the code you proposed works
 - make sure empty lines are actually empty: avoid generating lines of spaces or tabs
 - always place closing triple backticks (```) on their own, new line
 
