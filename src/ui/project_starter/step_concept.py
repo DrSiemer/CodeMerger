@@ -264,10 +264,7 @@ class ConceptView(tk.Frame):
         tk.Label(header, text="Review Concept Segments", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
-
-        data_keys = set(self.project_data["concept_segments"].keys())
-        ordered_keys = [k for k in c.CONCEPT_ORDER if k in data_keys]
-        ordered_keys += [k for k in data_keys if k not in ordered_keys]
+        ordered_keys = list(self.project_data["concept_segments"].keys())
 
         if not ordered_keys:
             self.handle_reset()
@@ -529,14 +526,15 @@ class ConceptView(tk.Frame):
         return {}
 
     def get_assembled_content(self):
-        # FIX: If segments are empty (merged mode), return the existing flat MD
         if not self.project_data.get("concept_segments"):
             return self.project_data.get("concept_md", ""), {}, {}
 
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
+        current_keys = list(self.project_data["concept_segments"].keys())
+
         full_text = SegmentManager.assemble_document(
             self.project_data["concept_segments"],
-            c.CONCEPT_ORDER,
+            current_keys,
             friendly_map
         )
         return full_text, self.project_data["concept_segments"], self.project_data["concept_signoffs"]

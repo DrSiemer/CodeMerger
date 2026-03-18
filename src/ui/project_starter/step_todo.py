@@ -246,9 +246,8 @@ class TodoView(tk.Frame):
         for k in mapped_segments.keys():
             self.project_data["todo_signoffs"][k] = False
 
-        # CRITICAL: Clear merged Markdown when moving back to segments
         self.project_data["todo_md"] = ""
-        self.project_data["todo_llm_response"] = "" # Clear buffer
+        self.project_data["todo_llm_response"] = ""
         self.starter_controller.state.save()
 
         self.show_editor_view()
@@ -265,9 +264,13 @@ class TodoView(tk.Frame):
         # Questions for TODO
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
 
-        data_keys = set(self.project_data["todo_segments"].keys())
-        ordered_keys = [k for k in c.TODO_ORDER if k in data_keys]
-        ordered_keys += [k for k in data_keys if k not in ordered_keys]
+        ordered_keys = list(self.project_data["todo_segments"].keys())
+
+        for k in ordered_keys:
+            if k == 'deployment':
+                ordered_keys.remove(k)
+                ordered_keys.append(k)
+                break
 
         if not ordered_keys:
             self.handle_reset()
@@ -505,7 +508,7 @@ class TodoView(tk.Frame):
             self.clipboard_append(prompt_text)
 
             button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-            self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
+            self.after(2000, lambda: button.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, state='normal'))
         except Exception as e:
             messagebox.showerror("Error", f"Could not copy to clipboard: {e}", parent=self)
 
@@ -533,10 +536,18 @@ class TodoView(tk.Frame):
         if not self.project_data.get("todo_segments"):
             return self.project_data.get("todo_md", ""), {}, {}
 
+        current_keys = list(self.project_data["todo_segments"].keys())
+
+        for k in current_keys:
+            if k == 'deployment':
+                current_keys.remove(k)
+                current_keys.append(k)
+                break
+
         friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
         full_text = SegmentManager.assemble_document(
             self.project_data["todo_segments"],
-            c.TODO_ORDER,
+            current_keys,
             friendly_map
         )
         return full_text, self.project_data["todo_segments"], self.project_data["todo_signoffs"]
