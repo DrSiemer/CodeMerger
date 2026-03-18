@@ -288,7 +288,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
         # Create .allcode with custom intro and the filtered list
         conf = load_config()
-        intro = f"We are working on {project_pitch}.\n\nYour task is to continue development, by following the plan laid out in `todo.md`. Pick up and check off steps from this whenever you are not fixing issues reported by the user."
+        intro = f"We are working on {project_pitch}.\n\nContinue work on the plan laid out in `todo.md`. If a bug is reported, fix it first. ONLY output `todo.md` (in full, without omissions) when explicitly updating checkbox status."
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []
