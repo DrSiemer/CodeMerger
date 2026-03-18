@@ -41,6 +41,8 @@ Directive: Optimize the code for a programmer that has never seen this code befo
 6. Do not use numbering in comments
 7. Remove dots from the end of single line comments
 8. Single line comments for single sentences are preferred, even if that makes them long
+9. No History: Delete comments describing changes, fixes, or renames (e.g., "Removed X", "Fixed Y", "Renamed Z"). If a comment refers to the code's past state, delete it
+10. Present Tense: All rationale must be in the present tense. If a rationale explains a choice (e.g., "Named pose_recorder to avoid shadowing"), ensure it describes the current state, not the act of changing it
 
 Do not change code, only comments."""
 
