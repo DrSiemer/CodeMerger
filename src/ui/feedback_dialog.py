@@ -1,6 +1,6 @@
 import tkinter as tk
 import os
-from tkinter import Frame, Label, ttk, BooleanVar
+from tkinter import Frame, Label, ttk, BooleanVar, messagebox
 from PIL import Image, ImageDraw, ImageTk
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
@@ -151,6 +151,15 @@ class FeedbackDialog(tk.Toplevel):
         self.destroy()
 
     def _handle_refuse(self):
+        """Warns the user before discarding the update if we are in confirmation mode."""
+        if self.on_apply:
+            if not messagebox.askyesno(
+                "Discard Update?",
+                "You are currently reviewing a proposed update. Closing this window will discard the changes and they will not be applied to your project files.\n\nAre you sure you want to discard this update?",
+                parent=self
+            ):
+                return
+
         if self.on_refuse:
             self.on_refuse()
         self.destroy()

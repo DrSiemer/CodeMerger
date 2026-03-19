@@ -54,20 +54,20 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
-    answers_match = re.search(r'<<ANSWERS>>(.*?)<</?ANSWERS>>', markdown_text, re.DOTALL | re.IGNORECASE)
-    answers_text = answers_match.group(1).strip() if answers_match else ""
+    def get_section(tag, text):
+        match = re.search(rf'<<{tag}>>(.*?)<</?{tag}>>', text, re.DOTALL | re.IGNORECASE)
+        if match:
+            content = match.group(1).strip()
+            if content.lower() in ["none", "n/a", "no files to delete", "no changes"]:
+                return ""
+            return content
+        return ""
 
-    intro_match = re.search(r'<<INTRO>>(.*?)<</?INTRO>>', markdown_text, re.DOTALL | re.IGNORECASE)
-    intro_text = intro_match.group(1).strip() if intro_match else ""
-
-    changes_match = re.search(r'<<CHANGES>>(.*?)<</?CHANGES>>', markdown_text, re.DOTALL | re.IGNORECASE)
-    changes_text = changes_match.group(1).strip() if changes_match else ""
-
-    delete_match = re.search(r'<<DELETE>>(.*?)<</?DELETE>>', markdown_text, re.DOTALL | re.IGNORECASE)
-    delete_text = delete_match.group(1).strip() if delete_match else ""
-
-    verification_match = re.search(r'<<VERIFICATION>>(.*?)<</?VERIFICATION>>', markdown_text, re.DOTALL | re.IGNORECASE)
-    verification_text = verification_match.group(1).strip() if verification_match else ""
+    answers_text = get_section("ANSWERS", markdown_text)
+    intro_text = get_section("INTRO", markdown_text)
+    changes_text = get_section("CHANGES", markdown_text)
+    delete_text = get_section("DELETE", markdown_text)
+    verification_text = get_section("VERIFICATION", markdown_text)
 
     # --- Pre-processing for common LLM formatting errors ---
 
@@ -91,7 +91,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
     markdown_text = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text)
 
     # Robust regex: handles \r\n, varying whitespace, and avoids being tripped up by content
-    # We look for the File header, the opening backticks, the content, the closing backticks, and the footer.
     file_blocks = re.findall(
         r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+--- End of file ---',
         markdown_text,
@@ -135,25 +134,19 @@ def parse_and_plan_changes(base_dir, markdown_text):
     if not files_to_update and not files_to_create:
         return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
 
+    result = {
+        'updates': files_to_update,
+        'creations': files_to_create,
+        'answers': answers_text,
+        'intro': intro_text,
+        'changes': changes_text,
+        'delete': delete_text,
+        'verification': verification_text
+    }
+
     if files_to_create:
-        return {
-            'status': 'CONFIRM_CREATION',
-            'updates': files_to_update,
-            'creations': files_to_create,
-            'answers': answers_text,
-            'intro': intro_text,
-            'changes': changes_text,
-            'delete': delete_text,
-            'verification': verification_text
-        }
+        result['status'] = 'CONFIRM_CREATION'
     else:
-        return {
-            'status': 'SUCCESS',
-            'updates': files_to_update,
-            'creations': {},
-            'answers': answers_text,
-            'intro': intro_text,
-            'changes': changes_text,
-            'delete': delete_text,
-            'verification': verification_text
-        }
+        result['status'] = 'SUCCESS'
+
+    return result
