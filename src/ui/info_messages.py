@@ -135,7 +135,7 @@ INFO_MESSAGES = {
         "Enable this to prevent accidentally sharing sensitive data with the language model."
     ),
     "set_app_feedback": (
-        "LLM Feedback: Automatically open the feedback window when an LLM response contains recognized sections."
+        "AI Response Review: Automatically open the response review window when wrapped sections are found."
     ),
     "set_app_compact": (
         "Compact Mode: Automatically switches to the floating Compact window when you minimize the "

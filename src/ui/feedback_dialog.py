@@ -18,7 +18,7 @@ class FeedbackDialog(tk.Toplevel):
         self.on_refuse = on_refuse
         self.app_state = parent.app_state if hasattr(parent, 'app_state') else parent.master.app_state
         self.withdraw()
-        self.title("LLM Feedback")
+        self.title("AI Response Review")
         self.iconbitmap(ICON_PATH)
         self.configure(bg=c.DARK_BG)
         self.transient(parent)
@@ -32,7 +32,7 @@ class FeedbackDialog(tk.Toplevel):
         main_frame.grid_rowconfigure(1, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
-        title_text = "Pending LLM Changes" if on_apply else "LLM Feedback History"
+        title_text = "Review Proposed Update" if on_apply else "Review Last Update"
         Label(main_frame, text=title_text, font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 10))
 
         self.notebook = ttk.Notebook(main_frame)
