@@ -54,19 +54,19 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
-    answers_match = re.search(r'<<ANSWERS>>(.*?)<<ANSWERS>>', markdown_text, re.DOTALL)
+    answers_match = re.search(r'<<ANSWERS>>(.*?)<</?ANSWERS>>', markdown_text, re.DOTALL | re.IGNORECASE)
     answers_text = answers_match.group(1).strip() if answers_match else ""
 
-    intro_match = re.search(r'<<INTRO>>(.*?)<<INTRO>>', markdown_text, re.DOTALL)
+    intro_match = re.search(r'<<INTRO>>(.*?)<</?INTRO>>', markdown_text, re.DOTALL | re.IGNORECASE)
     intro_text = intro_match.group(1).strip() if intro_match else ""
 
-    changes_match = re.search(r'<<CHANGES>>(.*?)<<CHANGES>>', markdown_text, re.DOTALL)
+    changes_match = re.search(r'<<CHANGES>>(.*?)<</?CHANGES>>', markdown_text, re.DOTALL | re.IGNORECASE)
     changes_text = changes_match.group(1).strip() if changes_match else ""
 
-    delete_match = re.search(r'<<DELETE>>(.*?)<<DELETE>>', markdown_text, re.DOTALL)
+    delete_match = re.search(r'<<DELETE>>(.*?)<</?DELETE>>', markdown_text, re.DOTALL | re.IGNORECASE)
     delete_text = delete_match.group(1).strip() if delete_match else ""
 
-    verification_match = re.search(r'<<VERIFICATION>>(.*?)<<VERIFICATION>>', markdown_text, re.DOTALL)
+    verification_match = re.search(r'<<VERIFICATION>>(.*?)<</?VERIFICATION>>', markdown_text, re.DOTALL | re.IGNORECASE)
     verification_text = verification_match.group(1).strip() if verification_match else ""
 
     # --- Pre-processing for common LLM formatting errors ---
