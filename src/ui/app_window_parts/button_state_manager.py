@@ -63,6 +63,7 @@ class ButtonStateManager:
             app.copy_merged_button.set_state('disabled')
             app.copy_wrapped_button.set_state('disabled')
             app.paste_changes_button.set_state('disabled')
+            app.review_button.set_state('disabled')
             app.cleanup_comments_button.place_forget()
         else:
             app.no_project_label.pack_forget()
@@ -70,6 +71,7 @@ class ButtonStateManager:
             app.button_grid_frame.pack(pady=(5, 18), padx=30)
             app.wrapper_text_button.set_state('normal')
             app.paste_changes_button.set_state('normal')
+            app.review_button.set_state('normal')
             app.cleanup_comments_button.place(relx=1.0, y=14, anchor='ne', x=-22)
 
             copy_buttons_state = 'disabled'
@@ -89,7 +91,7 @@ class ButtonStateManager:
             app.copy_wrapped_button.grid_remove()
             app.copy_merged_button.grid_remove()
             app.wrapper_text_button.grid_remove()
-            app.paste_changes_button.grid_remove()
+            app.paste_container.grid_remove()
 
             gap = 5
 
@@ -103,4 +105,20 @@ class ButtonStateManager:
 
             # Row 1: Small configuration buttons
             app.wrapper_text_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
-            app.paste_changes_button.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
+            app.paste_container.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
+
+            # --- AI Response Review Visibility ---
+            # Standard View
+            if app.last_ai_response:
+                app.review_button.pack(side='right', padx=(4, 0))
+            else:
+                app.review_button.pack_forget()
+
+            # Compact Mode View
+            compact = app.view_manager.compact_mode_window
+            if compact and compact.winfo_exists():
+                if app.last_ai_response:
+                    if not compact.review_button.winfo_ismapped():
+                        compact.review_button.pack(side='right', padx=(4, 0))
+                else:
+                    compact.review_button.pack_forget()

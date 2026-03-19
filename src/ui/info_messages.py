@@ -44,6 +44,10 @@ INFO_MESSAGES = {
         "Paste Changes (Ctrl+V): Open a review window to process AI responses. CodeMerger reads "
         "the Markdown and automatically writes changes back. Ctrl-click to instantly apply from clipboard."
     ),
+    "response_review": (
+        "AI Response Review: Opens the review window to see the most recently applied changes and "
+        "associated AI commentary."
+    ),
     "cleanup": (
         "Comment Cleanup: Copies a specialized prompt, that tells the AI to strip out it's own "
         "transient tags like [FIX] or [MODIFIED], while keeping structural logic comments."

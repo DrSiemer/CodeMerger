@@ -153,35 +153,36 @@ def setup_ui(app):
     app.cleanup_comments_button.bind("<Leave>", lambda e: app.cleanup_comments_button.config(fg="#555555"))
     ToolTip(app.cleanup_comments_button, "Copy prompt to clean up comments and remove tags", delay=500)
 
-    # Feedback button (Hidden by default, animated when new feedback arrives while window is disabled)
-    app.feedback_button = Label(
-        app.wrapper_box,
-        text="✉ Feedback",
-        font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'),
-        bg=c.DARK_BG,
-        fg=c.BTN_BLUE,
-        cursor='hand2',
-        padx=5, pady=2
-    )
-    app.feedback_button.bind("<ButtonRelease-1>", lambda e: app.action_handlers.show_feedback_window())
-    app.feedback_button.place_forget()
-    ToolTip(app.feedback_button, "Read latest LLM feedback", delay=500)
-
     app.button_grid_frame = Frame(app.wrapper_box, bg=c.DARK_BG)
     app.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")
 
     copy_button_height = 60
-    app.paste_changes_button = RoundedButton(app.button_grid_frame, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, command=None, cursor='hand2')
     app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy with Instructions", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.copy_wrapped_code, cursor='hand2')
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.open_instructions_window, cursor='hand2')
     app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
+
+    # --- Paste Container Layout ---
+    app.paste_container = Frame(app.button_grid_frame, bg=c.DARK_BG)
+    app.paste_changes_button = RoundedButton(app.paste_container, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, command=None, cursor='hand2')
+    app.paste_changes_button.pack(side='left', fill='x', expand=True, padx=(0, 0))
+
+    # --- AI Response Review Button ---
+    # Narrow orange bar with subtle 4px padding from the paste button. Hidden by default.
+    app.review_button = RoundedButton(
+        app.paste_container, text="", bg=c.ATTENTION, fg=c.TEXT_COLOR,
+        width=12, height=30, radius=6,
+        command=app.action_handlers.show_response_review,
+        cursor='hand2'
+    )
+    app.review_button.pack_forget()
 
     app.paste_changes_button.bind("<Button-1>", app.action_handlers.on_paste_click)
     app.paste_changes_button.unbind("<ButtonRelease-1>")
     app.paste_changes_button.bind("<ButtonRelease-1>", app.action_handlers.on_paste_release)
 
     ToolTip(app.paste_changes_button, "Open paste window\n(Ctrl+Click to paste from clipboard)", delay=500)
+    ToolTip(app.review_button, "Read latest AI response review", delay=500)
     ToolTip(app.copy_wrapped_button, "Copy all included code with your custom intro/outro instructions", delay=500)
     ToolTip(app.copy_merged_button, "Copy just the merged code with a default prompt", delay=500)
 

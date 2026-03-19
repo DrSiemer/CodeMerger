@@ -100,13 +100,30 @@ class CompactMode(tk.Toplevel):
         )
         self.copy_button.pack(fill='x', pady=(4, 2))
 
+        # --- Paste Row Frame ---
+        paste_row = tk.Frame(button_container, bg=c.DARK_BG)
+        paste_row.pack(fill='x', pady=(2, 4))
+
         self.paste_button = RoundedButton(
-            button_container, text="Paste", font=button_font,
+            paste_row, text="Paste", font=button_font,
             bg=c.BTN_GREEN, fg=button_fg,
             command=None,
             height=button_height, radius=button_radius, cursor='hand2'
         )
-        self.paste_button.pack(fill='x', pady=(2, 4))
+        self.paste_button.pack(side='left', fill='x', expand=True, padx=(0, 0))
+
+        # --- AI Response Review Button ---
+        # Permanent narrow orange button to the right of Paste.
+        self.review_button = RoundedButton(
+            paste_row, text="", font=button_font,
+            bg=c.ATTENTION, fg="#FFFFFF",
+            command=self.parent.action_handlers.show_response_review,
+            width=12, height=button_height, radius=button_radius, cursor='hand2'
+        )
+
+        # Show immediately if data exists
+        if self.parent.last_ai_response:
+            self.review_button.pack(side='right', padx=(4, 0))
 
         # Override the command with specific bindings for ctrl-click
         self.copy_button.bind("<Button-1>", self.on_copy_click)
@@ -116,14 +133,6 @@ class CompactMode(tk.Toplevel):
         self.paste_button.bind("<Button-1>", self.on_paste_click)
         self.paste_button.unbind("<ButtonRelease-1>")
         self.paste_button.bind("<ButtonRelease-1>", self.on_paste_release)
-
-        # --- Feedback Button ---
-        self.feedback_button = tk.Label(self.paste_button, text="✉", bg=c.BTN_GREEN, fg="#FFFFFF", font=button_font, cursor="hand2")
-        self.feedback_button.bind("<ButtonRelease-1>", lambda e: self.parent.action_handlers.show_feedback_window())
-        self.feedback_button.place_forget()
-
-        self.feedback_button.bind("<Enter>", lambda e: self.show_tooltip("Read latest LLM feedback"))
-        self.feedback_button.bind("<Leave>", self.hide_tooltip)
 
         # --- Bindings ---
         self.move_bar.bind("<ButtonPress-1>", self.on_press_drag)
@@ -152,6 +161,8 @@ class CompactMode(tk.Toplevel):
         self.copy_button.bind("<Leave>", self.hide_tooltip)
         self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window\n(Ctrl+Click to paste from clipboard)"))
         self.paste_button.bind("<Leave>", self.hide_tooltip)
+        self.review_button.bind("<Enter>", lambda e: self.show_tooltip("Read latest AI response review"))
+        self.review_button.bind("<Leave>", self.hide_tooltip)
         self.close_button.bind("<Enter>", lambda e: self.show_tooltip("Restore window (Ctrl+Click to exit app)"))
         self.close_button.bind("<Leave>", self.hide_tooltip)
 

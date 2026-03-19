@@ -438,10 +438,8 @@ class ActionHandlers:
                 self.app.helpers.show_compact_toast(final_message)
                 if creations:
                     self.app.file_monitor.perform_new_file_check()
-
-                self.app.last_feedback = plan
-                if not was_dialog_shown:
-                    self.animate_feedback_button()
+                self.app.last_ai_response = plan
+                self.app.button_manager.update_button_states()
 
                 if dialog_to_close:
                     dialog_to_close.destroy()
@@ -458,55 +456,28 @@ class ActionHandlers:
 
         if has_feedback and self.app.app_state.config.get('show_feedback_on_paste', True):
             was_dialog_shown = True
-            self.show_feedback_window(plan=plan, on_apply=do_execute, on_refuse=do_refuse)
+            self.show_response_review(plan=plan, on_apply=do_execute, on_refuse=do_refuse)
         else:
             do_execute()
 
-    def show_feedback_window(self, plan=None, on_apply=None, on_refuse=None):
+    def show_response_review(self, plan=None, on_apply=None, on_refuse=None):
+        """
+        Opens the AI Response Review window.
+        Uses either the provided plan (from a fresh paste) or the cached last response.
+        """
         is_pending = True
         if plan is None:
-            plan = getattr(self.app, 'last_feedback', None)
+            plan = getattr(self.app, 'last_ai_response', None)
             is_pending = False
 
-        if plan:
-            if not is_pending:
-                if hasattr(self.app, 'feedback_anim_job') and self.app.feedback_anim_job:
-                    self.app.after_cancel(self.app.feedback_anim_job)
-                    self.app.feedback_anim_job = None
+        if plan is None:
+            self.app.helpers.show_compact_toast("No AI response review available yet.")
+            return
 
-                # Reset colors and hide buttons
-                self.app.feedback_button.config(fg=c.BTN_BLUE)
-                self.app.feedback_button.place_forget()
+        from ..feedback_dialog import FeedbackDialog
 
-                if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
-                    self.app.view_manager.compact_mode_window.feedback_button.config(fg="#FFFFFF")
-                    self.app.view_manager.compact_mode_window.feedback_button.place_forget()
+        dialog_parent = self.app
+        if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+            dialog_parent = self.app.view_manager.compact_mode_window
 
-            from ..feedback_dialog import FeedbackDialog
-
-            dialog_parent = self.app
-            if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
-                dialog_parent = self.app.view_manager.compact_mode_window
-
-            FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse)
-
-    def animate_feedback_button(self):
-        # Normal mode
-        self.app.feedback_button.place(relx=1.0, rely=1.0, anchor='se', x=-22, y=-2)
-
-        # Compact mode
-        if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
-            self.app.view_manager.compact_mode_window.feedback_button.place(relx=1.0, rely=0.5, anchor='e', x=-10)
-
-        self._pulse_feedback_button(0)
-
-    def _pulse_feedback_button(self, step):
-        colors =[c.BTN_BLUE, c.TEXT_COLOR, c.BTN_BLUE, c.TEXT_COLOR]
-        color = colors[step % len(colors)]
-
-        self.app.feedback_button.config(fg=color)
-        if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
-            compact_colors =["#FFFFFF", c.BTN_BLUE, "#FFFFFF", c.BTN_BLUE]
-            self.app.view_manager.compact_mode_window.feedback_button.config(fg=compact_colors[step % len(compact_colors)])
-
-        self.app.feedback_anim_job = self.app.after(500, self._pulse_feedback_button, step + 1)
+        FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse)

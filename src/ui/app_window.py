@@ -50,8 +50,7 @@ class App(Tk):
         self.load_thread_result = None
         self.loading_animation_job = None
         self.project_starter_window = None
-        self.feedback_anim_job = None
-        self.last_feedback = None
+        self.last_ai_response = None
 
         # Movement and Resize tracking
         self.last_move_time = 0.0
@@ -164,6 +163,7 @@ class App(Tk):
         mgr.register(self.copy_merged_button, "copy_code")
         mgr.register(self.copy_wrapped_button, "copy_with_instructions")
         mgr.register(self.paste_changes_button, "paste_changes")
+        mgr.register(self.review_button, "response_review")
         mgr.register(self.cleanup_comments_button, "cleanup")
         mgr.register(self.settings_button, "settings")
         mgr.register(self.filetypes_button, "filetypes")
