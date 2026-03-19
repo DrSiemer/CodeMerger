@@ -80,12 +80,14 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block. Omitting it will break my automated file applier.
 
-6. **CHANGES & VERIFICATION (POST-CODE):**
-   - Immediately following the final "--- End of file ---" marker, provide two sections wrapped in their own tags: `<<CHANGES>>` and `<<VERIFICATION>>`.
-   - In `<<CHANGES>>`: A bulleted list of behavioral/algorithmic/visual/layout changes. If any files should be deleted, explicitly state: "DELETE FILE: `path/to/obsolete_file.ext`".
+6. **CHANGES, DELETE & VERIFICATION (POST-CODE):**
+   - Immediately following the final "--- End of file ---" marker, provide three sections wrapped in their own tags: `<<CHANGES>>`, `<<DELETE>>` and `<<VERIFICATION>>`.
+   - In `<<CHANGES>>`: A bulleted list of behavioral/algorithmic/visual/layout changes.
+   - In `<<DELETE>>`: A list of any files that are now obsolete and should be removed by the user. Explicitly state the path: "DELETE FILE: `path/to/obsolete_file.ext`".
    - In `<<VERIFICATION>>`: A clear list of actions I must take to test these specific changes.
    - Example:
      `<<CHANGES>>- Added new logic...<<CHANGES>>`
+     `<<DELETE>>DELETE FILE: `src/old_utility.py`<<DELETE>>`
      `<<VERIFICATION>>1. Run the app...<<VERIFICATION>>`"""
 
         # Important reminder on the absolute end

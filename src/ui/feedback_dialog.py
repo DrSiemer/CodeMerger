@@ -42,7 +42,7 @@ class FeedbackDialog(tk.Toplevel):
         tab_indices = {}
         current_idx = 0
 
-        # Preserve the preferred order: Intro, Answers, Changes, Verification
+        # Preferred order: Intro, Answers, Changes, Delete, Verification
         if plan.get('intro'):
             self._add_tab("Intro", plan.get('intro'))
             tab_indices['intro'] = current_idx
@@ -58,14 +58,21 @@ class FeedbackDialog(tk.Toplevel):
             tab_indices['changes'] = current_idx
             current_idx += 1
 
+        if plan.get('delete'):
+            self._add_tab("Delete", plan.get('delete'))
+            tab_indices['delete'] = current_idx
+            current_idx += 1
+
         if plan.get('verification'):
             self._add_tab("Verification", plan.get('verification'))
             tab_indices['verification'] = current_idx
             current_idx += 1
 
-        # Tab Selection Priority
+        # Tab Selection Priority: answers, delete, verification
         if 'answers' in tab_indices:
             self.notebook.select(tab_indices['answers'])
+        elif 'delete' in tab_indices:
+            self.notebook.select(tab_indices['delete'])
         elif 'verification' in tab_indices:
             self.notebook.select(tab_indices['verification'])
         elif current_idx > 0:

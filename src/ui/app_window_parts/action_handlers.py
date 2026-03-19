@@ -453,7 +453,7 @@ class ActionHandlers:
             if dialog_to_close:
                 dialog_to_close.destroy()
 
-        has_feedback = plan.get('intro') or plan.get('answers') or plan.get('changes') or plan.get('verification')
+        has_feedback = any(plan.get(k) for k in ['intro', 'answers', 'changes', 'delete', 'verification'])
         was_dialog_shown = False
 
         if has_feedback and self.app.app_state.config.get('show_feedback_on_paste', True):

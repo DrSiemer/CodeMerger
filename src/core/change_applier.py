@@ -63,6 +63,9 @@ def parse_and_plan_changes(base_dir, markdown_text):
     changes_match = re.search(r'<<CHANGES>>(.*?)<<CHANGES>>', markdown_text, re.DOTALL)
     changes_text = changes_match.group(1).strip() if changes_match else ""
 
+    delete_match = re.search(r'<<DELETE>>(.*?)<<DELETE>>', markdown_text, re.DOTALL)
+    delete_text = delete_match.group(1).strip() if delete_match else ""
+
     verification_match = re.search(r'<<VERIFICATION>>(.*?)<<VERIFICATION>>', markdown_text, re.DOTALL)
     verification_text = verification_match.group(1).strip() if verification_match else ""
 
@@ -140,6 +143,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'answers': answers_text,
             'intro': intro_text,
             'changes': changes_text,
+            'delete': delete_text,
             'verification': verification_text
         }
     else:
@@ -150,5 +154,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'answers': answers_text,
             'intro': intro_text,
             'changes': changes_text,
+            'delete': delete_text,
             'verification': verification_text
         }
