@@ -153,6 +153,20 @@ def setup_ui(app):
     app.cleanup_comments_button.bind("<Leave>", lambda e: app.cleanup_comments_button.config(fg="#555555"))
     ToolTip(app.cleanup_comments_button, "Copy prompt to clean up comments and remove tags", delay=500)
 
+    # Feedback button (Hidden by default, animated when new feedback arrives while window is disabled)
+    app.feedback_button = Label(
+        app.wrapper_box,
+        text="✉ Feedback",
+        font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'),
+        bg=c.DARK_BG,
+        fg=c.BTN_BLUE,
+        cursor='hand2',
+        padx=5, pady=2
+    )
+    app.feedback_button.bind("<ButtonRelease-1>", lambda e: app.action_handlers.show_feedback_window())
+    app.feedback_button.place_forget()
+    ToolTip(app.feedback_button, "Read latest LLM feedback", delay=500)
+
     app.button_grid_frame = Frame(app.wrapper_box, bg=c.DARK_BG)
     app.button_grid_frame.columnconfigure(0, weight=1, uniform="group1")
     app.button_grid_frame.columnconfigure(1, weight=1, uniform="group1")

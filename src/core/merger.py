@@ -49,21 +49,26 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         # Always prepended to the merged code block via final_parts
         formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
 
-1. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
+1. **ANSWERS & INTRO (PRE-CODE):**
+   - If you are answering a specific question, you MUST wrap it in `<<ANSWERS>>` tags before any code blocks.
+   - If you want to provide a short intro or plan of changes, you MUST wrap it in `<<INTRO>>` tags before any code blocks.
+   - Example: `<<ANSWERS>>Yes, the issue was...<<ANSWERS>> <<INTRO>>I will update...<<INTRO>>`
+
+2. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
    - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
    - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure.
 
-2. **FUNCTIONAL PRESERVATION:**
+3. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
    - NO SILENT REFACTORING: Do not "improve," "clean up," or "simplify" any code that is not directly related to the requested change. Leave unrelated logic and comments untouched.
 
-3. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
+4. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
    - ONLY output files that have actually been modified.
    - If a file's final code is **byte-for-byte identical** to the original input provided in this prompt, **DO NOT** include it in your output.
    - You may list names of unchanged files at the end of your response, but do not wrap them in code blocks.
 
-4. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
+5. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
 
 --- File: `path/to/file.ext` ---
@@ -75,16 +80,13 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block. Omitting it will break my automated file applier.
 
-5. **VERIFICATION SUMMARY (POST-CODE):**
-   - Immediately following the final "--- End of file ---" marker, include a section titled:
-   ### Summary & Verification
-   - **Logic Changes:** Bulleted list of behavioral/algorithmic changes.
-   - **Integrity Confirmation**: Explicitly state: "I have verified that no code or comments have been truncated or accidentally omitted. Every part of the original files has either been preserved exactly or intentionally modified to fulfill the request."
-   - **UI Changes:** Bulleted list of visual/layout modifications.
-   - **Verification Steps:** A clear list of actions I must take to test these specific changes.
-
-6. **FILE OPERATIONS:**
-   - If your modifications make certain existing files obsolete, explicitly state: "DELETE FILE: `path/to/obsolete_file.ext`" in the Summary section."""
+6. **CHANGES & VERIFICATION (POST-CODE):**
+   - Immediately following the final "--- End of file ---" marker, provide two sections wrapped in their own tags: `<<CHANGES>>` and `<<VERIFICATION>>`.
+   - In `<<CHANGES>>`: A bulleted list of behavioral/algorithmic/visual/layout changes. If any files should be deleted, explicitly state: "DELETE FILE: `path/to/obsolete_file.ext`".
+   - In `<<VERIFICATION>>`: A clear list of actions I must take to test these specific changes.
+   - Example:
+     `<<CHANGES>>- Added new logic...<<CHANGES>>`
+     `<<VERIFICATION>>1. Run the app...<<VERIFICATION>>`"""
 
         # Important reminder on the absolute end
         automation_warning = "Note: This output is processed by a parser. Strict adherence to the format is required for technical compatibility."

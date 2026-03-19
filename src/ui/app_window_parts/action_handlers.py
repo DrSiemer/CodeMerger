@@ -402,39 +402,111 @@ class ActionHandlers:
             return
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, markdown_text)
+        self._handle_parsed_plan(plan, project_config.base_dir)
 
+    def _handle_parsed_plan(self, plan, base_dir, dialog_to_close=None):
         status = plan.get('status')
         message = plan.get('message')
 
         if status == 'ERROR':
-            app.show_error_dialog("Parsing Error", message)
+            self.app.show_error_dialog("Parsing Error", message)
             return
 
-        if status == 'CONFIRM_CREATION':
+        def do_execute():
+            if status == 'CONFIRM_CREATION':
+                creations = plan.get('creations', {})
+                creation_rel_paths = list(creations.keys())
+
+                confirm_message = (
+                    f"This operation will create {len(creations)} new file(s):\n\n"
+                    f" - " + "\n - ".join(creation_rel_paths) +
+                    "\n\nDo you want to proceed?"
+                )
+                dialog_parent = self.app
+                if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+                    dialog_parent = self.app.view_manager.compact_mode_window
+
+                if not messagebox.askyesno("Confirm New Files", confirm_message, parent=dialog_parent):
+                    self.app.helpers.show_compact_toast("Operation cancelled.")
+                    return
+
+            updates = plan.get('updates', {})
             creations = plan.get('creations', {})
-            creation_rel_paths = [os.path.relpath(p, project_config.base_dir).replace('\\', '/') for p in creations.keys()]
+            success, final_message = change_applier.execute_plan(base_dir, updates, creations)
 
-            confirm_message = (
-                f"This operation will create {len(creations)} new file(s):\n\n"
-                f" - " + "\n - ".join(creation_rel_paths) +
-                "\n\nDo you want to proceed?"
-            )
-            dialog_parent = app
-            if app.view_manager.current_state == 'compact' and app.view_manager.compact_mode_window and app.view_manager.compact_mode_window.winfo_exists():
-                dialog_parent = app.view_manager.compact_mode_window
+            if success:
+                self.app.helpers.show_compact_toast(final_message)
+                if creations:
+                    self.app.file_monitor.perform_new_file_check()
 
-            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=dialog_parent):
-                app.helpers.show_compact_toast("Operation cancelled.")
-                return
+                self.app.last_feedback = plan
+                if not was_dialog_shown:
+                    self.animate_feedback_button()
 
-        updates = plan.get('updates', {})
-        creations = plan.get('creations', {})
+                if dialog_to_close:
+                    dialog_to_close.destroy()
+            else:
+                self.app.show_error_dialog("File Write Error", final_message)
 
-        success, final_message = change_applier.execute_plan(updates, creations)
+        def do_refuse():
+            self.app.helpers.show_compact_toast("Update refused.")
+            if dialog_to_close:
+                dialog_to_close.destroy()
 
-        if success:
-            app.helpers.show_compact_toast(final_message)
-            if creations:
-                app.file_monitor.perform_new_file_check()
+        has_feedback = plan.get('intro') or plan.get('answers') or plan.get('changes') or plan.get('verification')
+        was_dialog_shown = False
+
+        if has_feedback and self.app.app_state.config.get('show_feedback_on_paste', True):
+            was_dialog_shown = True
+            self.show_feedback_window(plan=plan, on_apply=do_execute, on_refuse=do_refuse)
         else:
-            app.show_error_dialog("File Write Error", final_message)
+            do_execute()
+
+    def show_feedback_window(self, plan=None, on_apply=None, on_refuse=None):
+        is_pending = True
+        if plan is None:
+            plan = getattr(self.app, 'last_feedback', None)
+            is_pending = False
+
+        if plan:
+            if not is_pending:
+                if hasattr(self.app, 'feedback_anim_job') and self.app.feedback_anim_job:
+                    self.app.after_cancel(self.app.feedback_anim_job)
+                    self.app.feedback_anim_job = None
+
+                # Reset colors and hide buttons
+                self.app.feedback_button.config(fg=c.BTN_BLUE)
+                self.app.feedback_button.place_forget()
+
+                if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+                    self.app.view_manager.compact_mode_window.feedback_button.config(fg="#FFFFFF")
+                    self.app.view_manager.compact_mode_window.feedback_button.place_forget()
+
+            from ..feedback_dialog import FeedbackDialog
+
+            dialog_parent = self.app
+            if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+                dialog_parent = self.app.view_manager.compact_mode_window
+
+            FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse)
+
+    def animate_feedback_button(self):
+        # Normal mode
+        self.app.feedback_button.place(relx=1.0, rely=1.0, anchor='se', x=-22, y=-2)
+
+        # Compact mode
+        if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+            self.app.view_manager.compact_mode_window.feedback_button.place(relx=1.0, rely=0.5, anchor='e', x=-10)
+
+        self._pulse_feedback_button(0)
+
+    def _pulse_feedback_button(self, step):
+        colors =[c.BTN_BLUE, c.TEXT_COLOR, c.BTN_BLUE, c.TEXT_COLOR]
+        color = colors[step % len(colors)]
+
+        self.app.feedback_button.config(fg=color)
+        if self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+            compact_colors =["#FFFFFF", c.BTN_BLUE, "#FFFFFF", c.BTN_BLUE]
+            self.app.view_manager.compact_mode_window.feedback_button.config(fg=compact_colors[step % len(compact_colors)])
+
+        self.app.feedback_anim_job = self.app.after(500, self._pulse_feedback_button, step + 1)

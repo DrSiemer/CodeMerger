@@ -102,46 +102,12 @@ class PasteChangesDialog(Toplevel):
 
         plan = change_applier.parse_and_plan_changes(self.base_dir, markdown_text)
 
-        status = plan.get('status')
-        message = plan.get('message')
+        logical_app = self.parent
+        while logical_app and not hasattr(logical_app, 'action_handlers'):
+            logical_app = logical_app.master
 
-        if status == 'ERROR':
-            CustomErrorDialog(self, title="Error", message=message)
-            return
-
-        if status == 'CONFIRM_CREATION':
-            creations = plan.get('creations', {})
-            # Get relative paths for display in the confirmation dialog
-            creation_rel_paths = [os.path.relpath(p, self.base_dir).replace('\\', '/') for p in creations.keys()]
-
-            confirm_message = (
-                f"This operation will create {len(creations)} new file(s):\n\n"
-                f" - " + "\n - ".join(creation_rel_paths) +
-                "\n\nDo you want to proceed?"
-            )
-
-            if not messagebox.askyesno("Confirm New Files", confirm_message, parent=self):
-                self.status_var.set("Operation cancelled by user.")
-                return
-
-        # Proceed if status was 'SUCCESS' or if user confirmed creation
-        updates = plan.get('updates', {})
-        creations = plan.get('creations', {})
-
-        success, final_message = change_applier.execute_plan(updates, creations)
-
-        if success:
-            self.status_var.set(final_message)
-            if creations:
-                logical_app = self.parent
-                while logical_app and not hasattr(logical_app, 'file_monitor'):
-                    logical_app = logical_app.master
-
-                if logical_app and hasattr(logical_app, 'file_monitor'):
-                    logical_app.file_monitor.perform_new_file_check()
-            self.destroy()
-        else:
-            CustomErrorDialog(self, title="File Write Error", message=final_message)
+        if logical_app:
+            logical_app.action_handlers._handle_parsed_plan(plan, self.base_dir, dialog_to_close=self)
 
     def on_cancel(self, event=None):
         self.destroy()

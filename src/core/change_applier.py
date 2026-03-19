@@ -22,11 +22,12 @@ def _sanitize_content(path, content):
         last_line_was_empty = is_empty
     return '\n'.join(collapsed_lines)
 
-def execute_plan(updates, creations):
+def execute_plan(base_dir, updates, creations):
     """Writes the planned changes to the filesystem"""
     try:
         # Create new files
-        for path, content in creations.items():
+        for rel_path, content in creations.items():
+            path = os.path.join(base_dir, rel_path)
             dir_path = os.path.dirname(path)
             if not os.path.isdir(dir_path):
                 os.makedirs(dir_path, exist_ok=True)
@@ -36,7 +37,8 @@ def execute_plan(updates, creations):
                 f.write(sanitized_content)
 
         # Update existing files
-        for path, content in updates.items():
+        for rel_path, content in updates.items():
+            path = os.path.join(base_dir, rel_path)
             sanitized_content = _sanitize_content(path, content)
             with open(path, 'w', encoding='utf-8') as f:
                 f.write(sanitized_content)
@@ -52,6 +54,18 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
+    answers_match = re.search(r'<<ANSWERS>>(.*?)<<ANSWERS>>', markdown_text, re.DOTALL)
+    answers_text = answers_match.group(1).strip() if answers_match else ""
+
+    intro_match = re.search(r'<<INTRO>>(.*?)<<INTRO>>', markdown_text, re.DOTALL)
+    intro_text = intro_match.group(1).strip() if intro_match else ""
+
+    changes_match = re.search(r'<<CHANGES>>(.*?)<<CHANGES>>', markdown_text, re.DOTALL)
+    changes_text = changes_match.group(1).strip() if changes_match else ""
+
+    verification_match = re.search(r'<<VERIFICATION>>(.*?)<<VERIFICATION>>', markdown_text, re.DOTALL)
+    verification_text = verification_match.group(1).strip() if verification_match else ""
+
     # --- Pre-processing for common LLM formatting errors ---
 
     # Ensure there is a newline between the header and the code block
@@ -109,11 +123,11 @@ def parse_and_plan_changes(base_dir, markdown_text):
             return {'status': 'ERROR', 'message': f"Error: Path '{relative_path}' attempts to access a location outside the project directory."}
 
         if os.path.isfile(full_path):
-            files_to_update[full_path] = content
+            files_to_update[relative_path] = content
         elif os.path.isdir(full_path):
             return {'status': 'ERROR', 'message': f"Error: The path '{relative_path}' points to a directory, not a file."}
         else:
-            files_to_create[full_path] = content
+            files_to_create[relative_path] = content
 
     if not files_to_update and not files_to_create:
         return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
@@ -122,11 +136,19 @@ def parse_and_plan_changes(base_dir, markdown_text):
         return {
             'status': 'CONFIRM_CREATION',
             'updates': files_to_update,
-            'creations': files_to_create
+            'creations': files_to_create,
+            'answers': answers_text,
+            'intro': intro_text,
+            'changes': changes_text,
+            'verification': verification_text
         }
     else:
         return {
             'status': 'SUCCESS',
             'updates': files_to_update,
-            'creations': {}
+            'creations': {},
+            'answers': answers_text,
+            'intro': intro_text,
+            'changes': changes_text,
+            'verification': verification_text
         }

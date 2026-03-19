@@ -50,6 +50,8 @@ class App(Tk):
         self.load_thread_result = None
         self.loading_animation_job = None
         self.project_starter_window = None
+        self.feedback_anim_job = None
+        self.last_feedback = None
 
         # Movement and Resize tracking
         self.last_move_time = 0.0

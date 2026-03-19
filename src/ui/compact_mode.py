@@ -117,6 +117,14 @@ class CompactMode(tk.Toplevel):
         self.paste_button.unbind("<ButtonRelease-1>")
         self.paste_button.bind("<ButtonRelease-1>", self.on_paste_release)
 
+        # --- Feedback Button ---
+        self.feedback_button = tk.Label(self.paste_button, text="✉", bg=c.BTN_GREEN, fg="#FFFFFF", font=button_font, cursor="hand2")
+        self.feedback_button.bind("<ButtonRelease-1>", lambda e: self.parent.action_handlers.show_feedback_window())
+        self.feedback_button.place_forget()
+
+        self.feedback_button.bind("<Enter>", lambda e: self.show_tooltip("Read latest LLM feedback"))
+        self.feedback_button.bind("<Leave>", self.hide_tooltip)
+
         # --- Bindings ---
         self.move_bar.bind("<ButtonPress-1>", self.on_press_drag)
         self.move_bar.bind("<B1-Motion>", self.on_drag)

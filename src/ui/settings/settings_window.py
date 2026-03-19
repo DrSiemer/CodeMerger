@@ -66,6 +66,7 @@ class SettingsWindow(Toplevel):
             'check_for_updates': BooleanVar(value=get_setting('AutomaticUpdates', True)),
             'enable_new_file_check': BooleanVar(value=self.config.get('enable_new_file_check', True)),
             'new_file_check_interval': StringVar(value=str(self.config.get('new_file_check_interval', 5))),
+            'show_feedback_on_paste': BooleanVar(value=self.config.get('show_feedback_on_paste', True)),
             'token_count_enabled': BooleanVar(value=self.config.get('token_count_enabled', c.TOKEN_COUNT_ENABLED_DEFAULT)),
             'token_limit': StringVar(value=str(self.config.get('token_limit', 0) if self.config.get('token_limit', 0) != 0 else "")),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
@@ -153,6 +154,7 @@ class SettingsWindow(Toplevel):
         config['scan_for_secrets'] = self.vars['scan_for_secrets'].get()
         config['enable_new_file_check'] = self.vars['enable_new_file_check'].get()
         config['token_count_enabled'] = self.vars['token_count_enabled'].get()
+        config['show_feedback_on_paste'] = self.vars['show_feedback_on_paste'].get()
         config['enable_compact_mode_on_minimize'] = self.vars['enable_compact_mode_on_minimize'].get()
         config['default_parent_folder'] = self.vars['default_parent_folder'].get()
         config.update(prompt_values)

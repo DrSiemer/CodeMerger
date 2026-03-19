@@ -12,6 +12,7 @@ class ApplicationSettingsFrame(Frame):
         self.scan_for_secrets = vars['scan_for_secrets']
         self.enable_compact_mode_on_minimize = vars['enable_compact_mode_on_minimize']
         self.check_for_updates = vars['check_for_updates']
+        self.show_feedback_on_paste = vars['show_feedback_on_paste']
 
         self._create_widgets()
 
@@ -41,6 +42,10 @@ class ApplicationSettingsFrame(Frame):
         self.secrets_chk = ttk.Checkbutton(container, text="Scan for secrets (on each copy)", variable=self.scan_for_secrets, style='Dark.TCheckbutton')
         self.secrets_chk.pack(anchor='w')
 
+        # Feedback Options
+        self.feedback_chk = ttk.Checkbutton(container, text="Show LLM feedback window automatically on paste", variable=self.show_feedback_on_paste, style='Dark.TCheckbutton')
+        self.feedback_chk.pack(anchor='w')
+
         # Compact Mode
         self.compact_chk = ttk.Checkbutton(container, text="Activate compact mode when main window is minimized", variable=self.enable_compact_mode_on_minimize, style='Dark.TCheckbutton')
         self.compact_chk.pack(anchor='w')
@@ -65,6 +70,7 @@ class ApplicationSettingsFrame(Frame):
         info_mgr.register(self.interval_combo, "set_app_interval")
         info_mgr.register(self.seconds_label, "set_app_interval")
         info_mgr.register(self.secrets_chk, "set_app_secrets")
+        info_mgr.register(self.feedback_chk, "set_app_feedback")
         info_mgr.register(self.compact_chk, "set_app_compact")
         info_mgr.register(self.updates_chk, "set_app_updates")
         info_mgr.register(self.check_now_btn, "set_app_check_now")

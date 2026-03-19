@@ -138,6 +138,7 @@ def _create_and_get_default_config():
         'token_limit': 0,
         'enable_compact_mode_on_minimize': True,
         'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT,
+        'show_feedback_on_paste': True,
         'info_mode_active': True,
         'user_lists': {
             'recent_projects': [],
@@ -198,6 +199,8 @@ def load_config():
                 del config['check_for_updates']
             if 'enable_new_file_check' not in config:
                 config['enable_new_file_check'] = True
+            if 'show_feedback_on_paste' not in config:
+                config['show_feedback_on_paste'] = True
             if 'new_file_check_interval' not in config:
                 config['new_file_check_interval'] = 5
             if 'copy_merged_prompt' not in config:
