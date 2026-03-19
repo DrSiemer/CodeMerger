@@ -80,7 +80,7 @@ def parse_and_write_files(project_path, llm_output):
 
     if not found_any:
         # Preserve original return error message
-        return False, [], "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---'."
+        return False, [], "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---', and ensure the code is wrapped in standard triple backticks."
 
     return True, files_created, ""
 

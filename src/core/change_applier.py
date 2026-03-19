@@ -99,7 +99,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     )
 
     if not file_blocks:
-        return {'status': 'ERROR', 'message': "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---'."}
+        return {'status': 'ERROR', 'message': "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---', and ensure the code is wrapped in standard triple backticks."}
 
     files_to_update = {}
     files_to_create = {}
