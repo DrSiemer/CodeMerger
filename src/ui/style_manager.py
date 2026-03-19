@@ -55,5 +55,16 @@ def apply_dark_theme(window):
 
     # --- Notebook Style ---
     s.configure('TNotebook', background=c.DARK_BG, borderwidth=0)
-    s.configure('TNotebook.Tab', background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, padding=[15, 4], font=c.FONT_NORMAL)
-    s.map('TNotebook.Tab', background=[('selected', c.BTN_BLUE)], foreground=[('selected', c.BTN_BLUE_TEXT)])
+    s.configure('TNotebook.Tab',
+        background=c.TEXT_INPUT_BG,
+        foreground=c.TEXT_COLOR,
+        padding=[15, 4],
+        font=c.FONT_NORMAL,
+        focusthickness=0,
+        focuscolor=c.TEXT_INPUT_BG
+    )
+    s.map('TNotebook.Tab',
+        background=[('selected', c.BTN_BLUE)],
+        foreground=[('selected', c.BTN_BLUE_TEXT)],
+        focuscolor=[('selected', c.BTN_BLUE)]
+    )
