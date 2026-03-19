@@ -1,6 +1,7 @@
 import tkinter as tk
 import os
 from tkinter import Frame, Label, ttk, BooleanVar
+from PIL import Image, ImageDraw, ImageTk
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 from .widgets.markdown_renderer import MarkdownRenderer
@@ -26,6 +27,13 @@ class FeedbackDialog(tk.Toplevel):
 
         apply_dark_theme(self)
 
+        # Generate vertical accent bars for all tabs
+        self._gray_accent = self._create_vertical_accent(c.TEXT_SUBTLE_COLOR)  # Intro
+        self._cyan_accent = self._create_vertical_accent("#00BCD4")           # Answers
+        self._blue_accent = self._create_vertical_accent(c.BTN_BLUE)          # Changes
+        self._red_accent = self._create_vertical_accent(c.WARN)               # Delete
+        self._green_accent = self._create_vertical_accent(c.BTN_GREEN)        # Verification
+
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
         main_frame.pack(fill="both", expand=True)
 
@@ -44,27 +52,27 @@ class FeedbackDialog(tk.Toplevel):
 
         # Preferred order: Intro, Answers, Changes, Delete, Verification
         if plan.get('intro'):
-            self._add_tab("Intro", plan.get('intro'))
+            self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent)
             tab_indices['intro'] = current_idx
             current_idx += 1
 
         if plan.get('answers'):
-            self._add_tab("Answers", plan.get('answers'))
+            self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent)
             tab_indices['answers'] = current_idx
             current_idx += 1
 
         if plan.get('changes'):
-            self._add_tab("Changes", plan.get('changes'))
+            self._add_tab("Changes", plan.get('changes'), icon=self._blue_accent)
             tab_indices['changes'] = current_idx
             current_idx += 1
 
         if plan.get('delete'):
-            self._add_tab("Delete", plan.get('delete'))
+            self._add_tab("Delete", plan.get('delete'), icon=self._red_accent)
             tab_indices['delete'] = current_idx
             current_idx += 1
 
         if plan.get('verification'):
-            self._add_tab("Verification", plan.get('verification'))
+            self._add_tab("Verification", plan.get('verification'), icon=self._green_accent)
             tab_indices['verification'] = current_idx
             current_idx += 1
 
@@ -106,9 +114,21 @@ class FeedbackDialog(tk.Toplevel):
         self.deiconify()
         self.wait_window(self)
 
-    def _add_tab(self, title, markdown_text):
+    def _create_vertical_accent(self, hex_color):
+        """Creates a sharpened vertical bar PhotoImage shifted down 1px."""
+        size = (14, 22)
+        img = Image.new('RGBA', size, (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rounded_rectangle([0, 1, 3, 20], radius=1, fill=hex_color)
+        return ImageTk.PhotoImage(img)
+
+    def _add_tab(self, title, markdown_text, icon=None):
         frame = Frame(self.notebook, bg=c.DARK_BG)
-        self.notebook.add(frame, text=title)
+        if icon:
+            self.notebook.add(frame, text=title, image=icon, compound="left")
+        else:
+            self.notebook.add(frame, text=title)
+
         renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=self._adjust_font_size)
         renderer.pack(fill="both", expand=True)
         renderer.set_markdown(markdown_text.strip())

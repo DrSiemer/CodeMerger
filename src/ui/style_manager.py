@@ -58,7 +58,7 @@ def apply_dark_theme(window):
     s.configure('TNotebook.Tab',
         background=c.TEXT_INPUT_BG,
         foreground=c.TEXT_COLOR,
-        padding=[15, 4],
+        padding=[8, 6, 20, 6],
         font=c.FONT_NORMAL,
         focusthickness=0,
         focuscolor=c.TEXT_INPUT_BG
