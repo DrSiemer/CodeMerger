@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Frame, Label
 from .... import constants as c
+from ...assets import assets
 
 class SidebarItem(Frame):
     def __init__(self, parent, text, is_overview, status_var=None, command=None):
@@ -14,8 +15,8 @@ class SidebarItem(Frame):
 
         # Alignment: Overview (Full Text) is the parent. Segments are children.
         if not is_overview:
-            # Bullet indicator for segments (Uses Unicode Black Circle)
-            self.indicator = Label(self, text="●", font=("Arial", 12), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR)
+            # Indicator for segments (Uses lock graphics)
+            self.indicator = Label(self, bg=c.DARK_BG, image=assets.unlocked_icon)
             self.indicator.pack(side="left", padx=(15, 5))
             text_padx = (0, 10)
         else:
@@ -78,7 +79,7 @@ class SidebarItem(Frame):
 
         self.config(cursor=cursor)
         self.label.config(fg=fg, cursor=cursor)
-        self.indicator.config(fg=fg, cursor=cursor)
+        self.indicator.config(cursor=cursor)
 
     def set_updated(self, updated):
         """Marks the item as having pending changes from a sync operation."""
@@ -92,11 +93,14 @@ class SidebarItem(Frame):
         if not self.status_var or self.is_overview: return
 
         if self.status_var.get():
-            # Signed Off: Green Check
-            self.indicator.config(text="✓", fg=c.BTN_GREEN)
-        elif self.is_updated:
-            # Updated / Attention Needed: Orange Dot
-            self.indicator.config(text="●", fg=c.ATTENTION)
+            # Locked: Use locked icon
+            self.indicator.config(image=assets.locked_icon)
         else:
-            # Default: Gray Dot
-            self.indicator.config(text="●", fg=c.TEXT_SUBTLE_COLOR)
+            # Unlocked: Use unlocked icon
+            self.indicator.config(image=assets.unlocked_icon)
+
+        # Highlight color for sync updates
+        if not self.status_var.get() and self.is_updated:
+            self.label.config(fg=c.ATTENTION)
+        else:
+            self.label.config(fg=c.TEXT_COLOR if not self.is_disabled else "#666666")

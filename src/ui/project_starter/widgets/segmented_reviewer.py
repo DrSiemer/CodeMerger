@@ -33,7 +33,7 @@ class SegmentedReviewer(Frame):
         self.sidebar_items = {}
         self.current_question_index = 0
         self.is_loading_nav = False
-        self.current_segment_original_text = "" # Tracks content state for sync button logic
+        self.current_segment_original_text = "" # Tracks content state for sync logic
         self.questions_visible = False # Track visibility state across segments
         self.info_mgr = None # Store reference to re-register transient buttons
 
@@ -141,11 +141,11 @@ class SegmentedReviewer(Frame):
         self.footer_buttons_frame.pack(fill='x', expand=True)
 
         # Footer Buttons
-        self.signoff_btn = RoundedButton(self.footer_buttons_frame, text="Sign Off & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=160, cursor="hand2")
+        self.signoff_btn = RoundedButton(self.footer_buttons_frame, text="Lock segment & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=180, cursor="hand2")
         ToolTip(self.signoff_btn, "Lock this section and move to the next incomplete part", delay=500)
 
         self.revert_btn = RoundedButton(self.footer_buttons_frame, text="Unlock to Edit", command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2")
-        ToolTip(self.revert_btn, "Release the sign-off to make further changes to this section", delay=500)
+        ToolTip(self.revert_btn, "Release the lock to make further changes to this section", delay=500)
 
         self.sync_btn = RoundedButton(self.footer_buttons_frame, text="Sync Unsigned", command=self._open_sync_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2")
         ToolTip(self.sync_btn, "Propagates your changes to other unlocked sections to maintain consistency.\n(Only affects sections that are not signed off)", delay=500)

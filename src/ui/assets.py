@@ -9,6 +9,7 @@ from ..core.paths import (
     GIT_FILES_ICON_PATH, GIT_FILES_ACTIVE_ICON_PATH,
     SETTINGS_ICON_PATH, FILETYPES_ICON_PATH, SETTINGS_ICON_ACTIVE_PATH, FILETYPES_ICON_ACTIVE_PATH,
     PROJECT_STARTER_ICON_PATH, PROJECT_STARTER_ACTIVE_ICON_PATH,
+    LOCKED_ICON_PATH, UNLOCKED_ICON_PATH,
     INFO_ICON_PATH, INFO_ICON_ACTIVE_PATH
 )
 
@@ -45,6 +46,8 @@ class AppAssets:
         # Project Starter Icons
         self.project_starter_pil = self._load_image(PROJECT_STARTER_ICON_PATH, (28, 28))
         self.project_starter_active_pil = self._load_image(PROJECT_STARTER_ACTIVE_ICON_PATH, (28, 28))
+        self.locked_pil = self._load_image(LOCKED_ICON_PATH, (16, 20))
+        self.unlocked_pil = self._load_image(UNLOCKED_ICON_PATH, (16, 20))
 
         # Info Mode Icons
         self.info_icon_pil = self._load_image(INFO_ICON_PATH, (18, 18))
@@ -74,6 +77,8 @@ class AppAssets:
         self.filetypes_icon_active = None
         self.project_starter_icon = None
         self.project_starter_active_icon = None
+        self.locked_icon = None
+        self.unlocked_icon = None
         self.info_icon = None
         self.info_icon_active = None
 
@@ -102,6 +107,8 @@ class AppAssets:
         self.filetypes_icon_active = self._pil_to_photoimage(self.filetypes_icon_active_pil)
         self.project_starter_icon = self._pil_to_photoimage(self.project_starter_pil)
         self.project_starter_active_icon = self._pil_to_photoimage(self.project_starter_active_pil)
+        self.locked_icon = self._pil_to_photoimage(self.locked_pil)
+        self.unlocked_icon = self._pil_to_photoimage(self.unlocked_pil)
         self.info_icon = self._pil_to_photoimage(self.info_icon_pil)
         self.info_icon_active = self._pil_to_photoimage(self.info_icon_active_pil)
 

@@ -104,6 +104,8 @@ FILETYPES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes_activ
 # --- Project Starter Icons ---
 PROJECT_STARTER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter.png')
 PROJECT_STARTER_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter_active.png')
+LOCKED_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'locked.png')
+UNLOCKED_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'unlocked.png')
 
 # --- Info Mode Icons ---
 INFO_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info.png')
