@@ -49,26 +49,40 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         # Always prepended to the merged code block via final_parts
         formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
 
-1. **ANSWERS & INTRO (PRE-CODE):**
+1. **MANDATORY TAGGING & CLOSING POLICY:**
+   Every section of your response (Answers, Intro, Changes, Delete, Verification) MUST be explicitly wrapped in tags.
+   **CRITICAL:** Every opening tag MUST have an identical closing tag.
+
+   Format: `<<TAG>>[content]<<TAG>>`
+
+2. **ANSWERS & INTRO (PRE-CODE):**
    - If you are answering a specific question, you MUST wrap it in `<<ANSWERS>>` tags before any code blocks.
    - If you want to provide a short intro or plan of changes, you MUST wrap it in `<<INTRO>>` tags before any code blocks.
-   - Example: `<<ANSWERS>>Yes, the issue was...<<ANSWERS>> <<INTRO>>I will update...<<INTRO>>`
 
-2. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
+   Example:
+   <<ANSWERS>>
+   The bug was caused by a null pointer...
+   <<ANSWERS>>
+
+   <<INTRO>>
+   I will update the main controller and the utility script.
+   <<INTRO>>
+
+3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
    - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
    - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure.
 
-3. **FUNCTIONAL PRESERVATION:**
+4. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
    - NO SILENT REFACTORING: Do not "improve," "clean up," or "simplify" any code that is not directly related to the requested change. Leave unrelated logic and comments untouched.
 
-4. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
+5. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
    - ONLY output files that have actually been modified.
    - If a file's final code is **byte-for-byte identical** to the original input provided in this prompt, **DO NOT** include it in your output.
    - You may list names of unchanged files at the end of your response, but do not wrap them in code blocks.
 
-5. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
+6. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
 
 --- File: `path/to/file.ext` ---
@@ -78,20 +92,25 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 ```
 --- End of file ---
 
-   - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block. Omitting it will break my automated file applier.
+   - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
 
-6. **CHANGES, DELETE & VERIFICATION (POST-CODE):**
-   - Immediately following the final "--- End of file ---" marker, provide three sections wrapped in their own tags: `<<CHANGES>>`, `<<DELETE>>` and `<<VERIFICATION>>`.
-   - In `<<CHANGES>>`: A bulleted list of behavioral/algorithmic/visual/layout changes.
-   - In `<<DELETE>>`: A list of any files that are now obsolete and should be removed by the user. Explicitly state the path: "DELETE FILE: `path/to/obsolete_file.ext`".
-   - In `<<VERIFICATION>>`: A clear list of actions I must take to test these specific changes.
-   - Example:
-     `<<CHANGES>>- Added new logic...<<CHANGES>>`
-     `<<DELETE>>DELETE FILE: `src/old_utility.py`<<DELETE>>`
-     `<<VERIFICATION>>1. Run the app...<<VERIFICATION>>`"""
+7. **CHANGES, DELETE & VERIFICATION (POST-CODE):**
+   Immediately following the final "--- End of file ---" marker, provide these sections wrapped in their own tags:
+
+   <<CHANGES>>
+   - List of behavioral/algorithmic/visual changes.
+   <<CHANGES>>
+
+   <<DELETE>>
+   DELETE FILE: `path/to/obsolete_file.ext`
+   <<DELETE>>
+
+   <<VERIFICATION>>
+   - Steps to test the changes.
+   <<VERIFICATION>>"""
 
         # Important reminder on the absolute end
-        automation_warning = "Note: This output is processed by a parser. Strict adherence to the format is required for technical compatibility."
+        automation_warning = "Note: This output is processed by a parser. Strict adherence to the format and mandatory tag closures is required for technical compatibility."
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}\n\n{automation_warning}"
