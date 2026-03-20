@@ -55,18 +55,11 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    Format: `<<TAG>>[content]<<TAG>>`
 
-2. **ANSWERS & INTRO (PRE-CODE):**
-   - If you are answering a specific question, you MUST wrap it in `<<ANSWERS>>` tags before any code blocks.
-   - If you want to provide a short intro or plan of changes, you MUST wrap it in `<<INTRO>>` tags before any code blocks.
-
-   Example:
-   <<ANSWERS>>
-   The bug was caused by a null pointer...
-   <<ANSWERS>>
-
-   <<INTRO>>
-   I will update the main controller and the utility script.
-   <<INTRO>>
+2. **INTRO & ANSWERS (PRE-CODE):**
+   - **<<INTRO>>**: Use this to provide a technical implementation plan or architectural summary.
+   - **<<ANSWERS>>**: Use this ONLY to answer conceptual or theoretical questions (usually ending in '?').
+   - **THE "LOGGING" PROHIBITION**: Do NOT use this section to report on your activity, confirm task completion, or summarize what you did (e.g., "I updated...", "Fixed the bug...", "Task complete").
+   - **PLACEMENT RULE**: If your sentence describes a change you made to the code, it MUST go in the `<<CHANGES>>` section at the end of the response. If the user's request contains no explicit questions beyond the code changes, this section MUST be empty.
 
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.

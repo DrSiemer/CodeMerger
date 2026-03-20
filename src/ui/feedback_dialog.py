@@ -98,14 +98,14 @@ class FeedbackDialog(tk.Toplevel):
             self.apply_btn = RoundedButton(self.bottom_frame, text="Apply Changes", command=self._handle_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=130, height=30, cursor="hand2")
             self.apply_btn.pack(side="right")
 
-            self.refuse_btn = RoundedButton(self.bottom_frame, text="Refuse Update", command=self._handle_refuse, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
-            self.refuse_btn.pack(side="right", padx=(0, 10))
+            self.cancel_btn = RoundedButton(self.bottom_frame, text="Cancel", command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
+            self.cancel_btn.pack(side="right", padx=(0, 10))
         else:
             self.ok_button = RoundedButton(self.bottom_frame, text="OK", command=self.destroy, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
             self.ok_button.pack(side="right")
 
-        self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply else self._handle_refuse())
-        self.protocol("WM_DELETE_WINDOW", self._handle_refuse if self.on_apply else self.destroy)
+        self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply else self._on_close_request())
+        self.protocol("WM_DELETE_WINDOW", self._on_close_request if self.on_apply else self.destroy)
 
         self.geometry("900x750")
         self.minsize(600, 500)
@@ -149,11 +149,15 @@ class FeedbackDialog(tk.Toplevel):
         """Applies the changes. If verification steps exist, remains open to show them."""
         if self.on_apply:
             self.on_apply()
+            # Clear callbacks once executed to indicate the update is no longer pending.
+            # This suppresses the "Discard Update?" warning on window close.
+            self.on_apply = None
+            self.on_refuse = None
 
         if 'verification' in self.tab_indices:
             # Changes applied, so hide the decision buttons
             self.apply_btn.pack_forget()
-            self.refuse_btn.pack_forget()
+            self.cancel_btn.pack_forget()
 
             # Add a final Close/OK button to exit the window after verification is read
             self.ok_button = RoundedButton(
@@ -168,8 +172,14 @@ class FeedbackDialog(tk.Toplevel):
         else:
             self.destroy()
 
-    def _handle_refuse(self):
-        """Warns the user before discarding the update if we are in confirmation mode."""
+    def _handle_cancel(self):
+        """Discards the update immediately. Used by the explicit 'Cancel' button."""
+        if self.on_refuse:
+            self.on_refuse()
+        self.destroy()
+
+    def _on_close_request(self):
+        """Warns the user before discarding the update if the window is closed manually."""
         if self.on_apply:
             if not messagebox.askyesno(
                 "Discard Update?",
@@ -178,6 +188,4 @@ class FeedbackDialog(tk.Toplevel):
             ):
                 return
 
-        if self.on_refuse:
-            self.on_refuse()
-        self.destroy()
+        self._handle_cancel()

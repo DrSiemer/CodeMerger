@@ -27,7 +27,6 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 *(Use this section to log corrections to my own behavior, so I don't repeat mistakes. This is separate from code logic.)*
 
 - **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
-- **Full File Requirement:** Always provide the full content of the file being modified. Snippets or partial updates are strictly forbidden as they break the user's automated application scripts.
 - **UI Persistence (Regressions):**
     1. **Treeview background:** Must explicitly set `fieldbackground` in `ttk.Style` to `c.TEXT_INPUT_BG` in `src/ui/file_manager/ui_setup.py`.
     2. **Info Panel wraplength:** Labels must update `wraplength` on `<Configure>` based on the true window width, or text will be shrunken to the left half.
