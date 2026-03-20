@@ -59,6 +59,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - **<<INTRO>>**: Use this to provide a technical implementation plan or architectural summary.
    - **<<ANSWERS>>**: Use this ONLY to answer conceptual or theoretical questions (usually ending in '?').
    - **THE "LOGGING" PROHIBITION**: Do NOT use this section to report on your activity, confirm task completion, or summarize what you did (e.g., "I updated...", "Fixed the bug...", "Task complete").
+   - **IF YOU DESCRIBE YOUR CODE CHANGES IN THESE TAGS, IT IS A CRITICAL FAILURE.**
    - **PLACEMENT RULE**: If your sentence describes a change you made to the code, it MUST go in the `<<CHANGES>>` section at the end of the response. If the user's request contains no explicit questions beyond the code changes, this section MUST be empty.
 
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
@@ -95,7 +96,10 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    <<CHANGES>>
 
    <<DELETE>>
-   DELETE FILE: `path/to/obsolete_file.ext`
+   STRICT FILE PATHS ONLY.
+   FORMAT: DELETE FILE: path/to/obsolete_file.ext
+   PROHIBITION: Do NOT describe code-level removals, logic deletions, or "cleanup."
+   If no files were deleted from the filesystem, this section MUST be empty.
    <<DELETE>>
 
    <<VERIFICATION>>
