@@ -32,13 +32,13 @@ INFO_MESSAGES = {
         "around your code whenever you use 'Copy with Instructions'."
     ),
     "copy_code": (
-        "Copy Code Only (Ctrl+Shift+C): Merges all selected files with a standard prompt header. "
+        "Copy Prompt Only (Ctrl+Shift+C): Merges all selected files with a standard prompt header. "
         "Useful for providing updated context to an LLM without repeating project goals. "
         "Ctrl-clicking the Adaptive Copy button in Compact mode also triggers this action."
     ),
     "copy_with_instructions": (
-        "Copy with Instructions (Ctrl+C): Merges code and wraps it in your custom Intro/Outro. "
-        "Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Code Only'."
+        "Copy Prompt with Instructions (Ctrl+C): Merges code and wraps it in your custom Intro/Outro. "
+        "Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Prompt Only'."
     ),
     "paste_changes": (
         "Paste Changes (Ctrl+V): Open a review window to process AI responses. CodeMerger reads "
@@ -104,7 +104,7 @@ INFO_MESSAGES = {
     "fm_filter_ext": "Filetype Filter: Toggle visibility of files not in your allowed extensions list. When ON, extra files are hidden.",
     "fm_filter_text": "Text Filter: Type to filter the tree and the merge list by filename.",
     "fm_tokens": (
-        "Total Tokens: A real-time estimate of context usage. As the count grows, the color changes "
+        "Total Tokens: A real-time estimate of context usage. As the grow count grows, the color changes "
         "from gray to yellow to red to warn you about LLM context limits."
     ),
     "fm_order": (
@@ -121,7 +121,7 @@ INFO_MESSAGES = {
     "fm_sort_bottom": "Move to Bottom: Place the selected files at the end of the merge list.",
     "fm_sort_remove": "Remove: Take the selected files out of the merge list (does not delete files from disk).",
     "fm_add_all": "Add All: Add every file matching your current filters and search text to the merge list.",
-    "fm_save": "Save and Close: Commit your changes to the project's .allcode file and return to the main window.",
+    "fm_save": "Update Project: Commit your changes to the project's .allcode file and return to the main window.",
     "fm_remove_all": "Remove All: Clear the entire merge list for the current profile.",
 
     # --- Settings Window ---
@@ -169,7 +169,7 @@ INFO_MESSAGES = {
 
     "set_prompts": "Define your default intro/outro texts.",
     "set_prompt_merged": (
-        "Default Header: The text prepended when using 'Copy Code Only'. Best used for a short "
+        "Default Header: The text prepended when using 'Copy Prompt Only'. Best used for a short "
         "instruction, telling the AI to use the code as updated context."
     ),
     "set_prompt_intro": (

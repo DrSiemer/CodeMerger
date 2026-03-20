@@ -224,8 +224,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     window.remove_all_btn.pack(side='left')
 
     if include_save_button:
-        # "Save and Close" button moved to the far right of the bottom row
-        window.save_close_btn = RoundedButton(right_bottom_row, text="Save and Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
+        window.save_close_btn = RoundedButton(right_bottom_row, text="Update Project", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
         window.save_close_btn.pack(side='right')
 
     # Info Toggle: Managed by InfoManager.place

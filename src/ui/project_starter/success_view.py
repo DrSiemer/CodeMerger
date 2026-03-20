@@ -34,6 +34,6 @@ class SuccessView(tk.Frame):
             listbox.insert(tk.END, f)
         listbox.pack(expand=True, fill="both", pady=5)
 
-        btn_open = RoundedButton(self, text="Open Project in CodeMerger", command=on_start_work_callback, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
+        btn_open = RoundedButton(self, text="Activate Project in CodeMerger", command=on_start_work_callback, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
         btn_open.pack(pady=20)
         ToolTip(btn_open, "Activate this project and close the wizard", delay=500)

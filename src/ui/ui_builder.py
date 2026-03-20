@@ -160,7 +160,7 @@ def setup_ui(app):
     copy_button_height = 60
     app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy with Instructions", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.copy_wrapped_code, cursor='hand2')
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.open_instructions_window, cursor='hand2')
-    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
+    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Prompt Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
 
     # --- Paste Container Layout ---
     app.paste_container = Frame(app.button_grid_frame, bg=c.DARK_BG)
@@ -183,8 +183,8 @@ def setup_ui(app):
 
     ToolTip(app.paste_changes_button, "Open paste window\n(Ctrl+Click to paste from clipboard)", delay=500)
     ToolTip(app.review_button, "Read latest AI response review", delay=500)
-    ToolTip(app.copy_wrapped_button, "Copy all included code with your custom intro/outro instructions", delay=500)
-    ToolTip(app.copy_merged_button, "Copy just the merged code with a default prompt", delay=500)
+    ToolTip(app.copy_wrapped_button, "Copy Prompt: includes code wrapped with custom intro/outro instructions", delay=500)
+    ToolTip(app.copy_merged_button, "Copy Prompt: merges code and prepends the default context prompt", delay=500)
 
     app.settings_button.bind("<Enter>", lambda e: app.settings_button.config(image=assets.settings_icon_active), add='+')
     app.settings_button.bind("<Leave>", lambda e: app.settings_button.config(image=assets.settings_icon), add='+')

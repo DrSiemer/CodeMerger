@@ -34,7 +34,11 @@ class DetailsView(tk.Frame):
         tk.Frame(self, height=1, bg=c.WRAPPER_BORDER).pack(fill='x', pady=20)
 
         # Base Project Section
-        tk.Label(self, text="Or start from an existing project (optional):", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(anchor="w", pady=(0, 5))
+        base_title_frame = tk.Frame(self, bg=c.DARK_BG)
+        base_title_frame.pack(anchor="w", pady=(0, 5))
+
+        tk.Label(base_title_frame, text="Or start from an existing project ", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side="left")
+        tk.Label(base_title_frame, text="(OPTIONAL):", bg=c.DARK_BG, fg=c.NOTE, font=c.FONT_BOLD).pack(side="left")
 
         base_frame = tk.Frame(self, bg=c.DARK_BG)
         base_frame.pack(fill='x', anchor='w')
@@ -55,7 +59,6 @@ class DetailsView(tk.Frame):
 
         tk.Label(tips_frame, text="💡 LLM Best Practices", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.NOTE).pack(anchor="w", pady=(0, 2))
         tk.Label(tips_frame, text="- Always start a new conversation when pasting prompts from CodeMerger.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
-        tk.Label(tips_frame, text="- Ensure code blocks are wrapped in triple backticks (```).", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
 
     def register_info(self, info_mgr):
         """Registers step-specific widgets for Info Mode."""
