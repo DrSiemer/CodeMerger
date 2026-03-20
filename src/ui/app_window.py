@@ -143,6 +143,12 @@ class App(Tk):
         if force_selector:
             self.after(100, self.action_handlers.open_project_selector)
 
+        # --- Monitor Synchronization ---
+        # Ensure the current_monitor_handle is initialized correctly after the first layout
+        # This prevents a recalculation of compact mode on the first minimize if the monitor handle
+        # was captured as None in ViewManager.
+        self.after(100, self.event_handlers.check_for_monitor_change)
+
         self.deiconify()
         self.lift()
         self.focus_force()

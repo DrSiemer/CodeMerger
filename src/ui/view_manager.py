@@ -29,7 +29,11 @@ class ViewManager:
         self.compact_mode_window = None
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
+
+        # Tracks the monitor handle where Compact Mode was last active or where
+        # coordinates were invalidated.
         self.compact_last_monitor_handle = None
+
         self.main_window_geom = None
 
     def on_main_window_minimized(self, event=None):
@@ -69,9 +73,10 @@ class ViewManager:
 
     def invalidate_compact_mode_position(self):
         """Forgets the last position, forcing recalculation on the next compact transition."""
-        log.info("Invalidating compact mode position memory.")
-        self.compact_mode_last_x = None
-        self.compact_mode_last_y = None
+        if self.compact_mode_last_x is not None:
+            log.info("Invalidating compact mode position memory due to monitor change.")
+            self.compact_mode_last_x = None
+            self.compact_mode_last_y = None
 
     def _animate_window(self, start_time, duration, start_geom, end_geom, is_shrinking):
         """Helper method to animate the main window's geometry and alpha with easing."""
@@ -176,8 +181,9 @@ class ViewManager:
         widget_h = self.compact_mode_window.winfo_reqheight()
 
         # Decision Engine: Do we use the user's manual placement or recalculate?
-        # We only recalculate if the monitor changed. We ignore main window movement
-        # on the same screen.
+        # Recalculation only occurs if:
+        # 1. We have never saved a position.
+        # 2. The main window has moved to a DIFFERENT physical monitor since the last compact use.
         current_monitor = self.main_window.current_monitor_handle
 
         monitor_changed = self.compact_last_monitor_handle != current_monitor
@@ -187,7 +193,7 @@ class ViewManager:
             log.info(f"Restoring compact position: {self.compact_mode_last_x}, {self.compact_mode_last_y}")
             target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
         else:
-            log.info("Recalculating compact position (Monitor change or first run).")
+            log.info(f"Recalculating compact position (Monitor switch: {monitor_changed}).")
             mon_x, mon_y, mon_right, mon_bottom = get_monitor_work_area(self.main_window)
             main_x, main_y, main_w, _ = start_geom
 
