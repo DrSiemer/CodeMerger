@@ -55,12 +55,11 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    Format: `<<TAG>>[content]<<TAG>>`
 
-2. **INTRO & ANSWERS (PRE-CODE):**
+2. **INTRO, CHANGES & ANSWERS (PRE-CODE):**
+   Immediately before the code blocks, provide these sections in this order:
    - **<<INTRO>>**: Use this to provide a technical implementation plan or architectural summary.
+   - **<<CHANGES>>**: List of behavioral, algorithmic, or visual changes.
    - **<<ANSWERS>>**: Use this ONLY to answer conceptual or theoretical questions (usually ending in '?').
-   - **THE "LOGGING" PROHIBITION**: Do NOT use this section to report on your activity, confirm task completion, or summarize what you did (e.g., "I updated...", "Fixed the bug...", "Task complete").
-   - **IF YOU DESCRIBE YOUR CODE CHANGES IN THESE TAGS, IT IS A CRITICAL FAILURE.**
-   - **PLACEMENT RULE**: If your sentence describes a change you made to the code, it MUST go in the `<<CHANGES>>` section at the end of the response. If the user's request contains no explicit questions beyond the code changes, this section MUST be empty.
 
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
@@ -88,12 +87,8 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
 
-7. **CHANGES, DELETE & VERIFICATION (POST-CODE):**
-   Immediately following the final "--- End of file ---" marker, provide these sections wrapped in their own tags:
-
-   <<CHANGES>>
-   - List of behavioral/algorithmic/visual changes.
-   <<CHANGES>>
+7. **DELETE & VERIFICATION (POST-CODE):**
+   Immediately following the final "--- End of file ---" marker, provide these sections:
 
    <<DELETE>>
    STRICT FILE PATHS ONLY.

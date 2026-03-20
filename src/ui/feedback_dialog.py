@@ -50,20 +50,20 @@ class FeedbackDialog(tk.Toplevel):
         self.tab_indices = {}
         current_idx = 0
 
-        # Preferred order: Intro, Answers, Changes, Delete, Verification
+        # Tab order: Intro, Changes, Answers, Delete, Verification
         if plan.get('intro'):
             self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent)
             self.tab_indices['intro'] = current_idx
             current_idx += 1
 
-        if plan.get('answers'):
-            self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent)
-            self.tab_indices['answers'] = current_idx
-            current_idx += 1
-
         if plan.get('changes'):
             self._add_tab("Changes", plan.get('changes'), icon=self._blue_accent)
             self.tab_indices['changes'] = current_idx
+            current_idx += 1
+
+        if plan.get('answers'):
+            self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent)
+            self.tab_indices['answers'] = current_idx
             current_idx += 1
 
         if plan.get('delete'):
