@@ -200,17 +200,28 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     move_buttons_frame.grid_columnconfigure(3, weight=1, uniform="group1")
     move_buttons_frame.grid_columnconfigure(4, weight=1, uniform="group1")
 
-    narrow_padding = 20
-    window.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑ Top", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=narrow_padding, cursor='hand2')
+    # Minimalist Reorder Buttons with Muted Borders
+    btn_height = 34
+    window.move_to_top_button = RoundedButton(move_buttons_frame, text="↑↑", command=None, bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, width=40, height=btn_height, hollow=True, muted_border=True, cursor='hand2')
     window.move_to_top_button.grid(row=0, column=0, sticky='ew', padx=(0, 2))
-    window.move_up_button = RoundedButton(move_buttons_frame, text="↑ Up", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=narrow_padding, cursor='hand2')
+    ToolTip(window.move_to_top_button, "Move Selected to Top")
+
+    window.move_up_button = RoundedButton(move_buttons_frame, text="↑", command=None, bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, width=40, height=btn_height, hollow=True, muted_border=True, cursor='hand2')
     window.move_up_button.grid(row=0, column=1, sticky='ew', padx=(2, 2))
-    window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, hollow=True, h_padding=narrow_padding, cursor='hand2')
+    ToolTip(window.move_up_button, "Move Selected Up")
+
+    # Removal button reverted to original text
+    window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, height=btn_height, hollow=True, cursor='hand2')
     window.remove_button.grid(row=0, column=2, sticky='ew', padx=2)
-    window.move_down_button = RoundedButton(move_buttons_frame, text="↓ Down", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=narrow_padding, cursor='hand2')
+    ToolTip(window.remove_button, "Remove Selected from Merge List")
+
+    window.move_down_button = RoundedButton(move_buttons_frame, text="↓", command=None, bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, width=40, height=btn_height, hollow=True, muted_border=True, cursor='hand2')
     window.move_down_button.grid(row=0, column=3, sticky='ew', padx=(2, 2))
-    window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓ Bottom", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=narrow_padding, cursor='hand2')
+    ToolTip(window.move_down_button, "Move Selected Down")
+
+    window.move_to_bottom_button = RoundedButton(move_buttons_frame, text="↓↓", command=None, bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, width=40, height=btn_height, hollow=True, muted_border=True, cursor='hand2')
     window.move_to_bottom_button.grid(row=0, column=4, sticky='ew', padx=(2, 0))
+    ToolTip(window.move_to_bottom_button, "Move Selected to Bottom")
 
     for btn in [window.move_to_top_button, window.move_up_button, window.remove_button, window.move_down_button, window.move_to_bottom_button]:
         btn.set_state('disabled')

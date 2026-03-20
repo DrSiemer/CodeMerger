@@ -6,7 +6,7 @@ from ..font_utils import get_pil_font
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, h_padding=None, cursor=None, text_align='center'):
+    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, muted_border=False, h_padding=None, cursor=None, text_align='center'):
         # If a tuple like ("Segoe UI", 12) is passed, use it directly
         if font:
             self.tk_font_tuple = font
@@ -14,6 +14,7 @@ class RoundedButton(tk.Canvas):
         else:
             self.tk_font_tuple = c.FONT_DEFAULT
         self.hollow = hollow
+        self.muted_border = muted_border
         self.image = image
         self.text_align = text_align
         self.pil_font = get_pil_font(self.tk_font_tuple)
@@ -116,7 +117,11 @@ class RoundedButton(tk.Canvas):
         draw = ImageDraw.Draw(img)
 
         if self.hollow:
-            border_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
+            if self.muted_border:
+                border_color = self.disabled_text_color
+            else:
+                border_color = self.disabled_text_color if not self.is_enabled else self.original_fg_color
+
             scaled_border_width = 1 * scale
             inset = scaled_border_width / 2
             draw.rounded_rectangle(
@@ -204,6 +209,7 @@ class RoundedButton(tk.Canvas):
         bg_changed = 'bg' in kwargs
         fg_changed = 'fg' in kwargs
         hollow_changed = 'hollow' in kwargs
+        muted_border_changed = 'muted_border' in kwargs
 
         if text_changed:
             self.text = kwargs.pop('text')
@@ -237,9 +243,12 @@ class RoundedButton(tk.Canvas):
                 self.hover_color = self._adjust_brightness(self.base_color, -0.1)
                 self.click_color = self._adjust_brightness(self.base_color, -0.2)
 
+        if muted_border_changed:
+            self.muted_border = kwargs.pop('muted_border')
+
         if 'state' in kwargs:
             self.set_state(kwargs.pop('state'))
-        elif text_changed or width_changed or bg_changed or fg_changed or hollow_changed:
+        elif text_changed or width_changed or bg_changed or fg_changed or hollow_changed or muted_border_changed:
             # Force a redraw if appearance changed
             color = self.base_color if self.is_enabled else self.disabled_color
             self._draw(color)

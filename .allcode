@@ -16,9 +16,9 @@
         },
         {
           "path": "README.md",
-          "mtime": 1773870635.518687,
-          "hash": "ed30e8137335de7bc300fdd784369650413e20ee",
-          "tokens": 1767,
+          "mtime": 1773998603.155551,
+          "hash": "abf0023ca2edcd47f2aad0ca30b75c4d9ad63636",
+          "tokens": 1766,
           "lines": 109
         },
         {
@@ -116,10 +116,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1773963953.2436981,
-          "hash": "34046bab1afa9eefcb8b038cc912d6037f3095f9",
-          "tokens": 1503,
-          "lines": 140
+          "mtime": 1773999376.752835,
+          "hash": "41b8ba6e85dc6ce50bdb94fc3cd80553818c481c",
+          "tokens": 1469,
+          "lines": 159
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -179,9 +179,9 @@
         },
         {
           "path": "src/ui/info_messages.py",
-          "mtime": 1773963953.298081,
-          "hash": "7e184a84d0173a148d95c5e4ed2ab840cba5d858",
-          "tokens": 3819,
+          "mtime": 1773998905.1735878,
+          "hash": "18127c50a47237d87fdffbe657bc0b34838684ba",
+          "tokens": 3820,
           "lines": 292
         },
         {
@@ -200,10 +200,10 @@
         },
         {
           "path": "src/ui/widgets/rounded_button.py",
-          "mtime": 1772545862.8718815,
-          "hash": "14d30083536e447f946ad3bce23cf4e74ab0bdd5",
-          "tokens": 2277,
-          "lines": 252
+          "mtime": 1774001962.203998,
+          "hash": "8d049deffed86cd1a92cd5cc7633d9a61f5d51cf",
+          "tokens": 2345,
+          "lines": 261
         },
         {
           "path": "src/ui/widgets/switch_button.py",
@@ -431,10 +431,10 @@
         },
         {
           "path": "src/ui/file_manager/ui_setup.py",
-          "mtime": 1773870643.2843924,
-          "hash": "af3265e48d00a8800339cd655782913f834a1af4",
-          "tokens": 3431,
-          "lines": 232
+          "mtime": 1774001962.2049956,
+          "hash": "e8bcdebee5399ce69f441900308fa43c0a65fd6b",
+          "tokens": 3526,
+          "lines": 242
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
@@ -543,10 +543,10 @@
         },
         {
           "path": "src/ui/project_starter/step_details.py",
-          "mtime": 1773870643.351395,
-          "hash": "bd37bd26ceb6195476eeb84624aa0ce326fffa1c",
-          "tokens": 1097,
-          "lines": 81
+          "mtime": 1773998114.944431,
+          "hash": "02a079b5ff75ee334f76443c39822dce68353c45",
+          "tokens": 1108,
+          "lines": 84
         },
         {
           "path": "src/ui/project_starter/step_base_files.py",
@@ -585,8 +585,8 @@
         },
         {
           "path": "src/ui/project_starter/success_view.py",
-          "mtime": 1772545862.902881,
-          "hash": "6caf3540c05f31b38640330629c3102fa4ad9194",
+          "mtime": 1773998114.944431,
+          "hash": "4c00c2042657086344b682a797d49f78c29166e5",
           "tokens": 451,
           "lines": 39
         },
@@ -606,9 +606,9 @@
         },
         {
           "path": "src/ui/compact_mode.py",
-          "mtime": 1773963953.285083,
-          "hash": "96690412cfbcccb8b9c76c139cf944d37607cad3",
-          "tokens": 3450,
+          "mtime": 1773998781.3199239,
+          "hash": "ff66f7a50a152c8fba0c84585a96cb2f58ec02a7",
+          "tokens": 3451,
           "lines": 330
         },
         {
@@ -683,9 +683,9 @@
         },
         {
           "path": "src/ui/ui_builder.py",
-          "mtime": 1773963953.3320808,
-          "hash": "a2d322b969ae438e56a1df79299c77544e0939fe",
-          "tokens": 3129,
+          "mtime": 1773998474.941495,
+          "hash": "da5defaab6d44f0d1fbffd17983c17c466e33dd8",
+          "tokens": 3133,
           "lines": 215
         },
         {
