@@ -47,62 +47,62 @@ class FeedbackDialog(tk.Toplevel):
         self.notebook.grid(row=1, column=0, sticky="nsew", pady=(0, 15))
         self.renderers =[]
 
-        tab_indices = {}
+        self.tab_indices = {}
         current_idx = 0
 
         # Preferred order: Intro, Answers, Changes, Delete, Verification
         if plan.get('intro'):
             self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent)
-            tab_indices['intro'] = current_idx
+            self.tab_indices['intro'] = current_idx
             current_idx += 1
 
         if plan.get('answers'):
             self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent)
-            tab_indices['answers'] = current_idx
+            self.tab_indices['answers'] = current_idx
             current_idx += 1
 
         if plan.get('changes'):
             self._add_tab("Changes", plan.get('changes'), icon=self._blue_accent)
-            tab_indices['changes'] = current_idx
+            self.tab_indices['changes'] = current_idx
             current_idx += 1
 
         if plan.get('delete'):
             self._add_tab("Delete", plan.get('delete'), icon=self._red_accent)
-            tab_indices['delete'] = current_idx
+            self.tab_indices['delete'] = current_idx
             current_idx += 1
 
         if plan.get('verification'):
             self._add_tab("Verification", plan.get('verification'), icon=self._green_accent)
-            tab_indices['verification'] = current_idx
+            self.tab_indices['verification'] = current_idx
             current_idx += 1
 
         # Tab Selection Priority: answers, delete, verification
-        if 'answers' in tab_indices:
-            self.notebook.select(tab_indices['answers'])
-        elif 'delete' in tab_indices:
-            self.notebook.select(tab_indices['delete'])
-        elif 'verification' in tab_indices:
-            self.notebook.select(tab_indices['verification'])
+        if 'answers' in self.tab_indices:
+            self.notebook.select(self.tab_indices['answers'])
+        elif 'delete' in self.tab_indices:
+            self.notebook.select(self.tab_indices['delete'])
+        elif 'verification' in self.tab_indices:
+            self.notebook.select(self.tab_indices['verification'])
         elif current_idx > 0:
             self.notebook.select(0)
 
-        bottom_frame = Frame(main_frame, bg=c.DARK_BG)
-        bottom_frame.grid(row=2, column=0, sticky="ew", pady=(15, 0))
+        self.bottom_frame = Frame(main_frame, bg=c.DARK_BG)
+        self.bottom_frame.grid(row=2, column=0, sticky="ew", pady=(15, 0))
 
         # Checkbox
         self.show_var = BooleanVar(value=self.app_state.config.get('show_feedback_on_paste', True))
-        chk = ttk.Checkbutton(bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
+        chk = ttk.Checkbutton(self.bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
         chk.pack(side="left")
 
         if self.on_apply:
-            apply_btn = RoundedButton(bottom_frame, text="Apply Changes", command=self._handle_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=130, height=30, cursor="hand2")
-            apply_btn.pack(side="right")
+            self.apply_btn = RoundedButton(self.bottom_frame, text="Apply Changes", command=self._handle_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=130, height=30, cursor="hand2")
+            self.apply_btn.pack(side="right")
 
-            refuse_btn = RoundedButton(bottom_frame, text="Refuse Update", command=self._handle_refuse, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
-            refuse_btn.pack(side="right", padx=(0, 10))
+            self.refuse_btn = RoundedButton(self.bottom_frame, text="Refuse Update", command=self._handle_refuse, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
+            self.refuse_btn.pack(side="right", padx=(0, 10))
         else:
-            ok_button = RoundedButton(bottom_frame, text="OK", command=self.destroy, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
-            ok_button.pack(side="right")
+            self.ok_button = RoundedButton(self.bottom_frame, text="OK", command=self.destroy, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
+            self.ok_button.pack(side="right")
 
         self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply else self._handle_refuse())
         self.protocol("WM_DELETE_WINDOW", self._handle_refuse if self.on_apply else self.destroy)
@@ -146,9 +146,27 @@ class FeedbackDialog(tk.Toplevel):
         save_config(self.app_state.config)
 
     def _handle_apply(self):
+        """Applies the changes. If verification steps exist, remains open to show them."""
         if self.on_apply:
             self.on_apply()
-        self.destroy()
+
+        if 'verification' in self.tab_indices:
+            # Changes applied, so hide the decision buttons
+            self.apply_btn.pack_forget()
+            self.refuse_btn.pack_forget()
+
+            # Add a final Close/OK button to exit the window after verification is read
+            self.ok_button = RoundedButton(
+                self.bottom_frame, text="Close", command=self.destroy,
+                bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL,
+                width=100, height=30, cursor="hand2"
+            )
+            self.ok_button.pack(side="right")
+
+            # Navigate to verification steps automatically
+            self.notebook.select(self.tab_indices['verification'])
+        else:
+            self.destroy()
 
     def _handle_refuse(self):
         """Warns the user before discarding the update if we are in confirmation mode."""
