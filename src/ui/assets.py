@@ -2,7 +2,7 @@ import os
 from PIL import Image, ImageTk, ImageColor
 from ..core.paths import (
     TRASH_ICON_PATH, NEW_FILES_ICON_PATH, NEW_FILES_MANY_ICON_PATH, DEFAULTS_ICON_PATH,
-    LOGO_MASK_PATH, LOGO_MASK_SMALL_PATH, ICON_PATH,
+    LOGO_MASK_PATH, LOGO_MASK_SMALL_PATH, ICON_PATH, EDIT_ICON_PATH,
     COMPACT_MODE_CLOSE_ICON_PATH,
     FOLDER_ICON_PATH, FOLDER_REVEAL_ICON_PATH, PATHS_ICON_PATH, PATHS_ACTIVE_ICON_PATH,
     EXTRA_FILES_ICON_PATH, EXTRA_FILES_ICON_ACTIVE_PATH, ORDER_REQUEST_ICON_PATH,
@@ -23,6 +23,7 @@ class AppAssets:
         # Load main icons
         self.compact_icon_pil = self._load_image(ICON_PATH, (12, 12))
         self.trash_icon_pil = self._load_image(TRASH_ICON_PATH, (18, 18))
+        self.edit_icon_pil = self._load_image(EDIT_ICON_PATH, (14, 14))
         self.new_files_pil = self._load_image(NEW_FILES_ICON_PATH, (24, 24))
         self.new_files_compact_pil = self._load_image(NEW_FILES_ICON_PATH, (14, 14))
         self.new_files_many_compact_pil = self._load_image(NEW_FILES_MANY_ICON_PATH, (14, 14))
@@ -54,6 +55,7 @@ class AppAssets:
         # Placeholders for Tk images
         self.trash_icon_image = self.trash_icon_pil
         self.compact_icon_tk = None
+        self.edit_icon_tk = None
         self.new_files_icon = None
         self.defaults_icon = None
         self.folder_icon = None
@@ -81,6 +83,7 @@ class AppAssets:
         This method MUST be called after the Tk() root window has been created.
         """
         self.compact_icon_tk = self._pil_to_photoimage(self.compact_icon_pil)
+        self.edit_icon_tk = self._pil_to_photoimage(self.edit_icon_pil)
         self.new_files_icon = self._pil_to_photoimage(self.new_files_pil)
         self.defaults_icon = self._pil_to_photoimage(self.defaults_pil)
         self.folder_icon = self._pil_to_photoimage(self.folder_icon_pil)

@@ -12,8 +12,8 @@ INFO_MESSAGES = {
         "in that directory, that will store your file selections and project-specific instructions."
     ),
     "project_name": (
-        "Project Name: This is the active project. Double-click to set a custom name. Single-click "
-        "to switch to another project (same as Select Project button)."
+        "Project Name: This is the active project. Hover here to reveal the pen icon or double-click "
+        "to set a custom title. Single-click to switch to another project (same as Select Project button)."
     ),
     "color_swatch": (
         "Project Color: Pick a unique accent color for this project. This color is used in "

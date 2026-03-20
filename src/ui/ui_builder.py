@@ -37,6 +37,33 @@ def setup_ui(app):
     app.title_label = Label(app.title_container, textvariable=app.project_title_var, font=c.FONT_LARGE_BOLD, bg=c.TOP_BAR_BG, fg=c.TEXT_COLOR, anchor='w', cursor="hand2")
     app.title_label.grid(row=0, column=0, sticky='w')
 
+    # Store ToolTip reference for cross-widget suppression/restoration
+    app.title_tooltip = ToolTip(app.title_container, "Click to select project, double-click to edit title", delay=500)
+
+    # --- Pen Icon (Edit) Logic ---
+    app.edit_title_icon = Label(app.title_container, image=assets.edit_icon_tk, bg=c.TOP_BAR_BG, cursor="hand2")
+    app.edit_title_icon.grid(row=0, column=1, sticky='w', padx=(5, 0))
+    app.edit_title_icon.grid_remove() # Start hidden
+    app.edit_title_icon.bind("<ButtonRelease-1>", app.action_handlers.edit_project_title)
+    ToolTip(app.edit_title_icon, "Edit project title", delay=500)
+
+    # Tooltip Handoff: Hide parent tip when on icon, restore when leaving icon
+    app.edit_title_icon.bind("<Enter>", lambda e: app.title_tooltip.hide_tooltip(), add="+")
+    app.edit_title_icon.bind("<Leave>", lambda e: app.title_tooltip.schedule_show(), add="+")
+
+    def on_title_hover(event):
+        # Only show the icon if a project is actually selected
+        active_path = app.active_dir.get()
+        if active_path and active_path != "No project selected" and active_path != "Loading...":
+            app.edit_title_icon.grid()
+
+    def on_title_leave(event):
+        app.edit_title_icon.grid_remove()
+
+    # Apply hover bindings to the entire container
+    app.title_container.bind("<Enter>", on_title_hover, add="+")
+    app.title_container.bind("<Leave>", on_title_leave, add="+")
+
     # Set a minimum height on the container's grid row based on the label's actual required height
     app.update_idletasks()
     required_height = app.title_label.winfo_reqheight()
@@ -47,7 +74,6 @@ def setup_ui(app):
     app.title_label.bind("<Double-Button-1>", app.action_handlers.edit_project_title)
     app.title_container.bind("<Button-1>", app.action_handlers.handle_title_click)
     app.title_container.bind("<Double-Button-1>", app.action_handlers.edit_project_title)
-    ToolTip(app.title_container, "Click to select project, double-click to edit title", delay=500)
 
     # Right-aligned items
     right_frame = Frame(top_bar, bg=c.TOP_BAR_BG)
