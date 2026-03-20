@@ -248,7 +248,7 @@ class TodoView(tk.Frame):
 
         self.project_data["todo_md"] = ""
         self.project_data["todo_llm_response"] = ""
-        self.starter_controller.state.save()
+        self.starter_controller.starter_state.save()
 
         self.show_editor_view()
 
@@ -300,8 +300,8 @@ class TodoView(tk.Frame):
         self.project_data["todo_md"] = full_text
 
         # Sync the Starter State immediately to unlock the 'Next' button Logic
-        self.starter_controller.state.update_from_view(self)
-        self.starter_controller.state.save()
+        self.starter_controller.starter_state.update_from_view(self)
+        self.starter_controller.starter_state.save()
 
         # Set generic questions for the full text
         self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]

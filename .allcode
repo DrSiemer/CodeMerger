@@ -820,7 +820,6 @@
   "known_files": [
     ".github/workflows/release.yml",
     "README.md",
-    "assets/boilerplate/2do.txt",
     "assets/boilerplate/README.md",
     "assets/boilerplate/go_docker.bat",
     "assets/boilerplate/go_nodejs.bat",

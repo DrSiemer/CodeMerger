@@ -19,7 +19,7 @@ from .step_todo import TodoView
 from .step_generate import GenerateView
 from .step_base_files import StepBaseFilesView
 from .success_view import SuccessView
-from ..window_utils import position_window
+from ..window_utils import position_window, get_monitor_work_area
 from . import session_manager, generator, starter_state, starter_validator
 from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
@@ -35,6 +35,7 @@ class ProjectStarterDialog(tk.Toplevel):
     """
     def __init__(self, parent, app):
         super().__init__(parent)
+        # Hidden initially to allow for flicker-free monitor assignment
         self.withdraw()
         self.parent = parent
         self.app = app
@@ -42,8 +43,8 @@ class ProjectStarterDialog(tk.Toplevel):
         # Flag to track if a project was finished, preventing restoration of old project
         self.finished_successfully = False
 
-        # Initialize the state manager
-        self.state = starter_state.StarterState()
+        # Initialize the state manager. Renamed to starter_state to avoid shadowing self.state()
+        self.starter_state = starter_state.StarterState()
 
         # Font Scaling State (Unified)
         self.font_size = c.FONT_NORMAL[1] # Default 12
@@ -51,8 +52,6 @@ class ProjectStarterDialog(tk.Toplevel):
         self.title("Project Starter")
         self.iconbitmap(ICON_PATH)
 
-        self.geometry(c.PROJECT_STARTER_GEOMETRY)
-        self.minsize(900, 700)
         self.configure(bg=c.DARK_BG)
         self.grab_set()
 
@@ -74,13 +73,13 @@ class ProjectStarterDialog(tk.Toplevel):
         self._build_ui()
 
         # Load previous session
-        self.state.load()
+        self.starter_state.load()
 
         # Add traces to trigger validation updates when data changes
-        self.state.project_data["name"].trace_add("write", lambda *args: self.update_nav_state())
-        self.state.project_data["name"].trace_add("write", self._update_window_title)
-        self.state.project_data["parent_folder"].trace_add("write", lambda *args: self.update_nav_state())
-        self.state.project_data["stack"].trace_add("write", lambda *args: self.update_nav_state())
+        self.starter_state.project_data["name"].trace_add("write", lambda *args: self.update_nav_state())
+        self.starter_state.project_data["name"].trace_add("write", self._update_window_title)
+        self.starter_state.project_data["parent_folder"].trace_add("write", lambda *args: self.update_nav_state())
+        self.starter_state.project_data["stack"].trace_add("write", lambda *args: self.update_nav_state())
 
         # Info Toggle: Managed by InfoManager.place
         self.info_toggle_btn = tk.Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
@@ -94,12 +93,35 @@ class ProjectStarterDialog(tk.Toplevel):
         self._update_window_title()
         self._show_current_step_view()
 
-        position_window(self)
+        # --- Flicker-Free Monitor-Aware Maximization ---
+        # 1. Determine the monitor the parent window is currently on
+        m_left, m_top, m_right, m_bottom = get_monitor_work_area(self.parent)
+
+        # 2. Make the window invisible but 'mapped'
+        self.attributes("-alpha", 0.0)
+
+        # 3. Position the window at a standard size on the target monitor to pin the handle
+        self.geometry(f"600x400+{m_left + 50}+{m_top + 50}")
         self.deiconify()
-        self.focus_force()
+
+        # 4. Force OS to acknowledge the mapping and coordinate change
+        self.update_idletasks()
+
+        # 5. Apply maximized state
+        self.state('zoomed')
+
+        # 6. Delay showing the window to hide the OS "zoom" animation jank
+        # 200ms is usually sufficient for the DWM to finish its transition.
+        self.after(200, self._reveal_after_maximized)
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.bind("<Control-0>", self.reset_zoom)
+
+    def _reveal_after_maximized(self):
+        """Finalizes the launch by making the window visible and grabbing focus."""
+        if not self.winfo_exists(): return
+        self.attributes("-alpha", 1.0)
+        self.focus_force()
 
     def _build_ui(self):
         """Builds a rigid 4-row grid layout."""
@@ -170,24 +192,24 @@ class ProjectStarterDialog(tk.Toplevel):
         view_frame = tk.Frame(self.content_frame, bg=c.DARK_BG)
         view_frame.pack(expand=True, fill="both", padx=10, pady=(10, 0))
 
-        step = self.state.current_step
+        step = self.starter_state.current_step
 
         # Step availability logic
-        if step > 3 and not self.state.project_data["concept_md"]:
+        if step > 3 and not self.starter_state.project_data["concept_md"]:
              messagebox.showerror("Concept Missing", "You must complete and merge the Concept document before moving to later steps.", parent=self)
              self._go_to_step(3)
              return
-        if step == 6 and not self.state.project_data["todo_md"]:
+        if step == 6 and not self.starter_state.project_data["todo_md"]:
              messagebox.showerror("Content Missing", "You must complete and merge the TODO Plan before moving to the Generate step.", parent=self)
              self._go_to_step(5)
              return
 
-        if step == 1: self.current_view = DetailsView(view_frame, self.state.project_data, starter_controller=self)
-        elif step == 2: self.current_view = StepBaseFilesView(view_frame, self, self.state.project_data)
-        elif step == 3: self.current_view = ConceptView(view_frame, self, self.state.project_data)
-        elif step == 4: self.current_view = StackView(view_frame, self, self.state.project_data)
-        elif step == 5: self.current_view = TodoView(view_frame, self, self.state.project_data)
-        elif step == 6: self.current_view = GenerateView(view_frame, self.state.project_data, self.create_project, starter_controller=self)
+        if step == 1: self.current_view = DetailsView(view_frame, self.starter_state.project_data, starter_controller=self)
+        elif step == 2: self.current_view = StepBaseFilesView(view_frame, self, self.starter_state.project_data)
+        elif step == 3: self.current_view = ConceptView(view_frame, self, self.starter_state.project_data)
+        elif step == 4: self.current_view = StackView(view_frame, self, self.starter_state.project_data)
+        elif step == 5: self.current_view = TodoView(view_frame, self, self.starter_state.project_data)
+        elif step == 6: self.current_view = GenerateView(view_frame, self.starter_state.project_data, self.create_project, starter_controller=self)
 
         if self.current_view:
             self.current_view.pack(expand=True, fill="both")
@@ -210,7 +232,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def _update_window_title(self, *args):
         """Updates the dialog window title with the project name if set."""
-        name = self.state.project_data["name"].get().strip()
+        name = self.starter_state.project_data["name"].get().strip()
         if name:
             self.title(f"Project Starter - {name}")
         else:
@@ -218,7 +240,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def create_project(self, llm_output, include_base_reference=False, project_pitch="a new project"):
         """Processes the LLM output and creates the actual files on disk."""
-        is_valid, err_title, err_msg = starter_validator.validate_step(6, self.state.project_data)
+        is_valid, err_title, err_msg = starter_validator.validate_step(6, self.starter_state.project_data)
         if not is_valid:
             messagebox.showerror(err_title, err_msg, parent=self)
             return
@@ -227,8 +249,8 @@ class ProjectStarterDialog(tk.Toplevel):
             messagebox.showerror("Error", "LLM Result text area is empty.", parent=self)
             return
 
-        raw_project_name = self.state.project_data["name"].get()
-        parent_folder = self.state.project_data["parent_folder"].get()
+        raw_project_name = self.starter_state.project_data["name"].get()
+        parent_folder = self.starter_state.project_data["parent_folder"].get()
 
         # Parse recommended color from LLM response
         color_match = re.search(r"<<COLOR>>(.*?)<<COLOR>>", llm_output, re.DOTALL)
@@ -255,14 +277,14 @@ class ProjectStarterDialog(tk.Toplevel):
 
         # 1. Add concept.md and todo.md from the Starter state
         try:
-            concept_segs = self.state.project_data.get("concept_segments")
-            concept_content = SegmentManager.assemble_document(concept_segs, c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if concept_segs else self.state.project_data.get("concept_md", "")
+            concept_segs = self.starter_state.project_data.get("concept_segments")
+            concept_content = SegmentManager.assemble_document(concept_segs, c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if concept_segs else self.starter_state.project_data.get("concept_md", "")
             if concept_content:
                 (project_path / "concept.md").write_text(concept_content, encoding="utf-8")
                 files_created.append("concept.md")
 
-            todo_segs = self.state.project_data.get("todo_segments")
-            todo_content = SegmentManager.assemble_document(todo_segs, c.TODO_ORDER, c.TODO_PHASES) if todo_segs else self.state.project_data.get("todo_md", "")
+            todo_segs = self.starter_state.project_data.get("todo_segments")
+            todo_content = SegmentManager.assemble_document(todo_segs, c.TODO_ORDER, c.TODO_PHASES) if todo_segs else self.starter_state.project_data.get("todo_md", "")
             if todo_content:
                 (project_path / "todo.md").write_text(todo_content, encoding="utf-8")
                 files_created.append("todo.md")
@@ -271,7 +293,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
         # 2. Save the Starter config into the project folder for future reloading
         try:
-            config_data = self.state.get_dict()
+            config_data = self.starter_state.get_dict()
             starter_json_path = project_path / "project-starter.json"
             with open(starter_json_path, "w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=2)
@@ -281,8 +303,8 @@ class ProjectStarterDialog(tk.Toplevel):
 
         # Optional: Write Base Project Reference
         if include_base_reference:
-            base_path = self.state.project_data["base_project_path"].get()
-            base_files = self.state.project_data["base_project_files"]
+            base_path = self.starter_state.project_data["base_project_path"].get()
+            base_files = self.starter_state.project_data["base_project_files"]
             if generator.write_base_reference_file(project_path, base_path, base_files):
                 files_created.append("project_reference.md")
 
@@ -312,7 +334,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
     def _get_active_steps(self):
         steps = [1]
-        if self.state.project_data["base_project_path"].get():
+        if self.starter_state.project_data["base_project_path"].get():
             steps.append(2)
         steps.extend([3, 4, 5, 6])
         return steps
@@ -334,8 +356,8 @@ class ProjectStarterDialog(tk.Toplevel):
         self._refresh_tabs()
 
     def on_closing(self):
-        self.state.update_from_view(self.current_view)
-        self.state.save()
+        self.starter_state.update_from_view(self.current_view)
+        self.starter_state.save()
         if not self.finished_successfully:
             last_path = getattr(self.app, '_last_project_path', None)
             if last_path:
@@ -343,64 +365,64 @@ class ProjectStarterDialog(tk.Toplevel):
         self.destroy()
 
     def save_config_to_dialog(self):
-        self.state.update_from_view(self.current_view)
-        project_name = self.state.project_data["name"].get().strip()
+        self.starter_state.update_from_view(self.current_view)
+        project_name = self.starter_state.project_data["name"].get().strip()
         initial_file = f"{project_name}.json" if project_name else "project-config.json"
         filepath = filedialog.asksaveasfilename(title="Save Project Configuration", defaultextension=".json", initialfile=initial_file, filetypes=[("JSON files", "*.json")], parent=self)
         if not filepath: return
-        session_manager.save_session_data(self.state.get_dict(), filepath)
+        session_manager.save_session_data(self.starter_state.get_dict(), filepath)
         messagebox.showinfo("Success", f"Configuration saved to:\n{filepath}", parent=self)
 
     def load_config_from_dialog(self):
         filepath = filedialog.askopenfilename(title="Load Project Configuration", filetypes=[("JSON files", "*.json")], defaultextension=".json", parent=self)
         if not filepath: return
-        self.state.update_from_view(self.current_view)
-        self.state.load(filepath)
-        self.state.save()
-        self.state.current_step = 1
+        self.starter_state.update_from_view(self.current_view)
+        self.starter_state.load(filepath)
+        self.starter_state.save()
+        self.starter_state.current_step = 1
         self._refresh_tabs()
         self._show_current_step_view()
 
     def _start_over(self):
         if self.current_view and hasattr(self.current_view, 'handle_reset'):
             self.current_view.handle_reset()
-            self.state.update_from_view(self.current_view)
-            self.state.save()
+            self.starter_state.update_from_view(self.current_view)
+            self.starter_state.save()
             self.update_nav_state()
 
     def _clear_session_data(self):
         if messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh?", parent=self):
-            self.state.reset()
+            self.starter_state.reset()
             self._refresh_tabs()
             self._show_current_step_view()
 
     def _go_to_next_step(self):
         active_steps = self._get_active_steps()
-        if self.state.current_step in active_steps:
-            current_idx = active_steps.index(self.state.current_step)
+        if self.starter_state.current_step in active_steps:
+            current_idx = active_steps.index(self.starter_state.current_step)
             if current_idx < len(active_steps) - 1:
                 self._go_to_step(active_steps[current_idx + 1])
 
     def _go_to_prev_step(self):
         active_steps = self._get_active_steps()
-        if self.state.current_step in active_steps:
-            current_idx = active_steps.index(self.state.current_step)
+        if self.starter_state.current_step in active_steps:
+            current_idx = active_steps.index(self.starter_state.current_step)
             if current_idx > 0:
                 self._go_to_step(active_steps[current_idx - 1])
 
     def _go_to_step(self, target_step_id):
-        if target_step_id == self.state.current_step: return
-        is_accessible = (target_step_id <= self.state.max_accessible_step) or (target_step_id == 2)
+        if target_step_id == self.starter_state.current_step: return
+        is_accessible = (target_step_id <= self.starter_state.max_accessible_step) or (target_step_id == 2)
         if not is_accessible: return
-        self.state.update_from_view(self.current_view)
-        self.state.save()
-        if target_step_id > self.state.current_step:
-            is_valid, err_title, err_msg = starter_validator.validate_step(self.state.current_step, self.state.project_data)
+        self.starter_state.update_from_view(self.current_view)
+        self.starter_state.save()
+        if target_step_id > self.starter_state.current_step:
+            is_valid, err_title, err_msg = starter_validator.validate_step(self.starter_state.current_step, self.starter_state.project_data)
             if not is_valid:
                 messagebox.showerror(err_title, err_msg, parent=self)
                 return
-            self.state.max_accessible_step = max(self.state.max_accessible_step, target_step_id)
-        self.state.current_step = target_step_id
+            self.starter_state.max_accessible_step = max(self.starter_state.max_accessible_step, target_step_id)
+        self.starter_state.current_step = target_step_id
         self._show_current_step_view()
 
     def reset_zoom(self, event=None):
@@ -423,7 +445,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.next_button.pack_forget()
 
         active_steps = self._get_active_steps()
-        current_idx = active_steps.index(self.state.current_step)
+        current_idx = active_steps.index(self.starter_state.current_step)
 
         # Pack from right to left to keep [Prev] [Reset] [Next] order on the right side
         if current_idx < len(active_steps) - 1:
@@ -447,15 +469,15 @@ class ProjectStarterDialog(tk.Toplevel):
         self.update_nav_state()
 
     def update_nav_state(self):
-        if self.state.current_step == 6: return
+        if self.starter_state.current_step == 6: return
         self.next_button.config(text="Next >")
-        if self.state.current_step == 2:
+        if self.starter_state.current_step == 2:
             self.next_button.set_state('normal')
             self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
             self.next_tooltip.text = "Skip or confirm base files and proceed"
             return
-        if self.state.current_step == 4:
-            stack_val = self.state.project_data["stack"].get()
+        if self.starter_state.current_step == 4:
+            stack_val = self.starter_state.project_data["stack"].get()
             if not stack_val.strip():
                 self.next_button.config(text="Skip", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
                 self.next_tooltip.text = "Proceed without defining a specific stack"
@@ -464,7 +486,7 @@ class ProjectStarterDialog(tk.Toplevel):
                 self.next_tooltip.text = "Confirm stack and proceed to TODO plan"
             self.next_button.set_state('normal')
             return
-        is_valid, _, _ = starter_validator.validate_step(self.state.current_step, self.state.project_data)
+        is_valid, _, _ = starter_validator.validate_step(self.starter_state.current_step, self.starter_state.project_data)
         if is_valid:
             self.next_button.set_state('normal')
             self.next_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
@@ -478,8 +500,8 @@ class ProjectStarterDialog(tk.Toplevel):
         active_steps = self._get_active_steps()
         for i, tab in enumerate(self.tabs):
             step_id = active_steps[i]
-            is_active = (step_id == self.state.current_step)
-            is_accessible = (step_id <= self.state.max_accessible_step) or (step_id == 2)
+            is_active = (step_id == self.starter_state.current_step)
+            is_accessible = (step_id <= self.starter_state.max_accessible_step) or (step_id == 2)
             tab.set_state('normal' if is_accessible else 'disabled')
             tab.config(hollow=(not is_active), bg=(c.BTN_BLUE if is_active else c.BTN_GRAY_BG), fg=(c.BTN_BLUE_TEXT if is_active else (c.TEXT_COLOR if is_accessible else c.BTN_GRAY_TEXT)))
 
@@ -489,7 +511,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.nav_frame.grid_forget()
         def on_start_work():
             full_path = str(Path(parent_folder) / project_name)
-            self.state.reset()
+            self.starter_state.reset()
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
             self.app.after(100, self.app.show_and_raise)

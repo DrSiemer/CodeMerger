@@ -294,8 +294,8 @@ class ConceptView(tk.Frame):
         self.project_data["concept_md"] = full_text
 
         # Sync the Starter State immediately to unlock the 'Next' button Logic
-        self.starter_controller.state.update_from_view(self)
-        self.starter_controller.state.save()
+        self.starter_controller.starter_state.update_from_view(self)
+        self.starter_controller.starter_state.save()
 
         self.show_merged_view(full_text)
 
