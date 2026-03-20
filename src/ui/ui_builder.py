@@ -186,7 +186,7 @@ def setup_ui(app):
     copy_button_height = 60
     app.copy_wrapped_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy with Instructions", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.copy_wrapped_code, cursor='hand2')
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.open_instructions_window, cursor='hand2')
-    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Prompt Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
+    app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
 
     # --- Paste Container Layout ---
     app.paste_container = Frame(app.button_grid_frame, bg=c.DARK_BG)

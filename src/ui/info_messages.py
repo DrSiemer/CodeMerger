@@ -32,13 +32,13 @@ INFO_MESSAGES = {
         "around your code whenever you use 'Copy with Instructions'."
     ),
     "copy_code": (
-        "Copy Prompt Only (Ctrl+Shift+C): Merges all selected files with a standard prompt header. "
+        "Copy Code Only (Ctrl+Shift+C): Merges all selected files with a standard prompt header. "
         "Useful for providing updated context to an LLM without repeating project goals. "
         "Ctrl-clicking the Adaptive Copy button in Compact mode also triggers this action."
     ),
     "copy_with_instructions": (
         "Copy Prompt with Instructions (Ctrl+C): Merges code and wraps it in your custom Intro/Outro. "
-        "Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Prompt Only'."
+        "Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Code Only'."
     ),
     "paste_changes": (
         "Paste Changes (Ctrl+V): Open a review window to process AI responses. CodeMerger reads "
@@ -169,7 +169,7 @@ INFO_MESSAGES = {
 
     "set_prompts": "Define your default intro/outro texts.",
     "set_prompt_merged": (
-        "Default Header: The text prepended when using 'Copy Prompt Only'. Best used for a short "
+        "Default Header: The text prepended when using 'Copy Code Only'. Best used for a short "
         "instruction, telling the AI to use the code as updated context."
     ),
     "set_prompt_intro": (
