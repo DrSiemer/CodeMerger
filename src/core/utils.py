@@ -117,13 +117,9 @@ def get_file_hash(full_path):
     except (IOError, OSError):
         return None
 
-def _create_and_get_default_config():
-    """
-    Creates a new config object from the default template, saves it to disk,
-    and returns it. This is the definitive first-run function.
-    Info Mode is active by default on fresh installs.
-    """
-    config = {
+def _get_default_config_dict():
+    """Returns a fresh dictionary with all default application settings."""
+    return {
         'active_directory': '',
         'default_editor': '',
         'user_experience': '',
@@ -145,110 +141,118 @@ def _create_and_get_default_config():
             'filetypes': []
         }
     }
+
+def _create_and_get_default_config():
+    """
+    Creates a new config object from the default template, saves it to disk,
+    and returns it. This is the definitive first-run function.
+    """
+    config = _get_default_config_dict()
     try:
         # Load the list of filetypes from the bundled template
         with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
             config['user_lists']['filetypes'] = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
-        # Fallback in case the template is missing or corrupt
         pass
 
-    # Save the newly created config to disk before returning
     save_config(config)
     return config
 
 def load_config():
     """
-    Loads the main application configuration from config.json.
-    If the file is missing or corrupt, it's created from the default template.
-    Updates to an existing config set Info Mode to False by default.
+    Loads the main application configuration using a non-destructive reconciliation strategy.
+    If the file exists, it merges user values with the default template to ensure all keys exist.
+    If migrations are needed, they are applied and the result is saved back to disk.
     """
+    defaults = _get_default_config_dict()
+
+    # Pre-populate default filetypes in the template
     try:
-        with open(CONFIG_FILE_PATH, 'r', encoding='utf-8-sig') as f:
-            config = json.load(f)
-            migration_occurred = False
+        with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
+            defaults['user_lists']['filetypes'] = json.load(f)
+    except Exception:
+        pass
 
-            # --- Backward Compatibility: Migrate old flat list format to new nested format ---
-            if 'recent_projects' in config or 'filetypes' in config or 'recent_directories' in config:
-                migration_occurred = True
-                user_lists_group = config.setdefault('user_lists', {})
-
-                # Handle 'recent_projects' or the even older 'recent_directories'
-                if 'recent_projects' in config:
-                    user_lists_group['recent_projects'] = config.pop('recent_projects', [])
-                elif 'recent_directories' in config:
-                    user_lists_group['recent_projects'] = config.pop('recent_directories', [])
-
-                if 'filetypes' in config:
-                    user_lists_group['filetypes'] = config.pop('filetypes', [])
-
-            # --- Standard key validation and addition for backward compatibility ---
-            if 'user_lists' not in config or 'filetypes' not in config.get('user_lists', {}):
-                raise ValueError("Config is missing 'filetypes' key.")
-            if 'default_editor' not in config:
-                config['default_editor'] = ''
-            if 'default_parent_folder' in config:
-                config.pop('default_parent_folder')
-            if 'user_experience' not in config:
-                config['user_experience'] = ''
-            if 'scan_for_secrets' not in config:
-                config['scan_for_secrets'] = False
-            if 'last_update_check' not in config:
-                config['last_update_check'] = None
-            if 'check_for_updates' in config:
-                del config['check_for_updates']
-            if 'enable_new_file_check' not in config:
-                config['enable_new_file_check'] = True
-            if 'show_feedback_on_paste' not in config:
-                config['show_feedback_on_paste'] = True
-            if 'new_file_check_interval' not in config:
-                config['new_file_check_interval'] = 5
-            if 'copy_merged_prompt' not in config:
-                config['copy_merged_prompt'] = DEFAULT_COPY_MERGED_PROMPT
-            if 'default_intro_prompt' not in config:
-                config['default_intro_prompt'] = DEFAULT_INTRO_PROMPT
-            if 'default_outro_prompt' not in config:
-                config['default_outro_prompt'] = DEFAULT_OUTRO_PROMPT
-            if 'line_count_enabled' in config:
-                config['token_count_enabled'] = config.pop('line_count_enabled')
-            if 'token_count_enabled' not in config:
-                config['token_count_enabled'] = TOKEN_COUNT_ENABLED_DEFAULT
-            if 'token_limit' not in config:
-                config['token_limit'] = 0
-            if 'line_count_threshold' in config:
-                config.pop('line_count_threshold')
-            if 'token_count_threshold' in config:
-                config.pop('token_count_threshold')
-            if 'enable_compact_mode_on_minimize' not in config:
-                config['enable_compact_mode_on_minimize'] = True
-            if 'add_all_warning_threshold' not in config:
-                config['add_all_warning_threshold'] = ADD_ALL_WARNING_THRESHOLD_DEFAULT
-            if 'info_mode_active' not in config:
-                config['info_mode_active'] = False
-                migration_occurred = True
-
-            # If a migration was performed, save the newly structured config immediately.
-            if migration_occurred:
-                save_config(config)
-
-            return config
-    except (FileNotFoundError, json.JSONDecodeError, ValueError, IOError):
-        # Any failure results in creating a new, correctly structured config
+    if not os.path.exists(CONFIG_FILE_PATH):
         return _create_and_get_default_config()
 
-def save_config(config):
-    """Saves the complete application configuration object to config.json"""
-    # Force 'user_lists' to be the last key for consistent ordering.
-    user_lists_data = config.pop('user_lists', {'recent_projects': [], 'filetypes': []})
+    try:
+        with open(CONFIG_FILE_PATH, 'r', encoding='utf-8-sig') as f:
+            loaded_config = json.load(f)
+    except (json.JSONDecodeError, IOError):
+        return _create_and_get_default_config()
 
-    # Ensure filetypes within the group are sorted alphabetically for consistency
+    migration_occurred = False
+
+    # --- 1. Key Migrations (Legacy Formats) ---
+    # Handle the transition from flat keys to nested 'user_lists'
+    if 'recent_projects' in loaded_config or 'filetypes' in loaded_config or 'recent_directories' in loaded_config:
+        migration_occurred = True
+        user_lists = loaded_config.setdefault('user_lists', {})
+        if 'recent_projects' in loaded_config:
+            user_lists['recent_projects'] = loaded_config.pop('recent_projects', [])
+        elif 'recent_directories' in loaded_config:
+            user_lists['recent_projects'] = loaded_config.pop('recent_directories', [])
+        if 'filetypes' in loaded_config:
+            user_lists['filetypes'] = loaded_config.pop('filetypes', [])
+
+    # Handle singular renames
+    if 'line_count_enabled' in loaded_config:
+        loaded_config['token_count_enabled'] = loaded_config.pop('line_count_enabled')
+        migration_occurred = True
+
+    # Cleanup unused legacy keys
+    for old_key in ['default_parent_folder', 'check_for_updates', 'line_count_threshold', 'token_count_threshold']:
+        if old_key in loaded_config:
+            loaded_config.pop(old_key)
+            migration_occurred = True
+
+    # --- 2. Deep Reconciliation ---
+    # Merge the loaded config into the defaults. This ensures all keys exist
+    # (including newly added features) without wiping old settings.
+    final_config = defaults.copy()
+
+    # Check for missing top-level keys before update to determine if we should save
+    for key in defaults:
+        if key not in loaded_config:
+            # We don't mark migration_occurred for 'info_mode_active' if it's the only thing,
+            # to avoid forced saves on every single boot for existing users unless necessary.
+            if key != 'info_mode_active':
+                migration_occurred = True
+
+    final_config.update(loaded_config)
+
+    # Handle nested user_lists merge specifically to avoid overwriting the whole group
+    if 'user_lists' in loaded_config:
+        final_config['user_lists'] = defaults['user_lists'].copy()
+        final_config['user_lists'].update(loaded_config['user_lists'])
+
+    if migration_occurred:
+        save_config(final_config)
+
+    return final_config
+
+def save_config(config):
+    """
+    Saves the application configuration to config.json.
+    Operates on a copy to avoid mutating the configuration object in memory.
+    """
+    # Create a local copy to avoid side effects (like the 'pop' bug)
+    export_data = config.copy()
+
+    user_lists_data = export_data.pop('user_lists', {'recent_projects': [], 'filetypes': []})
+
+    # Ensure filetypes are sorted alphabetically for consistency
     if isinstance(user_lists_data.get('filetypes'), list):
         user_lists_data['filetypes'].sort(key=lambda item: item['ext'])
 
-    config['user_lists'] = user_lists_data
+    export_data['user_lists'] = user_lists_data
 
-    with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
-        json.dump(config, f, indent=2)
+    try:
+        with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(export_data, f, indent=2)
+    except IOError as e:
+        print(f"Error saving configuration: {e}")
 
 def update_and_get_new_filetypes():
     """

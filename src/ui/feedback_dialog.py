@@ -22,7 +22,18 @@ class FeedbackDialog(tk.Toplevel):
         self.title("AI Response Review")
         self.iconbitmap(ICON_PATH)
         self.configure(bg=c.DARK_BG)
-        self.transient(parent)
+
+        # --- Topmost Decoupling ---
+        is_parent_topmost = False
+        try:
+            is_parent_topmost = self.parent.attributes("-topmost")
+        except Exception:
+            pass
+
+        if not is_parent_topmost:
+            self.transient(parent)
+
+        self.attributes("-topmost", False)
         self.grab_set()
 
         apply_dark_theme(self)

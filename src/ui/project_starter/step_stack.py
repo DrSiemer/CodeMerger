@@ -114,9 +114,16 @@ class StackView(tk.Frame):
             self.load_exp_btn.pack_forget()
 
     def _save_experience(self):
+        """Saves current text to global config and synchronizes main app state."""
         new_exp = self.experience_text.get("1.0", "end-1c").strip()
         self.app_config['user_experience'] = new_exp
         save_config(self.app_config)
+
+        try:
+            self.starter_controller.app.app_state.reload()
+        except Exception:
+            pass
+
         self.save_exp_btn.pack_forget()
         self.load_exp_btn.pack_forget()
 
