@@ -102,7 +102,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    <<VERIFICATION>>"""
 
         # Important reminder on the absolute end
-        automation_warning = "Note: This output is processed by a parser. Strict adherence to the format and mandatory tag closures is required for technical compatibility."
+        automation_warning = "CRITICAL: Your output is parsed by a script. You MUST use the exact XML tags and --- File: --- wrappers shown in the template, or the system will crash."
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}\n\n{automation_warning}"

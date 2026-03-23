@@ -8,18 +8,18 @@
     "Default": {
       "selected_files": [
         {
-          "path": "llm.md",
-          "mtime": 1774263263.8523734,
-          "hash": "48478b2f9d9b6c576e83c396cf869b58f778d1f0",
-          "tokens": 3704,
-          "lines": 115
-        },
-        {
           "path": "README.md",
           "mtime": 1774259204.109317,
           "hash": "fd2b90908000cef6232818392df02a1dec3b2cfd",
           "tokens": 1801,
           "lines": 110
+        },
+        {
+          "path": "llm.md",
+          "mtime": 1774263263.8523734,
+          "hash": "48478b2f9d9b6c576e83c396cf869b58f778d1f0",
+          "tokens": 3704,
+          "lines": 115
         },
         {
           "path": "requirements.txt",
@@ -34,6 +34,20 @@
           "hash": "82e1023c396a27d6476bb67c244601e47c157f93",
           "tokens": 11,
           "lines": 3
+        },
+        {
+          "path": "run.py",
+          "mtime": 1758726639.7019978,
+          "hash": "0171f0345556bf0145d65b50baf26e2a40af3bfb",
+          "tokens": 21,
+          "lines": 4
+        },
+        {
+          "path": "src/codemerger.py",
+          "mtime": 1770654762.8932688,
+          "hash": "1cd07110583a5d714c3252d304e1b9eade20eda1",
+          "tokens": 429,
+          "lines": 62
         },
         {
           "path": "src/constants.py",
@@ -57,6 +71,21 @@
           "lines": 118
         },
         {
+          "path": "src/core/prompts.py",
+          "mtime": 1773923257.958029,
+          "hash": "7eed606cde8653fd4ea808ba5b9ffcb7cc428a47",
+          "tokens": 1979,
+          "lines": 152
+        },
+        {
+          "path": "src/core/utils.py",
+          "mtime": 1774256964.0875568,
+          "hash": "3d21ade37374f4a9976e9ded7e00e3092639148c",
+          "tokens": 3498,
+          "lines": 435,
+          "ignore_tokens": false
+        },
+        {
           "path": "src/core/logger.py",
           "mtime": 1770647141.1508079,
           "hash": "515b0ac34e6a883fbff12ee42666023e38124ab4",
@@ -69,21 +98,6 @@
           "hash": "e2c3a1c68db148ce4e3a2414be5ee389b2c48ffe",
           "tokens": 526,
           "lines": 59
-        },
-        {
-          "path": "src/core/utils.py",
-          "mtime": 1774256964.0875568,
-          "hash": "3d21ade37374f4a9976e9ded7e00e3092639148c",
-          "tokens": 3498,
-          "lines": 435,
-          "ignore_tokens": false
-        },
-        {
-          "path": "src/core/prompts.py",
-          "mtime": 1773923257.958029,
-          "hash": "7eed606cde8653fd4ea808ba5b9ffcb7cc428a47",
-          "tokens": 1979,
-          "lines": 152
         },
         {
           "path": "src/app_state.py",
@@ -106,13 +120,6 @@
           "hash": "a3fdb48e7474c5e341e985922a85911856b5612d",
           "tokens": 463,
           "lines": 60
-        },
-        {
-          "path": "src/core/project_manager.py",
-          "mtime": 1771604843.3317907,
-          "hash": "1e857c0114d04a62a11b8deeedc510e0f7ed4627",
-          "tokens": 814,
-          "lines": 102
         },
         {
           "path": "src/core/merger.py",
@@ -150,6 +157,13 @@
           "lines": 203
         },
         {
+          "path": "src/core/project_manager.py",
+          "mtime": 1771604843.3317907,
+          "hash": "1e857c0114d04a62a11b8deeedc510e0f7ed4627",
+          "tokens": 814,
+          "lines": 102
+        },
+        {
           "path": "src/ui/assets.py",
           "mtime": 1774256964.1250174,
           "hash": "5e1bb33a134b496493d1e46241306aa945866a6b",
@@ -176,27 +190,6 @@
           "hash": "646cc8746fe627bf006d1a97e03c679e707f1190",
           "tokens": 1373,
           "lines": 143
-        },
-        {
-          "path": "src/ui/info_messages.py",
-          "mtime": 1774261835.3957968,
-          "hash": "9002fa68f9344d31484e28f3aae5bf8c643f499e",
-          "tokens": 3887,
-          "lines": 297
-        },
-        {
-          "path": "src/ui/info_manager.py",
-          "mtime": 1773923258.0669298,
-          "hash": "1eb23e5300791984050a8247f15f3341488a7b11",
-          "tokens": 1520,
-          "lines": 154
-        },
-        {
-          "path": "src/ui/tooltip.py",
-          "mtime": 1758720729.2563279,
-          "hash": "612ea9a29b7fc05b985105a02f247c905faa64b3",
-          "tokens": 400,
-          "lines": 60
         },
         {
           "path": "src/ui/widgets/rounded_button.py",
@@ -248,6 +241,125 @@
           "lines": 103
         },
         {
+          "path": "src/ui/tooltip.py",
+          "mtime": 1758720729.2563279,
+          "hash": "612ea9a29b7fc05b985105a02f247c905faa64b3",
+          "tokens": 400,
+          "lines": 60
+        },
+        {
+          "path": "src/ui/info_messages.py",
+          "mtime": 1774261835.3957968,
+          "hash": "9002fa68f9344d31484e28f3aae5bf8c643f499e",
+          "tokens": 3887,
+          "lines": 297
+        },
+        {
+          "path": "src/ui/info_manager.py",
+          "mtime": 1773923258.0669298,
+          "hash": "1eb23e5300791984050a8247f15f3341488a7b11",
+          "tokens": 1520,
+          "lines": 154
+        },
+        {
+          "path": "src/ui/compact_status.py",
+          "mtime": 1762434765.495304,
+          "hash": "5fcc5c7d016f22e07ea032140dc173553d3de2a4",
+          "tokens": 447,
+          "lines": 53
+        },
+        {
+          "path": "src/ui/compact_mode.py",
+          "mtime": 1774259204.1103175,
+          "hash": "0faf1691e3dc82f8b6160fedb5512c40e6242ffe",
+          "tokens": 3535,
+          "lines": 342
+        },
+        {
+          "path": "src/ui/view_manager.py",
+          "mtime": 1774259384.6883297,
+          "hash": "3f48186a57b8c4d3fae67efab5ef2120ae5c3035",
+          "tokens": 2776,
+          "lines": 283
+        },
+        {
+          "path": "src/ui/file_monitor.py",
+          "mtime": 1771604843.3904886,
+          "hash": "89fc8031a9f98691df8f946dce74488ed04763da",
+          "tokens": 1782,
+          "lines": 203
+        },
+        {
+          "path": "src/ui/app_window_parts/helpers.py",
+          "mtime": 1768828778.999754,
+          "hash": "782d8453dc4bb5e27379cad0eb1185412b433fec",
+          "tokens": 303,
+          "lines": 40
+        },
+        {
+          "path": "src/ui/app_window_parts/status_bar_manager.py",
+          "mtime": 1763047285.9509306,
+          "hash": "94ea75d7486a8898a494eeb579f449bff67730e9",
+          "tokens": 742,
+          "lines": 68
+        },
+        {
+          "path": "src/ui/app_window_parts/button_state_manager.py",
+          "mtime": 1774259204.1103175,
+          "hash": "0bc4b502783f80f9882662be3605d3d8207a3e40",
+          "tokens": 1420,
+          "lines": 149
+        },
+        {
+          "path": "src/ui/app_window_parts/ui_callbacks.py",
+          "mtime": 1774258281.2368577,
+          "hash": "b67414c3fb2856a838abc8bc6c82193df48cd66f",
+          "tokens": 231,
+          "lines": 32
+        },
+        {
+          "path": "src/ui/app_window_parts/project_actions.py",
+          "mtime": 1768828779.022995,
+          "hash": "d1487348ab1e53e08066044b145984d40780394a",
+          "tokens": 838,
+          "lines": 116
+        },
+        {
+          "path": "src/ui/app_window_parts/profile_actions.py",
+          "mtime": 1768828784.1755383,
+          "hash": "44e38ee2892344808baac3c60ab7cb71db2ade6d",
+          "tokens": 1066,
+          "lines": 133
+        },
+        {
+          "path": "src/ui/app_window_parts/action_handlers.py",
+          "mtime": 1774259359.6430624,
+          "hash": "2243bd5ba26406c7e7859bde0a3f210b9286c370",
+          "tokens": 4072,
+          "lines": 499
+        },
+        {
+          "path": "src/ui/app_window_parts/event_handlers.py",
+          "mtime": 1774256964.1240163,
+          "hash": "1d6ae47585bcc8428dcb0cc28db20af24f5e583b",
+          "tokens": 588,
+          "lines": 77
+        },
+        {
+          "path": "src/ui/ui_builder.py",
+          "mtime": 1774258032.4614403,
+          "hash": "81c49ce493b5dddbbf0a4bab3488b2de5faad5f2",
+          "tokens": 3456,
+          "lines": 243
+        },
+        {
+          "path": "src/ui/app_window.py",
+          "mtime": 1774258336.899488,
+          "hash": "8f6e08fde06e06e3a4a68fc62a7e829554320c13",
+          "tokens": 2363,
+          "lines": 275
+        },
+        {
           "path": "src/ui/custom_error_dialog.py",
           "mtime": 1768828784.198942,
           "hash": "5cb9345544813a0dff72087c27246c6466e70caa",
@@ -290,13 +402,6 @@
           "lines": 384
         },
         {
-          "path": "src/ui/instructions_window.py",
-          "mtime": 1773923258.0811853,
-          "hash": "5bb3106f71379a1bdbec2a945684aeb82d8379c6",
-          "tokens": 1765,
-          "lines": 171
-        },
-        {
           "path": "src/ui/paste_changes_dialog.py",
           "mtime": 1774257728.754694,
           "hash": "41a789c21b468f7d56cb07960d5909bb9edb703b",
@@ -309,6 +414,13 @@
           "hash": "a130aef517ac4d5a615c1f8b2090541f4df86cf9",
           "tokens": 2006,
           "lines": 208
+        },
+        {
+          "path": "src/ui/instructions_window.py",
+          "mtime": 1773923258.0811853,
+          "hash": "5bb3106f71379a1bdbec2a945684aeb82d8379c6",
+          "tokens": 1765,
+          "lines": 171
         },
         {
           "path": "src/ui/settings/collapsible_section.py",
@@ -410,9 +522,9 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1771604843.3748846,
-          "hash": "60f8a834d50d9cdfb13350fb2531d42690d65a71",
-          "tokens": 2497,
+          "mtime": 1774264036.1321573,
+          "hash": "e343693ac3abb27da47eb92c11ee2a6aaeebd0be",
+          "tokens": 2479,
           "lines": 270
         },
         {
@@ -444,6 +556,195 @@
           "lines": 319
         },
         {
+          "path": "src/ui/project_starter/session_manager.py",
+          "mtime": 1768828779.1222806,
+          "hash": "9280f6e4c2f18b1a78f8ef641e1da2338b53527e",
+          "tokens": 317,
+          "lines": 43
+        },
+        {
+          "path": "src/ui/project_starter/starter_state.py",
+          "mtime": 1773923258.1589277,
+          "hash": "a72e7ae1601f4aca88cf86cd4f4b6e6e7be30d95",
+          "tokens": 1937,
+          "lines": 205
+        },
+        {
+          "path": "src/ui/project_starter/starter_validator.py",
+          "mtime": 1772458637.3528166,
+          "hash": "541dd40ce1139ea6492de9fc2b6147f4a1a3eebd",
+          "tokens": 472,
+          "lines": 62
+        },
+        {
+          "path": "src/ui/project_starter/segment_manager.py",
+          "mtime": 1773923258.1358812,
+          "hash": "ecb1741cc518c34474392bcf9b8a5c76589cb0ef",
+          "tokens": 753,
+          "lines": 98
+        },
+        {
+          "path": "src/ui/project_starter/generator.py",
+          "mtime": 1774256964.1513598,
+          "hash": "64c1662685640045fac8ce036afed21cd52cef6f",
+          "tokens": 1037,
+          "lines": 127
+        },
+        {
+          "path": "src/ui/project_starter/starter_prompts.py",
+          "mtime": 1774264872.8882153,
+          "hash": "b85ea4ce1dc4684c77184275e2bf60c53a173e55",
+          "tokens": 806,
+          "lines": 84
+        },
+        {
+          "path": "src/ui/project_starter/widgets/sidebar_item.py",
+          "mtime": 1774262085.197804,
+          "hash": "84720dfcf13ead5649f7a3ccc77dd83c76d0c14c",
+          "tokens": 1271,
+          "lines": 145
+        },
+        {
+          "path": "src/ui/project_starter/widgets/reviewer_sidebar.py",
+          "mtime": 1774264110.8211648,
+          "hash": "ebca9cd33ebb303bf9bc91ef8aa57f65851d045b",
+          "tokens": 410,
+          "lines": 53
+        },
+        {
+          "path": "src/ui/project_starter/widgets/reviewer_questions.py",
+          "mtime": 1774264110.8224444,
+          "hash": "a2ba890f8a1b2be66a562285c525a54b31983bc3",
+          "tokens": 953,
+          "lines": 90
+        },
+        {
+          "path": "src/ui/project_starter/widgets/reviewer_footer.py",
+          "mtime": 1774265013.789516,
+          "hash": "811fa2b75dcdddffbb82248d207caa414674b2db",
+          "tokens": 831,
+          "lines": 75
+        },
+        {
+          "path": "src/ui/project_starter/widgets/notes_dialog.py",
+          "mtime": 1771604843.3936157,
+          "hash": "763d648ed095aab484f7e765b02b7fed3412544b",
+          "tokens": 482,
+          "lines": 49
+        },
+        {
+          "path": "src/ui/project_starter/widgets/rewrite_dialog.py",
+          "mtime": 1774262359.7930865,
+          "hash": "9714d934ee248e0496ab8776985ea114cc5a0681",
+          "tokens": 2065,
+          "lines": 194
+        },
+        {
+          "path": "src/ui/project_starter/widgets/sync_dialog.py",
+          "mtime": 1770647141.2155857,
+          "hash": "93c595373a7281716abeb8103bee6f418f5ccbbe",
+          "tokens": 1001,
+          "lines": 84
+        },
+        {
+          "path": "src/ui/project_starter/widgets/segmented_reviewer.py",
+          "mtime": 1774265286.5124657,
+          "hash": "4aefaa746619f8817e4e0804fc39a2f6face4d9e",
+          "tokens": 3808,
+          "lines": 375
+        },
+        {
+          "path": "src/ui/project_starter/widgets/full_text_reviewer.py",
+          "mtime": 1774264872.8892155,
+          "hash": "c745f80137b8ece83d2c385ad094e5c52a8e6c38",
+          "tokens": 2246,
+          "lines": 205
+        },
+        {
+          "path": "src/ui/project_starter/step_details.py",
+          "mtime": 1774256964.153361,
+          "hash": "02a079b5ff75ee334f76443c39822dce68353c45",
+          "tokens": 1108,
+          "lines": 84
+        },
+        {
+          "path": "src/ui/project_starter/step_base_files.py",
+          "mtime": 1773923258.1761532,
+          "hash": "a65b5fc05207268b73bdc88d63e44d8063a18912",
+          "tokens": 3311,
+          "lines": 336
+        },
+        {
+          "path": "src/ui/project_starter/step_concept.py",
+          "mtime": 1774264872.8892155,
+          "hash": "b1e261dc9537840b777de7b9efcc5fabd2e278ed",
+          "tokens": 2973,
+          "lines": 251
+        },
+        {
+          "path": "src/ui/project_starter/step_stack.py",
+          "mtime": 1774261311.7222543,
+          "hash": "63122111ba98652f607893697037ef65aa7bb8d0",
+          "tokens": 3267,
+          "lines": 273
+        },
+        {
+          "path": "src/ui/project_starter/step_todo.py",
+          "mtime": 1774265500.696203,
+          "hash": "1477f03506191d26eb69fc740af21c6420ec1e86",
+          "tokens": 2548,
+          "lines": 215
+        },
+        {
+          "path": "src/ui/project_starter/step_generate.py",
+          "mtime": 1774263778.5672977,
+          "hash": "9de581c50bcc6d71121b3e6bc9f11fe7120a50ba",
+          "tokens": 3581,
+          "lines": 318
+        },
+        {
+          "path": "src/ui/project_starter/success_view.py",
+          "mtime": 1774263824.8729692,
+          "hash": "555355ad0ce23e2c66890ae1c57ba915c028bd07",
+          "tokens": 524,
+          "lines": 54
+        },
+        {
+          "path": "src/ui/project_starter/starter_navigation.py",
+          "mtime": 1774268644.8561985,
+          "hash": "bb5f2d20ee993b088a3984d6f1369ce9cfb03b85",
+          "tokens": 972,
+          "lines": 103
+        },
+        {
+          "path": "src/ui/project_starter/starter_actions.py",
+          "mtime": 1774268644.8571985,
+          "hash": "116172d49e6020e730e0b2de17c9cb95146cf4a2",
+          "tokens": 406,
+          "lines": 42
+        },
+        {
+          "path": "src/ui/project_starter/starter_project_creator.py",
+          "mtime": 1774268644.8571985,
+          "hash": "425dd295d6a6e3d7b7472405fd0303cb47f4e9bd",
+          "tokens": 1025,
+          "lines": 105
+        },
+        {
+          "path": "src/ui/project_starter/starter_ui_builder.py",
+          "mtime": 1774268644.8561985,
+          "hash": "181511b988b3c97f0bf8ed8bcd4f2f0f75505fe4",
+          "tokens": 1150,
+          "lines": 83
+        },
+        {
+          "path": "src/ui/project_starter/starter_dialog.py",
+          "mtime": 1774268644.8571985,
+          "hash": "a8e62c1247a177546643887fb7d02ed8852606d0",
+          "tokens": 1714,
+          "lines": 189
+        },
+        {
           "path": "assets/reference/concept_questions.json",
           "mtime": 1770647141.0949862,
           "hash": "aa50e371179585a1a80c9a4163939e386e2b21f4",
@@ -470,230 +771,6 @@
           "hash": "7ccfbc3fb41d3f73047238cd3660549deca857f4",
           "tokens": 1135,
           "lines": 88
-        },
-        {
-          "path": "src/ui/project_starter/session_manager.py",
-          "mtime": 1768828779.1222806,
-          "hash": "9280f6e4c2f18b1a78f8ef641e1da2338b53527e",
-          "tokens": 317,
-          "lines": 43
-        },
-        {
-          "path": "src/ui/project_starter/starter_state.py",
-          "mtime": 1773923258.1589277,
-          "hash": "a72e7ae1601f4aca88cf86cd4f4b6e6e7be30d95",
-          "tokens": 1937,
-          "lines": 205
-        },
-        {
-          "path": "src/ui/project_starter/starter_validator.py",
-          "mtime": 1772458637.3528166,
-          "hash": "541dd40ce1139ea6492de9fc2b6147f4a1a3eebd",
-          "tokens": 472,
-          "lines": 62
-        },
-        {
-          "path": "src/ui/project_starter/generator.py",
-          "mtime": 1774256964.1513598,
-          "hash": "64c1662685640045fac8ce036afed21cd52cef6f",
-          "tokens": 1037,
-          "lines": 127
-        },
-        {
-          "path": "src/ui/project_starter/segment_manager.py",
-          "mtime": 1773923258.1358812,
-          "hash": "ecb1741cc518c34474392bcf9b8a5c76589cb0ef",
-          "tokens": 753,
-          "lines": 98
-        },
-        {
-          "path": "src/ui/project_starter/widgets/sidebar_item.py",
-          "mtime": 1774262085.197804,
-          "hash": "84720dfcf13ead5649f7a3ccc77dd83c76d0c14c",
-          "tokens": 1271,
-          "lines": 145
-        },
-        {
-          "path": "src/ui/project_starter/widgets/notes_dialog.py",
-          "mtime": 1771604843.3936157,
-          "hash": "763d648ed095aab484f7e765b02b7fed3412544b",
-          "tokens": 482,
-          "lines": 49
-        },
-        {
-          "path": "src/ui/project_starter/widgets/rewrite_dialog.py",
-          "mtime": 1774262359.7930865,
-          "hash": "9714d934ee248e0496ab8776985ea114cc5a0681",
-          "tokens": 2065,
-          "lines": 194
-        },
-        {
-          "path": "src/ui/project_starter/widgets/sync_dialog.py",
-          "mtime": 1770647141.2155857,
-          "hash": "93c595373a7281716abeb8103bee6f418f5ccbbe",
-          "tokens": 1001,
-          "lines": 84
-        },
-        {
-          "path": "src/ui/project_starter/widgets/segmented_reviewer.py",
-          "mtime": 1774262850.5301034,
-          "hash": "2f75aa77beb1e53bf5bb21504e8cff1fad3cbcd1",
-          "tokens": 5785,
-          "lines": 568
-        },
-        {
-          "path": "src/ui/project_starter/step_details.py",
-          "mtime": 1774256964.153361,
-          "hash": "02a079b5ff75ee334f76443c39822dce68353c45",
-          "tokens": 1108,
-          "lines": 84
-        },
-        {
-          "path": "src/ui/project_starter/step_base_files.py",
-          "mtime": 1773923258.1761532,
-          "hash": "a65b5fc05207268b73bdc88d63e44d8063a18912",
-          "tokens": 3311,
-          "lines": 336
-        },
-        {
-          "path": "src/ui/project_starter/step_concept.py",
-          "mtime": 1774263385.055833,
-          "hash": "d09cbeb3b05cf42693e471bcda2e6a1114d2315d",
-          "tokens": 6065,
-          "lines": 560
-        },
-        {
-          "path": "src/ui/project_starter/step_stack.py",
-          "mtime": 1774261311.7222543,
-          "hash": "63122111ba98652f607893697037ef65aa7bb8d0",
-          "tokens": 3267,
-          "lines": 273
-        },
-        {
-          "path": "src/ui/project_starter/step_todo.py",
-          "mtime": 1774263437.926072,
-          "hash": "eda52e3aed420d9e522bdd344d55dd9489bbe33a",
-          "tokens": 6023,
-          "lines": 578
-        },
-        {
-          "path": "src/ui/project_starter/step_generate.py",
-          "mtime": 1774263778.5672977,
-          "hash": "9de581c50bcc6d71121b3e6bc9f11fe7120a50ba",
-          "tokens": 3581,
-          "lines": 318
-        },
-        {
-          "path": "src/ui/project_starter/success_view.py",
-          "mtime": 1774263824.8729692,
-          "hash": "555355ad0ce23e2c66890ae1c57ba915c028bd07",
-          "tokens": 524,
-          "lines": 54
-        },
-        {
-          "path": "src/ui/project_starter/starter_dialog.py",
-          "mtime": 1774263557.2084832,
-          "hash": "3d56c232f29dbcc6c21e1e80e6bbf65357014b5e",
-          "tokens": 5460,
-          "lines": 518
-        },
-        {
-          "path": "src/ui/compact_status.py",
-          "mtime": 1762434765.495304,
-          "hash": "5fcc5c7d016f22e07ea032140dc173553d3de2a4",
-          "tokens": 447,
-          "lines": 53
-        },
-        {
-          "path": "src/ui/compact_mode.py",
-          "mtime": 1774259204.1103175,
-          "hash": "0faf1691e3dc82f8b6160fedb5512c40e6242ffe",
-          "tokens": 3535,
-          "lines": 342
-        },
-        {
-          "path": "src/ui/view_manager.py",
-          "mtime": 1774259384.6883297,
-          "hash": "3f48186a57b8c4d3fae67efab5ef2120ae5c3035",
-          "tokens": 2776,
-          "lines": 283
-        },
-        {
-          "path": "src/ui/file_monitor.py",
-          "mtime": 1771604843.3904886,
-          "hash": "89fc8031a9f98691df8f946dce74488ed04763da",
-          "tokens": 1782,
-          "lines": 203
-        },
-        {
-          "path": "src/ui/app_window_parts/helpers.py",
-          "mtime": 1768828778.999754,
-          "hash": "782d8453dc4bb5e27379cad0eb1185412b433fec",
-          "tokens": 303,
-          "lines": 40
-        },
-        {
-          "path": "src/ui/app_window_parts/status_bar_manager.py",
-          "mtime": 1763047285.9509306,
-          "hash": "94ea75d7486a8898a494eeb579f449bff67730e9",
-          "tokens": 742,
-          "lines": 68
-        },
-        {
-          "path": "src/ui/app_window_parts/button_state_manager.py",
-          "mtime": 1774259204.1103175,
-          "hash": "0bc4b502783f80f9882662be3605d3d8207a3e40",
-          "tokens": 1420,
-          "lines": 149
-        },
-        {
-          "path": "src/ui/app_window_parts/ui_callbacks.py",
-          "mtime": 1774258281.2368577,
-          "hash": "b67414c3fb2856a838abc8bc6c82193df48cd66f",
-          "tokens": 231,
-          "lines": 32
-        },
-        {
-          "path": "src/ui/app_window_parts/project_actions.py",
-          "mtime": 1768828779.022995,
-          "hash": "d1487348ab1e53e08066044b145984d40780394a",
-          "tokens": 838,
-          "lines": 116
-        },
-        {
-          "path": "src/ui/app_window_parts/profile_actions.py",
-          "mtime": 1768828784.1755383,
-          "hash": "44e38ee2892344808baac3c60ab7cb71db2ade6d",
-          "tokens": 1066,
-          "lines": 133
-        },
-        {
-          "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1774259359.6430624,
-          "hash": "2243bd5ba26406c7e7859bde0a3f210b9286c370",
-          "tokens": 4072,
-          "lines": 499
-        },
-        {
-          "path": "src/ui/app_window_parts/event_handlers.py",
-          "mtime": 1774256964.1240163,
-          "hash": "1d6ae47585bcc8428dcb0cc28db20af24f5e583b",
-          "tokens": 588,
-          "lines": 77
-        },
-        {
-          "path": "src/ui/ui_builder.py",
-          "mtime": 1774258032.4614403,
-          "hash": "81c49ce493b5dddbbf0a4bab3488b2de5faad5f2",
-          "tokens": 3456,
-          "lines": 243
-        },
-        {
-          "path": "src/ui/app_window.py",
-          "mtime": 1774258336.899488,
-          "hash": "8f6e08fde06e06e3a4a68fc62a7e829554320c13",
-          "tokens": 2363,
-          "lines": 275
         },
         {
           "path": "assets/boilerplate/README.md",
@@ -745,20 +822,6 @@
           "lines": 61
         },
         {
-          "path": "run.py",
-          "mtime": 1758726639.7019978,
-          "hash": "0171f0345556bf0145d65b50baf26e2a40af3bfb",
-          "tokens": 21,
-          "lines": 4
-        },
-        {
-          "path": "src/codemerger.py",
-          "mtime": 1770654762.8932688,
-          "hash": "1cd07110583a5d714c3252d304e1b9eade20eda1",
-          "tokens": 429,
-          "lines": 62
-        },
-        {
           "path": "go.bat",
           "mtime": 1770647141.1263542,
           "hash": "9d2ef95cfcb2e36e9fb671226d7a513ca82cabb3",
@@ -793,44 +856,9 @@
           "hash": "3dda90222f519bb257ce9154e049a99296213ebb",
           "tokens": 630,
           "lines": 84
-        },
-        {
-          "path": "src/ui/project_starter/widgets/reviewer_footer.py",
-          "mtime": 1774264110.8224444,
-          "hash": "3576-1774264110.8224444",
-          "tokens": 831,
-          "lines": 75
-        },
-        {
-          "path": "src/ui/project_starter/widgets/reviewer_questions.py",
-          "mtime": 1774264110.8224444,
-          "hash": "4246-1774264110.8224444",
-          "tokens": 953,
-          "lines": 90
-        },
-        {
-          "path": "src/ui/project_starter/widgets/reviewer_sidebar.py",
-          "mtime": 1774264110.8211648,
-          "hash": "1988-1774264110.8211648",
-          "tokens": 410,
-          "lines": 53
-        },
-        {
-          "path": "src/ui/project_starter/starter_prompts.py",
-          "mtime": 1774264468.584801,
-          "hash": "3487-1774264468.584801",
-          "tokens": 804,
-          "lines": 84
-        },
-        {
-          "path": "src/ui/project_starter/widgets/full_text_reviewer.py",
-          "mtime": 1774264468.585801,
-          "hash": "10072-1774264468.585801",
-          "tokens": 2253,
-          "lines": 206
         }
       ],
-      "total_tokens": 176600,
+      "total_tokens": 167840,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -935,9 +963,13 @@
     "src/ui/project_starter/generator.py",
     "src/ui/project_starter/segment_manager.py",
     "src/ui/project_starter/session_manager.py",
+    "src/ui/project_starter/starter_actions.py",
     "src/ui/project_starter/starter_dialog.py",
+    "src/ui/project_starter/starter_navigation.py",
+    "src/ui/project_starter/starter_project_creator.py",
     "src/ui/project_starter/starter_prompts.py",
     "src/ui/project_starter/starter_state.py",
+    "src/ui/project_starter/starter_ui_builder.py",
     "src/ui/project_starter/starter_validator.py",
     "src/ui/project_starter/step_base_files.py",
     "src/ui/project_starter/step_concept.py",

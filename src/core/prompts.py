@@ -12,14 +12,12 @@ DEFAULT_OUTRO_PROMPT = """Stylistic Guidelines
 
 DO:
 - make sure empty lines are actually empty: avoid generating lines of spaces or tabs
+- use only concise, single-sentence, unnumbered comments without trailing punctuation or XML tags
 - always place closing triple backticks (```) on their own, new line
 
 Do NOT:
 - remove my original comments
 - shorten code with comments like `... Unchanged` or `Same as before`
-- use numbered steps (e.g., "1.") in comments
-- use <summary> tags
-- end comments with dots (unless you are using multiple sentences)
 - call something "final" or "definitive"; it usually isn't
 - use double newlines between code
 - add comments if the code itself makes it pretty clear what it does
