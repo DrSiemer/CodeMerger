@@ -129,7 +129,7 @@ class RewriteUnsignedDialog(Toplevel):
         if self.is_merged_mode:
             # Treating full document as a single target block
             targets = ["full_content"]
-            target_blocks = [f"--- Content ---\n{data.get('full_content', '')}"]
+            target_blocks = [f"{data.get('full_content', '')}"]
             reference_blocks = []
             target_instructions = "Return the complete updated Markdown document."
         else:
