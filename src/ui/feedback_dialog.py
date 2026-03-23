@@ -196,7 +196,7 @@ class FeedbackDialog(tk.Toplevel):
         self.renderers.append(renderer)
 
     def _copy_admonishment(self):
-        msg = "Please follow the output format as described in your instructions, the tool cannot use this unformatted text."
+        msg = "Please follow the output format as described in your instructions, the tool cannot use this incorrectly formatted text."
         pyperclip.copy(msg)
         self.admonish_btn.config(text="Copied!", bg=c.BTN_GREEN)
         self.after(2000, lambda: self.admonish_btn.config(text="Copy Correction Prompt", bg=c.ATTENTION))
