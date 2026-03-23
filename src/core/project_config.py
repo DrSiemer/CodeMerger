@@ -10,7 +10,6 @@ from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
 from .utils import get_token_count_for_text
 
 def _get_file_hash(full_path):
-    """Calculates the SHA1 hash of a file's content."""
     try:
         with open(full_path, 'rb') as f:
             return hashlib.sha1(f.read()).hexdigest()
@@ -18,7 +17,7 @@ def _get_file_hash(full_path):
         return None
 
 def _generate_random_color():
-    """Generates a random, visually pleasing hex color string."""
+    """Generates a random visually pleasing hex color string"""
     hue = random.random()
     saturation = random.uniform(0.5, 0.7)
     value = random.uniform(0.6, 0.8)
@@ -27,7 +26,7 @@ def _generate_random_color():
     return f"#{r_int:02x}{g_int:02x}{b_int:02x}"
 
 def _calculate_font_color(hex_color):
-    """Determines if light or dark text should be used for a given hex background color."""
+    """Selects light or dark text based on background luminance"""
     try:
         hex_color = hex_color.lstrip('#')
         r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
@@ -38,9 +37,8 @@ def _calculate_font_color(hex_color):
 
 class ProjectConfig:
     """
-    Manages loading and saving the .allcode configuration for a project directory.
-    Tracking for 'New Files' is now profile-specific via the 'unknown_files' list,
-    while 'known_files' remains global to the project to avoid duplication.
+    Manages loading and saving the .allcode configuration for a project directory
+    New File tracking is profile-specific via unknown_files; known_files is global to the project
     """
     def __init__(self, base_dir):
         self.base_dir = base_dir
@@ -48,7 +46,7 @@ class ProjectConfig:
         self.project_name = os.path.basename(self.base_dir)
         self.project_color = COMPACT_MODE_BG_COLOR
         self.project_font_color = 'light'
-        self.known_files = [] # Global to project
+        self.known_files = []
 
         self.profiles = {}
         self.active_profile_name = "Default"
@@ -78,23 +76,20 @@ class ProjectConfig:
         return project_name, project_color
 
     def get_active_profile(self):
-        """Returns the dictionary for the currently active profile."""
         if self.active_profile_name not in self.profiles:
             self.profiles[self.active_profile_name] = self._create_empty_profile()
         return self.profiles[self.active_profile_name]
 
     def _create_empty_profile(self):
-        """Returns a new, empty profile dictionary."""
         return {
             "selected_files": [],
             "total_tokens": 0,
             "intro_text": "",
             "outro_text": "",
             "expanded_dirs": [],
-            "unknown_files": [] # Files that haven't been 'seen' by this profile yet
+            "unknown_files": []
         }
 
-    # Redirect properties to the active profile
     @property
     def selected_files(self):
         return self.get_active_profile().get('selected_files', [])
@@ -144,16 +139,17 @@ class ProjectConfig:
         self.get_active_profile()['unknown_files'] = sorted(list(set(value)))
 
     def load(self):
+        """Loads and reconciles project settings using defensive collision checks"""
         data = {}
         config_was_updated = False
         files_were_cleaned_globally = False
 
         try:
             if os.path.isfile(self.allcode_path):
-                # Capture mtime immediately before reading to track this version
+                # Track this version by capturing mtime immediately before reading
                 self._last_mtime = os.path.getmtime(self.allcode_path)
 
-                # Prevent loading transiently empty files during write collisions
+                # Prevents loading transiently empty files during write collisions
                 if os.path.getsize(self.allcode_path) == 0:
                     return False
 
@@ -171,7 +167,7 @@ class ProjectConfig:
         except (json.JSONDecodeError, IOError):
             return False
 
-        # Abort if the file exists but dictionary is empty to prevent overwriting with defaults
+        # Abort to prevent overwriting with defaults if the file exists but dictionary is empty
         if os.path.isfile(self.allcode_path) and not data:
             return False
 
@@ -192,7 +188,7 @@ class ProjectConfig:
         else:
             self.project_font_color = font_color_value
 
-        # Handle Profile Loading
+        # Profile Initialization
         if 'profiles' in data and isinstance(data['profiles'], dict):
             self.profiles = data.get('profiles', {})
             self.active_profile_name = data.get('active_profile', 'Default')
@@ -201,10 +197,10 @@ class ProjectConfig:
                 self.active_profile_name = 'Default'
                 config_was_updated = True
         elif os.path.isfile(self.allcode_path) and 'selected_files' not in data:
-            # File exists but is missing both profiles and legacy keys; abort to prevent data loss
+            # Abort to prevent data loss if profiles and legacy keys are both missing
             return False
         else:
-            # Migration from legacy flat format
+            # Reconcile legacy flat format
             config_was_updated = True
             default_profile = self._create_empty_profile()
             default_profile['intro_text'] = data.get('intro_text', '')
@@ -215,25 +211,21 @@ class ProjectConfig:
             self.profiles = {'Default': default_profile}
             self.active_profile_name = 'Default'
 
-        # Global Known Files Migration/Extraction
+        # Known Files Extraction
         all_found_known = set(data.get('known_files', []))
         for p_data in self.profiles.values():
             if 'known_files' in p_data:
                 all_found_known.update(p_data.pop('known_files', []))
                 config_was_updated = True
-            # Ensure every profile has an 'unknown_files' list
+            # Ensures every profile maintains an unknown_files list
             if 'unknown_files' not in p_data:
                 p_data['unknown_files'] = []
                 config_was_updated = True
 
-        # Load known_files (project-level)
         self.known_files = sorted(list(all_found_known))
 
-        # Clean selected_files and unknown_files within each profile
         for profile_name, profile_data in self.profiles.items():
-            # Standardize unknown_files list
-            orig_unknown = set(profile_data.get('unknown_files', []))
-            profile_data['unknown_files'] = sorted(list(orig_unknown))
+            profile_data['unknown_files'] = sorted(list(set(profile_data.get('unknown_files', []))))
 
             files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
             if files_cleaned_in_profile:
@@ -281,7 +273,7 @@ class ProjectConfig:
         return files_were_cleaned, profile_was_updated
 
     def save(self):
-        """Saves configuration with known_files at the root using an atomic write."""
+        """Saves configuration using an atomic replacement to prevent data wipes during collisions"""
         final_data = {
             "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
             "project_name": self.project_name,
@@ -292,7 +284,6 @@ class ProjectConfig:
             "known_files": sorted(list(set(self.known_files)))
         }
 
-        # Use atomic replacement to prevent profile wipes during multi-instance collisions
         fd, temp_path = tempfile.mkstemp(dir=self.base_dir, prefix='.allcode_tmp_')
         try:
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
@@ -303,16 +294,16 @@ class ProjectConfig:
                 os.remove(temp_path)
             raise
 
-        # Update timestamp to prevent detecting self-save as an external change
+        # Prevents detecting self-save as an external change
         if os.path.isfile(self.allcode_path):
             self._last_mtime = os.path.getmtime(self.allcode_path)
 
     def has_external_changes(self):
-        """Checks if the .allcode file has been modified on disk since last load/save."""
+        """Identifies file modifications on disk since the last internal access"""
         if not os.path.isfile(self.allcode_path):
             return False
         try:
-            # Wait for file to have content if it is currently being written
+            # Aborts if the file is currently being written
             if os.path.getsize(self.allcode_path) == 0:
                 return False
             return os.path.getmtime(self.allcode_path) != self._last_mtime

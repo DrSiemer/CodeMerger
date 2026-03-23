@@ -1,40 +1,39 @@
-# --- Application Behavior ---
+# Application Behavior
 RECENT_PROJECTS_MAX = 25
 MAX_SECRET_SCAN_REPORT_LINES = 10
 TOKEN_COUNT_ENABLED_DEFAULT = True
 ADD_ALL_WARNING_THRESHOLD_DEFAULT = 100
 STATUS_FADE_SECONDS = 5
 
-# --- API Endpoints ---
+# API Endpoints
 GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"
 
-# --- File System ---
-# Added explicit directories to ignore for performance (node_modules, .git, .venv, etc)
+# File System
+# Explicit directories to ignore for performance during recursive scans
 SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode'}
-# Files that should be treated as "selected" when calculating if a parent folder should be greyed out,
-# preventing them from keeping a folder "bright" if they are the only unselected files.
+# Files treated as selected to prevent folders from appearing unselected if they are the only unselected items
 FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
 
-# --- Logging ---
+# Logging
 LOG_FILENAME = "codemerger.log"
 LOG_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
 LOG_BACKUP_COUNT = 3
 
-# --- Behavioral Magic Numbers ---
+# Behavioral Magic Numbers
 ANTIALIASING_SCALE_FACTOR = 2
 FONT_LUMINANCE_THRESHOLD = 150
 LAZY_LAYOUT_DELAY_MS = 250
 
-# --- Timing (in seconds or milliseconds) ---
+# Timing (in seconds or milliseconds)
 ANIMATION_DURATION_SECONDS = 0.25
 ANIMATION_START_DELAY_MS = 20
 DOUBLE_CLICK_INTERVAL_SECONDS = 0.4
 STATUS_FADE_DURATION_SECONDS = 0.5
 
-# --- Visual Defaults ---
+# Visual Defaults
 TOKEN_THRESHOLD_WARNING_TEXT = "You are close to the current maximum tokens\nfor currently available language models"
 
-# --- Project Starter Logic ---
+# Project Starter Logic
 DELIMITER_TEMPLATE = '<SECTION name="{name}">'
 
 # Concept Generation Segments
@@ -61,32 +60,33 @@ TODO_PHASES = {
     "deployment": "Deployment"
 }
 
-# Detailed descriptions for the TODO configuration UI
+# TODO configuration UI
 TODO_DESCRIPTIONS = {
     "setup": "Project initialization, folder structure, and basic 'go' automation scripts.",
     "database": "Data modeling, schema implementation, migrations, and initial seed data.",
-    "api": "Server-side routes, controllers, business logic, and API documentation.",
+    "api": "Server-side architecture, controllers, business logic, and API documentation.",
     "frontend": "User interface components, layout, client-side routing, and styling.",
     "logic": "State management, complex algorithms, and third-party integrations.",
     "polish": "Error handling, animations, responsive design, and final code cleanup.",
     "deployment": "Production builds, environment variables, and hosting configuration."
 }
 
-# Logical order for the TODO document
+# TODO document section order
 TODO_ORDER = [
     "setup", "database", "api", "frontend", "logic", "polish", "deployment"
 ]
 
-# --- UI Theming & Configuration ---
+# UI Theming & Configuration
 PROJECT_TITLE_MAX_LENGTH = 64
 COMPACT_MODE_PROJECT_TITLE_MAX_LENGTH = 8
 COMPACT_MODE_BG_COLOR = "#6f6f6f"
+TOKEN_COUNT_ENABLED_DEFAULT = True
 TOKEN_COLOR_RANGE_MIN_MAX = 2500
 COMPACT_MODE_MOVE_BAR_HEIGHT = 14
 COMPACT_MODE_BORDER_WIDTH = 1
 DEFAULT_LIST_ITEM_HEIGHT = 25
 
-# --- UI Default Dimensions ---
+# UI Default Dimensions
 DEFAULT_WINDOW_GEOMETRY = "660x360"
 MIN_WINDOW_WIDTH = 550
 MIN_WINDOW_HEIGHT = 360
@@ -103,9 +103,9 @@ TITLE_EDIT_DIALOG_WIDTH = 400
 PROJECT_STARTER_GEOMETRY = "1000x750"
 NOTES_DIALOG_DEFAULT_GEOMETRY = "600x350"
 
-# --- UI Color Palette (dark to light) ---
+# UI Color Palette (dark to light)
 
-## Grayscale
+# Grayscale
 TOP_BAR_BG = '#252525'
 DARK_BG = '#2E2E2E'
 BTN_GRAY_TEXT = '#333333'
@@ -121,7 +121,7 @@ BTN_GREEN_TEXT = '#FFFFFF'
 BTN_BLUE_TEXT = '#FFFFFF'
 INFO_PANEL_BG = "#1A1A1A"
 
-## Colors
+# Colors
 BTN_GREEN = '#0D8319'
 BTN_BLUE = '#0078D4'
 NOTE = "#B77B06"
@@ -130,7 +130,7 @@ ATTENTION = "#DE6808"
 FILTER_ACTIVE_BORDER = '#009900'
 TEXT_FILTERED_COLOR = '#BB86FC'
 
-# --- UI Fonts ---
+# UI Fonts
 FONT_FAMILY_PRIMARY = "Segoe UI"
 FONT_FAMILY_SECONDARY = "Helvetica"
 FONT_FAMILY_TOOLTIP = "tahoma"
@@ -153,10 +153,10 @@ FONT_H3 = (FONT_FAMILY_PRIMARY, 14, 'bold')
 FONT_TOOLTIP = (FONT_FAMILY_TOOLTIP, 8, "normal")
 FONT_INFO_PANEL = (FONT_FAMILY_PRIMARY, 10)
 
-# --- Info Mode Config ---
+# Info Mode Config
 INFO_PANEL_HEIGHT = 80
 
-# --- Data Mappings ---
+# Data Mappings
 LANGUAGE_MAP = {
     '.bat': 'batch',
     '.c': 'c',

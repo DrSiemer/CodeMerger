@@ -52,13 +52,12 @@ class App(Tk):
         self.project_starter_window = None
         self.last_ai_response = None
 
-        # Movement and Resize tracking
         self.last_move_time = 0.0
         self._lazy_timer = None
         self._is_lazy_hiding = False
         self._last_size = (0, 0)
 
-        # Initialize logic components (Order is important)
+        # Order of initialization is critical for established logic components
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
         self.updater = Updater(self, self.app_state, self.app_version)
@@ -73,7 +72,6 @@ class App(Tk):
         self.ui_callbacks = UICallbacks(self)
         self.helpers = AppHelpers(self)
 
-        # Window Setup
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
 
@@ -88,18 +86,15 @@ class App(Tk):
         self.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
         self.configure(bg=self.app_bg_color)
 
-        # Initialize state variables
         self.active_dir = StringVar()
         self.project_title_var = StringVar()
         self.status_var = StringVar(value="")
 
-        # Build UI before establishing traces or loading projects
         setup_ui(self)
         self.status_bar_manager = StatusBarManager(self, self.status_bar, self.status_var)
         self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=4, toggle_btn=self.info_toggle_btn)
         self._register_hover_help()
 
-        # Establish dynamic behavior triggers
         self.active_dir.trace_add('write', self.button_manager.update_button_states)
         self.bind("<Configure>", self.event_handlers.update_responsive_layout, add='+')
         self.after(50, self.event_handlers.update_responsive_layout)
@@ -116,7 +111,6 @@ class App(Tk):
         self.bind("<Control-Shift-V>", lambda event: self.action_handlers.apply_changes_from_clipboard())
         self.bind("<Escape>", lambda event: self.project_actions.cancel_loading())
 
-        # Project Loading Logic
         force_selector = is_second_instance and initial_project_path is None
 
         if initial_project_path and os.path.isdir(initial_project_path):
@@ -140,11 +134,10 @@ class App(Tk):
         self.focus_force()
 
     def _register_hover_help(self):
-        """Attaches detailed help messages to main window widgets."""
+        """Attaches help panel triggers to main window widgets"""
         mgr = self.info_mgr
         mgr.register(self.select_project_button, "select_project")
 
-        # Identity covering both container and label
         mgr.register(self.title_container, "project_name")
         mgr.register(self.title_label, "project_name")
 
@@ -161,7 +154,6 @@ class App(Tk):
         mgr.register(self.filetypes_button, "filetypes")
         mgr.register(self.project_starter_button, "starter")
 
-        # Profile Controls
         mgr.register(self.profile_navigator, "profile_nav")
         mgr.register(self.add_profile_button, "profile_add")
         mgr.register(self.delete_profile_button, "profile_delete")
@@ -170,18 +162,15 @@ class App(Tk):
 
     def _on_configure(self, event):
         """
-        Custom handler for <Configure> to implement 'Lazy Layout' resizing.
-        Hides UI on drag-resize and restores after a debounce period to avoid lag.
-        Also tracks movement time to assist Compact Mode positioning.
+        Implements 'Lazy Layout' resizing to prevent lag during drag operations
+        Tracking movement time assists with Compact Mode positioning
         """
         if event.widget != self:
             return
 
-        # Distinguish between window movement and size change
         new_size = (event.width, event.height)
         if self._last_size == new_size:
-            # Only update movement timestamp if we are in a normal, non-animating state.
-            # This prevents restoration/minimization animations from being interpreted as manual moves.
+            # Captures manual moves when in normal state to avoid polluting restoration targets
             if self.view_manager.current_state == self.view_manager.STATE_NORMAL:
                 self.last_move_time = time.time()
 
@@ -190,51 +179,42 @@ class App(Tk):
 
         self._last_size = new_size
 
-        # Don't trigger lazy hiding if we are already in compact mode or animating
         if self.view_manager.current_state != 'normal':
             self.event_handlers.on_window_configure(event)
             return
 
-        # Step 1: Hide heavy UI components immediately
+        # Hide heavy UI components immediately to stop layout thrashing
         if not self._is_lazy_hiding:
             self._start_lazy_layout()
 
-        # Step 2: Debounce the restore operation
         if self._lazy_timer:
             self.after_cancel(self._lazy_timer)
 
         self._lazy_timer = self.after(c.LAZY_LAYOUT_DELAY_MS, self._end_lazy_layout)
 
-        # Continue with standard configure checks (like monitor updates)
         self.event_handlers.on_window_configure(event)
 
     def _start_lazy_layout(self):
-        """Immediately hides content areas to stop layout thrashing during resize."""
         self._is_lazy_hiding = True
         self.top_buttons_container.grid_remove()
         self.center_frame.grid_remove()
         self.status_container.grid_remove()
 
     def _end_lazy_layout(self):
-        """Restores heavy UI components after resizing has stopped."""
         self.top_buttons_container.grid()
         self.center_frame.grid()
         self.status_container.grid()
         self._is_lazy_hiding = False
         self._lazy_timer = None
-        # Force one final layout calculation
         self.update_idletasks()
 
     def _on_focus_in(self, event):
-        """Called when the application window gains focus."""
-        # Only act if the main window itself received focus (not a child widget)
-        # or if it is a general activation event.
+        # Triggers immediate file check on application focus to identify external configuration changes
         if event.widget == self and self.project_manager.get_current_project():
-            # Trigger an immediate file check without scheduling a new loop
-            # This will detect config changes and reload if needed.
             self.file_monitor.perform_new_file_check(schedule_next=False)
 
     def _run_update_cleanup(self):
+        """Safely purges temporary installation files created by the updater"""
         if not os.path.exists(UPDATE_CLEANUP_FILE_PATH):
             return
 
@@ -267,7 +247,6 @@ class App(Tk):
             except OSError as e:
                 log.error(f"Failed to remove cleanup file: {e}")
 
-    # For convenience, keep these direct calls
     def show_and_raise(self):
         self.helpers.show_and_raise()
 

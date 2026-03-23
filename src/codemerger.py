@@ -19,25 +19,21 @@ def main():
     try:
         newly_added_filetypes = update_and_get_new_filetypes()
 
-        # Check if another instance is already running
+        # Check for active instances to prevent configuration write collisions
         another_instance_active = is_another_instance_running()
 
-        # --- Command-line Argument Parsing ---
+        # Command-line Argument Parsing
         initial_project_path = None
 
-        # Simple parsing for flags and paths
         cmd_args = sys.argv[1:]
 
         if cmd_args:
             initial_project_path = cmd_args[0]
             log.info(f"Received initial project path from command line: {initial_project_path}")
 
-        # Load app version
         app_version = load_app_version()
-        # Load active file extensions first
         loaded_extensions = load_active_file_extensions()
         log.info(f"CodeMerger {app_version} starting up.")
-        # Create and run the main application, passing the new filetypes to it.
         app = App(
             file_extensions=loaded_extensions,
             app_version=app_version,
@@ -48,7 +44,6 @@ def main():
         app.mainloop()
     except Exception as e:
         log.exception("An uncaught exception occurred during application startup.")
-        # Generic error for failures during startup
         root = Tk()
         root.withdraw()
         messagebox.showerror(

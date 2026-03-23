@@ -4,9 +4,8 @@ from pathlib import Path
 
 def get_bundle_dir():
     """
-    Gets the base path for reading bundled resources.
-    This is the temporary directory created by PyInstaller for the executable
-    or the project root when running from source.
+    Gets the base path for reading bundled resources
+    Returns the temporary directory created by PyInstaller or the project root
     """
     if hasattr(sys, '_MEIPASS'):
         return sys._MEIPASS
@@ -14,8 +13,8 @@ def get_bundle_dir():
 
 def get_persistent_data_dir():
     """
-    Gets the directory for storing persistent data (e.g., config files).
-    This is OS-aware for bundled executables.
+    Gets the directory for storing persistent data
+    Uses OS-appropriate paths for user configuration
     """
     if getattr(sys, 'frozen', False):
         if sys.platform == "win32":
@@ -34,85 +33,66 @@ def get_persistent_data_dir():
     else:
         return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
-# --- Define Application Paths ---
+# Application Paths
 BUNDLE_DIR = get_bundle_dir()
 PERSISTENT_DATA_DIR = get_persistent_data_dir()
 
-# Path to the config file
 CONFIG_FILE_PATH = os.path.join(PERSISTENT_DATA_DIR, 'config.json')
 
-# Path to the bundled default filetypes template
 DEFAULT_FILETYPES_CONFIG_PATH = os.path.join(BUNDLE_DIR, 'default_filetypes.json')
 
-# --- Project Starter Template Paths ---
+# Project Starter Template Paths
 BOILERPLATE_DIR = os.path.join(BUNDLE_DIR, 'assets', 'boilerplate')
 REFERENCE_DIR = os.path.join(BUNDLE_DIR, 'assets', 'reference')
 
-# Path to the application icon
 ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 
-# Path to the logo mask for the project color swatch
 LOGO_MASK_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask.png')
 LOGO_MASK_SMALL_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask_small.png')
 
-# Path to the new files warning icon
 NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
 NEW_FILES_MANY_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles_many.png')
 
-# Path to the folder icon
 FOLDER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder.png')
 
-# Path to the smaller folder icon used for revealing files
 FOLDER_REVEAL_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder_small.png')
 
-# Path to the trash icon
 TRASH_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'trash.png')
 
-# Path to the edit icon
 EDIT_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'edit.png')
 
-# Path to the version file
 VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'version.txt')
 
-# Path to the compact mode graphics
 COMPACT_MODE_CLOSE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode_close.png')
 
-# Path to the defaults icon
 DEFAULTS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'defaults.png')
 
-# Path to the filetype filter toggle icon
 EXTRA_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files.png')
 EXTRA_FILES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files_active.png')
 
-# Path to the gitignore toggle icon
 GIT_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'git_files.png')
 GIT_FILES_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'git_files_active.png')
 
-# Path to the paths toggle icon
 PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')
 PATHS_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths_active.png')
 
-# Path to the order request icon
 ORDER_REQUEST_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'order_request.png')
 
-# Path to the settings/filetypes icons
 SETTINGS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'settings.png')
 FILETYPES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes.png')
 SETTINGS_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'settings_active.png')
 FILETYPES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes_active.png')
 
-# --- Project Starter Icons ---
+# Project Starter Icons
 PROJECT_STARTER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter.png')
 PROJECT_STARTER_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter_active.png')
 LOCKED_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'locked.png')
 UNLOCKED_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'unlocked.png')
 
-# --- Info Mode Icons ---
+# Info Mode Icons
 INFO_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info.png')
 INFO_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info_active.png')
 
-# Windows Registry path
 REGISTRY_KEY_PATH = r"Software\CodeMerger"
 
-# Path for post-update cleanup instructions
 UPDATE_CLEANUP_FILE_PATH = os.path.join(PERSISTENT_DATA_DIR, 'update_cleanup.json')

@@ -9,25 +9,23 @@ from .. import constants as c
 log = logging.getLogger("CodeMerger")
 
 class DummyStream:
-    """Swallows all writes to prevent crashes when sys.stdout/stderr are None."""
+    """Swallows writes to prevent crashes when standard streams are unavailable"""
     def write(self, data):
         pass
     def flush(self):
         pass
 
 def handle_exception(exc_type, exc_value, exc_traceback):
-    """Global exception hook to log unhandled exceptions."""
+    """Global exception hook to log unhandled exceptions"""
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     log.critical("Unhandled exception:", exc_info=(exc_type, exc_value, exc_traceback))
 
 def setup_logging():
-    """Configures logging for the entire application."""
+    """Configures application-wide logging"""
 
-    # --- Fix for Windowed Mode (console=False) ---
-    # In windowed mode, sys.stdout and sys.stderr are None.
-    # Any print() or library writing to stdout will crash the app.
+    # In windowed mode sys.stdout/stderr are None; DummyStream prevents attribute errors
     if sys.stdout is None:
         sys.stdout = DummyStream()
     if sys.stderr is None:
@@ -35,14 +33,11 @@ def setup_logging():
 
     log.setLevel(logging.INFO)
 
-    # Prevent propagation to the root logger if it has handlers
     log.propagate = False
 
-    # --- Rich Handler for console output ---
-    # Only add RichHandler if we actually HAVE a real console/terminal.
-    # rich.logging can cause issues if initialized without a functional TTY.
+    # Rich Handler for console output
     if not log.handlers:
-        # Check if we are running in a real terminal
+        # Only uses Rich if a functional TTY exists
         if sys.stdout and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty():
             try:
                 console_handler = RichHandler(
@@ -52,11 +47,9 @@ def setup_logging():
                 console_handler.setFormatter(logging.Formatter("%(message)s"))
                 log.addHandler(console_handler)
             except Exception:
-                # Fallback: if Rich fails to init for any reason, don't crash the app
                 pass
 
-        # --- File Handler for persistent logging ---
-        # This is the most important handler for windowed mode debugging
+        # File Handler for persistent logging
         try:
             log_path = os.path.join(PERSISTENT_DATA_DIR, c.LOG_FILENAME)
             file_handler = RotatingFileHandler(
@@ -71,8 +64,6 @@ def setup_logging():
             file_handler.setFormatter(file_formatter)
             log.addHandler(file_handler)
         except Exception as e:
-            # Last resort: if we can't even log to a file, we can't do much
             pass
 
-    # Set the global exception hook
     sys.excepthook = handle_exception

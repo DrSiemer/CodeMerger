@@ -5,14 +5,14 @@ from .prompts import DEFAULT_COPY_MERGED_PROMPT
 from .utils import get_token_count_for_text
 
 def get_language_from_path(path):
-    """Gets a markdown language identifier from a file path based on its extension"""
+    """Maps file extensions to Markdown code block identifiers"""
     _, ext = os.path.splitext(path)
-    return c.LANGUAGE_MAP.get(ext.lower(), '') # Return empty string for unknown extensions
+    return c.LANGUAGE_MAP.get(ext.lower(), '') 
 
 def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
     """
-    Core logic for merging files
-    Reads the .allcode file, processes files, and returns the final string and a status message
+    Concatenates selected files into a single machine-parseable string
+    Returns the final string and a status message
     """
     if not project_config.selected_files:
         return None, "No files selected to copy"
@@ -37,7 +37,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
     if use_wrapper:
         project_title = project_config.project_name
 
-        # Defensive string coercion for fields that might have been corrupted by bad defaults
+        # Defensive coercion ensures fields corrupted by trailing commas are handled correctly
         intro_text = project_config.intro_text
         if isinstance(intro_text, (list, tuple)):
             intro_text = "\n".join(intro_text)
@@ -46,7 +46,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         if isinstance(outro_text, (list, tuple)):
             outro_text = "\n".join(outro_text)
 
-        # Always prepended to the merged code block via final_parts
         formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
 
 1. **MANDATORY TAGGING & CLOSING POLICY:**
@@ -132,7 +131,6 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 </VERIFICATION>
 """
 
-        # Important reminder on the absolute end
         automation_warning = "CRITICAL: Your output is parsed by a script. You MUST use the exact XML tags and --- File: --- wrappers shown in the template, or the system will crash."
 
         if outro_text:
@@ -161,9 +159,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
     return final_content, status_message
 
 def recalculate_token_count(base_dir, selected_files_info):
-    """
-    Reads selected files, concatenates their content, and counts the tokens
-    """
+    """Summarizes total tokens for the current selection set"""
     if not selected_files_info:
         return 0
 
@@ -175,7 +171,6 @@ def recalculate_token_count(base_dir, selected_files_info):
             with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                 all_content.append(f.read())
         except FileNotFoundError:
-            # File might have been deleted, just skip it
             continue
 
     full_text = "\n".join(all_content)
