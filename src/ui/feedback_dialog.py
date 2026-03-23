@@ -87,14 +87,7 @@ class FeedbackDialog(tk.Toplevel):
             self.tab_indices['verification'] = current_idx
             current_idx += 1
 
-        # Tab Selection Priority: answers, delete, verification
-        if 'answers' in self.tab_indices:
-            self.notebook.select(self.tab_indices['answers'])
-        elif 'delete' in self.tab_indices:
-            self.notebook.select(self.tab_indices['delete'])
-        elif 'verification' in self.tab_indices:
-            self.notebook.select(self.tab_indices['verification'])
-        elif current_idx > 0:
+        if current_idx > 0:
             self.notebook.select(0)
 
         self.bottom_frame = Frame(main_frame, bg=c.DARK_BG)
@@ -106,7 +99,11 @@ class FeedbackDialog(tk.Toplevel):
         chk.pack(side="left")
 
         if self.on_apply:
-            self.apply_btn = RoundedButton(self.bottom_frame, text="Apply Changes", command=self._handle_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=130, height=30, cursor="hand2")
+            self.apply_btn = RoundedButton(
+                self.bottom_frame, text="Apply Changes", command=self._handle_apply,
+                bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BOLD,
+                width=200, height=30, cursor="hand2"
+            )
             self.apply_btn.pack(side="right")
 
             self.cancel_btn = RoundedButton(self.bottom_frame, text="Cancel", command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
@@ -155,6 +152,15 @@ class FeedbackDialog(tk.Toplevel):
     def _save_setting(self):
         self.app_state.config['show_feedback_on_paste'] = self.show_var.get()
         save_config(self.app_state.config)
+
+        # Find the main App instance to notify it of the change so tooltips can update.
+        # This handles review windows spawned from both Normal and Compact modes.
+        app = self.parent
+        while app and not hasattr(app, 'button_manager'):
+            app = getattr(app, 'parent', getattr(app, 'master', None))
+
+        if app and hasattr(app, 'button_manager'):
+            app.button_manager.refresh_paste_tooltips()
 
     def _handle_apply(self):
         """Applies the changes. If verification steps exist, remains open to show them."""

@@ -246,8 +246,9 @@ class ActionHandlers:
         if 0 <= event.x <= btn.winfo_width() and 0 <= event.y <= btn.winfo_height():
             btn._draw(btn.hover_color)
             is_ctrl = (event.state & 0x0004)
-            if is_ctrl:
-                self.apply_changes_from_clipboard()
+            is_alt = (event.state & 0x20000)
+            if is_ctrl or is_alt:
+                self.apply_changes_from_clipboard(force_toggle_feedback=is_alt)
             else:
                 self.open_paste_changes_dialog()
         else:
@@ -389,7 +390,7 @@ class ActionHandlers:
             app.show_error_dialog("File Access Error", f"Could not access file to add it to the merge list:\n{path}")
         return None
 
-    def apply_changes_from_clipboard(self):
+    def apply_changes_from_clipboard(self, force_toggle_feedback=False):
         app = self.app
         project_config = app.project_manager.get_current_project()
         if not project_config:
@@ -402,9 +403,9 @@ class ActionHandlers:
             return
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, markdown_text)
-        self._handle_parsed_plan(plan, project_config.base_dir)
+        self._handle_parsed_plan(plan, project_config.base_dir, force_toggle_feedback=force_toggle_feedback)
 
-    def _handle_parsed_plan(self, plan, base_dir, dialog_to_close=None):
+    def _handle_parsed_plan(self, plan, base_dir, dialog_to_close=None, force_toggle_feedback=False):
         status = plan.get('status')
         message = plan.get('message')
 
@@ -452,10 +453,15 @@ class ActionHandlers:
                 dialog_to_close.destroy()
 
         has_feedback = any(plan.get(k) for k in ['intro', 'answers', 'changes', 'delete', 'verification'])
-        was_dialog_shown = False
 
-        if has_feedback and self.app.app_state.config.get('show_feedback_on_paste', True):
-            was_dialog_shown = True
+        # Determine whether to show review dialog based on user settings and the Alt-click override
+        show_feedback_setting = self.app.app_state.config.get('show_feedback_on_paste', True)
+        if force_toggle_feedback:
+            should_show = not show_feedback_setting
+        else:
+            should_show = show_feedback_setting
+
+        if has_feedback and should_show:
             self.show_response_review(plan=plan, on_apply=do_execute, on_refuse=do_refuse)
         else:
             do_execute()

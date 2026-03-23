@@ -207,7 +207,9 @@ def setup_ui(app):
     app.paste_changes_button.unbind("<ButtonRelease-1>")
     app.paste_changes_button.bind("<ButtonRelease-1>", app.action_handlers.on_paste_release)
 
-    ToolTip(app.paste_changes_button, "Open paste window\n(Ctrl+Click to paste from clipboard)", delay=500)
+    paste_tooltip = "Open paste window\n(Ctrl+Click: instant paste from clipboard, Alt+Click: toggle review)"
+    app.paste_changes_tooltip = ToolTip(app.paste_changes_button, paste_tooltip, delay=500)
+
     ToolTip(app.review_button, "Read latest AI response review", delay=500)
     ToolTip(app.copy_wrapped_button, "Copy Prompt: includes code wrapped with custom intro/outro instructions", delay=500)
     ToolTip(app.copy_merged_button, "Copy Prompt: merges code and prepends the default context prompt", delay=500)

@@ -11,6 +11,28 @@ class ButtonStateManager:
         """
         self.app = app
 
+    def refresh_paste_tooltips(self):
+        """Builds and applies dynamic tooltip text for the Paste buttons based on settings."""
+        app = self.app
+
+        # Defensive check: if setup_ui hasn't run yet, abort.
+        if not hasattr(app, 'paste_changes_tooltip'):
+            return
+
+        show_review = app.app_state.config.get('show_feedback_on_paste', True)
+
+        if show_review:
+            hint = "Open paste window\n(Ctrl+Click: instant paste from clipboard, Alt+Click: instant paste, skip review)"
+        else:
+            hint = "Open paste window\n(Ctrl+Click: instant paste from clipboard, Alt+Click: instant paste with review)"
+
+        app.paste_changes_tooltip.text = hint
+
+        # Also sync to compact mode if it's currently active
+        compact = app.view_manager.compact_mode_window
+        if compact and compact.winfo_exists():
+            compact.paste_tooltip_text = hint
+
     def update_button_states(self, *args):
         """Updates button states based on the active directory and .allcode file."""
         app = self.app
@@ -19,6 +41,9 @@ class ButtonStateManager:
         is_dir_active = os.path.isdir(active_dir_path)
         dir_dependent_state = 'normal' if is_dir_active else 'disabled'
         project_config = app.project_manager.get_current_project()
+
+        # Update dynamic tooltips based on current settings
+        self.refresh_paste_tooltips()
 
         # Handle the loading state for the Select Project button
         if is_loading:

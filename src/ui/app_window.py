@@ -58,7 +58,7 @@ class App(Tk):
         self._is_lazy_hiding = False
         self._last_size = (0, 0)
 
-        # Core Components
+        # Initialize logic components (Order is important)
         self.app_state = AppState()
         self.view_manager = ViewManager(self)
         self.updater = Updater(self, self.app_state, self.app_version)
@@ -66,7 +66,6 @@ class App(Tk):
         self.file_monitor = FileMonitor(self)
         self.button_manager = ButtonStateManager(self)
 
-        # Refactored Logic Handlers
         self.action_handlers = ActionHandlers(self)
         self.event_handlers = EventHandlers(self)
         self.project_actions = ProjectActions(self)
@@ -78,7 +77,6 @@ class App(Tk):
         self.title(f"CodeMerger [ {app_version} ]")
         self.iconbitmap(ICON_PATH)
 
-        # --- Dynamic Geometry for Boot ---
         initial_geom = c.DEFAULT_WINDOW_GEOMETRY
         if self.app_state.info_mode_active:
             match = re.match(r"(\d+)x(\d+)", initial_geom)
@@ -90,37 +88,33 @@ class App(Tk):
         self.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
         self.configure(bg=self.app_bg_color)
 
-        # Bindings
+        # Initialize state variables
+        self.active_dir = StringVar()
+        self.project_title_var = StringVar()
+        self.status_var = StringVar(value="")
+
+        # Build UI before establishing traces or loading projects
+        setup_ui(self)
+        self.status_bar_manager = StatusBarManager(self, self.status_bar, self.status_var)
+        self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=4, toggle_btn=self.info_toggle_btn)
+        self._register_hover_help()
+
+        # Establish dynamic behavior triggers
+        self.active_dir.trace_add('write', self.button_manager.update_button_states)
+        self.bind("<Configure>", self.event_handlers.update_responsive_layout, add='+')
+        self.after(50, self.event_handlers.update_responsive_layout)
         self.protocol("WM_DELETE_WINDOW", self.event_handlers.on_app_close)
         self.bind("<Map>", self.view_manager.on_main_window_restored)
         self.bind("<Unmap>", self.view_manager.on_main_window_minimized)
         self.bind("<Configure>", self._on_configure)
-
-        # When app regains focus, immediately check if config changed on disk
         self.bind("<FocusIn>", self._on_focus_in)
 
-        # Keyboard shortcuts
+        # Shortcuts
         self.bind("<Control-c>", lambda event: self.action_handlers.copy_wrapped_code())
         self.bind("<Control-Shift-C>", lambda event: self.action_handlers.copy_merged_code())
         self.bind("<Control-v>", lambda event: self.action_handlers.open_paste_changes_dialog())
         self.bind("<Control-Shift-V>", lambda event: self.action_handlers.apply_changes_from_clipboard())
         self.bind("<Escape>", lambda event: self.project_actions.cancel_loading())
-
-        # Initialize StringVar members before UI build
-        self.active_dir = StringVar()
-        self.project_title_var = StringVar()
-        self.status_var = StringVar(value="")
-        self.active_dir.trace_add('write', self.button_manager.update_button_states)
-
-        setup_ui(self)
-        self.bind("<Configure>", self.event_handlers.update_responsive_layout, add='+')
-        self.after(50, self.event_handlers.update_responsive_layout)
-
-        self.status_bar_manager = StatusBarManager(self, self.status_bar, self.status_var)
-
-        # --- Info Mode Integration ---
-        self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=4, toggle_btn=self.info_toggle_btn)
-        self._register_hover_help()
 
         # Project Loading Logic
         force_selector = is_second_instance and initial_project_path is None
@@ -129,24 +123,16 @@ class App(Tk):
             self.app_state.update_active_dir(initial_project_path)
             self.project_actions.set_active_dir_display(initial_project_path)
         elif force_selector:
-            # Don't load any project, prepare for selector
             self.project_actions.set_active_dir_display(None, set_status=False)
         else:
-            # Standard launch: load the last used project
             self.project_actions.set_active_dir_display(self.app_state.active_directory)
 
         self.after(1500, self.updater.check_for_updates)
-
         if newly_added_filetypes:
             self.after(500, lambda: NewFiletypesDialog(self, newly_added_filetypes))
-
         if force_selector:
             self.after(100, self.action_handlers.open_project_selector)
 
-        # --- Monitor Synchronization ---
-        # Ensure the current_monitor_handle is initialized correctly after the first layout
-        # This prevents a recalculation of compact mode on the first minimize if the monitor handle
-        # was captured as None in ViewManager.
         self.after(100, self.event_handlers.check_for_monitor_change)
 
         self.deiconify()

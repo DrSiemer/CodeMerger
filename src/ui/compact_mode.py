@@ -19,6 +19,9 @@ class CompactMode(tk.Toplevel):
         self.show_wrapped_button = show_wrapped_button
         self.current_new_file_count = 0
 
+        # This will be updated by the main App's ButtonStateManager
+        self.paste_tooltip_text = "Paste Response"
+
         # --- Style and Layout Constants ---
         BAR_COLOR = instance_color
         BORDER_COLOR = "#CCCCCC"
@@ -159,8 +162,10 @@ class CompactMode(tk.Toplevel):
         copy_tooltip_text = "Copy Prompt with Instructions (Ctrl+Click for 'Copy Prompt')" if self.show_wrapped_button else "Copy Prompt"
         self.copy_button.bind("<Enter>", lambda e: self.show_tooltip(copy_tooltip_text))
         self.copy_button.bind("<Leave>", self.hide_tooltip)
-        self.paste_button.bind("<Enter>", lambda e: self.show_tooltip("Open paste window\n(Ctrl+Click to paste from clipboard)"))
+
+        self.paste_button.bind("<Enter>", lambda e: self.show_tooltip(self.paste_tooltip_text))
         self.paste_button.bind("<Leave>", self.hide_tooltip)
+
         self.review_button.bind("<Enter>", lambda e: self.show_tooltip("Read latest AI response review"))
         self.review_button.bind("<Leave>", self.hide_tooltip)
         self.close_button.bind("<Enter>", lambda e: self.show_tooltip("Restore window (Ctrl+Click to exit app)"))
@@ -209,8 +214,10 @@ class CompactMode(tk.Toplevel):
         if 0 <= event.x <= self.paste_button.winfo_width() and 0 <= event.y <= self.paste_button.winfo_height():
             self.paste_button._draw(self.paste_button.hover_color)
             is_ctrl = (event.state & 0x0004)
-            if is_ctrl:
-                self.parent.action_handlers.apply_changes_from_clipboard()
+            is_alt = (event.state & 0x20000)
+
+            if is_ctrl or is_alt:
+                self.parent.action_handlers.apply_changes_from_clipboard(force_toggle_feedback=is_alt)
             else:
                 self.parent.action_handlers.open_paste_changes_dialog()
         else:
