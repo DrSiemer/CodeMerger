@@ -223,7 +223,9 @@ class FeedbackDialog(tk.Toplevel):
     def _handle_apply(self):
         """Applies the changes. If verification steps exist, remains open to show them."""
         if self.on_apply:
-            self.on_apply()
+            if self.on_apply() is False:
+                return
+
             # Clear callbacks once executed to indicate the update is no longer pending.
             self.on_apply = None
             self.on_refuse = None

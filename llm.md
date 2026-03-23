@@ -72,6 +72,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/core/utils.py`: `parse_gitignore` modifies the `dirs` list of `os.walk` in-place using `is_ignored`. This prevents the walker from traversing into ignored directories (like `node_modules`), drastically improving load times.
 - `src/core/utils.py`: Replaced `psutil` process iteration with a Named Mutex (Windows) and `fcntl` lock file (POSIX) for single-instance detection. This avoids the high startup cost of scanning the system process table.
 - `src/core/project_config.py`: Implements atomic saving using `tempfile.mkstemp` and `os.replace` to prevent configuration wipes when multiple instances (e.g., dev and build) access the same project simultaneously. The `load` method includes defensive checks to ignore transiently empty or partial files created during write collisions, preventing the initialization of empty default profiles.
+- `src/core/change_applier.py`: Implements a placeholder-bypass in `get_section` to treat a single dash (`-`) or standard keywords (none, n/a) as an empty string. This is a workaround for LLMs that struggle to leave XML-tagged segments completely empty when instructed.
 
 ### User Interface (`src/ui`)
 

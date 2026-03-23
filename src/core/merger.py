@@ -93,7 +93,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    STRICT FILE PATHS ONLY.
    FORMAT: DELETE FILE: path/to/obsolete_file.ext
    PROHIBITION: Do NOT describe code-level removals, logic deletions, or "cleanup."
-   If no files were deleted from the filesystem, this section MUST be empty.
+   If no files were deleted from the filesystem, this section should only contain a dash symbol (`-`).
    </DELETE>
 
    <VERIFICATION>
@@ -104,10 +104,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
 You MUST format your EXACT output using this skeleton. Do not deviate from this structure:
 
-<ANSWERS>
-(Answer any direct questions here, otherwise leave empty)
-</ANSWERS>
-
 <INTRO>
 (Implementation plan)
 </INTRO>
@@ -116,6 +112,10 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (List of changes)
 </CHANGES>
 
+<ANSWERS>
+(Answer any direct questions here, otherwise `-`)
+</ANSWERS>
+
 --- File: `path/to/file.ext` ---
 ```language
 (Full file code)
@@ -123,7 +123,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 --- End of file ---
 
 <DELETE>
-(Files to delete, or empty)
+(Files to delete, or `-`)
 </DELETE>
 
 <VERIFICATION>
@@ -131,7 +131,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 </VERIFICATION>
 """
 
-        automation_warning = "CRITICAL: Your output is parsed by a script. You MUST use the exact XML tags and --- File: --- wrappers shown in the template, or the system will crash."
+        automation_warning = "CRITICAL: I am using an automated parser. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file, even unchanged ones."
 
         if outro_text:
             final_outro = f"{formatting_instruction}\n\n{outro_text}\n\n{automation_warning}"

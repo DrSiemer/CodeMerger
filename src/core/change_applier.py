@@ -58,7 +58,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         match = re.search(rf'<{tag}>(.*?)</{tag}>', text, re.DOTALL | re.IGNORECASE)
         if match:
             content = match.group(1).strip()
-            if content.lower() in ["none", "n/a", "no files to delete", "no changes"]:
+            if content == "-" or content.lower() in ["none", "n/a", "no files to delete", "no changes"]:
                 return ""
             return content
         return ""

@@ -420,6 +420,7 @@ class ActionHandlers:
             return
 
         def do_execute():
+            """Writes files to disk. Returns True on success, False if cancelled or error."""
             if status == 'CONFIRM_CREATION':
                 creations = plan.get('creations', {})
                 creation_rel_paths = list(creations.keys())
@@ -435,7 +436,7 @@ class ActionHandlers:
 
                 if not messagebox.askyesno("Confirm New Files", confirm_message, parent=dialog_parent):
                     self.app.helpers.show_compact_toast("Operation cancelled.")
-                    return
+                    return False
 
             updates = plan.get('updates', {})
             creations = plan.get('creations', {})
@@ -450,8 +451,10 @@ class ActionHandlers:
 
                 if dialog_to_close:
                     dialog_to_close.destroy()
+                return True
             else:
                 self.app.show_error_dialog("File Write Error", final_message)
+                return False
 
         def do_refuse():
             self.app.helpers.show_compact_toast("Update refused.")
