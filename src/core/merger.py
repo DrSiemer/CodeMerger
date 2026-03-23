@@ -52,7 +52,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    Every section of your response (Answers, Intro, Changes, Delete, Verification) MUST be explicitly wrapped in tags.
    **CRITICAL:** Every opening tag MUST have an identical closing tag.
 
-   Format: `<TAG>[content]</TAG>`
+   Format: `<INTRO>[content]</INTRO>`
 
 2. **INTRO, CHANGES & ANSWERS (PRE-CODE):**
    Immediately before the code blocks, provide these sections in this order:
