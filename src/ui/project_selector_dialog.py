@@ -29,8 +29,10 @@ class ProjectSelectorDialog(Toplevel):
         self.on_select_callback = on_select_callback
         self.on_remove_callback = on_remove_callback
         self.tooltip = None
-        self.project_widgets = []
-        self.non_list_height = 0
+
+        # Mapping of project path -> the Frame widget representing it
+        self.project_widgets_map = {}
+
         self.project_metadata_cache = {}
         # Instance variables to reliably store the current position.
         self.current_x = 0
@@ -40,7 +42,6 @@ class ProjectSelectorDialog(Toplevel):
         self.iconbitmap(ICON_PATH)
         self.transient(parent)
         self.grab_set()
-        self.focus_force()
         self.configure(bg=self.app_bg_color)
         self.resizable(False, False)
 
@@ -129,15 +130,26 @@ class ProjectSelectorDialog(Toplevel):
         self.info_mgr.register(self.browse_btn, "sel_browse")
         self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
-        self._populate_projects(self.recent_projects)
+        # Initial one-time creation of all project entry widgets
+        self._initialize_project_widgets()
+        self._filter_projects()
 
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
         self.bind('<Configure>', self._on_drag)
-        self.deiconify()
 
+        self.deiconify()
+        self.lift()
+        self.focus_force()
+
+        # Focus with delay for Tcl reliability
+        self.after(100, self._set_initial_focus)
+
+    def _set_initial_focus(self):
+        """Requests focus on the filter entry."""
         if self.filter_frame.winfo_ismapped():
             self.filter_entry.focus_set()
+            self.filter_entry.icursor(tk.END)
 
     def _on_drag(self, event):
         """Updates the stored position when the window is moved by the user."""
@@ -145,18 +157,54 @@ class ProjectSelectorDialog(Toplevel):
             self.current_x = self.winfo_x()
             self.current_y = self.winfo_y()
 
+    def _initialize_project_widgets(self):
+        """Creates widgets for all recent projects once."""
+        for path in self.recent_projects:
+            entry_frame = self._create_recent_dir_entry(path)
+            self.project_widgets_map[path] = entry_frame
+            # Start hidden; _filter_projects will show relevant ones
+            entry_frame.pack_forget()
+
     def _filter_projects(self, *args):
+        """Toggles visibility of existing widgets based on query instead of rebuilding."""
         query = self.filter_var.get().lower()
-        filtered_list = [
-            path for path in self.recent_projects
-            if not query or query in os.path.basename(path).lower() or query in path.lower()
-        ]
-        self._populate_projects(filtered_list)
+
+        # 1. Update filter bar visibility: Hide if user has less than 5 projects total
+        if len(self.recent_projects) >= 5:
+            if not self.filter_frame.winfo_ismapped():
+                self.filter_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
+        else:
+            if self.filter_frame.winfo_ismapped():
+                self.filter_frame.grid_forget()
+                if self.filter_var.get():
+                    self.filter_var.set("")
+                    return
+
+        # 2. Toggle visibility of existing widgets
+        visible_count = 0
+        for path, frame in self.project_widgets_map.items():
+            metadata = self._get_project_metadata(path)
+            matches = not query or query in metadata['name'].lower() or query in path.lower()
+
+            if matches:
+                frame.pack(fill='x', padx=20, pady=3)
+                visible_count += 1
+            else:
+                frame.pack_forget()
+
+        # 3. Handle 'No Results' state
+        if visible_count == 0 and self.recent_projects:
+            if not hasattr(self, 'no_results_label'):
+                self.no_results_label = Label(self.recent_dirs_frame, text="No projects match your filter.", bg=self.app_bg_color, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL, pady=20)
+            self.no_results_label.pack(fill='x')
+        elif hasattr(self, 'no_results_label'):
+            self.no_results_label.pack_forget()
+
+        self._adjust_height(visible_count)
 
     def _get_project_metadata(self, path):
         """
         Retrieves project name and color from a cache to avoid repeated file I/O.
-        If not in cache, reads .allcode, caches the data, and returns it.
         """
         if path in self.project_metadata_cache:
             return self.project_metadata_cache[path]
@@ -174,60 +222,37 @@ class ProjectSelectorDialog(Toplevel):
                         name = data.get('project_name', name)
                         color = data.get('project_color', color)
             except (IOError, json.JSONDecodeError):
-                pass # Use defaults if file is unreadable
+                pass
 
         metadata = {'name': name, 'color': color}
         self.project_metadata_cache[path] = metadata
         return metadata
 
-    def _populate_projects(self, project_list):
-        for widget in self.project_widgets:
-            widget.destroy()
-        self.project_widgets.clear()
-
-        # Update filter bar visibility: Hide if user has less than 5 projects total
-        if len(self.recent_projects) >= 5:
-            if not self.filter_frame.winfo_ismapped():
-                self.filter_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
-        else:
-            if self.filter_frame.winfo_ismapped():
-                self.filter_frame.grid_forget()
-                # Clear filter when hidden to avoid being stuck in a filtered state
-                if self.filter_var.get():
-                    self.filter_var.set("")
-                    return # Trace will trigger re-populate
-
-        for path in project_list:
-            entry_frame = self._create_recent_dir_entry(path)
-            self.project_widgets.append(entry_frame)
-
-        self._adjust_height()
-
-    def _adjust_height(self):
+    def _adjust_height(self, visible_count):
         """
-        Calculates and applies the height of the inner scrollable area
-        and allows the window to naturally shrink-wrap around all content.
+        Calculates and applies the height without using flickering geometry reset calls.
         """
-        num_items = len(self.project_widgets)
-
-        # Determine row height (default to 38 if not yet rendered)
+        # Determine row height
         item_h = 38
-        if num_items > 0:
-            self.update_idletasks()
-            item_h = self.project_widgets[0].winfo_reqheight() + 6 # req + padding
+        if visible_count > 0:
+            # Sample first visible widget
+            for frame in self.project_widgets_map.values():
+                if frame.winfo_ismapped():
+                    req_h = frame.winfo_reqheight()
+                    if req_h > 1:
+                        item_h = req_h + 6 # req + padding
+                        break
 
         # 1. Set the specific height for the Canvas (cap at 10 rows)
-        list_h = min(num_items, 10) * item_h
+        list_h = min(visible_count, 10) * item_h
         self.scroll_frame.canvas.config(height=list_h)
 
-        # 2. Tell the window to reset its geometry calculation
-        self.geometry("")
+        # 2. Update internal layout logic
         self.update_idletasks()
 
-        # 3. Get the calculated natural height
+        # 3. Apply the final height while keeping x/y and ensuring on-screen
         win_w, win_h = self.dialog_width, self.winfo_reqheight()
 
-        # 4. Final Position and screen constraint
         x, y = self.current_x, self.current_y
         mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area((x, y))
         mon_bottom -= 50; mon_right -= 20; mon_left += 10; mon_top += 10
@@ -252,7 +277,6 @@ class ProjectSelectorDialog(Toplevel):
 
     def _create_recent_dir_entry(self, path):
         entry_frame = Frame(self.recent_dirs_frame, bg=self.app_bg_color)
-        entry_frame.pack(fill='x', padx=20, pady=3)
 
         metadata = self._get_project_metadata(path)
         display_text = metadata['name']
@@ -278,10 +302,8 @@ class ProjectSelectorDialog(Toplevel):
                 parent=buttons_container, command=lambda p=path: self.remove_and_update_dialog(p),
                 image=assets.trash_icon_image, bg=c.BTN_GRAY_BG, width=32, height=32, cursor='hand2'
             )
-            # The button is created but not packed initially. It will be shown on hover.
             buttons_container.trash_button = remove_btn
 
-            # Info Mode integration for the Trash button
             if hasattr(self, 'info_mgr'):
                 self.info_mgr.register(remove_btn, "sel_remove")
 
@@ -290,7 +312,6 @@ class ProjectSelectorDialog(Toplevel):
         btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
         btn.bind("<Leave>", self.hide_path_tooltip)
 
-        # Bind hover events to the entire row for a better user experience
         entry_frame.bind("<Enter>", lambda e, c=buttons_container: self._show_trash_button(c))
         entry_frame.bind("<Leave>", lambda e, c=buttons_container: self._hide_trash_button(c))
 
@@ -298,20 +319,16 @@ class ProjectSelectorDialog(Toplevel):
 
     def on_project_button_release(self, event, path):
         widget = event.widget
-        # Only proceed if the release happens within the button's boundaries
         if 0 <= event.x <= widget.winfo_width() and 0 <= event.y <= widget.winfo_height():
-            # Provide visual feedback of release/hover state
             if hasattr(widget, '_draw') and hasattr(widget, 'hover_color'):
                 widget._draw(widget.hover_color)
 
-            # Ctrl key is state 4
             is_ctrl = (event.state & 0x0004)
             if is_ctrl:
                 self.open_project_folder(path)
             else:
                 self.select_and_close(path)
         else:
-            # If released outside, reset visual state to normal
             if hasattr(widget, '_draw') and hasattr(widget, 'base_color'):
                 widget._draw(widget.base_color)
 
@@ -351,6 +368,12 @@ class ProjectSelectorDialog(Toplevel):
     def remove_and_update_dialog(self, path_to_remove):
         self.on_remove_callback(path_to_remove)
         self.recent_projects = [p for p in self.recent_projects if p != path_to_remove]
+
+        # Cleanup the persistent widget
+        if path_to_remove in self.project_widgets_map:
+            self.project_widgets_map[path_to_remove].destroy()
+            del self.project_widgets_map[path_to_remove]
+
         self._filter_projects()
 
         if not self.recent_projects:
