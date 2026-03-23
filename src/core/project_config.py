@@ -4,6 +4,8 @@ import random
 import re
 import colorsys
 import hashlib
+import tempfile
+from pathlib import Path
 from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
 from .utils import get_token_count_for_text
 
@@ -150,6 +152,11 @@ class ProjectConfig:
             if os.path.isfile(self.allcode_path):
                 # Capture mtime immediately before reading to track this version
                 self._last_mtime = os.path.getmtime(self.allcode_path)
+
+                # Prevent loading transiently empty files during write collisions
+                if os.path.getsize(self.allcode_path) == 0:
+                    return False
+
                 with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
                     content = f.read()
                     if content:
@@ -162,7 +169,11 @@ class ProjectConfig:
                                 data = json.loads(json_content)
                                 config_was_updated = True
         except (json.JSONDecodeError, IOError):
-            pass
+            return False
+
+        # Abort if the file exists but dictionary is empty to prevent overwriting with defaults
+        if os.path.isfile(self.allcode_path) and not data:
+            return False
 
         self.project_name = data.get('project_name', os.path.basename(self.base_dir))
         color_value = data.get('project_color')
@@ -189,6 +200,9 @@ class ProjectConfig:
                 self.profiles['Default'] = self._create_empty_profile()
                 self.active_profile_name = 'Default'
                 config_was_updated = True
+        elif os.path.isfile(self.allcode_path) and 'selected_files' not in data:
+            # File exists but is missing both profiles and legacy keys; abort to prevent data loss
+            return False
         else:
             # Migration from legacy flat format
             config_was_updated = True
@@ -212,9 +226,7 @@ class ProjectConfig:
                 p_data['unknown_files'] = []
                 config_was_updated = True
 
-        # Load known_files (project-level) WITHOUT strict existence check
-        # We rely on FileMonitor to clean up deleted files later.
-        # This prevents mass deletion of known files if the drive/folder is temporarily inaccessible during load.
+        # Load known_files (project-level)
         self.known_files = sorted(list(all_found_known))
 
         # Clean selected_files and unknown_files within each profile
@@ -242,8 +254,6 @@ class ProjectConfig:
         cleaned_selection = []
         if not is_new_format:
             if original_selection: profile_was_updated = True
-            # Legacy migration MUST read files to calculate initial tokens/hash.
-            # If files are missing during migration, they are skipped. This is acceptable for legacy upgrade.
             for f_path in original_selection:
                 full_path = os.path.join(self.base_dir, f_path)
                 if os.path.isfile(full_path):
@@ -256,9 +266,6 @@ class ProjectConfig:
                         cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
                     except OSError: continue
         else:
-            # Standard load: Do NOT check for file existence here.
-            # Preserving entries allows the UI to handle "missing" files gracefully or
-            # recover them if they reappear (network share glitches, git switching).
             for f_info in original_selection:
                 if 'tokens' not in f_info or 'lines' not in f_info:
                     profile_was_updated = True
@@ -274,7 +281,7 @@ class ProjectConfig:
         return files_were_cleaned, profile_was_updated
 
     def save(self):
-        """Saves configuration with known_files at the root."""
+        """Saves configuration with known_files at the root using an atomic write."""
         final_data = {
             "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
             "project_name": self.project_name,
@@ -284,8 +291,17 @@ class ProjectConfig:
             "profiles": self.profiles,
             "known_files": sorted(list(set(self.known_files)))
         }
-        with open(self.allcode_path, 'w', encoding='utf-8') as f:
-            json.dump(final_data, f, indent=2)
+
+        # Use atomic replacement to prevent profile wipes during multi-instance collisions
+        fd, temp_path = tempfile.mkstemp(dir=self.base_dir, prefix='.allcode_tmp_')
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                json.dump(final_data, f, indent=2)
+            os.replace(temp_path, self.allcode_path)
+        except Exception:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            raise
 
         # Update timestamp to prevent detecting self-save as an external change
         if os.path.isfile(self.allcode_path):
@@ -296,6 +312,9 @@ class ProjectConfig:
         if not os.path.isfile(self.allcode_path):
             return False
         try:
+            # Wait for file to have content if it is currently being written
+            if os.path.getsize(self.allcode_path) == 0:
+                return False
             return os.path.getmtime(self.allcode_path) != self._last_mtime
         except OSError:
             return False
@@ -309,7 +328,6 @@ class ProjectConfig:
 
         if copy_files or copy_instructions:
             source_profile = self.get_active_profile()
-            # Deep copy the file selection to prevent shared memory references
             new_profile = {
                 "selected_files": [dict(f) for f in source_profile.get('selected_files', [])] if copy_files else [],
                 "total_tokens": source_profile.get('total_tokens', 0) if copy_files else 0,
