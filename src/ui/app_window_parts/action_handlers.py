@@ -468,6 +468,10 @@ class ActionHandlers:
             should_show = show_feedback_setting
 
         if has_feedback and should_show:
+            if dialog_to_close:
+                dialog_to_close.destroy()
+                dialog_to_close = None
+
             self.show_response_review(plan=plan, on_apply=do_execute, on_refuse=do_refuse)
         else:
             do_execute()
