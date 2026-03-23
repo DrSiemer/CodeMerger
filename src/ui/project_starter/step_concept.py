@@ -359,6 +359,8 @@ class ConceptView(tk.Frame):
             base_font_size=self.starter_controller.font_size,
             on_zoom=self.starter_controller.adjust_font_size
         )
+        # Enable double-click to edit from the renderer
+        self.markdown_renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
 
         # Default to Rendered View
         self.is_raw_mode = False
@@ -366,6 +368,18 @@ class ConceptView(tk.Frame):
 
         self.starter_controller._update_navigation_controls()
         self.register_info(self.starter_controller.info_mgr)
+
+    def _on_renderer_double_click(self, event):
+        """Switches to raw mode and positions cursor where user double-clicked."""
+        try:
+            click_index = self.markdown_renderer.text_widget.index(f"@{event.x},{event.y}")
+        except Exception:
+            click_index = "1.0"
+        self._toggle_view_mode()
+        self.editor_text.update_idletasks()
+        self.editor_text.text_widget.mark_set("insert", click_index)
+        self.editor_text.text_widget.see(click_index)
+        self.editor_text.text_widget.focus_set()
 
     def _open_merged_rewrite_dialog(self):
         current_text = self.editor_text.get("1.0", "end-1c").strip()
