@@ -114,8 +114,9 @@ class ViewManager:
         """Handles state changes after an animation finishes."""
         if is_shrinking:
             log.debug("Shrink animation complete.")
-            # Restore main window to full size/buffer before officially hiding it.
-            # This ensures the taskbar thumbnail reflects the full app, not a shrunken sliver.
+            # Restoration logic forces alpha to 0.01 and calls update() before minimizing.
+            # This workaround forces the Windows DWM to update the taskbar thumbnail
+            # with the full-sized window buffer instead of a black or shrunken artifact.
             if self.main_window_geom:
                 w, h, x, y = self.main_window_geom[2], self.main_window_geom[3], self.main_window_geom[0], self.main_window_geom[1]
                 self.main_window.geometry(f"{w}x{h}+{x}+{y}")
@@ -278,4 +279,5 @@ class ViewManager:
             show_wrapped_button=has_wrapper_text
         )
         self.main_window.file_monitor._update_warning_ui()
+        self.main_window.button_manager.refresh_paste_tooltips()
         self.compact_mode_window.withdraw()
