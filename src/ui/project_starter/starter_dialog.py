@@ -330,7 +330,7 @@ class ProjectStarterDialog(tk.Toplevel):
             project_color=recommended_color
         )
 
-        self._display_success_screen(project_path.name, files_created, parent_folder)
+        self._display_success_screen(project_path.name, files_created, parent_folder, recommended_color)
 
     def _get_active_steps(self):
         steps = [1]
@@ -505,7 +505,7 @@ class ProjectStarterDialog(tk.Toplevel):
             tab.set_state('normal' if is_accessible else 'disabled')
             tab.config(hollow=(not is_active), bg=(c.BTN_BLUE if is_active else c.BTN_GRAY_BG), fg=(c.BTN_BLUE_TEXT if is_active else (c.TEXT_COLOR if is_accessible else c.BTN_GRAY_TEXT)))
 
-    def _display_success_screen(self, project_name, files, parent_folder):
+    def _display_success_screen(self, project_name, files, parent_folder, project_color=None):
         self.finished_successfully = True
         for w in self.content_frame.winfo_children(): w.destroy()
         self.nav_frame.grid_forget()
@@ -515,4 +515,4 @@ class ProjectStarterDialog(tk.Toplevel):
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
             self.app.after(100, self.app.show_and_raise)
-        SuccessView(self.content_frame, project_name, files, on_start_work, parent_folder).pack(expand=True, fill="both")
+        SuccessView(self.content_frame, project_name, files, on_start_work, parent_folder, project_color=project_color).pack(expand=True, fill="both")

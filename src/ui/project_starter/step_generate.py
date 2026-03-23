@@ -8,10 +8,9 @@ from ...core.paths import BOILERPLATE_DIR
 from ...core.utils import strip_markdown_wrapper
 from ...core.prompts import STARTER_GENERATE_MASTER_INTRO, STARTER_GENERATE_MASTER_INSTR
 from ..widgets.rounded_button import RoundedButton
-from ..widgets.scrollable_text import ScrollableText
-from .generator import sanitize_project_name
 from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
+from ..widgets.scrollable_text import ScrollableText
 
 class GenerateView(tk.Frame):
     def __init__(self, parent, project_data, create_project_callback, starter_controller):
@@ -110,10 +109,12 @@ class GenerateView(tk.Frame):
         t2 = self.project_data["name"].trace_add("write", self._update_preview_path)
         t3 = self.project_data["parent_folder"].trace_add("write", self._validate_and_sync)
         t4 = self.project_data["name"].trace_add("write", self._validate_and_sync)
+        t5 = self.project_data["parent_folder"].trace_add("write", self._force_backward_slashes)
 
         self._trace_ids = [
             ("parent_folder", t1), ("name", t2),
-            ("parent_folder", t3), ("name", t4)
+            ("parent_folder", t3), ("name", t4),
+            ("parent_folder", t5)
         ]
 
         self._update_preview_path()
@@ -143,6 +144,12 @@ class GenerateView(tk.Frame):
                 pass
         super().destroy()
 
+    def _force_backward_slashes(self, *args):
+        """Ensures the parent folder path always uses backslashes."""
+        val = self.project_data["parent_folder"].get()
+        if '/' in val:
+            self.project_data["parent_folder"].set(val.replace('/', '\\'))
+
     def _update_preview_path(self, *args):
         """Safely updates the preview path label if the widget still exists."""
         if not self.winfo_exists():
@@ -158,15 +165,19 @@ class GenerateView(tk.Frame):
             self.preview_path_label.config(text="[Incomplete details - please set Name and Parent Folder]", fg=c.TEXT_SUBTLE_COLOR)
             return
 
+        from .generator import sanitize_project_name
         sanitized_name = sanitize_project_name(name)
-        # Normalize to backslashes for user preference
+
+        # Join components and normalize to backslashes for user preference
         full_path = os.path.join(parent, sanitized_name).replace('/', '\\')
         self.preview_path_label.config(text=full_path, fg=c.BTN_BLUE)
 
     def _browse_folder(self):
         folder = filedialog.askdirectory(parent=self)
         if folder:
-            self.project_data["parent_folder"].set(folder)
+            # Normalize to backward slashes immediately after browsing
+            normalized = folder.replace('/', '\\')
+            self.project_data["parent_folder"].set(normalized)
 
     def _validate_and_sync(self, *args):
         """

@@ -3,10 +3,15 @@ from pathlib import Path
 from ... import constants as c
 from ..widgets.rounded_button import RoundedButton
 from ..tooltip import ToolTip
+from ...core.project_config import _calculate_font_color
 
 class SuccessView(tk.Frame):
-    def __init__(self, parent, project_folder_name, files_created, on_start_work_callback, parent_folder):
+    def __init__(self, parent, project_folder_name, files_created, on_start_work_callback, parent_folder, project_color=None):
         super().__init__(parent, bg=c.DARK_BG, padx=20, pady=20)
+
+        accent_color = project_color if project_color else c.BTN_BLUE
+        font_mode = _calculate_font_color(accent_color)
+        text_color = "#FFFFFF" if font_mode == 'light' else "#000000"
 
         tk.Label(self, text="Project Created Successfully!", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(pady=10)
 
@@ -34,6 +39,16 @@ class SuccessView(tk.Frame):
             listbox.insert(tk.END, f)
         listbox.pack(expand=True, fill="both", pady=5)
 
-        btn_open = RoundedButton(self, text="Activate Project in CodeMerger", command=on_start_work_callback, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=40, cursor="hand2")
+        btn_open = RoundedButton(
+            self,
+            text="Activate Project in CodeMerger",
+            command=on_start_work_callback,
+            bg=accent_color,
+            fg=text_color,
+            font=c.FONT_BUTTON,
+            height=50,
+            width=350,
+            cursor="hand2"
+        )
         btn_open.pack(pady=20)
         ToolTip(btn_open, "Activate this project and close the wizard", delay=500)
