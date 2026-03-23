@@ -53,13 +53,13 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    Every section of your response (Answers, Intro, Changes, Delete, Verification) MUST be explicitly wrapped in tags.
    **CRITICAL:** Every opening tag MUST have an identical closing tag.
 
-   Format: `<<TAG>>[content]<<TAG>>`
+   Format: `<TAG>[content]</TAG>`
 
 2. **INTRO, CHANGES & ANSWERS (PRE-CODE):**
    Immediately before the code blocks, provide these sections in this order:
-   - **<<INTRO>>**: Use this to provide a technical implementation plan or architectural summary.
-   - **<<CHANGES>>**: List of behavioral, algorithmic, or visual changes.
-   - **<<ANSWERS>>**: Use this ONLY to answer conceptual or theoretical questions (usually ending in '?').
+   - **<INTRO>**: Use this to provide a technical implementation plan or architectural summary.
+   - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
+   - **<ANSWERS>**: Use this ONLY to answer conceptual or theoretical questions (usually ending in '?').
 
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
@@ -90,16 +90,47 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 7. **DELETE & VERIFICATION (POST-CODE):**
    Immediately following the final "--- End of file ---" marker, provide these sections:
 
-   <<DELETE>>
+   <DELETE>
    STRICT FILE PATHS ONLY.
    FORMAT: DELETE FILE: path/to/obsolete_file.ext
    PROHIBITION: Do NOT describe code-level removals, logic deletions, or "cleanup."
    If no files were deleted from the filesystem, this section MUST be empty.
-   <<DELETE>>
+   </DELETE>
 
-   <<VERIFICATION>>
+   <VERIFICATION>
    - Steps to test the changes.
-   <<VERIFICATION>>"""
+   </VERIFICATION>
+
+==========
+
+You MUST format your EXACT output using this skeleton. Do not deviate from this structure:
+
+<ANSWERS>
+(Answer any direct questions here, otherwise leave empty)
+</ANSWERS>
+
+<INTRO>
+(Implementation plan)
+</INTRO>
+
+<CHANGES>
+(List of changes)
+</CHANGES>
+
+--- File: `path/to/file.ext` ---
+```language
+(Full file code)
+```
+--- End of file ---
+
+<DELETE>
+(Files to delete, or empty)
+</DELETE>
+
+<VERIFICATION>
+(Testing steps)
+</VERIFICATION>
+"""
 
         # Important reminder on the absolute end
         automation_warning = "CRITICAL: Your output is parsed by a script. You MUST use the exact XML tags and --- File: --- wrappers shown in the template, or the system will crash."

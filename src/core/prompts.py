@@ -73,7 +73,7 @@ STARTER_TODO_PROMPT_INSTR = """
 ### Instructions
 1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).
 2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').
-3. **Format & Custom Phases:** You MUST output the plan using `<<SECTION: Phase Name>>` followed by content.
+3. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
    - Suggested Phase Names: {headers_str}.
    - **ADDITIONAL PHASES:** You are encouraged to add project-specific phases if the suggested list is insufficient. Simply create a descriptive name for any new section.
    - **DO NOT** output sections for phases you decided to skip.
@@ -87,8 +87,8 @@ STARTER_GENERATE_MASTER_INSTR = """
 1. **Select & Rename:** Select the appropriate `go_*.bat` script for the stack and rename it to `go.bat`.
 2. **Mandatory README:** You MUST output the `README.md` file. Populate it (or create it) with the project title, the pitch, and specific setup steps derived from the stack.
 3. **BOILERPLATE ONLY:** DO NOT implement any of the actual tasks, code, or features described in the TODO plan yet. Your job is ONLY to set up the skeleton/infrastructure (README, batch scripts, config files). Do NOT create source files (like *.js, *.py, *.css) unless they are explicitly part of the standard boilerplate provided above.
-4. **Short Description:** At the start of your response, provide a short, one-sentence description (noun phrase) of exactly what this project is (e.g., 'a Python-based CLI tool for image processing'). This description must grammatically fit into the sentence 'We are working on [PITCH].' Wrap this description in `<<PITCH>>` tags. **You MUST close the tag with `<<PITCH>>`. Example: `<<PITCH>>a new CLI tool<<PITCH>>`.**
-5. **Project Color:** Choose a single accent hex color code (e.g. #4A90E2) that fits the brand or technology of this project. Wrap it in `<<COLOR>>` tags. Example: `<<COLOR>>#4A90E2<<COLOR>>`.
+4. **Short Description:** At the start of your response, provide a short, one-sentence description (noun phrase) of exactly what this project is (e.g., 'a Python-based CLI tool for image processing'). This description must grammatically fit into the sentence 'We are working on [PITCH].' Wrap this description in `<PITCH>` tags. **You MUST close the tag with `</PITCH>`. Example: `<PITCH>a new CLI tool</PITCH>`.**
+5. **Project Color:** Choose a single accent hex color code (e.g. #4A90E2) that fits the brand or technology of this project. Wrap it in `<COLOR>` tags. Example: `<COLOR>#4A90E2</COLOR>`.
 6. **Output Format:** Return the complete source code for every file you are modifying or creating using this exact format:
 --- File: `path/to/file.ext` ---
 ```language
@@ -105,8 +105,8 @@ Your task is to update the drafts listed below to comply with this instruction.
 
 ### Summary Requirement
 You MUST start your response with a brief summary and explanation of what you changed and why.
-Wrap this summary in `<<NOTES>>` tags.
-Example: <<NOTES>>I updated the database schema to include a 'status' field and revised the user flow accordingly.<<NOTES>>
+Wrap this summary in `<NOTES>` tags.
+Example: <NOTES>I updated the database schema to include a 'status' field and revised the user flow accordingly.</NOTES>
 
 ### User Instruction
 {instruction}
@@ -122,7 +122,7 @@ Example: <<NOTES>>I updated the database schema to include a 'status' field and 
 2. Rewrite the content in the 'Content to Update' section to incorporate this instruction.
 3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.
 4. {target_instructions}
-5. Output the summary in `<<NOTES>>`, followed by the updated content."""
+5. Output the summary in `<NOTES>`, followed by the updated content."""
 
 STARTER_SYNC_PROMPT_TEMPLATE = """You are a Consistency Engine. The user has modified section **{current_name}**.
 Update *unsigned* drafts to match these changes, respecting *locked* sections.

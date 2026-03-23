@@ -181,11 +181,11 @@ class RewriteUnsignedDialog(Toplevel):
             return
 
         # 1. Extract Notes
-        notes_match = re.search(r"<<NOTES>>(.*?)<<NOTES>>", raw_content, re.DOTALL)
+        notes_match = re.search(r"<NOTES>(.*?)</NOTES>", raw_content, re.DOTALL | re.IGNORECASE)
         notes = notes_match.group(1).strip() if notes_match else ""
 
         # 2. Extract remaining content (all content minus the notes block)
-        clean_content = re.sub(r"<<NOTES>>.*?<<NOTES>>", "", raw_content, flags=re.DOTALL).strip()
+        clean_content = re.sub(r"<NOTES>.*?</NOTES>", "", raw_content, flags=re.DOTALL | re.IGNORECASE).strip()
 
         if notes:
             NotesDisplayDialog(self, notes)

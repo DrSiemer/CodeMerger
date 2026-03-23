@@ -219,9 +219,9 @@ class GenerateView(tk.Frame):
             return
 
         # STRICT Check: Must find opening and closing tag
-        has_pitch = re.search(r"<<PITCH>>.*?<<PITCH>>", content, re.DOTALL)
+        has_pitch = re.search(r"<PITCH>.*?</PITCH>", content, re.DOTALL | re.IGNORECASE)
         if not has_pitch:
-            self._set_ui_state("disabled", "Response missing <<PITCH>> tags")
+            self._set_ui_state("disabled", "Response missing <PITCH> tags")
             return
 
         # All conditions met
@@ -304,7 +304,7 @@ class GenerateView(tk.Frame):
         if not raw: return
 
         # Strict Regex: Will only match if closing tag exists
-        pitch_match = re.search(r"<<PITCH>>(.*?)<<PITCH>>", raw, re.DOTALL)
+        pitch_match = re.search(r"<PITCH>(.*?)</PITCH>", raw, re.DOTALL | re.IGNORECASE)
         project_pitch = pitch_match.group(1).strip() if pitch_match else "a new project"
 
         # Now get file content

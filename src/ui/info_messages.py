@@ -288,10 +288,10 @@ INFO_MESSAGES = {
         "Clicking this copies the prompt to your clipboard for use with an LLM."
     ),
     "rewrite_response": (
-        "Paste Area: Paste the LLM's updated segments here. Ensure the tags like <<SECTION: Name>> are preserved."
+        "Paste Area: Paste the LLM's updated segments here. Ensure the tags like <SECTION name=\"Name\"> are preserved."
     ),
     "rewrite_apply": (
         "Apply Changes: Processes the response and updates the project starter drafts. Any change notes "
-        "provided by the AI in <<NOTES>> tags will be displayed for your review."
+        "provided by the AI in <NOTES> tags will be displayed for your review."
     )
 }

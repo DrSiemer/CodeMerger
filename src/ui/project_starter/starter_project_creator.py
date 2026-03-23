@@ -31,7 +31,7 @@ class StarterProjectCreator:
         raw_project_name = dialog.starter_state.project_data["name"].get()
         parent_folder = dialog.starter_state.project_data["parent_folder"].get()
 
-        color_match = re.search(r"<<COLOR>>(.*?)<<COLOR>>", llm_output, re.DOTALL)
+        color_match = re.search(r"<COLOR>(.*?)</COLOR>", llm_output, re.DOTALL | re.IGNORECASE)
         recommended_color = color_match.group(1).strip() if color_match else None
         if recommended_color and not re.match(r'^#[0-9a-fA-F]{6}$', recommended_color):
             recommended_color = None

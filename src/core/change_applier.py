@@ -55,7 +55,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     a dictionary describing the plan. This does NOT write any files.
     """
     def get_section(tag, text):
-        match = re.search(rf'<<{tag}>>(.*?)<</?{tag}>>', text, re.DOTALL | re.IGNORECASE)
+        match = re.search(rf'<{tag}>(.*?)</{tag}>', text, re.DOTALL | re.IGNORECASE)
         if match:
             content = match.group(1).strip()
             if content.lower() in ["none", "n/a", "no files to delete", "no changes"]:

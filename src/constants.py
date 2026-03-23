@@ -35,7 +35,7 @@ STATUS_FADE_DURATION_SECONDS = 0.5
 TOKEN_THRESHOLD_WARNING_TEXT = "You are close to the current maximum tokens\nfor currently available language models"
 
 # --- Project Starter Logic ---
-DELIMITER_TEMPLATE = "<<SECTION: {name}>>"
+DELIMITER_TEMPLATE = '<SECTION name="{name}">'
 
 # Concept Generation Segments
 CONCEPT_SEGMENTS = {

@@ -18,14 +18,14 @@ class SegmentManager:
         instructions = [
             "You MUST structure your response using specific section separators.",
             "Do not add any text outside these sections.",
-            "For each section, output the delimiter followed immediately by the content.",
+            "For each section, output the delimiter followed immediately by the content and close it.",
             "\nREQUIRED FORMAT:"
         ]
 
         for key in segment_keys:
             name = friendly_names_map.get(key, key)
             delimiter = DELIMITER_TEMPLATE.format(name=name)
-            instructions.append(f"{delimiter}\n... content for {name} ...")
+            instructions.append(f"{delimiter}\n... content for {name} ...\n</SECTION>")
 
         return "\n".join(instructions)
 
@@ -33,10 +33,10 @@ class SegmentManager:
     def parse_segments(text):
         """
         Parses the LLM output into a dictionary { "Section Name": "Content" }.
-        Uses regex to find <<SECTION: Name>> followed by content.
+        Uses regex to find <SECTION name="Name"> followed by content.
         """
-        # Regex to find <<SECTION: Name>> followed by content until the next section or end of string
-        pattern = re.compile(r'<<SECTION:\s*(.*?)>>\s*(.*?)(?=<<SECTION:|$)', re.DOTALL | re.IGNORECASE)
+        # Regex to find <SECTION name="Name"> followed by content until the next section or end of string
+        pattern = re.compile(r'<SECTION name="([^"]+)">\s*(.*?)(?=</SECTION>|<SECTION name=|$)', re.DOTALL | re.IGNORECASE)
 
         matches = pattern.findall(text)
         segments = {}
