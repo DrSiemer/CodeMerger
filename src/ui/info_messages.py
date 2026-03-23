@@ -211,6 +211,11 @@ INFO_MESSAGES = {
     # --- Paste Changes ---
     "paste_text": "Paste Area: Paste the full Markdown response from the AI here. CodeMerger will look for '--- File: `path` ---' tags.",
     "paste_apply": "Apply Changes: CodeMerger will parse the code, validate the paths, and overwrite your local files with the new content.",
+    "paste_unformatted": (
+        "Unformatted Response: This response contained commentary that was not properly wrapped in the requested XML tags. "
+        "Review this tab to see what the AI said, and use the Correction button to ask for a reformatted reply."
+    ),
+    "paste_admonish": "Admonish AI: Copies a specialized instruction to your clipboard, telling the AI that the tool cannot use its previous unformatted response.",
 
     # --- New Profile Dialog ---
     "profile_name": "Profile Name: Enter a unique label for this configuration (e.g. 'Frontend' or 'Feature Name').",

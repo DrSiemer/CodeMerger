@@ -458,23 +458,26 @@ class ActionHandlers:
             if dialog_to_close:
                 dialog_to_close.destroy()
 
-        has_feedback = any(plan.get(k) for k in ['intro', 'answers', 'changes', 'delete', 'verification'])
-
         # Determine whether to show review dialog based on user settings and the modifier override
         show_feedback_setting = self.app.app_state.config.get('show_feedback_on_paste', True)
-        if force_toggle_feedback:
-            should_show = not show_feedback_setting
-        else:
-            should_show = show_feedback_setting
+        should_show = (not show_feedback_setting) if force_toggle_feedback else show_feedback_setting
 
-        if has_feedback and should_show:
+        is_unformatted_only = (status == 'UNFORMATTED')
+
+        # Logic Update: If user wants review, always open the dialog for valid changes
+        if should_show:
             if dialog_to_close:
                 dialog_to_close.destroy()
                 dialog_to_close = None
 
-            self.show_response_review(plan=plan, on_apply=do_execute, on_refuse=do_refuse)
-        else:
+            on_apply_cb = do_execute if not is_unformatted_only else None
+            self.show_response_review(plan=plan, on_apply=on_apply_cb, on_refuse=do_refuse)
+        elif not is_unformatted_only:
+            # Review disabled: apply instantly
             do_execute()
+        else:
+            # Unformatted ONLY + Review Disabled: show specific failure toast
+            self.app.helpers.show_compact_toast("Error: LLM response followed no usable format.")
 
     def show_response_review(self, plan=None, on_apply=None, on_refuse=None):
         """

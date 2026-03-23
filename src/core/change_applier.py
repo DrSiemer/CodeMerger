@@ -69,12 +69,29 @@ def parse_and_plan_changes(base_dir, markdown_text):
     delete_text = get_section("DELETE", markdown_text)
     verification_text = get_section("VERIFICATION", markdown_text)
 
+    # Flag to determine if the AI followed formatting for commentary at all
+    has_any_tags = any([answers_text, intro_text, changes_text, delete_text, verification_text])
+
+    # --- Orphan / Unformatted Text Detection ---
+    # We define unformatted text as anything that is NOT inside a valid tag
+    # and NOT inside a valid File block.
+    orphan_detect = markdown_text
+
+    # 1. Strip all valid tagged blocks
+    orphan_detect = re.sub(r'<(ANSWERS|INTRO|CHANGES|DELETE|VERIFICATION)>.*?</\1>', '', orphan_detect, flags=re.DOTALL | re.IGNORECASE)
+
+    # 2. Strip all valid File blocks
+    orphan_detect = re.sub(r'--- File: `[^\n`]+` ---\s*[\r\n]+```[^\n]*[\r\n]+.*?\n```\s*[\r\n]+--- End of file ---', '', orphan_detect, flags=re.DOTALL)
+
+    # 3. Cleanup whitespace: Collapse multiple newlines (3+) left behind by stripped blocks into just two
+    unformatted_text = re.sub(r'\n\s*\n\s*\n+', '\n\n', orphan_detect).strip()
+
     # --- Pre-processing for common LLM formatting errors ---
 
     # Ensure there is a newline between the header and the code block
-    markdown_text = re.sub(r'(--- File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
+    markdown_text_processed = re.sub(r'(--- File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
 
-    lines = markdown_text.split('\n')
+    lines = markdown_text_processed.split('\n')
     processed_lines = []
     for line in lines:
         stripped_line = line.strip()
@@ -85,20 +102,31 @@ def parse_and_plan_changes(base_dir, markdown_text):
             processed_lines.append(line[pos:])
         else:
             processed_lines.append(line)
-    markdown_text = '\n'.join(processed_lines)
+    markdown_text_processed = '\n'.join(processed_lines)
 
     # Ensure there is a newline between the closing backticks and the footer
-    markdown_text = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text)
+    markdown_text_processed = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text_processed)
 
     # Robust regex: handles \r\n, varying whitespace, and avoids being tripped up by content
     file_blocks = re.findall(
         r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+--- End of file ---',
-        markdown_text,
+        markdown_text_processed,
         re.DOTALL
     )
 
     if not file_blocks:
-        return {'status': 'ERROR', 'message': "No valid file blocks were found. Make sure each file is wrapped with '--- File: `path` ---' and '--- End of file ---', and ensure the code is wrapped in standard triple backticks."}
+        # If NO file blocks are found, return the full original text as unformatted
+        return {
+            'status': 'UNFORMATTED',
+            'message': "No valid file blocks were found.",
+            'unformatted': markdown_text.strip(),
+            'answers': answers_text,
+            'intro': intro_text,
+            'changes': changes_text,
+            'delete': delete_text,
+            'verification': verification_text,
+            'has_any_tags': has_any_tags
+        }
 
     files_to_update = {}
     files_to_create = {}
@@ -141,7 +169,9 @@ def parse_and_plan_changes(base_dir, markdown_text):
         'intro': intro_text,
         'changes': changes_text,
         'delete': delete_text,
-        'verification': verification_text
+        'verification': verification_text,
+        'unformatted': unformatted_text,
+        'has_any_tags': has_any_tags
     }
 
     if files_to_create:

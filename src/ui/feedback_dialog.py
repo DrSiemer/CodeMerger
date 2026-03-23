@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+import pyperclip
 from tkinter import Frame, Label, ttk, BooleanVar, messagebox
 from PIL import Image, ImageDraw, ImageTk
 from .. import constants as c
@@ -9,6 +10,7 @@ from .window_utils import position_window
 from .style_manager import apply_dark_theme
 from ..core.paths import ICON_PATH
 from ..core.utils import save_config
+from .tooltip import ToolTip
 
 class FeedbackDialog(tk.Toplevel):
     def __init__(self, parent, plan, on_apply=None, on_refuse=None):
@@ -39,29 +41,55 @@ class FeedbackDialog(tk.Toplevel):
         apply_dark_theme(self)
 
         # Generate vertical accent bars for all tabs
-        self._gray_accent = self._create_vertical_accent(c.TEXT_SUBTLE_COLOR)  # Intro
+        self._gray_accent = self._create_vertical_accent(c.TEXT_SUBTLE_COLOR)  # Intro / Placeholder
         self._cyan_accent = self._create_vertical_accent("#00BCD4")           # Answers
         self._blue_accent = self._create_vertical_accent(c.BTN_BLUE)          # Changes
         self._red_accent = self._create_vertical_accent(c.WARN)               # Delete
         self._green_accent = self._create_vertical_accent(c.BTN_GREEN)        # Verification
+        self._yellow_accent = self._create_vertical_accent(c.ATTENTION)        # Unformatted
 
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
         main_frame.pack(fill="both", expand=True)
 
-        main_frame.grid_rowconfigure(1, weight=1)
+        # Main Layout Rows: 0=Title, 1=UnformattedAlert, 2=Notebook, 3=BottomActions
+        main_frame.grid_rowconfigure(2, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
         title_text = "Review Proposed Update" if on_apply else "Review Last Update"
         Label(main_frame, text=title_text, font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 10))
 
+        # --- Global Unformatted Alert Header ---
+        # Show ONLY if unformatted text exists AND no tags were detected at all.
+        has_any_tags = plan.get('has_any_tags', False)
+        has_unformatted = bool(plan.get('unformatted'))
+
+        self.alert_frame = Frame(main_frame, bg=c.DARK_BG)
+        if has_unformatted and not has_any_tags:
+            self.alert_frame.grid(row=1, column=0, sticky="ew", pady=(0, 15))
+
+            Label(
+                self.alert_frame,
+                text="This text was not properly wrapped in the requested XML tags",
+                fg=c.WARN, bg=c.DARK_BG, font=c.FONT_NORMAL
+            ).pack(side='left')
+
+            self.admonish_btn = RoundedButton(
+                self.alert_frame, text="Copy Correction Prompt", command=self._copy_admonishment,
+                bg=c.ATTENTION, fg="#FFFFFF", font=c.FONT_SMALL_BUTTON,
+                width=200, height=26, cursor="hand2"
+            )
+            self.admonish_btn.pack(side='right')
+            ToolTip(self.admonish_btn, "Copy a prompt to tell the AI to follow the output format")
+
         self.notebook = ttk.Notebook(main_frame)
-        self.notebook.grid(row=1, column=0, sticky="nsew", pady=(0, 15))
-        self.renderers =[]
+        self.notebook.grid(row=2, column=0, sticky="nsew", pady=(0, 15))
+        self.renderers = []
 
         self.tab_indices = {}
         current_idx = 0
 
-        # Tab order: Intro, Changes, Answers, Delete, Verification
+        # Tab order: Intro, Changes, Answers, Delete, Verification, Unformatted (Priority order)
+
         if plan.get('intro'):
             self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent)
             self.tab_indices['intro'] = current_idx
@@ -87,11 +115,24 @@ class FeedbackDialog(tk.Toplevel):
             self.tab_indices['verification'] = current_idx
             current_idx += 1
 
+        # Unformatted output is added last as it's the lowest priority
+        if plan.get('unformatted'):
+            self._add_unformatted_tab(plan.get('unformatted'))
+            self.tab_indices['unformatted'] = current_idx
+            current_idx += 1
+
+        # --- Placeholder for "Code Only" responses ---
+        if current_idx == 0:
+            msg = "The AI response contained only code blocks with no accompanying text or tagged sections."
+            self._add_tab("Response Summary", msg, icon=self._gray_accent)
+            self.tab_indices['placeholder'] = current_idx
+            current_idx += 1
+
         if current_idx > 0:
             self.notebook.select(0)
 
         self.bottom_frame = Frame(main_frame, bg=c.DARK_BG)
-        self.bottom_frame.grid(row=2, column=0, sticky="ew", pady=(15, 0))
+        self.bottom_frame.grid(row=3, column=0, sticky="ew", pady=(15, 0))
 
         # Checkbox
         self.show_var = BooleanVar(value=self.app_state.config.get('show_feedback_on_paste', True))
@@ -99,12 +140,14 @@ class FeedbackDialog(tk.Toplevel):
         chk.pack(side="left")
 
         if self.on_apply:
-            self.apply_btn = RoundedButton(
-                self.bottom_frame, text="Apply Changes", command=self._handle_apply,
-                bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BOLD,
-                width=200, height=30, cursor="hand2"
-            )
-            self.apply_btn.pack(side="right")
+            # Only show Apply Changes if there are actually file modifications in the plan
+            if plan.get('updates') or plan.get('creations'):
+                self.apply_btn = RoundedButton(
+                    self.bottom_frame, text="Apply Changes", command=self._handle_apply,
+                    bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BOLD,
+                    width=200, height=30, cursor="hand2"
+                )
+                self.apply_btn.pack(side="right")
 
             self.cancel_btn = RoundedButton(self.bottom_frame, text="Cancel", command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
             self.cancel_btn.pack(side="right", padx=(0, 10))
@@ -142,6 +185,22 @@ class FeedbackDialog(tk.Toplevel):
         renderer.set_markdown(markdown_text.strip())
         self.renderers.append(renderer)
 
+    def _add_unformatted_tab(self, raw_text):
+        """Adds a specialized tab for text that wasn't properly wrapped in tags."""
+        frame = Frame(self.notebook, bg=c.DARK_BG)
+        self.notebook.add(frame, text="Unformatted output", image=self._yellow_accent, compound="left")
+
+        renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=self._adjust_font_size)
+        renderer.pack(fill="both", expand=True)
+        renderer.set_markdown(raw_text.strip())
+        self.renderers.append(renderer)
+
+    def _copy_admonishment(self):
+        msg = "Please follow the output format as described in your instructions, the tool cannot use this unformatted text."
+        pyperclip.copy(msg)
+        self.admonish_btn.config(text="Copied!", bg=c.BTN_GREEN)
+        self.after(2000, lambda: self.admonish_btn.config(text="Copy Correction Prompt", bg=c.ATTENTION))
+
     def _adjust_font_size(self, delta):
         if not self.renderers: return
         new_size = self.renderers[0].base_font_size + delta
@@ -154,7 +213,6 @@ class FeedbackDialog(tk.Toplevel):
         save_config(self.app_state.config)
 
         # Find the main App instance to notify it of the change so tooltips can update.
-        # This handles review windows spawned from both Normal and Compact modes.
         app = self.parent
         while app and not hasattr(app, 'button_manager'):
             app = getattr(app, 'parent', getattr(app, 'master', None))
@@ -167,13 +225,12 @@ class FeedbackDialog(tk.Toplevel):
         if self.on_apply:
             self.on_apply()
             # Clear callbacks once executed to indicate the update is no longer pending.
-            # This suppresses the "Discard Update?" warning on window close.
             self.on_apply = None
             self.on_refuse = None
 
         if 'verification' in self.tab_indices:
             # Changes applied, so hide the decision buttons
-            self.apply_btn.pack_forget()
+            if hasattr(self, 'apply_btn'): self.apply_btn.pack_forget()
             self.cancel_btn.pack_forget()
 
             # Add a final Close/OK button to exit the window after verification is read
