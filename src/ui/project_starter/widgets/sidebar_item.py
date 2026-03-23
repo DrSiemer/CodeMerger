@@ -17,12 +17,12 @@ class SidebarItem(Frame):
         if not is_overview:
             # Indicator for segments (Uses lock graphics)
             self.indicator = Label(self, bg=c.DARK_BG, image=assets.unlocked_icon)
-            self.indicator.pack(side="left", padx=(15, 5))
+            self.indicator.pack(side="left", padx=(5, 5))
             text_padx = (0, 10)
         else:
             # No indicator for Full Text, align to far left
             self.indicator = Label(self, bg=c.DARK_BG)
-            text_padx = (10, 10)
+            text_padx = (5, 10)
 
         label_text = text
         font = c.FONT_BOLD if is_overview else c.FONT_NORMAL
