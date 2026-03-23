@@ -105,7 +105,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/ui/project_starter/step_generate.py`: The project path preview is explicitly normalized to use backslashes (`\`) to match user preference and maintain consistency across environments that might return mixed slash styles from directory pickers.
 - **Dynamic Tooltip Dependencies**: The `refresh_paste_tooltips` method in `ButtonStateManager` depends on a specific `ToolTip` object reference (`app.paste_changes_tooltip`) created during the UI build in `ui_builder.py`. Removing or renaming this reference will cause an `AttributeError`.
 - **Custom Font Boldness**: The `RoundedButton` uses a manual Pillow-based drawing system. To render bold text on Windows, `font_utils.py` must explicitly map the font family to the specific bold `.ttf` file (e.g., `seguisb.ttf` for Segoe UI), as Pillow does not automatically synthesize bold styles from standard font handles.
-- **Paste Button Modifiers**: The Paste button implements a "Setting Override" pattern via Alt-click. This behavior (Inverse of `show_feedback_on_paste`) is non-standard and should be preserved as an intentional UX feature rather than being "refactored" to a standard paste.
+- **Paste Button Modifiers**: The Paste button implements a "Setting Override" pattern via Ctrl-click. This behavior (Inverse of `show_feedback_on_paste`) is non-standard and should be preserved as an intentional UX feature. Alt-click provides a fallback to the manual paste window.
 
 ### Build, Installation, & CI/CD
 

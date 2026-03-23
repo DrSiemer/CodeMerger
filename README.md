@@ -60,8 +60,9 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - If you added instructions, a "Copy with Instructions" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation. The keyboard shortcut for this action is **`Ctrl+C`**.
 - **Paste Changes**
     - To apply changes from a language model, you can use the paste functionality.
-    - Pressing **`Ctrl+V`** will open the "Paste Changes" window, allowing you to review and apply the code from your clipboard.
-    - Pressing **`Ctrl+Shift+V`** will apply the changes from your clipboard immediately, without opening the review window (unless new files need to be created).
+    - Click **"Paste Changes"** or press **`Ctrl+V`** to apply changes from your clipboard. Depending on your settings, this will either open the "AI Response Review" window or apply changes instantly.
+    - **Ctrl-clicking** the button (or **`Ctrl+Shift+V`**) will toggle the automatic review behavior (doing the opposite of your current settings).
+    - **Alt-clicking** the button will open the manual "Paste Changes" window for raw text input.
 - **Compact Mode**
     - Minimize the main window to activate the compact mode panel. All keyboard shortcuts (`Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+V`, and `Ctrl+Shift+V`) are also active in this mode.
     - The panel contains two primary buttons:
@@ -69,7 +70,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
             - It appears as "Copy with Instructions" if you have defined instructions for the project, and "Copy Code Only" if you have not.
             - A normal click performs the action shown on the button.
             - Holding **Ctrl** while clicking will always perform the "Copy Code Only" action.
-        - **Paste**: Opens the "Paste Changes" window. If you hold **Ctrl** while clicking, it will immediately apply the changes from your clipboard without opening the window (unless new files need to be created).
+        - **Paste**: Applies changes from your clipboard. A normal click follows your "AI Response Review" settings. **Ctrl-click** toggles that behavior, and **Alt-click** opens the manual paste window.
     - The panel is colored with your project's assigned color.
     - A warning icon will appear in the move bar if new files are found.
         - **Click** the icon to restore the main window and open the file manager.

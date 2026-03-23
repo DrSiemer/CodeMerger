@@ -216,10 +216,15 @@ class CompactMode(tk.Toplevel):
             is_ctrl = (event.state & 0x0004)
             is_alt = (event.state & 0x20000)
 
-            if is_ctrl or is_alt:
-                self.parent.action_handlers.apply_changes_from_clipboard(force_toggle_feedback=is_alt)
-            else:
+            if is_alt:
+                # Manual paste window (fallback)
                 self.parent.action_handlers.open_paste_changes_dialog()
+            elif is_ctrl:
+                # Toggle feedback (opposite of setting)
+                self.parent.action_handlers.apply_changes_from_clipboard(force_toggle_feedback=True)
+            else:
+                # Default behavior: Apply changes (follows setting)
+                self.parent.action_handlers.apply_changes_from_clipboard(force_toggle_feedback=False)
         else:
             self.paste_button._draw(self.paste_button.base_color)
 

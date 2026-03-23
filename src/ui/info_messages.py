@@ -41,8 +41,9 @@ INFO_MESSAGES = {
         "Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Code Only'."
     ),
     "paste_changes": (
-        "Paste Changes (Ctrl+V): Open a review window to process AI responses. CodeMerger reads "
-        "the Markdown and automatically writes changes back. Ctrl-click to instantly apply from clipboard."
+        "Paste Changes (Ctrl+V): Instantly applies code from your clipboard. Depending on your settings, "
+        "this opens a review window or writes directly to disk. Ctrl-click to toggle the review behavior. "
+        "Alt-click to open the manual paste window for raw text input."
     ),
     "response_review": (
         "AI Response Review: Opens the review window to see the most recently applied changes and "

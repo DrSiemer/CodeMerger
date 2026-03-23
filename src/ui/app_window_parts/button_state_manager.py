@@ -22,9 +22,9 @@ class ButtonStateManager:
         show_review = app.app_state.config.get('show_feedback_on_paste', True)
 
         if show_review:
-            hint = "Open paste window\n(Ctrl+Click: instant paste from clipboard, Alt+Click: instant paste, skip review)"
+            hint = "Paste: instant apply with review\n(Ctrl+Click: instant apply without review, Alt+Click: manual paste window)"
         else:
-            hint = "Open paste window\n(Ctrl+Click: instant paste from clipboard, Alt+Click: instant paste with review)"
+            hint = "Paste: instant apply without review\n(Ctrl+Click: instant apply with review, Alt+Click: manual paste window)"
 
         app.paste_changes_tooltip.text = hint
 

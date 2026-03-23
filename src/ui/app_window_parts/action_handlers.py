@@ -247,10 +247,16 @@ class ActionHandlers:
             btn._draw(btn.hover_color)
             is_ctrl = (event.state & 0x0004)
             is_alt = (event.state & 0x20000)
-            if is_ctrl or is_alt:
-                self.apply_changes_from_clipboard(force_toggle_feedback=is_alt)
-            else:
+
+            if is_alt:
+                # Manual paste window (old default)
                 self.open_paste_changes_dialog()
+            elif is_ctrl:
+                # Toggle feedback (opposite of setting)
+                self.apply_changes_from_clipboard(force_toggle_feedback=True)
+            else:
+                # Default behavior: Apply changes (follows setting)
+                self.apply_changes_from_clipboard(force_toggle_feedback=False)
         else:
             btn._draw(btn.base_color)
 
@@ -454,7 +460,7 @@ class ActionHandlers:
 
         has_feedback = any(plan.get(k) for k in ['intro', 'answers', 'changes', 'delete', 'verification'])
 
-        # Determine whether to show review dialog based on user settings and the Alt-click override
+        # Determine whether to show review dialog based on user settings and the modifier override
         show_feedback_setting = self.app.app_state.config.get('show_feedback_on_paste', True)
         if force_toggle_feedback:
             should_show = not show_feedback_setting
