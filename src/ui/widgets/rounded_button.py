@@ -7,12 +7,11 @@ from ..font_utils import get_pil_font
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
     def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, muted_border=False, h_padding=None, cursor=None, text_align='center', hover_bg=None, click_bg=None, hover_fg=None):
-        # If a tuple like ("Segoe UI", 12) is passed, use it directly
         if font:
             self.tk_font_tuple = font
-        # If font is None, use the default font from constants
         else:
             self.tk_font_tuple = c.FONT_DEFAULT
+
         self.hollow = hollow
         self.muted_border = muted_border
         self.image = image
@@ -143,8 +142,9 @@ class RoundedButton(tk.Canvas):
             paste_y = (scaled_height - scaled_image.height) // 2
             img.paste(scaled_image, (int(paste_x), int(paste_y)), scaled_image)
         elif self.text:
-            original_font_size = self.tk_font_tuple[1]
-            scaled_font = get_pil_font((self.tk_font_tuple[0], int(original_font_size * scale)))
+            scaled_font_tuple = (self.tk_font_tuple[0], int(self.tk_font_tuple[1] * scale)) + tuple(self.tk_font_tuple[2:])
+            scaled_font = get_pil_font(scaled_font_tuple)
+
             anchor = "mm"
             text_x = scaled_width / 2
             if self.text_align == 'left':
