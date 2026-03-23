@@ -262,7 +262,9 @@ class RoundedButton(tk.Canvas):
             else:
                 self.base_color = self.original_bg_color
                 if not hasattr(self, '_custom_hover'): self.hover_color = self._adjust_brightness(self.base_color, -0.1)
-                if not hasattr(self, '_custom_click'): self.click_color = self._adjust_brightness(self.base_color, -0.2)
+                if not hasattr(self, '_custom_click'): self.click_color = self.base_color
+                self.disabled_color = self.base_color
+                self.disabled_text_color = '#757575'
 
         if muted_border_changed:
             self.muted_border = kwargs.pop('muted_border')

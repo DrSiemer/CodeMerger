@@ -7,6 +7,7 @@ from ...widgets.scrollable_text import ScrollableText
 from ...widgets.markdown_renderer import MarkdownRenderer
 from ...tooltip import ToolTip
 from ..segment_manager import SegmentManager
+from ...assets import assets
 
 # Extracted Component Imports
 from .sidebar_item import SidebarItem
@@ -148,11 +149,32 @@ class SegmentedReviewer(Frame):
         self.footer_buttons_frame = Frame(self.footer, bg=c.DARK_BG)
         self.footer_buttons_frame.pack(fill='x', expand=True)
 
-        # Footer Buttons
-        self.signoff_btn = RoundedButton(self.footer_buttons_frame, text="Lock segment & Next", command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON, width=180, cursor="hand2")
+        # --- Sign-off Container (Icon on left) ---
+        self.signoff_container = Frame(self.footer_buttons_frame, bg=c.DARK_BG)
+
+        self.lock_icon_label = Label(self.signoff_container, image=assets.locked_icon, bg=c.DARK_BG)
+        self.lock_icon_label.pack(side="left", padx=(0, 10))
+
+        self.signoff_btn = RoundedButton(
+            self.signoff_container, text="Lock segment & Next",
+            command=self._sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT,
+            font=c.FONT_BUTTON, width=200, cursor="hand2"
+        )
+        self.signoff_btn.pack(side="left")
         ToolTip(self.signoff_btn, "Lock this section and move to the next incomplete part", delay=500)
 
-        self.revert_btn = RoundedButton(self.footer_buttons_frame, text="Unlock to Edit", command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, cursor="hand2")
+        # --- Revert Container (Icon on right) ---
+        self.revert_container = Frame(self.footer_buttons_frame, bg=c.DARK_BG)
+
+        self.revert_btn = RoundedButton(
+            self.revert_container, text="Unlock to edit",
+            command=self._revert_draft, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT,
+            font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2"
+        )
+        self.revert_btn.pack(side="left")
+
+        self.unlock_icon_label = Label(self.revert_container, image=assets.unlocked_icon, bg=c.DARK_BG)
+        self.unlock_icon_label.pack(side="left", padx=(10, 0))
         ToolTip(self.revert_btn, "Release the lock to make further changes to this section", delay=500)
 
         self.sync_btn = RoundedButton(self.footer_buttons_frame, text="Sync Unsigned", command=self._open_sync_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2")
@@ -184,7 +206,7 @@ class SegmentedReviewer(Frame):
         self.renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
 
     def _on_renderer_double_click(self, event):
-        if self.revert_btn.winfo_ismapped(): return
+        if self.revert_container.winfo_ismapped(): return
         try: click_index = self.renderer.text_widget.index(f"@{event.x},{event.y}")
         except Exception: click_index = "1.0"
         self._toggle_view(force_render=False)
@@ -389,12 +411,12 @@ class SegmentedReviewer(Frame):
 
         if all_signed:
             # If all are signed, show Merge Button in the main slot
-            self.signoff_btn.pack_forget()
+            self.signoff_container.pack_forget()
             self.sync_btn.pack_forget()
             self.merge_btn.pack(side="right")
 
             # Allow reversion even if all are signed
-            self.revert_btn.pack(side="left", padx=(0, 10))
+            self.revert_container.pack(side="left", padx=(0, 10))
             self.editor.text_widget.config(state="disabled", bg=c.DARK_BG)
             return
 
@@ -402,13 +424,13 @@ class SegmentedReviewer(Frame):
         self.merge_btn.pack_forget()
 
         if is_signed:
-            self.signoff_btn.pack_forget()
+            self.signoff_container.pack_forget()
             self.sync_btn.pack_forget()
-            self.revert_btn.pack(side="left", padx=(0, 10))
+            self.revert_container.pack(side="left", padx=(0, 10))
             self.editor.text_widget.config(state="disabled", bg=c.DARK_BG)
         else:
-            self.revert_btn.pack_forget()
-            self.signoff_btn.pack(side="right")
+            self.revert_container.pack_forget()
+            self.signoff_container.pack(side="right")
             self._update_sync_button_visibility(self.segments_data.get(target_key, "").strip())
             self.editor.text_widget.config(state="normal", bg=c.TEXT_INPUT_BG)
 
