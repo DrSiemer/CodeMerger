@@ -6,7 +6,7 @@ from ..font_utils import get_pil_font
 
 class RoundedButton(tk.Canvas):
     """A custom anti-aliased rounded button widget for tkinter."""
-    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, muted_border=False, h_padding=None, cursor=None, text_align='center'):
+    def __init__(self, parent, command, text=None, image=None, font=None, bg='#CCCCCC', fg='#000000', width=None, height=30, radius=6, hollow=False, muted_border=False, h_padding=None, cursor=None, text_align='center', hover_bg=None, click_bg=None, hover_fg=None):
         # If a tuple like ("Segoe UI", 12) is passed, use it directly
         if font:
             self.tk_font_tuple = font
@@ -51,19 +51,20 @@ class RoundedButton(tk.Canvas):
         self.original_bg_color = bg
         self.original_fg_color = fg
         self.fg_color = self.original_fg_color
+        self.hover_fg = hover_fg
 
         # For hollow buttons, the look is a specific fill with fg text
         if self.hollow:
             self.base_color = c.DARK_BG
-            self.hover_color = self._adjust_brightness(self.base_color, 0.2)
-            self.click_color = self.base_color
+            self.hover_color = hover_bg if hover_bg else self._adjust_brightness(self.base_color, 0.2)
+            self.click_color = click_bg if click_bg else self.base_color
             self.disabled_color = self.base_color
             self.disabled_text_color = '#757575'
         # For solid buttons, colors are based on the background
         else:
             self.base_color = self.original_bg_color
-            self.hover_color = self._adjust_brightness(self.base_color, -0.1)
-            self.click_color = self._adjust_brightness(self.base_color, -0.2)
+            self.hover_color = hover_bg if hover_bg else self._adjust_brightness(self.base_color, -0.1)
+            self.click_color = click_bg if click_bg else self._adjust_brightness(self.base_color, -0.2)
             self.disabled_color = '#9E9E9E'
 
         self._last_draw_width = 0
@@ -164,10 +165,13 @@ class RoundedButton(tk.Canvas):
 
     def _on_enter(self, event):
         if self.is_enabled:
+            if self.hover_fg:
+                self.fg_color = self.hover_fg
             self._draw(self.hover_color)
 
     def _on_leave(self, event):
         if self.is_enabled:
+            self.fg_color = self.original_fg_color
             self._draw(self.base_color)
 
     def _on_click(self, event):
@@ -210,6 +214,9 @@ class RoundedButton(tk.Canvas):
         fg_changed = 'fg' in kwargs
         hollow_changed = 'hollow' in kwargs
         muted_border_changed = 'muted_border' in kwargs
+        hover_bg_changed = 'hover_bg' in kwargs
+        click_bg_changed = 'click_bg' in kwargs
+        hover_fg_changed = 'hover_fg' in kwargs
 
         if text_changed:
             self.text = kwargs.pop('text')
@@ -223,8 +230,22 @@ class RoundedButton(tk.Canvas):
             self.original_bg_color = kwargs.pop('bg')
             if not self.hollow:
                 self.base_color = self.original_bg_color
-                self.hover_color = self._adjust_brightness(self.base_color, -0.1)
-                self.click_color = self._adjust_brightness(self.base_color, -0.2)
+                # Refresh derived colors if they weren't explicitly set previously
+                if not hasattr(self, '_custom_hover'):
+                    self.hover_color = self._adjust_brightness(self.base_color, -0.1)
+                if not hasattr(self, '_custom_click'):
+                    self.click_color = self._adjust_brightness(self.base_color, -0.2)
+
+        if hover_bg_changed:
+            self.hover_color = kwargs.pop('hover_bg')
+            self._custom_hover = True
+
+        if click_bg_changed:
+            self.click_color = kwargs.pop('click_bg')
+            self._custom_click = True
+
+        if hover_fg_changed:
+            self.hover_fg = kwargs.pop('hover_fg')
 
         if fg_changed:
             self.original_fg_color = kwargs.pop('fg')
@@ -234,21 +255,21 @@ class RoundedButton(tk.Canvas):
             self.hollow = kwargs.pop('hollow')
             if self.hollow:
                 self.base_color = c.DARK_BG
-                self.hover_color = self._adjust_brightness(self.base_color, 0.2)
-                self.click_color = self.base_color
+                if not hasattr(self, '_custom_hover'): self.hover_color = self._adjust_brightness(self.base_color, 0.2)
+                if not hasattr(self, '_custom_click'): self.click_color = self.base_color
                 self.disabled_color = self.base_color
                 self.disabled_text_color = '#757575'
             else:
                 self.base_color = self.original_bg_color
-                self.hover_color = self._adjust_brightness(self.base_color, -0.1)
-                self.click_color = self._adjust_brightness(self.base_color, -0.2)
+                if not hasattr(self, '_custom_hover'): self.hover_color = self._adjust_brightness(self.base_color, -0.1)
+                if not hasattr(self, '_custom_click'): self.click_color = self._adjust_brightness(self.base_color, -0.2)
 
         if muted_border_changed:
             self.muted_border = kwargs.pop('muted_border')
 
         if 'state' in kwargs:
             self.set_state(kwargs.pop('state'))
-        elif text_changed or width_changed or bg_changed or fg_changed or hollow_changed or muted_border_changed:
+        elif text_changed or width_changed or bg_changed or fg_changed or hollow_changed or muted_border_changed or hover_bg_changed or click_bg_changed or hover_fg_changed:
             # Force a redraw if appearance changed
             color = self.base_color if self.is_enabled else self.disabled_color
             self._draw(color)

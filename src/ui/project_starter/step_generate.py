@@ -21,14 +21,12 @@ class GenerateView(tk.Frame):
         self.starter_controller = starter_controller
         self._trace_ids = [] # Track traces for cleanup
 
-        prompt = self._generate_master_prompt(project_data)
+        self.master_prompt_content = self._generate_master_prompt(project_data)
 
         self.grid_columnconfigure(0, weight=1)
 
-        # We assign equal weight to both text areas so they divide
-        # the remaining vertical space 50/50.
-        self.grid_rowconfigure(6, weight=1)
-        self.grid_rowconfigure(8, weight=1)
+        # Response area is the primary expanding element
+        self.grid_rowconfigure(7, weight=1)
 
         # 0. Header
         tk.Label(self, text="Finalize and Generate", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, pady=(0, 10), sticky="w")
@@ -56,34 +54,35 @@ class GenerateView(tk.Frame):
         self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, justify='left')
         self.preview_path_label.pack(side='left', padx=(5, 0))
 
-        # 3. Prompt Copy Section
-        prompt_header = tk.Frame(self, bg=c.DARK_BG)
-        prompt_header.grid(row=4, column=0, pady=(5, 5), sticky="ew")
-        tk.Label(prompt_header, text="2. Review and Copy the Master Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
+        # 3. Prompt Copy Section (Redesigned: Big green button, no text area)
+        copy_section_frame = tk.Frame(self, bg=c.DARK_BG)
+        copy_section_frame.grid(row=4, column=0, pady=(15, 0), sticky="ew")
 
-        self.copy_btn = RoundedButton(prompt_header, text="Copy", command=lambda: self._copy_prompt_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
-        self.copy_btn.pack(side="right")
-        ToolTip(self.copy_btn, "Copy the final master prompt to clipboard", delay=500)
+        tk.Label(copy_section_frame, text="2. Copy Creation Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="top", anchor="w")
 
-        tk.Label(self, text="Review and copy the prompt to paste into your LLM.", wraplength=680, justify="left", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=5, column=0, sticky="w")
-
-        self.prompt_text = ScrollableText(
-            self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
-            on_zoom=self.starter_controller.adjust_font_size
+        self.copy_btn = RoundedButton(
+            copy_section_frame, text="Copy Creation Prompt",
+            command=lambda: self._copy_prompt_to_clipboard(self.copy_btn, self.master_prompt_content),
+            bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON,
+            height=40, width=250, radius=6, cursor="hand2",
+            hover_bg=c.BTN_GREEN, # Maintain green on hover even if idle turns grey
+            hover_fg="#FFFFFF"    # Maintain white text on hover
         )
-        self.prompt_text.insert(tk.END, prompt)
-        self.prompt_text.grid(row=6, column=0, pady=(5, 10), sticky="nsew")
+        self.copy_btn.pack(side="top", anchor="w", pady=(10, 5))
+        ToolTip(self.copy_btn, "Copy the final boilerplate and instructions for your AI", delay=500)
+
+        self.hint_label = tk.Label(copy_section_frame, text="Note: it is recommended to use a smart thinking model for this step", font=(c.FONT_FAMILY_PRIMARY, 9, 'italic'), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR)
+        self.hint_label.pack(side="top", anchor="w")
 
         # 4. Response Section
-        tk.Label(self, text="3. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=7, column=0, pady=(5, 5), sticky="w")
+        tk.Label(self, text="3. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=6, column=0, pady=(20, 5), sticky="w")
 
         self.llm_result_text = ScrollableText(
             self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
             font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
             on_zoom=self.starter_controller.adjust_font_size
         )
-        self.llm_result_text.grid(row=8, column=0, pady=(0, 10), sticky="nsew")
+        self.llm_result_text.grid(row=7, column=0, pady=(0, 10), sticky="nsew")
 
         # Restore buffer if present
         self.llm_result_text.insert("1.0", self.project_data.get("generate_llm_response", ""))
@@ -93,7 +92,7 @@ class GenerateView(tk.Frame):
 
         # 5. Footer
         footer_frame = tk.Frame(self, bg=c.DARK_BG)
-        footer_frame.grid(row=9, column=0, sticky="ew", pady=(5, 15))
+        footer_frame.grid(row=8, column=0, sticky="ew", pady=(5, 15))
 
         if self.project_data["base_project_path"].get():
             ttk.Checkbutton(footer_frame, text="Include base project reference", variable=self.project_data["include_base_reference"], style='Dark.TCheckbutton').pack(side="left")
@@ -127,13 +126,11 @@ class GenerateView(tk.Frame):
         info_mgr.register(self.dest_label, "starter_gen_parent")
         info_mgr.register(self.folder_entry, "starter_gen_parent")
         info_mgr.register(self.browse_btn, "starter_gen_parent")
-        info_mgr.register(self.copy_btn, "starter_gen_prompt") # This IS the Master Prompt
+        info_mgr.register(self.copy_btn, "starter_gen_prompt") # This IS the Creation Prompt
         info_mgr.register(self.llm_result_text, "starter_gen_response")
         info_mgr.register(self.create_button, "starter_gen_create")
 
     def refresh_fonts(self):
-        if hasattr(self, 'prompt_text') and self.prompt_text.winfo_exists():
-            self.prompt_text.set_font_size(self.starter_controller.font_size)
         if hasattr(self, 'llm_result_text') and self.llm_result_text.winfo_exists():
             self.llm_result_text.set_font_size(self.starter_controller.font_size)
 
@@ -162,7 +159,8 @@ class GenerateView(tk.Frame):
             return
 
         sanitized_name = sanitize_project_name(name)
-        full_path = os.path.join(parent, sanitized_name)
+        # Normalize to backslashes for user preference
+        full_path = os.path.join(parent, sanitized_name).replace('/', '\\')
         self.preview_path_label.config(text=full_path, fg=c.BTN_BLUE)
 
     def _browse_folder(self):
@@ -224,11 +222,14 @@ class GenerateView(tk.Frame):
         self.status_hint_label.config(text=hint_text)
 
     def _copy_prompt_to_clipboard(self, button, text):
-        content = self.prompt_text.get('1.0', 'end-1c')
-        pyperclip.copy(content)
+        pyperclip.copy(text)
         original_text = button.text
-        button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-        self.after(2000, lambda: button.config(text=original_text, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+        # Change button visual state to indicate action performed
+        button.config(text="Prompt Copied!", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+        # Ensure that hovering always brings back the white-on-green signal
+        button.hover_color = c.BTN_GREEN
+        button.hover_fg = "#FFFFFF"
+        self.after(2000, lambda: button.config(text=original_text))
 
     def _get_base_project_content(self):
         base_path = self.project_data.get("base_project_path", tk.StringVar()).get()

@@ -102,6 +102,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/ui/project_starter/starter_dialog.py`: To avoid shadowing the inherited Tkinter `state()` method, the project starter's internal logic state is stored in `self.starter_state` instead of `self.state`.
 - **Flicker-Free Maximized Launch (Workaround)**: To avoid OS-level maximization animation jank and ensure correct monitor targeting, a "Pinned Handle" strategy is used. The window starts `withdrawn`, sets `alpha=0`, moves to the target monitor, and maps via `deiconify()`. We then wait 200ms (the duration of the Windows zoom animation) before setting `alpha=1`. This ensures the window is only visible once it is already locked in its final maximized state.
 - `src/ui/feedback_dialog.py`: **Topmost Decoupling (Workaround)**: When spawned from Compact Mode, the dialog automatically inherits the parent's "always in front" (topmost) attribute via the window manager's transient rules. To prevent the review window from being forced topmost on the desktop, the dialog conditionally skips the `transient(parent)` call if the parent is currently topmost. This allows Compact Mode to remain "always in front" while the dialog behaves like a standard window.
+- `src/ui/project_starter/step_generate.py`: The project path preview is explicitly normalized to use backslashes (`\`) to match user preference and maintain consistency across environments that might return mixed slash styles from directory pickers.
 
 ### Build, Installation, & CI/CD
 
