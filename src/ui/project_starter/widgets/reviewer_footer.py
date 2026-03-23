@@ -24,7 +24,7 @@ class ReviewerFooter(Frame):
 
         # --- Sign-off Group ---
         self.signoff_group = Frame(self.container, bg=c.DARK_BG)
-        Label(self.signoff_group, image=assets.locked_icon, bg=c.DARK_BG).pack(side="left", padx=(0, 10))
+        Label(self.signoff_group, image=assets.unlocked_icon, bg=c.DARK_BG).pack(side="left", padx=(0, 10))
         self.signoff_btn = RoundedButton(
             self.signoff_group, text="Lock segment & Next",
             command=self.on_sign_off, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT,
@@ -41,7 +41,7 @@ class ReviewerFooter(Frame):
             font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2"
         )
         self.revert_btn.pack(side="left")
-        Label(self.revert_group, image=assets.unlocked_icon, bg=c.DARK_BG).pack(side="left", padx=(10, 0))
+        Label(self.revert_group, image=assets.locked_icon, bg=c.DARK_BG).pack(side="left", padx=(10, 0))
         ToolTip(self.revert_btn, "Release the lock to make further changes to this section", delay=500)
 
         # --- Utility Buttons ---

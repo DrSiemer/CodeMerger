@@ -168,7 +168,10 @@ class SegmentedReviewer(Frame):
     def _on_signoff_var_change(self, key, var):
         self.signoffs_data[key] = var.get()
         if self.on_change_callback: self.on_change_callback()
-        if key == self.active_key: self._update_footer_state()
+        if key == self.active_key:
+            self._update_footer_state()
+        else:
+            self._update_footer_buttons_only()
 
     def _update_footer_state(self, key=None):
         target_key = key or self.active_key
@@ -184,6 +187,17 @@ class SegmentedReviewer(Frame):
         else:
             self.view_btn.pack(side="left", padx=(10, 0))
             self.editor.text_widget.config(state="normal", bg=c.TEXT_INPUT_BG)
+
+        self._update_footer_buttons_only(target_key, is_signed, all_signed)
+
+    def _update_footer_buttons_only(self, target_key=None, is_signed=None, all_signed=None):
+        target_key = target_key or self.active_key
+        if not target_key: return
+
+        if is_signed is None:
+            is_signed = self.signoff_vars[target_key].get()
+        if all_signed is None:
+            all_signed = all(self.signoff_vars[k].get() for k in self.segment_keys)
 
         current_text = self.segments_data.get(target_key, "").strip()
         has_changes = current_text != self.current_segment_original_text
@@ -283,7 +297,7 @@ class SegmentedReviewer(Frame):
 
     def _open_sync_dialog(self):
         self.segments_data[self.active_key] = self.editor.get("1.0", "end-1c").strip()
-        targets, references = [], []
+        targets, references = [],[]
         for k in self.segment_keys:
             if k == self.active_key: continue
             if self.signoff_vars[k].get(): references.append(k)

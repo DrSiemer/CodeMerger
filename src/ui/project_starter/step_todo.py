@@ -1,22 +1,19 @@
 import os
 import json
+import pyperclip
 import tkinter as tk
 from tkinter import messagebox
 from ... import constants as c
-from ...core import prompts as p
 from ...core.paths import REFERENCE_DIR
 from ...core.utils import strip_markdown_wrapper
-from ...core.prompts import (
-    STARTER_TODO_PROMPT_INTRO, STARTER_TODO_PROMPT_INSTR,
-    STARTER_QUESTION_PROMPT_TEMPLATE
-)
-from ..widgets.markdown_renderer import MarkdownRenderer
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
 from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
 from .widgets.rewrite_dialog import RewriteUnsignedDialog
+from .widgets.full_text_reviewer import FullTextReviewer
 from ..tooltip import ToolTip
+from . import starter_prompts
 
 class TodoView(tk.Frame):
     def __init__(self, parent, starter_controller, project_data):
@@ -24,555 +21,195 @@ class TodoView(tk.Frame):
         self.starter_controller = starter_controller
         self.project_data = project_data
 
-        self.todo_content = self.project_data.get("todo_md", "")
-
-        # Initialize questions_map before loading questions to prevent AttributeError
         self.questions_map = {}
-        self.questions = self._load_questions()
+        self.manual_questions = self._load_questions()
 
-        self.current_question_index = 0
-        self.questions_frame_visible = False
         self.editor_is_active = False
         self.generation_mode_active = False
-
-        # State for merged view toggle
-        self.is_raw_mode = False
-
         self.has_segments = bool(self.project_data.get("todo_segments"))
 
         if self.has_segments:
             self.show_editor_view()
-        elif self.todo_content:
-            # Fallback for manual or legacy content
-            if not self.questions:
-                self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
-            self.show_merged_view(self.todo_content)
+        elif self.project_data.get("todo_md"):
+            self.show_merged_view(self.project_data.get("todo_md"))
         elif self.project_data.get("todo_llm_response"):
-            # Restore state where response was pasted but not yet processed
-            self.show_generation_view(self._get_prompt())
+            self.show_generation_view(starter_prompts.get_todo_prompt(self.project_data, self.questions_map))
         else:
             self.show_generation_view()
 
     def register_info(self, info_mgr):
-        """Registers step-specific widgets for Info Mode."""
         if not info_mgr: return
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            info_mgr.register(self.llm_response_text, "starter_gen_response")
-        if hasattr(self, 'btn_process') and self.btn_process.winfo_exists():
-             info_mgr.register(self.btn_process, "starter_gen_process")
-        if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
-            self.reviewer.register_info(info_mgr)
-        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            info_mgr.register(self.editor_text, "starter_todo_review")
-        if hasattr(self, 'q_btn') and self.q_btn.winfo_exists():
-            info_mgr.register(self.q_btn, "starter_seg_questions")
-        if hasattr(self, 'rewrite_btn') and self.rewrite_btn.winfo_exists():
-            info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
-        if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
             info_mgr.register(self.copy_btn, "starter_todo_gen")
-        if hasattr(self, 'view_btn') and self.view_btn.winfo_exists():
-            info_mgr.register(self.view_btn, "starter_view_toggle")
+            info_mgr.register(self.llm_response_text, "starter_gen_response")
+            info_mgr.register(self.btn_process, "starter_gen_process")
+        elif hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
+            if isinstance(self.reviewer, FullTextReviewer):
+                self.reviewer.register_info(info_mgr, "starter_todo_review")
+            else:
+                self.reviewer.register_info(info_mgr)
 
     def refresh_fonts(self):
+        size = self.starter_controller.font_size
         if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            self.llm_response_text.set_font_size(self.starter_controller.font_size)
-        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            self.editor_text.set_font_size(self.starter_controller.font_size)
-        if hasattr(self, 'markdown_renderer') and self.markdown_renderer.winfo_exists():
-            self.markdown_renderer.set_font_size(self.starter_controller.font_size)
+            self.llm_response_text.set_font_size(size)
         if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
-            self.reviewer.refresh_fonts(self.starter_controller.font_size)
+            self.reviewer.refresh_fonts(size)
 
     def _load_questions(self):
-        questions_path = os.path.join(REFERENCE_DIR, "todo_questions.json")
+        path = os.path.join(REFERENCE_DIR, "todo_questions.json")
         try:
-            with open(questions_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                if not content: return []
-                # Check if it's the new format (dict of objects) or old (list)
-                data = json.loads(content)
-                if isinstance(data, list):
-                    return data
-                elif isinstance(data, dict):
-                    # Populate the map for the SegmentedReviewer and assembly logic
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.loads(f.read())
+                if isinstance(data, dict):
                     self.questions_map = data
-                    # Return empty list for the legacy self.questions used by manual mode
                     return []
-                return []
-        except (FileNotFoundError, json.JSONDecodeError):
-            return []
-
-    def _get_base_project_content(self):
-        base_path = self.project_data.get("base_project_path", tk.StringVar()).get()
-        base_files = self.project_data.get("base_project_files", [])
-        if not base_path or not base_files: return ""
-
-        content_blocks = ["\n### Example Project Code (For Reference Only)\n"]
-        for file_info in base_files:
-            rel_path = file_info['path']
-            full_path = os.path.join(base_path, rel_path)
-            try:
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                content_blocks.append("--- File: `" + rel_path + "` ---\n```\n" + content + "\n```\n")
-            except Exception: pass
-        return "\n".join(content_blocks)
-
-    def _get_prompt(self):
-        # 1. Concept
-        concept_md = self.project_data.get("concept_md")
-        if not concept_md and self.project_data.get("concept_segments"):
-            concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
-
-        # 2. Stack
-        stack = self.project_data["stack"].get()
-
-        # 3. Base Code (if any)
-        example_code = self._get_base_project_content()
-
-        # 4. Template
-        template_path = os.path.join(REFERENCE_DIR, "todo.md")
-        try:
-            with open(template_path, 'r', encoding='utf-8') as f:
-                todo_template = f.read()
-        except Exception:
-            todo_template = "(Template not found)"
-
-        # 5. Section headers for SegmentManager
-        valid_headers = [v for k, v in c.TODO_PHASES.items()]
-        headers_str = ", ".join([f'"{h}"' for h in valid_headers])
-
-        parts = [
-            STARTER_TODO_PROMPT_INTRO,
-            "\n### Tech Stack\n" + stack,
-            "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
-            example_code,
-            "\n### Reference Template (Standard TODO List)\n```markdown\n" + todo_template + "\n```",
-            STARTER_TODO_PROMPT_INSTR.format(headers_str=headers_str)
-        ]
-        return "\n".join(parts)
-
-    def _copy_prompt_to_clipboard(self, button, text):
-        prompt_content = text
-        original_text = button.text
-        original_bg = button.original_bg_color
-        self.clipboard_clear()
-        self.clipboard_append(prompt_content)
-        button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-        self.after(2000, lambda: button.config(text=original_text, bg=original_bg, fg=c.BTN_GRAY_TEXT, state='normal'))
+                return data if isinstance(data, list) else[]
+        except (FileNotFoundError, json.JSONDecodeError): return[]
 
     def show_generation_view(self, prompt=None):
-        if prompt is None:
-            prompt = self._get_prompt()
-
+        if prompt is None: prompt = starter_prompts.get_todo_prompt(self.project_data, self.questions_map)
         self._clear_frame()
         self.editor_is_active = False
         self.generation_mode_active = True
-        self.grid_rowconfigure(2, weight=1) # Response area expands
+        self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # Row 0: Header and Copy Button
-        prompt_header = tk.Frame(self, bg=c.DARK_BG)
-        prompt_header.grid(row=0, column=0, pady=(0, 10), sticky="ew")
-        tk.Label(prompt_header, text="1. Copy Prompt for LLM", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
-
-        self.copy_btn = RoundedButton(prompt_header, text="Copy Prompt", command=lambda: self._copy_prompt_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        hdr = tk.Frame(self, bg=c.DARK_BG)
+        hdr.grid(row=0, column=0, pady=(0, 10), sticky="ew")
+        tk.Label(hdr, text="1. Copy Prompt for LLM", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
+        self.copy_btn = RoundedButton(hdr, text="Copy Prompt", command=lambda: self._copy_prompt(prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
         self.copy_btn.pack(side='left', padx=15)
-        ToolTip(self.copy_btn, "Copy the prompt to your clipboard", delay=500)
 
-        # Row 1: Label for Input
         tk.Label(self, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=1, column=0, pady=(10, 5), sticky="w")
-
-        # Row 2: Input Field
-        self.llm_response_text = ScrollableText(
-            self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
-            on_zoom=self.starter_controller.adjust_font_size
-        )
+        self.llm_response_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size), on_zoom=self.starter_controller.adjust_font_size)
         self.llm_response_text.grid(row=2, column=0, sticky='nsew')
         self.llm_response_text.insert("1.0", self.project_data.get("todo_llm_response", ""))
-
-        # Sync input area to state to prevent data loss on navigation
         self.llm_response_text.text_widget.bind("<KeyRelease>", self._on_response_change)
-        self.llm_response_text.text_widget.bind("<<Paste>>", self._on_response_change)
 
-        # Row 3: Action Button
         self.btn_process = RoundedButton(self, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         self.btn_process.grid(row=3, column=0, pady=(10,0), sticky="e")
-        ToolTip(self.btn_process, "Parse the LLM's response and open the segmented editor", delay=500)
-
-        self._update_process_button_state()
+        self._update_process_btn()
         self.register_info(self.starter_controller.info_mgr)
 
     def _on_response_change(self, event=None):
-        content = self.llm_response_text.get("1.0", "end-1c").strip()
-        self.project_data["todo_llm_response"] = content
-        self._update_process_button_state()
+        self.project_data["todo_llm_response"] = self.llm_response_text.get("1.0", "end-1c").strip()
+        self._update_process_btn()
 
-    def _update_process_button_state(self):
+    def _update_process_btn(self):
         content = self.project_data.get("todo_llm_response", "").strip()
-        if content:
-            self.btn_process.set_state('normal')
-            self.btn_process.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-        else:
-            self.btn_process.set_state('disabled')
-            self.btn_process.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+        st = 'normal' if content else 'disabled'
+        self.btn_process.set_state(st)
+        self.btn_process.config(bg=c.BTN_BLUE if st=='normal' else c.BTN_GRAY_BG, fg=c.BTN_BLUE_TEXT if st=='normal' else c.BTN_GRAY_TEXT)
+
+    def _copy_prompt(self, text):
+        pyperclip.copy(text)
+        self.copy_btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+        self.after(2000, lambda: self.copy_btn.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
 
     def handle_llm_response(self):
-        raw_content = self.llm_response_text.get("1.0", "end-1c").strip()
-        if not raw_content:
-            messagebox.showerror("Error", "The LLM response is empty.", parent=self)
-            return
-
-        content = strip_markdown_wrapper(raw_content)
-        parsed_segments = SegmentManager.parse_segments(content)
-
-        # Fallback to legacy editor if no segments found
-        if not parsed_segments:
-            self.todo_content = content
+        raw = self.llm_response_text.get("1.0", "end-1c").strip()
+        if not raw: return
+        content = strip_markdown_wrapper(raw)
+        parsed = SegmentManager.parse_segments(content)
+        if not parsed:
             self.project_data["todo_md"] = content
-            self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
             self.show_merged_view(content)
             return
 
-        # Map friendly names back to internal keys
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
-        mapped_segments = SegmentManager.map_parsed_segments_to_keys(parsed_segments, friendly_map)
-
+        friendly = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
+        mapped = SegmentManager.map_parsed_segments_to_keys(parsed, friendly)
         self.project_data["todo_segments"].clear()
-        self.project_data["todo_segments"].update(mapped_segments)
-
+        self.project_data["todo_segments"].update(mapped)
         self.project_data["todo_signoffs"].clear()
-        for k in mapped_segments.keys():
-            self.project_data["todo_signoffs"][k] = False
-
+        for k in mapped: self.project_data["todo_signoffs"][k] = False
         self.project_data["todo_md"] = ""
         self.project_data["todo_llm_response"] = ""
-        self.starter_controller.starter_state.save()
-
         self.show_editor_view()
 
     def show_editor_view(self):
         self._clear_frame()
-        self.editor_is_active = True
-        self.generation_mode_active = False
-
+        self.editor_is_active, self.generation_mode_active = True, False
         header = tk.Frame(self, bg=c.DARK_BG)
         header.pack(side='top', fill="x", pady=(0, 5))
         tk.Label(header, text="Review TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
-        # Questions for TODO
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
-
+        friendly = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
         ordered_keys = list(self.project_data["todo_segments"].keys())
+        if 'deployment' in ordered_keys:
+            ordered_keys.remove('deployment'); ordered_keys.append('deployment')
 
-        for k in ordered_keys:
-            if k == 'deployment':
-                ordered_keys.remove(k)
-                ordered_keys.append(k)
-                break
-
-        if not ordered_keys:
-            self.handle_reset()
-            return
-
-        self.reviewer = SegmentedReviewer(
-            parent=self,
-            segment_keys=ordered_keys,
-            friendly_names_map=friendly_map,
-            segments_data=self.project_data["todo_segments"],
-            signoffs_data=self.project_data["todo_signoffs"],
-            questions_map=self.questions_map,
-            on_change_callback=self.starter_controller.update_nav_state,
-            on_merge_callback=self.handle_merge
-        )
+        self.reviewer = SegmentedReviewer(self, ordered_keys, friendly, self.project_data["todo_segments"], self.project_data["todo_signoffs"], self.questions_map, self.starter_controller.update_nav_state, self.handle_merge)
         self.reviewer.pack(fill="both", expand=True, pady=5)
         self.starter_controller._update_navigation_controls()
         self.register_info(self.starter_controller.info_mgr)
 
     def handle_merge(self, full_text):
-        """
-        Transitions the view to a single full-text editor (merged state).
-        Clears segments and performs an immediate hard-save and lock-update.
-        """
         self.project_data["todo_segments"].clear()
         self.project_data["todo_signoffs"].clear()
         self.project_data["todo_md"] = full_text
-
-        # Sync the Starter State immediately to unlock the 'Next' button Logic
         self.starter_controller.starter_state.update_from_view(self)
         self.starter_controller.starter_state.save()
-
-        # Set generic questions for the full text
-        self.questions = ["Do these TODO steps fully cover everything described in the concept?", "Did we miss anything?"]
         self.show_merged_view(full_text)
 
     def show_merged_view(self, content):
         self._clear_frame()
-        self.editor_is_active = True
-        self.generation_mode_active = False
-        self.grid_rowconfigure(1, weight=0) # Questions (dynamic)
-        self.grid_rowconfigure(2, weight=1) # Editor (expands)
-        self.grid_columnconfigure(0, weight=1)
-
-        header_frame = tk.Frame(self, bg=c.DARK_BG)
-        header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        tk.Label(header_frame, text="Edit Your TODO Plan", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
-
-        controls = tk.Frame(header_frame, bg=c.DARK_BG)
-        controls.pack(side="right")
-
-        # Questions Toggle
-        if self.questions:
-             self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
-             self.q_btn.pack(side="left", padx=(0,10))
-             ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
-
-        # Rewrite Button for Merged View
-        self.rewrite_btn = RoundedButton(controls, text="Rewrite", command=self._open_merged_rewrite_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, height=24, cursor="hand2")
-        self.rewrite_btn.pack(side="left", padx=(0, 10))
-        ToolTip(self.rewrite_btn, "Instructional rewrite of the entire plan with change notes.", delay=500)
-
-        # View Switch Button
-        self.view_btn = RoundedButton(controls, text="Edit", command=self._toggle_view_mode, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
-        self.view_btn.pack(side="left", padx=(0, 0))
-        self.view_btn_tooltip = ToolTip(self.view_btn, "Switch to raw text editor", delay=500)
-
-        # Questions Container
-        self.questions_container = tk.Frame(self, bg=c.DARK_BG)
-
-        if self.questions_frame_visible:
-            self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
-            if not self.questions_container.winfo_children():
-                self._create_question_prompter()
-                if hasattr(self, 'q_btn'):
-                    self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-        else:
-            self.questions_container.grid_remove()
-
-        # Editor Frame
-        self.editor_frame = tk.Frame(self, bg=c.DARK_BG)
-        self.editor_frame.grid(row=2, column=0, sticky="nsew")
-        self.editor_frame.grid_rowconfigure(0, weight=1)
-        self.editor_frame.grid_columnconfigure(0, weight=1)
-
-        self.editor_text = ScrollableText(
-            self.editor_frame, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
-            on_zoom=self.starter_controller.adjust_font_size
-        )
-        self.editor_text.insert("1.0", content)
-        # Bind text change for saving
-        self.editor_text.text_widget.bind("<KeyRelease>", lambda e: self.project_data.__setitem__("todo_md", self.editor_text.get("1.0", "end-1c").strip()))
-
-        self.markdown_renderer = MarkdownRenderer(
-            self.editor_frame,
-            base_font_size=self.starter_controller.font_size,
-            on_zoom=self.starter_controller.adjust_font_size
-        )
-        # Enable double-click to edit from the renderer
-        self.markdown_renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
-
-        # Default to Rendered View
-        self.is_raw_mode = False
-        self._apply_view_mode()
-
+        self.editor_is_active, self.generation_mode_active = True, False
+        qs = self.manual_questions or["Do these TODO steps cover the concept?", "Did we miss anything?"]
+        self.reviewer = FullTextReviewer(self, "Edit Your TODO Plan", content, qs, self._on_merged_change, self._open_rewrite, self._get_prompt_context, self.starter_controller)
+        self.reviewer.pack(fill="both", expand=True)
         self.starter_controller._update_navigation_controls()
         self.register_info(self.starter_controller.info_mgr)
 
-    def _on_renderer_double_click(self, event):
-        """Switches to raw mode and positions cursor where user double-clicked."""
-        try:
-            click_index = self.markdown_renderer.text_widget.index(f"@{event.x},{event.y}")
-        except Exception:
-            click_index = "1.0"
-        self._toggle_view_mode()
-        self.editor_text.update_idletasks()
-        self.editor_text.text_widget.mark_set("insert", click_index)
-        self.editor_text.text_widget.see(click_index)
-        self.editor_text.text_widget.focus_set()
+    def _get_prompt_context(self):
+        """Provides the specific background and focus context for the LLM prompt."""
+        concept_md = self.project_data.get("concept_md")
+        if not concept_md and self.project_data.get("concept_segments"):
+            concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
+        todo_content = self.project_data.get("todo_md", "")
 
-    def _open_merged_rewrite_dialog(self):
-        current_text = self.editor_text.get("1.0", "end-1c").strip()
-        context_data = {
-            'keys': ['full_content'],
-            'names': {'full_content': 'Full TODO Plan'},
-            'data': {'full_content': current_text}
-        }
-        # Correctly pass app_state
-        app_state = self.starter_controller.app.app_state
-        RewriteUnsignedDialog(self, app_state, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
+        return (
+            "Project Concept",
+            "```markdown\n" + (concept_md or "No concept provided") + "\n```",
+            "Full TODO Plan",
+            "```markdown\n" + todo_content + "\n```"
+        )
 
-    def _apply_merged_rewrite_results(self, new_text):
-        if not new_text: return
-        clean_text = strip_markdown_wrapper(new_text)
+    def _on_merged_change(self, text):
+        self.project_data["todo_md"] = text
 
-        self.editor_text.text_widget.config(state="normal")
-        self.editor_text.delete("1.0", "end")
-        self.editor_text.insert("1.0", clean_text)
-        self.project_data["todo_md"] = clean_text
+    def _open_rewrite(self):
+        ctx = {'keys': ['full_content'], 'names': {'full_content': 'Full TODO Plan'}, 'data': {'full_content': self.project_data["todo_md"]}}
+        RewriteUnsignedDialog(self, self.starter_controller.app.app_state, ctx, self._apply_rewrite, is_merged_mode=True)
 
-        if not self.is_raw_mode:
-            self.markdown_renderer.set_markdown(clean_text)
-
+    def _apply_rewrite(self, text):
+        clean = strip_markdown_wrapper(text)
+        self.project_data["todo_md"] = clean
+        self.reviewer.set_content(clean)
         self.starter_controller.update_nav_state()
 
-    def is_editor_visible(self):
-        return self.editor_is_active
-
-    def _toggle_view_mode(self):
-        self.is_raw_mode = not self.is_raw_mode
-        self._apply_view_mode()
-
-    def _apply_view_mode(self):
-        if self.is_raw_mode:
-            self.markdown_renderer.grid_forget()
-            self.editor_text.grid(row=0, column=0, sticky="nsew")
-
-            self.view_btn.config(text="Render", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-            self.view_btn_tooltip.text = "Switch to stylized Markdown preview"
-        else:
-            current_text = self.editor_text.get("1.0", "end-1c")
-            self.markdown_renderer.set_markdown(current_text)
-            self.editor_text.grid_forget()
-            self.markdown_renderer.grid(row=0, column=0, sticky="nsew")
-
-            self.view_btn.config(text="Edit", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-            self.view_btn_tooltip.text = "Switch to raw text editor"
-
-        if self.view_btn_tooltip.tooltip_window:
-             self.view_btn_tooltip.hide_tooltip()
-             self.view_btn_tooltip.show_tooltip()
-
-    def _toggle_questions(self):
-        self.questions_frame_visible = not self.questions_frame_visible
-        if self.questions_frame_visible:
-            self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
-            self._create_question_prompter()
-            self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-        else:
-            self.questions_container.grid_remove()
-            for widget in self.questions_container.winfo_children():
-                widget.destroy()
-            self.q_btn.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-
-    def _create_question_prompter(self):
-        if self.questions_container.winfo_children(): return
-
-        panel = tk.Frame(self.questions_container, bg=c.STATUS_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-        panel.pack(fill='x', expand=True)
-
-        content = tk.Frame(panel, bg=c.STATUS_BG, padx=10, pady=10)
-        content.pack(fill='x', expand=True)
-
-        self.question_label = tk.Label(content, text="", wraplength=600, justify="left", anchor="w", font=c.FONT_NORMAL, bg=c.STATUS_BG, fg=c.TEXT_COLOR)
-        self.question_label.pack(side='left', fill='x', expand=True)
-
-        actions_frame = tk.Frame(content, bg=c.STATUS_BG)
-        actions_frame.pack(side='left', padx=(10,0))
-
-        nav_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
-        nav_frame.pack(anchor='e')
-        self.prev_question_button = RoundedButton(nav_frame, text="<", command=self._show_prev_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        self.prev_question_button.pack(side="left")
-        self.next_question_button = RoundedButton(nav_frame, text=">", command=self._show_next_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        self.next_question_button.pack(side="left", padx=2)
-
-        copy_btn_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
-        copy_btn_frame.pack(anchor='e', pady=(5, 0))
-
-        copy_btn = RoundedButton(copy_btn_frame, text="Copy Context & Question", command=lambda: self._copy_question_prompt(copy_btn), width=160, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        copy_btn.pack(side="right")
-        ToolTip(copy_btn, "Copy the full text and this question, asking for feedback (no rewrite)", delay=500)
-
-        self._update_question_display()
-
-    def _update_question_display(self):
-        if not hasattr(self, 'question_label') or not self.question_label.winfo_exists(): return
-        self.question_label.config(text=self.questions[self.current_question_index])
-        self.prev_question_button.set_state("normal" if self.current_question_index > 0 else "disabled")
-        self.next_question_button.set_state("normal" if self.current_question_index < len(self.questions) - 1 else "disabled")
-
-    def _show_next_question(self):
-        if self.current_question_index < len(self.questions) - 1:
-            self.current_question_index += 1
-            self._update_question_display()
-
-    def _show_prev_question(self):
-        if self.current_question_index > 0:
-            self.current_question_index -= 1
-            self._update_question_display()
-
-    def _copy_question_prompt(self, button):
-        try:
-            concept_md = self.project_data.get("concept_md")
-            if not concept_md and self.project_data.get("concept_segments"):
-                concept_md = SegmentManager.assemble_document(self.project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
-            todo_content = self.editor_text.get("1.0", "end-1c").strip()
-
-            prompt_text = p.STARTER_QUESTION_PROMPT_TEMPLATE.format(
-                context_label="Project Concept",
-                context_content="```markdown\n" + (concept_md or "No concept provided") + "\n```",
-                focus_name="Full TODO Plan",
-                focus_content="```markdown\n" + todo_content + "\n```",
-                question=self.questions[self.current_question_index],
-                instruction_suffix="Please answer the question or provide critical feedback regarding the plan. Do NOT rewrite the text."
-            )
-            self.clipboard_clear()
-            self.clipboard_append(prompt_text)
-
-            button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, state='disabled')
-            self.after(2000, lambda: button.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, state='normal'))
-        except Exception as e:
-            messagebox.showerror("Error", f"Could not copy to clipboard: {e}", parent=self)
-
     def handle_reset(self):
-        if messagebox.askyesno("Confirm", "Are you sure you want to start over? Current plan will be lost.", parent=self):
+        if messagebox.askyesno("Confirm", "Are you sure you want to start over?", parent=self):
             self.project_data["todo_segments"].clear()
             self.project_data["todo_signoffs"].clear()
             self.project_data["todo_md"] = ""
             self.project_data["todo_llm_response"] = ""
-            self.todo_content = ""
-            self.editor_is_active = False
-            self.generation_mode_active = False
-            self.questions = self._load_questions()
-            self.questions_frame_visible = False
-            self.current_question_index = 0
+            self.editor_is_active, self.generation_mode_active = False, False
             self.show_generation_view()
             self.starter_controller._update_navigation_controls()
 
     def get_llm_response_content(self):
-        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            return {"todo_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()}
-        return {}
+        return {"todo_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()} if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists() else {}
 
     def get_assembled_content(self):
-        if not self.project_data.get("todo_segments"):
-            return self.project_data.get("todo_md", ""), {}, {}
+        if not self.project_data.get("todo_segments"): return self.project_data.get("todo_md", ""), {}, {}
+        keys = list(self.project_data["todo_segments"].keys())
+        if 'deployment' in keys: keys.remove('deployment'); keys.append('deployment')
+        friendly = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
+        txt = SegmentManager.assemble_document(self.project_data["todo_segments"], keys, friendly)
+        return txt, self.project_data["todo_segments"], self.project_data["todo_signoffs"]
 
-        current_keys = list(self.project_data["todo_segments"].keys())
-
-        for k in current_keys:
-            if k == 'deployment':
-                current_keys.remove(k)
-                current_keys.append(k)
-                break
-
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()} if self.questions_map else c.TODO_PHASES
-        full_text = SegmentManager.assemble_document(
-            self.project_data["todo_segments"],
-            current_keys,
-            friendly_map
-        )
-        return full_text, self.project_data["todo_segments"], self.project_data["todo_signoffs"]
-
-    def get_todo_content(self):
-        return self.get_assembled_content()[0]
-
+    def is_editor_visible(self): return self.editor_is_active
+    def is_step_in_progress(self): return self.editor_is_active or self.generation_mode_active
     def _clear_frame(self):
-        for i in range(self.grid_size()[1]):
-            self.grid_rowconfigure(i, weight=0)
-        for i in range(self.grid_size()[0]):
-            self.grid_columnconfigure(i, weight=0)
-        for widget in self.winfo_children():
-            widget.destroy()
+        for w in self.winfo_children(): w.destroy()

@@ -1,23 +1,20 @@
+import tkinter as tk
 import os
 import json
-import tkinter as tk
 import pyperclip
 from tkinter import messagebox
 from ... import constants as c
-from ...core import prompts as p
 from ...core.paths import REFERENCE_DIR
 from ...core.utils import strip_markdown_wrapper
-from ...core.prompts import (
-    STARTER_CONCEPT_PROMPT_INTRO, STARTER_CONCEPT_PROMPT_CORE_INSTR,
-    STARTER_CONCEPT_DEFAULT_GOAL, STARTER_QUESTION_PROMPT_TEMPLATE
-)
+from ...core.prompts import STARTER_CONCEPT_DEFAULT_GOAL
 from ..widgets.rounded_button import RoundedButton
 from ..widgets.scrollable_text import ScrollableText
-from ..widgets.markdown_renderer import MarkdownRenderer
 from .segment_manager import SegmentManager
 from .widgets.segmented_reviewer import SegmentedReviewer
 from .widgets.rewrite_dialog import RewriteUnsignedDialog
+from .widgets.full_text_reviewer import FullTextReviewer
 from ..tooltip import ToolTip
+from . import starter_prompts
 
 class ConceptView(tk.Frame):
     def __init__(self, parent, starter_controller, project_data):
@@ -28,10 +25,6 @@ class ConceptView(tk.Frame):
         self.questions_map = self._load_questions()
         self.has_segments = bool(self.project_data.get("concept_segments"))
 
-        # State for merged view toggle
-        self.is_raw_mode = False
-
-        # State tracking for UI transition
         self.editor_is_active = False
         self.generation_mode_active = False
 
@@ -40,54 +33,33 @@ class ConceptView(tk.Frame):
         elif self.project_data.get("concept_md"):
             self.show_merged_view(self.project_data.get("concept_md"))
         elif self.project_data.get("concept_llm_response"):
-            # If we have an unprocessed response, return to that view
-            self.show_generation_view(self._get_prompt())
+            self.show_generation_view(starter_prompts.get_concept_prompt(self.project_data, self.questions_map))
         else:
             self.show_initial_view()
 
     def register_info(self, info_mgr):
-        """Registers step-specific widgets for Info Mode."""
-        if not info_mgr:
-            return
-
-        # Describe Goal UI
+        if not info_mgr: return
         if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
             info_mgr.register(self.goal_text, "starter_concept_goal")
-        if hasattr(self, 'generate_btn') and self.generate_btn.winfo_exists():
             info_mgr.register(self.generate_btn, "starter_concept_gen")
-
-        # Generation UI
-        if hasattr(self, 'copy_btn') and self.copy_btn.winfo_exists():
-             info_mgr.register(self.copy_btn, "starter_concept_gen")
-        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-             info_mgr.register(self.llm_response_text, "starter_gen_response")
-        if hasattr(self, 'btn_process') and self.btn_process.winfo_exists():
-             info_mgr.register(self.btn_process, "starter_gen_process")
-
-        # Review UI
-        if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
-            self.reviewer.register_info(info_mgr)
-        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            info_mgr.register(self.editor_text, "starter_concept_review")
-        if hasattr(self, 'q_btn') and self.q_btn.winfo_exists():
-            info_mgr.register(self.q_btn, "starter_seg_questions")
-        if hasattr(self, 'rewrite_btn') and self.rewrite_btn.winfo_exists():
-            info_mgr.register(self.rewrite_btn, "starter_seg_rewrite")
-        if hasattr(self, 'view_btn') and self.view_btn.winfo_exists():
-            info_mgr.register(self.view_btn, "starter_view_toggle")
+        elif hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
+            info_mgr.register(self.copy_btn, "starter_concept_gen")
+            info_mgr.register(self.llm_response_text, "starter_gen_response")
+            info_mgr.register(self.btn_process, "starter_gen_process")
+        elif hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
+            if isinstance(self.reviewer, FullTextReviewer):
+                self.reviewer.register_info(info_mgr, "starter_concept_review")
+            else:
+                self.reviewer.register_info(info_mgr)
 
     def refresh_fonts(self):
-        """Updates font sizes for all active text/renderer widgets."""
-        if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
-            self.goal_text.set_font_size(self.starter_controller.font_size)
-        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            self.llm_response_text.set_font_size(self.starter_controller.font_size)
-        if hasattr(self, 'reviewer') and self.reviewer.winfo_exists():
-            self.reviewer.refresh_fonts(self.starter_controller.font_size)
-        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            self.editor_text.set_font_size(self.starter_controller.font_size)
-        if hasattr(self, 'markdown_renderer') and self.markdown_renderer.winfo_exists():
-            self.markdown_renderer.set_font_size(self.starter_controller.font_size)
+        size = self.starter_controller.font_size
+        for attr in['goal_text', 'llm_response_text', 'reviewer']:
+            if hasattr(self, attr):
+                widget = getattr(self, attr)
+                if widget.winfo_exists():
+                    if hasattr(widget, 'refresh_fonts'): widget.refresh_fonts(size)
+                    else: widget.set_font_size(size)
 
     def _load_questions(self):
         questions_path = os.path.join(REFERENCE_DIR, "concept_questions.json")
@@ -96,22 +68,6 @@ class ConceptView(tk.Frame):
                 return json.loads(f.read())
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
-
-    def _get_base_project_content(self):
-        base_path = self.project_data.get("base_project_path", tk.StringVar()).get()
-        base_files = self.project_data.get("base_project_files", [])
-        if not base_path or not base_files: return ""
-
-        content_blocks = ["\n### Example Project Code (For Reference Only)\n"]
-        for file_info in base_files:
-            rel_path = file_info['path']
-            full_path = os.path.join(base_path, rel_path)
-            try:
-                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-                content_blocks.append("--- File: `" + rel_path + "` ---\n```\n" + content + "\n```\n")
-            except Exception: pass
-        return "\n".join(content_blocks)
 
     def show_initial_view(self):
         self._clear_frame()
@@ -122,20 +78,13 @@ class ConceptView(tk.Frame):
         btn_container.pack(side='bottom', fill='x', pady=10)
         self.generate_btn = RoundedButton(btn_container, text="Generate Concept Prompt", command=self.handle_prompt_generation, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         self.generate_btn.pack(side='right')
-        ToolTip(self.generate_btn, "Create a structured prompt for your LLM based on this goal", delay=500)
 
         tk.Label(self, text="Describe Your Goal", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 5))
         tk.Label(self, text="Briefly describe what you want to build.", wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").pack(side='top', anchor="w", pady=(0, 10))
 
-        self.goal_text = ScrollableText(
-            self, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
-            on_zoom=self.starter_controller.adjust_font_size
-        )
+        self.goal_text = ScrollableText(self, height=5, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size), on_zoom=self.starter_controller.adjust_font_size)
         self.goal_text.pack(side='top', fill="both", expand=True, pady=5)
-
-        existing_goal = self.project_data.get("goal", "").strip()
-        self.goal_text.insert("1.0", existing_goal if existing_goal else STARTER_CONCEPT_DEFAULT_GOAL)
+        self.goal_text.insert("1.0", self.project_data.get("goal", "") or STARTER_CONCEPT_DEFAULT_GOAL)
         self.goal_text.text_widget.bind("<KeyRelease>", self._update_goal_state)
         self._update_button_state()
         self.register_info(self.starter_controller.info_mgr)
@@ -144,31 +93,13 @@ class ConceptView(tk.Frame):
         self.project_data["goal"] = self.goal_text.get("1.0", "end-1c").strip()
         self._update_button_state()
 
-    def _update_button_state(self, event=None):
+    def _update_button_state(self):
         content = self.project_data.get("goal", "").strip()
         self.generate_btn.set_state('normal' if content and content != STARTER_CONCEPT_DEFAULT_GOAL else 'disabled')
 
-    def _get_prompt(self):
-        user_goal = self.project_data.get("goal", "")
-        # Use centralized segments mapping for consistent labeling
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
-        segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
-
-        parts = [
-            STARTER_CONCEPT_PROMPT_INTRO,
-            "\n### User Goal\n```\n" + user_goal.strip() + "\n```",
-            self._get_base_project_content(),
-            "\n### Format Instructions",
-            segment_instructions,
-            STARTER_CONCEPT_PROMPT_CORE_INSTR
-        ]
-        return "\n".join(parts)
-
     def handle_prompt_generation(self):
-        if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
-            self.project_data["goal"] = self.goal_text.get("1.0", "end-1c").strip()
-        prompt = self._get_prompt()
-        if prompt: self.show_generation_view(prompt)
+        prompt = starter_prompts.get_concept_prompt(self.project_data, self.questions_map)
+        self.show_generation_view(prompt)
 
     def show_generation_view(self, prompt):
         self._clear_frame()
@@ -180,78 +111,57 @@ class ConceptView(tk.Frame):
         btn_container.pack(side='bottom', fill='x', pady=10)
         self.btn_process = RoundedButton(btn_container, text="Process & Review", command=self.handle_llm_response, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, height=30, cursor="hand2")
         self.btn_process.pack(side='right')
-        ToolTip(self.btn_process, "Parse the LLM's response and open the segmented editor", delay=500)
 
         tk.Label(self, text="Generate Concept", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(0, 10))
 
-        instr_frame = tk.Frame(self, bg=c.DARK_BG);
-        instr_frame.pack(side='top', fill="x", pady=(0, 10))
-        tk.Label(instr_frame, text="1. Copy prompt", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
-        self.copy_btn = RoundedButton(instr_frame, text="Copy Prompt", command=lambda: self._copy_to_clipboard(self.copy_btn, prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
+        instr_f = tk.Frame(self, bg=c.DARK_BG)
+        instr_f.pack(side='top', fill="x", pady=(0, 10))
+        tk.Label(instr_f, text="1. Copy prompt", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_BOLD).pack(side='left')
+        self.copy_btn = RoundedButton(instr_f, text="Copy Prompt", command=lambda: self._copy_prompt(prompt), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, radius=6, cursor="hand2")
         self.copy_btn.pack(side='left', padx=15)
-        ToolTip(self.copy_btn, "Copy the prompt to your clipboard for use with an LLM", delay=500)
 
         tk.Label(self, text="2. Paste LLM Response (with tags)", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='top', anchor="w", pady=(10, 0))
-        self.llm_response_text = ScrollableText(
-            self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
-            on_zoom=self.starter_controller.adjust_font_size
-        )
+        self.llm_response_text = ScrollableText(self, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size), on_zoom=self.starter_controller.adjust_font_size)
         self.llm_response_text.pack(side='top', fill="both", expand=True, pady=5)
         self.llm_response_text.insert("1.0", self.project_data.get("concept_llm_response", ""))
-
-        # Sync input area to state and toggle button availability
         self.llm_response_text.text_widget.bind("<KeyRelease>", self._on_response_change)
-        self.llm_response_text.text_widget.bind("<<Paste>>", self._on_response_change)
 
-        self._update_process_button_state()
+        self._update_process_btn()
         self.register_info(self.starter_controller.info_mgr)
 
     def _on_response_change(self, event=None):
-        content = self.llm_response_text.get("1.0", "end-1c").strip()
-        self.project_data["concept_llm_response"] = content
-        self._update_process_button_state()
+        self.project_data["concept_llm_response"] = self.llm_response_text.get("1.0", "end-1c").strip()
+        self._update_process_btn()
 
-    def _update_process_button_state(self):
+    def _update_process_btn(self):
         content = self.project_data.get("concept_llm_response", "").strip()
-        if content:
-            self.btn_process.set_state('normal')
-            self.btn_process.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-        else:
-            self.btn_process.set_state('disabled')
-            self.btn_process.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+        st = 'normal' if content else 'disabled'
+        self.btn_process.set_state(st)
+        self.btn_process.config(bg=c.BTN_BLUE if st=='normal' else c.BTN_GRAY_BG, fg=c.BTN_BLUE_TEXT if st=='normal' else c.BTN_GRAY_TEXT)
 
-    def _copy_to_clipboard(self, button, text):
+    def _copy_prompt(self, text):
         pyperclip.copy(text)
-        button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-        self.after(2000, lambda: button.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+        self.copy_btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
+        self.after(2000, lambda: self.copy_btn.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
 
     def handle_llm_response(self):
         raw = self.llm_response_text.get("1.0", "end-1c").strip()
         if not raw: return
-
         content = strip_markdown_wrapper(raw)
-        parsed_segments = SegmentManager.parse_segments(content)
-
-        if not parsed_segments:
-            # Fallback to merged view if tags are missing
+        parsed = SegmentManager.parse_segments(content)
+        if not parsed:
             self.project_data["concept_md"] = content
             self.show_merged_view(content)
             return
 
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
-        mapped_segments = SegmentManager.map_parsed_segments_to_keys(parsed_segments, friendly_map)
-
+        friendly = {k: v["label"] for k, v in self.questions_map.items()}
+        mapped = SegmentManager.map_parsed_segments_to_keys(parsed, friendly)
         self.project_data["concept_segments"].clear()
-        self.project_data["concept_segments"].update(mapped_segments)
-
+        self.project_data["concept_segments"].update(mapped)
         self.project_data["concept_signoffs"].clear()
-        for k in mapped_segments.keys():
-            self.project_data["concept_signoffs"][k] = False
-
-        # CRITICAL: Clear merged Markdown when moving back to segments
+        for k in mapped: self.project_data["concept_signoffs"][k] = False
         self.project_data["concept_md"] = ""
-        self.project_data["concept_llm_response"] = "" # Clear the buffer on success
+        self.project_data["concept_llm_response"] = ""
         self.show_editor_view()
 
     def show_editor_view(self):
@@ -263,260 +173,54 @@ class ConceptView(tk.Frame):
         header.pack(side='top', fill="x", pady=(0, 5))
         tk.Label(header, text="Review Concept Segments", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
 
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
-        ordered_keys = list(self.project_data["concept_segments"].keys())
-
-        if not ordered_keys:
-            self.handle_reset()
-            return
-
-        self.reviewer = SegmentedReviewer(
-            parent=self,
-            segment_keys=ordered_keys,
-            friendly_names_map=friendly_map,
-            segments_data=self.project_data["concept_segments"],
-            signoffs_data=self.project_data["concept_signoffs"],
-            questions_map=self.questions_map,
-            on_change_callback=self.starter_controller.update_nav_state,
-            on_merge_callback=self.handle_merge
-        )
+        friendly = {k: v["label"] for k, v in self.questions_map.items()}
+        self.reviewer = SegmentedReviewer(self, list(self.project_data["concept_segments"].keys()), friendly, self.project_data["concept_segments"], self.project_data["concept_signoffs"], self.questions_map, self.starter_controller.update_nav_state, self.handle_merge)
         self.reviewer.pack(fill="both", expand=True, pady=5)
         self.starter_controller._update_navigation_controls()
         self.register_info(self.starter_controller.info_mgr)
 
     def handle_merge(self, full_text):
-        """
-        Transitions the view to a single full-text editor (merged state).
-        Clears segments and performs an immediate hard-save and lock-update.
-        """
         self.project_data["concept_segments"].clear()
         self.project_data["concept_signoffs"].clear()
         self.project_data["concept_md"] = full_text
-
-        # Sync the Starter State immediately to unlock the 'Next' button Logic
         self.starter_controller.starter_state.update_from_view(self)
         self.starter_controller.starter_state.save()
-
         self.show_merged_view(full_text)
 
     def show_merged_view(self, content):
-        """Displays the single text editor for the merged concept."""
         self._clear_frame()
         self.editor_is_active = True
         self.generation_mode_active = False
 
-        self.questions = ["Is this concept clearly explained?", "Did we miss anything?"]
-        self.current_question_index = 0
-        self.questions_frame_visible = False
-
-        # Grid configuration for main layout
-        self.grid_rowconfigure(1, weight=0) # Questions Panel (dynamic height)
-        self.grid_rowconfigure(2, weight=1) # Editor (expands)
-        self.grid_columnconfigure(0, weight=1)
-
-        # Header Control Row
-        header_frame = tk.Frame(self, bg=c.DARK_BG)
-        header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        tk.Label(header_frame, text="Review Full Concept", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
-
-        controls = tk.Frame(header_frame, bg=c.DARK_BG)
-        controls.pack(side="right")
-
-        self.q_btn = RoundedButton(controls, text="Questions", command=self._toggle_questions, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, cursor="hand2")
-        self.q_btn.pack(side="left", padx=(0,10))
-        ToolTip(self.q_btn, "Toggle guiding questions to help refine this section.", delay=500)
-
-        # Rewrite Button for Merged View
-        self.rewrite_btn = RoundedButton(controls, text="Rewrite", command=self._open_merged_rewrite_dialog, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, height=24, cursor="hand2")
-        self.rewrite_btn.pack(side="left", padx=(0, 10))
-        ToolTip(self.rewrite_btn, "Instructional rewrite of the entire document with change notes.", delay=500)
-
-        # Single toggle button for View Mode
-        self.view_btn = RoundedButton(controls, text="Edit", command=self._toggle_view_mode, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=80, height=24, cursor="hand2")
-        self.view_btn.pack(side="left", padx=(0, 0))
-        self.view_btn_tooltip = ToolTip(self.view_btn, "Switch to raw text editor", delay=500)
-
-        # Questions Panel Container (Row 1)
-        self.questions_container = tk.Frame(self, bg=c.DARK_BG)
-        self.questions_container.grid(row=1, column=0, sticky="ew", pady=(0, 10))
-
-        # Editor Container (Row 2)
-        self.editor_frame = tk.Frame(self, bg=c.DARK_BG)
-        self.editor_frame.grid(row=2, column=0, sticky="nsew")
-        self.editor_frame.grid_rowconfigure(0, weight=1)
-        self.editor_frame.grid_columnconfigure(0, weight=1)
-
-        self.editor_text = ScrollableText(
-            self.editor_frame, wrap=tk.WORD, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
-            font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
-            on_zoom=self.starter_controller.adjust_font_size
-        )
-        self.editor_text.insert("1.0", content)
-        self.editor_text.text_widget.bind("<KeyRelease>", self._on_merged_text_change)
-
-        self.markdown_renderer = MarkdownRenderer(
-            self.editor_frame,
-            base_font_size=self.starter_controller.font_size,
-            on_zoom=self.starter_controller.adjust_font_size
-        )
-        # Enable double-click to edit from the renderer
-        self.markdown_renderer.text_widget.bind("<Double-Button-1>", self._on_renderer_double_click)
-
-        # Default to Rendered View
-        self.is_raw_mode = False
-        self._apply_view_mode()
+        qs =["Is this concept clearly explained?", "Did we miss anything?"]
+        self.reviewer = FullTextReviewer(self, "Review Full Concept", content, qs, self._on_merged_change, self._open_rewrite, self._get_prompt_context, self.starter_controller)
+        self.reviewer.pack(fill="both", expand=True)
 
         self.starter_controller._update_navigation_controls()
         self.register_info(self.starter_controller.info_mgr)
 
-    def _on_renderer_double_click(self, event):
-        """Switches to raw mode and positions cursor where user double-clicked."""
-        try:
-            click_index = self.markdown_renderer.text_widget.index(f"@{event.x},{event.y}")
-        except Exception:
-            click_index = "1.0"
-        self._toggle_view_mode()
-        self.editor_text.update_idletasks()
-        self.editor_text.text_widget.mark_set("insert", click_index)
-        self.editor_text.text_widget.see(click_index)
-        self.editor_text.text_widget.focus_set()
+    def _get_prompt_context(self):
+        """Provides the specific background and focus context for the LLM prompt."""
+        full_text = self.project_data.get("concept_md", "")
+        return (
+            "Full Concept",
+            "```markdown\n" + full_text + "\n```",
+            "Concept",
+            "(Overview above)"
+        )
 
-    def _open_merged_rewrite_dialog(self):
-        current_text = self.editor_text.get("1.0", "end-1c").strip()
-        context_data = {
-            'keys': ['full_content'],
-            'names': {'full_content': 'Full Concept'},
-            'data': {'full_content': current_text}
-        }
-        # Correctly pass app_state
-        app_state = self.starter_controller.app.app_state
-        RewriteUnsignedDialog(self, app_state, context_data, self._apply_merged_rewrite_results, is_merged_mode=True)
+    def _on_merged_change(self, text):
+        self.project_data["concept_md"] = text
 
-    def _apply_merged_rewrite_results(self, new_text):
-        if not new_text: return
-        clean_text = strip_markdown_wrapper(new_text)
+    def _open_rewrite(self):
+        ctx = {'keys': ['full_content'], 'names': {'full_content': 'Full Concept'}, 'data': {'full_content': self.project_data["concept_md"]}}
+        RewriteUnsignedDialog(self, self.starter_controller.app.app_state, ctx, self._apply_rewrite, is_merged_mode=True)
 
-        self.editor_text.text_widget.config(state="normal")
-        self.editor_text.delete("1.0", "end")
-        self.editor_text.insert("1.0", clean_text)
-        self.project_data["concept_md"] = clean_text
-
-        if not self.is_raw_mode:
-            self.markdown_renderer.set_markdown(clean_text)
-
+    def _apply_rewrite(self, text):
+        clean = strip_markdown_wrapper(text)
+        self.project_data["concept_md"] = clean
+        self.reviewer.set_content(clean)
         self.starter_controller.update_nav_state()
-
-    def _on_merged_text_change(self, event=None):
-        if hasattr(self, 'editor_text') and self.editor_text.winfo_exists():
-            self.project_data["concept_md"] = self.editor_text.get("1.0", "end-1c").strip()
-
-    def _toggle_view_mode(self):
-        self.is_raw_mode = not self.is_raw_mode
-        self._apply_view_mode()
-
-    def _apply_view_mode(self):
-        if self.is_raw_mode:
-            # Switch to Editor
-            self.markdown_renderer.grid_forget()
-            self.editor_text.grid(row=0, column=0, sticky="nsew")
-
-            self.view_btn.config(text="Render", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-            self.view_btn_tooltip.text = "Switch to stylized Markdown preview"
-        else:
-            # Switch to Renderer
-            current_text = self.editor_text.get("1.0", "end-1c")
-            self.markdown_renderer.set_markdown(current_text)
-            self.editor_text.grid_forget()
-            self.markdown_renderer.grid(row=0, column=0, sticky="nsew")
-
-            self.view_btn.config(text="Edit", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-            self.view_btn_tooltip.text = "Switch to raw text editor"
-
-        if self.view_btn_tooltip.tooltip_window:
-             self.view_btn_tooltip.hide_tooltip()
-             self.view_btn_tooltip.show_tooltip()
-
-    def _toggle_questions(self):
-        self.questions_frame_visible = not self.questions_frame_visible
-        if self.questions_frame_visible:
-            self._create_question_prompter()
-            self.q_btn.config(bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
-        else:
-            for widget in self.questions_container.winfo_children():
-                widget.destroy()
-            self.q_btn.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
-
-    def _create_question_prompter(self):
-        if self.questions_container.winfo_children(): return
-
-        panel = tk.Frame(self.questions_container, bg=c.STATUS_BG, highlightbackground=c.WRAPPER_BORDER, highlightthickness=1)
-        panel.pack(fill='x', expand=True)
-
-        content = tk.Frame(panel, bg=c.STATUS_BG, padx=10, pady=10)
-        content.pack(fill='x', expand=True)
-
-        self.question_label = tk.Label(content, text="", wraplength=600, justify="left", anchor="w", font=c.FONT_NORMAL, bg=c.STATUS_BG, fg=c.TEXT_COLOR)
-        self.question_label.pack(side='left', fill='x', expand=True)
-
-        actions_frame = tk.Frame(content, bg=c.STATUS_BG)
-        actions_frame.pack(side='left', padx=(10,0))
-
-        nav_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
-        nav_frame.pack(anchor='e')
-        self.prev_question_button = RoundedButton(nav_frame, text="<", command=self._show_prev_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        self.prev_question_button.pack(side="left")
-        self.next_question_button = RoundedButton(nav_frame, text=">", command=self._show_next_question, width=24, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        self.next_question_button.pack(side="left", padx=2)
-
-        copy_btn_frame = tk.Frame(actions_frame, bg=c.STATUS_BG)
-        copy_btn_frame.pack(anchor='e', pady=(5, 0))
-
-        copy_btn = RoundedButton(copy_btn_frame, text="Copy Context & Question", command=lambda: self._copy_question_prompt(copy_btn), width=160, height=24, font=c.FONT_SMALL_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, cursor="hand2")
-        copy_btn.pack(side="right")
-        ToolTip(copy_btn, "Copy the full text and this question, asking for feedback (no rewrite)", delay=500)
-
-        self._update_question_display()
-
-    def _copy_question_prompt(self, btn):
-        try:
-            full_text = self.editor_text.get("1.0", "end-1c").strip()
-            current_q = self.questions[self.current_question_index]
-
-            prompt = p.STARTER_QUESTION_PROMPT_TEMPLATE.format(
-                context_label="Full Concept",
-                context_content="```markdown\n" + full_text + "\n```",
-                focus_name="Concept",
-                focus_content="(Overview above)",
-                question=current_q,
-                instruction_suffix="Please answer the question or provide critical feedback regarding the concept. Do NOT rewrite the text."
-            )
-
-            self.clipboard_clear()
-            self.clipboard_append(prompt)
-
-            btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-            self.after(2000, lambda: btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
-        except tk.TclError:
-            messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
-
-    def _update_question_display(self):
-        if not hasattr(self, 'question_label') or not self.question_label.winfo_exists(): return
-        self.question_label.config(text=self.questions[self.current_question_index])
-        self.prev_question_button.set_state("normal" if self.current_question_index > 0 else "disabled")
-        self.next_question_button.set_state("normal" if self.current_question_index < len(self.questions) - 1 else "disabled")
-
-    def _show_next_question(self):
-        if self.current_question_index < len(self.questions) - 1:
-            self.current_question_index += 1
-            self._update_question_display()
-
-    def _show_prev_question(self):
-        if self.current_question_index > 0:
-            self.current_question_index -= 1
-            self._update_question_display()
-
-    def is_editor_visible(self): return self.editor_is_active
-    def is_step_in_progress(self): return self.editor_is_active or self.generation_mode_active
 
     def handle_reset(self):
         if messagebox.askyesno("Confirm", "Are you sure you want to start over?", parent=self):
@@ -530,31 +234,18 @@ class ConceptView(tk.Frame):
             self.starter_controller._update_navigation_controls()
 
     def get_goal_content(self):
-        if hasattr(self, 'goal_text') and self.goal_text.winfo_exists():
-            return self.goal_text.get("1.0", "end-1c").strip()
-        return self.project_data.get("goal", "")
+        return self.goal_text.get("1.0", "end-1c").strip() if hasattr(self, 'goal_text') and self.goal_text.winfo_exists() else self.project_data.get("goal", "")
 
     def get_llm_response_content(self):
-        if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists():
-            return {"concept_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()}
-        return {}
+        return {"concept_llm_response": self.llm_response_text.get("1.0", "end-1c").strip()} if hasattr(self, 'llm_response_text') and self.llm_response_text.winfo_exists() else {}
 
     def get_assembled_content(self):
-        if not self.project_data.get("concept_segments"):
-            return self.project_data.get("concept_md", ""), {}, {}
+        if not self.project_data.get("concept_segments"): return self.project_data.get("concept_md", ""), {}, {}
+        friendly = {k: v["label"] for k, v in self.questions_map.items()}
+        txt = SegmentManager.assemble_document(self.project_data["concept_segments"], list(self.project_data["concept_segments"].keys()), friendly)
+        return txt, self.project_data["concept_segments"], self.project_data["concept_signoffs"]
 
-        friendly_map = {k: v["label"] for k, v in self.questions_map.items()}
-        current_keys = list(self.project_data["concept_segments"].keys())
-
-        full_text = SegmentManager.assemble_document(
-            self.project_data["concept_segments"],
-            current_keys,
-            friendly_map
-        )
-        return full_text, self.project_data["concept_segments"], self.project_data["concept_signoffs"]
-
-    def get_concept_content(self):
-        return self.get_assembled_content()[0]
-
+    def is_editor_visible(self): return self.editor_is_active
+    def is_step_in_progress(self): return self.editor_is_active or self.generation_mode_active
     def _clear_frame(self):
-        for widget in self.winfo_children(): widget.destroy()
+        for w in self.winfo_children(): w.destroy()
