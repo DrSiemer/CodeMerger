@@ -64,6 +64,10 @@ class SegmentedReviewer(Frame):
         info_mgr.register(self.signoff_btn, "starter_seg_signoff")
         info_mgr.register(self.sync_btn, "starter_seg_sync")
 
+        # Register indicators for each sidebar item
+        for item in self.sidebar_items.values():
+            item.register_indicator_info(info_mgr)
+
         # Register the transient buttons that currently exist for the active segment
         self._register_transient_info()
 
@@ -115,7 +119,11 @@ class SegmentedReviewer(Frame):
                 command=lambda k=key: self._navigate(k)
             )
             item.pack(fill="x")
-            ToolTip(item, f"Navigate to {name}", delay=500)
+
+            # Create the parent ToolTip and link it to the item so the item can suppress it
+            item_tooltip = ToolTip(item, f"Navigate to {name}", delay=500)
+            item.link_parent_tooltip(item_tooltip)
+
             self.sidebar_items[key] = item
 
         # Content Area

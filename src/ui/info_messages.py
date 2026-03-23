@@ -263,6 +263,10 @@ INFO_MESSAGES = {
 
     "starter_seg_nav": "Navigation: Jump between different segments.",
     "starter_seg_signoff": "Sign Off: Lock this segment. When all segments are signed off, you can merge them into a single document.",
+    "starter_seg_indicator": (
+        "Segment Status: Shows if a section is locked (signed off). "
+        "Click the icon to instantly toggle the lock state without switching views."
+    ),
     "starter_seg_rewrite": "Rewrite: Provide a specific instruction to rewrite this segment and all unsigned segments.",
     "starter_seg_sync": "Sync: Propagate manual edits from this segment to other unsigned segments to keep the document consistent.",
     "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this segment.",
