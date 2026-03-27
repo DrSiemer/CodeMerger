@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw, ImageTk
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 from .widgets.markdown_renderer import MarkdownRenderer
-from .window_utils import position_window
+from .window_utils import position_window, save_window_geometry
 from .style_manager import apply_dark_theme
 from ..core.paths import ICON_PATH
 from ..core.utils import save_config
@@ -19,7 +19,7 @@ class FeedbackDialog(tk.Toplevel):
         self.plan = plan
         self.on_apply = on_apply
         self.on_refuse = on_refuse
-        self.app_state = parent.app_state if hasattr(parent, 'app_state') else parent.master.app_state
+        self.app_state = getattr(parent, 'app_state', getattr(parent.master, 'app_state', None))
         self.withdraw()
         self.title("AI Response Review")
         self.iconbitmap(ICON_PATH)
@@ -135,7 +135,8 @@ class FeedbackDialog(tk.Toplevel):
         self.bottom_frame.grid(row=3, column=0, sticky="ew", pady=(15, 0))
 
         # Checkbox
-        self.show_var = BooleanVar(value=self.app_state.config.get('show_feedback_on_paste', True))
+        show_val = self.app_state.config.get('show_feedback_on_paste', True) if self.app_state else True
+        self.show_var = BooleanVar(value=show_val)
         chk = ttk.Checkbutton(self.bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
         chk.pack(side="left")
 
@@ -209,6 +210,7 @@ class FeedbackDialog(tk.Toplevel):
             r.set_font_size(new_size)
 
     def _save_setting(self):
+        if not self.app_state: return
         self.app_state.config['show_feedback_on_paste'] = self.show_var.get()
         save_config(self.app_state.config)
 
@@ -265,3 +267,8 @@ class FeedbackDialog(tk.Toplevel):
                 return
 
         self._handle_cancel()
+
+    def destroy(self):
+        """Saves geometry before closing."""
+        save_window_geometry(self)
+        super().destroy()

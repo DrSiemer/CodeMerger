@@ -62,7 +62,21 @@ def _get_default_geometry_for_window(window_class_name):
         return c.PROJECT_STARTER_GEOMETRY
     if window_class_name == 'NotesDisplayDialog':
         return c.NOTES_DIALOG_DEFAULT_GEOMETRY
+    if window_class_name == 'FeedbackDialog':
+        return "900x750"
     # Return None if no specific default is found for this window type
+    return None
+
+def _find_geometry_store(window):
+    """Recursively searches up the parent chain for the window_geometries dictionary."""
+    curr = getattr(window, 'parent', getattr(window, 'master', None))
+    while curr:
+        if hasattr(curr, 'window_geometries'):
+            return curr
+        # Navigate up via parent attribute or Tkinter master
+        next_node = getattr(curr, 'parent', getattr(curr, 'master', None))
+        if next_node == curr: break
+        curr = next_node
     return None
 
 def position_window(window):
@@ -73,9 +87,10 @@ def position_window(window):
     """
     parent = window.parent
     window_name = window.__class__.__name__
-    saved_geometry = None
-    if hasattr(parent, 'window_geometries'):
-        saved_geometry = parent.window_geometries.get(window_name)
+
+    # Attempt to find the geometry store (usually on the main App instance)
+    store_node = _find_geometry_store(window)
+    saved_geometry = store_node.window_geometries.get(window_name) if store_node else None
 
     win_w, win_h, x, y = 0, 0, 0, 0
 
@@ -117,10 +132,13 @@ def position_window(window):
         y = parent_y + (parent_h - win_h) // 2
 
     # --- Step 2: Constrain the position to be fully on-screen ---
-    # We use the parent window to identify the correct monitor.
-    # This prevents the window from snapping to the adjacent monitor if the calculated
-    # top-left coordinates 'bleed' into it.
-    target_for_monitor_detection = parent if parent else (x, y)
+    # Use the target monitor based on where the window IS, not where parent is.
+    # This allows windows to persist on separate monitors.
+    if saved_geometry:
+        target_for_monitor_detection = (x, y)
+    else:
+        target_for_monitor_detection = parent if parent else (x, y)
+
     mon_left, mon_top, mon_right, mon_bottom = get_monitor_work_area(target_for_monitor_detection)
 
     # Apply buffers to prevent spawning behind the taskbar or against the screen edges.
@@ -138,6 +156,7 @@ def position_window(window):
     window.geometry(f"{win_w}x{win_h}+{x}+{y}")
 
 def save_window_geometry(window):
-    """Saves the window's current geometry to the parent's registry."""
-    if window.state() == 'normal' and hasattr(window.parent, 'window_geometries'):
-        window.parent.window_geometries[window.__class__.__name__] = window.geometry()
+    """Saves the window's current geometry to the persistent store."""
+    store_node = _find_geometry_store(window)
+    if store_node:
+        store_node.window_geometries[window.__class__.__name__] = window.geometry()
