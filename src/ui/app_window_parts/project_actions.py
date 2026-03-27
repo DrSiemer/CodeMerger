@@ -34,6 +34,10 @@ class ProjectActions:
 
     def set_active_dir_display(self, path, set_status=True):
         app = self.app
+
+        # Clear the last AI response review when switching projects
+        app.last_ai_response = None
+
         if not path or not os.path.isdir(path):
             self._clear_project_ui()
             return
