@@ -21,11 +21,12 @@ class EventHandlers:
         # This prevents movement/resizing events triggered by the state-machine
         # animations from polluting the saved restoration target.
         if app.view_manager.current_state == 'normal':
-            app.view_manager.main_window_geom = (
-                app.winfo_x(), app.winfo_y(),
-                app.winfo_width(), app.winfo_height()
-            )
-            self.check_for_monitor_change()
+            if app.state() != 'iconic':
+                app.view_manager.main_window_geom = (
+                    app.winfo_x(), app.winfo_y(),
+                    app.winfo_width(), app.winfo_height()
+                )
+                self.check_for_monitor_change()
 
     def check_for_monitor_change(self):
         """
@@ -34,6 +35,11 @@ class EventHandlers:
         are invalidated to ensure the UI remains fully visible and contextually placed.
         """
         app = self.app
+
+        # Do not perform check if the window is minimized
+        if app.state() == 'iconic':
+            return
+
         if sys.platform != "win32":
             return
 

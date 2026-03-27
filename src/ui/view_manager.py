@@ -232,7 +232,8 @@ class ViewManager:
         # --- Lazy Layout: Ensure content is hidden during growth to maintain performance ---
         self.main_window._start_lazy_layout()
 
-        # Update the saved position before we hide the compact window
+        # Update the saved position before we hide the compact window.
+        # This capture must happen while the window is still visible and in a 'normal' state.
         self.compact_mode_last_x = self.compact_mode_window.winfo_x()
         self.compact_mode_last_y = self.compact_mode_window.winfo_y()
         log.debug(f"Saved compact coordinates before restore: {self.compact_mode_last_x}, {self.compact_mode_last_y}")
