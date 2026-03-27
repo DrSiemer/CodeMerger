@@ -198,7 +198,7 @@ def setup_ui(app):
     app.review_button = RoundedButton(
         app.paste_container, text="", bg=c.ATTENTION, fg=c.TEXT_COLOR,
         width=12, height=30, radius=6,
-        command=app.action_handlers.show_response_review,
+        command=lambda: app.action_handlers.show_response_review(force_verification=True),
         cursor='hand2'
     )
     app.review_button.pack_forget()

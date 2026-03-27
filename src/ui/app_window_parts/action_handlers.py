@@ -482,7 +482,7 @@ class ActionHandlers:
             # Unformatted ONLY + Review Disabled: show specific failure toast
             self.app.helpers.show_compact_toast("Error: LLM response followed no usable format.")
 
-    def show_response_review(self, plan=None, on_apply=None, on_refuse=None):
+    def show_response_review(self, plan=None, on_apply=None, on_refuse=None, force_verification=False):
         """
         Opens the AI Response Review window.
         Uses either the provided plan (from a fresh paste) or the cached last response.
@@ -502,4 +502,4 @@ class ActionHandlers:
         if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
             dialog_parent = self.app.view_manager.compact_mode_window
 
-        FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse)
+        FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse, force_verification=force_verification)

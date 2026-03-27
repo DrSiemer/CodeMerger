@@ -13,7 +13,7 @@ from ..core.utils import save_config
 from .tooltip import ToolTip
 
 class FeedbackDialog(tk.Toplevel):
-    def __init__(self, parent, plan, on_apply=None, on_refuse=None):
+    def __init__(self, parent, plan, on_apply=None, on_refuse=None, force_verification=False):
         super().__init__(parent)
         self.parent = parent
         self.plan = plan
@@ -129,7 +129,11 @@ class FeedbackDialog(tk.Toplevel):
             current_idx += 1
 
         if current_idx > 0:
-            self.notebook.select(0)
+            # Decisions on which tab to start on
+            if force_verification and 'verification' in self.tab_indices:
+                self.notebook.select(self.tab_indices['verification'])
+            else:
+                self.notebook.select(0)
 
         self.bottom_frame = Frame(main_frame, bg=c.DARK_BG)
         self.bottom_frame.grid(row=3, column=0, sticky="ew", pady=(15, 0))

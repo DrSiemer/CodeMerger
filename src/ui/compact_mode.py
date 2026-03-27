@@ -120,7 +120,7 @@ class CompactMode(tk.Toplevel):
         self.review_button = RoundedButton(
             paste_row, text="", font=button_font,
             bg=c.ATTENTION, fg="#FFFFFF",
-            command=self.parent.action_handlers.show_response_review,
+            command=lambda: self.parent.action_handlers.show_response_review(force_verification=True),
             width=12, height=button_height, radius=button_radius, cursor='hand2'
         )
 
