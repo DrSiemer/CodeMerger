@@ -69,7 +69,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    Immediately before the code blocks, provide these sections in this order:
    - **<INTRO>**: Use this to provide a technical implementation plan or architectural summary.
    - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
-   - **<ANSWERS>**: Use this ONLY to answer conceptual or theoretical questions (usually ending in '?').
+   - **<ANSWERS TO DIRECT USER QUESTIONS>**: If the user asked a specific question (usually ending with a '?'), answer it here. If there is no question mark in the prompt, there is no question. In that case, this block MUST remain empty (use a single dash `-`). Do NOT fill it with filler text like "None" or "No questions".
 
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
@@ -100,12 +100,12 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 7. **DELETE & VERIFICATION (POST-CODE):**
    Immediately following the final "--- End of file ---" marker, provide these sections:
 
-   <DELETE>
+   <DELETED FILES>
    STRICT FILE PATHS ONLY.
    FORMAT: DELETE FILE: path/to/obsolete_file.ext
    PROHIBITION: Do NOT describe code-level removals, logic deletions, or "cleanup."
-   If no files were deleted from the filesystem, this section should only contain a dash symbol (`-`).
-   </DELETE>
+   If no files were deleted from the filesystem, this section should ONLY contain a single dash (`-`). Do NOT write "None" or any other text.
+   </DELETED FILES>
 
    <VERIFICATION>
    - Steps to test the changes.
@@ -123,9 +123,9 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (List of changes)
 </CHANGES>
 
-<ANSWERS>
+<ANSWERS TO DIRECT USER QUESTIONS>
 (Answer any direct questions here, otherwise `-`)
-</ANSWERS>
+</ANSWERS TO DIRECT USER QUESTIONS>
 
 --- File: `path/to/file.ext` ---
 ```language
@@ -133,9 +133,9 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 ```
 --- End of file ---
 
-<DELETE>
+<DELETED FILES>
 (Files to delete, or `-`)
-</DELETE>
+</DELETED FILES>
 
 <VERIFICATION>
 (Testing steps)

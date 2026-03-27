@@ -64,7 +64,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
         match = re.search(rf'<{tag}>(.*?)</{tag}>', text, re.DOTALL | re.IGNORECASE)
         if match:
             content = match.group(1).strip()
-            if content == "-" or content.lower() in ["none", "n/a", "no files to delete", "no changes"]:
+            content_lower = content.lower().strip('.')
+            if content == "-" or content_lower in ["none", "n/a", "no files to delete", "no changes", "no conceptual questions were asked in the prompt", "no conceptual questions were asked", "no direct questions were asked", "no questions"]:
                 return ""
             return content
         return ""
@@ -80,10 +81,10 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'hint': "Please ask the AI to correct its output format."
         }
 
-    answers_text = get_section("ANSWERS", markdown_text)
+    answers_text = get_section("ANSWERS TO DIRECT USER QUESTIONS", markdown_text)
     intro_text = get_section("INTRO", markdown_text)
     changes_text = get_section("CHANGES", markdown_text)
-    delete_text = get_section("DELETE", markdown_text)
+    delete_text = get_section("DELETED FILES", markdown_text)
     verification_text = get_section("VERIFICATION", markdown_text)
 
     # Flag to determine if the AI followed formatting for commentary at all
@@ -95,7 +96,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     orphan_detect = markdown_text
 
     # 1. Strip all valid tagged blocks
-    orphan_detect = re.sub(r'<(ANSWERS|INTRO|CHANGES|DELETE|VERIFICATION)>.*?</\1>', '', orphan_detect, flags=re.DOTALL | re.IGNORECASE)
+    orphan_detect = re.sub(r'<(ANSWERS TO DIRECT USER QUESTIONS|INTRO|CHANGES|DELETED FILES|VERIFICATION)>.*?</\1>', '', orphan_detect, flags=re.DOTALL | re.IGNORECASE)
 
     # 2. Strip all valid File blocks
     file_block_strip_pattern = re.escape(PREFIX) + r'File: `[^\n`]+` ---\s*[\r\n]+```[^\n]*[\r\n]+.*?\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
