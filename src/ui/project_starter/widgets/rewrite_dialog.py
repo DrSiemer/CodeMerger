@@ -26,6 +26,10 @@ class RewriteUnsignedDialog(Toplevel):
         self.is_merged_mode = is_merged_mode
         self.withdraw()
 
+        # Ensure grid is used on the Toplevel so the main frame and info panel never overlap
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         self.title("Rewrite Content" if is_merged_mode else "Rewrite Unsigned Segments")
         self.configure(bg=c.DARK_BG)
         self.transient(parent)
@@ -42,7 +46,7 @@ class RewriteUnsignedDialog(Toplevel):
         self.minsize(600, 600)
 
         # --- Info Mode Integration ---
-        self.info_mgr = attach_info_mode(self, self.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.instruction_text, "rewrite_instruction")
         self.info_mgr.register(self.copy_btn, "rewrite_copy_prompt")
         self.info_mgr.register(self.response_text, "rewrite_response")
@@ -54,7 +58,7 @@ class RewriteUnsignedDialog(Toplevel):
 
     def _build_ui(self):
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
-        main_frame.pack(fill="both", expand=True)
+        main_frame.grid(row=0, column=0, sticky="nsew")
         main_frame.grid_rowconfigure(5, weight=1) # Paste area expands
         main_frame.grid_columnconfigure(0, weight=1)
 

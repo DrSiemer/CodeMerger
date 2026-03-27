@@ -24,6 +24,10 @@ class InstructionsWindow(Toplevel):
         self.title("Set Instructions")
         self.iconbitmap(ICON_PATH)
 
+        # Ensure grid is used on the Toplevel so the main frame and info panel never overlap
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         # --- Dynamic Geometry for Boot ---
         initial_geom = c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY
         if self.parent.app_state.info_mode_active:
@@ -40,7 +44,7 @@ class InstructionsWindow(Toplevel):
 
         # --- UI Layout using a single, robust Grid ---
         main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
-        main_frame.pack(fill='both', expand=True)
+        main_frame.grid(row=0, column=0, sticky='nsew')
         main_frame.grid_columnconfigure(0, weight=1)
         # Configure rows for labels, text areas (expanding), and buttons
         main_frame.grid_rowconfigure(1, weight=1) # Intro text
@@ -118,7 +122,7 @@ class InstructionsWindow(Toplevel):
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
 
         # --- Info Mode Integration ---
-        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.intro_text, "inst_intro")
         self.info_mgr.register(self.outro_text, "inst_outro")
         self.info_mgr.register(self.save_button, "inst_save")

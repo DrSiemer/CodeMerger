@@ -11,6 +11,8 @@ from .style_manager import apply_dark_theme
 from ..core.paths import ICON_PATH
 from ..core.utils import save_config
 from .tooltip import ToolTip
+from .info_manager import attach_info_mode
+from .assets import assets
 
 class FeedbackDialog(tk.Toplevel):
     def __init__(self, parent, plan, on_apply=None, on_refuse=None, force_verification=False):
@@ -24,6 +26,10 @@ class FeedbackDialog(tk.Toplevel):
         self.title("AI Response Review")
         self.iconbitmap(ICON_PATH)
         self.configure(bg=c.DARK_BG)
+
+        # Ensure grid is used on the Toplevel so the main frame and info panel never overlap
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
 
         # --- Topmost Decoupling ---
         is_parent_topmost = False
@@ -49,7 +55,7 @@ class FeedbackDialog(tk.Toplevel):
         self._yellow_accent = self._create_vertical_accent(c.ATTENTION)        # Unformatted
 
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
-        main_frame.pack(fill="both", expand=True)
+        main_frame.grid(row=0, column=0, sticky="nsew")
 
         # Main Layout Rows: 0=Title, 1=UnformattedAlert, 2=Notebook, 3=BottomActions
         main_frame.grid_rowconfigure(2, weight=1)
@@ -84,6 +90,7 @@ class FeedbackDialog(tk.Toplevel):
         self.notebook = ttk.Notebook(main_frame)
         self.notebook.grid(row=2, column=0, sticky="nsew", pady=(0, 15))
         self.renderers = []
+        self.tab_widgets_for_info = []
 
         self.tab_indices = {}
         current_idx = 0
@@ -91,27 +98,27 @@ class FeedbackDialog(tk.Toplevel):
         # Tab order: Intro, Changes, Answers, Delete, Verification, Unformatted (Priority order)
 
         if plan.get('intro'):
-            self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent)
+            self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent, info_key="review_tab_intro")
             self.tab_indices['intro'] = current_idx
             current_idx += 1
 
         if plan.get('changes'):
-            self._add_tab("Changes", plan.get('changes'), icon=self._blue_accent)
+            self._add_tab("Changes", plan.get('changes'), icon=self._blue_accent, info_key="review_tab_changes")
             self.tab_indices['changes'] = current_idx
             current_idx += 1
 
         if plan.get('answers'):
-            self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent)
+            self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent, info_key="review_tab_answers")
             self.tab_indices['answers'] = current_idx
             current_idx += 1
 
         if plan.get('delete'):
-            self._add_tab("Delete", plan.get('delete'), icon=self._red_accent)
+            self._add_tab("Delete", plan.get('delete'), icon=self._red_accent, info_key="review_tab_delete")
             self.tab_indices['delete'] = current_idx
             current_idx += 1
 
         if plan.get('verification'):
-            self._add_tab("Verification", plan.get('verification'), icon=self._green_accent)
+            self._add_tab("Verification", plan.get('verification'), icon=self._green_accent, info_key="review_tab_verification")
             self.tab_indices['verification'] = current_idx
             current_idx += 1
 
@@ -124,7 +131,7 @@ class FeedbackDialog(tk.Toplevel):
         # --- Placeholder for "Code Only" responses ---
         if current_idx == 0:
             msg = "The AI response contained only code blocks with no accompanying text or tagged sections."
-            self._add_tab("Response Summary", msg, icon=self._gray_accent)
+            self._add_tab("Response Summary", msg, icon=self._gray_accent, info_key="review_tab_placeholder")
             self.tab_indices['placeholder'] = current_idx
             current_idx += 1
 
@@ -141,8 +148,8 @@ class FeedbackDialog(tk.Toplevel):
         # Checkbox
         show_val = self.app_state.config.get('show_feedback_on_paste', True) if self.app_state else True
         self.show_var = BooleanVar(value=show_val)
-        chk = ttk.Checkbutton(self.bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
-        chk.pack(side="left")
+        self.auto_show_chk = ttk.Checkbutton(self.bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
+        self.auto_show_chk.pack(side="left")
 
         if self.on_apply:
             # Only show Apply Changes if there are actually file modifications in the plan
@@ -163,9 +170,40 @@ class FeedbackDialog(tk.Toplevel):
         self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply else self._on_close_request())
         self.protocol("WM_DELETE_WINDOW", self._on_close_request if self.on_apply else self.destroy)
 
-        self.geometry("900x750")
+        initial_w, initial_h = 900, 750
+        if self.app_state and self.app_state.info_mode_active:
+            initial_h += c.INFO_PANEL_HEIGHT
+
+        self.geometry(f"{initial_w}x{initial_h}")
         self.minsize(600, 500)
         position_window(self)
+
+        # --- Info Mode Integration ---
+        if self.app_state:
+            self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+            self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
+
+            self.info_mgr.register(self.notebook, "review_tabs")
+            self.info_mgr.register(self.auto_show_chk, "review_auto_show")
+
+            if hasattr(self, 'apply_btn'):
+                self.info_mgr.register(self.apply_btn, "review_apply")
+            if hasattr(self, 'cancel_btn'):
+                self.info_mgr.register(self.cancel_btn, "review_cancel")
+            if hasattr(self, 'ok_button'):
+                self.info_mgr.register(self.ok_button, "review_close")
+            if hasattr(self, 'admonish_btn'):
+                self.info_mgr.register(self.admonish_btn, "review_admonish")
+
+            # Granular registration for each tab's content
+            for renderer, info_key in self.tab_widgets_for_info:
+                self.info_mgr.register(renderer, info_key)
+                if hasattr(renderer, 'text_widget'):
+                    self.info_mgr.register(renderer.text_widget, info_key)
+
+            self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+        else:
+            self.info_mgr = None
 
         self.deiconify()
         self.wait_window(self)
@@ -178,7 +216,7 @@ class FeedbackDialog(tk.Toplevel):
         draw.rounded_rectangle([0, 1, 3, 20], radius=1, fill=hex_color)
         return ImageTk.PhotoImage(img)
 
-    def _add_tab(self, title, markdown_text, icon=None):
+    def _add_tab(self, title, markdown_text, icon=None, info_key=None):
         frame = Frame(self.notebook, bg=c.DARK_BG)
         if icon:
             self.notebook.add(frame, text=title, image=icon, compound="left")
@@ -190,6 +228,9 @@ class FeedbackDialog(tk.Toplevel):
         renderer.set_markdown(markdown_text.strip())
         self.renderers.append(renderer)
 
+        if info_key:
+            self.tab_widgets_for_info.append((renderer, info_key))
+
     def _add_unformatted_tab(self, raw_text):
         """Adds a specialized tab for text that wasn't properly wrapped in tags."""
         frame = Frame(self.notebook, bg=c.DARK_BG)
@@ -199,6 +240,8 @@ class FeedbackDialog(tk.Toplevel):
         renderer.pack(fill="both", expand=True)
         renderer.set_markdown(raw_text.strip())
         self.renderers.append(renderer)
+
+        self.tab_widgets_for_info.append((renderer, "review_tab_unformatted"))
 
     def _copy_admonishment(self):
         msg = "Please follow the output format as described in your instructions, the tool cannot use this incorrectly formatted text."
@@ -248,6 +291,9 @@ class FeedbackDialog(tk.Toplevel):
                 width=100, height=30, cursor="hand2"
             )
             self.ok_button.pack(side="right")
+
+            if hasattr(self, 'info_mgr') and self.info_mgr:
+                self.info_mgr.register(self.ok_button, "review_close")
 
             # Navigate to verification steps automatically
             self.notebook.select(self.tab_indices['verification'])

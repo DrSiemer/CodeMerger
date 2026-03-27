@@ -19,10 +19,14 @@ class NewProfileDialog(Toplevel):
         self.iconbitmap(ICON_PATH)
         self.result = None
 
+        # Ensure grid is used on the Toplevel so the main frame and info panel never overlap
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         self.configure(bg=c.DARK_BG)
         apply_dark_theme(self)
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
-        main_frame.pack(fill='both', expand=True)
+        main_frame.grid(row=0, column=0, sticky="nsew")
 
         Label(main_frame, text="Enter a unique name for the new profile:", bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(pady=(0, 5), anchor='w')
 
@@ -61,7 +65,7 @@ class NewProfileDialog(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
         # --- Info Mode Integration ---
-        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.entry, "profile_name")
         self.info_mgr.register(self.copy_files_chk, "profile_copy_files")
         self.info_mgr.register(self.copy_inst_chk, "profile_copy_inst")

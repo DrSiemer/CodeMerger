@@ -26,6 +26,10 @@ class FiletypesManagerWindow(Toplevel):
         self.title("Manage Filetypes")
         self.iconbitmap(ICON_PATH)
 
+        # Ensure grid is used on the Toplevel so the main frame and info panel never overlap
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         # --- Dynamic Geometry for Boot ---
         initial_geom = c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
         if self.parent.app_state.info_mode_active:
@@ -42,7 +46,7 @@ class FiletypesManagerWindow(Toplevel):
 
         # --- UI Layout ---
         main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
-        main_frame.pack(fill='both', expand=True)
+        main_frame.grid(row=0, column=0, sticky='nsew')
         main_frame.rowconfigure(1, weight=1)
         main_frame.columnconfigure(0, weight=1)
 
@@ -111,7 +115,7 @@ class FiletypesManagerWindow(Toplevel):
         self.bind('<Configure>', self._on_resize)
 
         # --- Info Mode Integration ---
-        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
+        self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.tree, "ft_list")
         self.info_mgr.register(self.action_button, "ft_action")
         self.info_mgr.register(input_section_frame, "ft_add")
