@@ -108,3 +108,8 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - The release will be a draft, you'll need to finalize it on github.com
 - Run the Inno Setup with a log like this: `CodeMerger_Setup.exe /LOG="setup.log"`
 - When the app is installed, config can be found in `%APPDATA%\CodeMerger`
+
+
+## License
+
+CodeMerger is free to use for personal and commercial development. However, the distribution of modified versions, resale, or rebranding is strictly prohibited. If you wish to contribute to the project, please reach out via GitHub. See the [LICENSE](LICENSE) file for the full legal text.
