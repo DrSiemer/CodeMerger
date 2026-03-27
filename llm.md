@@ -60,6 +60,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 
 - **Global UI Changes**: Component variations must be implemented via optional parameters to avoid creating visual side effects in other parts of the UI.
 - **Lazy Layout (Resize Workaround)**: Tkinter triggers recursive layout calculations on every pixel move during window resizing, which blocks the UI thread in complex layouts. The workaround in `src/ui/app_window.py` detects a resize event, immediately calls `grid_remove()` on all heavy content containers, and uses a 250ms debounced timer to restore them. This ensures the window frame tracks the mouse perfectly during drag operations.
+- **Marker Fragment Strategy (Self-Hosting)**: To allow CodeMerger to bundle its own source code without the parser tripping over its own definitions, all marker string constants and regex patterns (e.g., `--- File:`) are constructed using string fragments (concatenation). Marker counting logic also uses line-start anchors (`^`) and `re.MULTILINE` to avoid matching substrings inside code blocks.
 
 ### Core Logic (`src/core`)
 

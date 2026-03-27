@@ -30,11 +30,11 @@ class AppHelpers:
         app.lift()
         app.focus_force()
 
-    def show_error_dialog(self, title, message):
+    def show_error_dialog(self, title, message, hint=None):
         from ..custom_error_dialog import CustomErrorDialog
         app = self.app
         dialog_parent = app
         if app.view_manager.current_state == 'compact' and app.view_manager.compact_mode_window and app.view_manager.compact_mode_window.winfo_exists():
             dialog_parent = app.view_manager.compact_mode_window
 
-        CustomErrorDialog(dialog_parent, title, message)
+        CustomErrorDialog(dialog_parent, title, message, hint=hint)

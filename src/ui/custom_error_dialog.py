@@ -1,15 +1,16 @@
 import pyperclip
-from tkinter import Toplevel, Frame, Message
+from tkinter import Toplevel, Frame, Message, Label
 from .widgets.rounded_button import RoundedButton
 from .. import constants as c
 from ..core.paths import ICON_PATH
 from .window_utils import position_window
 
 class CustomErrorDialog(Toplevel):
-    def __init__(self, parent, title, message):
+    def __init__(self, parent, title, message, hint=None):
         super().__init__(parent)
         self.parent = parent
         self.message = message
+        self.hint = hint
         self.withdraw()
         self.transient(parent)
         self.grab_set()
@@ -21,7 +22,15 @@ class CustomErrorDialog(Toplevel):
         main_frame.pack(fill='both', expand=True)
 
         msg_widget = Message(main_frame, text=self.message, width=350, bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
-        msg_widget.pack(pady=(0, 20))
+        msg_widget.pack(pady=(0, 10))
+
+        if self.hint:
+            hint_label = Label(
+                main_frame, text=self.hint, wraplength=350,
+                bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR,
+                font=c.FONT_STATUS_BAR, justify='left'
+            )
+            hint_label.pack(pady=(0, 20), anchor='w')
 
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.pack(fill='x')
@@ -49,4 +58,5 @@ class CustomErrorDialog(Toplevel):
         self.wait_window(self)
 
     def _copy_to_clipboard(self):
+        # We only copy the core message, excluding the UI hint
         pyperclip.copy(self.message)

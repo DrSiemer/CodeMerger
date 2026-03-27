@@ -250,5 +250,5 @@ class App(Tk):
     def show_and_raise(self):
         self.helpers.show_and_raise()
 
-    def show_error_dialog(self, title, message):
-        self.helpers.show_error_dialog(title, message)
+    def show_error_dialog(self, title, message, hint=None):
+        self.helpers.show_error_dialog(title, message, hint=hint)

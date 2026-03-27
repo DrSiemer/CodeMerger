@@ -173,9 +173,9 @@ class FileManagerWindow(Toplevel):
         except (ValueError, Exception):
             pass
 
-    def show_error_dialog(self, title, message):
+    def show_error_dialog(self, title, message, hint=None):
         # Instantiate the dialog with this window as the parent to keep focus.
-        CustomErrorDialog(self, title, message)
+        CustomErrorDialog(self, title, message, hint=hint)
 
     def _position_window(self):
         position_window(self)

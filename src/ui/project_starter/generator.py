@@ -41,9 +41,25 @@ def parse_and_write_files(project_path, llm_output):
     Parses the LLM response for file blocks and writes them to the project path.
     Uses a robust regex to handle whitespace variations and short files.
     """
-    # Robust Regex: handles headers, code blocks, and the End of file sentinel.
+    # Construct counting logic with fragments for self-processing safety
+    PREFIX = "--- "
+    FILE_LABEL = "File: "
+    EOF_LABEL = "End of file"
+    EOF_MARKER = PREFIX + EOF_LABEL + " ---"
+
+    # Use anchored line-start counts
+    start_count_pattern = r'^' + re.escape(PREFIX) + re.escape(FILE_LABEL)
+    end_count_pattern = r'^' + re.escape(PREFIX) + re.escape(EOF_LABEL)
+
+    start_count = len(re.findall(start_count_pattern, llm_output, re.MULTILINE))
+    end_count = len(re.findall(end_count_pattern, llm_output, re.MULTILINE))
+
+    if start_count != end_count:
+        return False, [], f"Format Error: Marker mismatch detected ({start_count} starts, {end_count} ends). Please ask the AI to provide the full output again."
+
+    # Pattern constructed using fragments for self-processing safety.
     file_pattern = re.compile(
-        r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n?```\s*[\r\n]+--- End of file ---',
+        re.escape(PREFIX) + r'File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n?```\s*[\r\n]+' + re.escape(EOF_MARKER),
         re.DOTALL
     )
 
@@ -94,6 +110,11 @@ def write_base_reference_file(project_path, base_path, base_files):
     output_blocks = []
     output_blocks.append("# Base Project Reference\n\nThis file contains the code from the base project: `" + base_path + "`\n")
 
+    # Construct markers via fragments
+    PREFIX = "--- "
+    FILE_TAG = "File: "
+    EOF_TAG = "End of file"
+
     for file_info in base_files:
         rel_path = file_info['path']
         full_path = os.path.join(base_path, rel_path)
@@ -105,12 +126,17 @@ def write_base_reference_file(project_path, base_path, base_files):
                 content = f.read()
 
             language = get_language_from_path(rel_path)
+
+            # Use safe concatenation
+            header = f"{PREFIX}{FILE_TAG}`{rel_path}` ---"
+            footer = f"{PREFIX}{EOF_TAG} ---"
+
             block = [
-                "--- File: `" + rel_path + "` ---",
+                header,
                 "```" + language,
                 content,
                 "```",
-                "--- End of file ---"
+                footer
             ]
             output_blocks.append("\n".join(block))
         except Exception as e:

@@ -414,9 +414,10 @@ class ActionHandlers:
     def _handle_parsed_plan(self, plan, base_dir, dialog_to_close=None, force_toggle_feedback=False):
         status = plan.get('status')
         message = plan.get('message')
+        hint = plan.get('hint')
 
         if status == 'ERROR':
-            self.app.show_error_dialog("Parsing Error", message)
+            self.app.show_error_dialog("Parsing Error", message, hint=hint)
             return
 
         def do_execute():

@@ -54,6 +54,12 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
+    # Define markers using concatenation to prevent self-detection
+    PREFIX = "--- "
+    FILE_LABEL = "File: "
+    EOF_LABEL = "End of file"
+    EOF_MARKER = PREFIX + EOF_LABEL + " ---"
+
     def get_section(tag, text):
         match = re.search(rf'<{tag}>(.*?)</{tag}>', text, re.DOTALL | re.IGNORECASE)
         if match:
@@ -62,6 +68,17 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 return ""
             return content
         return ""
+
+    # Verify marker symmetry via anchored line-start counts
+    start_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(FILE_LABEL), markdown_text, re.MULTILINE))
+    end_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(EOF_LABEL), markdown_text, re.MULTILINE))
+
+    if start_count != end_count:
+        return {
+            'status': 'ERROR',
+            'message': f"Format Error: Marker mismatch detected.\nFound {start_count} start markers but {end_count} end markers.",
+            'hint': "Please ask the AI to correct its output format."
+        }
 
     answers_text = get_section("ANSWERS", markdown_text)
     intro_text = get_section("INTRO", markdown_text)
@@ -81,7 +98,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
     orphan_detect = re.sub(r'<(ANSWERS|INTRO|CHANGES|DELETE|VERIFICATION)>.*?</\1>', '', orphan_detect, flags=re.DOTALL | re.IGNORECASE)
 
     # 2. Strip all valid File blocks
-    orphan_detect = re.sub(r'--- File: `[^\n`]+` ---\s*[\r\n]+```[^\n]*[\r\n]+.*?\n```\s*[\r\n]+--- End of file ---', '', orphan_detect, flags=re.DOTALL)
+    file_block_strip_pattern = re.escape(PREFIX) + r'File: `[^\n`]+` ---\s*[\r\n]+```[^\n]*[\r\n]+.*?\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
+    orphan_detect = re.sub(file_block_strip_pattern, '', orphan_detect, flags=re.DOTALL)
 
     # 3. Cleanup whitespace: Collapse multiple newlines (3+) left behind by stripped blocks into just two
     unformatted_text = re.sub(r'\n\s*\n\s*\n+', '\n\n', orphan_detect).strip()
@@ -89,7 +107,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     # --- Pre-processing for common LLM formatting errors ---
 
     # Ensure there is a newline between the header and the code block
-    markdown_text_processed = re.sub(r'(--- File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
+    markdown_text_processed = re.sub(r'(' + re.escape(PREFIX) + r'File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
 
     lines = markdown_text_processed.split('\n')
     processed_lines = []
@@ -105,14 +123,11 @@ def parse_and_plan_changes(base_dir, markdown_text):
     markdown_text_processed = '\n'.join(processed_lines)
 
     # Ensure there is a newline between the closing backticks and the footer
-    markdown_text_processed = re.sub(r'```(--- End of file ---)', r'```\n\n\1', markdown_text_processed)
+    markdown_text_processed = re.sub(r'```(' + re.escape(EOF_MARKER) + r')', r'```\n\n\1', markdown_text_processed)
 
-    # Robust regex: handles \r\n, varying whitespace, and avoids being tripped up by content
-    file_blocks = re.findall(
-        r'--- File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+--- End of file ---',
-        markdown_text_processed,
-        re.DOTALL
-    )
+    # Robust regex using fragments
+    file_block_regex = re.escape(PREFIX) + r'File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
+    file_blocks = re.findall(file_block_regex, markdown_text_processed, re.DOTALL)
 
     if not file_blocks:
         # If NO file blocks are found, return the full original text as unformatted

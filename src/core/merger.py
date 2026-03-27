@@ -7,7 +7,7 @@ from .utils import get_token_count_for_text
 def get_language_from_path(path):
     """Maps file extensions to Markdown code block identifiers"""
     _, ext = os.path.splitext(path)
-    return c.LANGUAGE_MAP.get(ext.lower(), '') 
+    return c.LANGUAGE_MAP.get(ext.lower(), '')
 
 def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
     """
@@ -21,6 +21,12 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
     output_blocks = []
     skipped_files = []
+
+    # Use fragments to build markers to avoid triggering regex when CodeMerger bundles itself
+    PREFIX = "--- "
+    FILE_LABEL = "File: "
+    EOF_LABEL = "End of file"
+
     for path in final_ordered_list:
         full_path = os.path.join(base_dir, path)
         if not os.path.isfile(full_path):
@@ -30,7 +36,12 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
             content = code_file.read()
 
         language = get_language_from_path(path)
-        output_blocks.append(f"--- File: `{path}` ---\n\n```{language}\n{content}\n```\n\n--- End of file ---")
+
+        # Build block using concatenation
+        block_header = f"{PREFIX}{FILE_LABEL}`{path}` ---"
+        block_footer = f"{PREFIX}{EOF_LABEL} ---"
+
+        output_blocks.append(f"{block_header}\n\n```{language}\n{content}\n```\n\n{block_footer}")
 
     merged_code = '\n\n'.join(output_blocks)
 
