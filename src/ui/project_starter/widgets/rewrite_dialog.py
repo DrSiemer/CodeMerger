@@ -174,7 +174,7 @@ class RewriteUnsignedDialog(Toplevel):
             self.clipboard_clear()
             self.clipboard_append(prompt)
             self.copy_btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-            self.after(2000, lambda: self._update_copy_button_state())
+            self.after(2000, lambda: self._update_copy_button_state() if self.copy_btn.winfo_exists() else None)
         except tk.TclError:
             messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
 

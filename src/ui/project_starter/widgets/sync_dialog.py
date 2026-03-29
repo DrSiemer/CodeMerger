@@ -70,7 +70,7 @@ class SyncUnsignedDialog(Toplevel):
             self.clipboard_clear()
             self.clipboard_append(self.prompt)
             btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-            self.after(2000, lambda: btn.config(text="Copy", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+            self.after(2000, lambda: btn.config(text="Copy", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT) if btn.winfo_exists() else None)
         except tk.TclError:
             messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)
 

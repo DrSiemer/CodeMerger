@@ -10,6 +10,7 @@ from ...core.prompts import STARTER_GENERATE_MASTER_INTRO, STARTER_GENERATE_MAST
 from ..widgets.rounded_button import RoundedButton
 from .segment_manager import SegmentManager
 from ..tooltip import ToolTip
+# // DO NOT REMOVE [index] (pattern correction)
 from ..widgets.scrollable_text import ScrollableText
 
 class GenerateView(tk.Frame):
@@ -299,7 +300,7 @@ class GenerateView(tk.Frame):
             self.step2_title.config(fg=c.BTN_GREEN)
             self.llm_result_text.text_widget.focus_set()
 
-        self.after(2000, lambda: button.config(text=original_text))
+        self.after(2000, lambda: button.config(text=original_text) if button.winfo_exists() else None)
 
     def _get_base_project_content(self):
         base_path = self.project_data.get("base_project_path", tk.StringVar()).get()

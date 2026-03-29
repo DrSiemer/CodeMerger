@@ -197,7 +197,7 @@ class StackView(tk.Frame):
     def _copy_to_clipboard(self, button, text):
         pyperclip.copy(text)
         button.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-        self.after(2000, lambda: button.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+        self.after(2000, lambda: button.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT) if button.winfo_exists() else None)
 
     def handle_llm_response(self):
         raw_content = self.llm_response_text.get("1.0", "end-1c").strip()

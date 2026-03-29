@@ -105,7 +105,7 @@ class TodoView(tk.Frame):
     def _copy_prompt(self, text):
         pyperclip.copy(text)
         self.copy_btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-        self.after(2000, lambda: self.copy_btn.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+        self.after(2000, lambda: self.copy_btn.config(text="Copy Prompt", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT) if self.copy_btn.winfo_exists() else None)
 
     def handle_llm_response(self):
         raw = self.llm_response_text.get("1.0", "end-1c").strip()

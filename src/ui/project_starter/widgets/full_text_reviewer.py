@@ -200,6 +200,6 @@ class FullTextReviewer(tk.Frame):
 
             pyperclip.copy(prompt)
             btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-            self.after(2000, lambda: btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+            self.after(2000, lambda: btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT) if btn.winfo_exists() else None)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to copy prompt: {e}", parent=self)

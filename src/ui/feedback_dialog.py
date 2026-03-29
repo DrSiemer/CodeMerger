@@ -334,7 +334,7 @@ class FeedbackDialog(tk.Toplevel):
         msg = "Please follow the output format as described in your instructions, the tool cannot use this incorrectly formatted text."
         pyperclip.copy(msg)
         self.admonish_btn.config(text="Copied!", bg=c.BTN_GREEN)
-        self.after(2000, lambda: self.admonish_btn.config(text="Copy Correction Prompt", bg=c.ATTENTION))
+        self.after(2000, lambda: self.admonish_btn.config(text="Copy Correction Prompt", bg=c.ATTENTION) if self.admonish_btn.winfo_exists() else None)
 
     def _adjust_font_size(self, delta):
         if not self.renderers:

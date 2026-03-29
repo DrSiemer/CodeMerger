@@ -85,6 +85,6 @@ class ReviewerQuestions(Frame):
             self.clipboard_clear()
             self.clipboard_append(prompt)
             self.copy_btn.config(text="Copied!", bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
-            self.after(2000, lambda: self.copy_btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT))
+            self.after(2000, lambda: self.copy_btn.config(text="Copy Context & Question", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT) if self.copy_btn.winfo_exists() else None)
         except tk.TclError:
             messagebox.showerror("Clipboard Error", "Failed to copy to clipboard.", parent=self)

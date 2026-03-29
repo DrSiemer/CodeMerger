@@ -183,8 +183,12 @@ class SegmentedReviewer(Frame):
         if is_signed:
             self._toggle_view(force_render=True)
             self.view_btn.pack_forget()
+            self.rewrite_btn.pack_forget()
             self.editor.text_widget.config(state="disabled", bg=c.DARK_BG)
         else:
+            # Re-pack in specific order to maintain visual layout
+            self.q_btn.pack(side="left")
+            self.rewrite_btn.pack(side="left", padx=(10, 0))
             self.view_btn.pack(side="left", padx=(10, 0))
             self.editor.text_widget.config(state="normal", bg=c.TEXT_INPUT_BG)
 
