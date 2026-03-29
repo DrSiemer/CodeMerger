@@ -121,8 +121,8 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     tree_actions_frame.columnconfigure(0, weight=1)
     tree_actions_frame.columnconfigure(1, weight=2)
 
-    window.tree_action_button = RoundedButton(tree_actions_frame, text="Add to List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=180, cursor='hand2')
-    window.tree_action_button.grid(row=0, column=0, sticky='ew')
+    window.tree_action_button = RoundedButton(tree_actions_frame, text="Add to List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=80, cursor='hand2')
+    window.tree_action_button.grid(row=0, column=0, sticky='w')
     window.tree_action_button.set_state('disabled')
 
     filter_container = Frame(tree_actions_frame, bg=c.DARK_BG)
