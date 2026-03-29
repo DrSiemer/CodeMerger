@@ -121,7 +121,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     tree_actions_frame.columnconfigure(0, weight=1)
     tree_actions_frame.columnconfigure(1, weight=2)
 
-    window.tree_action_button = RoundedButton(tree_actions_frame, text="Add to Merge List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=180, cursor='hand2')
+    window.tree_action_button = RoundedButton(tree_actions_frame, text="Add to List", command=None, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_FILE_MANAGER_BUTTON, h_padding=180, cursor='hand2')
     window.tree_action_button.grid(row=0, column=0, sticky='ew')
     window.tree_action_button.set_state('disabled')
 
@@ -213,7 +213,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     # Removal button reverted to original text
     window.remove_button = RoundedButton(move_buttons_frame, text="Remove", command=None, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, height=btn_height, hollow=True, cursor='hand2')
     window.remove_button.grid(row=0, column=2, sticky='ew', padx=2)
-    ToolTip(window.remove_button, "Remove Selected from Merge List")
+    ToolTip(window.remove_button, "Remove Selected from List")
 
     window.move_down_button = RoundedButton(move_buttons_frame, text="↓", command=None, bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_FILE_MANAGER_BUTTON, width=40, height=btn_height, hollow=True, muted_border=True, cursor='hand2')
     window.move_down_button.grid(row=0, column=3, sticky='ew', padx=(2, 2))
@@ -235,7 +235,7 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     window.remove_all_btn.pack(side='left')
 
     if include_save_button:
-        window.save_close_btn = RoundedButton(right_bottom_row, text="Save & Close", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
+        window.save_close_btn = RoundedButton(right_bottom_row, text="Update Project", command=window.state_controller.save_and_close, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, width=240, cursor='hand2')
         window.save_close_btn.pack(side='right')
 
     # Info Toggle: Managed by InfoManager.place

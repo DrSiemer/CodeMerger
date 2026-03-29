@@ -363,7 +363,7 @@ class ActionHandlers:
                     project_config.selected_files.append(new_entry)
 
             project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
-            app.status_var.set(f"Added {len(files_to_add)} new file(s) to merge order.")
+            app.status_var.set(f"Added {len(files_to_add)} new file(s) to merge list.")
         else:
             app.status_var.set("New files already acknowledged.")
 

@@ -5,7 +5,7 @@ from ...core.utils import is_ignored
 
 class FileTreeHandler:
     """
-    Manages the file tree view in the FileManagerWindow, including population,
+    Manages the file tree view in the List Editor, including population,
     event handling, and visual state.
     """
     def __init__(self, parent, tree_widget, action_button, item_map, path_to_item_id, is_selected_callback, on_toggle_callback):
@@ -132,7 +132,7 @@ class FileTreeHandler:
         """Updates the state and text of the button under the treeview based on multi-selection."""
         selection = self.tree.selection()
         if not selection:
-            self.action_button.config(state='disabled', text="Add to Merge List")
+            self.action_button.config(state='disabled', text="Add to List")
             return
 
         selected_files = [
@@ -141,7 +141,7 @@ class FileTreeHandler:
         ]
 
         if not selected_files:
-            self.action_button.config(state='disabled', text="Add to Merge List")
+            self.action_button.config(state='disabled', text="Add to List")
             return
 
         self.action_button.config(state='normal')
@@ -150,11 +150,11 @@ class FileTreeHandler:
         selection_states = [self.is_selected(path) for path in paths]
 
         if all(selection_states):
-            self.action_button.config(text="Remove from Merge List")
+            self.action_button.config(text="Remove from List")
         elif not any(selection_states):
-            self.action_button.config(text="Add to Merge List")
+            self.action_button.config(text="Add to List")
         else:
-            self.action_button.config(text="Toggle Selection")
+            self.action_button.config(text="Toggle List Status")
 
     def handle_tree_click(self, event):
         """Standard click handler to manage focus and manual click tracking."""

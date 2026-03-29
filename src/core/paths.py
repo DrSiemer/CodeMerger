@@ -54,6 +54,7 @@ NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
 NEW_FILES_MANY_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles_many.png')
 
 FOLDER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder.png')
+FOLDER_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder_active.png')
 
 FOLDER_REVEAL_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'folder_small.png')
 

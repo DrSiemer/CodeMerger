@@ -39,7 +39,7 @@ class FileManagerWindow(Toplevel):
         self.sash_pos_normal = None
         self.window_geometries = {}
 
-        self.title(f"Manage files for: {self.project_config.project_name}")
+        self.title(f"Edit merge list for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
 
         # --- Dynamic Geometry for Boot ---
@@ -106,7 +106,7 @@ class FileManagerWindow(Toplevel):
             self.ui_controller.expand_and_scroll_to_new_files()
 
     def _register_hover_help(self):
-        """Attaches detailed help messages to File Manager widgets."""
+        """Attaches detailed help messages to the List Editor widgets."""
         mgr = self.info_mgr
         mgr.register(self.tree, "fm_tree")
         mgr.register(self.merge_order_list, "fm_list")

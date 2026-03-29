@@ -30,7 +30,7 @@ class StepBaseFilesView(tk.Frame):
 
     def register_info(self, info_mgr):
         """
-        Maps the embedded File Manager widgets to their documentation keys.
+        Maps the embedded List Editor widgets to their documentation keys.
         """
         if not hasattr(self, 'tree') or not info_mgr:
             return
@@ -88,7 +88,7 @@ class StepBaseFilesView(tk.Frame):
             self._init_file_manager_ui()
 
     def _init_file_manager_ui(self):
-        """Initializes the full file manager UI for a valid directory."""
+        """Initializes the full list editor UI for a valid directory."""
         # Clean up any existing widgets (e.g., error UI)
         for widget in self.winfo_children():
             widget.destroy()
@@ -123,7 +123,7 @@ class StepBaseFilesView(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)  # Header
         self.grid_rowconfigure(1, weight=0)  # Description
-        self.grid_rowconfigure(2, weight=1)  # Main FM
+        self.grid_rowconfigure(2, weight=1)  # Main Editor
         self.grid_rowconfigure(3, weight=0)  # Status bar
 
         header_frame = tk.Frame(self, bg=c.DARK_BG)
@@ -138,7 +138,7 @@ class StepBaseFilesView(tk.Frame):
 
         tk.Label(self, text="Choose files from the existing project to use as a reference. These will be included in the context for the LLM.", wraplength=680, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, justify="left").grid(row=1, column=0, sticky='w', padx=10)
 
-        # Main File Manager Area - The container for the file manager UI
+        # Main Area - The container for the list editor UI
         self.fm_frame = tk.Frame(self, bg=c.DARK_BG)
         self.fm_frame.grid(row=2, column=0, sticky='nsew')
 
@@ -150,7 +150,7 @@ class StepBaseFilesView(tk.Frame):
         self.state_controller = FileManagerStateController(self)
         self.order_request_handler = OrderRequestHandler(self)
 
-        # Setup File Manager UI with zero-padding overrides to prevent gaps
+        # Setup Editor UI with zero-padding overrides to prevent gaps
         setup_file_manager_ui(
             self,
             container=self.fm_frame,

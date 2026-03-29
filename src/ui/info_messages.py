@@ -24,7 +24,7 @@ INFO_MESSAGES = {
         "path. Alt-click to open a Command Prompt (CMD) window directly in this directory."
     ),
     "manage_files": (
-        "File Manager: Open the dual-panel management window. This is where you decide exactly "
+        "Edit Merge List: Open the dual-panel management window. This is where you decide exactly "
         "which files are relevant to your current task and in what order the AI should read them."
     ),
     "instructions": (
@@ -87,7 +87,7 @@ INFO_MESSAGES = {
         "files in your merge list that would normally be ignored by the Git or extension filters."
     ),
     "fm_tree_action": (
-        "Merge Toggle: Adds or removes the currently selected files from the Merge Order list. "
+        "Merge Toggle: Adds or removes the currently selected files from the list."
     ),
     "fm_list": (
         "Merge Order: This list determines in what order the code will be presented to the AI. "
@@ -143,7 +143,7 @@ INFO_MESSAGES = {
         "AI Response Review: Automatically open the response review window when wrapped sections are found."
     ),
     "set_app_compact": (
-        "Compact Mode: Automatically switches to the floating Compact window when you minimize the "
+        "Compact Mode: Automatically switches to the compact window when you minimize the "
         "main window. Useful for keeping CodeMerger easily accessible while working in your IDE."
     ),
     "set_app_updates": (
@@ -154,13 +154,13 @@ INFO_MESSAGES = {
         "is available on GitHub, bypassing the automatic daily timer."
     ),
 
-    "set_fm": "Settings that determine the behavior of the File Manager.",
+    "set_fm": "Settings that determine the behavior of the merge list editor.",
     "set_fm_tokens": (
         "Token Counting: Calculates context usage based on the gpt-4 tokenizer. "
         "Disable this if you want to speed up file indexing in extremely large projects."
     ),
     "set_fm_limit": (
-        "Context Limit: Set a target token count (e.g. 200000 for ChatGPT). The token count in the File Manager will "
+        "Context Limit: Set a target token count (e.g. 200000 for ChatGPT). The token count in the merge list editor will "
         "turn red if you exceed this."
     ),
     "set_fm_threshold": (
@@ -188,7 +188,7 @@ INFO_MESSAGES = {
     "set_editor": "Overrule the default code editor to use when double-clicking files. Leave blank to use system defaults.",
     "set_editor_path": (
         "Editor Path: Provide the path to your code editor's executable (e.g., sublime_text.exe). "
-        "When set, double-clicking files in the manager opens them directly in this application."
+        "When set, double-clicking files in the editor opens them directly in this application."
     ),
 
     # --- Instructions Window ---

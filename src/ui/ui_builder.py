@@ -88,6 +88,8 @@ def setup_ui(app):
     # Open folder icon
     app.folder_icon_label = Label(right_frame, image=assets.folder_icon, bg=c.TOP_BAR_BG, cursor="hand2")
     app.folder_icon_label.bind("<ButtonRelease-1>", app.action_handlers.open_project_folder)
+    app.folder_icon_label.bind("<Enter>", lambda e: app.folder_icon_label.config(image=assets.folder_active_icon), add='+')
+    app.folder_icon_label.bind("<Leave>", lambda e: app.folder_icon_label.config(image=assets.folder_icon), add='+')
     ToolTip(app.folder_icon_label, "Open project folder\nCtrl+Click: Copy path\nAlt+Click: Open console", delay=500)
 
     # --- Top-Level Buttons (Row 1) ---
@@ -97,10 +99,10 @@ def setup_ui(app):
     app.top_buttons_container.columnconfigure(1, weight=1) # Make the central column expandable
     app.top_buttons_container.rowconfigure(0, weight=1) # Center all content vertically
 
-    # Column 0: Manage Files Button
-    app.manage_files_button = RoundedButton(app.top_buttons_container, text="Manage Files", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.manage_files, cursor='hand2')
+    # Column 0: Edit Merge List Button
+    app.manage_files_button = RoundedButton(app.top_buttons_container, text="Edit Merge List", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.manage_files, cursor='hand2')
     app.manage_files_button.grid(row=0, column=0, sticky='w')
-    app.manage_files_tooltip = ToolTip(app.manage_files_button, text="Manage project files")
+    app.manage_files_tooltip = ToolTip(app.manage_files_button, text="Edit project merge list")
 
     # Column 1: Middle Container (Profiles)
     app.middle_container = Frame(app.top_buttons_container, bg=c.DARK_BG)

@@ -23,7 +23,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 
 - **Project-Based Settings**: Saves all your file selections, merge order, and window state in a local `.allcode` file for each project
 - **`.gitignore` Aware**: The file browser automatically hides files and folders listed in your `.gitignore` file
-- **New File Detection**: Automatically scans your project for new files that match your filetype settings and alerts you with a visual indicator. New files are highlighted in the file manager for easy review
+- **New File Detection**: Automatically scans your project for new files that match your filetype settings and alerts you with a visual indicator. New files are highlighted in the list editor for easy review
 - **Token Counting**: Calculates the total token count of your selected files to help you stay within an LLM's context limit
 - **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Code Only" button. You can also set application-wide default intro and outro texts for the instructions feature
 - **Customizable Instructions**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
@@ -40,10 +40,10 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 
 - **Select a project**
     - Click "Select project" to browse for a folder or choose one from your recent projects list
-- **Manage Files**
-    - A warning icon will appear in the top bar if new files are detected in your project. Click this or the "Manage Files" button to open the file manager
-        - **Ctrl-clicking** the new files icon will immediately add all new files to the current merge list without opening the file manager.
-    - In the "Manage Files" window, a tree of available files is shown on the left
+- **Edit Merge List**
+    - A warning icon will appear in the top bar if new files are detected in your project. Click this or the "Edit Merge List" button to open the list editor
+        - **Ctrl-clicking** the new files icon will immediately add all new files to the current merge list without opening the list editor.
+    - In the "Edit Merge List" window, a tree of available files is shown on the left
         - Newly detected files are highlighted in green for easy identification
         - Files listed in `.gitignore` are automatically hidden
         - Double-click a file or select it and click the button to add/remove it from the merge list
@@ -73,7 +73,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
         - **Paste**: Applies changes from your clipboard. A normal click follows your "AI Response Review" settings. **Ctrl-click** toggles that behavior, and **Alt-click** opens the manual paste window.
     - The panel is colored with your project's assigned color.
     - A warning icon will appear in the move bar if new files are found.
-        - **Click** the icon to restore the main window and open the file manager.
+        - **Click** the icon to restore the main window and open the list editor.
         - **Ctrl-click** the icon to immediately add all new files to the merge list.
     - Double-click the move bar or click the close button to exit compact mode and restore the main window. **Ctrl-clicking** the close button will exit the application immediately.
 
@@ -90,7 +90,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 - **Prompts**:
     - **"Copy Code Only" Prompt**: Set the default text that is automatically prepended when you click "Copy Code Only"
     - **Default Intro/Outro Prompts**: Define reusable, application-wide default texts for the instructions feature. These can be quickly loaded into any project's specific instructions
-- **Default Editor**: Select your preferred editor for opening files from the file manager (leaving it blank uses the system default)
+- **Default Editor**: Select your preferred editor for opening files from the list editor (leaving it blank uses the system default)
 - To manage indexed filetypes, click "Manage Filetypes" from the main window
 
 

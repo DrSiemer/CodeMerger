@@ -35,7 +35,7 @@ class FileManagerStateController:
         current_paths = {f['path'] for f in project.selected_files}
         project.known_files = list(set(project.known_files) | current_paths)
         project.save()
-        self.window.status_var.set("File selection and order saved to .allcode")
+        self.window.status_var.set("Merge list and order saved to .allcode")
         self.window._close_and_save_geometry()
 
     def select_all_files(self):
@@ -58,7 +58,7 @@ class FileManagerStateController:
                 return
 
         self.window.selection_handler.add_files(paths_to_add)
-        self.window.status_var.set(f"Added {len(paths_to_add)} file(s) to the merge list")
+        self.window.status_var.set(f"Added {len(paths_to_add)} file(s) to the list")
 
     def remove_all_files(self):
         if not self.window.selection_handler.ordered_selection:
@@ -67,4 +67,4 @@ class FileManagerStateController:
         if messagebox.askyesno("Confirm Removal", "Remove all files from the merge list?", parent=self.window):
             count = len(self.window.selection_handler.ordered_selection)
             self.window.selection_handler.remove_all_files()
-            self.window.status_var.set(f"Removed {count} file(s) from the merge list")
+            self.window.status_var.set(f"Removed {count} file(s) from the list")
