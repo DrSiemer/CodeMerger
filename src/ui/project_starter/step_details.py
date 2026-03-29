@@ -58,7 +58,7 @@ class DetailsView(tk.Frame):
         tips_frame.pack(side="bottom", fill="x", anchor="w", pady=(40, 0))
 
         tk.Label(tips_frame, text="💡 LLM Best Practices", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.NOTE).pack(anchor="w", pady=(0, 2))
-        tk.Label(tips_frame, text="- Always start a new conversation when pasting prompts from CodeMerger.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
+        tk.Label(tips_frame, text="- Always start a new conversation with the LLM when pasting a prompt from CodeMerger.", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(anchor="w")
 
     def register_info(self, info_mgr):
         """Registers step-specific widgets for Info Mode."""
