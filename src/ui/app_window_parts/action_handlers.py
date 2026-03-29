@@ -487,7 +487,25 @@ class ActionHandlers:
         """
         Opens the AI Response Review window.
         Uses either the provided plan (from a fresh paste) or the cached last response.
+        Overwrites any currently open review window to allow sequential pasting.
         """
+        # Check if an existing review window is open with pending (unapplied) changes
+        existing = getattr(self.app, 'active_feedback_dialog', None)
+        if existing and existing.winfo_exists():
+            # on_apply is cleared after changes are written, so if it's set, code is unapplied
+            if existing.on_apply is not None:
+                # Determine appropriate parent for the confirmation dialog
+                dialog_parent = self.app
+                if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+                    dialog_parent = self.app.view_manager.compact_mode_window
+
+                msg = "An AI response review is already open with changes that haven't been applied yet.\n\nAre you sure you want to overwrite it?"
+                if not messagebox.askyesno("Confirm Overwrite", msg, parent=dialog_parent):
+                    return # User chose to keep the current review
+
+            # Destroy the old dialog to make room for the new one
+            existing.destroy()
+
         is_pending = True
         if plan is None:
             plan = getattr(self.app, 'last_ai_response', None)
@@ -503,4 +521,4 @@ class ActionHandlers:
         if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
             dialog_parent = self.app.view_manager.compact_mode_window
 
-        FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse, force_verification=force_verification)
+        self.app.active_feedback_dialog = FeedbackDialog(dialog_parent, plan, on_apply=on_apply, on_refuse=on_refuse, force_verification=force_verification)

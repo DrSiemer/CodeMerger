@@ -21,6 +21,12 @@ class FeedbackDialog(tk.Toplevel):
         self.plan = plan
         self.on_apply = on_apply
         self.on_refuse = on_refuse
+
+        # Identify the root App instance for global action handling
+        self.app = parent
+        while self.app and not hasattr(self.app, 'action_handlers'):
+            self.app = getattr(self.app, 'parent', getattr(self.app, 'master', None))
+
         self.app_state = getattr(parent, 'app_state', getattr(parent.master, 'app_state', None))
         self.withdraw()
         self.title("AI Response Review")
@@ -31,18 +37,19 @@ class FeedbackDialog(tk.Toplevel):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # --- Topmost Decoupling ---
+        # --- Modality & Layering Logic ---
         is_parent_topmost = False
         try:
             is_parent_topmost = self.parent.attributes("-topmost")
         except Exception:
             pass
 
-        if not is_parent_topmost:
+        if is_parent_topmost:
+            # If spawned from Compact Mode, stay in front of IDE but don't lock the app
+            self.attributes("-topmost", True)
+        else:
+            # If spawned from main window, behave as a standard dependent window
             self.transient(parent)
-
-        self.attributes("-topmost", False)
-        self.grab_set()
 
         apply_dark_theme(self)
 
@@ -52,23 +59,38 @@ class FeedbackDialog(tk.Toplevel):
         self._blue_accent = self._create_vertical_accent(c.BTN_BLUE)          # Changes
         self._red_accent = self._create_vertical_accent(c.WARN)               # Delete
         self._green_accent = self._create_vertical_accent(c.BTN_GREEN)        # Verification
-        self._yellow_accent = self._create_vertical_accent(c.ATTENTION)        # Unformatted
+        self._yellow_accent = self._create_vertical_accent(c.ATTENTION)       # Unformatted
 
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
         main_frame.grid(row=0, column=0, sticky="nsew")
 
-        # Main Layout Rows: 0=Title, 1=UnformattedAlert, 2=Notebook, 3=BottomActions
+        # Main Layout Rows: 0=Header, 1=UnformattedAlert, 2=Notebook, 3=BottomActions
         main_frame.grid_rowconfigure(2, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
+        header_row = Frame(main_frame, bg=c.DARK_BG)
+        header_row.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        header_row.columnconfigure(0, weight=1)
+
         title_text = "Review Proposed Update" if on_apply else "Review Last Update"
-        Label(main_frame, text=title_text, font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 10))
+        Label(
+            header_row,
+            text=title_text,
+            font=c.FONT_LARGE_BOLD,
+            bg=c.DARK_BG,
+            fg=c.TEXT_COLOR
+        ).grid(row=0, column=0, sticky="w")
+
+        # --- New Files Integration ---
+        self.new_files_btn = None
+        self._check_for_new_files(header_row)
 
         # --- Global Unformatted Alert Header ---
-        # Show ONLY if unformatted text exists AND no tags were detected at all.
         has_any_tags = plan.get('has_any_tags', False)
-        unformatted_text = plan.get('unformatted', "").strip()
-        has_unformatted = bool(unformatted_text)
+
+        ordered_segments = plan.get('ordered_segments', [])
+        orphan_segments = [s for s in ordered_segments if s['type'] == 'orphan']
+        has_unformatted = len(orphan_segments) > 0
 
         self.alert_frame = Frame(main_frame, bg=c.DARK_BG)
         if has_unformatted and not has_any_tags:
@@ -94,50 +116,69 @@ class FeedbackDialog(tk.Toplevel):
         self.tab_widgets_for_info = []
 
         self.tab_indices = {}
+
+        # --- Build Tabs Chronologically ---
         current_idx = 0
+        orphan_count = 0
+        total_orphans = len(orphan_segments)
 
-        # Tab order: Intro, Changes, Answers, Delete, Verification, Unformatted (Priority order)
+        for seg in ordered_segments:
+            stype = seg['type']
+            content = seg.get('content', "").strip()
 
-        if plan.get('intro'):
-            self._add_tab("Intro", plan.get('intro'), icon=self._gray_accent, info_key="review_tab_intro")
-            self.tab_indices['intro'] = current_idx
-            current_idx += 1
+            # Skip empty segments unless they are file placeholders (which mark relative positions)
+            if not content and stype != 'file_placeholder':
+                continue
 
-        if plan.get('changes'):
-            self._add_tab("Changes", plan.get('changes'), icon=self._blue_accent, info_key="review_tab_changes")
-            self.tab_indices['changes'] = current_idx
-            current_idx += 1
+            if stype == 'tag':
+                tag_name = seg['tag']
+                title = tag_name.replace("ANSWERS TO DIRECT USER QUESTIONS", "Answers").title()
 
-        if plan.get('answers'):
-            self._add_tab("Answers", plan.get('answers'), icon=self._cyan_accent, info_key="review_tab_answers")
-            self.tab_indices['answers'] = current_idx
-            current_idx += 1
+                # Defaults
+                icon = self._gray_accent
+                info_key = "review_tab_placeholder"
 
-        if plan.get('delete'):
-            self._add_tab("Delete", plan.get('delete'), icon=self._red_accent, info_key="review_tab_delete")
-            self.tab_indices['delete'] = current_idx
-            current_idx += 1
+                if "INTRO" in tag_name:
+                    info_key = "review_tab_intro"
+                elif "CHANGES" in tag_name:
+                    icon = self._blue_accent
+                    info_key = "review_tab_changes"
+                elif "ANSWERS" in tag_name:
+                    icon = self._cyan_accent
+                    info_key = "review_tab_answers"
+                elif "DELETED" in tag_name:
+                    icon = self._red_accent
+                    info_key = "review_tab_delete"
+                elif "VERIFICATION" in tag_name:
+                    icon = self._green_accent
+                    info_key = "review_tab_verification"
 
-        if plan.get('verification'):
-            self._add_tab("Verification", plan.get('verification'), icon=self._green_accent, info_key="review_tab_verification")
-            self.tab_indices['verification'] = current_idx
-            current_idx += 1
+                self._add_tab(title, content, icon=icon, info_key=info_key)
 
-        # Unformatted output is added last as it's the lowest priority
-        if has_unformatted:
-            self._add_unformatted_tab(unformatted_text)
-            self.tab_indices['unformatted'] = current_idx
-            current_idx += 1
+                # Store verification index for auto-navigation after apply
+                if "VERIFICATION" in tag_name:
+                    self.tab_indices['verification'] = current_idx
 
-        # --- Placeholder for "Code Only" responses ---
+                current_idx += 1
+
+            elif stype == 'orphan':
+                orphan_count += 1
+                title = "Unformatted output"
+
+                if total_orphans > 1:
+                    title = f"Unformatted ({orphan_count})"
+
+                self._add_unformatted_tab(title, content)
+                current_idx += 1
+
+        # --- Placeholder if empty ---
         if current_idx == 0:
             msg = "The AI response contained only code blocks with no accompanying text or tagged sections."
             self._add_tab("Response Summary", msg, icon=self._gray_accent, info_key="review_tab_placeholder")
-            self.tab_indices['placeholder'] = current_idx
             current_idx += 1
 
         if current_idx > 0:
-            # Decisions on which tab to start on
+            # Decide starting tab
             if force_verification and 'verification' in self.tab_indices:
                 self.notebook.select(self.tab_indices['verification'])
             else:
@@ -149,12 +190,19 @@ class FeedbackDialog(tk.Toplevel):
         # Checkbox
         show_val = self.app_state.config.get('show_feedback_on_paste', True) if self.app_state else True
         self.show_var = BooleanVar(value=show_val)
-        self.auto_show_chk = ttk.Checkbutton(self.bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
+        self.auto_show_chk = ttk.Checkbutton(
+            self.bottom_frame,
+            text="Show this window automatically on paste",
+            variable=self.show_var,
+            style='Dark.TCheckbutton',
+            command=self._save_setting
+        )
         self.auto_show_chk.pack(side="left")
 
         if self.on_apply:
-            # Only show Apply Changes if there are actually file modifications in the plan
+            # Determine if we have actual file content to commit
             has_changes = bool(plan.get('updates')) or bool(plan.get('creations'))
+
             if has_changes:
                 self.apply_btn = RoundedButton(
                     self.bottom_frame, text="Apply Changes", command=self._handle_apply,
@@ -166,13 +214,27 @@ class FeedbackDialog(tk.Toplevel):
             else:
                 cancel_text = "Close"
 
-            self.cancel_btn = RoundedButton(self.bottom_frame, text=cancel_text, command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
+            self.cancel_btn = RoundedButton(
+                self.bottom_frame, text=cancel_text, command=self._handle_cancel,
+                bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL,
+                width=100, height=30, cursor="hand2"
+            )
             self.cancel_btn.pack(side="right", padx=(0, 10))
         else:
-            self.ok_button = RoundedButton(self.bottom_frame, text="OK", command=self.destroy, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
+            self.ok_button = RoundedButton(
+                self.bottom_frame, text="OK", command=self.destroy,
+                bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL,
+                width=100, height=30, cursor="hand2"
+            )
             self.ok_button.pack(side="right")
 
+        # --- Bindings ---
         self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply else self._on_close_request())
+
+        # Shortcut passthrough allows overwriting via Ctrl+V while the review is active
+        self.bind("<Control-v>", lambda e: self.app.action_handlers.apply_changes_from_clipboard(force_toggle_feedback=False))
+        self.bind("<Control-Shift-V>", lambda e: self.app.action_handlers.apply_changes_from_clipboard(force_toggle_feedback=True))
+
         self.protocol("WM_DELETE_WINDOW", self._on_close_request if self.on_apply else self.destroy)
 
         initial_w, initial_h = 900, 750
@@ -211,7 +273,27 @@ class FeedbackDialog(tk.Toplevel):
             self.info_mgr = None
 
         self.deiconify()
-        self.wait_window(self)
+
+    def _check_for_new_files(self, container):
+        """Adds a 'New Files' warning icon if the active project has unacknowledged files."""
+        if not self.app:
+            return
+
+        new_count = len(self.app.file_monitor.newly_detected_files)
+        if new_count > 0:
+            icon = assets.new_files_icon
+            self.new_files_btn = Label(container, image=icon, bg=c.DARK_BG, cursor="hand2")
+            self.new_files_btn.grid(row=0, column=1, sticky="e")
+
+            def handle_add_files(event):
+                self.app.action_handlers.add_new_files_to_merge_order()
+                self.new_files_btn.grid_forget()
+                self.app.helpers.show_compact_toast(f"Added {new_count} new file(s) to merge list")
+
+            self.new_files_btn.bind("<ButtonRelease-1>", handle_add_files)
+
+            hint = f"{new_count} new files found.\nClick to add all to merge order immediately."
+            ToolTip(self.new_files_btn, hint)
 
     def _create_vertical_accent(self, hex_color):
         """Creates a sharpened vertical bar PhotoImage shifted down 1px."""
@@ -236,10 +318,10 @@ class FeedbackDialog(tk.Toplevel):
         if info_key:
             self.tab_widgets_for_info.append((renderer, info_key))
 
-    def _add_unformatted_tab(self, raw_text):
+    def _add_unformatted_tab(self, title, raw_text):
         """Adds a specialized tab for text that wasn't properly wrapped in tags."""
         frame = Frame(self.notebook, bg=c.DARK_BG)
-        self.notebook.add(frame, text="Unformatted output", image=self._yellow_accent, compound="left")
+        self.notebook.add(frame, text=title, image=self._yellow_accent, compound="left")
 
         renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=self._adjust_font_size)
         renderer.pack(fill="both", expand=True)
@@ -255,14 +337,16 @@ class FeedbackDialog(tk.Toplevel):
         self.after(2000, lambda: self.admonish_btn.config(text="Copy Correction Prompt", bg=c.ATTENTION))
 
     def _adjust_font_size(self, delta):
-        if not self.renderers: return
+        if not self.renderers:
+            return
         new_size = self.renderers[0].base_font_size + delta
         new_size = max(8, min(new_size, 40))
         for r in self.renderers:
             r.set_font_size(new_size)
 
     def _save_setting(self):
-        if not self.app_state: return
+        if not self.app_state:
+            return
         self.app_state.config['show_feedback_on_paste'] = self.show_var.get()
         save_config(self.app_state.config)
 
@@ -286,7 +370,8 @@ class FeedbackDialog(tk.Toplevel):
 
         if 'verification' in self.tab_indices:
             # Changes applied, so hide the decision buttons
-            if hasattr(self, 'apply_btn'): self.apply_btn.pack_forget()
+            if hasattr(self, 'apply_btn'):
+                self.apply_btn.pack_forget()
             self.cancel_btn.pack_forget()
 
             # Add a final Close/OK button to exit the window after verification is read
@@ -327,6 +412,8 @@ class FeedbackDialog(tk.Toplevel):
         self._handle_cancel()
 
     def destroy(self):
-        """Saves geometry before closing."""
+        """Clears active reference and saves geometry before closing."""
+        if hasattr(self.app, 'active_feedback_dialog'):
+            self.app.active_feedback_dialog = None
         save_window_geometry(self)
         super().destroy()

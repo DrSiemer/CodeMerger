@@ -60,16 +60,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
     EOF_LABEL = "End of file"
     EOF_MARKER = PREFIX + EOF_LABEL + " ---"
 
-    def get_section(tag, text):
-        match = re.search(rf'<{tag}>(.*?)</{tag}>', text, re.DOTALL | re.IGNORECASE)
-        if match:
-            content = match.group(1).strip()
-            content_lower = content.lower().strip('.')
-            if content == "-" or content_lower in ["none", "n/a", "no files to delete", "no changes", "no conceptual questions were asked in the prompt", "no conceptual questions were asked", "no direct questions were asked", "no questions"]:
-                return ""
-            return content
-        return ""
-
     # Verify marker symmetry via anchored line-start counts
     start_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(FILE_LABEL), markdown_text, re.MULTILINE))
     end_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(EOF_LABEL), markdown_text, re.MULTILINE))
@@ -81,40 +71,13 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'hint': "Please ask the AI to correct its output format."
         }
 
-    answers_text = get_section("ANSWERS TO DIRECT USER QUESTIONS", markdown_text)
-    intro_text = get_section("INTRO", markdown_text)
-    changes_text = get_section("CHANGES", markdown_text)
-    delete_text = get_section("DELETED FILES", markdown_text)
-    verification_text = get_section("VERIFICATION", markdown_text)
-
-    # Flag to determine if the AI followed formatting for commentary at all
-    has_any_tags = any([answers_text, intro_text, changes_text, delete_text, verification_text])
-
-    # --- Orphan / Unformatted Text Detection ---
-    # We define unformatted text as anything that is NOT inside a valid tag
-    # and NOT inside a valid File block.
-    orphan_detect = markdown_text
-
-    # 1. Strip all valid tagged blocks
-    orphan_detect = re.sub(r'<(ANSWERS TO DIRECT USER QUESTIONS|INTRO|CHANGES|DELETED FILES|VERIFICATION)>.*?</\1>', '', orphan_detect, flags=re.DOTALL | re.IGNORECASE)
-
-    # 2. Strip all valid File blocks
-    file_block_strip_pattern = re.escape(PREFIX) + r'File: `[^\n`]+` ---\s*[\r\n]+```[^\n]*[\r\n]+.*?\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
-    orphan_detect = re.sub(file_block_strip_pattern, '', orphan_detect, flags=re.DOTALL)
-
-    # 3. Cleanup whitespace: Collapse multiple newlines (3+) left behind by stripped blocks into just two
-    unformatted_text = re.sub(r'\n\s*\n\s*\n+', '\n\n', orphan_detect).strip()
-
-    # --- Pre-processing for common LLM formatting errors ---
-
-    # Ensure there is a newline between the header and the code block
-    markdown_text_processed = re.sub(r'(' + re.escape(PREFIX) + r'File: `.+?` ---\s*)\`\`\`', r'\1\n```', markdown_text)
+    # Pre-processing for common LLM formatting errors
+    markdown_text_processed = re.sub(r'(' + re.escape(PREFIX) + r'File: [^`\n]+ ---\s*)\`\`\`', r'\1\n```', markdown_text)
 
     lines = markdown_text_processed.split('\n')
     processed_lines = []
     for line in lines:
         stripped_line = line.strip()
-        # Find ``` that is not at the start of the line and has content before it.
         if stripped_line.endswith('```') and stripped_line != '```':
             pos = line.rfind('```')
             processed_lines.append(line[:pos])
@@ -123,71 +86,141 @@ def parse_and_plan_changes(base_dir, markdown_text):
             processed_lines.append(line)
     markdown_text_processed = '\n'.join(processed_lines)
 
-    # Ensure there is a newline between the closing backticks and the footer
     markdown_text_processed = re.sub(r'```(' + re.escape(EOF_MARKER) + r')', r'```\n\n\1', markdown_text_processed)
 
-    # Robust regex using fragments
-    file_block_regex = re.escape(PREFIX) + r'File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
-    file_blocks = re.findall(file_block_regex, markdown_text_processed, re.DOTALL)
+    # Identify all blocks chronologically
+    all_blocks = []
 
-    if not file_blocks and not has_any_tags:
-        # If NO file blocks AND NO tags are found, return the full original text as unformatted
-        return {
-            'status': 'UNFORMATTED',
-            'message': "No valid file blocks or tags were found.",
-            'unformatted': markdown_text.strip(),
-            'answers': answers_text,
-            'intro': intro_text,
-            'changes': changes_text,
-            'delete': delete_text,
-            'verification': verification_text,
-            'has_any_tags': has_any_tags
-        }
+    # Identify tagged sections
+    tags = ["ANSWERS TO DIRECT USER QUESTIONS", "INTRO", "CHANGES", "DELETED FILES", "VERIFICATION"]
+    for tag in tags:
+        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.DOTALL | re.IGNORECASE)
+        for match in pattern.finditer(markdown_text_processed):
+            content = match.group(1).strip()
+            content_lower = content.lower().strip('.')
 
+            # Filter out generic AI placeholder phrases
+            filler_phrases = [
+                "none", "n/a", "no files to delete", "no changes",
+                "no conceptual questions were asked in the prompt",
+                "no conceptual questions were asked",
+                "no direct questions were asked", "no questions"
+            ]
+
+            if content == "-" or content_lower in filler_phrases:
+                content = ""
+
+            all_blocks.append({
+                'type': 'tag',
+                'tag': tag,
+                'span': match.span(),
+                'content': content
+            })
+
+    # Identify file blocks
+    # Supports paths wrapped in backticks or single quotes to handle AI typos
+    file_block_regex = re.escape(PREFIX) + r'File: [`\']([^\n`\']+)[\'`] ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
+    for match in re.finditer(file_block_regex, markdown_text_processed, re.DOTALL):
+        all_blocks.append({
+            'type': 'file',
+            'path': match.group(1).strip().replace('\\', '/'),
+            'span': match.span(),
+            'content': match.group(2)
+        })
+
+    # Sort blocks by starting position to identify chronological order
+    all_blocks.sort(key=lambda x: x['span'][0])
+
+    # Map orphans (unformatted gaps between valid blocks)
+    ordered_segments = []
+    last_end = 0
+
+    for block in all_blocks:
+        # Check for gap before this block
+        gap_text = markdown_text_processed[last_end:block['span'][0]].strip()
+        if gap_text:
+            ordered_segments.append({
+                'type': 'orphan',
+                'content': gap_text
+            })
+
+        # Add metadata for the block itself
+        if block['type'] == 'tag':
+            ordered_segments.append({
+                'type': 'tag',
+                'tag': block['tag'],
+                'content': block['content']
+            })
+        else:
+            # Files are handled by the execution plan but recorded here for tab ordering
+            ordered_segments.append({'type': 'file_placeholder'})
+
+        last_end = block['span'][1]
+
+    # Check for trailing orphan commentary
+    final_gap = markdown_text_processed[last_end:].strip()
+    if final_gap:
+        ordered_segments.append({
+            'type': 'orphan',
+            'content': final_gap
+        })
+
+    # Validation and planning for file changes
     files_to_update = {}
     files_to_create = {}
-
     invalid_chars_pattern = r'[<>:"|?*]'
 
-    for relative_path, content in file_blocks:
-        # Normalize path separators
-        relative_path = relative_path.strip().replace('\\', '/')
-        full_path = os.path.normpath(os.path.join(base_dir, relative_path))
+    file_blocks = [b for b in all_blocks if b['type'] == 'file']
+    for b in file_blocks:
+        rel_path = b['path']
+        content = b['content']
+        full_path = os.path.normpath(os.path.join(base_dir, rel_path))
 
-        # Validation for illegal characters in the path
-        if re.search(invalid_chars_pattern, relative_path):
-            return {'status': 'ERROR', 'message': f"Error: The file path '{relative_path}' contains invalid characters."}
+        if re.search(invalid_chars_pattern, rel_path):
+            return {
+                'status': 'ERROR',
+                'message': f"Error: The file path '{rel_path}' contains invalid characters."
+            }
 
-        # Validation for path component length
-        path_components = relative_path.split('/')
-        for component in path_components:
-            if len(component) > 260:
-                return {'status': 'ERROR', 'message': f"Error: A filename or directory in the path '{relative_path}' exceeds the 260-character limit."}
-
-        # Security check: ensure the path is within the project directory
         if not full_path.startswith(os.path.normpath(base_dir)):
-            return {'status': 'ERROR', 'message': f"Error: Path '{relative_path}' attempts to access a location outside the project directory."}
+            return {
+                'status': 'ERROR',
+                'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."
+            }
 
         if os.path.isfile(full_path):
-            files_to_update[relative_path] = content
+            files_to_update[rel_path] = content
         elif os.path.isdir(full_path):
-            return {'status': 'ERROR', 'message': f"Error: The path '{relative_path}' points to a directory, not a file."}
+            return {
+                'status': 'ERROR',
+                'message': f"Error: The path '{rel_path}' points to a directory, not a file."
+            }
         else:
-            files_to_create[relative_path] = content
+            files_to_create[rel_path] = content
+
+    # Helper to extract flat tag content for compatibility
+    def get_tag_content(tag_name):
+        for s in ordered_segments:
+            if s.get('tag') == tag_name:
+                return s['content']
+        return ""
 
     result = {
         'updates': files_to_update,
         'creations': files_to_create,
-        'answers': answers_text,
-        'intro': intro_text,
-        'changes': changes_text,
-        'delete': delete_text,
-        'verification': verification_text,
-        'unformatted': unformatted_text,
-        'has_any_tags': has_any_tags
+        'answers': get_tag_content("ANSWERS TO DIRECT USER QUESTIONS"),
+        'intro': get_tag_content("INTRO"),
+        'changes': get_tag_content("CHANGES"),
+        'delete': get_tag_content("DELETED FILES"),
+        'verification': get_tag_content("VERIFICATION"),
+        'ordered_segments': ordered_segments,
+        'has_any_tags': any(b['type'] == 'tag' for b in all_blocks)
     }
 
-    if files_to_create:
+    if not all_blocks:
+        result['status'] = 'UNFORMATTED'
+        result['unformatted'] = markdown_text.strip()
+    elif files_to_create:
         result['status'] = 'CONFIRM_CREATION'
     else:
         result['status'] = 'SUCCESS'
