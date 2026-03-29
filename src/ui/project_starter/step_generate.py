@@ -19,48 +19,27 @@ class GenerateView(tk.Frame):
         self.project_data = project_data
         self.starter_controller = starter_controller
         self._trace_ids = [] # Track traces for cleanup
+        self.step3_interacted = False
 
         self.master_prompt_content = self._generate_master_prompt(project_data)
 
         self.grid_columnconfigure(0, weight=1)
 
         # Response area is the primary expanding element
-        self.grid_rowconfigure(7, weight=1)
+        self.grid_rowconfigure(2, weight=1)
 
         # 0. Header
         tk.Label(self, text="Finalize and Generate", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, pady=(0, 10), sticky="w")
 
-        # 1. Destination Folder Section
-        dest_label_frame = tk.Frame(self, bg=c.DARK_BG)
-        dest_label_frame.grid(row=1, column=0, sticky="ew", pady=(0, 5))
-        self.dest_label = tk.Label(dest_label_frame, text="1. Select Parent Folder for the project", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
-        self.dest_label.pack(side="left")
+        # --- STEP 1: PROMPT COPY SECTION ---
+        self.step1_frame = tk.Frame(self, bg=c.DARK_BG)
+        self.step1_frame.grid(row=1, column=0, pady=(10, 0), sticky="ew")
 
-        folder_select_frame = tk.Frame(self, bg=c.DARK_BG)
-        folder_select_frame.grid(row=2, column=0, sticky="ew", pady=(0, 5))
-
-        self.folder_entry = tk.Entry(folder_select_frame, textvariable=self.project_data["parent_folder"], bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
-        self.folder_entry.pack(side='left', fill='x', expand=True, ipady=4)
-
-        self.browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
-        self.browse_btn.pack(side='left', padx=(5, 0))
-
-        # 2. Path Preview (Compact Single Line)
-        self.preview_container = tk.Frame(self, bg=c.STATUS_BG, padx=10, pady=4)
-        self.preview_container.grid(row=3, column=0, sticky="ew", pady=(5, 10))
-
-        tk.Label(self.preview_container, text="A new folder will be created:", font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.STATUS_BG, fg=c.TEXT_COLOR).pack(side='left')
-        self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, justify='left')
-        self.preview_path_label.pack(side='left', padx=(5, 0))
-
-        # 3. Prompt Copy Section (Redesigned: Big green button, no text area)
-        copy_section_frame = tk.Frame(self, bg=c.DARK_BG)
-        copy_section_frame.grid(row=4, column=0, pady=(15, 0), sticky="ew")
-
-        tk.Label(copy_section_frame, text="2. Copy Creation Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="top", anchor="w")
+        self.step1_title = tk.Label(self.step1_frame, text="1. Copy Creation Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.BTN_GREEN)
+        self.step1_title.pack(side="top", anchor="w")
 
         self.copy_btn = RoundedButton(
-            copy_section_frame, text="Copy Creation Prompt",
+            self.step1_frame, text="Copy Creation Prompt",
             command=lambda: self._copy_prompt_to_clipboard(self.copy_btn, self.master_prompt_content),
             bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BUTTON,
             height=40, width=250, radius=6, cursor="hand2",
@@ -70,28 +49,64 @@ class GenerateView(tk.Frame):
         self.copy_btn.pack(side="top", anchor="w", pady=(10, 5))
         ToolTip(self.copy_btn, "Copy the final boilerplate and instructions for your AI", delay=500)
 
-        self.hint_label = tk.Label(copy_section_frame, text="Note: it is recommended to use a smart thinking model for this step", font=(c.FONT_FAMILY_PRIMARY, 9, 'italic'), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR)
+        self.hint_label = tk.Label(self.step1_frame, text="Note: it is recommended to use a smart thinking model for this step", font=(c.FONT_FAMILY_PRIMARY, 9, 'italic'), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR)
         self.hint_label.pack(side="top", anchor="w")
 
-        # 4. Response Section
-        tk.Label(self, text="3. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=6, column=0, pady=(20, 5), sticky="w")
+        # --- STEP 2: RESPONSE SECTION (Initially Hidden) ---
+        self.step2_frame = tk.Frame(self, bg=c.DARK_BG)
+
+        self.step2_title = tk.Label(self.step2_frame, text="2. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
+        self.step2_title.pack(side="top", anchor="w", pady=(20, 5))
 
         self.llm_result_text = ScrollableText(
-            self, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
+            self.step2_frame, wrap=tk.WORD, height=2, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR,
             font=(c.FONT_FAMILY_PRIMARY, self.starter_controller.font_size),
             on_zoom=self.starter_controller.adjust_font_size
         )
-        self.llm_result_text.grid(row=7, column=0, pady=(0, 10), sticky="nsew")
+        self.llm_result_text.pack(side="top", fill="both", expand=True, pady=(0, 10))
 
         # Restore buffer if present
-        self.llm_result_text.insert("1.0", self.project_data.get("generate_llm_response", ""))
+        saved_response = self.project_data.get("generate_llm_response", "")
+        if saved_response:
+            self.llm_result_text.insert("1.0", saved_response)
 
         self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_and_sync)
         self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_and_sync)
 
-        # 5. Footer
+        # --- STEP 3: DESTINATION FOLDER SECTION (Initially Hidden) ---
+        self.step3_frame = tk.Frame(self, bg=c.DARK_BG)
+
+        dest_label_frame = tk.Frame(self.step3_frame, bg=c.DARK_BG)
+        dest_label_frame.pack(side="top", fill="x", pady=(10, 5))
+        self.step3_title = tk.Label(dest_label_frame, text="3. Select Parent Folder for the project", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
+        self.step3_title.pack(side="left")
+
+        folder_select_frame = tk.Frame(self.step3_frame, bg=c.DARK_BG)
+        folder_select_frame.pack(side="top", fill="x", pady=(0, 5))
+
+        self.folder_entry = tk.Entry(folder_select_frame, textvariable=self.project_data["parent_folder"], bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL)
+        self.folder_entry.pack(side='left', fill='x', expand=True, ipady=4)
+
+        self.browse_btn = RoundedButton(folder_select_frame, text="Browse", command=self._browse_folder, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=28, cursor='hand2')
+        self.browse_btn.pack(side='left', padx=(5, 0))
+
+        # Path Preview (Compact Single Line)
+        self.preview_container = tk.Frame(self.step3_frame, bg=c.STATUS_BG, padx=10, pady=4)
+        self.preview_container.pack(side="top", fill="x", pady=(5, 10))
+
+        tk.Label(self.preview_container, text="A new folder will be created:", font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.STATUS_BG, fg=c.TEXT_COLOR).pack(side='left')
+        self.preview_path_label = tk.Label(self.preview_container, text="", font=(c.FONT_FAMILY_PRIMARY, 9), bg=c.STATUS_BG, fg=c.BTN_BLUE, justify='left')
+        self.preview_path_label.pack(side='left', padx=(5, 0))
+
+        # Interaction listeners for Step 3
+        self.step3_frame.bind("<Button-1>", self._on_step3_click)
+        self.folder_entry.bind("<Button-1>", self._on_step3_click)
+        self.browse_btn.bind("<Button-1>", self._on_step3_click, add="+")
+        self.preview_container.bind("<Button-1>", self._on_step3_click)
+
+        # Footer
         footer_frame = tk.Frame(self, bg=c.DARK_BG)
-        footer_frame.grid(row=8, column=0, sticky="ew", pady=(5, 15))
+        footer_frame.grid(row=4, column=0, sticky="ew", pady=(5, 15))
 
         if self.project_data["base_project_path"].get():
             ttk.Checkbutton(footer_frame, text="Include base project reference", variable=self.project_data["include_base_reference"], style='Dark.TCheckbutton').pack(side="left")
@@ -117,6 +132,11 @@ class GenerateView(tk.Frame):
             ("parent_folder", t5)
         ]
 
+        # Initial visibility check (handle session restore)
+        if saved_response:
+            self.step2_frame.grid(row=2, column=0, sticky="nsew")
+            self._validate_and_sync()
+
         self._update_preview_path()
         self._validate_and_sync() # Initial state check
         self.register_info(self.starter_controller.info_mgr)
@@ -124,11 +144,13 @@ class GenerateView(tk.Frame):
     def register_info(self, info_mgr):
         """Registers step-specific widgets for Info Mode."""
         if not info_mgr: return
-        info_mgr.register(self.dest_label, "starter_gen_parent")
+        info_mgr.register(self.step1_title, "starter_gen_prompt")
+        info_mgr.register(self.copy_btn, "starter_gen_prompt")
+        info_mgr.register(self.step2_title, "starter_gen_response")
+        info_mgr.register(self.llm_result_text, "starter_gen_response")
+        info_mgr.register(self.step3_title, "starter_gen_parent")
         info_mgr.register(self.folder_entry, "starter_gen_parent")
         info_mgr.register(self.browse_btn, "starter_gen_parent")
-        info_mgr.register(self.copy_btn, "starter_gen_prompt") # This IS the Creation Prompt
-        info_mgr.register(self.llm_result_text, "starter_gen_response")
         info_mgr.register(self.create_button, "starter_gen_create")
 
     def refresh_fonts(self):
@@ -173,11 +195,19 @@ class GenerateView(tk.Frame):
         self.preview_path_label.config(text=full_path, fg=c.BTN_BLUE)
 
     def _browse_folder(self):
+        self._on_step3_click()
         folder = filedialog.askdirectory(parent=self)
         if folder:
             # Normalize to backward slashes immediately after browsing
             normalized = folder.replace('/', '\\')
             self.project_data["parent_folder"].set(normalized)
+
+    def _on_step3_click(self, event=None):
+        """Called when user interacts with Step 3."""
+        if not self.step3_interacted:
+            self.step3_interacted = True
+            self.step3_title.config(fg=c.TEXT_COLOR)
+            self._validate_and_sync()
 
     def _validate_and_sync(self, *args):
         """
@@ -188,12 +218,23 @@ class GenerateView(tk.Frame):
         if not self.winfo_exists():
             return
 
-        content = self.llm_result_text.get("1.0", "end-1c")
+        content = self.llm_result_text.get("1.0", "end-1c").strip()
 
         # Save to buffer for persistence
-        self.project_data["generate_llm_response"] = content.strip()
+        self.project_data["generate_llm_response"] = content
 
-        # 1. Check Project Details
+        # Handle title highlighting
+        if content:
+            self.step2_title.config(fg=c.TEXT_COLOR)
+            # Reveal Step 3
+            if not self.step3_frame.winfo_ismapped():
+                self.step3_frame.grid(row=3, column=0, sticky="ew")
+                if not self.step3_interacted:
+                    self.step3_title.config(fg=c.BTN_GREEN)
+        else:
+            self.step3_frame.grid_forget()
+
+        # Check Project Details
         project_name = self.project_data["name"].get().strip()
         if not project_name:
             self._set_ui_state("disabled", "Missing project name (Step 1)")
@@ -208,8 +249,8 @@ class GenerateView(tk.Frame):
             self._set_ui_state("disabled", "Parent folder path is invalid")
             return
 
-        # 2. Check LLM Content (Files and Pitch tag)
-        if not content.strip():
+        # Check LLM Content (Files and Pitch tag)
+        if not content:
              self._set_ui_state("disabled", "Paste the LLM response first")
              return
 
@@ -224,13 +265,23 @@ class GenerateView(tk.Frame):
             self._set_ui_state("disabled", "Response missing <PITCH> tags")
             return
 
+        # Check Interaction state
+        if not self.step3_interacted:
+            self._set_ui_state("disabled", "Verify parent folder to continue", use_gray_btn=True)
+            return
+
         # All conditions met
         self._set_ui_state("normal", "")
 
-    def _set_ui_state(self, state, hint_text):
+    def _set_ui_state(self, state, hint_text, use_gray_btn=False):
         """Helper to sync button state and hint label."""
         self.create_button.set_state(state)
         self.status_hint_label.config(text=hint_text)
+
+        if use_gray_btn:
+            self.create_button.config(bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+        elif state == 'normal':
+            self.create_button.config(bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT)
 
     def _copy_prompt_to_clipboard(self, button, text):
         pyperclip.copy(text)
@@ -240,6 +291,14 @@ class GenerateView(tk.Frame):
         # Ensure that hovering always brings back the white-on-green signal
         button.hover_color = c.BTN_GREEN
         button.hover_fg = "#FFFFFF"
+
+        # Advance focus to Step 2
+        self.step1_title.config(fg=c.TEXT_COLOR)
+        if not self.step2_frame.winfo_ismapped():
+            self.step2_frame.grid(row=2, column=0, sticky="nsew")
+            self.step2_title.config(fg=c.BTN_GREEN)
+            self.llm_result_text.text_widget.focus_set()
+
         self.after(2000, lambda: button.config(text=original_text))
 
     def _get_base_project_content(self):
