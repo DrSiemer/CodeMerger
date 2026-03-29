@@ -67,7 +67,8 @@ class FeedbackDialog(tk.Toplevel):
         # --- Global Unformatted Alert Header ---
         # Show ONLY if unformatted text exists AND no tags were detected at all.
         has_any_tags = plan.get('has_any_tags', False)
-        has_unformatted = bool(plan.get('unformatted'))
+        unformatted_text = plan.get('unformatted', "").strip()
+        has_unformatted = bool(unformatted_text)
 
         self.alert_frame = Frame(main_frame, bg=c.DARK_BG)
         if has_unformatted and not has_any_tags:
@@ -123,8 +124,8 @@ class FeedbackDialog(tk.Toplevel):
             current_idx += 1
 
         # Unformatted output is added last as it's the lowest priority
-        if plan.get('unformatted'):
-            self._add_unformatted_tab(plan.get('unformatted'))
+        if has_unformatted:
+            self._add_unformatted_tab(unformatted_text)
             self.tab_indices['unformatted'] = current_idx
             current_idx += 1
 
@@ -153,15 +154,19 @@ class FeedbackDialog(tk.Toplevel):
 
         if self.on_apply:
             # Only show Apply Changes if there are actually file modifications in the plan
-            if plan.get('updates') or plan.get('creations'):
+            has_changes = bool(plan.get('updates')) or bool(plan.get('creations'))
+            if has_changes:
                 self.apply_btn = RoundedButton(
                     self.bottom_frame, text="Apply Changes", command=self._handle_apply,
                     bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, font=c.FONT_BOLD,
                     width=200, height=30, cursor="hand2"
                 )
                 self.apply_btn.pack(side="right")
+                cancel_text = "Cancel"
+            else:
+                cancel_text = "Close"
 
-            self.cancel_btn = RoundedButton(self.bottom_frame, text="Cancel", command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
+            self.cancel_btn = RoundedButton(self.bottom_frame, text=cancel_text, command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
             self.cancel_btn.pack(side="right", padx=(0, 10))
         else:
             self.ok_button = RoundedButton(self.bottom_frame, text="OK", command=self.destroy, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
@@ -309,12 +314,15 @@ class FeedbackDialog(tk.Toplevel):
     def _on_close_request(self):
         """Warns the user before discarding the update if the window is closed manually."""
         if self.on_apply:
-            if not messagebox.askyesno(
-                "Discard Update?",
-                "You are currently reviewing a proposed update. Closing this window will discard the changes and they will not be applied to your project files.\n\nAre you sure you want to discard this update?",
-                parent=self
-            ):
-                return
+            # Check if there is actual code to discard
+            has_changes = bool(self.plan.get('updates')) or bool(self.plan.get('creations'))
+            if has_changes:
+                if not messagebox.askyesno(
+                    "Discard Update?",
+                    "You are currently reviewing a proposed update. Closing this window will discard the changes and they will not be applied to your project files.\n\nAre you sure you want to discard this update?",
+                    parent=self
+                ):
+                    return
 
         self._handle_cancel()
 

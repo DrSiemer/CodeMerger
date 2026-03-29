@@ -130,11 +130,11 @@ def parse_and_plan_changes(base_dir, markdown_text):
     file_block_regex = re.escape(PREFIX) + r'File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
     file_blocks = re.findall(file_block_regex, markdown_text_processed, re.DOTALL)
 
-    if not file_blocks:
-        # If NO file blocks are found, return the full original text as unformatted
+    if not file_blocks and not has_any_tags:
+        # If NO file blocks AND NO tags are found, return the full original text as unformatted
         return {
             'status': 'UNFORMATTED',
-            'message': "No valid file blocks were found.",
+            'message': "No valid file blocks or tags were found.",
             'unformatted': markdown_text.strip(),
             'answers': answers_text,
             'intro': intro_text,
@@ -174,9 +174,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
             return {'status': 'ERROR', 'message': f"Error: The path '{relative_path}' points to a directory, not a file."}
         else:
             files_to_create[relative_path] = content
-
-    if not files_to_update and not files_to_create:
-        return {'status': 'ERROR', 'message': "Error: No valid files to update or create were found."}
 
     result = {
         'updates': files_to_update,
