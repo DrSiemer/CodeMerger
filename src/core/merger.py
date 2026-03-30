@@ -129,7 +129,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 
 --- File: `path/to/file.ext` ---
 ```language
-(Full file code)
+(Full unabridged file code)
 ```
 --- End of file ---
 
