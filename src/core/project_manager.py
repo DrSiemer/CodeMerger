@@ -34,9 +34,18 @@ class ProjectManager:
             self.project_config = None
             return None, "No project selected"
 
-        is_new_project = not os.path.isfile(os.path.join(path, '.allcode'))
+        allcode_file = os.path.join(path, '.allcode')
+        is_new_project = not os.path.isfile(allcode_file)
+
         self.project_config = ProjectConfig(path)
-        files_were_cleaned = self.project_config.load()
+
+        try:
+            files_were_cleaned = self.project_config.load()
+        except RuntimeError as e:
+            # Fatal error during load of an existing file: return None to prevent further damage
+            self.project_config = None
+            return None, str(e)
+
         project_display_name = self.project_config.project_name
 
         if is_new_project:

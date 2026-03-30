@@ -51,6 +51,7 @@ class FileMonitor:
                 current_memory_known = set(project_config.known_files)
 
                 # Reload the config from disk to avoid overwriting it with stale state
+                # Note: this will raise RuntimeError if the file is currently empty/locked
                 project_config.load()
 
                 # Merge memory back into the loaded config
@@ -68,8 +69,8 @@ class FileMonitor:
                 self._update_warning_ui()
 
             except Exception as e:
-                # If load fails (e.g. file locked or corrupt), skip this scan cycle
-                print(f"Error reloading config: {e}")
+                # If load fails (e.g. file locked or corrupt), skip this scan cycle and wait for next interval
+                # This prevents triggering a save() on a config object that failed its load latch.
                 if schedule_next:
                     interval_sec = self.app.app_state.config.get('new_file_check_interval', 5)
                     self._schedule_next_check(interval_sec * 1000)
@@ -83,8 +84,6 @@ class FileMonitor:
             return
 
         # Collect paths that MUST be checked for existence regardless of filters.
-        # This ensures files added to the merge order (possibly by disabling filters)
-        # are not treated as "deleted" just because the filter is re-enabled.
         force_include_paths = set()
         for p_data in project_config.profiles.values():
              for f in p_data.get('selected_files', []):
@@ -104,58 +103,38 @@ class FileMonitor:
 
         # Handle Deleted Files
         missing_from_scan = known_set - current_set
-
         truly_deleted_files = set()
 
         if missing_from_scan:
             for rel_path in missing_from_scan:
                 full_path = os.path.join(base_dir, rel_path)
-                # Check for physical existence.
                 if not os.path.exists(full_path):
                     truly_deleted_files.add(rel_path)
 
         if truly_deleted_files:
-            # Remove ONLY the files that are confirmed deleted from disk
             project_config.known_files = list(known_set - truly_deleted_files)
-
-            # Remove from all profiles' selections and unknown lists
             for p_name, p_data in project_config.profiles.items():
                 orig_selection = len(p_data.get('selected_files', []))
-
-                p_data['selected_files'] = [
-                    f for f in p_data.get('selected_files', [])
-                    if f['path'] not in truly_deleted_files
-                ]
-
-                p_data['unknown_files'] = [
-                    f for f in p_data.get('unknown_files', [])
-                    if f not in truly_deleted_files
-                ]
-
+                p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] not in truly_deleted_files]
+                p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f not in truly_deleted_files]
                 if len(p_data['selected_files']) != orig_selection:
-                    p_data['total_tokens'] = 0 # Force recalc
-
+                    p_data['total_tokens'] = 0
             config_changed = True
             self.app.status_var.set(f"Cleaned {len(truly_deleted_files)} missing file(s).")
 
-        # Handle Brand New Files (to the whole project)
+        # Handle Brand New Files
         brand_new_files = current_set - set(project_config.known_files)
         if brand_new_files:
-            # Update global list
             project_config.known_files.extend(list(brand_new_files))
-
-            # Add to the 'unknown' list of EVERY profile
             for p_data in project_config.profiles.values():
                 p_unknown = set(p_data.get('unknown_files', []))
                 p_unknown.update(brand_new_files)
                 p_data['unknown_files'] = sorted(list(p_unknown))
-
             config_changed = True
 
         if config_changed:
             project_config.save()
 
-        # Update UI based on active profile's unknown list
         profile_unknown = project_config.unknown_files
         if sorted(profile_unknown) != sorted(self.newly_detected_files):
             self.newly_detected_files = profile_unknown
@@ -171,10 +150,8 @@ class FileMonitor:
         project_config = self.app.project_manager.get_current_project()
 
         if files_to_highlight and project_config:
-            # Clear only the active profile's unknown list
             project_config.unknown_files = []
             project_config.save()
-
             self.newly_detected_files = []
             self._update_warning_ui()
 

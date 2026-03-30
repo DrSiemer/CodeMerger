@@ -52,6 +52,9 @@ class ProjectConfig:
         self.active_profile_name = "Default"
         self._last_mtime = 0
 
+        # Safety latch: prevent saving if an existing file failed to load correctly
+        self._load_successful = False
+
     @staticmethod
     def read_project_display_info(base_dir):
         allcode_path = os.path.join(base_dir, '.allcode')
@@ -144,32 +147,37 @@ class ProjectConfig:
         config_was_updated = False
         files_were_cleaned_globally = False
 
+        if not os.path.isfile(self.allcode_path):
+            self._load_successful = True # Valid state for new projects
+            return False
+
         try:
-            if os.path.isfile(self.allcode_path):
-                # Track this version by capturing mtime immediately before reading
-                self._last_mtime = os.path.getmtime(self.allcode_path)
+            self._last_mtime = os.path.getmtime(self.allcode_path)
 
-                # Prevents loading transiently empty files during write collisions
-                if os.path.getsize(self.allcode_path) == 0:
-                    return False
+            # Defensive: Don't load if the file is currently 0 bytes (mid-write lock)
+            if os.path.getsize(self.allcode_path) == 0:
+                raise RuntimeError("Config file is empty or locked.")
 
-                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
-                    content = f.read()
-                    if content:
-                        try:
-                            data = json.loads(content)
-                        except json.JSONDecodeError:
-                            json_start_index = content.find('{')
-                            if json_start_index != -1:
-                                json_content = content[json_start_index:]
-                                data = json.loads(json_content)
-                                config_was_updated = True
-        except (json.JSONDecodeError, IOError):
-            return False
+            with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
+                content = f.read()
+                if content:
+                    try:
+                        data = json.loads(content)
+                    except json.JSONDecodeError:
+                        # Attempt recovery from partial write artifacts
+                        json_start_index = content.find('{')
+                        if json_start_index != -1:
+                            json_content = content[json_start_index:]
+                            data = json.loads(json_content)
+                            config_was_updated = True
+                        else:
+                            raise RuntimeError("Config file contains no valid JSON.")
+        except (json.JSONDecodeError, IOError, OSError) as e:
+            raise RuntimeError(f"Failed to read project config: {e}")
 
-        # Abort to prevent overwriting with defaults if the file exists but dictionary is empty
-        if os.path.isfile(self.allcode_path) and not data:
-            return False
+        # Final sanity check: if the file exists but we ended up with no data, abort to protect against wipe
+        if not data:
+            raise RuntimeError("Config file contained an empty JSON object.")
 
         self.project_name = data.get('project_name', os.path.basename(self.base_dir))
         color_value = data.get('project_color')
@@ -196,10 +204,7 @@ class ProjectConfig:
                 self.profiles['Default'] = self._create_empty_profile()
                 self.active_profile_name = 'Default'
                 config_was_updated = True
-        elif os.path.isfile(self.allcode_path) and 'selected_files' not in data:
-            # Abort to prevent data loss if profiles and legacy keys are both missing
-            return False
-        else:
+        elif 'selected_files' in data:
             # Reconcile legacy flat format
             config_was_updated = True
             default_profile = self._create_empty_profile()
@@ -210,6 +215,8 @@ class ProjectConfig:
             default_profile['total_tokens'] = data.get('total_tokens', 0)
             self.profiles = {'Default': default_profile}
             self.active_profile_name = 'Default'
+        else:
+            raise RuntimeError("Config file is malformed: missing project data keys.")
 
         # Known Files Extraction
         all_found_known = set(data.get('known_files', []))
@@ -217,7 +224,6 @@ class ProjectConfig:
             if 'known_files' in p_data:
                 all_found_known.update(p_data.pop('known_files', []))
                 config_was_updated = True
-            # Ensures every profile maintains an unknown_files list
             if 'unknown_files' not in p_data:
                 p_data['unknown_files'] = []
                 config_was_updated = True
@@ -226,12 +232,14 @@ class ProjectConfig:
 
         for profile_name, profile_data in self.profiles.items():
             profile_data['unknown_files'] = sorted(list(set(profile_data.get('unknown_files', []))))
-
             files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
             if files_cleaned_in_profile:
                 files_were_cleaned_globally = True
             if profile_updated:
                 config_was_updated = True
+
+        # Mark load as successful only after full data validation
+        self._load_successful = True
 
         if config_was_updated or files_were_cleaned_globally:
             self.save()
@@ -274,6 +282,10 @@ class ProjectConfig:
 
     def save(self):
         """Saves configuration using an atomic replacement to prevent data wipes during collisions"""
+        # Block saving if a previous load of an existing file failed
+        if os.path.isfile(self.allcode_path) and not self._load_successful:
+            return
+
         final_data = {
             "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
             "project_name": self.project_name,
@@ -294,7 +306,6 @@ class ProjectConfig:
                 os.remove(temp_path)
             raise
 
-        # Prevents detecting self-save as an external change
         if os.path.isfile(self.allcode_path):
             self._last_mtime = os.path.getmtime(self.allcode_path)
 
@@ -303,7 +314,6 @@ class ProjectConfig:
         if not os.path.isfile(self.allcode_path):
             return False
         try:
-            # Aborts if the file is currently being written
             if os.path.getsize(self.allcode_path) == 0:
                 return False
             return os.path.getmtime(self.allcode_path) != self._last_mtime

@@ -64,11 +64,11 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    **CRITICAL:** Every opening tag MUST have an identical closing tag.
    Format: `<INTRO>[content]</INTRO>`
 
-2. **INTRO, CHANGES & ANSWERS (PRE-CODE):**
+2. **INTRO, ANSWERS & CHANGES (PRE-CODE):**
    Immediately before the code blocks, provide these sections in this order:
    - **<INTRO>**: Use this to provide a technical implementation plan or architectural summary.
-   - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
    - **<ANSWERS TO DIRECT USER QUESTIONS>**: If the user asked a specific question (usually ending with a '?'), answer it here. If there is no question mark in the prompt, there is no question. In that case, this block MUST remain empty (use a single dash `-`). Do NOT fill it with filler text like "None" or "No questions".
+   - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
 
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
@@ -117,13 +117,13 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (Implementation plan)
 </INTRO>
 
-<CHANGES>
-(List of changes)
-</CHANGES>
-
 <ANSWERS TO DIRECT USER QUESTIONS>
 (Answer any direct questions here, otherwise `-`)
 </ANSWERS TO DIRECT USER QUESTIONS>
+
+<CHANGES>
+(List of changes)
+</CHANGES>
 
 --- File: `path/to/file.ext` ---
 ```language

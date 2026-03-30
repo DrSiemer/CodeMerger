@@ -123,7 +123,7 @@ class FeedbackDialog(tk.Toplevel):
                 tag_name = seg['tag']
                 if tag_name == "DELETED FILES": continue
 
-                # Injection: Add Changes tab before Verification if it hasn't been added yet
+                # Injection: Add Changes tab before Verification if it hasn't been added yet.
                 if tag_name == "VERIFICATION" and not changes_tab_added:
                     has_data = plan.get('updates') or plan.get('creations') or plan.get('deletions_proposed')
                     if has_data:
@@ -428,7 +428,7 @@ class FeedbackDialog(tk.Toplevel):
             "Please follow the output format strictly as described in your instructions. "
             "Your previous response did not fully comply with the required formatting standards. "
             "Specifically, please ensure that:\n"
-            "- ALL commentary and explanations are placed inside the mandatory XML tags (<INTRO>, <CHANGES>, <ANSWERS TO DIRECT USER QUESTIONS>, <VERIFICATION>).\n"
+            "- ALL commentary and explanations are placed inside the mandatory XML tags (<INTRO>, <ANSWERS TO DIRECT USER QUESTIONS>, <CHANGES>, <VERIFICATION>).\n"
             "- No text or commentary exists outside of these tags.\n"
             "- File markers are present and correctly formatted (--- File: `path` --- and --- End of file ---).\n"
             "- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.\n"
