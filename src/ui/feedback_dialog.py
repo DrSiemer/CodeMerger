@@ -424,7 +424,16 @@ class FeedbackDialog(tk.Toplevel):
         self.tab_widgets_for_info.append((renderer, "review_tab_unformatted"))
 
     def _copy_admonishment(self):
-        msg = "Please follow the output format as described in your instructions."
+        msg = (
+            "Please follow the output format strictly as described in your instructions. "
+            "Your previous response did not fully comply with the required formatting standards. "
+            "Specifically, please ensure that:\n"
+            "- ALL commentary and explanations are placed inside the mandatory XML tags (<INTRO>, <CHANGES>, <ANSWERS TO DIRECT USER QUESTIONS>, <VERIFICATION>).\n"
+            "- No text or commentary exists outside of these tags.\n"
+            "- File markers are present and correctly formatted (--- File: `path` --- and --- End of file ---).\n"
+            "- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.\n"
+            "Please re-output the response correctly."
+        )
         pyperclip.copy(msg)
         self.admonish_btn.config(text="Copied!", bg=c.BTN_GREEN)
         self.after(2000, lambda: self.admonish_btn.config(text="Copy Correction Prompt", bg=c.ATTENTION) if self.admonish_btn.winfo_exists() else None)
