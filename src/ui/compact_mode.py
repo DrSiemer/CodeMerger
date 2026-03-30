@@ -19,8 +19,9 @@ class CompactMode(tk.Toplevel):
         self.show_wrapped_button = show_wrapped_button
         self.current_new_file_count = 0
 
-        # This will be updated by the main App's ButtonStateManager
+        # These will be updated by the main App's ButtonStateManager
         self.paste_tooltip_text = "Paste Response"
+        self.copy_tooltip_text = "Copy Prompt with Instructions (Ctrl+Click for 'Copy Prompt')" if self.show_wrapped_button else "Copy Prompt"
 
         # Style and Layout Constants
         BAR_COLOR = instance_color
@@ -159,8 +160,7 @@ class CompactMode(tk.Toplevel):
             self.app_icon_label.bind("<Double-Button-1>", self.close_window)
 
         # Tooltips
-        copy_tooltip_text = "Copy Prompt with Instructions (Ctrl+Click for 'Copy Prompt')" if self.show_wrapped_button else "Copy Prompt"
-        self.copy_button.bind("<Enter>", lambda e: self.show_tooltip(copy_tooltip_text))
+        self.copy_button.bind("<Enter>", lambda e: self.show_tooltip(self.copy_tooltip_text))
         self.copy_button.bind("<Leave>", self.hide_tooltip)
 
         self.paste_button.bind("<Enter>", lambda e: self.show_tooltip(self.paste_tooltip_text))

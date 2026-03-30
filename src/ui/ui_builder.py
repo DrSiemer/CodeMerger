@@ -190,6 +190,10 @@ def setup_ui(app):
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.open_instructions_window, cursor='hand2')
     app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
 
+    # Tooltip setup for Copy buttons with instance references for dynamic updates
+    app.copy_wrapped_tooltip = ToolTip(app.copy_wrapped_button, "Copy Prompt: includes code wrapped with custom intro/outro instructions", delay=500)
+    app.copy_merged_tooltip = ToolTip(app.copy_merged_button, "Copy Prompt: merges code and prepends the default context prompt", delay=500)
+
     # Paste Container Layout
     app.paste_container = Frame(app.button_grid_frame, bg=c.DARK_BG)
     app.paste_changes_button = RoundedButton(app.paste_container, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, command=None, cursor='hand2')
@@ -213,8 +217,6 @@ def setup_ui(app):
     app.paste_changes_tooltip = ToolTip(app.paste_changes_button, paste_tooltip, delay=500)
 
     ToolTip(app.review_button, "Read latest AI response review", delay=500)
-    ToolTip(app.copy_wrapped_button, "Copy Prompt: includes code wrapped with custom intro/outro instructions", delay=500)
-    ToolTip(app.copy_merged_button, "Copy Prompt: merges code and prepends the default context prompt", delay=500)
 
     app.settings_button.bind("<Enter>", lambda e: app.settings_button.config(image=assets.settings_icon_active), add='+')
     app.settings_button.bind("<Leave>", lambda e: app.settings_button.config(image=assets.settings_icon), add='+')

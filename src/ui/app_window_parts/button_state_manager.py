@@ -101,10 +101,12 @@ class ButtonStateManager:
 
             copy_buttons_state = 'disabled'
             has_wrapper_text = False
+            has_files_selected = False
 
             if project_config:
                 if project_config.selected_files:
                     copy_buttons_state = 'normal'
+                    has_files_selected = True
                 intro = project_config.intro_text
                 outro = project_config.outro_text
                 if intro or outro:
@@ -112,6 +114,22 @@ class ButtonStateManager:
 
             app.copy_merged_button.set_state(copy_buttons_state)
             app.copy_wrapped_button.set_state(copy_buttons_state)
+
+            # Update Copy Button Tooltips based on file selection
+            if has_files_selected:
+                app.copy_merged_tooltip.text = "Copy Prompt: merges code and prepends the default context prompt"
+                app.copy_wrapped_tooltip.text = "Copy Prompt: includes code wrapped with custom intro/outro instructions"
+                compact_copy_tooltip = "Copy Prompt with Instructions (Ctrl+Click for 'Copy Prompt')" if has_wrapper_text else "Copy Prompt"
+            else:
+                inactive_msg = "Inactive: No files added to the Merge List"
+                app.copy_merged_tooltip.text = inactive_msg
+                app.copy_wrapped_tooltip.text = inactive_msg
+                compact_copy_tooltip = inactive_msg
+
+            # Sync to compact mode if it's currently active
+            compact = app.view_manager.compact_mode_window
+            if compact and compact.winfo_exists():
+                compact.copy_tooltip_text = compact_copy_tooltip
 
             app.copy_wrapped_button.grid_remove()
             app.copy_merged_button.grid_remove()
