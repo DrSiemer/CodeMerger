@@ -130,6 +130,13 @@ ATTENTION = "#DE6808"
 FILTER_ACTIVE_BORDER = '#009900'
 TEXT_FILTERED_COLOR = '#BB86FC'
 
+# Diff Colors - Optimized for Dark Theme Legibility
+DIFF_ADD_BG = '#1e301e'
+DIFF_ADD_FG = '#a7f0a7'
+DIFF_REMOVE_BG = '#3a1e1e'
+DIFF_REMOVE_FG = '#f0a7a7'
+DIFF_HEADER_FG = '#85b5d5'
+
 # UI Fonts
 FONT_FAMILY_PRIMARY = "Segoe UI"
 FONT_FAMILY_SECONDARY = "Helvetica"

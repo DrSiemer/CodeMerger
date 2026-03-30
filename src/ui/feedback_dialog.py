@@ -1,12 +1,16 @@
 import tkinter as tk
 import os
 import pyperclip
-from tkinter import Frame, Label, ttk, BooleanVar, messagebox
+import time
+import subprocess
+import sys
+from tkinter import Frame, Label, ttk, BooleanVar, messagebox, Button
 from PIL import Image, ImageDraw, ImageTk
 from .. import constants as c
 from .widgets.rounded_button import RoundedButton
 from .widgets.markdown_renderer import MarkdownRenderer
 from .widgets.scrollable_frame import ScrollableFrame
+from .widgets.diff_viewer import DiffViewer
 from .window_utils import position_window, save_window_geometry
 from .style_manager import apply_dark_theme
 from ..core.paths import ICON_PATH
@@ -23,6 +27,11 @@ class FeedbackDialog(tk.Toplevel):
         self.plan = plan
         self.on_apply_executor = on_apply
         self.on_refuse = on_refuse
+
+        # Lazy Layout variables
+        self._lazy_timer = None
+        self._is_lazy_hiding = False
+        self._last_size = (0, 0)
 
         # Identify the root App instance immediately for global action handling
         self.app = parent
@@ -50,6 +59,9 @@ class FeedbackDialog(tk.Toplevel):
         self.iconbitmap(ICON_PATH)
         self.configure(bg=c.DARK_BG)
 
+        # Track active diff viewers to support toggling
+        self._diff_viewers = {}
+
         # Ensure grid is used on the Toplevel so the main frame and info panel never overlap
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -64,9 +76,6 @@ class FeedbackDialog(tk.Toplevel):
         if is_parent_topmost:
             # If spawned from Compact Mode, stay in front of IDE but don't lock the app
             self.attributes("-topmost", True)
-        else:
-            # If spawned from main window, behave as a standard dependent window
-            self.transient(parent)
 
         apply_dark_theme(self)
 
@@ -78,14 +87,16 @@ class FeedbackDialog(tk.Toplevel):
         self._green_accent = self._create_vertical_accent(c.BTN_GREEN)        # Verification
         self._yellow_accent = self._create_vertical_accent(c.ATTENTION)       # Unformatted
 
-        main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
-        main_frame.grid(row=0, column=0, sticky="nsew")
+        # main_content_frame has NO horizontal padding to allow scrollbar flushness
+        self.main_content_frame = Frame(self, bg=c.DARK_BG, pady=20)
+        self.main_content_frame.grid(row=0, column=0, sticky="nsew")
 
         # Main Layout Rows: 0=Header, 1=UnformattedAlert, 2=Notebook, 3=BottomActions
-        main_frame.grid_rowconfigure(2, weight=1)
-        main_frame.grid_columnconfigure(0, weight=1)
+        self.main_content_frame.grid_rowconfigure(2, weight=1)
+        self.main_content_frame.grid_columnconfigure(0, weight=1)
 
-        header_row = Frame(main_frame, bg=c.DARK_BG)
+        # Header padding applied internally
+        header_row = Frame(self.main_content_frame, bg=c.DARK_BG, padx=20)
         header_row.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         header_row.columnconfigure(0, weight=1)
 
@@ -100,7 +111,7 @@ class FeedbackDialog(tk.Toplevel):
         has_unformatted = len(orphan_segments) > 0
         has_any_tags = plan.get('has_any_tags', False)
 
-        self.alert_frame = Frame(main_frame, bg=c.DARK_BG)
+        self.alert_frame = Frame(self.main_content_frame, bg=c.DARK_BG, padx=20)
 
         # Show the correction button if ANY unformatted segments exist.
         if has_unformatted and not has_any_tags:
@@ -111,7 +122,7 @@ class FeedbackDialog(tk.Toplevel):
             self.admonish_btn.pack(side='right')
             ToolTip(self.admonish_btn, "Copy a prompt to tell the AI to follow the output format")
 
-        self.notebook = ttk.Notebook(main_frame)
+        self.notebook = ttk.Notebook(self.main_content_frame)
         self.notebook.grid(row=2, column=0, sticky="nsew", pady=(0, 15))
         self.renderers = []
         self.tab_widgets_for_info = []
@@ -170,7 +181,7 @@ class FeedbackDialog(tk.Toplevel):
         elif current_idx > 0:
             self.notebook.select(0)
 
-        self.bottom_frame = Frame(main_frame, bg=c.DARK_BG)
+        self.bottom_frame = Frame(self.main_content_frame, bg=c.DARK_BG, padx=20)
         self.bottom_frame.grid(row=3, column=0, sticky="ew", pady=(15, 0))
 
         show_val = self.app_state.config.get('show_feedback_on_paste', True) if self.app_state else True
@@ -193,11 +204,13 @@ class FeedbackDialog(tk.Toplevel):
         # Bindings
         self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply_executor else self._on_close_request())
         self.protocol("WM_DELETE_WINDOW", self._on_close_request if self.on_apply_executor else self.destroy)
+        self.bind("<Configure>", self._on_configure)
 
         initial_w, initial_h = 900, 750
         if self.app_state and self.app_state.info_mode_active: initial_h += c.INFO_PANEL_HEIGHT
         self.geometry(f"{initial_w}x{initial_h}")
         self.minsize(600, 500)
+        self.resizable(True, True)
         position_window(self)
 
         if self.app_state:
@@ -213,6 +226,36 @@ class FeedbackDialog(tk.Toplevel):
         self._update_mass_apply_visibility()
         self.deiconify()
 
+    def _on_configure(self, event):
+        """Implements Resize Guard to keep the UI responsive during manual resizing."""
+        if event.widget != self:
+            return
+
+        new_size = (event.width, event.height)
+        if self._last_size == new_size:
+            return
+        
+        self._last_size = new_size
+
+        # Hide heavy UI components immediately to stop layout thrashing
+        if not self._is_lazy_hiding:
+            self._start_lazy_layout()
+
+        if self._lazy_timer:
+            self.after_cancel(self._lazy_timer)
+
+        self._lazy_timer = self.after(c.LAZY_LAYOUT_DELAY_MS, self._end_lazy_layout)
+
+    def _start_lazy_layout(self):
+        self._is_lazy_hiding = True
+        self.notebook.grid_remove()
+
+    def _end_lazy_layout(self):
+        self.notebook.grid()
+        self._is_lazy_hiding = False
+        self._lazy_timer = None
+        self.update_idletasks()
+
     def _initialize_file_states(self):
         for path in self.plan.get('updates', {}): self.file_states[path] = "pending"
         for path in self.plan.get('creations', {}): self.file_states[path] = "pending"
@@ -225,6 +268,8 @@ class FeedbackDialog(tk.Toplevel):
         frame = Frame(self.notebook, bg=c.DARK_BG)
         if icon: self.notebook.add(frame, text=title, image=icon, compound="left")
         else: self.notebook.add(frame, text=title)
+        
+        # Ensure MarkdownRenderer inside uses the full width
         renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=self._adjust_font_size)
         renderer.pack(fill="both", expand=True)
         renderer.set_markdown(markdown_text.strip())
@@ -234,7 +279,7 @@ class FeedbackDialog(tk.Toplevel):
     def _add_interactive_changes_tab(self, title, desc, icon):
         frame = Frame(self.notebook, bg=c.DARK_BG)
         self.notebook.add(frame, text=title, image=icon, compound="left")
-        header = Frame(frame, bg=c.DARK_BG, padx=15, pady=10)
+        header = Frame(frame, bg=c.DARK_BG, padx=20, pady=10)
         header.pack(fill='x')
         Label(header, text="Proposed Actions", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
 
@@ -244,8 +289,9 @@ class FeedbackDialog(tk.Toplevel):
             self.commentary_renderer = MarkdownRenderer(frame, base_font_size=10, height=8)
             self.commentary_renderer.set_markdown(desc.strip())
 
+        # No padding on the ScrollableFrame container itself to keep scrollbar flush
         self.file_list_scroll = ScrollableFrame(frame, bg=c.DARK_BG)
-        self.file_list_scroll.pack(fill='both', expand=True, padx=15, pady=(0, 10))
+        self.file_list_scroll.pack(fill='both', expand=True, pady=(0, 10))
         self._refresh_file_list_ui()
 
     def _toggle_commentary(self):
@@ -254,7 +300,7 @@ class FeedbackDialog(tk.Toplevel):
             self.commentary_renderer.pack_forget()
             self.toggle_desc_btn.config(text="Show AI Commentary", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
         else:
-            self.commentary_renderer.pack(fill='x', before=self.file_list_scroll, padx=15, pady=(0, 10))
+            self.commentary_renderer.pack(fill='x', before=self.file_list_scroll, padx=20, pady=(0, 10))
             self.toggle_desc_btn.config(text="Hide AI Commentary", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
     def _refresh_file_list_ui(self):
@@ -278,23 +324,50 @@ class FeedbackDialog(tk.Toplevel):
         self._update_mass_apply_visibility()
 
     def _create_group_header(self, parent, text, color):
-        f = Frame(parent, bg=c.DARK_BG)
+        f = Frame(parent, bg=c.DARK_BG, padx=20)
         f.pack(fill='x', pady=(15, 5))
         Label(f, text=text.upper(), font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.DARK_BG, fg=color).pack(side='left')
         Frame(f, bg=color, height=1).pack(side='left', fill='x', expand=True, padx=(10, 0))
 
     def _create_file_row(self, parent, path, action_type):
-        row = Frame(parent, bg=c.DARK_BG)
-        row.pack(fill='x', pady=2)
+        """Creates a container for the file row with flat buttons for performance."""
+        row_container = Frame(parent, bg=c.DARK_BG)
+        # Apply padding internal to the row content so scrollbar stays at window edge
+        row_container.pack(fill='x', pady=2, padx=(20, 20))
+
+        row_header = Frame(row_container, bg=c.DARK_BG)
+        row_header.pack(fill='x')
+
         state = self.file_states.get(path, "pending")
-
         is_handled = state in ["applied", "deleted", "rejected"]
-        font = (c.FONT_FAMILY_PRIMARY, 11, 'overstrike') if is_handled else c.FONT_NORMAL
-        fg = c.TEXT_SUBTLE_COLOR if is_handled else c.TEXT_COLOR
+        font_config = c.FONT_NORMAL
+        if is_handled:
+            font = (font_config[0], font_config[1], 'overstrike')
+            fg = c.TEXT_SUBTLE_COLOR
+        else:
+            font = font_config
+            fg = c.TEXT_COLOR
 
-        Label(row, text=path, font=font, fg=fg, bg=c.DARK_BG, anchor='w').pack(side='left', fill='x', expand=True)
-        btn_frame = Frame(row, bg=c.DARK_BG)
+        # Link-style Filename Label
+        lbl_name = Label(row_header, text=path, font=font, fg=fg, bg=c.DARK_BG, anchor='w', cursor='hand2')
+        lbl_name.pack(side='left', fill='x', expand=True)
+
+        # Bind events for opening the file and visual feedback
+        lbl_name.bind("<Button-1>", lambda e, p=path: self._open_file_in_editor(p))
+        lbl_name.bind("<Enter>", lambda e, l=lbl_name, f=font_config: self._on_link_hover(l, f, True))
+        lbl_name.bind("<Leave>", lambda e, l=lbl_name, f=font: self._on_link_hover(l, f, False))
+        
+        btn_frame = Frame(row_header, bg=c.DARK_BG)
         btn_frame.pack(side='right')
+
+        diff_container = Frame(row_container, bg=c.DARK_BG)
+        # diff_container remains unpacked until requested
+
+        # Common button styling for high-performance simple buttons
+        btn_opts = {
+            'font': c.FONT_SMALL_BUTTON, 'relief': 'flat', 'borderwidth': 0, 
+            'height': 1, 'cursor': 'hand2', 'padx': 10
+        }
 
         if is_handled:
             is_new_creation = path in self.plan.get('creations', {})
@@ -304,14 +377,80 @@ class FeedbackDialog(tk.Toplevel):
             elif path in self.undo_buffer and self.undo_buffer[path] is not None: show_undo = True
 
             if show_undo:
-                RoundedButton(btn_frame, text="Undo", command=lambda: self._undo_file_action(path, action_type), bg="#666666", fg="#FFFFFF", font=c.FONT_SMALL_BUTTON, width=60, height=24, radius=4, cursor="hand2").pack()
+                Button(btn_frame, text="Undo", command=lambda: self._undo_file_action(path, action_type), bg="#666666", fg="#FFFFFF", **btn_opts).pack()
         else:
+            # Diff Toggle Button (Blue)
+            diff_btn = Button(btn_frame, text="Diff", command=lambda: self._toggle_diff(path, diff_container, action_type), bg=c.BTN_BLUE, fg="#FFFFFF", **btn_opts)
+            diff_btn.pack(side='left', padx=(0, 2))
+            ToolTip(diff_btn, "Inspect text changes")
+
             if action_type == "delete":
-                RoundedButton(btn_frame, text="Accept Delete", command=lambda: self._apply_file_action(path, "delete"), bg=c.WARN, fg="#FFFFFF", font=c.FONT_SMALL_BUTTON, width=100, height=24, radius=4, cursor="hand2").pack(side='left', padx=2)
-                RoundedButton(btn_frame, text="Keep", command=lambda: self._discard_file_item(path), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=60, height=24, radius=4, cursor="hand2").pack(side='left')
+                Button(btn_frame, text="Accept Delete", command=lambda: self._apply_file_action(path, "delete"), bg=c.WARN, fg="#FFFFFF", **btn_opts).pack(side='left', padx=(0, 2))
+                Button(btn_frame, text="Keep", command=lambda: self._discard_file_item(path), bg=c.STATUS_BG, fg=c.TEXT_COLOR, **btn_opts).pack(side='left')
             else:
-                RoundedButton(btn_frame, text="Accept", command=lambda: self._apply_file_action(path, action_type), bg=c.BTN_GREEN, fg="#FFFFFF", font=c.FONT_SMALL_BUTTON, width=70, height=24, radius=4, cursor="hand2").pack(side='left', padx=2)
-                RoundedButton(btn_frame, text="Discard", command=lambda: self._discard_file_item(path), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, width=70, height=24, radius=4, cursor="hand2").pack(side='left')
+                Button(btn_frame, text="Accept", command=lambda: self._apply_file_action(path, action_type), bg=c.BTN_GREEN, fg="#FFFFFF", **btn_opts).pack(side='left', padx=(0, 2))
+                Button(btn_frame, text="Discard", command=lambda: self._discard_file_item(path), bg=c.STATUS_BG, fg=c.TEXT_COLOR, **btn_opts).pack(side='left')
+
+    def _on_link_hover(self, label, base_font, is_enter):
+        """Applies/Removes underlining and highlight on filename hover."""
+        if is_enter:
+            # Use underline if possible
+            if len(base_font) > 2:
+                new_font = (base_font[0], base_font[1], base_font[2] + ' underline')
+            else:
+                new_font = (base_font[0], base_font[1], 'underline')
+            label.config(font=new_font, fg=c.BTN_BLUE_TEXT)
+        else:
+            label.config(font=base_font, fg=c.TEXT_COLOR if label.cget('fg') != c.TEXT_SUBTLE_COLOR else c.TEXT_SUBTLE_COLOR)
+
+    def _open_file_in_editor(self, rel_path):
+        """Attempts to open the file using the application's editor logic."""
+        full_path = os.path.join(self.base_dir, rel_path)
+        if not os.path.isfile(full_path):
+            self.app.status_var.set(f"File not found on disk: {rel_path}")
+            return
+
+        editor = self.app_state.config.get('default_editor', '')
+        try:
+            if editor and os.path.isfile(editor):
+                subprocess.Popen([editor, full_path])
+            else:
+                if sys.platform == "win32":
+                    os.startfile(full_path)
+                elif sys.platform == "darwin":
+                    subprocess.call(['open', full_path])
+                else:
+                    subprocess.call(['xdg-open', full_path])
+            self.app.status_var.set(f"Opening {os.path.basename(rel_path)}...")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open file: {e}", parent=self)
+
+    def _toggle_diff(self, path, container, action_type):
+        """Lazily loads and toggles the diff viewer for a specific file."""
+        if container.winfo_ismapped():
+            container.pack_forget()
+            return
+
+        # Lazy instantiation
+        if path not in self._diff_viewers:
+            old_text = ""
+            new_text = ""
+
+            if action_type == "create":
+                new_text = self.plan['creations'].get(path, "")
+            elif action_type == "delete":
+                old_text = change_applier.get_current_file_content(self.base_dir, path) or ""
+            else: # modify
+                old_text = change_applier.get_current_file_content(self.base_dir, path) or ""
+                new_text = self.plan['updates'].get(path, "")
+
+            viewer = DiffViewer(container, old_text, new_text)
+            viewer.pack(fill='x', pady=(5, 10))
+            self._diff_viewers[path] = viewer
+
+        container.pack(fill='x')
+        # Ensure scrollregion is updated for the parent scrollable frame
+        self.file_list_scroll._on_frame_configure()
 
     def _apply_file_action(self, path, action_type):
         original = None

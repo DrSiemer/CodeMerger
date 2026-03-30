@@ -36,11 +36,12 @@ class ScrollableFrame(tk.Frame):
         self._manage_scrollbar()
 
     def _on_mousewheel(self, event):
-        # Prevent this widget from scrolling if the cursor is over a child Text widget
+        # Allow scrolling if over a Text widget as long as it's read-only (disabled)
         widget_under_cursor = self.winfo_containing(event.x_root, event.y_root)
         w = widget_under_cursor
         while w is not None:
-            if isinstance(w, tk.Text):
+            # If the widget is an editable Text box, let it handle its own scroll
+            if isinstance(w, tk.Text) and w.cget('state') == 'normal':
                 return
             if w == self:
                 break
