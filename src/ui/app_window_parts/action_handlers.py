@@ -418,8 +418,6 @@ class ActionHandlers:
             self.app.show_error_dialog("Parsing Error", message, hint=hint)
             return
 
-        # PERSISTENCE FIX: Assign the plan to the app immediately so the orange button appears
-        # the absolute instant it is parsed.
         self.app.last_ai_response = plan
         self.app.button_manager.update_button_states()
 
@@ -431,7 +429,7 @@ class ActionHandlers:
             creations = filtered_creations if filtered_creations is not None else plan.get('creations', {})
             deletions = filtered_deletions if filtered_deletions is not None else plan.get('deletions_proposed', [])
 
-            # AUTO-APPLY SAFETY: If we are not in a review window and there are creations OR deletions, warn the user.
+            # If we are not in a review window and there are creations OR deletions, warn the user.
             if not dialog_to_close:
                 warning_parts = []
                 if creations:
@@ -507,9 +505,6 @@ class ActionHandlers:
 
         if plan is None:
             plan = getattr(self.app, 'last_ai_response', None)
-
-            # REQUIREMENT FIX: When re-opening a cached response, we must reconstruct the do_execute closure
-            # so the "Apply All Remaining" button actually works.
             if plan and on_apply is None:
                 project = self.app.project_manager.get_current_project()
                 if project:
