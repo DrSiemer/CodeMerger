@@ -6,7 +6,7 @@ Separating these from logic improves maintainability and readability.
 # Default Project Instructions
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"
 
-DEFAULT_INTRO_PROMPT = "Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n"
+DEFAULT_INTRO_PROMPT = "We are working on REPLACE_ME.\n\nQUESTION\n\n"
 
 DEFAULT_OUTRO_PROMPT = """Stylistic Guidelines
 
