@@ -56,10 +56,17 @@ class FeedbackDialog(tk.Toplevel):
 
         # Modality & Layering Logic
         is_parent_topmost = False
-        try: is_parent_topmost = self.parent.attributes("-topmost")
-        except Exception: pass
-        if is_parent_topmost: self.attributes("-topmost", True)
-        else: self.transient(parent)
+        try:
+            is_parent_topmost = self.parent.attributes("-topmost")
+        except Exception:
+            pass
+
+        if is_parent_topmost:
+            # If spawned from Compact Mode, stay in front of IDE but don't lock the app
+            self.attributes("-topmost", True)
+        else:
+            # If spawned from main window, behave as a standard dependent window
+            self.transient(parent)
 
         apply_dark_theme(self)
 
@@ -95,14 +102,14 @@ class FeedbackDialog(tk.Toplevel):
 
         self.alert_frame = Frame(main_frame, bg=c.DARK_BG)
 
-        # UI CHANGE: Show the correction button if ANY unformatted segments exist.
-        if has_unformatted:
+        # Show the correction button if ANY unformatted segments exist.
+        if has_unformatted and not has_any_tags:
             self.alert_frame.grid(row=1, column=0, sticky="ew", pady=(0, 15))
-            alert_msg = "This response contains commentary not wrapped in tags" if has_any_tags else "This response was not properly wrapped in XML tags"
-            Label(self.alert_frame, text=alert_msg, fg=c.WARN, bg=c.DARK_BG, font=c.FONT_NORMAL).pack(side='left')
+            Label(self.alert_frame, text="This text was not properly wrapped in the requested XML tags", fg=c.WARN, bg=c.DARK_BG, font=c.FONT_NORMAL).pack(side='left')
 
             self.admonish_btn = RoundedButton(self.alert_frame, text="Copy Correction Prompt", command=self._copy_admonishment, bg=c.ATTENTION, fg="#FFFFFF", font=c.FONT_SMALL_BUTTON, width=200, height=26, cursor="hand2")
             self.admonish_btn.pack(side='right')
+            ToolTip(self.admonish_btn, "Copy a prompt to tell the AI to follow the output format")
 
         self.notebook = ttk.Notebook(main_frame)
         self.notebook.grid(row=2, column=0, sticky="nsew", pady=(0, 15))
@@ -140,6 +147,7 @@ class FeedbackDialog(tk.Toplevel):
                     changes_tab_added = True
                 elif "ANSWERS" in tag_name: icon = self._cyan_accent; info_key = "review_tab_answers"
                 elif "VERIFICATION" in tag_name: icon = self._green_accent; info_key = "review_tab_verification"
+                elif "DELETED" in tag_name: icon = self._red_accent; info_key = "review_tab_delete"
 
                 self._add_tab(title, content, icon=icon, info_key=info_key)
                 if "VERIFICATION" in tag_name: self.tab_indices['verification'] = current_idx
@@ -159,19 +167,21 @@ class FeedbackDialog(tk.Toplevel):
 
         if force_verification and 'verification' in self.tab_indices:
             self.notebook.select(self.tab_indices['verification'])
+        elif current_idx > 0:
+            self.notebook.select(0)
 
         self.bottom_frame = Frame(main_frame, bg=c.DARK_BG)
         self.bottom_frame.grid(row=3, column=0, sticky="ew", pady=(15, 0))
 
         show_val = self.app_state.config.get('show_feedback_on_paste', True) if self.app_state else True
         self.show_var = BooleanVar(value=show_val)
-        self.auto_show_chk = ttk.Checkbutton(self.bottom_frame, text="Show automatically", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
+        self.auto_show_chk = ttk.Checkbutton(self.bottom_frame, text="Show this window automatically on paste", variable=self.show_var, style='Dark.TCheckbutton', command=self._save_setting)
         self.auto_show_chk.pack(side="left")
 
         if self.on_apply_executor:
             # Main action buttons
-            self.apply_btn = RoundedButton(self.bottom_frame, text="Apply All Remaining", command=self._handle_apply_all, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, width=200, height=30, cursor="hand2")
-            self.cancel_btn = RoundedButton(self.bottom_frame, text="Close", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
+            self.apply_btn = RoundedButton(self.bottom_frame, text="Apply All", command=self._handle_apply_all, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BOLD, width=200, height=30, cursor="hand2")
+            self.cancel_btn = RoundedButton(self.bottom_frame, text="Close", command=self._handle_cancel, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
 
             # Initial pack
             self.apply_btn.pack(side="right")
@@ -180,8 +190,9 @@ class FeedbackDialog(tk.Toplevel):
             self.ok_button = RoundedButton(self.bottom_frame, text="OK", command=self.destroy, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=100, height=30, cursor="hand2")
             self.ok_button.pack(side="right")
 
-        self.bind("<Escape>", lambda e: self.destroy())
-        self.protocol("WM_DELETE_WINDOW", self.destroy)
+        # Bindings
+        self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply_executor else self._on_close_request())
+        self.protocol("WM_DELETE_WINDOW", self._on_close_request if self.on_apply_executor else self.destroy)
 
         initial_w, initial_h = 900, 750
         if self.app_state and self.app_state.info_mode_active: initial_h += c.INFO_PANEL_HEIGHT
@@ -195,6 +206,8 @@ class FeedbackDialog(tk.Toplevel):
             self.info_mgr.register(self.notebook, "review_tabs")
             self.info_mgr.register(self.auto_show_chk, "review_auto_show")
             if hasattr(self, 'apply_btn'): self.info_mgr.register(self.apply_btn, "review_apply")
+            if hasattr(self, 'cancel_btn'): self.info_mgr.register(self.cancel_btn, "review_cancel")
+            if hasattr(self, 'ok_button'): self.info_mgr.register(self.ok_button, "review_close")
             self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
         self._update_mass_apply_visibility()
@@ -366,6 +379,10 @@ class FeedbackDialog(tk.Toplevel):
 
         has_pending = any(s == "pending" for s in self.file_states.values())
         if has_pending:
+            # Show "Apply All Remaining" if any manual change (modify, delete, create) was accepted/rejected.
+            has_handled = any(s != "pending" for s in self.file_states.values())
+            self.apply_btn.config(text="Apply All Remaining" if has_handled else "Apply All")
+
             if not self.apply_btn.winfo_ismapped():
                 # Correct button order: Cancel on left, Apply on far right
                 self.cancel_btn.pack_forget()
@@ -375,6 +392,7 @@ class FeedbackDialog(tk.Toplevel):
             self.apply_btn.pack_forget()
 
     def _handle_apply_all(self):
+        """Applies all currently pending changes and crosses them out in the list."""
         pending_updates = {p: c for p, c in self.plan.get('updates', {}).items() if self.file_states.get(p) == "pending"}
         pending_creations = {p: c for p, c in self.plan.get('creations', {}).items() if self.file_states.get(p) == "pending"}
         pending_deletions = [p for p in self.plan.get('deletions_proposed', []) if self.file_states.get(p) == "pending"]
@@ -382,6 +400,7 @@ class FeedbackDialog(tk.Toplevel):
         if not (pending_updates or pending_creations or pending_deletions):
             return
 
+        # Backup all pending items for individual UNDO capability
         for path in list(pending_updates.keys()) + pending_deletions:
             if path not in self.undo_buffer:
                  self.undo_buffer[path] = change_applier.get_current_file_content(self.base_dir, path)
@@ -391,12 +410,36 @@ class FeedbackDialog(tk.Toplevel):
             for p in pending_creations: self.file_states[p] = "applied"
             for p in pending_deletions: self.file_states[p] = "deleted"
 
+            # Cross out the files in the UI list and show Undo buttons
+            self._refresh_file_list_ui()
+
             if 'verification' in self.tab_indices:
                 self._update_mass_apply_visibility()
                 self.cancel_btn.config(text="Close")
                 self.notebook.select(self.tab_indices['verification'])
             else:
                 self.destroy()
+
+    def _handle_cancel(self):
+        """Discards the update immediately. Used by the explicit 'Cancel' button."""
+        if self.on_refuse:
+            self.on_refuse()
+        self.destroy()
+
+    def _on_close_request(self):
+        """Warns the user before discarding the update if the window is closed manually."""
+        if self.on_apply_executor:
+            # Check if there are actual pending changes to discard
+            has_pending = any(s == "pending" for s in self.file_states.values())
+            if has_pending:
+                if not messagebox.askyesno(
+                    "Discard Update?",
+                    "You are currently reviewing a proposed update. Closing this window will discard the changes and they will not be applied to your project files.\n\nAre you sure you want to discard this update?",
+                    parent=self
+                ):
+                    return
+
+        self._handle_cancel()
 
     def _check_for_new_files(self, container):
         if not self.app: return
