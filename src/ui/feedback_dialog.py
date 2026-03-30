@@ -87,13 +87,16 @@ class FeedbackDialog(tk.Toplevel):
         self._green_accent = self._create_vertical_accent(c.BTN_GREEN)        # Verification
         self._yellow_accent = self._create_vertical_accent(c.ATTENTION)       # Unformatted
 
-        # main_content_frame has NO horizontal padding to allow scrollbar flushness
         self.main_content_frame = Frame(self, bg=c.DARK_BG, pady=20)
         self.main_content_frame.grid(row=0, column=0, sticky="nsew")
-
-        # Main Layout Rows: 0=Header, 1=UnformattedAlert, 2=Notebook, 3=BottomActions
         self.main_content_frame.grid_rowconfigure(2, weight=1)
         self.main_content_frame.grid_columnconfigure(0, weight=1)
+
+        if self.app_state:
+            self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+            self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
+        else:
+            self.info_mgr = None
 
         # Header padding applied internally
         header_row = Frame(self.main_content_frame, bg=c.DARK_BG, padx=20)
@@ -121,6 +124,7 @@ class FeedbackDialog(tk.Toplevel):
             self.admonish_btn = RoundedButton(self.alert_frame, text="Copy Correction Prompt", command=self._copy_admonishment, bg=c.ATTENTION, fg="#FFFFFF", font=c.FONT_SMALL_BUTTON, width=200, height=26, cursor="hand2")
             self.admonish_btn.pack(side='right')
             ToolTip(self.admonish_btn, "Copy a prompt to tell the AI to follow the output format")
+            if self.info_mgr: self.info_mgr.register(self.admonish_btn, "review_admonish")
 
         self.notebook = ttk.Notebook(self.main_content_frame)
         self.notebook.grid(row=2, column=0, sticky="nsew", pady=(0, 15))
@@ -213,15 +217,21 @@ class FeedbackDialog(tk.Toplevel):
         self.resizable(True, True)
         position_window(self)
 
-        if self.app_state:
-            self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
-            self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
+        # Register remaining UI components with Info Mode
+        if self.info_mgr:
             self.info_mgr.register(self.notebook, "review_tabs")
             self.info_mgr.register(self.auto_show_chk, "review_auto_show")
             if hasattr(self, 'apply_btn'): self.info_mgr.register(self.apply_btn, "review_apply")
             if hasattr(self, 'cancel_btn'): self.info_mgr.register(self.cancel_btn, "review_cancel")
             if hasattr(self, 'ok_button'): self.info_mgr.register(self.ok_button, "review_close")
             self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+
+            # Link registered tab renderers built during the segment loop
+            for widget, key in self.tab_widgets_for_info:
+                self.info_mgr.register(widget, key)
+
+            # Ensure the toggle button is physically on top of the main layout frames
+            self.info_toggle_btn.lift()
 
         self._update_mass_apply_visibility()
         self.deiconify()
@@ -234,7 +244,7 @@ class FeedbackDialog(tk.Toplevel):
         new_size = (event.width, event.height)
         if self._last_size == new_size:
             return
-        
+
         self._last_size = new_size
 
         # Hide heavy UI components immediately to stop layout thrashing
@@ -268,7 +278,7 @@ class FeedbackDialog(tk.Toplevel):
         frame = Frame(self.notebook, bg=c.DARK_BG)
         if icon: self.notebook.add(frame, text=title, image=icon, compound="left")
         else: self.notebook.add(frame, text=title)
-        
+
         # Ensure MarkdownRenderer inside uses the full width
         renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=self._adjust_font_size)
         renderer.pack(fill="both", expand=True)
@@ -284,8 +294,8 @@ class FeedbackDialog(tk.Toplevel):
         Label(header, text="Proposed Actions", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
 
         if desc.strip():
-            self.toggle_desc_btn = RoundedButton(header, text="Show AI Commentary", command=self._toggle_commentary, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
-            self.toggle_desc_btn.pack(side='right')
+            self.toggle_commentary_btn = RoundedButton(header, text="Show AI Commentary", command=self._toggle_commentary, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+            self.toggle_commentary_btn.pack(side='right')
             self.commentary_renderer = MarkdownRenderer(frame, base_font_size=10, height=8)
             self.commentary_renderer.set_markdown(desc.strip())
 
@@ -298,10 +308,10 @@ class FeedbackDialog(tk.Toplevel):
         if not hasattr(self, 'commentary_renderer'): return
         if self.commentary_renderer.winfo_ismapped():
             self.commentary_renderer.pack_forget()
-            self.toggle_desc_btn.config(text="Show AI Commentary", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
+            self.toggle_commentary_btn.config(text="Show AI Commentary", bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT)
         else:
             self.commentary_renderer.pack(fill='x', before=self.file_list_scroll, padx=20, pady=(0, 10))
-            self.toggle_desc_btn.config(text="Hide AI Commentary", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
+            self.toggle_commentary_btn.config(text="Hide AI Commentary", bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT)
 
     def _refresh_file_list_ui(self):
         container = self.file_list_scroll.scrollable_frame
@@ -320,6 +330,10 @@ class FeedbackDialog(tk.Toplevel):
         if deletions:
             self._create_group_header(container, "Delete Obsolete File", c.WARN)
             for p in sorted(deletions): self._create_file_row(container, p, "delete")
+
+        # Register commentary toggle if it exists after UI rebuild
+        if hasattr(self, 'toggle_commentary_btn') and self.info_mgr:
+            self.info_mgr.register(self.toggle_commentary_btn, "review_commentary")
 
         self._update_mass_apply_visibility()
 
@@ -356,7 +370,7 @@ class FeedbackDialog(tk.Toplevel):
         lbl_name.bind("<Button-1>", lambda e, p=path: self._open_file_in_editor(p))
         lbl_name.bind("<Enter>", lambda e, l=lbl_name, f=font_config: self._on_link_hover(l, f, True))
         lbl_name.bind("<Leave>", lambda e, l=lbl_name, f=font: self._on_link_hover(l, f, False))
-        
+
         btn_frame = Frame(row_header, bg=c.DARK_BG)
         btn_frame.pack(side='right')
 
@@ -365,7 +379,7 @@ class FeedbackDialog(tk.Toplevel):
 
         # Common button styling for high-performance simple buttons
         btn_opts = {
-            'font': c.FONT_SMALL_BUTTON, 'relief': 'flat', 'borderwidth': 0, 
+            'font': c.FONT_SMALL_BUTTON, 'relief': 'flat', 'borderwidth': 0,
             'height': 1, 'cursor': 'hand2', 'padx': 10
         }
 
@@ -377,19 +391,32 @@ class FeedbackDialog(tk.Toplevel):
             elif path in self.undo_buffer and self.undo_buffer[path] is not None: show_undo = True
 
             if show_undo:
-                Button(btn_frame, text="Undo", command=lambda: self._undo_file_action(path, action_type), bg="#666666", fg="#FFFFFF", **btn_opts).pack()
+                undo_btn = Button(btn_frame, text="Undo", command=lambda: self._undo_file_action(path, action_type), bg="#666666", fg="#FFFFFF", **btn_opts)
+                undo_btn.pack()
+                if self.info_mgr: self.info_mgr.register(undo_btn, "review_file_action")
         else:
             # Diff Toggle Button (Blue)
             diff_btn = Button(btn_frame, text="Diff", command=lambda: self._toggle_diff(path, diff_container, action_type), bg=c.BTN_BLUE, fg="#FFFFFF", **btn_opts)
             diff_btn.pack(side='left', padx=(0, 2))
             ToolTip(diff_btn, "Inspect text changes")
+            if self.info_mgr: self.info_mgr.register(diff_btn, "review_diff")
 
             if action_type == "delete":
-                Button(btn_frame, text="Accept Delete", command=lambda: self._apply_file_action(path, "delete"), bg=c.WARN, fg="#FFFFFF", **btn_opts).pack(side='left', padx=(0, 2))
-                Button(btn_frame, text="Keep", command=lambda: self._discard_file_item(path), bg=c.STATUS_BG, fg=c.TEXT_COLOR, **btn_opts).pack(side='left')
+                accept_btn = Button(btn_frame, text="Accept Delete", command=lambda: self._apply_file_action(path, "delete"), bg=c.WARN, fg="#FFFFFF", **btn_opts)
+                accept_btn.pack(side='left', padx=(0, 2))
+                discard_btn = Button(btn_frame, text="Keep", command=lambda: self._discard_file_item(path), bg=c.STATUS_BG, fg=c.TEXT_COLOR, **btn_opts)
+                discard_btn.pack(side='left')
+                if self.info_mgr:
+                    self.info_mgr.register(accept_btn, "review_file_action")
+                    self.info_mgr.register(discard_btn, "review_file_action")
             else:
-                Button(btn_frame, text="Accept", command=lambda: self._apply_file_action(path, action_type), bg=c.BTN_GREEN, fg="#FFFFFF", **btn_opts).pack(side='left', padx=(0, 2))
-                Button(btn_frame, text="Discard", command=lambda: self._discard_file_item(path), bg=c.STATUS_BG, fg=c.TEXT_COLOR, **btn_opts).pack(side='left')
+                accept_btn = Button(btn_frame, text="Accept", command=lambda: self._apply_file_action(path, action_type), bg=c.BTN_GREEN, fg="#FFFFFF", **btn_opts)
+                accept_btn.pack(side='left', padx=(0, 2))
+                discard_btn = Button(btn_frame, text="Discard", command=lambda: self._discard_file_item(path), bg=c.STATUS_BG, fg=c.TEXT_COLOR, **btn_opts)
+                discard_btn.pack(side='left')
+                if self.info_mgr:
+                    self.info_mgr.register(accept_btn, "review_file_action")
+                    self.info_mgr.register(discard_btn, "review_file_action")
 
     def _on_link_hover(self, label, base_font, is_enter):
         """Applies/Removes underlining and highlight on filename hover."""
@@ -603,7 +630,7 @@ class FeedbackDialog(tk.Toplevel):
         renderer.pack(fill="both", expand=True)
         renderer.set_markdown(raw_text.strip())
         self.renderers.append(renderer)
-        self.tab_widgets_for_info.append((renderer, "review_tab_unformatted"))
+        if self.info_mgr: self.info_mgr.register(renderer, "review_tab_unformatted")
 
     def _copy_admonishment(self):
         msg = (
