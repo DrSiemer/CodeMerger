@@ -1,6 +1,42 @@
 import os
 import re
 
+def get_current_file_content(base_dir, rel_path):
+    """Reads current file content from disk for backup/undo purposes."""
+    full_path = os.path.join(base_dir, rel_path)
+    if os.path.isfile(full_path):
+        try:
+            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                return f.read()
+        except OSError:
+            return None
+    return None
+
+def apply_single_file(base_dir, rel_path, content):
+    """Writes a single file to disk, creating directories if needed."""
+    try:
+        path = os.path.join(base_dir, rel_path)
+        dir_path = os.path.dirname(path)
+        if not os.path.isdir(dir_path):
+            os.makedirs(dir_path, exist_ok=True)
+
+        sanitized_content = _sanitize_content(path, content)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(sanitized_content)
+        return True, ""
+    except IOError as e:
+        return False, str(e)
+
+def delete_single_file(base_dir, rel_path):
+    """Removes a single file from disk."""
+    try:
+        path = os.path.join(base_dir, rel_path)
+        if os.path.isfile(path):
+            os.remove(path)
+        return True, ""
+    except IOError as e:
+        return False, str(e)
+
 def _sanitize_content(path, content):
     """Cleans up whitespace and line endings"""
     lines = content.split('\n')
@@ -8,10 +44,8 @@ def _sanitize_content(path, content):
 
     _, extension = os.path.splitext(path)
     if extension.lower() == '.md':
-        # For markdown, only normalize line endings and trailing whitespace
         return '\n'.join(lines)
 
-    # For all other code files, also collapse multiple consecutive empty lines
     collapsed_lines = []
     last_line_was_empty = False
     for line in lines:
@@ -22,32 +56,32 @@ def _sanitize_content(path, content):
         last_line_was_empty = is_empty
     return '\n'.join(collapsed_lines)
 
-def execute_plan(base_dir, updates, creations):
-    """Writes the planned changes to the filesystem"""
+def execute_plan(base_dir, updates, creations, deletions=None):
+    """Writes the planned changes to the filesystem and deletes files marked for removal"""
     try:
         # Create new files
         for rel_path, content in creations.items():
-            path = os.path.join(base_dir, rel_path)
-            dir_path = os.path.dirname(path)
-            if not os.path.isdir(dir_path):
-                os.makedirs(dir_path, exist_ok=True)
-
-            sanitized_content = _sanitize_content(path, content)
-            with open(path, 'w', encoding='utf-8') as f:
-                f.write(sanitized_content)
+            apply_single_file(base_dir, rel_path, content)
 
         # Update existing files
         for rel_path, content in updates.items():
-            path = os.path.join(base_dir, rel_path)
-            sanitized_content = _sanitize_content(path, content)
-            with open(path, 'w', encoding='utf-8') as f:
-                f.write(sanitized_content)
+            apply_single_file(base_dir, rel_path, content)
+
+        # Handle Deletions
+        if deletions:
+            for rel_path in deletions:
+                delete_single_file(base_dir, rel_path)
 
     except IOError as e:
         return False, f"Error writing to file: {e}"
 
-    total_files = len(updates) + len(creations)
-    return True, f"Successfully applied changes to {total_files} file(s)."
+    total_added = len(updates) + len(creations)
+    total_deleted = len(deletions) if deletions else 0
+    msg = f"Successfully updated {total_added} file(s)"
+    if total_deleted > 0:
+        msg += f" and deleted {total_deleted} file(s)"
+
+    return True, msg + "."
 
 def parse_and_plan_changes(base_dir, markdown_text):
     """
@@ -117,8 +151,20 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'content': content
             })
 
+    # Extract proposed deletions from the tag content
+    deletions_proposed = []
+    delete_section_content = ""
+    for b in all_blocks:
+        if b['tag'] == "DELETED FILES":
+            delete_section_content = b['content']
+            break
+
+    if delete_section_content:
+        # Match lines like "DELETE FILE: path/to/file.ext"
+        del_matches = re.findall(r'DELETE FILE:\s*(.+)', delete_section_content, re.IGNORECASE)
+        deletions_proposed = [m.strip().replace('\\', '/') for m in del_matches if m.strip()]
+
     # Identify file blocks
-    # Supports paths wrapped in backticks or single quotes to handle AI typos
     file_block_regex = re.escape(PREFIX) + r'File: [`\']([^\n`\']+)[\'`] ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
     for match in re.finditer(file_block_regex, markdown_text_processed, re.DOTALL):
         all_blocks.append({
@@ -152,7 +198,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'content': block['content']
             })
         else:
-            # Files are handled by the execution plan but recorded here for tab ordering
             ordered_segments.append({'type': 'file_placeholder'})
 
         last_end = block['span'][1]
@@ -208,6 +253,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     result = {
         'updates': files_to_update,
         'creations': files_to_create,
+        'deletions_proposed': deletions_proposed,
         'answers': get_tag_content("ANSWERS TO DIRECT USER QUESTIONS"),
         'intro': get_tag_content("INTRO"),
         'changes': get_tag_content("CHANGES"),
@@ -220,7 +266,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     if not all_blocks:
         result['status'] = 'UNFORMATTED'
         result['unformatted'] = markdown_text.strip()
-    elif files_to_create:
+    elif files_to_create or deletions_proposed:
         result['status'] = 'CONFIRM_CREATION'
     else:
         result['status'] = 'SUCCESS'

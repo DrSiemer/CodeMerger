@@ -418,38 +418,48 @@ class ActionHandlers:
             self.app.show_error_dialog("Parsing Error", message, hint=hint)
             return
 
-        def do_execute():
+        # PERSISTENCE FIX: Assign the plan to the app immediately so the orange button appears
+        # the absolute instant it is parsed.
+        self.app.last_ai_response = plan
+        self.app.button_manager.update_button_states()
+
+        def do_execute(filtered_updates=None, filtered_creations=None, filtered_deletions=None):
             """Writes files to disk. Returns True on success, False if cancelled or error."""
-            if status == 'CONFIRM_CREATION':
-                creations = plan.get('creations', {})
-                creation_rel_paths = list(creations.keys())
 
-                confirm_message = (
-                    f"This operation will create {len(creations)} new file(s):\n\n"
-                    f" - " + "\n - ".join(creation_rel_paths) +
-                    "\n\nDo you want to proceed?"
-                )
-                dialog_parent = self.app
-                if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
-                    dialog_parent = self.app.view_manager.compact_mode_window
+            # Use provided lists (from Review window) or default to the full parsed plan
+            updates = filtered_updates if filtered_updates is not None else plan.get('updates', {})
+            creations = filtered_creations if filtered_creations is not None else plan.get('creations', {})
+            deletions = filtered_deletions if filtered_deletions is not None else plan.get('deletions_proposed', [])
 
-                if not messagebox.askyesno("Confirm New Files", confirm_message, parent=dialog_parent):
-                    self.app.helpers.show_compact_toast("Operation cancelled.")
-                    return False
+            # AUTO-APPLY SAFETY: If we are not in a review window and there are creations OR deletions, warn the user.
+            if not dialog_to_close:
+                warning_parts = []
+                if creations:
+                    warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
+                if deletions:
+                    warning_parts.append(f"DELETE {len(deletions)} file(s):\n- " + "\n- ".join(deletions))
 
-            updates = plan.get('updates', {})
-            creations = plan.get('creations', {})
-            success, final_message = change_applier.execute_plan(base_dir, updates, creations)
+                if warning_parts:
+                    confirm_message = "This operation will perform the following actions:\n\n" + "\n\n".join(warning_parts) + "\n\nDo you want to proceed?"
+
+                    dialog_parent = self.app
+                    if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
+                        dialog_parent = self.app.view_manager.compact_mode_window
+
+                    if not messagebox.askyesno("Confirm File Actions", confirm_message, parent=dialog_parent):
+                        self.app.helpers.show_compact_toast("Operation cancelled.")
+                        return False
+
+            success, final_message = change_applier.execute_plan(base_dir, updates, creations, deletions)
 
             if success:
                 self.app.helpers.show_compact_toast(final_message)
-                if creations:
+                if creations or deletions:
                     self.app.file_monitor.perform_new_file_check()
-                self.app.last_ai_response = plan
+
+                # Refresh main UI buttons
                 self.app.button_manager.update_button_states()
 
-                if dialog_to_close:
-                    dialog_to_close.destroy()
                 return True
             else:
                 self.app.show_error_dialog("File Write Error", final_message)
@@ -460,13 +470,10 @@ class ActionHandlers:
             if dialog_to_close:
                 dialog_to_close.destroy()
 
-        # Determine whether to show review dialog based on user settings and the modifier override
         show_feedback_setting = self.app.app_state.config.get('show_feedback_on_paste', True)
         should_show = (not show_feedback_setting) if force_toggle_feedback else show_feedback_setting
-
         is_unformatted_only = (status == 'UNFORMATTED')
 
-        # Logic Update: If user wants review, always open the dialog for valid changes
         if should_show:
             if dialog_to_close:
                 dialog_to_close.destroy()
@@ -475,10 +482,8 @@ class ActionHandlers:
             on_apply_cb = do_execute if not is_unformatted_only else None
             self.show_response_review(plan=plan, on_apply=on_apply_cb, on_refuse=do_refuse)
         elif not is_unformatted_only:
-            # Review disabled: apply instantly
             do_execute()
         else:
-            # Unformatted ONLY + Review Disabled: show specific failure toast
             self.app.helpers.show_compact_toast("Error: LLM response followed no usable format.")
 
     def show_response_review(self, plan=None, on_apply=None, on_refuse=None, force_verification=False):
@@ -487,27 +492,43 @@ class ActionHandlers:
         Uses either the provided plan (from a fresh paste) or the cached last response.
         Overwrites any currently open review window to allow sequential pasting.
         """
-        # Check if an existing review window is open with pending (unapplied) changes
         existing = getattr(self.app, 'active_feedback_dialog', None)
         if existing and existing.winfo_exists():
-            # on_apply is cleared after changes are written, so if it's set, code is unapplied
-            if existing.on_apply is not None:
-                # Determine appropriate parent for the confirmation dialog
+            if existing.on_apply_executor is not None:
                 dialog_parent = self.app
                 if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
                     dialog_parent = self.app.view_manager.compact_mode_window
 
                 msg = "An AI response review is already open with changes that haven't been applied yet.\n\nAre you sure you want to overwrite it?"
                 if not messagebox.askyesno("Confirm Overwrite", msg, parent=dialog_parent):
-                    return # User chose to keep the current review
+                    return
 
-            # Destroy the old dialog to make room for the new one
             existing.destroy()
 
-        is_pending = True
         if plan is None:
             plan = getattr(self.app, 'last_ai_response', None)
-            is_pending = False
+
+            # REQUIREMENT FIX: When re-opening a cached response, we must reconstruct the do_execute closure
+            # so the "Apply All Remaining" button actually works.
+            if plan and on_apply is None:
+                project = self.app.project_manager.get_current_project()
+                if project:
+                    def do_execute_cached(u=None, c_list=None, d=None):
+                        # Re-use the existing do_execute logic
+                        updates = u if u is not None else plan.get('updates', {})
+                        creations = c_list if c_list is not None else plan.get('creations', {})
+                        deletions = d if d is not None else plan.get('deletions_proposed', [])
+
+                        success, final_message = change_applier.execute_plan(project.base_dir, updates, creations, deletions)
+                        if success:
+                            self.app.helpers.show_compact_toast(final_message)
+                            self.app.button_manager.update_button_states()
+                            return True
+                        else:
+                            self.app.show_error_dialog("File Write Error", final_message)
+                            return False
+
+                    on_apply = do_execute_cached
 
         if plan is None:
             self.app.helpers.show_compact_toast("No AI response review available yet.")

@@ -74,7 +74,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
    - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
-   - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure.
+   - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure. Byte-for-byte mirroring of unchanged lines is MANDATORY.
 
 4. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
