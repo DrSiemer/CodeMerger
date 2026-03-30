@@ -94,9 +94,13 @@ class FeedbackDialog(tk.Toplevel):
         has_any_tags = plan.get('has_any_tags', False)
 
         self.alert_frame = Frame(main_frame, bg=c.DARK_BG)
-        if has_unformatted and not has_any_tags:
+
+        # UI CHANGE: Show the correction button if ANY unformatted segments exist.
+        if has_unformatted:
             self.alert_frame.grid(row=1, column=0, sticky="ew", pady=(0, 15))
-            Label(self.alert_frame, text="This text was not properly wrapped in the requested XML tags", fg=c.WARN, bg=c.DARK_BG, font=c.FONT_NORMAL).pack(side='left')
+            alert_msg = "This response contains commentary not wrapped in tags" if has_any_tags else "This response was not properly wrapped in XML tags"
+            Label(self.alert_frame, text=alert_msg, fg=c.WARN, bg=c.DARK_BG, font=c.FONT_NORMAL).pack(side='left')
+
             self.admonish_btn = RoundedButton(self.alert_frame, text="Copy Correction Prompt", command=self._copy_admonishment, bg=c.ATTENTION, fg="#FFFFFF", font=c.FONT_SMALL_BUTTON, width=200, height=26, cursor="hand2")
             self.admonish_btn.pack(side='right')
 
