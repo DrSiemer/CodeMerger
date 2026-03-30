@@ -20,7 +20,7 @@ class InstructionsWindow(Toplevel):
         self.status_var = status_var
         self.on_close_callback = on_close_callback
 
-        # --- Window Setup ---
+        # Window Setup
         self.title("Set Instructions")
         self.iconbitmap(ICON_PATH)
 
@@ -28,7 +28,7 @@ class InstructionsWindow(Toplevel):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # --- Dynamic Geometry for Boot ---
+        # Dynamic Geometry for Boot
         initial_geom = c.INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY
         if self.parent.app_state.info_mode_active:
             match = re.match(r"(\d+)x(\d+)", initial_geom)
@@ -42,7 +42,7 @@ class InstructionsWindow(Toplevel):
         self.focus_force()
         self.configure(bg=c.DARK_BG)
 
-        # --- UI Layout using a single, robust Grid ---
+        # UI Layout using a single, robust Grid
         main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
         main_frame.grid(row=0, column=0, sticky='nsew')
         main_frame.grid_columnconfigure(0, weight=1)
@@ -50,7 +50,7 @@ class InstructionsWindow(Toplevel):
         main_frame.grid_rowconfigure(1, weight=1) # Intro text
         main_frame.grid_rowconfigure(3, weight=1) # Outro text
 
-        # --- Intro Section ---
+        # Intro Section
         intro_label_frame = Frame(main_frame, bg=c.DARK_BG)
         intro_label_frame.grid(row=0, column=0, sticky='w', pady=(0, 5))
         Label(intro_label_frame, text="Intro Instructions", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
@@ -62,7 +62,7 @@ class InstructionsWindow(Toplevel):
         )
         self.intro_text.grid(row=1, column=0, sticky='nsew', pady=(0, 10))
 
-        # --- Outro Section ---
+        # Outro Section
         outro_label_frame = Frame(main_frame, bg=c.DARK_BG)
         outro_label_frame.grid(row=2, column=0, sticky='w', pady=(0, 5))
         Label(outro_label_frame, text="Outro Instructions", font=c.FONT_WRAPPER_TITLE, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side='left')
@@ -74,7 +74,7 @@ class InstructionsWindow(Toplevel):
         )
         self.outro_text.grid(row=3, column=0, sticky='nsew')
 
-        # --- Action Buttons Section ---
+        # Action Buttons Section
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=4, column=0, sticky='ew', pady=(10, 0))
 
@@ -107,7 +107,7 @@ class InstructionsWindow(Toplevel):
         )
         self.save_button.pack(side='right')
 
-        # --- Populate Text Fields ---
+        # Populate Text Fields
         # Handle existing project config data defensively
         curr_intro = self.project_config.intro_text
         if isinstance(curr_intro, (list, tuple)): curr_intro = "\n".join(curr_intro)
@@ -121,7 +121,7 @@ class InstructionsWindow(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self._close_and_save_geometry)
         self.bind('<Escape>', lambda e: self._close_and_save_geometry())
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.intro_text, "inst_intro")
         self.info_mgr.register(self.outro_text, "inst_outro")

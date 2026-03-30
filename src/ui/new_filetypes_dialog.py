@@ -33,7 +33,7 @@ class NewFiletypesDialog(Toplevel):
         )
         ok_button.pack(side='bottom', anchor='e', pady=(15, 0))
 
-        # --- Scrollable List of New Filetypes ---
+        # Scrollable List of New Filetypes
         scroll_container = ScrollableFrame(main_frame, bg=c.DARK_BG)
         scroll_container.pack(fill='both', expand=True, pady=5)
         content_frame = scroll_container.scrollable_frame

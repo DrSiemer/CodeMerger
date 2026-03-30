@@ -54,7 +54,7 @@ class ProjectSelectorDialog(Toplevel):
         self.info_label = Label(self, text=message, padx=20, pady=10, bg=self.app_bg_color, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.info_label.grid(row=0, column=0, sticky='ew', pady=(5, 0))
 
-        # --- Filter Bar ---
+        # Filter Bar
         self.filter_frame = Frame(self, bg=c.DARK_BG, padx=20)
         self.filter_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
         Label(self.filter_frame, text="Filter:", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL).pack(side='left')
@@ -63,7 +63,7 @@ class ProjectSelectorDialog(Toplevel):
         self.filter_entry.pack(side='left', fill='x', expand=True, padx=(5,0), ipady=3)
         self.filter_var.trace_add('write', self._filter_projects)
 
-        # --- Scrollable List Container ---
+        # Scrollable List Container
         self.list_container = Frame(self, bg=self.app_bg_color)
         self.list_container.grid(row=2, column=0, sticky='nsew')
         self.list_container.grid_rowconfigure(0, weight=1)
@@ -72,7 +72,7 @@ class ProjectSelectorDialog(Toplevel):
         self.scroll_frame.grid(row=0, column=0, sticky='nsew')
         self.recent_dirs_frame = self.scroll_frame.scrollable_frame
 
-        # --- Footer Section ---
+        # Footer Section
         footer_frame = Frame(self, bg=self.app_bg_color, padx=20, pady=20)
         footer_frame.grid(row=3, column=0, sticky='ew')
         footer_frame.columnconfigure(1, weight=1)
@@ -80,7 +80,7 @@ class ProjectSelectorDialog(Toplevel):
         # Info Toggle: Managed by InfoManager.place
         self.info_toggle_btn = Label(self, image=assets.info_icon, bg=self.app_bg_color, cursor="hand2")
 
-        # --- "Add Project" Button ---
+        # "Add Project" Button
         self.browse_btn = RoundedButton(
             footer_frame, text="Add project", command=self.browse_for_new_dir,
             bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_BUTTON, cursor='hand2'
@@ -123,7 +123,7 @@ class ProjectSelectorDialog(Toplevel):
 
         self.geometry(f"{self.dialog_width}x{initial_height}+{self.current_x}+{self.current_y}")
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=4, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.scroll_frame.canvas, "sel_list")
         self.info_mgr.register(self.filter_entry, "sel_filter")
@@ -307,7 +307,7 @@ class ProjectSelectorDialog(Toplevel):
             if hasattr(self, 'info_mgr'):
                 self.info_mgr.register(remove_btn, "sel_remove")
 
-        # --- Event Bindings ---
+        # Event Bindings
         btn.bind("<ButtonRelease-1>", lambda e, p=path: self.on_project_button_release(e, p))
         btn.bind("<Enter>", lambda e, p=path: self.show_path_tooltip(e, p))
         btn.bind("<Leave>", self.hide_path_tooltip)

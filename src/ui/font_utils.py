@@ -3,7 +3,7 @@ import sys
 from PIL import ImageFont
 from functools import lru_cache
 
-# --- Robust Font Finding Logic ---
+# Robust Font Finding Logic
 WINDOWS_FONT_MAP = {
     "segoe ui": ["segoeui.ttf", "seguisb.ttf", "seguili.ttf"],
     "calibri": ["calibri.ttf", "calibrib.ttf"],

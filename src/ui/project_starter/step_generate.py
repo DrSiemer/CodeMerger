@@ -29,10 +29,10 @@ class GenerateView(tk.Frame):
         # Response area is the primary expanding element
         self.grid_rowconfigure(2, weight=1)
 
-        # 0. Header
+        # Header
         tk.Label(self, text="Finalize and Generate", font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, pady=(0, 10), sticky="w")
 
-        # --- STEP 1: PROMPT COPY SECTION ---
+        # PROMPT COPY SECTION
         self.step1_frame = tk.Frame(self, bg=c.DARK_BG)
         self.step1_frame.grid(row=1, column=0, pady=(10, 0), sticky="ew")
 
@@ -53,7 +53,7 @@ class GenerateView(tk.Frame):
         self.hint_label = tk.Label(self.step1_frame, text="Note: it is recommended to use a smart thinking model for this step", font=(c.FONT_FAMILY_PRIMARY, 9, 'italic'), bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR)
         self.hint_label.pack(side="top", anchor="w")
 
-        # --- STEP 2: RESPONSE SECTION (Initially Hidden) ---
+        # RESPONSE SECTION (Initially Hidden)
         self.step2_frame = tk.Frame(self, bg=c.DARK_BG)
 
         self.step2_title = tk.Label(self.step2_frame, text="2. Paste the LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
@@ -74,7 +74,7 @@ class GenerateView(tk.Frame):
         self.llm_result_text.text_widget.bind('<KeyRelease>', self._validate_and_sync)
         self.llm_result_text.text_widget.bind('<<Paste>>', self._validate_and_sync)
 
-        # --- STEP 3: DESTINATION FOLDER SECTION (Initially Hidden) ---
+        # DESTINATION FOLDER SECTION (Initially Hidden)
         self.step3_frame = tk.Frame(self, bg=c.DARK_BG)
 
         dest_label_frame = tk.Frame(self.step3_frame, bg=c.DARK_BG)

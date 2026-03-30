@@ -60,7 +60,7 @@ class SelectionListUI:
             file_name = os.path.basename(path)
             display_text = path if self.show_full_paths else file_name
 
-            # --- Filter Check Logic ---
+            # Filter Check Logic
             file_name_lower = file_name.lower()
             file_ext = os.path.splitext(file_name_lower)[1]
 
@@ -70,7 +70,6 @@ class SelectionListUI:
             # If it's ignored by Git OR has an unsupported extension, it's "filtered"
             is_filtered = is_git_ignored or (not is_valid_ext)
             left_col_color = c.TEXT_FILTERED_COLOR if is_filtered else c.TEXT_COLOR
-            # --------------------------
 
             right_col_text, right_col_color = "", c.TEXT_SUBTLE_COLOR
             if self.token_count_enabled:

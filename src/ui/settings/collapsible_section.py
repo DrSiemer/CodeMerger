@@ -12,7 +12,7 @@ class CollapsibleTextSection(Frame):
         super().__init__(parent, bg=c.DARK_BG, **kwargs)
         self.on_toggle_callback = on_toggle_callback
 
-        # --- Header ---
+        # Header
         header_frame = Frame(self, bg=c.DARK_BG)
         header_frame.pack(fill='x', expand=True)
 
@@ -30,7 +30,7 @@ class CollapsibleTextSection(Frame):
         )
         reset_button.pack(side='right', padx=(5, 0))
 
-        # --- Body (initially hidden) ---
+        # Body (initially hidden)
         self.body_frame = Frame(self, bg=c.DARK_BG)
 
         self.text_widget = ScrollableText(
@@ -41,7 +41,7 @@ class CollapsibleTextSection(Frame):
         )
         self.text_widget.pack(fill='x', expand=True, padx=(22, 0))
 
-        # --- State and Bindings ---
+        # State and Bindings
         self.is_expanded = BooleanVar(value=False)
         self.default_text = default_text
 

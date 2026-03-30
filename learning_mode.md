@@ -32,7 +32,7 @@ To enable the parser to function correctly, the LLM must adhere to a strict sepa
 # Introduction
 [High-level summary of the architectural approach]
 
-## --- STEP 1: [Step Title] ---
+## STEP 1: [Step Title]
 ### Explanation
 [Why we are doing this. Focus on architecture/design patterns.]
 
@@ -46,10 +46,10 @@ To enable the parser to function correctly, the LLM must adhere to a strict sepa
 ```
 --- End of file ---
 
-## --- STEP 2: [Step Title] ---
+## STEP 2: [Step Title]
 ... (Repeat structure)
 
-## --- END STEPS ---
+## END STEPS
 [Final summary]
 ```
 

@@ -132,14 +132,14 @@ class ButtonStateManager:
             app.wrapper_text_button.grid(row=1, column=0, sticky='ew', padx=(0, gap))
             app.paste_container.grid(row=1, column=1, sticky='ew', padx=(gap, 0))
 
-            # --- AI Response Review Visibility ---
-            # Standard View
+            # AI Response Review Visibility
+            # > Standard View
             if app.last_ai_response:
                 app.review_button.pack(side='right', padx=(4, 0))
             else:
                 app.review_button.pack_forget()
 
-            # Compact Mode View
+            # > Compact Mode View
             compact = app.view_manager.compact_mode_window
             if compact and compact.winfo_exists():
                 if app.last_ai_response:

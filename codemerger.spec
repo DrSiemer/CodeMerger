@@ -2,7 +2,7 @@
 import os
 import sys
 
-# --- Tcl/Tk Correct Folder Mapping ---
+# Tcl/Tk Correct Folder Mapping
 def get_tcl_tk_datas():
     """
     Finds Tcl/Tk and maps the CONTENTS of the versioned folders
@@ -33,7 +33,7 @@ def get_tcl_tk_datas():
 # Load the Tcl/Tk data once
 tcl_tk_data_bundle = get_tcl_tk_datas()
 
-# --- Main Application Analysis ---
+# Main Application Analysis
 app_data_files = [
     ('assets', 'assets'),
     ('default_filetypes.json', '.'),
@@ -81,8 +81,7 @@ exe = EXE(
     icon=app_icon_path
 )
 
-# --- Updater GUI Launcher Analysis ---
-# Added Tcl/Tk data here as well to prevent updater crashes
+# Updater GUI Launcher Analysis
 updater_datas = [(install_icon_path, 'assets')]
 updater_datas.extend(tcl_tk_data_bundle)
 
@@ -115,7 +114,7 @@ updater_exe = EXE(
     icon=install_icon_path
 )
 
-# --- Collection ---
+# Collection
 coll = COLLECT(
     exe,
     updater_exe,

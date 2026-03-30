@@ -37,7 +37,7 @@ class RewriteUnsignedDialog(Toplevel):
 
         self._build_ui()
 
-        # --- Dynamic Geometry for Boot ---
+        # Dynamic Geometry for Boot
         initial_w, initial_h = 700, 750
         if self.app_state.info_mode_active:
             initial_h += c.INFO_PANEL_HEIGHT
@@ -45,7 +45,7 @@ class RewriteUnsignedDialog(Toplevel):
         self.geometry(f"{initial_w}x{initial_h}")
         self.minsize(600, 600)
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.instruction_text, "rewrite_instruction")
         self.info_mgr.register(self.copy_btn, "rewrite_copy_prompt")
@@ -69,7 +69,7 @@ class RewriteUnsignedDialog(Toplevel):
         Label(main_frame, text=title_text, font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=0, column=0, sticky="w", pady=(0, 5))
         Label(main_frame, text=desc_text, bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR).grid(row=1, column=0, sticky="w", pady=(0, 15))
 
-        # --- Section 1: Your Instruction ---
+        # Section 1: Your Instruction
         Label(main_frame, text="1. Your Instruction", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=2, column=0, sticky="w", pady=(0, 5))
 
         self.instruction_text = ScrollableText(main_frame, height=4, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
@@ -85,13 +85,13 @@ class RewriteUnsignedDialog(Toplevel):
         self.copy_btn.set_state("disabled") # Initially disabled
         ToolTip(self.copy_btn, "Create and copy a prompt to modify the drafts based on your instruction", delay=500)
 
-        # --- Section 2: Paste Response ---
+        # Section 2: Paste Response
         Label(main_frame, text="2. Paste LLM Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=5, column=0, sticky="nw", pady=(0, 5))
 
         self.response_text = ScrollableText(main_frame, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.response_text.grid(row=6, column=0, sticky="nsew", pady=(0, 15))
 
-        # --- Footer Actions ---
+        # Footer Actions
         footer_frame = Frame(main_frame, bg=c.DARK_BG)
         footer_frame.grid(row=7, column=0, sticky="ew")
 

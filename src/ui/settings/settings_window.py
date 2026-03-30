@@ -37,7 +37,7 @@ class SettingsWindow(Toplevel):
         # Info Toggle: Managed by InfoManager.place
         self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
 
         # Section summaries
@@ -81,7 +81,7 @@ class SettingsWindow(Toplevel):
         self.title("Settings")
         self.iconbitmap(ICON_PATH)
 
-        # --- Dynamic Geometry for Boot ---
+        # Dynamic Geometry for Boot
         initial_geom = c.SETTINGS_WINDOW_DEFAULT_GEOMETRY
         if self.parent.app_state.info_mode_active:
             match = re.match(r"(\d+)x(\d+)", initial_geom)
@@ -99,19 +99,19 @@ class SettingsWindow(Toplevel):
         self.grid_columnconfigure(0, weight=1)
 
     def _create_widgets(self):
-        # --- Main container frame ---
+        # Main container frame
         main_frame = Frame(self, bg=c.DARK_BG)
         main_frame.grid(row=0, column=0, sticky='nsew')
         main_frame.grid_rowconfigure(0, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
-        # --- Use the reusable ScrollableFrame ---
+        # Use the reusable ScrollableFrame
         self.scroll_frame = ScrollableFrame(main_frame, bg=c.DARK_BG)
         self.scroll_frame.grid(row=0, column=0, sticky='nsew')
         content_frame = self.scroll_frame.scrollable_frame
         content_frame.config(padx=20, pady=20)
 
-        # --- Instantiate and pack setting sections ---
+        # Instantiate and pack setting sections
         self.app_settings = ApplicationSettingsFrame(content_frame, self.vars, self.updater)
         self.app_settings.pack(fill='x', expand=True)
 
@@ -127,7 +127,7 @@ class SettingsWindow(Toplevel):
         self.editor_settings = EditorSettingsFrame(content_frame, self.vars)
         self.editor_settings.pack(fill='x', expand=True)
 
-        # --- Action Buttons (Outside scroll area) ---
+        # Action Buttons (Outside scroll area)
         button_frame = Frame(main_frame, bg=c.DARK_BG)
         button_frame.grid(row=1, column=0, sticky='ew', padx=20, pady=(0, 20))
         button_frame.grid_columnconfigure(1, weight=1)

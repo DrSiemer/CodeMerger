@@ -30,7 +30,7 @@ class PasteChangesDialog(Toplevel):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # --- Dynamic Geometry for Boot ---
+        # Dynamic Geometry for Boot
         initial_w, initial_h = 600, 500
         if self.parent.app_state.info_mode_active:
             initial_h += c.INFO_PANEL_HEIGHT
@@ -85,7 +85,7 @@ class PasteChangesDialog(Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         self.bind("<Escape>", self.on_cancel)
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.text_widget, "paste_text")
         self.info_mgr.register(ok_button, "paste_apply")

@@ -35,7 +35,7 @@ class StepBaseFilesView(tk.Frame):
         if not hasattr(self, 'tree') or not info_mgr:
             return
 
-        # --- Left Panel (Available Files) ---
+        # Left Panel (Available Files)
         info_mgr.register(self.tree, "fm_tree")
         info_mgr.register(self.tree_action_button, "fm_tree_action")
         info_mgr.register(self.toggle_gitignore_button, "fm_filter_git")
@@ -46,7 +46,7 @@ class StepBaseFilesView(tk.Frame):
         for label in self.folder_icon_labels.values():
             info_mgr.register(label, "fm_reveal")
 
-        # --- Right Panel (Merge Order) ---
+        # Right Panel (Merge Order)
         info_mgr.register(self.merge_order_list, "fm_list")
         info_mgr.register(self.merge_order_details_label, "fm_tokens")
         info_mgr.register(self.order_request_button, "fm_order")
@@ -59,7 +59,7 @@ class StepBaseFilesView(tk.Frame):
         info_mgr.register(self.move_down_button, "fm_sort_down")
         info_mgr.register(self.move_to_bottom_button, "fm_sort_bottom")
 
-        # --- Footer ---
+        # Footer
         info_mgr.register(self.add_all_btn, "fm_add_all")
         info_mgr.register(self.remove_all_btn, "fm_remove_all")
 
@@ -205,7 +205,7 @@ class StepBaseFilesView(tk.Frame):
         if self.selection_handler:
             self.project_data["base_project_files"] = self.selection_handler.ordered_selection
 
-    # --- Methods mimicking FileManagerWindow ---
+    # Methods mimicking FileManagerWindow
     def create_handlers(self):
         self.item_map = {}
         self.path_to_item_id = {}

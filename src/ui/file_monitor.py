@@ -42,7 +42,7 @@ class FileMonitor:
             self.stop()
             return
 
-        # --- 0. Check for external config changes (e.g. git switch) ---
+        # Check for external config changes (e.g. git switch)
         if project_config.has_external_changes():
             try:
                 # Capture current known files from memory before reload.
@@ -102,10 +102,7 @@ class FileMonitor:
 
         config_changed = False
 
-        # --- 1. Handle Deleted Files ---
-        # The file scanner respects .gitignore and filetype filters.
-        # However, because we passed 'force_include_paths' above, any file that is
-        # currently selected will be present in 'current_set' if it physically exists.
+        # Handle Deleted Files
         missing_from_scan = known_set - current_set
 
         truly_deleted_files = set()
@@ -141,7 +138,7 @@ class FileMonitor:
             config_changed = True
             self.app.status_var.set(f"Cleaned {len(truly_deleted_files)} missing file(s).")
 
-        # --- 2. Handle Brand New Files (to the whole project) ---
+        # Handle Brand New Files (to the whole project)
         brand_new_files = current_set - set(project_config.known_files)
         if brand_new_files:
             # Update global list
@@ -158,8 +155,7 @@ class FileMonitor:
         if config_changed:
             project_config.save()
 
-        # --- 3. Update UI based on active profile's unknown list ---
-        # The 'newly_detected_files' is simply what the active profile hasn't seen.
+        # Update UI based on active profile's unknown list
         profile_unknown = project_config.unknown_files
         if sorted(profile_unknown) != sorted(self.newly_detected_files):
             self.newly_detected_files = profile_unknown

@@ -42,7 +42,7 @@ class FileManagerWindow(Toplevel):
         self.title(f"Edit merge list for: {self.project_config.project_name}")
         self.iconbitmap(ICON_PATH)
 
-        # --- Dynamic Geometry for Boot ---
+        # Dynamic Geometry for Boot
         initial_geom = c.FILE_MANAGER_DEFAULT_GEOMETRY
         if self.app_state.info_mode_active:
             match = re.match(r"(\d+)x(\d+)", initial_geom)
@@ -91,14 +91,14 @@ class FileManagerWindow(Toplevel):
         self.data_controller.run_token_recalculation()
         self.update_all_button_states()
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.app_state, manager_type='pack', toggle_btn=self.info_toggle_btn)
         self._register_hover_help()
 
         self._position_window()
         self.deiconify()
 
-        # --- Disable Minimize Button (Windows Only) ---
+        # Disable Minimize Button (Windows Only)
         if sys.platform == "win32":
             self.after(10, self._disable_minimize_button)
 

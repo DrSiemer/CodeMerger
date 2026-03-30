@@ -37,7 +37,7 @@ class FeedbackDialog(tk.Toplevel):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # --- Modality & Layering Logic ---
+        # Modality & Layering Logic
         is_parent_topmost = False
         try:
             is_parent_topmost = self.parent.attributes("-topmost")
@@ -81,11 +81,11 @@ class FeedbackDialog(tk.Toplevel):
             fg=c.TEXT_COLOR
         ).grid(row=0, column=0, sticky="w")
 
-        # --- New Files Integration ---
+        # New Files Integration
         self.new_files_btn = None
         self._check_for_new_files(header_row)
 
-        # --- Global Unformatted Alert Header ---
+        # Global Unformatted Alert Header
         has_any_tags = plan.get('has_any_tags', False)
 
         ordered_segments = plan.get('ordered_segments', [])
@@ -117,7 +117,7 @@ class FeedbackDialog(tk.Toplevel):
 
         self.tab_indices = {}
 
-        # --- Build Tabs Chronologically ---
+        # Build Tabs Chronologically
         current_idx = 0
         orphan_count = 0
         total_orphans = len(orphan_segments)
@@ -171,7 +171,7 @@ class FeedbackDialog(tk.Toplevel):
                 self._add_unformatted_tab(title, content)
                 current_idx += 1
 
-        # --- Placeholder if empty ---
+        # Placeholder if empty
         if current_idx == 0:
             msg = "The AI response contained only code blocks with no accompanying text or tagged sections."
             self._add_tab("Response Summary", msg, icon=self._gray_accent, info_key="review_tab_placeholder")
@@ -228,7 +228,7 @@ class FeedbackDialog(tk.Toplevel):
             )
             self.ok_button.pack(side="right")
 
-        # --- Bindings ---
+        # Bindings
         self.bind("<Escape>", lambda e: self.destroy() if not self.on_apply else self._on_close_request())
 
         # Shortcut passthrough allows overwriting via Ctrl+V while the review is active
@@ -245,7 +245,7 @@ class FeedbackDialog(tk.Toplevel):
         self.minsize(600, 500)
         position_window(self)
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         if self.app_state:
             self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
             self.info_mgr = attach_info_mode(self, self.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)

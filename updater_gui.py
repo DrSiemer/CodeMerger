@@ -11,7 +11,7 @@ import logging
 from tkinter import ttk, messagebox
 import shutil
 
-# --- Self-Contained Constants ---
+# Self-Contained Constants
 DARK_BG = '#2E2E2E'
 TEXT_COLOR = '#FFFFFF'
 TEXT_INPUT_BG = '#3C3C3C'
@@ -21,7 +21,7 @@ FONT_NORMAL = ("Segoe UI", 11)
 FONT_STATUS_BAR = ("Segoe UI", 9)
 FONT_BUTTON = ("Segoe UI", 12)
 
-# --- Logging Setup ---
+# Logging Setup
 log_dir = tempfile.gettempdir()
 log_file = os.path.join(log_dir, "codemerger_updater.log")
 logging.basicConfig(

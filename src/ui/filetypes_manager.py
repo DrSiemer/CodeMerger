@@ -22,7 +22,7 @@ class FiletypesManagerWindow(Toplevel):
         self.last_tree_click_time = 0
         self.tooltip_window = None
 
-        # --- Window Setup ---
+        # Window Setup
         self.title("Manage Filetypes")
         self.iconbitmap(ICON_PATH)
 
@@ -30,7 +30,7 @@ class FiletypesManagerWindow(Toplevel):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
-        # --- Dynamic Geometry for Boot ---
+        # Dynamic Geometry for Boot
         initial_geom = c.FILETYPES_WINDOW_DEFAULT_GEOMETRY
         if self.parent.app_state.info_mode_active:
             match = re.match(r"(\d+)x(\d+)", initial_geom)
@@ -44,7 +44,7 @@ class FiletypesManagerWindow(Toplevel):
         self.focus_force()
         self.configure(bg=c.DARK_BG)
 
-        # --- UI Layout ---
+        # UI Layout
         main_frame = Frame(self, padx=15, pady=15, bg=c.DARK_BG)
         main_frame.grid(row=0, column=0, sticky='nsew')
         main_frame.rowconfigure(1, weight=1)
@@ -57,7 +57,7 @@ class FiletypesManagerWindow(Toplevel):
         tree_frame.rowconfigure(0, weight=1)
         tree_frame.columnconfigure(0, weight=1)
 
-        # --- Treeview Styling ---
+        # Treeview Styling
         style = ttk.Style()
         style.theme_use('default')
         style.configure("Treeview", background=c.TEXT_INPUT_BG, foreground=c.TEXT_COLOR, fieldbackground=c.TEXT_INPUT_BG, borderwidth=0, font=c.FONT_NORMAL, rowheight=25)
@@ -68,7 +68,7 @@ class FiletypesManagerWindow(Toplevel):
         self.tree_scroll = ttk.Scrollbar(tree_frame, orient='vertical', command=self.tree.yview)
         self.tree.config(yscrollcommand=self.tree_scroll.set)
 
-        # --- Action Button Row ---
+        # Action Button Row
         action_row_frame = Frame(main_frame, bg=c.DARK_BG)
         action_row_frame.grid(row=2, column=0, sticky='ew', pady=(10, 10))
         action_row_frame.columnconfigure(1, weight=1)
@@ -80,7 +80,7 @@ class FiletypesManagerWindow(Toplevel):
         self.action_button.grid(row=0, column=1, sticky='ew', padx=(10, 0))
         self.action_button_tooltip = ToolTip(self.action_button, text="", delay=500)
 
-        # --- Input Section for Adding New Filetypes ---
+        # Input Section for Adding New Filetypes
         input_section_frame = Frame(main_frame, bg=c.DARK_BG)
         input_section_frame.grid(row=3, column=0, sticky='ew', pady=(15, 5))
         input_section_frame.columnconfigure(1, weight=1)
@@ -105,7 +105,7 @@ class FiletypesManagerWindow(Toplevel):
         self.add_button.pack()
         self.add_button.set_state('disabled')
 
-        # --- Bindings ---
+        # Bindings
         self.tree.bind('<Button-1>', self.handle_tree_click)
         self.tree.bind('<<TreeviewSelect>>', self.on_tree_selection_change)
         self.tree.bind("<Motion>", self._on_tree_motion)
@@ -114,7 +114,7 @@ class FiletypesManagerWindow(Toplevel):
         self.bind('<Escape>', lambda e: self.on_closing())
         self.bind('<Configure>', self._on_resize)
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.tree, "ft_list")
         self.info_mgr.register(self.action_button, "ft_action")

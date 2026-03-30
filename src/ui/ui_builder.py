@@ -8,13 +8,13 @@ from .assets import assets
 
 def setup_ui(app):
     """Creates and places all the UI widgets for the main application window"""
-    # --- Window Grid Configuration ---
+    # Window Grid Configuration
     app.columnconfigure(0, weight=1)
     app.rowconfigure(2, weight=1) # Central content row expands vertically
     app.rowconfigure(3, weight=0) # Status bar row
     app.rowconfigure(4, weight=0) # Info panel row
 
-    # --- Top Bar (Row 0) ---
+    # Top Bar (Row 0)
     top_bar = Frame(app, bg=c.TOP_BAR_BG, padx=20, pady=15)
     top_bar.grid(row=0, column=0, sticky='ew')
     top_bar.columnconfigure(1, weight=1) # Make the center area expand
@@ -40,7 +40,7 @@ def setup_ui(app):
     # Store ToolTip reference for cross-widget suppression/restoration
     app.title_tooltip = ToolTip(app.title_container, "Click to select project, double-click to edit title", delay=500)
 
-    # --- Pen Icon (Edit) Logic ---
+    # Pen Icon (Edit) Logic
     app.edit_title_icon = Label(app.title_container, image=assets.edit_icon_tk, bg=c.TOP_BAR_BG, cursor="hand2")
     app.edit_title_icon.grid(row=0, column=1, sticky='w', padx=(5, 0))
     app.edit_title_icon.grid_remove() # Start hidden
@@ -92,7 +92,7 @@ def setup_ui(app):
     app.folder_icon_label.bind("<Leave>", lambda e: app.folder_icon_label.config(image=assets.folder_icon), add='+')
     ToolTip(app.folder_icon_label, "Open project folder\nCtrl+Click: Copy path\nAlt+Click: Open console", delay=500)
 
-    # --- Top-Level Buttons (Row 1) ---
+    # Top-Level Buttons (Row 1)
     app.top_buttons_container = Frame(app, bg=c.DARK_BG, padx=20, height=30)
     app.top_buttons_container.grid(row=1, column=0, sticky='ew', pady=(15, 0))
     app.top_buttons_container.grid_propagate(False)
@@ -109,11 +109,11 @@ def setup_ui(app):
     app.middle_container.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
     app.middle_container.columnconfigure(0, weight=0) # Profile Frame
 
-    # --- Profile Management Frame ---
+    # Profile Management Frame
     app.profile_frame = Frame(app.middle_container, bg=c.DARK_BG)
     app.profile_frame.grid(row=0, column=0, sticky='w')
 
-    # --- Profile Widgets ---
+    # Profile Widgets
     app.profile_navigator = ProfileNavigator(app.profile_frame, on_change_callback=app.profile_actions.on_profile_switched)
     app.add_profile_button = RoundedButton(app.profile_frame, text="+", font=(c.FONT_BOLD[0], c.FONT_BOLD[1]), bg=c.BTN_GRAY_BG, fg=c.TEXT_COLOR, command=app.profile_actions.open_new_profile_dialog, cursor='hand2', width=20, height=28, hollow=True)
     ToolTip(app.add_profile_button, "Create an additional project profile", delay=500)
@@ -134,7 +134,7 @@ def setup_ui(app):
     app.select_project_button = RoundedButton(right_controls_frame, text="Select Project", font=c.FONT_BUTTON, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, command=app.action_handlers.open_project_selector, cursor='hand2')
     app.select_project_button.pack(side='left')
 
-    # --- Center Content Area (Row 2) ---
+    # Center Content Area (Row 2)
     center_frame = Frame(app, bg=c.DARK_BG)
     center_frame.grid(row=2, column=0, sticky='nsew')
     center_frame.grid_rowconfigure(0, weight=1)
@@ -166,7 +166,7 @@ def setup_ui(app):
 
     app.no_project_label = Label(app.wrapper_box, text="Select a project to get started", bg=c.DARK_BG, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL)
 
-    # --- Cleanup Comments Label (Replaces Button) ---
+    # Cleanup Comments Label (Replaces Button)
     app.cleanup_comments_button = Label(
         app.wrapper_box,
         text="//",
@@ -190,12 +190,12 @@ def setup_ui(app):
     app.wrapper_text_button = RoundedButton(app.button_grid_frame, text="Define Instructions", height=30, font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.open_instructions_window, cursor='hand2')
     app.copy_merged_button = RoundedButton(app.button_grid_frame, height=copy_button_height, text="Copy Code Only", font=c.FONT_BUTTON, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, command=app.action_handlers.copy_merged_code, cursor='hand2')
 
-    # --- Paste Container Layout ---
+    # Paste Container Layout
     app.paste_container = Frame(app.button_grid_frame, bg=c.DARK_BG)
     app.paste_changes_button = RoundedButton(app.paste_container, text="Paste Changes", height=30, font=c.FONT_BUTTON, bg=c.BTN_GREEN, fg=c.BTN_GREEN_TEXT, command=None, cursor='hand2')
     app.paste_changes_button.pack(side='left', fill='x', expand=True, padx=(0, 0))
 
-    # --- AI Response Review Button ---
+    # AI Response Review Button
     # Narrow orange bar with subtle 4px padding from the paste button. Hidden by default.
     app.review_button = RoundedButton(
         app.paste_container, text="", bg=c.ATTENTION, fg=c.TEXT_COLOR,
@@ -224,7 +224,7 @@ def setup_ui(app):
     app.filetypes_button.bind("<Leave>", lambda e: app.filetypes_button.config(image=assets.filetypes_icon), add='+')
     app.filetypes_button.bind("<ButtonRelease-1>", app.action_handlers.open_filetypes_manager)
 
-    # --- Status Bar Area (Row 3) ---
+    # Status Bar Area (Row 3)
     app.status_container = Frame(app, bg=c.STATUS_BG)
     app.status_container.grid(row=3, column=0, sticky='ew')
 

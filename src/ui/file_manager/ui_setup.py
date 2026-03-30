@@ -26,17 +26,17 @@ def setup_file_manager_ui(window, container=None, include_save_button=True, main
     main_frame.grid_rowconfigure(1, weight=0)
     main_frame.grid_columnconfigure(0, weight=1)
 
-    # --- Paned Window for a truly resizable and seamless layout ---
+    # Paned Window for a truly resizable and seamless layout
     window.paned_window = ttk.PanedWindow(main_frame, orient='horizontal')
     window.paned_window.grid(row=0, column=0, sticky='nsew')
 
-    # --- Left Panel (Available Files) ---
+    # Left Panel (Available Files)
     left_panel = Frame(window.paned_window, bg=c.DARK_BG)
     left_panel.grid_columnconfigure(0, weight=1)
     left_panel.grid_rowconfigure(1, weight=1)
     window.paned_window.add(left_panel, weight=1)
 
-    # --- Right Panel (Merge Order) ---
+    # Right Panel (Merge Order)
     right_panel = Frame(window.paned_window, bg=c.DARK_BG)
     right_panel.grid_columnconfigure(0, weight=1)
     right_panel.grid_rowconfigure(1, weight=1)

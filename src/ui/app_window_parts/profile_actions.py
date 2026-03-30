@@ -58,9 +58,7 @@ class ProfileActions:
             project_config.save()
             app.status_var.set(f"Switched to profile: {new_profile_name}")
 
-            # --- Reset Independent File Tracking ---
-            # Clear the monitor's local cache so it pulls the
-            # new profile's specific 'unknown_files' list.
+            # Reset Independent File Tracking
             app.file_monitor.newly_detected_files = []
             app.file_monitor.perform_new_file_check(schedule_next=True)
 

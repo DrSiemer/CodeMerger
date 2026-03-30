@@ -15,7 +15,7 @@ class ProfileNavigator(Frame):
         self.current_index = -1
         self.font = tkFont.Font(family=c.FONT_NORMAL[0], size=c.FONT_NORMAL[1])
 
-        # --- Widgets ---
+        # Widgets
         button_font = (c.FONT_FAMILY_PRIMARY, 12, 'bold')
 
         self.prev_button = RoundedButton(

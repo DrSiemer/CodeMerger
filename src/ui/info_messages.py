@@ -6,7 +6,7 @@ Explanations are based on the core application documentation.
 INFO_MESSAGES = {
     "default": "Info mode active: hover over any interface element to see its purpose and usage details.",
 
-    # --- Main Window ---
+    # Main Window
     "select_project": (
         "Select a Project: Click to browse for a folder. CodeMerger will create a hidden .allcode file "
         "in that directory, that will store your file selections and project-specific instructions."
@@ -80,7 +80,7 @@ INFO_MESSAGES = {
         "Delete Profile: Remove the currently active profile. The 'Default' profile cannot be deleted."
     ),
 
-    # --- File Manager ---
+    # File Manager
     "fm_tree": (
         "Available Files: Browse your project structure. Double-click files or folders to add "
         "them to the merge list. Green text indicates newly detected files. Purple text indicates "
@@ -125,7 +125,7 @@ INFO_MESSAGES = {
     "fm_save": "Update Project: Commit your changes to the project's .allcode file and return to the main window.",
     "fm_remove_all": "Remove All: Clear the entire merge list for the current profile.",
 
-    # --- Settings Window ---
+    # Settings Window
     "set_app": "Various settings related to application behavior.",
     "set_app_new_file": (
         "File Monitoring: Monitors your project folder for new files added since your last session. "
@@ -191,24 +191,24 @@ INFO_MESSAGES = {
         "When set, double-clicking files in the editor opens them directly in this application."
     ),
 
-    # --- Instructions Window ---
+    # Instructions Window
     "inst_intro": "Intro Instructions: This text is placed at the very top of your merged code block. Use it to introduce your project.",
     "inst_outro": "Outro Instructions: This text is placed at the bottom. Use it for code style rules or recurring constraints.",
     "inst_defaults": "Load Defaults: Click to wipe the current fields and load the global default prompts you defined in the Settings.",
     "inst_save": "Save: Commit these instructions to the project's .allcode file. They are profile-specific.",
 
-    # --- Filetype Manager ---
+    # Filetype Manager
     "ft_list": "Indexed Types: Only files matching these extensions are scanned. Double-click to enable or disable.",
     "ft_action": "Active Toggle: Delete custom extensions or toggle the active status of bundled default extensions.",
     "ft_add": "Add Filetype: Type a new extension (e.g. .py or .js) and a short description to add it to the indexing list.",
 
-    # --- Project Selector ---
+    # Project Selector
     "sel_list": "Recent Projects: Quickly switch to another CodeMerger project. Hover over an entry to see the full path and Ctrl-Click to open it's folder.",
     "sel_filter": "Project Filter: Start typing to narrow down the list by folder name or display title.",
     "sel_browse": "Add Project: Open a directory browser to select a new folder for use with CodeMerger.",
     "sel_remove": "Remove Entry: Take this project off your recent list. This does not delete any files on your computer.",
 
-    # --- Paste Changes ---
+    # Paste Changes
     "paste_text": "Paste Area: Paste the full Markdown response from the AI here. CodeMerger will look for '--- File: `path` ---' tags.",
     "paste_apply": "Apply Changes: CodeMerger will parse the code, validate the paths, and overwrite your local files with the new content.",
     "paste_unformatted": (
@@ -217,7 +217,7 @@ INFO_MESSAGES = {
     ),
     "paste_admonish": "Admonish AI: Copies a specialized instruction to your clipboard, telling the AI that the tool cannot use its previous unformatted response.",
 
-    # --- AI Response Review ---
+    # AI Response Review
     "review_tabs": "Review Tabs: Switch between the different sections of the AI's response (Intro, Changes, Answers, etc.) to review the commentary before applying.",
     "review_tab_intro": "Intro: A technical implementation plan or architectural summary provided by the AI before the code.",
     "review_tab_changes": "Changes: A list of behavioral, algorithmic, or visual changes made in this update.",
@@ -232,13 +232,13 @@ INFO_MESSAGES = {
     "review_close": "Close: Exit the review window.",
     "review_admonish": "Copy Correction Prompt: Copies a prompt telling the AI that it failed to follow the required output format.",
 
-    # --- New Profile Dialog ---
+    # New Profile Dialog
     "profile_name": "Profile Name: Enter a unique label for this configuration (e.g. 'Frontend' or 'Feature Name').",
     "profile_copy_files": "Clone Selection: If checked, the new profile will start with the exact same files selected in your current merge list.",
     "profile_copy_inst": "Clone Instructions: If checked, the new profile will inherit the current custom Intro and Outro instructions.",
     "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk.",
 
-    # --- Project Starter ---
+    # Project Starter
     "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
     "starter_nav_next": "Next Step: Proceed to the next phase. Validates current input before moving.",
     "starter_nav_reset": "Reset Step: Clear the current form or editor to start this specific step over.",
@@ -298,7 +298,7 @@ INFO_MESSAGES = {
         "Be careful: manual changes could create a conflict with other segments. Use 'Rewrite' to avoid this."
     ),
 
-    # --- Rewrite Dialog ---
+    # Rewrite Dialog
     "rewrite_instruction": (
         "Modification Instruction: Tell the AI what you want to change in the project drafts. "
         "For example: 'Change the primary data entity from Projects to Tasks' or 'Use a more formal tone'."

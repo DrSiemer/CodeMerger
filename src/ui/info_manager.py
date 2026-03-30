@@ -24,7 +24,7 @@ class InfoManager:
 
         self._active_stack = []
 
-        # --- Info Panel ---
+        # Info Panel
         self.panel = tk.Frame(
             window, bg=c.INFO_PANEL_BG, height=self.panel_height,
             highlightbackground=c.WRAPPER_BORDER, highlightthickness=1
@@ -46,7 +46,7 @@ class InfoManager:
 
         self.button_tooltip = ToolTip(self.toggle_btn, text="Toggle Info Mode")
 
-        # --- Toggle Button Configuration ---
+        # Toggle Button Configuration
         self.toggle_btn.bind("<Button-1>", lambda e: self.app_state.toggle_info_mode())
         self.toggle_btn.bind("<Enter>", self._on_button_enter, add="+")
         self.toggle_btn.bind("<Leave>", self._on_button_leave, add="+")

@@ -14,7 +14,7 @@ def apply_dark_theme(window):
     s = ttk.Style(window)
     s.theme_use('default')
 
-    # --- Checkbutton Style ---
+    # Checkbutton Style
     s.configure('Dark.TCheckbutton',
         background=c.DARK_BG,
         foreground=c.TEXT_COLOR,
@@ -26,7 +26,7 @@ def apply_dark_theme(window):
         indicatorrelief=[('pressed', 'sunken'), ('!pressed', 'flat')]
     )
 
-    # --- Large Checkbutton Style (Used in Project Starter) ---
+    # Large Checkbutton Style (Used in Project Starter)
     s.configure('Large.TCheckbutton',
         background=c.DARK_BG,
         foreground=c.TEXT_COLOR,
@@ -39,7 +39,7 @@ def apply_dark_theme(window):
         indicatorrelief=[('pressed', 'sunken'), ('!pressed', 'flat')]
     )
 
-    # --- Combobox Style ---
+    # Combobox Style
     s.configure('Dark.TCombobox',
         fieldbackground=c.TEXT_INPUT_BG,
         background=c.TEXT_INPUT_BG,
@@ -53,7 +53,7 @@ def apply_dark_theme(window):
         fieldbackground=[('readonly', c.TEXT_INPUT_BG)]
     )
 
-    # --- Notebook Style ---
+    # Notebook Style
     s.configure('TNotebook', background=c.DARK_BG, borderwidth=0)
     s.configure('TNotebook.Tab',
         background=c.TEXT_INPUT_BG,

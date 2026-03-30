@@ -144,18 +144,16 @@ class ActionHandlers:
         if is_alt_pressed:
             try:
                 if sys.platform == "win32":
-                    # --- Environment Scrubbing ---
-                    # We must ensure the child process does not inherit CodeMerger's
-                    # specific Python environment (venv or PyInstaller bundle).
+                    # Environment Scrubbing
                     new_env = os.environ.copy()
 
-                    # 1. Strip core environment identification variables
+                    # Strip core environment identification variables
                     venv_root = new_env.pop('VIRTUAL_ENV', None)
                     new_env.pop('PYTHONHOME', None)
                     new_env.pop('PYTHONPATH', None)
                     new_env.pop('PROMPT', None) # Remove the (.venv) prefix from shell prompt
 
-                    # 2. Identify directories to purge from PATH
+                    # Identify directories to purge from PATH
                     purge_targets = []
                     if venv_root:
                         purge_targets.append(venv_root.lower())
@@ -168,7 +166,7 @@ class ActionHandlers:
                     exec_dir = os.path.dirname(sys.executable).lower()
                     purge_targets.append(exec_dir)
 
-                    # 3. Rebuild PATH correctly using os.pathsep (semicolon on Windows)
+                    # Rebuild PATH correctly using os.pathsep (semicolon on Windows)
                     path_entries = new_env.get('PATH', '').split(os.pathsep)
                     cleaned_entries = []
 
@@ -188,7 +186,7 @@ class ActionHandlers:
 
                     new_env['PATH'] = os.pathsep.join(cleaned_entries)
 
-                    # 4. Launch clean shell
+                    # Launch clean shell
                     creationflags = subprocess.CREATE_NEW_CONSOLE
                     subprocess.Popen('cmd.exe', cwd=project_path, creationflags=creationflags, env=new_env)
                     app.helpers.show_compact_toast("Opened clean console in project folder")

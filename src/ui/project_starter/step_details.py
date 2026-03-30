@@ -53,7 +53,7 @@ class DetailsView(tk.Frame):
         # Update label if path already exists
         self._update_base_label()
 
-        # --- Tips Section at Bottom ---
+        # Tips Section at Bottom
         tips_frame = tk.Frame(self, bg=c.DARK_BG)
         tips_frame.pack(side="bottom", fill="x", anchor="w", pady=(40, 0))
 

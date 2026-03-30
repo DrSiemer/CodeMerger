@@ -212,14 +212,14 @@ class SelectionListController:
         is_over_token_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
         tooltip_text = ""
 
-        # --- Base Path Tooltip (if truncated) ---
+        # Base Path Tooltip (if truncated)
         if not self.ui_manager.show_full_paths:
             basename = os.path.basename(path)
             full_path_display = path.replace('/', os.sep)
             if basename != full_path_display:
                 tooltip_text = full_path_display
 
-        # --- Filter Reason Hint ---
+        # Filter Reason Hint
         hidden_reasons = []
         if is_ignored(os.path.join(self.base_dir, path), self.base_dir, self.parent.gitignore_patterns):
             hidden_reasons.append("the .gitignore filter")
@@ -238,7 +238,7 @@ class SelectionListController:
             else:
                 tooltip_text = hint
 
-        # --- Token Stats Tooltip ---
+        # Token Stats Tooltip
         if is_over_token_area and self.ui_manager.token_count_enabled:
             tokens, lines = item_info.get('tokens', -1), item_info.get('lines', -1)
             is_ignored_token = item_info.get('ignore_tokens', False)

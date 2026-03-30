@@ -22,19 +22,19 @@ class CompactMode(tk.Toplevel):
         # This will be updated by the main App's ButtonStateManager
         self.paste_tooltip_text = "Paste Response"
 
-        # --- Style and Layout Constants ---
+        # Style and Layout Constants
         BAR_COLOR = instance_color
         BORDER_COLOR = "#CCCCCC"
         BORDER_WIDTH = c.COMPACT_MODE_BORDER_WIDTH
         MOVE_BAR_HEIGHT = c.COMPACT_MODE_MOVE_BAR_HEIGHT
         text_hex_color = c.TEXT_COLOR if font_color_name == 'light' else '#000000'
 
-        # --- Window Configuration ---
+        # Window Configuration
         self.overrideredirect(True)
         self.attributes('-topmost', True)
         self.config(bg=BORDER_COLOR, padx=BORDER_WIDTH, pady=BORDER_WIDTH)
 
-        # --- Internal State for Dragging ---
+        # Internal State for Dragging
         self._offset_x = 0
         self._offset_y = 0
 
@@ -42,17 +42,17 @@ class CompactMode(tk.Toplevel):
         self.main_container = tk.Frame(self, bg=c.DARK_BG)
         self.main_container.pack(fill='both', expand=True)
 
-        # --- Move Bar (Header) ---
+        # Move Bar (Header)
         self.move_bar = tk.Frame(self.main_container, height=MOVE_BAR_HEIGHT, bg=BAR_COLOR, cursor="fleur")
         self.move_bar.pack(fill='x', side='top')
 
-        # --- App Icon ---
+        # App Icon
         self.app_icon_image = self.parent.assets.compact_icon_tk
         if self.app_icon_image:
             self.app_icon_label = tk.Label(self.move_bar, image=self.app_icon_image, bg=BAR_COLOR)
             self.app_icon_label.pack(side='left', padx=(2, 1), pady=3)
 
-        # --- Project title abbreviation logic ---
+        # Project title abbreviation logic
         max_len = c.COMPACT_MODE_PROJECT_TITLE_MAX_LENGTH
         capital_indices = [i for i, char in enumerate(project_name) if 'A' <= char <= 'Z']
 
@@ -74,15 +74,15 @@ class CompactMode(tk.Toplevel):
         self.title_label = tk.Label(self.move_bar, text=title_abbr, bg=BAR_COLOR, fg=text_hex_color, font=c.FONT_COMPACT_TITLE)
         self.title_label.pack(side='left', padx=(0, 4))
 
-        # --- Right-aligned icons container ---
+        # Right-aligned icons container
         self.right_icons_frame = tk.Frame(self.move_bar, bg=BAR_COLOR)
         self.right_icons_frame.pack(side='right')
 
-        # --- Close Button ---
+        # Close Button
         self.close_button = tk.Label(self.right_icons_frame, image=self.parent.assets.compact_mode_close_image, bg=BAR_COLOR, cursor="hand2")
         self.close_button.pack(side='right', padx=(0, 1))
 
-        # --- Button Container (Body) ---
+        # Button Container (Body)
         button_container = tk.Frame(self.main_container, bg=c.DARK_BG, padx=4, pady=0)
         button_container.pack(fill='x', side='top')
 
@@ -103,7 +103,7 @@ class CompactMode(tk.Toplevel):
         )
         self.copy_button.pack(fill='x', pady=(4, 2))
 
-        # --- Paste Row Frame ---
+        # Paste Row Frame
         paste_row = tk.Frame(button_container, bg=c.DARK_BG)
         paste_row.pack(fill='x', pady=(2, 4))
 
@@ -115,7 +115,7 @@ class CompactMode(tk.Toplevel):
         )
         self.paste_button.pack(side='left', fill='x', expand=True, padx=(0, 0))
 
-        # --- AI Response Review Button ---
+        # AI Response Review Button
         # Permanent narrow orange button to the right of Paste.
         self.review_button = RoundedButton(
             paste_row, text="", font=button_font,
@@ -137,7 +137,7 @@ class CompactMode(tk.Toplevel):
         self.paste_button.unbind("<ButtonRelease-1>")
         self.paste_button.bind("<ButtonRelease-1>", self.on_paste_release)
 
-        # --- Bindings ---
+        # Bindings
         self.move_bar.bind("<ButtonPress-1>", self.on_press_drag)
         self.move_bar.bind("<B1-Motion>", self.on_drag)
         self.move_bar.bind("<ButtonRelease-1>", self.on_release_drag)

@@ -32,7 +32,7 @@ class FullTextReviewer(tk.Frame):
         self.grid_rowconfigure(2, weight=1) # Main View
         self.grid_columnconfigure(0, weight=1)
 
-        # --- Header ---
+        # Header
         header_frame = tk.Frame(self, bg=c.DARK_BG)
         header_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
         tk.Label(header_frame, text=title, font=c.FONT_LARGE_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
@@ -52,10 +52,10 @@ class FullTextReviewer(tk.Frame):
         self.view_btn.pack(side="left")
         self.view_btn_tooltip = ToolTip(self.view_btn, "Switch to raw text editor", delay=500)
 
-        # --- Questions Panel ---
+        # Questions Panel
         self.questions_container = tk.Frame(self, bg=c.DARK_BG)
 
-        # --- Editor/Renderer ---
+        # Editor/Renderer
         self.view_frame = tk.Frame(self, bg=c.DARK_BG)
         self.view_frame.grid(row=2, column=0, sticky="nsew")
         self.view_frame.grid_rowconfigure(0, weight=1)

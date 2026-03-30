@@ -137,7 +137,7 @@ class ViewManager:
             self.main_window.attributes("-alpha", 1.0)
             self.main_window.minsize(c.MIN_WINDOW_WIDTH, c.MIN_WINDOW_HEIGHT)
 
-            # --- Lazy Layout: Restore UI content after animation finishes ---
+            # Lazy Layout: Restore UI content after animation finishes
             self.main_window._end_lazy_layout()
 
             if self.compact_mode_window and self.compact_mode_window.winfo_exists():
@@ -152,7 +152,7 @@ class ViewManager:
 
         self.current_state = self.STATE_SHRINKING
 
-        # --- Lazy Layout: Hide UI content immediately to prevent lag during animation ---
+        # Lazy Layout: Hide UI content immediately to prevent lag during animation
         self.main_window._start_lazy_layout()
 
         # Capture current geometry immediately before we start messing with transparency/state
@@ -229,7 +229,7 @@ class ViewManager:
 
         self.current_state = self.STATE_GROWING
 
-        # --- Lazy Layout: Ensure content is hidden during growth to maintain performance ---
+        # Lazy Layout: Ensure content is hidden during growth to maintain performance
         self.main_window._start_lazy_layout()
 
         # Update the saved position before we hide the compact window.

@@ -94,7 +94,7 @@ def position_window(window):
 
     win_w, win_h, x, y = 0, 0, 0, 0
 
-    # --- Step 1: Determine authoritative dimensions and initial position ---
+    # Determine authoritative dimensions and initial position
     if saved_geometry:
         try:
             parts = saved_geometry.replace('+', ' ').replace('x', ' ').split()
@@ -131,9 +131,7 @@ def position_window(window):
         x = parent_x + (parent_w - win_w) // 2
         y = parent_y + (parent_h - win_h) // 2
 
-    # --- Step 2: Constrain the position to be fully on-screen ---
-    # Use the target monitor based on where the window IS, not where parent is.
-    # This allows windows to persist on separate monitors.
+    # Constrain the position to be fully on-screen
     if saved_geometry:
         target_for_monitor_detection = (x, y)
     else:
@@ -152,7 +150,7 @@ def position_window(window):
     if x < mon_left: x = mon_left
     if y < mon_top: y = mon_top
 
-    # --- Step 3: Apply the final, fully calculated geometry ---
+    # Apply the final, fully calculated geometry
     window.geometry(f"{win_w}x{win_h}+{x}+{y}")
 
 def save_window_geometry(window):

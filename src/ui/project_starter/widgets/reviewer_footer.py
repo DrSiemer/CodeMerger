@@ -22,7 +22,7 @@ class ReviewerFooter(Frame):
         self.container = Frame(self, bg=c.DARK_BG)
         self.container.pack(fill='x', expand=True)
 
-        # --- Sign-off Group ---
+        # Sign-off Group
         self.signoff_group = Frame(self.container, bg=c.DARK_BG)
         Label(self.signoff_group, image=assets.unlocked_icon, bg=c.DARK_BG).pack(side="left", padx=(0, 10))
         self.signoff_btn = RoundedButton(
@@ -33,7 +33,7 @@ class ReviewerFooter(Frame):
         self.signoff_btn.pack(side="left")
         ToolTip(self.signoff_btn, "Lock this section and move to the next incomplete part", delay=500)
 
-        # --- Revert Group ---
+        # Revert Group
         self.revert_group = Frame(self.container, bg=c.DARK_BG)
         self.revert_btn = RoundedButton(
             self.revert_group, text="Unlock to edit",
@@ -44,7 +44,7 @@ class ReviewerFooter(Frame):
         Label(self.revert_group, image=assets.locked_icon, bg=c.DARK_BG).pack(side="left", padx=(10, 0))
         ToolTip(self.revert_btn, "Release the lock to make further changes to this section", delay=500)
 
-        # --- Utility Buttons ---
+        # Utility Buttons
         self.sync_btn = RoundedButton(self.container, text="Sync Unsigned", command=self.on_sync, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_SMALL_BUTTON, width=130, cursor="hand2")
         ToolTip(self.sync_btn, "Propagates your changes to other unlocked sections to maintain consistency.", delay=500)
 

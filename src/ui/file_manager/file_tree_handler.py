@@ -61,14 +61,14 @@ class FileTreeHandler:
             check_char = "☑" if is_checked else "☐"
             self.tree.item(item_id, text=f"{check_char} {filename}")
 
-            # --- Check Normal Filter Status ---
+            # Check Normal Filter Status
             hidden_reasons = []
 
-            # 1. Check Gitignore
+            # Check Gitignore
             if is_ignored(os.path.join(self.parent.base_dir, path), self.parent.base_dir, self.parent.gitignore_patterns):
                 hidden_reasons.append("the .gitignore filter")
 
-            # 2. Check Extension Filter
+            # Check Extension Filter
             file_name_lower = filename.lower()
             file_ext = os.path.splitext(file_name_lower)[1]
             extensions = {ext for ext in self.parent.file_extensions if ext.startswith('.')}

@@ -3,7 +3,7 @@ Contains all large text blocks used as prompts for Language Models.
 Separating these from logic improves maintainability and readability.
 """
 
-# --- Default Project Instructions ---
+# Default Project Instructions
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"
 
 DEFAULT_INTRO_PROMPT = "Hi! I am working on REPLACE_ME.\n\nQUESTION\n\n"
@@ -43,7 +43,7 @@ Directive: Optimize the code for a programmer that has never seen this code befo
 
 Do not change code, only comments."""
 
-# --- Project Starter Prompt Templates ---
+# Project Starter Prompt Templates
 
 STARTER_CONCEPT_DEFAULT_GOAL = "The plan is to build a..."
 

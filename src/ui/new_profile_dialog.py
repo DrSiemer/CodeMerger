@@ -64,7 +64,7 @@ class NewProfileDialog(Toplevel):
         self.bind("<Escape>", self.on_cancel)
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
-        # --- Info Mode Integration ---
+        # Info Mode Integration
         self.info_mgr = attach_info_mode(self, self.parent.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
         self.info_mgr.register(self.entry, "profile_name")
         self.info_mgr.register(self.copy_files_chk, "profile_copy_files")

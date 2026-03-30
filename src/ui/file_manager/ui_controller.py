@@ -103,10 +103,10 @@ class FileManagerUIController:
         if item_id:
             item_info = self.window.item_map.get(item_id, {})
 
-            # --- Special Tooltip for Normally Filtered Files ---
+            # Special Tooltip for Normally Filtered Files
             if 'hidden_reason' in item_info:
                  self.folder_tooltip_job = self.window.after(400, lambda e=event, msg=item_info['hidden_reason']: self._show_generic_tooltip(e, msg))
-            # --- Standard Folder Tooltip ---
+            # Standard Folder Tooltip
             elif item_info.get('type') == 'dir':
                 self.hovered_folder_id = item_id
                 self.folder_tooltip_job = self.window.after(500, lambda e=event, iid=item_id: self._show_folder_tooltip(e, iid))
