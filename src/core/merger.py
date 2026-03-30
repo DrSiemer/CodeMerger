@@ -62,7 +62,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 1. **MANDATORY TAGGING & CLOSING POLICY:**
    Every section of your response (Answers, Intro, Changes, Delete, Verification) MUST be explicitly wrapped in tags.
    **CRITICAL:** Every opening tag MUST have an identical closing tag.
-
    Format: `<INTRO>[content]</INTRO>`
 
 2. **INTRO, CHANGES & ANSWERS (PRE-CODE):**
@@ -89,9 +88,8 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
 
 --- File: `path/to/file.ext` ---
-
 ```[language_id]
-[full code here]
+[full unabridged code here]
 ```
 --- End of file ---
 
@@ -139,21 +137,29 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 
 <VERIFICATION>
 (Testing steps)
-</VERIFICATION>
-"""
+</VERIFICATION>"""
 
         automation_warning = "CRITICAL: I am using an automated parser. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file, even unchanged ones."
 
-        if outro_text:
-            final_outro = f"{formatting_instruction}\n\n{outro_text}\n\n{automation_warning}"
-        else:
-            final_outro = f"{formatting_instruction}\n\n{automation_warning}"
-
         final_parts = [f"# {project_title}"]
+
+        # Add Intro (Custom)
         if intro_text:
             final_parts.append(intro_text)
+
+        # Add Critical Formatting Instructions (NOW IN THE MIDDLE)
+        final_parts.append(formatting_instruction)
+
+        # Add the Code
         final_parts.append(merged_code)
-        final_parts.append(final_outro)
+
+        # Add Outro (Custom + Automation Warning)
+        footer_parts = []
+        if outro_text:
+            footer_parts.append(outro_text)
+        footer_parts.append(automation_warning)
+
+        final_parts.append('\n\n'.join(footer_parts))
 
         final_content = '\n\n'.join(final_parts) + '\n'
         status_message = "Wrapped code copied as Markdown"
