@@ -128,7 +128,12 @@ def parse_and_plan_changes(base_dir, markdown_text):
     # Identify tagged sections
     tags = ["ANSWERS TO DIRECT USER QUESTIONS", "INTRO", "CHANGES", "DELETED FILES", "VERIFICATION"]
     for tag in tags:
-        pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.DOTALL | re.IGNORECASE)
+        # Accept truncated closing tag as well
+        if tag == "ANSWERS TO DIRECT USER QUESTIONS":
+            pattern = re.compile(rf'<{tag}>(.*?)</(?:ANSWERS TO DIRECT USER QUESTIONS|ANSWERS)>', re.DOTALL | re.IGNORECASE)
+        else:
+            pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.DOTALL | re.IGNORECASE)
+
         for match in pattern.finditer(markdown_text_processed):
             content = match.group(1).strip()
             content_lower = content.lower().strip('.')

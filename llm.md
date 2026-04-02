@@ -75,6 +75,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/core/utils.py`: Replaced `psutil` process iteration with a Named Mutex (Windows) and `fcntl` lock file (POSIX) for single-instance detection. This avoids the high startup cost of scanning the system process table.
 - `src/core/project_config.py`: Implements atomic saving using `tempfile.mkstemp` and `os.replace` to prevent configuration wipes when multiple instances (e.g., dev and build) access the same project simultaneously. The `load` method includes defensive checks to ignore transiently empty or partial files created during write collisions, preventing the initialization of empty default profiles.
 - `src/core/change_applier.py`: Expanded the placeholder-bypass in `get_section` to catch verbose LLM hallucinations (e.g., "No conceptual questions were asked") to ensure segments remain cleanly empty when no valid content is generated.
+- `src/core/change_applier.py`: The parser for tagged sections (specifically ANSWERS) is permissive with closing tags, accepting either the full closing tag or a truncated version to handle frequent LLM output cutoff issues.
 
 ### User Interface (`src/ui`)
 
