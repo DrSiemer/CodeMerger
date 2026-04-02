@@ -9,6 +9,27 @@ def get_language_from_path(path):
     _, ext = os.path.splitext(path)
     return c.LANGUAGE_MAP.get(ext.lower(), '')
 
+def _generate_project_surface_manifest(base_dir, selected_files_info):
+    """
+    Generates a Project Surface Manifest, that provides the LLM with a high-level overview of the context scope
+    """
+    lines = ["## Project Surface Manifest", ""]
+    lines.append(f"Total Files in Context: {len(selected_files_info)}")
+
+    total_tokens = sum(f.get('tokens', 0) for f in selected_files_info)
+    lines.append(f"Total Context Tokens: {total_tokens:,}".replace(',', '.'))
+    lines.append("")
+    lines.append("| File Path | Tokens | Lines |")
+    lines.append("| :--- | :--- | :--- |")
+
+    for f in selected_files_info:
+        path = f.get('path', 'unknown')
+        tokens = f.get('tokens', 0)
+        line_count = f.get('lines', 0)
+        lines.append(f"| `{path}` | {tokens} | {line_count} |")
+
+    return "\n".join(lines)
+
 def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
     """
     Concatenates selected files into a single machine-parseable string
@@ -47,6 +68,9 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
     if use_wrapper:
         project_title = project_config.project_name
+
+        # Generate the surface manifest
+        surface_manifest = _generate_project_surface_manifest(base_dir, project_config.selected_files)
 
         # Defensive coercion ensures fields corrupted by trailing commas are handled correctly
         intro_text = project_config.intro_text
@@ -147,8 +171,14 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
         if intro_text:
             final_parts.append(intro_text)
 
-        # Add Critical Formatting Instructions (NOW IN THE MIDDLE)
+        # Add Critical Formatting Instructions
         final_parts.append(formatting_instruction)
+
+        # Add Manifest (Surface Awareness)
+        final_parts.append(surface_manifest)
+
+        # Add header for code blocks
+        final_parts.append("## Project Files")
 
         # Add the Code
         final_parts.append(merged_code)
