@@ -8,12 +8,13 @@ DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when
 
 DEFAULT_INTRO_PROMPT = "We are working on REPLACE_ME.\n\nQUESTION\n\n"
 
-DEFAULT_OUTRO_PROMPT = """Stylistic Guidelines
+DEFAULT_OUTRO_PROMPT = """Stylistic Guidelines (The Harness Standard)
 
 DO:
 - make sure empty lines are actually empty: avoid generating lines of spaces or tabs
 - use only concise, single-sentence, unnumbered comments without trailing punctuation or XML tags
 - always place closing triple backticks (```) on their own, new line
+- Present Tense: All rationale in comments must be in the present tense (e.g., 'Checks for null' instead of 'Checked for null')
 
 Do NOT:
 - remove my original comments
@@ -23,23 +24,31 @@ Do NOT:
 - add comments if the code itself makes it pretty clear what it does
 - remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved
 - use !important to solve HTML styling issues
+- no history: do not add comments describing previous states, fixed bugs, or renames. Git handles history; the source should only describe the current state.
 
 Use the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them."""
 
 COMMENT_CLEANUP_PROMPT = """Let's clean up the comments. Remove all LLM tags (e.g., [MODIFIED], [FIX]), transient feedback, and changelogs. Git handles history; the code shouldn't.
 
-Directive: Optimize the code for a programmer that has never seen this code before. Assume they understand standard syntax; do not explain what the code is doing, only why it is the way it is, if it is non-obvious.
+Directive: Optimize the code for a programmer that has never seen this code before. Assume they understand standard syntax.
 
-1. Remove Redundancy: Delete comments that explain the obvious or simply restate the code in English (e.g., "Submit button" above a <button>, or "No clicks" next to pointer-events: none)
+The "Surprise Factor" Test:
+Only keep a comment if an experienced developer would be surprised by the code.
+- Keep comments for workarounds (fixing library bugs/race conditions).
+- Keep comments for atypical choices (why library X was used instead of Y).
+- Keep comments for complex business logic.
+- DELETE everything else.
+
+1. Remove Redundancy: Delete comments that explain the obvious or simply restate the code in English
 2. Keep Structure: Retain section headers (e.g., "Navigation", "API Logic") that help file navigation
-3. Keep Context: Retain comments that explain the "why" behind complex business logic or workarounds for browser bugs, but clean up the wording
+3. Keep Context: Retain comments that explain the "why" behind complex logic, but clean up the wording
 4. Clean Tags: Remove the [TAG] prefix. If the comment remains useful without the tag, keep it; otherwise, delete it
 5. Avoid comments directly behind code
 6. Do not use numbering in comments
 7. Remove dots from the end of single line comments
 8. Single line comments for single sentences are preferred, even if that makes them long
-9. No History: Delete comments describing changes, fixes, or renames (e.g., "Removed X", "Fixed Y", "Renamed Z"). If a comment refers to the code's past state, delete it
-10. Present Tense: All rationale must be in the present tense. If a rationale explains a choice (e.g., "Named pose_recorder to avoid shadowing"), ensure it describes the current state, not the act of changing it
+9. No History: Delete comments describing changes, fixes, or renames. If a comment refers to the code's past state, delete it
+10. Present Tense: All rationale must be in the present tense
 
 Do not change code, only comments."""
 
