@@ -13,11 +13,12 @@ class MarkdownRenderer(tk.Frame):
     A custom markdown renderer using a standard tk.Text widget to provide
     reliable layout, styling, and scrolling. Includes auto-hiding scrollbar.
     """
-    def __init__(self, parent, base_font_size=10, on_zoom=None, height=None, *args, **kwargs):
+    def __init__(self, parent, base_font_size=10, on_zoom=None, height=None, auto_height=False, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.config(bg=c.TEXT_INPUT_BG)
         self.base_font_size = base_font_size
         self.on_zoom = on_zoom
+        self.auto_height = auto_height
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -31,6 +32,8 @@ class MarkdownRenderer(tk.Frame):
             }
             if height:
                 text_kwargs['height'] = height
+            elif self.auto_height:
+                text_kwargs['height'] = 1 # Start small
 
             self.text_widget = tk.Text(self, **text_kwargs)
             self.text_widget.grid(row=0, column=0, sticky="nsew")
@@ -41,8 +44,8 @@ class MarkdownRenderer(tk.Frame):
             self.text_widget.configure(yscrollcommand=self.scrollbar.set)
             self._configure_tags()
 
-            # Bindings for Scrollbar Management
-            self.text_widget.bind("<Configure>", lambda e: self.after_idle(self._manage_scrollbar))
+            # Bindings for Scrollbar or Height Management
+            self.text_widget.bind("<Configure>", self._on_configure_trigger)
 
             # Zoom binding
             self.text_widget.bind("<Control-MouseWheel>", self._on_mousewheel_zoom)
@@ -54,12 +57,33 @@ class MarkdownRenderer(tk.Frame):
             )
             self.error_label.grid(row=0, column=0)
 
+    def _on_configure_trigger(self, event=None):
+        if self.auto_height:
+            self.after_idle(self._adjust_height_to_content)
+        else:
+            self.after_idle(self._manage_scrollbar)
+
+    def _adjust_height_to_content(self):
+        """Sets the widget height based on rendered visual lines."""
+        if not self.winfo_exists() or not MARKDOWN2_INSTALLED:
+            return
+        try:
+            # We use "displaylines" to account for word wrapping.
+            result = self.text_widget.count("1.0", "end-1c", "displaylines")
+            if result:
+                actual_lines = result[0]
+                # We add +1 as a buffer to account for internal padding and prevent
+                # the "one line short" scrolling artifact.
+                self.text_widget.config(height=max(1, actual_lines + 1))
+        except tk.TclError:
+            pass
+
     def _manage_scrollbar(self):
         """
         Checks if the content is taller than the frame.
         Shows scrollbar if needed, hides it if not.
         """
-        if not MARKDOWN2_INSTALLED: return
+        if not MARKDOWN2_INSTALLED or self.auto_height: return
 
         # Get the current scroll position (0.0 to 1.0)
         top_fraction, bottom_fraction = self.text_widget.yview()
@@ -87,8 +111,11 @@ class MarkdownRenderer(tk.Frame):
         self.text_widget.tag_configure("italic", font=(c.FONT_FAMILY_PRIMARY, self.base_font_size, 'italic'))
         self.text_widget.tag_configure("code", foreground="#DEB887", font=("Courier New", self.base_font_size - 1))
 
-        # Recalculate scrollbar after font change affects height
-        self.after_idle(self._manage_scrollbar)
+        # Recalculate layout metrics after font change affects height
+        if self.auto_height:
+            self.after_idle(self._adjust_height_to_content)
+        else:
+            self.after_idle(self._manage_scrollbar)
 
     def _on_mousewheel_zoom(self, event):
         if self.on_zoom:
@@ -110,7 +137,10 @@ class MarkdownRenderer(tk.Frame):
 
         if not markdown_text:
             self.text_widget.config(state=tk.DISABLED)
-            self.after_idle(self._manage_scrollbar) # Check on empty
+            if self.auto_height:
+                self.after_idle(self._adjust_height_to_content)
+            else:
+                self.after_idle(self._manage_scrollbar)
             return
 
         for line in markdown_text.split('\n'):
@@ -155,8 +185,11 @@ class MarkdownRenderer(tk.Frame):
 
         self.text_widget.config(state=tk.DISABLED)
 
-        # Check scrollbar after content is loaded
-        self.after_idle(self._manage_scrollbar)
+        # Check scrollbar or height after content is loaded
+        if self.auto_height:
+            self.after_idle(self._adjust_height_to_content)
+        else:
+            self.after_idle(self._manage_scrollbar)
 
     def _apply_format_and_hide_symbols(self, pattern, tag):
         start_index = "1.0"

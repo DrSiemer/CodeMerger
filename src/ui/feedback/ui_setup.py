@@ -165,8 +165,12 @@ def _add_standard_tab(window, title, markdown_text, icon=None, info_key=None):
     if icon: window.notebook.add(frame, text=title, image=icon, compound="left")
     else: window.notebook.add(frame, text=title)
 
-    renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=window.logic.adjust_font_size)
-    renderer.pack(fill="both", expand=True)
+    # Wrap the renderer in a ScrollableFrame to allow the entire content to be high enough
+    scroll = ScrollableFrame(frame, bg=c.DARK_BG)
+    scroll.pack(fill="both", expand=True)
+
+    renderer = MarkdownRenderer(scroll.scrollable_frame, base_font_size=11, on_zoom=window.logic.adjust_font_size, auto_height=True)
+    renderer.pack(fill="x", expand=True)
     renderer.set_markdown(markdown_text.strip())
     window.renderers.append(renderer)
     if info_key: window.tab_widgets_for_info.append((renderer, info_key))
@@ -174,8 +178,12 @@ def _add_standard_tab(window, title, markdown_text, icon=None, info_key=None):
 def _add_unformatted_tab(window, title, raw_text):
     frame = Frame(window.notebook, bg=c.DARK_BG)
     window.notebook.add(frame, text=title, image=window._yellow_accent, compound="left")
-    renderer = MarkdownRenderer(frame, base_font_size=11, on_zoom=window.logic.adjust_font_size)
-    renderer.pack(fill="both", expand=True)
+
+    scroll = ScrollableFrame(frame, bg=c.DARK_BG)
+    scroll.pack(fill="both", expand=True)
+
+    renderer = MarkdownRenderer(scroll.scrollable_frame, base_font_size=11, on_zoom=window.logic.adjust_font_size, auto_height=True)
+    renderer.pack(fill="x", expand=True)
     renderer.set_markdown(raw_text.strip())
     window.renderers.append(renderer)
     window.tab_widgets_for_info.append((renderer, "review_tab_unformatted"))

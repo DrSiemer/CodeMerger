@@ -64,7 +64,7 @@ class FeedbackChangesController:
         if desc:
             window.toggle_commentary_btn = RoundedButton(header, text="Show AI Commentary", command=self.toggle_commentary, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
             window.toggle_commentary_btn.pack(side='right')
-            window.commentary_renderer = MarkdownRenderer(frame, base_font_size=10, height=8)
+            window.commentary_renderer = MarkdownRenderer(frame, base_font_size=10, auto_height=True)
             window.commentary_renderer.set_markdown(desc)
 
         window.file_list_scroll = ScrollableFrame(frame, bg=c.DARK_BG)
