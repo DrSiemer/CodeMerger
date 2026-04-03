@@ -570,12 +570,17 @@ class FeedbackDialog(tk.Toplevel):
         if not (pending_updates or pending_creations or pending_deletions):
             return
 
+        # Determine if the user is currently reviewing the file list
+        current_tab_text = self.notebook.tab(self.notebook.select(), "text")
+        is_changes_tab = (current_tab_text == "Changes")
+
         # Backup all pending items for individual UNDO capability
         for path in list(pending_updates.keys()) + pending_deletions:
             if path not in self.undo_buffer:
                  self.undo_buffer[path] = change_applier.get_current_file_content(self.base_dir, path)
 
-        if self.on_apply_executor(pending_updates, pending_creations, pending_deletions) is not False:
+        # Call the executor with the tab context
+        if self.on_apply_executor(pending_updates, pending_creations, pending_deletions, is_changes_tab_active=is_changes_tab) is not False:
             for p in pending_updates: self.file_states[p] = "applied"
             for p in pending_creations: self.file_states[p] = "applied"
             for p in pending_deletions: self.file_states[p] = "deleted"

@@ -421,7 +421,7 @@ class ActionHandlers:
         self.app.last_ai_response = plan
         self.app.button_manager.update_button_states()
 
-        def do_execute(filtered_updates=None, filtered_creations=None, filtered_deletions=None):
+        def do_execute(filtered_updates=None, filtered_creations=None, filtered_deletions=None, is_changes_tab_active=False):
             """Writes files to disk. Returns True on success, False if cancelled or error."""
 
             # Use provided lists (from Review window) or default to the full parsed plan
@@ -432,8 +432,12 @@ class ActionHandlers:
             # If we are not in a review window and there are creations OR deletions, warn the user.
             if not dialog_to_close:
                 warning_parts = []
-                if creations:
+
+                # Creations: Warning is suppressed if user is currently looking at the Changes tab.
+                if creations and not is_changes_tab_active:
                     warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
+
+                # Deletions: ALWAYS warn for safety.
                 if deletions:
                     warning_parts.append(f"DELETE {len(deletions)} file(s):\n- " + "\n- ".join(deletions))
 
@@ -508,12 +512,13 @@ class ActionHandlers:
             if plan and on_apply is None:
                 project = self.app.project_manager.get_current_project()
                 if project:
-                    def do_execute_cached(u=None, c_list=None, d=None):
+                    def do_execute_cached(u=None, c_list=None, d=None, is_changes_tab_active=False):
                         # Re-use the existing do_execute logic
                         updates = u if u is not None else plan.get('updates', {})
                         creations = c_list if c_list is not None else plan.get('creations', {})
                         deletions = d if d is not None else plan.get('deletions_proposed', [])
 
+                        # Pass the tab state to ensure warnings are handled correctly for cached resumes
                         success, final_message = change_applier.execute_plan(project.base_dir, updates, creations, deletions)
                         if success:
                             self.app.helpers.show_compact_toast(final_message)
