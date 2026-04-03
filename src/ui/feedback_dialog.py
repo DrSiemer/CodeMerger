@@ -317,6 +317,9 @@ class FeedbackDialog(tk.Toplevel):
         container = self.file_list_scroll.scrollable_frame
         for w in container.winfo_children(): w.destroy()
 
+        # Invalidate current diff cache as all previous row containers are destroyed
+        self._diff_viewers.clear()
+
         updates = self.plan.get('updates', {})
         creations = self.plan.get('creations', {})
         deletions = self.plan.get('deletions_proposed', [])
