@@ -118,10 +118,7 @@ Wrap this summary in `<NOTES>` tags.
 Example: <NOTES>I updated the database schema to include a 'status' field and revised the user flow accordingly.</NOTES>
 
 ### User Instruction
-{instruction}
-
-### Locked Sections (Reference Only - DO NOT CHANGE)
-{references}
+{instruction}{references}
 
 ### Content to Update
 {targets}
@@ -129,7 +126,7 @@ Example: <NOTES>I updated the database schema to include a 'status' field and re
 ### Instructions
 1. Review the User Instruction.
 2. Rewrite the content in the 'Content to Update' section to incorporate this instruction.
-3. Ensure consistency with 'Locked Sections' (if any), but do not modify them.
+3. {consistency_instr}
 4. {target_instructions}
 5. Output the summary in `<NOTES>`, followed by the updated content."""
 

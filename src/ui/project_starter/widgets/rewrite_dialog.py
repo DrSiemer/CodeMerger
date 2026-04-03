@@ -163,10 +163,18 @@ class RewriteUnsignedDialog(Toplevel):
             friendly_map = {k: names.get(k, k) for k in targets}
             target_instructions = SegmentManager.build_prompt_instructions(targets, friendly_map)
 
+        # Build dynamic references block and consistency instruction
+        references_str = ""
+        consistency_instr = "Ensure the rewritten content is internally consistent."
+        if reference_blocks:
+            references_str = "\n\n### Locked Sections (Reference Only - DO NOT CHANGE)\n" + "".join(reference_blocks)
+            consistency_instr = "Ensure consistency with 'Locked Sections' (Reference Only), but do not modify them."
+
         prompt = p.STARTER_REWRITE_PROMPT_TEMPLATE.format(
             instruction=instruction,
-            references=''.join(reference_blocks) if reference_blocks else '(None)',
+            references=references_str,
             targets=''.join(target_blocks),
+            consistency_instr=consistency_instr,
             target_instructions=target_instructions
         )
 
