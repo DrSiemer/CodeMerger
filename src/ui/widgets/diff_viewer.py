@@ -34,6 +34,19 @@ class DiffViewer(tk.Frame):
 
     def _generate_diff(self, old_text, new_text):
         """Calculates the diff and populates the text widget with tags."""
+        # Plain view for new files (no old content)
+        if not old_text:
+            self.text_widget.config(state='normal')
+            self.text_widget.delete("1.0", tk.END)
+            if new_text:
+                self.text_widget.insert(tk.END, new_text)
+                line_count = new_text.count('\n') + 1
+            else:
+                self.text_widget.insert(tk.END, "(File is empty)")
+                line_count = 1
+            self.text_widget.config(height=line_count, state='disabled')
+            return
+
         old_lines = old_text.splitlines() if old_text else []
         new_lines = new_text.splitlines() if new_text else []
 

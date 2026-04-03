@@ -398,8 +398,9 @@ class FeedbackDialog(tk.Toplevel):
                 undo_btn.pack()
                 if self.info_mgr: self.info_mgr.register(undo_btn, "review_file_action")
         else:
-            # Diff Toggle Button (Blue)
-            diff_btn = Button(btn_frame, text="Diff", command=lambda: self._toggle_diff(path, diff_container, action_type), bg=c.BTN_BLUE, fg="#FFFFFF", **btn_opts)
+            # Diff/View Toggle Button (Blue)
+            btn_text = "View" if action_type == "create" else "Diff"
+            diff_btn = Button(btn_frame, text=btn_text, command=lambda: self._toggle_diff(path, diff_container, action_type), bg=c.BTN_BLUE, fg="#FFFFFF", **btn_opts)
             diff_btn.pack(side='left', padx=(0, 2))
             ToolTip(diff_btn, "Inspect text changes")
             if self.info_mgr: self.info_mgr.register(diff_btn, "review_diff")
