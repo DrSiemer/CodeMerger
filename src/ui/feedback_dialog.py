@@ -114,6 +114,9 @@ class FeedbackDialog(tk.Toplevel):
         has_unformatted = len(orphan_segments) > 0
         has_any_tags = plan.get('has_any_tags', False)
 
+        # Logic to detect if there's any file data in the plan
+        has_file_blocks = bool(plan.get('updates') or plan.get('creations') or plan.get('deletions_proposed'))
+
         self.alert_frame = Frame(self.main_content_frame, bg=c.DARK_BG, padx=20)
 
         # Show the correction button if ANY unformatted segments exist.
@@ -147,8 +150,7 @@ class FeedbackDialog(tk.Toplevel):
 
                 # Injection: Add Changes tab before Verification if it hasn't been added yet.
                 if tag_name == "VERIFICATION" and not changes_tab_added:
-                    has_data = plan.get('updates') or plan.get('creations') or plan.get('deletions_proposed')
-                    if has_data:
+                    if has_file_blocks:
                         self._add_tab("Changes", "", icon=self._blue_accent, info_key="review_tab_changes")
                         changes_tab_added = True
                         current_idx += 1
@@ -173,8 +175,7 @@ class FeedbackDialog(tk.Toplevel):
                 current_idx += 1
 
         if not changes_tab_added:
-            has_data = plan.get('updates') or plan.get('creations') or plan.get('deletions_proposed')
-            if has_data:
+            if has_file_blocks:
                 self._add_tab("Changes", "", icon=self._blue_accent, info_key="review_tab_changes")
 
         if current_idx == 0:
@@ -267,9 +268,27 @@ class FeedbackDialog(tk.Toplevel):
         self.update_idletasks()
 
     def _initialize_file_states(self):
-        for path in self.plan.get('updates', {}): self.file_states[path] = "pending"
-        for path in self.plan.get('creations', {}): self.file_states[path] = "pending"
-        for path in self.plan.get('deletions_proposed', []): self.file_states[path] = "pending"
+        updates = self.plan.get('updates', {})
+        for path, content in updates.items():
+            # Automatically detect unchanged files during initialization
+            old_text = change_applier.get_current_file_content(self.base_dir, path)
+            if old_text is not None:
+                # Mirror the sanitization logic used in the execution engine
+                sanitized_new = change_applier._sanitize_content(os.path.join(self.base_dir, path), content)
+                if old_text == sanitized_new:
+                    self.file_states[path] = "skipped"
+                    continue
+            self.file_states[path] = "pending"
+
+        for path in self.plan.get('creations', {}):
+            self.file_states[path] = "pending"
+
+        for path in self.plan.get('deletions_proposed', []):
+            # If the file is already gone, skip it automatically
+            if not os.path.isfile(os.path.join(self.base_dir, path)):
+                self.file_states[path] = "skipped"
+                continue
+            self.file_states[path] = "pending"
 
     def _add_tab(self, title, markdown_text, icon=None, info_key=None):
         if title == "Changes":
@@ -340,8 +359,8 @@ class FeedbackDialog(tk.Toplevel):
 
         self._update_mass_apply_visibility()
 
-    def _create_group_header(self, parent, text, color):
-        f = Frame(parent, bg=c.DARK_BG, padx=20)
+    def _create_group_header(self, container, text, color):
+        f = Frame(container, bg=c.DARK_BG, padx=20)
         f.pack(fill='x', pady=(15, 5))
         Label(f, text=text.upper(), font=(c.FONT_FAMILY_PRIMARY, 9, 'bold'), bg=c.DARK_BG, fg=color).pack(side='left')
         Frame(f, bg=color, height=1).pack(side='left', fill='x', expand=True, padx=(10, 0))
@@ -357,9 +376,14 @@ class FeedbackDialog(tk.Toplevel):
 
         state = self.file_states.get(path, "pending")
         is_handled = state in ["applied", "deleted", "rejected"]
+        is_skipped = state == "skipped"
+
         font_config = c.FONT_NORMAL
         if is_handled:
             font = (font_config[0], font_config[1], 'overstrike')
+            fg = c.TEXT_SUBTLE_COLOR
+        elif is_skipped:
+            font = font_config
             fg = c.TEXT_SUBTLE_COLOR
         else:
             font = font_config
@@ -386,7 +410,10 @@ class FeedbackDialog(tk.Toplevel):
             'height': 1, 'cursor': 'hand2', 'padx': 10
         }
 
-        if is_handled:
+        if is_skipped:
+            msg = "Already deleted" if action_type == "delete" else "No changes"
+            Label(btn_frame, text=msg, font=c.FONT_SMALL_BUTTON, fg=c.TEXT_SUBTLE_COLOR, bg=c.DARK_BG, padx=10).pack()
+        elif is_handled:
             is_new_creation = path in self.plan.get('creations', {})
             show_undo = False
             if state == "rejected": show_undo = True
@@ -432,7 +459,10 @@ class FeedbackDialog(tk.Toplevel):
                 new_font = (base_font[0], base_font[1], 'underline')
             label.config(font=new_font, fg=c.BTN_BLUE_TEXT)
         else:
-            label.config(font=base_font, fg=c.TEXT_COLOR if label.cget('fg') != c.TEXT_SUBTLE_COLOR else c.TEXT_SUBTLE_COLOR)
+            # Restore color but handle handled/skipped state color
+            current_state = self.file_states.get(label.cget('text'))
+            is_dimmed = current_state in ["applied", "deleted", "rejected", "skipped"]
+            label.config(font=base_font, fg=c.TEXT_SUBTLE_COLOR if is_dimmed else c.TEXT_COLOR)
 
     def _open_file_in_editor(self, rel_path):
         """Attempts to open the file using the application's editor logic."""
@@ -549,9 +579,10 @@ class FeedbackDialog(tk.Toplevel):
 
         has_pending = any(s == "pending" for s in self.file_states.values())
         if has_pending:
-            # Show "Apply All Remaining" if any manual change (modify, delete, create) was accepted/rejected.
-            has_handled = any(s != "pending" for s in self.file_states.values())
-            self.apply_btn.config(text="Apply All Remaining" if has_handled else "Apply All")
+            # Show "Apply All Remaining" if any manual change was accepted/rejected.
+            # We ignore "skipped" files to ensure the button says "Apply All" on first open.
+            has_manual_action = any(s in ["applied", "deleted", "rejected"] for s in self.file_states.values())
+            self.apply_btn.config(text="Apply All Remaining" if has_manual_action else "Apply All")
 
             if not self.apply_btn.winfo_ismapped():
                 # Correct button order: Cancel on left, Apply on far right
