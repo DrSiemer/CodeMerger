@@ -16,7 +16,7 @@
         },
         {
           "path": "llm.md",
-          "mtime": 1775246449.4378629,
+          "mtime": 1775250312.998074,
           "hash": "bc33dba2c547979044dc7a8dfc4fd2b429a39d32",
           "tokens": 4041,
           "lines": 121
@@ -116,7 +116,7 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1775246449.4521441,
+          "mtime": 1775250313.0000923,
           "hash": "9d9729309ff8c01fc57f7abd0f6d31cb2e4e8a03",
           "tokens": 2012,
           "lines": 224
@@ -130,7 +130,7 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1775246449.4458623,
+          "mtime": 1775250312.9990923,
           "hash": "65d52720a502cde1da2b90b567ed1d741c7f6669",
           "tokens": 2309,
           "lines": 279
@@ -400,13 +400,6 @@
           "hash": "f37e21cc917b5ef25378331f7cd64a76023ef86c",
           "tokens": 1052,
           "lines": 117
-        },
-        {
-          "path": "src/ui/feedback_dialog.py",
-          "mtime": 1775247642.1409986,
-          "hash": "91eb9053216f27fbe5ad9b69e3f0c90861565506",
-          "tokens": 7474,
-          "lines": 674
         },
         {
           "path": "src/ui/instructions_window.py",
@@ -856,9 +849,37 @@
           "hash": "34339853aeacb973486f3922cfb96dd2cb2353af",
           "tokens": 735,
           "lines": 80
+        },
+        {
+          "path": "src/ui/feedback/changes_controller.py",
+          "mtime": 1775250697.7169178,
+          "hash": "14503-1775250697.7169178",
+          "tokens": 3205,
+          "lines": 282
+        },
+        {
+          "path": "src/ui/feedback/feedback_dialog.py",
+          "mtime": 1775250697.7149174,
+          "hash": "2388-1775250697.7149174",
+          "tokens": 468,
+          "lines": 63
+        },
+        {
+          "path": "src/ui/feedback/logic_controller.py",
+          "mtime": 1775250697.7159169,
+          "hash": "7898-1775250697.7159169",
+          "tokens": 1637,
+          "lines": 180
+        },
+        {
+          "path": "src/ui/feedback/ui_setup.py",
+          "mtime": 1775250697.7159169,
+          "hash": "8891-1775250697.7159169",
+          "tokens": 2120,
+          "lines": 180
         }
       ],
-      "total_tokens": 174353,
+      "total_tokens": 177289,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -935,7 +956,10 @@
     "src/ui/compact_mode.py",
     "src/ui/compact_status.py",
     "src/ui/custom_error_dialog.py",
-    "src/ui/feedback_dialog.py",
+    "src/ui/feedback/changes_controller.py",
+    "src/ui/feedback/feedback_dialog.py",
+    "src/ui/feedback/logic_controller.py",
+    "src/ui/feedback/ui_setup.py",
     "src/ui/file_manager/__init__.py",
     "src/ui/file_manager/data_controller.py",
     "src/ui/file_manager/file_manager_window.py",

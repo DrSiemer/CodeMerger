@@ -534,7 +534,7 @@ class ActionHandlers:
             self.app.helpers.show_compact_toast("No AI response review available yet.")
             return
 
-        from ..feedback_dialog import FeedbackDialog
+        from ..feedback.feedback_dialog import FeedbackDialog
 
         dialog_parent = self.app
         if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():
