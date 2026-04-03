@@ -31,6 +31,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
     1. **Treeview background:** Must explicitly set `fieldbackground` in `ttk.Style` to `c.TEXT_INPUT_BG` in `src/ui/file_manager/ui_setup.py`.
     2. **Info Panel wraplength:** Labels must update `wraplength` on `<Configure>` based on the true window width, or text will be shrunken to the left half.
     3. **Info Button Padding:** The button must use `borderwidth=0` and `highlightthickness=0` with `place(x=0)` to avoid a 1px gap from the window edge.
+    4. **Feedback Dialog Topmost:** The `FeedbackDialog` MUST NOT be topmost. To prevent it inheriting topmost from Compact Mode on Windows, `transient(parent)` must be skipped if the parent is topmost.
 
 ---
 

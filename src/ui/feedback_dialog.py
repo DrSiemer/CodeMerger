@@ -73,9 +73,9 @@ class FeedbackDialog(tk.Toplevel):
         except Exception:
             pass
 
-        if is_parent_topmost:
-            # If spawned from Compact Mode, stay in front of IDE but don't lock the app
-            self.attributes("-topmost", True)
+        # Topmost Decoupling
+        if not is_parent_topmost:
+            self.transient(parent)
 
         apply_dark_theme(self)
 
