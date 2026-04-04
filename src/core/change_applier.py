@@ -210,12 +210,34 @@ def parse_and_plan_changes(base_dir, markdown_text):
     files_to_update = {}
     files_to_create = {}
     invalid_chars_pattern = r'[<>:"|?*]'
+    base_dir_abs = os.path.abspath(base_dir)
 
+    # Validate Proposed Deletions (Critical Security Step)
+    for rel_path in deletions_proposed:
+        if re.search(invalid_chars_pattern, rel_path):
+            return {
+                'status': 'ERROR',
+                'message': f"Error: The deletion path '{rel_path}' contains invalid characters."
+            }
+
+        try:
+            full_path = os.path.abspath(os.path.join(base_dir_abs, rel_path))
+            if os.path.commonpath([base_dir_abs, full_path]) != base_dir_abs:
+                return {
+                    'status': 'ERROR',
+                    'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."
+                }
+        except (ValueError, Exception):
+            return {
+                'status': 'ERROR',
+                'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."
+            }
+
+    # Validate and Plan File Blocks (Updates/Creations)
     file_blocks = [b for b in all_blocks if b['type'] == 'file']
     for b in file_blocks:
         rel_path = b['path']
         content = b['content']
-        full_path = os.path.normpath(os.path.join(base_dir, rel_path))
 
         if re.search(invalid_chars_pattern, rel_path):
             return {
@@ -223,7 +245,14 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'message': f"Error: The file path '{rel_path}' contains invalid characters."
             }
 
-        if not full_path.startswith(os.path.normpath(base_dir)):
+        try:
+            full_path = os.path.abspath(os.path.join(base_dir_abs, rel_path))
+            if os.path.commonpath([base_dir_abs, full_path]) != base_dir_abs:
+                return {
+                    'status': 'ERROR',
+                    'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."
+                }
+        except (ValueError, Exception):
             return {
                 'status': 'ERROR',
                 'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."
