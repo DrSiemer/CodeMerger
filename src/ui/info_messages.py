@@ -167,6 +167,10 @@ INFO_MESSAGES = {
         "Add All Safety: A warning threshold for the 'Add All' button. Prevents accidentally adding "
         "a large amount of files to your merge list."
     ),
+    "set_fm_alert_threshold": (
+        "New File Warning: When applying AI changes that create new files, CodeMerger will skip the "
+        "confirmation dialog if the count of new files is below this number. Deletions always trigger a warning."
+    ),
 
     "set_prompts": "Define your default intro/outro texts.",
     "set_prompt_merged": (

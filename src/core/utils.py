@@ -13,7 +13,8 @@ from ..core.prompts import (
 )
 from ..constants import (
     TOKEN_COUNT_ENABLED_DEFAULT,
-    ADD_ALL_WARNING_THRESHOLD_DEFAULT
+    ADD_ALL_WARNING_THRESHOLD_DEFAULT,
+    NEW_FILE_ALERT_THRESHOLD_DEFAULT
 )
 
 # Reference holds the lock for the application lifetime
@@ -119,6 +120,7 @@ def _get_default_config_dict():
         'token_limit': 0,
         'enable_compact_mode_on_minimize': True,
         'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT,
+        'new_file_alert_threshold': NEW_FILE_ALERT_THRESHOLD_DEFAULT,
         'show_feedback_on_paste': True,
         'info_mode_active': True,
         'user_lists': {

@@ -433,9 +433,11 @@ class ActionHandlers:
             if not dialog_to_close:
                 warning_parts = []
 
-                # Creations: Warning is suppressed if user is currently looking at the Changes tab.
+                # Creations: Warning is suppressed if count is below setting limit OR user is looking at Changes tab.
+                creation_threshold = self.app.app_state.config.get('new_file_alert_threshold', 5)
                 if creations and not is_changes_tab_active:
-                    warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
+                    if len(creations) > creation_threshold:
+                        warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
 
                 # Deletions: ALWAYS warn for safety.
                 if deletions:
@@ -456,6 +458,34 @@ class ActionHandlers:
 
             if success:
                 self.app.helpers.show_compact_toast(final_message)
+
+                # Automatic Addition of new files to the Merge List
+                if creations:
+                    project_config = self.app.project_manager.get_current_project()
+                    if project_config:
+                        added_count = 0
+                        new_creation_paths = set(creations.keys())
+
+                        for rel_path in new_creation_paths:
+                            # Avoid duplicates in the merge list
+                            if not any(f['path'] == rel_path for f in project_config.selected_files):
+                                new_entry = self._calculate_stats_for_file(rel_path)
+                                if new_entry:
+                                    project_config.selected_files.append(new_entry)
+                                    added_count += 1
+
+                        if added_count > 0:
+                            # Recalculate total tokens
+                            project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+
+                            # Ensure these files are marked as 'known' globally to prevent redundant alerts
+                            project_config.known_files = sorted(list(set(project_config.known_files) | new_creation_paths))
+
+                            # Clear from current profile unknowns
+                            project_config.unknown_files = [f for f in project_config.unknown_files if f not in new_creation_paths]
+
+                            project_config.save()
+
                 if creations or deletions:
                     self.app.file_monitor.perform_new_file_check()
 

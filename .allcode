@@ -44,10 +44,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1774906002.5983174,
-          "hash": "9599e973718cf359527286ea0938a20b2ca58ff5",
-          "tokens": 1814,
-          "lines": 215
+          "mtime": 1775308593.514701,
+          "hash": "304a28b2683c42d6d60e9bab656a18af1f665f83",
+          "tokens": 1823,
+          "lines": 216
         },
         {
           "path": "default_filetypes.json",
@@ -72,10 +72,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1774794037.4544034,
-          "hash": "20fdef9b87b573fbb2785b98aced6e5662153ebd",
-          "tokens": 2748,
-          "lines": 388,
+          "mtime": 1775308593.5157,
+          "hash": "2423c7b2361ac6f6f2599126c91e6116107ae04f",
+          "tokens": 2768,
+          "lines": 390,
           "ignore_tokens": false
         },
         {
@@ -116,10 +116,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1775250313.0000923,
-          "hash": "9d9729309ff8c01fc57f7abd0f6d31cb2e4e8a03",
-          "tokens": 2012,
-          "lines": 224
+          "mtime": 1775253419.3862658,
+          "hash": "6d863667c9048cb7137cc2b30e111a284c5afce1",
+          "tokens": 1769,
+          "lines": 197
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -221,10 +221,10 @@
         },
         {
           "path": "src/ui/widgets/markdown_renderer.py",
-          "mtime": 1772545862.8748834,
-          "hash": "1a716b58ef6dd84e612462e7352bef1f4766e29c",
-          "tokens": 1971,
-          "lines": 191
+          "mtime": 1775253173.301514,
+          "hash": "39151412a1ae8a635ffff921a2e31e4e49cfe581",
+          "tokens": 2246,
+          "lines": 224
         },
         {
           "path": "src/ui/widgets/profile_navigator.py",
@@ -326,10 +326,10 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1775247718.5278275,
-          "hash": "60b65f99aea924b62966919660102ce6b2f525dd",
-          "tokens": 4633,
-          "lines": 543
+          "mtime": 1775308607.719926,
+          "hash": "47afa34f1f58287090d8566c2971d773d5be80cb",
+          "tokens": 4903,
+          "lines": 573
         },
         {
           "path": "src/ui/app_window_parts/event_handlers.py",
@@ -424,10 +424,10 @@
         },
         {
           "path": "src/ui/settings/file_manager_settings.py",
-          "mtime": 1773870643.391395,
-          "hash": "087a7dfd748b13451792725dfb927e557184ec28",
-          "tokens": 838,
-          "lines": 65
+          "mtime": 1775308593.5157,
+          "hash": "9b2d69adf2e18117132d91a2b3590f62919c1ddf",
+          "tokens": 1059,
+          "lines": 78
         },
         {
           "path": "src/ui/settings/prompts_settings.py",
@@ -452,10 +452,10 @@
         },
         {
           "path": "src/ui/settings/settings_window.py",
-          "mtime": 1774899473.3251772,
-          "hash": "7dd1eeaf11ca04ba0cc6035d52bf3cb94aa5a6e3",
-          "tokens": 1816,
-          "lines": 184
+          "mtime": 1775308593.5157,
+          "hash": "5d238de21e3f56664f082fcb7f383d78672ea4b4",
+          "tokens": 1904,
+          "lines": 191
         },
         {
           "path": "src/ui/filetypes_manager.py",
@@ -845,41 +845,41 @@
         },
         {
           "path": "src/ui/widgets/diff_viewer.py",
-          "mtime": 1775246768.058027,
-          "hash": "34339853aeacb973486f3922cfb96dd2cb2353af",
-          "tokens": 735,
-          "lines": 80
+          "mtime": 1775253173.3005147,
+          "hash": "eef33dadf1cdf81d20e0a364abd739f93f80fbd4",
+          "tokens": 901,
+          "lines": 97
         },
         {
           "path": "src/ui/feedback/changes_controller.py",
-          "mtime": 1775250697.7169178,
-          "hash": "14503-1775250697.7169178",
-          "tokens": 3205,
-          "lines": 282
+          "mtime": 1775251689.0602312,
+          "hash": "5b02968048d870ebbfc94b8004b6cccce878e957",
+          "tokens": 3252,
+          "lines": 288
         },
         {
           "path": "src/ui/feedback/feedback_dialog.py",
-          "mtime": 1775250697.7149174,
-          "hash": "2388-1775250697.7149174",
-          "tokens": 468,
-          "lines": 63
+          "mtime": 1775251151.0433402,
+          "hash": "435f17d3e0776b08a5d6f1b4a864b081242fee28",
+          "tokens": 487,
+          "lines": 66
         },
         {
           "path": "src/ui/feedback/logic_controller.py",
-          "mtime": 1775250697.7159169,
-          "hash": "7898-1775250697.7159169",
-          "tokens": 1637,
-          "lines": 180
+          "mtime": 1775251151.0443382,
+          "hash": "2960987375cb6a487682664e4f2087c0dbaacf73",
+          "tokens": 1719,
+          "lines": 186
         },
         {
           "path": "src/ui/feedback/ui_setup.py",
-          "mtime": 1775250697.7159169,
-          "hash": "8891-1775250697.7159169",
-          "tokens": 2120,
-          "lines": 180
+          "mtime": 1775251689.0607588,
+          "hash": "99d9391b0c8f6badb7939d54f4c942ca977e867c",
+          "tokens": 2229,
+          "lines": 189
         }
       ],
-      "total_tokens": 177289,
+      "total_tokens": 0,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
