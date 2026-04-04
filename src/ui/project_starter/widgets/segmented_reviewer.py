@@ -56,14 +56,14 @@ class SegmentedReviewer(Frame):
             self._navigate(start_key)
 
     def _build_ui(self):
-        # 1. Sidebar
+        # Sidebar
         self.sidebar = ReviewerSidebar(
             self, self.segment_keys, self.friendly_names_map, self.signoff_vars,
             on_navigate_callback=self._navigate
         )
         self.sidebar.pack(side="left", fill="y", padx=(0, 10))
 
-        # 2. Content Container
+        # Content Container
         self.content_area = Frame(self, bg=c.DARK_BG)
         self.content_area.pack(side="left", fill="both", expand=True)
 
@@ -78,7 +78,7 @@ class SegmentedReviewer(Frame):
         self.main_view_container = Frame(self.content_area, bg=c.DARK_BG)
         self.main_view_container.pack(fill="both", expand=True)
 
-        # 3. Footer
+        # Footer
         self.footer = ReviewerFooter(
             self.main_view_container,
             on_sign_off=self._sign_off,
@@ -88,13 +88,13 @@ class SegmentedReviewer(Frame):
         )
         self.footer.pack(side="bottom", fill="x", pady=(10, 0))
 
-        # 4. Questions Panel
+        # Questions Panel
         self.questions_panel = ReviewerQuestions(
             self.main_view_container, self.questions_map,
             get_context_callback=self._get_question_context
         )
 
-        # 5. Display (Editor/Renderer)
+        # Display (Editor/Renderer)
         self.display_container = Frame(self.main_view_container, bg=c.DARK_BG)
         self.display_container.pack(side="top", fill="both", expand=True)
         self.display_container.grid_rowconfigure(0, weight=1)

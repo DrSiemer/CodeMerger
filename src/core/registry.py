@@ -10,7 +10,7 @@ def get_setting(name, default_value):
     if sys.platform != "win32":
         return default_value # Registry is a Windows-only feature
 
-    # 1. Try to read the user-specific setting from HKEY_CURRENT_USER
+    # Try to read the user-specific setting from HKEY_CURRENT_USER
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, REGISTRY_KEY_PATH, 0, winreg.KEY_READ) as key:
             value, reg_type = winreg.QueryValueEx(key, name)
@@ -24,7 +24,7 @@ def get_setting(name, default_value):
         # A different error occurred, fall back.
         pass
 
-    # 2. Fallback: Try to read the system-wide default from HKEY_LOCAL_MACHINE
+    # Fallback: Try to read the system-wide default from HKEY_LOCAL_MACHINE
     try:
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, REGISTRY_KEY_PATH, 0, winreg.KEY_READ) as key:
             value, reg_type = winreg.QueryValueEx(key, name)

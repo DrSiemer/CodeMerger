@@ -169,7 +169,7 @@ class ProjectSelectorDialog(Toplevel):
         """Toggles visibility of existing widgets based on query instead of rebuilding."""
         query = self.filter_var.get().lower()
 
-        # 1. Update filter bar visibility: Hide if user has less than 5 projects total
+        # Update filter bar visibility: Hide if user has less than 5 projects total
         if len(self.recent_projects) >= 5:
             if not self.filter_frame.winfo_ismapped():
                 self.filter_frame.grid(row=1, column=0, sticky='ew', pady=(0, 10))
@@ -180,7 +180,7 @@ class ProjectSelectorDialog(Toplevel):
                     self.filter_var.set("")
                     return
 
-        # 2. Toggle visibility of existing widgets
+        # Toggle visibility of existing widgets
         visible_count = 0
         for path, frame in self.project_widgets_map.items():
             metadata = self._get_project_metadata(path)
@@ -192,7 +192,7 @@ class ProjectSelectorDialog(Toplevel):
             else:
                 frame.pack_forget()
 
-        # 3. Handle 'No Results' state
+        # Handle 'No Results' state
         if visible_count == 0 and self.recent_projects:
             if not hasattr(self, 'no_results_label'):
                 self.no_results_label = Label(self.recent_dirs_frame, text="No projects match your filter.", bg=self.app_bg_color, fg=c.TEXT_SUBTLE_COLOR, font=c.FONT_NORMAL, pady=20)
@@ -243,14 +243,14 @@ class ProjectSelectorDialog(Toplevel):
                         item_h = req_h + 6 # req + padding
                         break
 
-        # 1. Set the specific height for the Canvas (cap at 10 rows)
+        # Set the specific height for the Canvas (cap at 10 rows)
         list_h = min(visible_count, 10) * item_h
         self.scroll_frame.canvas.config(height=list_h)
 
-        # 2. Update internal layout logic
+        # Update internal layout logic
         self.update_idletasks()
 
-        # 3. Apply the final height while keeping x/y and ensuring on-screen
+        # Apply the final height while keeping x/y and ensuring on-screen
         win_w, win_h = self.dialog_width, self.winfo_reqheight()
 
         x, y = self.current_x, self.current_y
