@@ -249,7 +249,12 @@ class FeedbackChangesController:
         else:
             content = window.plan['updates'].get(path) or window.plan['creations'].get(path)
             success, _ = change_applier.apply_single_file(window.base_dir, path, content)
-            if success: window.file_states[path] = "applied"
+            if success:
+                window.file_states[path] = "applied"
+                # Automatic Addition to Merge List on individual Accept
+                if hasattr(window.app, 'action_handlers'):
+                    window.app.action_handlers.ensure_file_is_merged(path)
+
         if success:
             window.app.button_manager.update_button_states()
             self.refresh_file_list_ui()

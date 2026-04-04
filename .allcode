@@ -130,10 +130,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1775250312.9990923,
-          "hash": "65d52720a502cde1da2b90b567ed1d741c7f6669",
-          "tokens": 2309,
-          "lines": 279
+          "mtime": 1775310952.719604,
+          "hash": "49c56fdd39af8212e6cd6582f0b5846f949d4301",
+          "tokens": 2207,
+          "lines": 270
         },
         {
           "path": "src/core/clipboard.py",
@@ -242,10 +242,10 @@
         },
         {
           "path": "src/ui/info_messages.py",
-          "mtime": 1774907505.8212428,
-          "hash": "6d906cb50e5b2f2986e07e8fc3ac3da4d10bd97e",
-          "tokens": 4445,
-          "lines": 329
+          "mtime": 1775308986.831216,
+          "hash": "4c232de62698974b2eec6cd301e93aac1eddb4a5",
+          "tokens": 4500,
+          "lines": 333
         },
         {
           "path": "src/ui/info_manager.py",
@@ -326,10 +326,10 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1775308607.719926,
-          "hash": "47afa34f1f58287090d8566c2971d773d5be80cb",
-          "tokens": 4903,
-          "lines": 573
+          "mtime": 1775309330.9444897,
+          "hash": "2b5722912eb1d9b3eb14068399472238f15a303a",
+          "tokens": 5002,
+          "lines": 580
         },
         {
           "path": "src/ui/app_window_parts/event_handlers.py",
@@ -424,10 +424,10 @@
         },
         {
           "path": "src/ui/settings/file_manager_settings.py",
-          "mtime": 1775308593.5157,
-          "hash": "9b2d69adf2e18117132d91a2b3590f62919c1ddf",
-          "tokens": 1059,
-          "lines": 78
+          "mtime": 1775308986.8322153,
+          "hash": "1839e5489abd2f9097757156997af9522d3bfc3e",
+          "tokens": 1101,
+          "lines": 81
         },
         {
           "path": "src/ui/settings/prompts_settings.py",
@@ -852,10 +852,10 @@
         },
         {
           "path": "src/ui/feedback/changes_controller.py",
-          "mtime": 1775251689.0602312,
-          "hash": "5b02968048d870ebbfc94b8004b6cccce878e957",
-          "tokens": 3252,
-          "lines": 288
+          "mtime": 1775309330.9454901,
+          "hash": "ad229ab6a694d11393f279eaf16385980758d749",
+          "tokens": 3285,
+          "lines": 293
         },
         {
           "path": "src/ui/feedback/feedback_dialog.py",
@@ -879,7 +879,7 @@
           "lines": 189
         }
       ],
-      "total_tokens": 0,
+      "total_tokens": 178479,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

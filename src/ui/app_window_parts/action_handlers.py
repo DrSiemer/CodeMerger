@@ -394,6 +394,29 @@ class ActionHandlers:
             app.show_error_dialog("File Access Error", f"Could not access file to add it to the merge list:\n{path}")
         return None
 
+    def ensure_file_is_merged(self, rel_path):
+        """Ensures a file is present in the Merge List and marks it as 'seen' globally."""
+        project_config = self.app.project_manager.get_current_project()
+        if not project_config:
+            return
+
+        # 1. Add to Merge List if not already there
+        if not any(f['path'] == rel_path for f in project_config.selected_files):
+            new_entry = self._calculate_stats_for_file(rel_path)
+            if new_entry:
+                project_config.selected_files.append(new_entry)
+                # Recalculate total tokens
+                project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+
+        # 2. Global State Cleanup: mark as known to prevent "New File" alerts
+        project_config.known_files = sorted(list(set(project_config.known_files) | {rel_path}))
+
+        # 3. Profile State Cleanup: remove from active unknown tracker
+        project_config.unknown_files = [f for f in project_config.unknown_files if f != rel_path]
+
+        project_config.save()
+        self.app.button_manager.update_button_states()
+
     def apply_changes_from_clipboard(self, force_toggle_feedback=False):
         app = self.app
         project_config = app.project_manager.get_current_project()
@@ -440,7 +463,7 @@ class ActionHandlers:
                         warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
 
                 # Deletions: ALWAYS warn for safety.
-                if deletions:
+                if deletions and not is_changes_tab_active:
                     warning_parts.append(f"DELETE {len(deletions)} file(s):\n- " + "\n- ".join(deletions))
 
                 if warning_parts:
@@ -459,32 +482,10 @@ class ActionHandlers:
             if success:
                 self.app.helpers.show_compact_toast(final_message)
 
-                # Automatic Addition of new files to the Merge List
-                if creations:
-                    project_config = self.app.project_manager.get_current_project()
-                    if project_config:
-                        added_count = 0
-                        new_creation_paths = set(creations.keys())
-
-                        for rel_path in new_creation_paths:
-                            # Avoid duplicates in the merge list
-                            if not any(f['path'] == rel_path for f in project_config.selected_files):
-                                new_entry = self._calculate_stats_for_file(rel_path)
-                                if new_entry:
-                                    project_config.selected_files.append(new_entry)
-                                    added_count += 1
-
-                        if added_count > 0:
-                            # Recalculate total tokens
-                            project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
-
-                            # Ensure these files are marked as 'known' globally to prevent redundant alerts
-                            project_config.known_files = sorted(list(set(project_config.known_files) | new_creation_paths))
-
-                            # Clear from current profile unknowns
-                            project_config.unknown_files = [f for f in project_config.unknown_files if f not in new_creation_paths]
-
-                            project_config.save()
+                # Automatic Addition of written files (creations AND updates) to the Merge List
+                processed_paths = set(updates.keys()) | set(creations.keys())
+                for rel_path in processed_paths:
+                    self.ensure_file_is_merged(rel_path)
 
                 if creations or deletions:
                     self.app.file_monitor.perform_new_file_check()
@@ -552,6 +553,12 @@ class ActionHandlers:
                         success, final_message = change_applier.execute_plan(project.base_dir, updates, creations, deletions)
                         if success:
                             self.app.helpers.show_compact_toast(final_message)
+
+                            # Auto-merge logic for cached apply
+                            all_paths = set(updates.keys()) | set(creations.keys())
+                            for rel_path in all_paths:
+                                self.ensure_file_is_merged(rel_path)
+
                             self.app.button_manager.update_button_states()
                             return True
                         else:
