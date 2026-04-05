@@ -226,6 +226,7 @@ class GenerateView(tk.Frame):
 
         # Handle title highlighting
         if content:
+            self.step1_title.config(fg=c.TEXT_COLOR) # Mark Step 1 done
             self.step2_title.config(fg=c.TEXT_COLOR)
             # Reveal Step 3
             if not self.step3_frame.winfo_ismapped():
@@ -234,6 +235,9 @@ class GenerateView(tk.Frame):
                     self.step3_title.config(fg=c.BTN_GREEN)
         else:
             self.step3_frame.grid_forget()
+            # If text is manually cleared or we are in reset, restore Step 1 focus
+            self.step1_title.config(fg=c.BTN_GREEN)
+            self.step2_title.config(fg=c.TEXT_COLOR)
 
         # Check Project Details
         project_name = self.project_data["name"].get().strip()
@@ -376,3 +380,23 @@ class GenerateView(tk.Frame):
         if hasattr(self, 'llm_result_text') and self.llm_result_text.winfo_exists():
             return {"generate_llm_response": self.llm_result_text.get("1.0", "end-1c").strip()}
         return {}
+
+    def handle_reset(self):
+        """Resets the input fields for the generate step."""
+        if messagebox.askyesno("Confirm", "Are you sure you want to clear the response and reset this step?", parent=self):
+            # Clear text
+            self.llm_result_text.text_widget.delete("1.0", "end")
+            self.project_data["generate_llm_response"] = ""
+
+            # Reset interaction flag
+            self.step3_interacted = False
+            self.step3_title.config(fg=c.TEXT_COLOR)
+
+            # Hide section frames
+            self.step2_frame.grid_forget()
+            self.step3_frame.grid_forget()
+
+            # Reset titles and navigation state
+            self.step1_title.config(fg=c.BTN_GREEN)
+            self._validate_and_sync()
+            self.starter_controller._update_navigation_controls()
