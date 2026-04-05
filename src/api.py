@@ -13,6 +13,7 @@ from src.core.utils import save_config, load_all_filetypes, save_filetypes, pars
 from src.core.registry import save_setting
 from src.core.paths import BUNDLE_DIR
 from src.ui.file_manager.file_tree_builder import build_file_tree_data
+from src.core import change_applier
 
 log = logging.getLogger("CodeMerger")
 
@@ -119,6 +120,8 @@ class Api:
             "unknown_files": project_config.unknown_files,
             "expanded_dirs": list(project_config.expanded_dirs),
             "has_instructions": bool(project_config.intro_text or project_config.outro_text),
+            "intro_text": project_config.intro_text,
+            "outro_text": project_config.outro_text,
             "status_msg": status_msg
         }
 
@@ -496,6 +499,81 @@ class Api:
         except Exception as e:
             log.error(f"Failed to open folder: {e}")
             return f"Error opening folder: {e}"
+
+    # --- AI Feedback / Change Applier Integration ---
+
+    def parse_markdown_response(self, text):
+        """Parses the provided Markdown string into a structured change plan."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return {"status": "ERROR", "message": "No active project loaded."}
+
+        plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
+        return plan
+
+    def get_file_content(self, rel_path):
+        """Reads and returns the current content of a file relative to project root."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+        return change_applier.get_current_file_content(project_config.base_dir, rel_path)
+
+    def apply_single_file_change(self, rel_path, content):
+        """Writes the provided content to the specified file path."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return False, "No active project."
+        return change_applier.apply_single_file(project_config.base_dir, rel_path, content)
+
+    def delete_file(self, rel_path):
+        """Deletes the specified file from disk."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return False, "No active project."
+        return change_applier.delete_single_file(project_config.base_dir, rel_path)
+
+    def get_admonishment_prompt(self):
+        """Generates a specialized prompt for corrected AI output format."""
+        LT, RT, PRE = "<", ">", "--- "
+        IN_T = "IN" + "TRO"
+        ANS_W = "ANS" + "WERS" + " TO DIR" + "ECT USER QUE" + "STIONS"
+        CHA_N = "CHA" + "NGES"
+        VER_I = "VER" + "IFI" + "CATION"
+
+        msg = (
+            "Please follow the output format strictly as described in your instructions. "
+            "Your previous response did not fully comply with the required formatting standards. "
+            "Specifically, please ensure that:\n"
+            f"- ALL commentary and explanations are placed inside the mandatory XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}).\n"
+            "- No text or commentary exists outside of these tags.\n"
+            f"- File markers are present and correctly formatted ({PRE}File: `path` --- and {PRE}End of file ---).\n"
+            "- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.\n"
+            "Please re-output the response correctly."
+        )
+        return msg
+
+    def save_project_instructions(self, intro, outro):
+        """Updates the intro and outro instructions for the currently active project."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        project_config.intro_text = intro
+        project_config.outro_text = outro
+        project_config.save()
+
+        return self._format_project_response(project_config, "Instructions saved successfully.")
+
+    def get_clipboard_text(self):
+        """
+        Reads text from the system clipboard using the Python pyperclip library.
+        Bypasses browser permission gated navigator.clipboard.readText() API.
+        """
+        try:
+            return pyperclip.paste()
+        except Exception as e:
+            log.error(f"Failed to read system clipboard: {e}")
+            return ""
 
     def test(self):
         """A simple test method to verify the Vue -> Python bridge is working."""

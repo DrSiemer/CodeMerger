@@ -83,6 +83,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **Smart Growth Mechanism**: To prevent "stuck" states where complex modals (like Settings or File Manager) are clipped due to a small main window size, components use a `resizeWindow` hook on mount. This calls the backend `ensure_window_size` API, which grows the window to `max(current, requested)` dimensions. It never shrinks the window, respecting user-defined larger layouts.
 - **Base64 Asset Pipeline**: Local images are served to the frontend via a `get_image_base64` API method. This bypasses security restrictions and path inconsistencies associated with serving local filesystem files directly in a WebView environment.
 - **API Bridge Protection**: Properties in the Python `Api` class prefixed with an underscore (e.g., `self._window`) are ignored by PyWebView during JS API generation. This is used to store internal references without triggering premature DOM evaluation or crashes during the startup handshake.
+- **Graceful Shutdown (Workaround)**: Avoid `os._exit(0)` inside the `window.events.closed` handler on Windows. Abruptly killing the process prevents Chromium (WebView2) from cleanly unregistering its window classes, resulting in `Failed to unregister class Chrome_WidgetWin_0. Error = 1411`. Cleanup logic (stopping background threads) is placed immediately after the blocking `webview.start()` call to ensure the UI loop has fully exited first.
 
 ### User Interface (`src/ui`)
 

@@ -60,20 +60,13 @@ def main():
     monitor = FileMonitorThread(window, app_state, project_manager)
     monitor.start()
 
-    def on_closed():
-        """
-        Handler triggered when the main window is closed.
-        Ensures background threads are stopped and the process terminates cleanly.
-        """
-        log.info("Window closed. Terminating application.")
-        monitor.stop()
-        # On Windows, PyWebView processes can sometimes hang if not explicitly terminated
-        os._exit(0)
-
-    window.events.closed += on_closed
-
-    # Start the application loop
+    # Start the application loop. This call blocks until the window is closed.
     webview.start(debug=dev_mode)
+
+    # After the UI loop returns, perform cleanup.
+    # Note: Logic moved here from on_closed event to avoid Win32 race conditions (Error 1411).
+    log.info("Window closed. Terminating application.")
+    monitor.stop()
 
 if __name__ == '__main__':
     main()

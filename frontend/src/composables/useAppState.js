@@ -11,9 +11,16 @@ const activeProject = reactive({
   selectedFiles: [],
   expandedDirs: [],
   hasInstructions: false,
+  introText: '',
+  outroText: '',
   newFileCount: 0
 })
 const statusMessage = ref('Initializing...')
+const lastAiResponse = ref(null)
+
+// Persistence for AI Review Window
+const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted'
+const planOriginalContents = ref({}) // path -> string content (for undo)
 
 export function useAppState() {
   const applyProjectData = (projData) => {
@@ -26,6 +33,8 @@ export function useAppState() {
       activeProject.selectedFiles = projData.selected_files || []
       activeProject.expandedDirs = projData.expanded_dirs || []
       activeProject.hasInstructions = projData.has_instructions
+      activeProject.introText = projData.intro_text || ''
+      activeProject.outroText = projData.outro_text || ''
       if (projData.status_msg) {
         statusMessage.value = projData.status_msg
       }
@@ -36,6 +45,8 @@ export function useAppState() {
       activeProject.selectedFiles = []
       activeProject.expandedDirs = []
       activeProject.hasInstructions = false
+      activeProject.introText = ''
+      activeProject.outroText = ''
       statusMessage.value = 'No project selected'
     }
   }
@@ -174,6 +185,103 @@ export function useAppState() {
     }
   }
 
+  const saveInstructions = async (intro, outro) => {
+    if (window.pywebview) {
+      const proj = await window.pywebview.api.save_project_instructions(intro, outro)
+      if (proj) {
+        applyProjectData(proj)
+        return true
+      }
+    }
+    return false
+  }
+
+  // --- AI Feedback & Change Applier ---
+
+  const processPaste = async () => {
+    if (!window.pywebview) return false
+    try {
+      // Use Python backend to access system clipboard bypassing browser prompts
+      const text = await window.pywebview.api.get_clipboard_text()
+
+      if (!text || !text.trim()) {
+        statusMessage.value = "Clipboard is empty."
+        return false
+      }
+
+      const plan = await window.pywebview.api.parse_markdown_response(text)
+      if (plan.status === 'ERROR') {
+        alert(plan.message)
+        return false
+      }
+
+      lastAiResponse.value = plan
+
+      // Reset Review State for new plan
+      planFileStates.value = {}
+      planOriginalContents.value = {}
+
+      const updates = plan.updates || {}
+      const creations = plan.creations || {}
+      const deletions = plan.deletions_proposed || []
+
+      Object.keys(updates).forEach(p => planFileStates.value[p] = 'pending')
+      Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
+      deletions.forEach(p => planFileStates.value[p] = 'pending')
+
+      return true
+    } catch (err) {
+      statusMessage.value = "Failed to access clipboard."
+      return false
+    }
+  }
+
+  const getFileContent = async (relPath) => {
+    if (window.pywebview) {
+      return await window.pywebview.api.get_file_content(relPath)
+    }
+    return null
+  }
+
+  const applyFileChange = async (relPath, content) => {
+    if (window.pywebview) {
+      const [success, error] = await window.pywebview.api.apply_single_file_change(relPath, content)
+      if (success) {
+        statusMessage.value = `Applied changes to ${relPath}`
+        // Trigger a reload of current project to update token counts and selection list
+        const proj = await window.pywebview.api.get_current_project()
+        applyProjectData(proj)
+      } else {
+        alert(`Error applying change: ${error}`)
+      }
+      return success
+    }
+    return false
+  }
+
+  const deleteFile = async (relPath) => {
+    if (window.pywebview) {
+      const [success, error] = await window.pywebview.api.delete_file(relPath)
+      if (success) {
+        statusMessage.value = `Deleted ${relPath}`
+        const proj = await window.pywebview.api.get_current_project()
+        applyProjectData(proj)
+      } else {
+        alert(`Error deleting file: ${error}`)
+      }
+      return success
+    }
+    return false
+  }
+
+  const copyAdmonishment = async () => {
+    if (window.pywebview) {
+      const prompt = await window.pywebview.api.get_admonishment_prompt()
+      await navigator.clipboard.writeText(prompt)
+      statusMessage.value = "Copied format correction prompt."
+    }
+  }
+
   // --- File Management ---
 
   const getFileTree = async (filterText, isExtFilter, isGitFilter) => {
@@ -210,6 +318,9 @@ export function useAppState() {
     config,
     activeProject,
     statusMessage,
+    lastAiResponse,
+    planFileStates,
+    planOriginalContents,
     init,
     getImage,
     resizeWindow,
@@ -228,6 +339,12 @@ export function useAppState() {
     addAllNewFiles,
     getFileTree,
     updateProjectFiles,
-    copyOrderRequest
+    copyOrderRequest,
+    processPaste,
+    getFileContent,
+    applyFileChange,
+    deleteFile,
+    copyAdmonishment,
+    saveInstructions
   }
 }

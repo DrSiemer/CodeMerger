@@ -64,13 +64,14 @@
 ## Phase 4: AI Feedback & Diff Viewer
 *Goal: Rebuild the Markdown rendering and interactive diff comparison.*
 
-- [ ] **Markdown Rendering:** Install `markdown-it` in Vue. Create a `<MarkdownRenderer>` component to display AI commentary safely.
-- [ ] **Paste Logic:** Connect the "Paste Changes" button. Vue sends clipboard text to Python -> Python parses it -> returns the structured JSON plan.
-- [ ] **Review Modal (Tabs):** Create a tabbed modal (Intro, Changes, Answers, Verification).
-- [ ] **Diff Viewer:**
+- [x] **Dependencies:** In `frontend/`, run `npm install` to ensure `markdown-it` and `diff` are available. (Note: Utilizing Vite 8 / Rolldown ecosystem).
+- [x] **Markdown Rendering:** Install `markdown-it` in Vue. Create a `<MarkdownRenderer>` component to display AI commentary safely.
+- [x] **Paste Logic:** Connect the "Paste Changes" button. Vue sends clipboard text to Python -> Python parses it -> returns the structured JSON plan.
+- [x] **Review Modal (Tabs):** Create a tabbed modal (Intro, Changes, Answers, Verification).
+- [x] **Diff Viewer:**
     - Expose original and new file content to Vue.
     - Use a library like `diff2html` or a simple custom Vue component that compares the two strings and renders green/red highlighted lines.
-- [ ] **Interactive File List:** Rebuild the file list where users can click "Accept", "Discard", or "Undo" on individual files, triggering the respective Python file-system actions.
+- [x] **Interactive File List:** Rebuild the file list where users can click "Accept", "Discard", or "Undo" on individual files, triggering the respective Python file-system actions.
 
 > **🛑 Human Verification Checkpoint 4:**
 > - When pasting an AI response, does the Review Modal appear?
