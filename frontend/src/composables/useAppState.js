@@ -1,7 +1,6 @@
 import { ref, reactive } from 'vue'
 
 // Define state variables OUTSIDE the composable function to create a global singleton.
-// This ensures all components (App, Settings, Modals) share the exact same data.
 const config = ref({})
 const activeProject = reactive({
   path: null,
@@ -9,7 +8,10 @@ const activeProject = reactive({
   color: null,
   fontColor: null,
   totalTokens: 0,
-  hasInstructions: false
+  selectedFiles: [],
+  expandedDirs: [],
+  hasInstructions: false,
+  newFileCount: 0
 })
 const statusMessage = ref('Initializing...')
 
@@ -21,6 +23,8 @@ export function useAppState() {
       activeProject.color = projData.project_color
       activeProject.fontColor = projData.project_font_color
       activeProject.totalTokens = projData.total_tokens
+      activeProject.selectedFiles = projData.selected_files || []
+      activeProject.expandedDirs = projData.expanded_dirs || []
       activeProject.hasInstructions = projData.has_instructions
       if (projData.status_msg) {
         statusMessage.value = projData.status_msg
@@ -29,6 +33,8 @@ export function useAppState() {
       activeProject.path = null
       activeProject.name = null
       activeProject.color = null
+      activeProject.selectedFiles = []
+      activeProject.expandedDirs = []
       activeProject.hasInstructions = false
       statusMessage.value = 'No project selected'
     }
@@ -39,6 +45,14 @@ export function useAppState() {
       config.value = await window.pywebview.api.get_app_config()
       const proj = await window.pywebview.api.get_current_project()
       applyProjectData(proj)
+
+      // Background Monitor Listeners
+      window.addEventListener('cm-new-files', (e) => {
+        activeProject.newFileCount = e.detail.count
+      })
+      window.addEventListener('cm-project-reloaded', () => {
+        init() // Re-fetch all data on external config change
+      })
     }
   }
 
@@ -128,6 +142,38 @@ export function useAppState() {
     statusMessage.value = msg
   }
 
+  // --- File Management ---
+
+  const getFileTree = async (filterText, isExtFilter, isGitFilter) => {
+    if (window.pywebview) {
+      return await window.pywebview.api.get_file_tree(filterText, isExtFilter, isGitFilter)
+    }
+    return []
+  }
+
+  const updateProjectFiles = async (newList, tokenCount, expandedDirs) => {
+    if (window.pywebview) {
+      const success = await window.pywebview.api.update_project_files(newList, tokenCount, expandedDirs)
+      if (success) {
+        activeProject.selectedFiles = newList
+        activeProject.totalTokens = tokenCount
+        activeProject.expandedDirs = expandedDirs
+        statusMessage.value = "Merge order updated."
+      }
+    }
+  }
+
+  const copyOrderRequest = async (selectedFiles) => {
+    if (window.pywebview) {
+      const msg = await window.pywebview.api.generate_order_request(selectedFiles)
+      if (msg) {
+        statusMessage.value = msg
+        return true
+      }
+    }
+    return false
+  }
+
   return {
     config,
     activeProject,
@@ -143,6 +189,9 @@ export function useAppState() {
     renameProject,
     getRecentProjects: async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : [],
     removeRecentProject,
-    copyCode
+    copyCode,
+    getFileTree,
+    updateProjectFiles,
+    copyOrderRequest
   }
 }

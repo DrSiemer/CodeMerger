@@ -4,6 +4,7 @@ import webview
 from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir
+from src.core.file_monitor_thread import FileMonitorThread
 
 # Import core backend logic
 from src.app_state import AppState
@@ -51,6 +52,10 @@ def main():
 
     # Link the window reference to the API for native dialogs
     api.set_window(window)
+
+    # Initialize background file monitor
+    monitor = FileMonitorThread(window, app_state, project_manager)
+    monitor.start()
 
     # Start the application loop
     webview.start(debug=dev_mode)

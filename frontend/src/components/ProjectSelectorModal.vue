@@ -11,19 +11,20 @@ const searchQuery = ref('')
 const isLoaded = ref(false)
 const logoMaskSmall = ref('')
 
+const handleEscape = (e) => {
+  if (e.key === 'Escape') emit('close')
+}
+
+// Register lifecycle hooks at the top level
 onMounted(async () => {
+  document.addEventListener('keydown', handleEscape)
   recents.value = await getRecentProjects()
   logoMaskSmall.value = await getImage('logo_mask_small.png')
   isLoaded.value = true
+})
 
-  // Add escape key listener to close modal
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') emit('close')
-  }
-  document.addEventListener('keydown', handleEscape)
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleEscape)
-  })
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
 })
 
 const filteredRecents = computed(() => {

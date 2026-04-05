@@ -37,6 +37,11 @@ class StarterActions:
 
     def clear_session_data(self):
         if messagebox.askyesno("Confirm Clear", "Are you sure you want to clear all project data and start fresh?", parent=self.dialog):
+            # First, destroy the current view to stop traces from saving back data during the reset
+            if self.dialog.current_view and self.dialog.current_view.winfo_exists():
+                self.dialog.current_view.destroy()
+            self.dialog.current_view = None
+
             self.dialog.starter_state.reset()
             self.dialog.ui_builder.refresh_tabs()
             self.dialog._show_current_step_view()
