@@ -8,7 +8,7 @@ import {
   Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle
 } from 'lucide-vue-next'
 
-const { activeProject, statusMessage, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles } = useAppState()
+const { activeProject, statusMessage, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles, selectColor } = useAppState()
 
 const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
@@ -130,6 +130,7 @@ onMounted(() => {
             maskRepeat: 'no-repeat',
             webkitMaskRepeat: 'no-repeat'
           }"
+          @click="selectColor"
           title="Change project color"
         ></div>
 
@@ -138,6 +139,7 @@ onMounted(() => {
           v-else-if="activeProject.path"
           class="w-6 h-6 rounded cursor-pointer border border-gray-600 shadow-sm shrink-0"
           :style="{ backgroundColor: activeProject.color }"
+          @click="selectColor"
           title="Change project color"
         ></div>
 

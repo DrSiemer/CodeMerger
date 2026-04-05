@@ -111,6 +111,15 @@ export function useAppState() {
     }
   }
 
+  const selectColor = async () => {
+    if (window.pywebview) {
+      const proj = await window.pywebview.api.select_color()
+      if (proj) {
+        applyProjectData(proj)
+      }
+    }
+  }
+
   const loadProject = async (path) => {
     statusMessage.value = 'Loading project...'
     const proj = await window.pywebview.api.load_project(path)
@@ -208,6 +217,7 @@ export function useAppState() {
     getFiletypes,
     saveFiletypes,
     selectProject,
+    selectColor,
     loadProject,
     renameProject,
     getRecentProjects: async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : [],

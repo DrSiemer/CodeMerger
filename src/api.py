@@ -177,6 +177,35 @@ class Api:
                 return self._format_project_response(project_config, status_msg)
         return None
 
+    def select_color(self):
+        """Opens a native color picker and updates the project color."""
+        from tkinter import colorchooser, Tk
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        # Create a temporary hidden Tk root to host the dialog
+        root = Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+
+        result = colorchooser.askcolor(
+            title="Choose project color",
+            initialcolor=project_config.project_color,
+            parent=root
+        )
+
+        root.destroy()
+
+        if result and result[1]:
+            new_hex = result[1]
+            project_config.project_color = new_hex
+            from src.core.project_config import _calculate_font_color
+            project_config.project_font_color = _calculate_font_color(new_hex)
+            project_config.save()
+            return self._format_project_response(project_config, "Project color updated.")
+        return None
+
     def copy_code(self, use_wrapper):
         """
         Merges the selected files and copies the result to the clipboard.
