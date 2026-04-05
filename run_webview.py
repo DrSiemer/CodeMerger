@@ -5,12 +5,21 @@ from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir
 
+# Import core backend logic
+from src.app_state import AppState
+from src.core.project_manager import ProjectManager
+from src.core.utils import load_active_file_extensions
+
 def main():
     # Initialize logging
     setup_logging()
 
+    # Initialize Core Application Logic
+    app_state = AppState()
+    project_manager = ProjectManager(load_active_file_extensions)
+
     # Initialize the Python API bridge
-    api = Api()
+    api = Api(app_state, project_manager)
 
     # Detect if we should run in dev mode (connect to Vite local server)
     dev_mode = "--dev" in sys.argv

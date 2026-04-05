@@ -22,9 +22,9 @@
 ## Phase 2: Core Layout, State & Settings
 *Goal: Rebuild the main dashboard structure and connect it to the `App_State` and `Project_Config` logic.*
 
-- [ ] **State Management:** Set up a Vue composable (e.g., `useAppState.js`) to fetch the initial config from Python on mount and sync changes back.
-- [ ] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
-- [ ] **Project Loading:** Implement the "Select Project" flow. Vue calls `api.select_project()` -> Python utilizes `ProjectManager` -> returns `ProjectConfig` dict -> Vue updates UI.
+- [x] **State Management:** Set up a Vue composable (e.g., `useAppState.js`) to fetch the initial config from Python on mount and sync changes back.
+- [x] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
+- [x] **Project Loading:** Implement the "Select Project" flow. Vue calls `api.select_project()` -> Python utilizes `ProjectManager` -> returns `ProjectConfig` dict -> Vue updates UI.
 - [ ] **Modals:** Implement basic Vue modals for:
     - Settings (Application, File Manager, Prompts, Editor, Starter).
     - Filetypes Manager (Simple list with toggles).
