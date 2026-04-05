@@ -3,9 +3,8 @@ import { onMounted, ref } from 'vue'
 import { useAppState } from './composables/useAppState'
 import ProjectSelectorModal from './components/ProjectSelectorModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
-import FiletypesModal from './components/FiletypesModal.vue'
 import {
-  FolderOpen, PenLine, Settings, FileCode2, Play,
+  FolderOpen, PenLine, Settings, Play,
   Copy, ClipboardPaste, BookOpen, Info
 } from 'lucide-vue-next'
 
@@ -13,7 +12,12 @@ const { config, activeProject, statusMessage, init, copyCode } = useAppState()
 
 const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
-const showFiletypesModal = ref(false)
+const settingsTab = ref('application')
+
+const openSettings = (tab = 'application') => {
+  settingsTab.value = tab
+  showSettingsModal.value = true
+}
 
 onMounted(() => {
   // Safe initialization depending on PyWebView injection timing
@@ -100,11 +104,8 @@ onMounted(() => {
 
       <!-- Bottom-Left Tools -->
       <div class="absolute bottom-4 left-6 flex flex-col space-y-5">
-        <button @click="showSettingsModal = true" class="text-gray-400 hover:text-white transition-colors" title="Settings">
+        <button @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings">
           <Settings class="w-7 h-7" />
-        </button>
-        <button @click="showFiletypesModal = true" class="text-gray-400 hover:text-white transition-colors" title="Manage Filetypes">
-          <FileCode2 class="w-7 h-7" />
         </button>
       </div>
 
@@ -183,11 +184,8 @@ onMounted(() => {
     />
     <SettingsModal
       v-if="showSettingsModal"
+      :initial-tab="settingsTab"
       @close="showSettingsModal = false"
-    />
-    <FiletypesModal
-      v-if="showFiletypesModal"
-      @close="showFiletypesModal = false"
     />
   </div>
 </template>
