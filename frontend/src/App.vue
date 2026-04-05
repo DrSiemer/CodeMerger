@@ -1,12 +1,15 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useAppState } from './composables/useAppState'
+import ProjectSelectorModal from './components/ProjectSelectorModal.vue'
 import {
   FolderOpen, PenLine, Settings, FileCode2, Play,
   Copy, ClipboardPaste, BookOpen, Info
 } from 'lucide-vue-next'
 
-const { config, activeProject, statusMessage, init, selectProject } = useAppState()
+const { config, activeProject, statusMessage, init, copyCode } = useAppState()
+
+const showProjectModal = ref(false)
 
 onMounted(() => {
   // Safe initialization depending on PyWebView injection timing
@@ -34,7 +37,11 @@ onMounted(() => {
         ></div>
 
         <!-- Title -->
-        <div class="flex items-center group cursor-pointer" title="Edit project title">
+        <div
+          class="flex items-center group cursor-pointer"
+          title="Click to select project, double-click to edit title"
+          @click="showProjectModal = true"
+        >
           <h1 class="text-2xl font-bold tracking-tight" :class="{'text-gray-500': !activeProject.path}">
             {{ activeProject.name || '(no active project)' }}
           </h1>
@@ -76,7 +83,7 @@ onMounted(() => {
           <Play class="w-7 h-7 fill-current" />
         </button>
         <button
-          @click="selectProject"
+          @click="showProjectModal = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors"
         >
           Select Project
@@ -107,11 +114,35 @@ onMounted(() => {
           </div>
 
           <div class="grid grid-cols-2 gap-4">
-            <!-- Large Button (Spans full width by default unless instructions exist) -->
-            <button class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2">
-              <Copy class="w-5 h-5" />
-              <span>Copy Code Only</span>
-            </button>
+
+            <!-- Conditional Copy Button Layout -->
+            <template v-if="activeProject.hasInstructions">
+              <button
+                @click="copyCode(true)"
+                class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight"
+                title="Copy Prompt: includes code wrapped with custom intro/outro instructions"
+              >
+                <span>Copy with Instructions</span>
+              </button>
+              <button
+                @click="copyCode(false)"
+                class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight"
+                title="Copy Prompt: merges code and prepends the default context prompt"
+              >
+                <span>Copy Code Only</span>
+              </button>
+            </template>
+
+            <template v-else>
+              <button
+                @click="copyCode(false)"
+                class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2"
+                title="Copy Prompt: merges code and prepends the default context prompt"
+              >
+                <Copy class="w-5 h-5" />
+                <span>Copy Code Only</span>
+              </button>
+            </template>
 
             <!-- Small Buttons -->
             <button class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]">
@@ -140,5 +171,11 @@ onMounted(() => {
         <Info class="w-5 h-5" />
       </button>
     </footer>
+
+    <!-- Modals -->
+    <ProjectSelectorModal
+      v-if="showProjectModal"
+      @close="showProjectModal = false"
+    />
   </div>
 </template>

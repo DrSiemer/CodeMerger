@@ -28,8 +28,8 @@
 - [ ] **Modals:** Implement basic Vue modals for:
     - Settings (Application, File Manager, Prompts, Editor, Starter).
     - Filetypes Manager (Simple list with toggles).
-    - Project Selector (Recent projects list with filtering).
-- [ ] **Actions:** Connect the "Copy Code Only" and "Copy with Instructions" buttons to call `api.copy_merged_code()` (which utilizes `src/core/clipboard.py`).
+    - [x] Project Selector (Recent projects list with filtering).
+- [x] **Actions:** Connect the "Copy Code Only" and "Copy with Instructions" buttons to call `api.copy_merged_code()` (which utilizes `src/core/clipboard.py`).
 - [ ] **Tooltips:** Implement standard HTML `title` attributes or a lightweight Vue tooltip plugin.
 
 > **🛑 Human Verification Checkpoint 2:**
