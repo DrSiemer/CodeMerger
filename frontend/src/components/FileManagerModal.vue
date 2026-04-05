@@ -3,14 +3,14 @@ import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import {
   X, Search, Filter, GitBranch, Milestone,
   Trash2, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
-  RotateCcw, Save, CheckSquare
+  RotateCcw, Save, CheckSquare, ArrowDownUp
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import FileTreeNode from './FileTreeNode.vue'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 
 const emit = defineEmits(['close'])
-const { activeProject, getFileTree, resizeWindow, updateProjectFiles } = useAppState()
+const { activeProject, getFileTree, resizeWindow, updateProjectFiles, copyOrderRequest, statusMessage } = useAppState()
 
 // Reorderable list setup
 const [mergeListRef, listItems] = useDragAndDrop(
@@ -46,7 +46,10 @@ watch([filterText, isExtFilter, isGitFilter], () => {
 })
 
 const totalTokens = computed(() => {
-  return listItems.value.reduce((acc, f) => acc + (f.tokens || 0), 0)
+  return listItems.value.reduce((acc, f) => {
+    if (!f || f.ignoreTokens) return acc
+    return acc + (f.tokens || 0)
+  }, 0)
 })
 
 const tokenColorClass = computed(() => {
@@ -55,9 +58,14 @@ const tokenColorClass = computed(() => {
   return 'text-gray-400'
 })
 
-const getTokenColor = (count) => {
+const getTokenColor = (file) => {
+  if (!file) return 'text-gray-500'
+  if (file.ignoreTokens) return 'text-gray-600'
+  const count = file.tokens
   if (!count || count < 0) return 'text-gray-500'
-  const maxInList = Math.max(...listItems.value.map(f => f.tokens || 0), TOKEN_COLOR_RANGE_MAX)
+
+  const tokenValues = listItems.value.map(f => f?.tokens || 0)
+  const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, TOKEN_COLOR_RANGE_MAX) : TOKEN_COLOR_RANGE_MAX
   const p = count / maxInList
   if (p < 0.2) return 'text-gray-500'
   if (p < 0.4) return 'text-gray-400'
@@ -70,26 +78,38 @@ const getTokenColor = (count) => {
 
 const handleFileClick = (index, event) => {
   if (event.shiftKey && lastSelectedIndex.value !== null) {
-    // Shift-Select: Range
     const start = Math.min(lastSelectedIndex.value, index)
     const end = Math.max(lastSelectedIndex.value, index)
     selectedIndices.value.clear()
-    for (let i = start; i <= end; i++) {
-      selectedIndices.value.add(i)
-    }
+    for (let i = start; i <= end; i++) selectedIndices.value.add(i)
   } else if (event.ctrlKey) {
-    // Ctrl-Select: Discrete
-    if (selectedIndices.value.has(index)) {
-      selectedIndices.value.delete(index)
-    } else {
+    if (selectedIndices.value.has(index)) selectedIndices.value.delete(index)
+    else {
       selectedIndices.value.add(index)
       lastSelectedIndex.value = index
     }
   } else {
-    // Single Click: Reset
     selectedIndices.value.clear()
     selectedIndices.value.add(index)
     lastSelectedIndex.value = index
+  }
+}
+
+// --- Token Interaction (Alt: Ignore, Ctrl: Breakup) ---
+
+const handleTokenInteraction = (index, event) => {
+  event.stopPropagation()
+  const item = listItems.value[index]
+  if (!item) return
+
+  if (event.altKey) {
+    item.ignoreTokens = !item.ignoreTokens
+  } else if (event.ctrlKey) {
+    const path = item.path
+    const breakupMsg = `\`${path}\` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality.`
+
+    navigator.clipboard.writeText(breakupMsg)
+    statusMessage.value = `Copied breakup request for ${path.split('/').pop()}`
   }
 }
 
@@ -103,7 +123,7 @@ const toggleFileSelect = (path) => {
     lastSelectedIndex.value = null
   } else {
     window.pywebview.api.get_token_count(path).then(tokens => {
-      listItems.value.push({ path, tokens })
+      listItems.value.push({ path, tokens, ignoreTokens: false })
     })
   }
 }
@@ -127,7 +147,7 @@ const addAll = () => {
   if (toAdd.length > 50 && !confirm(`Add ${toAdd.length} files to list?`)) return
   toAdd.forEach(path => {
     window.pywebview.api.get_token_count(path).then(tokens => {
-      listItems.value.push({ path, tokens })
+      listItems.value.push({ path, tokens, ignoreTokens: false })
     })
   })
 }
@@ -138,10 +158,7 @@ const scrollToSelection = (alignToTop = false) => {
   nextTick(() => {
     const selectedEl = mergeListRef.value?.querySelector('.bg-cm-blue')
     if (selectedEl) {
-      selectedEl.scrollIntoView({
-        behavior: 'smooth',
-        block: alignToTop ? 'start' : 'nearest'
-      })
+      selectedEl.scrollIntoView({ behavior: 'smooth', block: alignToTop ? 'start' : 'nearest' })
     }
   })
 }
@@ -216,12 +233,21 @@ const clearAll = () => {
   }
 }
 
+const handleOrderRequest = async () => {
+  if (listItems.value.length === 0) return
+  // Pass a clean JSON copy to avoid proxy serialization issues on the Python bridge
+  const cleanList = JSON.parse(JSON.stringify(listItems.value))
+  await copyOrderRequest(cleanList)
+}
+
 // --- Save & Close Logic ---
 
 const hasUnsavedChanges = computed(() => {
   if (listItems.value.length !== activeProject.selectedFiles.length) return true
   for (let i = 0; i < listItems.value.length; i++) {
-    if (listItems.value[i].path !== activeProject.selectedFiles[i].path) return true
+    const cur = listItems.value[i]
+    const orig = activeProject.selectedFiles[i]
+    if (cur.path !== orig.path || cur.ignoreTokens !== orig.ignoreTokens) return true
   }
   if (currentExpandedDirs.value.size !== activeProject.expandedDirs.length) return true
   for (const path of activeProject.expandedDirs) {
@@ -321,20 +347,29 @@ const handleSave = async () => {
         <!-- Right Panel: Merge Order -->
         <div class="w-1/2 flex flex-col p-5 bg-cm-dark-bg">
           <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-3">
-              <h3 class="font-semibold text-gray-200">Merge Order</h3>
-              <span :class="tokenColorClass" class="text-sm font-mono pt-0.5">
+            <div class="flex items-center space-x-3 min-w-0">
+              <h3 class="font-semibold text-gray-200 shrink-0">Merge Order</h3>
+              <span :class="tokenColorClass" class="text-sm font-mono pt-0.5 truncate">
                 ({{ listItems.length }} files, {{ totalTokens.toLocaleString() }} tokens)
               </span>
             </div>
-            <button
-              @click="showFullPaths = !showFullPaths"
-              class="p-1.5 rounded border transition-colors"
-              :class="showFullPaths ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
-              title="Toggle Path Visibility"
-            >
-              <Milestone class="w-4 h-4" />
-            </button>
+            <div class="flex items-center space-x-2">
+              <button
+                @click="handleOrderRequest"
+                class="p-1.5 rounded border border-gray-600 hover:border-cm-blue text-gray-500 hover:text-cm-blue transition-colors"
+                title="Copy order request prompt"
+              >
+                <ArrowDownUp class="w-4 h-4" />
+              </button>
+              <button
+                @click="showFullPaths = !showFullPaths"
+                class="p-1.5 rounded border transition-colors"
+                :class="showFullPaths ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
+                title="Toggle Path Visibility"
+              >
+                <Milestone class="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <!-- Merge List -->
@@ -357,9 +392,13 @@ const handleSave = async () => {
                   {{ showFullPaths ? file.path : file.path.split('/').pop() }}
                 </span>
 
-                <div class="flex items-center space-x-3 shrink-0">
-                  <span class="text-xs font-mono" :class="selectedIndices.has(index) ? 'text-blue-100 font-bold' : getTokenColor(file.tokens)">
-                    {{ file.tokens?.toLocaleString() || '?' }}
+                <div
+                  class="flex items-center space-x-3 shrink-0 cursor-help"
+                  @click="handleTokenInteraction(index, $event)"
+                  title="Alt+Click: Toggle Ignore tokens | Ctrl+Click: Copy refactor request"
+                >
+                  <span class="text-xs font-mono" :class="selectedIndices.has(index) ? 'text-blue-100 font-bold' : getTokenColor(file)">
+                    {{ file.ignoreTokens ? `[${file.tokens?.toLocaleString()}]` : (file.tokens?.toLocaleString() || '?') }}
                   </span>
                 </div>
               </li>
@@ -369,7 +408,7 @@ const handleSave = async () => {
             </div>
           </div>
 
-          <!-- Reorder Toolbar (No border, reduced padding) -->
+          <!-- Reorder Toolbar -->
           <div class="flex items-center justify-center space-x-2 pt-2">
             <button @click="moveSelectionToTop" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
             <button @click="moveSelectionUp" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>

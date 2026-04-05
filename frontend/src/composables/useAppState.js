@@ -163,6 +163,17 @@ export function useAppState() {
     }
   }
 
+  const copyOrderRequest = async (selectedFiles) => {
+    if (window.pywebview) {
+      const msg = await window.pywebview.api.generate_order_request(selectedFiles)
+      if (msg) {
+        statusMessage.value = msg
+        return true
+      }
+    }
+    return false
+  }
+
   return {
     config,
     activeProject,
@@ -180,6 +191,7 @@ export function useAppState() {
     removeRecentProject,
     copyCode,
     getFileTree,
-    updateProjectFiles
+    updateProjectFiles,
+    copyOrderRequest
   }
 }

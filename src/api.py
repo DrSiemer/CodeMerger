@@ -3,6 +3,7 @@ import os
 import logging
 import pyperclip
 import base64
+import json
 from src.core.secret_scanner import scan_for_secrets
 from src.core.merger import generate_output_string
 from src.core.project_config import ProjectConfig
@@ -292,6 +293,43 @@ class Api:
 
         project_config.save()
         return True
+
+    def generate_order_request(self, selected_files):
+        """Generates a prompt asking for the optimal file order and copies it to clipboard."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config or not selected_files:
+            return "Failed to generate request: No files selected."
+
+        # Temporarily apply provided selection to merger logic
+        orig_selection = project_config.selected_files
+        project_config.selected_files = selected_files
+
+        try:
+            merged_code, _ = generate_output_string(
+                base_dir=project_config.base_dir,
+                project_config=project_config,
+                use_wrapper=False,
+                copy_merged_prompt=""
+            )
+
+            if not merged_code:
+                return "Failed to generate request: Could not merge file content."
+
+            paths = [f['path'] for f in selected_files]
+            prepend_text = "Please provide me with the optimal order in which to present these files to a language model. Only return the file list in the exact same format I will use here:\n\n"
+            json_payload = json.dumps(paths, indent=2)
+            content_intro = "Here's the content of the files, to help you determine the best order:"
+
+            final_string = f"{prepend_text}{json_payload}\n\n{content_intro}\n\n{merged_code}"
+
+            pyperclip.copy(final_string)
+            return "Order request with file content copied to clipboard."
+        except Exception as e:
+            log.error(f"Error generating order request: {e}")
+            return f"Error: {str(e)}"
+        finally:
+            # Restore original selection
+            project_config.selected_files = orig_selection
 
     def test(self):
         """A simple test method to verify the Vue -> Python bridge is working."""
