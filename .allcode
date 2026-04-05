@@ -22,6 +22,13 @@
           "lines": 121
         },
         {
+          "path": "todo.md",
+          "mtime": 1775391287.8146415,
+          "hash": "5a5ba3e36243c65681fc9c8ccd24a03fb75b1a64",
+          "tokens": 2147,
+          "lines": 136
+        },
+        {
           "path": "requirements.txt",
           "mtime": 1772545862.8548799,
           "hash": "687cace16a4cde55a56d71d6f377b67598163f19",
@@ -877,10 +884,87 @@
           "hash": "99d9391b0c8f6badb7939d54f4c942ca977e867c",
           "tokens": 2229,
           "lines": 189
+        },
+        {
+          "path": "frontend/src/App.vue",
+          "mtime": 1775391220.8377697,
+          "hash": "8f3bcf6e45a4795e0337584d5909776139c646b1",
+          "tokens": 27,
+          "lines": 8
+        },
+        {
+          "path": "frontend/src/main.js",
+          "mtime": 1775391220.6138327,
+          "hash": "5d8b606a675e365872dfb9d02de3eb7340a40a9a",
+          "tokens": 29,
+          "lines": 6
+        },
+        {
+          "path": "frontend/src/style.css",
+          "mtime": 1775391220.59183,
+          "hash": "db92731e975e47d38ddcd15c45ab4d098c633801",
+          "tokens": 1845,
+          "lines": 297
+        },
+        {
+          "path": "frontend/index.html",
+          "mtime": 1775391223.859365,
+          "hash": "b512b800455c1fccd07f81524f6e9d003f0249c1",
+          "tokens": 110,
+          "lines": 14
+        },
+        {
+          "path": "frontend/package.json",
+          "mtime": 1775391223.878364,
+          "hash": "b96e0e51539abbbf1c1ee6bcb67b0228594c424e",
+          "tokens": 120,
+          "lines": 19
+        },
+        {
+          "path": "frontend/README.md",
+          "mtime": 1775391220.6768482,
+          "hash": "4f982052fbe68fd1ff5e029fc619533c03a2b9a4",
+          "tokens": 102,
+          "lines": 6
+        },
+        {
+          "path": "frontend/vite.config.js",
+          "mtime": 1775391220.6218297,
+          "hash": "530d754a5bb13ddc8445475eeec386c9e31a77ca",
+          "tokens": 41,
+          "lines": 8
+        },
+        {
+          "path": "run_webview.py",
+          "mtime": 1775391523.6171734,
+          "hash": "1410-1775391523.6171734",
+          "tokens": 328,
+          "lines": 49
+        },
+        {
+          "path": "src/api.py",
+          "mtime": 1775391523.6161726,
+          "hash": "1374-1775391523.6161726",
+          "tokens": 264,
+          "lines": 40
+        },
+        {
+          "path": "frontend/postcss.config.js",
+          "mtime": 1775391523.6181736,
+          "hash": "84-1775391523.6181736",
+          "tokens": 21,
+          "lines": 6
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "mtime": 1775391523.6171734,
+          "hash": "459-1775391523.6171734",
+          "tokens": 151,
+          "lines": 21
         }
       ],
-      "total_tokens": 178956,
-      "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
+      "total_tokens": 184141,
+      "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nLet's continue with the steps in `todo.md`. You can update checkmarks and add tasks or remove deprecated tasks, but DO NOT truncate todo.md!\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
         ".github",
@@ -888,6 +972,9 @@
         "assets",
         "assets/boilerplate",
         "assets/reference",
+        "frontend",
+        "frontend/src",
+        "frontend/src/components",
         "src",
         "src/core",
         "src/ui",
@@ -917,13 +1004,24 @@
     "assets/reference/todo_questions.json",
     "codemerger.spec",
     "default_filetypes.json",
+    "frontend/README.md",
+    "frontend/index.html",
+    "frontend/package.json",
+    "frontend/postcss.config.js",
+    "frontend/src/App.vue",
+    "frontend/src/main.js",
+    "frontend/src/style.css",
+    "frontend/tailwind.config.js",
+    "frontend/vite.config.js",
     "go.bat",
     "learning_mode.md",
     "llm.md",
     "requirements.txt",
     "run.py",
+    "run_webview.py",
     "setup.iss",
     "src/__init__.py",
+    "src/api.py",
     "src/app_state.py",
     "src/codemerger.py",
     "src/constants.py",
@@ -1034,6 +1132,7 @@
     "src/ui/widgets/switch_button.py",
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
+    "todo.md",
     "updater_gui.py",
     "version.txt"
   ]

@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base CodeMerger styles to override default browser resets */
+body {
+  background-color: #2E2E2E;
+  color: #FFFFFF;
+  margin: 0;
+  font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+  user-select: none; /* Prevent accidental text highlighting mimicking native feel */
+}
+
+/* Allow selection inside specific input fields and editors */
+input, textarea, .selectable {
+  user-select: text;
+}
