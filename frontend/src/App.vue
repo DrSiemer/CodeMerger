@@ -7,7 +7,7 @@ import FileManagerModal from './components/FileManagerModal.vue'
 import ReviewModal from './components/ReviewModal.vue'
 import InstructionsModal from './components/InstructionsModal.vue'
 import {
-  Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle
+  Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle, Eye
 } from 'lucide-vue-next'
 
 const { activeProject, statusMessage, lastAiResponse, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles, selectColor, processPaste } = useAppState()
@@ -18,6 +18,7 @@ const showFileManagerModal = ref(false)
 const showReviewModal = ref(false)
 const showInstructionsModal = ref(false)
 const settingsTab = ref('application')
+const reviewMode = ref('new') // 'new' or 'resume'
 
 // Image Assets
 const starterIcon = ref('')
@@ -89,8 +90,14 @@ const openFileManager = async () => {
 const handlePasteChanges = async () => {
   const success = await processPaste()
   if (success) {
+    reviewMode.value = 'new'
     showReviewModal.value = true
   }
+}
+
+const openExistingReview = () => {
+  reviewMode.value = 'resume'
+  showReviewModal.value = true
 }
 
 const handleNewFilesClick = async (event) => {
@@ -260,11 +267,11 @@ onMounted(() => {
       <!-- AI Response Review Button -->
       <div class="absolute bottom-4 right-6" v-if="lastAiResponse">
         <button
-          @click="showReviewModal = true"
+          @click="openExistingReview"
           class="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded shadow-lg transition-all flex items-center space-x-2"
           title="Review latest AI response"
         >
-          <AlertTriangle class="w-5 h-5" />
+          <Eye class="w-5 h-5" />
           <span>AI Response Review</span>
         </button>
       </div>
@@ -356,6 +363,7 @@ onMounted(() => {
     />
     <ReviewModal
       v-if="showReviewModal"
+      :mode="reviewMode"
       @close="showReviewModal = false"
     />
     <InstructionsModal

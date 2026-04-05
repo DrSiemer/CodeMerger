@@ -9,6 +9,13 @@ import { useAppState } from '../composables/useAppState'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import DiffViewer from './DiffViewer.vue'
 
+const props = defineProps({
+  mode: {
+    type: String,
+    default: 'new' // 'new' (pasted) or 'resume' (orange button)
+  }
+})
+
 const emit = defineEmits(['close'])
 const {
   lastAiResponse,
@@ -72,14 +79,18 @@ const hasFormattingTags = computed(() => lastAiResponse.value?.has_any_tags)
 onMounted(async () => {
   await resizeWindow(1100, 850)
 
-  // Determine initial active tab
+  // Determine initial active tab based on opening mode
   if (tabs.value.length > 0) {
+    const hasIntro = tabs.value.find(t => t.id === 'intro')
     const hasVerification = tabs.value.find(t => t.id === 'verification')
     const hasUnformatted = tabs.value.find(t => t.id === 'unformatted')
 
-    // Instruction: Re-opening a review should automatically open on the Verification tab
-    if (hasVerification) {
+    if (props.mode === 'resume' && hasVerification) {
+      // Re-opening: Go to testing steps
       activeTab.value = 'verification'
+    } else if (props.mode === 'new' && hasIntro) {
+      // Fresh paste: Go to plan intro
+      activeTab.value = 'intro'
     } else if (hasUnformatted && !hasFormattingTags.value) {
       // Fallback for format errors
       activeTab.value = 'unformatted'
@@ -158,7 +169,7 @@ const applyAllPending = async () => {
     await acceptChange(path, type)
   }
 
-  // Instruction: Clicking "Apply all" should automatically activate the Verification tab
+  // Activating the Verification tab automatically after batch apply
   if (tabs.value.find(t => t.id === 'verification')) {
     activeTab.value = 'verification'
   }
@@ -231,7 +242,7 @@ const getPendingCount = computed(() => {
                   class="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
                 >
                   <div class="flex items-center space-x-3">
-                    < BookOpen class="w-4 h-4 text-cm-blue" />
+                    <BookOpen class="w-4 h-4 text-cm-blue" />
                     <span class="text-sm font-bold text-gray-200 uppercase tracking-widest">AI Commentary</span>
                   </div>
                   <div class="flex items-center space-x-2">
