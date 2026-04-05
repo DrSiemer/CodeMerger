@@ -318,6 +318,12 @@ class StepBaseFilesView(tk.Frame):
             self.tree.see(item_id)
         self.ui_controller.refresh_hover_icon()
 
+    def handle_reset(self):
+        """Resets the file selection for this step."""
+        if messagebox.askyesno("Confirm", "Are you sure you want to reset the base file selection?", parent=self):
+            if self.selection_handler:
+                self.selection_handler.remove_all_files()
+
     # Stub methods for compatibility with controllers
     def show_error_dialog(self, title, message):
         messagebox.showerror(title, message, parent=self)

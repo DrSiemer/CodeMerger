@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from ... import constants as c
 from ..widgets.rounded_button import RoundedButton
 from ..tooltip import ToolTip
@@ -82,3 +82,10 @@ class DetailsView(tk.Frame):
             self.base_path_label.config(text=path, fg=c.TEXT_COLOR)
         else:
             self.base_path_label.config(text="No base project selected", fg=c.TEXT_SUBTLE_COLOR)
+
+    def handle_reset(self):
+        """Resets the input fields for this step."""
+        if messagebox.askyesno("Confirm", "Are you sure you want to reset project details?", parent=self):
+            self.project_data["name"].set("")
+            self.project_data["base_project_path"].set("")
+            self._update_base_label()
