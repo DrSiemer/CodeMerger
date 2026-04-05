@@ -22,6 +22,8 @@ const folderIcon = ref('')
 const folderActiveIcon = ref('')
 const isFolderHovered = ref(false)
 
+const logoMask = ref('')
+
 // Interaction state
 let clickTimer = null
 
@@ -78,6 +80,7 @@ const loadAssets = async () => {
   starterActiveIcon.value = await getImage('project_starter_active.png')
   folderIcon.value = await getImage('folder.png')
   folderActiveIcon.value = await getImage('folder_active.png')
+  logoMask.value = await getImage('logo_mask.png')
 }
 
 onMounted(() => {
@@ -98,9 +101,25 @@ onMounted(() => {
     <!-- Top Bar -->
     <header class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
       <div class="flex items-center space-x-4 min-w-0 flex-grow">
-        <!-- Color Swatch -->
+        <!-- Masked Logo Color Swatch -->
         <div
-          v-if="activeProject.path"
+          v-if="activeProject.path && logoMask"
+          class="w-12 h-12 cursor-pointer shrink-0"
+          :style="{
+            backgroundColor: activeProject.color,
+            maskImage: `url(${logoMask})`,
+            webkitMaskImage: `url(${logoMask})`,
+            maskSize: 'contain',
+            webkitMaskSize: 'contain',
+            maskRepeat: 'no-repeat',
+            webkitMaskRepeat: 'no-repeat'
+          }"
+          title="Change project color"
+        ></div>
+
+        <!-- Fallback if mask not loaded -->
+        <div
+          v-else-if="activeProject.path"
           class="w-6 h-6 rounded cursor-pointer border border-gray-600 shadow-sm shrink-0"
           :style="{ backgroundColor: activeProject.color }"
           title="Change project color"

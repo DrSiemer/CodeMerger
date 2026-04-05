@@ -4,14 +4,16 @@ import { X, Search, FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 const emit = defineEmits(['close'])
-const { getRecentProjects, removeRecentProject, loadProject, selectProject } = useAppState()
+const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage } = useAppState()
 
 const recents = ref([])
 const searchQuery = ref('')
 const isLoaded = ref(false)
+const logoMaskSmall = ref('')
 
 onMounted(async () => {
   recents.value = await getRecentProjects()
+  logoMaskSmall.value = await getImage('logo_mask_small.png')
   isLoaded.value = true
 
   // Add escape key listener to close modal
@@ -103,7 +105,23 @@ const handleBrowse = async () => {
               :title="`${proj.path} (Click to open)`"
             >
               <div class="flex items-center min-w-0 flex-grow">
+                <!-- Masked Logo Swatch -->
                 <div
+                  v-if="logoMaskSmall"
+                  class="w-7 h-7 flex-shrink-0 mr-3"
+                  :style="{
+                    backgroundColor: proj.color,
+                    maskImage: `url(${logoMaskSmall})`,
+                    webkitMaskImage: `url(${logoMaskSmall})`,
+                    maskSize: 'contain',
+                    webkitMaskSize: 'contain',
+                    maskRepeat: 'no-repeat',
+                    webkitMaskRepeat: 'no-repeat'
+                  }"
+                ></div>
+                <!-- Fallback if mask not loaded -->
+                <div
+                  v-else
                   class="w-4 h-4 rounded-sm flex-shrink-0 mr-3 border border-gray-600"
                   :style="{ backgroundColor: proj.color }"
                 ></div>
