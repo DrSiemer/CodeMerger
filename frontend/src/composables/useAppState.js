@@ -1,17 +1,19 @@
 import { ref, reactive } from 'vue'
 
-export function useAppState() {
-  const config = ref({})
-  const activeProject = reactive({
-    path: null,
-    name: null,
-    color: null,
-    fontColor: null,
-    totalTokens: 0,
-    hasInstructions: false
-  })
-  const statusMessage = ref('Initializing...')
+// Define state variables OUTSIDE the composable function to create a global singleton.
+// This ensures all components (App, Settings, Modals) share the exact same data.
+const config = ref({})
+const activeProject = reactive({
+  path: null,
+  name: null,
+  color: null,
+  fontColor: null,
+  totalTokens: 0,
+  hasInstructions: false
+})
+const statusMessage = ref('Initializing...')
 
+export function useAppState() {
   const applyProjectData = (projData) => {
     if (projData) {
       activeProject.path = projData.path
@@ -37,6 +39,36 @@ export function useAppState() {
       config.value = await window.pywebview.api.get_app_config()
       const proj = await window.pywebview.api.get_current_project()
       applyProjectData(proj)
+    }
+  }
+
+  const saveConfig = async (newConfig) => {
+    if (window.pywebview) {
+      const success = await window.pywebview.api.save_app_config(newConfig)
+      if (success) {
+        config.value = newConfig
+        statusMessage.value = "Settings updated successfully."
+      } else {
+        statusMessage.value = "Failed to save settings."
+      }
+    }
+  }
+
+  const getFiletypes = async () => {
+    if (window.pywebview) {
+      return await window.pywebview.api.get_filetypes()
+    }
+    return []
+  }
+
+  const saveFiletypes = async (types) => {
+    if (window.pywebview) {
+      const success = await window.pywebview.api.save_filetypes(types)
+      if (success) {
+        statusMessage.value = "Filetypes updated successfully."
+      } else {
+        statusMessage.value = "Failed to save filetypes."
+      }
     }
   }
 
@@ -86,6 +118,9 @@ export function useAppState() {
     activeProject,
     statusMessage,
     init,
+    saveConfig,
+    getFiletypes,
+    saveFiletypes,
     selectProject,
     loadProject,
     getRecentProjects,

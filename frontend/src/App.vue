@@ -2,6 +2,8 @@
 import { onMounted, ref } from 'vue'
 import { useAppState } from './composables/useAppState'
 import ProjectSelectorModal from './components/ProjectSelectorModal.vue'
+import SettingsModal from './components/SettingsModal.vue'
+import FiletypesModal from './components/FiletypesModal.vue'
 import {
   FolderOpen, PenLine, Settings, FileCode2, Play,
   Copy, ClipboardPaste, BookOpen, Info
@@ -10,6 +12,8 @@ import {
 const { config, activeProject, statusMessage, init, copyCode } = useAppState()
 
 const showProjectModal = ref(false)
+const showSettingsModal = ref(false)
+const showFiletypesModal = ref(false)
 
 onMounted(() => {
   // Safe initialization depending on PyWebView injection timing
@@ -96,10 +100,10 @@ onMounted(() => {
 
       <!-- Bottom-Left Tools -->
       <div class="absolute bottom-4 left-6 flex flex-col space-y-5">
-        <button class="text-gray-400 hover:text-white transition-colors" title="Settings">
+        <button @click="showSettingsModal = true" class="text-gray-400 hover:text-white transition-colors" title="Settings">
           <Settings class="w-7 h-7" />
         </button>
-        <button class="text-gray-400 hover:text-white transition-colors" title="Manage Filetypes">
+        <button @click="showFiletypesModal = true" class="text-gray-400 hover:text-white transition-colors" title="Manage Filetypes">
           <FileCode2 class="w-7 h-7" />
         </button>
       </div>
@@ -176,6 +180,14 @@ onMounted(() => {
     <ProjectSelectorModal
       v-if="showProjectModal"
       @close="showProjectModal = false"
+    />
+    <SettingsModal
+      v-if="showSettingsModal"
+      @close="showSettingsModal = false"
+    />
+    <FiletypesModal
+      v-if="showFiletypesModal"
+      @close="showFiletypesModal = false"
     />
   </div>
 </template>

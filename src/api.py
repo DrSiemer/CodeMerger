@@ -5,6 +5,8 @@ import pyperclip
 from src.core.secret_scanner import scan_for_secrets
 from src.core.merger import generate_output_string
 from src.core.project_config import ProjectConfig
+from src.core.utils import save_config, load_all_filetypes, save_filetypes
+from src.core.registry import save_setting
 
 log = logging.getLogger("CodeMerger")
 
@@ -25,8 +27,39 @@ class Api:
         self._window = window
 
     def get_app_config(self):
-        """Returns the global application configuration."""
-        return self.app_state.config
+        """Returns the global application configuration, integrating registry settings."""
+        config = self.app_state.config.copy()
+        config['check_for_updates'] = self.app_state.check_for_updates
+        return config
+
+    def save_app_config(self, new_config):
+        """Saves the application configuration and updates internal state."""
+        try:
+            if 'check_for_updates' in new_config:
+                save_setting('AutomaticUpdates', new_config['check_for_updates'])
+                self.app_state.check_for_updates = new_config['check_for_updates']
+                del new_config['check_for_updates']
+
+            self.app_state.config.update(new_config)
+            save_config(self.app_state.config)
+            self.app_state.reload()
+            return True
+        except Exception as e:
+            log.error(f"Error saving config: {e}")
+            return False
+
+    def get_filetypes(self):
+        """Returns the array of indexed filetypes."""
+        return load_all_filetypes()
+
+    def save_filetypes(self, filetypes):
+        """Saves the filetypes array to configuration."""
+        try:
+            save_filetypes(filetypes)
+            return True
+        except Exception as e:
+            log.error(f"Error saving filetypes: {e}")
+            return False
 
     def _format_project_response(self, project_config, status_msg):
         """Helper to format ProjectConfig into a dictionary suitable for JSON serialization."""

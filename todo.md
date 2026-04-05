@@ -25,12 +25,12 @@
 - [x] **State Management:** Set up a Vue composable (e.g., `useAppState.js`) to fetch the initial config from Python on mount and sync changes back.
 - [x] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
 - [x] **Project Loading:** Implement the "Select Project" flow. Vue calls `api.select_project()` -> Python utilizes `ProjectManager` -> returns `ProjectConfig` dict -> Vue updates UI.
-- [ ] **Modals:** Implement basic Vue modals for:
+- [x] **Modals:** Implement basic Vue modals for:
     - Settings (Application, File Manager, Prompts, Editor, Starter).
     - Filetypes Manager (Simple list with toggles).
-    - [x] Project Selector (Recent projects list with filtering).
+    - Project Selector (Recent projects list with filtering).
 - [x] **Actions:** Connect the "Copy Code Only" and "Copy with Instructions" buttons to call `api.copy_merged_code()` (which utilizes `src/core/clipboard.py`).
-- [ ] **Tooltips:** Implement standard HTML `title` attributes or a lightweight Vue tooltip plugin.
+- [x] **Tooltips:** Implement standard HTML `title` attributes or a lightweight Vue tooltip plugin.
 
 > **🛑 Human Verification Checkpoint 2:**
 > - Can you select a project and see the UI update with the project name?
