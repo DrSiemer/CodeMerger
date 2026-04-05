@@ -3,7 +3,8 @@ import { ref, onMounted, computed } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
   HelpCircle, Trash2, ShieldCheck, AlertTriangle,
-  ChevronDown, ChevronRight, Eye, Undo2, BookOpen
+  ChevronDown, ChevronRight, Eye, Undo2, BookOpen,
+  ClipboardPaste
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import MarkdownRenderer from './MarkdownRenderer.vue'
@@ -25,13 +26,15 @@ const {
   applyFileChange,
   deleteFile,
   copyAdmonishment,
-  resizeWindow
+  resizeWindow,
+  processPaste
 } = useAppState()
 
 // State management
 const visibleDiffs = ref(new Set()) // paths currently showing diff
 const activeTab = ref('')
 const showCommentary = ref(false)
+const tabContentContainer = ref(null)
 
 // Categorize segments from the plan
 const tabs = computed(() => {
@@ -175,6 +178,25 @@ const applyAllPending = async () => {
   }
 }
 
+const handlePasteNext = async () => {
+  const success = await processPaste()
+  if (success) {
+    visibleDiffs.value.clear()
+    showCommentary.value = false
+
+    // Reset tab to Intro if available, matching fresh paste behavior
+    if (tabs.value.length > 0) {
+      const hasIntro = tabs.value.find(t => t.id === 'intro')
+      activeTab.value = hasIntro ? 'intro' : tabs.value[0].id
+    }
+
+    // Reset scroll position to top for the new content
+    if (tabContentContainer.value) {
+      tabContentContainer.value.scrollTop = 0
+    }
+  }
+}
+
 // --- Helpers ---
 
 const getPendingCount = computed(() => {
@@ -223,7 +245,7 @@ const getPendingCount = computed(() => {
       </div>
 
       <!-- Scrollable Tab Content -->
-      <div class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg">
+      <div ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg">
         <div v-for="tab in tabs" :key="tab.id" v-show="activeTab === tab.id" class="p-8">
 
           <!-- Standard Content Tabs -->
@@ -360,6 +382,14 @@ const getPendingCount = computed(() => {
       <!-- Footer Actions -->
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end shrink-0">
         <div class="flex items-center space-x-3">
+          <button
+            v-if="getPendingCount === 0"
+            @click="handlePasteNext"
+            class="bg-cm-green hover:bg-green-600 text-white font-bold py-2 px-8 rounded shadow-md transition-all flex items-center"
+          >
+            <ClipboardPaste class="w-4 h-4 mr-2" />
+            Paste Next
+          </button>
           <button
             @click="emit('close')"
             class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors"

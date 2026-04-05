@@ -7,7 +7,7 @@ import FileManagerModal from './components/FileManagerModal.vue'
 import ReviewModal from './components/ReviewModal.vue'
 import InstructionsModal from './components/InstructionsModal.vue'
 import {
-  Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle, Eye
+  Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle, Eye, Loader2
 } from 'lucide-vue-next'
 
 const { activeProject, statusMessage, statusVisible, lastAiResponse, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles, selectColor, processPaste, copyCleanupPrompt } = useAppState()
@@ -21,6 +21,10 @@ const settingsTab = ref('application')
 const reviewMode = ref('new') // 'new' or 'resume'
 
 const cleanupPulse = ref(false)
+
+// Loading states for copy buttons
+const isCopyingInstructions = ref(false)
+const isCopyingOnly = ref(false)
 
 // Image Assets
 const starterIcon = ref('')
@@ -115,6 +119,21 @@ const handleNewFilesClick = async (event) => {
     await addAllNewFiles()
   } else {
     await openFileManager()
+  }
+}
+
+const handleCopy = async (useWrapper) => {
+  if (useWrapper) {
+    isCopyingInstructions.value = true
+  } else {
+    isCopyingOnly.value = true
+  }
+
+  try {
+    await copyCode(useWrapper)
+  } finally {
+    isCopyingInstructions.value = false
+    isCopyingOnly.value = false
   }
 }
 
@@ -306,29 +325,37 @@ onMounted(() => {
             <!-- Conditional Copy Button Layout -->
             <template v-if="activeProject.hasInstructions">
               <button
-                @click="copyCode(true)"
-                class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight"
+                @click="handleCopy(true)"
+                :disabled="isCopyingInstructions || isCopyingOnly"
+                class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt: includes code wrapped with custom intro/outro instructions"
               >
-                <span>Copy with Instructions</span>
+                <Loader2 v-if="isCopyingInstructions" class="w-6 h-6 animate-spin" />
+                <span v-else>Copy with Instructions</span>
               </button>
               <button
-                @click="copyCode(false)"
-                class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight"
+                @click="handleCopy(false)"
+                :disabled="isCopyingInstructions || isCopyingOnly"
+                class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt: merges code and prepends the default context prompt"
               >
-                <span>Copy Code Only</span>
+                <Loader2 v-if="isCopyingOnly" class="w-6 h-6 animate-spin" />
+                <span v-else>Copy Code Only</span>
               </button>
             </template>
 
             <template v-else>
               <button
-                @click="copyCode(false)"
-                class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2"
+                @click="handleCopy(false)"
+                :disabled="isCopyingInstructions || isCopyingOnly"
+                class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt: merges code and prepends the default context prompt"
               >
-                <Copy class="w-5 h-5" />
-                <span>Copy Code Only</span>
+                <Loader2 v-if="isCopyingOnly" class="w-6 h-6 animate-spin" />
+                <template v-else>
+                  <Copy class="w-5 h-5" />
+                  <span>Copy Code Only</span>
+                </template>
               </button>
             </template>
 

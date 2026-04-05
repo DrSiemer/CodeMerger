@@ -27,7 +27,7 @@ const loadDefaults = () => {
 }
 
 const handleSave = async () => {
-  const success = await saveInstructions(localIntro.value.trim(), localOutro.value.trim())
+  const success = await saveInstructions(localIntro.value, localOutro.value)
   if (success) {
     emit('close')
   }
