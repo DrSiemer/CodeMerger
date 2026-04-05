@@ -8,7 +8,7 @@ import {
   Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle
 } from 'lucide-vue-next'
 
-const { activeProject, statusMessage, init, copyCode, renameProject, getImage } = useAppState()
+const { activeProject, statusMessage, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles } = useAppState()
 
 const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
@@ -75,6 +75,20 @@ const cancelEditing = () => {
 const openSettings = (tab = 'application') => {
   settingsTab.value = tab
   showSettingsModal.value = true
+}
+
+const openFileManager = async () => {
+  // Clear the unknown file count backend-side when opening the manager
+  await clearUnknownFiles()
+  showFileManagerModal.value = true
+}
+
+const handleNewFilesClick = async (event) => {
+  if (event.ctrlKey) {
+    await addAllNewFiles()
+  } else {
+    await openFileManager()
+  }
 }
 
 const loadAssets = async () => {
@@ -164,10 +178,10 @@ onMounted(() => {
       <div class="flex items-center space-x-5 shrink-0 ml-4">
         <!-- New Files Alert -->
         <div
-          v-if="activeProject.newFileCount > 0"
-          class="flex items-center text-cm-blue cursor-pointer hover:brightness-125 transition-all"
-          title="New files detected! Click to manage."
-          @click="showFileManagerModal = true"
+          v-if="activeProject.newFileCount > 0 && !showFileManagerModal"
+          class="flex items-center text-cm-green cursor-pointer hover:brightness-125 transition-all"
+          title="New files found. Click: Open manager, Ctrl+Click: Add all to merge"
+          @click="handleNewFilesClick($event)"
         >
           <AlertTriangle class="w-6 h-6" />
         </div>
@@ -177,7 +191,8 @@ onMounted(() => {
           v-if="activeProject.path && folderIcon"
           :src="isFolderHovered ? folderActiveIcon : folderIcon"
           class="w-7 h-auto cursor-pointer transition-opacity"
-          title="Open project folder"
+          title="Open project folder (Ctrl+Click: Copy Path, Alt+Click: Open Console)"
+          @click="openProjectFolder($event)"
           @mouseenter="isFolderHovered = true"
           @mouseleave="isFolderHovered = false"
         />
@@ -190,7 +205,7 @@ onMounted(() => {
         <button
           class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2 px-6 rounded shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-[38px]"
           :disabled="!activeProject.path"
-          @click="showFileManagerModal = true"
+          @click="openFileManager"
         >
           Edit Merge List
         </button>
@@ -311,3 +326,20 @@ onMounted(() => {
     />
   </div>
 </template>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #2E2E2E;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+</style>

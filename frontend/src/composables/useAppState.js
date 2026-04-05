@@ -142,6 +142,29 @@ export function useAppState() {
     statusMessage.value = msg
   }
 
+  const openProjectFolder = async (event) => {
+    if (!activeProject.path) return
+    const msg = await window.pywebview.api.open_project_folder(event.ctrlKey, event.altKey)
+    statusMessage.value = msg
+  }
+
+  const clearUnknownFiles = async () => {
+    if (window.pywebview) {
+      await window.pywebview.api.clear_unknown_files()
+      activeProject.newFileCount = 0
+    }
+  }
+
+  const addAllNewFiles = async () => {
+    if (window.pywebview) {
+      const proj = await window.pywebview.api.add_all_new_files()
+      if (proj) {
+        applyProjectData(proj)
+        activeProject.newFileCount = 0
+      }
+    }
+  }
+
   // --- File Management ---
 
   const getFileTree = async (filterText, isExtFilter, isGitFilter) => {
@@ -190,6 +213,9 @@ export function useAppState() {
     getRecentProjects: async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : [],
     removeRecentProject,
     copyCode,
+    openProjectFolder,
+    clearUnknownFiles,
+    addAllNewFiles,
     getFileTree,
     updateProjectFiles,
     copyOrderRequest

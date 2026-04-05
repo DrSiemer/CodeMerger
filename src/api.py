@@ -4,10 +4,12 @@ import logging
 import pyperclip
 import base64
 import json
+import sys
+import subprocess
 from src.core.secret_scanner import scan_for_secrets
 from src.core.merger import generate_output_string
 from src.core.project_config import ProjectConfig
-from src.core.utils import save_config, load_all_filetypes, save_filetypes, parse_gitignore, get_token_count_for_text, is_ignored
+from src.core.utils import save_config, load_all_filetypes, save_filetypes, parse_gitignore, get_token_count_for_text, is_ignored, get_file_hash
 from src.core.registry import save_setting
 from src.core.paths import BUNDLE_DIR
 from src.ui.file_manager.file_tree_builder import build_file_tree_data
@@ -273,6 +275,76 @@ class Api:
         except Exception:
             return 0
 
+    def clear_unknown_files(self):
+        """
+        Resets the unknown files list for the current project profile.
+        Used to dismiss alert icons when the user opens the file manager.
+        """
+        project_config = self.project_manager.get_current_project()
+        if project_config:
+            project_config.unknown_files = []
+            project_config.save()
+            # Notify UI
+            if self._window:
+                self._window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
+            return True
+        return False
+
+    def add_all_new_files(self):
+        """
+        Instantly adds all currently detected unknown files to the merge list.
+        Clears the unknown files tracker upon completion.
+        """
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        new_files = list(project_config.unknown_files)
+        if not new_files:
+            return self._format_project_response(project_config, "No new files to add.")
+
+        base_dir = project_config.base_dir
+        current_selection_paths = {f['path'] for f in project_config.selected_files}
+        files_to_add = [path for path in new_files if path not in current_selection_paths]
+
+        added_count = 0
+        for path in files_to_add:
+            full_path = os.path.join(base_dir, path)
+            try:
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+
+                mtime = os.path.getmtime(full_path)
+                file_hash = get_file_hash(full_path)
+                tokens = get_token_count_for_text(content)
+                lines = content.count('\n') + 1
+
+                project_config.selected_files.append({
+                    'path': path, 'mtime': mtime, 'hash': file_hash,
+                    'tokens': tokens, 'lines': lines
+                })
+                added_count += 1
+            except Exception as e:
+                log.error(f"Failed to process new file {path}: {e}")
+
+        # Recalculate total tokens
+        project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+
+        # Clear unknown files for the active profile
+        project_config.unknown_files = []
+
+        # Ensure these files are marked as known globally
+        current_paths = {f['path'] for f in project_config.selected_files}
+        project_config.known_files = sorted(list(set(project_config.known_files) | current_paths))
+
+        project_config.save()
+
+        # Manually trigger the event to clear the counter in UI immediately
+        if self._window:
+            self._window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
+
+        return self._format_project_response(project_config, f"Added {added_count} new file(s) to merge list.")
+
     def update_project_files(self, selected_files, total_tokens, expanded_dirs=None):
         """Updates the project configuration with a new selection, order, and expansion state."""
         project_config = self.project_manager.get_current_project()
@@ -330,6 +402,71 @@ class Api:
         finally:
             # Restore original selection
             project_config.selected_files = orig_selection
+
+    def open_project_folder(self, is_ctrl=False, is_alt=False):
+        """
+        Handles folder icon interactions:
+        - Default: Opens the project root in File Explorer/Finder.
+        - Ctrl: Copies the full path to the clipboard.
+        - Alt: Opens a clean command prompt in the project directory (Windows only).
+        """
+        project_path = self.app_state.active_directory
+        if not project_path or not os.path.isdir(project_path):
+            return "No active project folder to open."
+
+        if is_alt:
+            try:
+                if sys.platform == "win32":
+                    # Environment Scrubbing logic to ensure a clean shell
+                    new_env = os.environ.copy()
+                    venv_root = new_env.pop('VIRTUAL_ENV', None)
+                    new_env.pop('PYTHONHOME', None)
+                    new_env.pop('PYTHONPATH', None)
+                    new_env.pop('PROMPT', None)
+
+                    purge_targets = []
+                    if venv_root: purge_targets.append(venv_root.lower())
+                    bundle_dir = getattr(sys, '_MEIPASS', None)
+                    if bundle_dir: bundle_dir_lower = bundle_dir.lower()
+                    else: bundle_dir_lower = ""
+                    exec_dir = os.path.dirname(sys.executable).lower()
+
+                    path_entries = new_env.get('PATH', '').split(os.pathsep)
+                    cleaned_entries = []
+                    for e in path_entries:
+                        low = e.lower()
+                        if (venv_root and low.startswith(venv_root.lower())) or \
+                           (bundle_dir_lower and low.startswith(bundle_dir_lower)) or \
+                           (low.startswith(exec_dir)):
+                            continue
+                        cleaned_entries.append(e)
+
+                    new_env['PATH'] = os.pathsep.join(cleaned_entries)
+
+                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
+                    return "Opened clean console in project folder."
+                else:
+                    return "Terminal feature only available on Windows."
+            except Exception as e:
+                log.error(f"Failed to open console: {e}")
+                return f"Error opening console: {e}"
+
+        if is_ctrl:
+            pyperclip.copy(project_path.replace('/', '\\'))
+            return "Project path copied to clipboard."
+
+        # Default: Open in native file manager
+        try:
+            if sys.platform == "win32":
+                os.startfile(project_path)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", project_path])
+            else:
+                subprocess.Popen(["xdg-open", project_path])
+            return "Opened project folder."
+        except Exception as e:
+            log.error(f"Failed to open folder: {e}")
+            return f"Error opening folder: {e}"
 
     def test(self):
         """A simple test method to verify the Vue -> Python bridge is working."""

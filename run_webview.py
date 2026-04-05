@@ -1,6 +1,7 @@
 import sys
 import os
 import webview
+import logging
 from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir
@@ -10,6 +11,8 @@ from src.core.file_monitor_thread import FileMonitorThread
 from src.app_state import AppState
 from src.core.project_manager import ProjectManager
 from src.core.utils import load_active_file_extensions
+
+log = logging.getLogger("CodeMerger")
 
 def main():
     # Initialize logging
@@ -56,6 +59,18 @@ def main():
     # Initialize background file monitor
     monitor = FileMonitorThread(window, app_state, project_manager)
     monitor.start()
+
+    def on_closed():
+        """
+        Handler triggered when the main window is closed.
+        Ensures background threads are stopped and the process terminates cleanly.
+        """
+        log.info("Window closed. Terminating application.")
+        monitor.stop()
+        # On Windows, PyWebView processes can sometimes hang if not explicitly terminated
+        os._exit(0)
+
+    window.events.closed += on_closed
 
     # Start the application loop
     webview.start(debug=dev_mode)

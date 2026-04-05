@@ -5,6 +5,8 @@ import re
 import colorsys
 import hashlib
 import tempfile
+import time
+import sys
 from pathlib import Path
 from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
 from .utils import get_token_count_for_text
@@ -300,7 +302,37 @@ class ProjectConfig:
         try:
             with os.fdopen(fd, 'w', encoding='utf-8') as f:
                 json.dump(final_data, f, indent=2)
-            os.replace(temp_path, self.allcode_path)
+
+            # Windows specific: PermissionError/Access Denied on os.replace is common
+            # if the file is being read by the monitor thread or has a Hidden attribute.
+            max_retries = 5
+            is_windows = sys.platform == "win32"
+            was_hidden = False
+
+            for attempt in range(max_retries):
+                try:
+                    # Attempt to clear hidden attribute if on Windows to prevent Access Denied
+                    if is_windows and os.path.exists(self.allcode_path):
+                        import ctypes
+                        FILE_ATTRIBUTE_HIDDEN = 0x02
+                        attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
+                        if attrs != -1 and (attrs & FILE_ATTRIBUTE_HIDDEN):
+                            was_hidden = True
+                            ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs & ~FILE_ATTRIBUTE_HIDDEN)
+
+                    os.replace(temp_path, self.allcode_path)
+
+                    # Restore hidden attribute if it was previously set
+                    if is_windows and was_hidden:
+                        attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
+                        if attrs != -1:
+                            ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs | FILE_ATTRIBUTE_HIDDEN)
+
+                    break
+                except PermissionError:
+                    if attempt == max_retries - 1:
+                        raise
+                    time.sleep(0.1)
         except Exception:
             if os.path.exists(temp_path):
                 os.remove(temp_path)
