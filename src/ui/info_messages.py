@@ -112,6 +112,10 @@ INFO_MESSAGES = {
         "Order Request: Single-click to copy a prompt asking the AI for the 'optimal' file order. "
         "Double-click to paste a new order list; Ctrl-click to directly apply a list from your clipboard."
     ),
+    "fm_list_item": (
+        "Merge Item: Double-click to open this file in your default or configured editor. Use the path "
+        "icon in the header to toggle between filename and full path display."
+    ),
     "fm_tokens_item": (
         "Token Stats: Shows the token count for this file. Ctrl-click to copy a breakup request for "
         "the AI. Alt-click to 'ignore' this file's tokens when calculating the color warnings."

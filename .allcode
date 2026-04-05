@@ -87,9 +87,9 @@
         },
         {
           "path": "src/core/registry.py",
-          "mtime": 1772545862.8578804,
-          "hash": "e2c3a1c68db148ce4e3a2414be5ee389b2c48ffe",
-          "tokens": 526,
+          "mtime": 1775311394.401047,
+          "hash": "e383a807279bd17c9a03cff41765d125c18560b2",
+          "tokens": 520,
           "lines": 59
         },
         {
@@ -130,10 +130,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1775310952.719604,
-          "hash": "49c56fdd39af8212e6cd6582f0b5846f949d4301",
-          "tokens": 2207,
-          "lines": 270
+          "mtime": 1775311379.4487514,
+          "hash": "a5d24372c7bee738679e7de426ed51aa71e37efc",
+          "tokens": 2468,
+          "lines": 299
         },
         {
           "path": "src/core/clipboard.py",
@@ -242,10 +242,10 @@
         },
         {
           "path": "src/ui/info_messages.py",
-          "mtime": 1775308986.831216,
-          "hash": "4c232de62698974b2eec6cd301e93aac1eddb4a5",
-          "tokens": 4500,
-          "lines": 333
+          "mtime": 1775388880.2836025,
+          "hash": "669807187f3f1784039ee5c552e712820baa0c6d",
+          "tokens": 4546,
+          "lines": 337
         },
         {
           "path": "src/ui/info_manager.py",
@@ -270,9 +270,9 @@
         },
         {
           "path": "src/ui/view_manager.py",
-          "mtime": 1774899473.3271782,
-          "hash": "d320324f1abada60b3a4fc09f11a6d0b102026d6",
-          "tokens": 2793,
+          "mtime": 1775311423.4446304,
+          "hash": "fb783775058bd4979d04f6f743d00c6df7181813",
+          "tokens": 2789,
           "lines": 284
         },
         {
@@ -389,9 +389,9 @@
         },
         {
           "path": "src/ui/project_selector_dialog.py",
-          "mtime": 1774899473.3181658,
-          "hash": "527f5707649d9e3b4418bbe67ba3a2aeaa921360",
-          "tokens": 3617,
+          "mtime": 1775311407.9947302,
+          "hash": "d033f0ccb13e282106ebb72be4a8922dda31acfa",
+          "tokens": 3599,
           "lines": 384
         },
         {
@@ -508,10 +508,10 @@
         },
         {
           "path": "src/ui/file_manager/selection_list_controller.py",
-          "mtime": 1774899473.308308,
-          "hash": "da3e87e305ea66a87d66d96dff8d1ce48dfb7781",
-          "tokens": 2475,
-          "lines": 270
+          "mtime": 1775388880.2836025,
+          "hash": "22aeaa9c064c35c1506af1f34fadfa57b31dc8e4",
+          "tokens": 2699,
+          "lines": 285
         },
         {
           "path": "src/ui/file_manager/state_controller.py",
@@ -536,10 +536,10 @@
         },
         {
           "path": "src/ui/file_manager/file_manager_window.py",
-          "mtime": 1774899473.3071644,
-          "hash": "9720aeadc040f094df5546e2300f8e2efb3b2a57",
-          "tokens": 2895,
-          "lines": 319
+          "mtime": 1775388880.2845998,
+          "hash": "a5a9db5086608ffe1f0667df342f0fdeedfa0211",
+          "tokens": 2890,
+          "lines": 320
         },
         {
           "path": "src/ui/project_starter/session_manager.py",
@@ -620,9 +620,9 @@
         },
         {
           "path": "src/ui/project_starter/widgets/rewrite_dialog.py",
-          "mtime": 1775246449.4778647,
-          "hash": "9f71b57e959cb0ad4efce84d8dea0dffb89e9cb3",
-          "tokens": 2212,
+          "mtime": 1775311433.6943877,
+          "hash": "0122c3883bff752124ffc1e3622da40dc91767b9",
+          "tokens": 2206,
           "lines": 206
         },
         {
@@ -634,9 +634,9 @@
         },
         {
           "path": "src/ui/project_starter/widgets/segmented_reviewer.py",
-          "mtime": 1774818087.393622,
-          "hash": "25538d1dbe72a9e3548463faccc2b8d986a0be74",
-          "tokens": 3855,
+          "mtime": 1775311442.5750768,
+          "hash": "91a63dc6cbbcf99cb090148a25bf79197df6fb9c",
+          "tokens": 3840,
           "lines": 379
         },
         {
@@ -879,7 +879,7 @@
           "lines": 189
         }
       ],
-      "total_tokens": 178479,
+      "total_tokens": 178956,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

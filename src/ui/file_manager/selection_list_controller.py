@@ -124,7 +124,7 @@ class SelectionListController:
         if new_selection:
             self._update_and_notify(is_reorder=True)
             self.listbox.selection_set(new_selection.start, new_selection.stop - 1)
-            self.listbox.see(new_selection.stop - 1)
+            self.listbox.see(new_selection.start)
             self.listbox.set_selection_anchor(new_selection.stop - 1)
 
     def move_to_bottom(self):
@@ -198,7 +198,27 @@ class SelectionListController:
 
     def _schedule_tooltip(self, event):
         self._hide_tooltip()
+        # Immediately update info panel based on current column
+        self._update_info_panel(event)
         self.tooltip_job = self.listbox.after(500, lambda e=event: self._show_tooltip(e))
+
+    def _update_info_panel(self, event):
+        """Swaps Info Panel keys based on cursor location relative to columns."""
+        mgr = getattr(self.parent, 'info_mgr', None)
+        if not mgr: return
+
+        index = int(self.listbox.canvasy(event.y) // self.listbox.row_height)
+        if 0 <= index < len(self.ordered_selection):
+            is_over_token_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
+            new_key = "fm_tokens_item" if is_over_token_area else "fm_list_item"
+        else:
+            new_key = "fm_list"
+
+        # Update the active documentation stack if the list is currently the top item
+        if mgr._active_stack and mgr._active_stack[-1][0] == self.listbox:
+            if mgr._active_stack[-1][1] != new_key:
+                mgr._active_stack[-1] = (self.listbox, new_key)
+                mgr._update_display()
 
     def _show_tooltip(self, event):
         if self.tooltip_window: self.tooltip_window.destroy(); self.tooltip_window = None
@@ -212,47 +232,42 @@ class SelectionListController:
         is_over_token_area = event.x > (self.listbox.winfo_width() - self.listbox.right_col_width)
         tooltip_text = ""
 
-        # Base Path Tooltip (if truncated)
-        if not self.ui_manager.show_full_paths:
-            basename = os.path.basename(path)
-            full_path_display = path.replace('/', os.sep)
-            if basename != full_path_display:
-                tooltip_text = full_path_display
+        if is_over_token_area:
+            # Token Stats Tooltip
+            if self.ui_manager.token_count_enabled:
+                tokens, lines = item_info.get('tokens', -1), item_info.get('lines', -1)
+                is_ignored_token = item_info.get('ignore_tokens', False)
+                if tokens >= 0:
+                    tooltip_text = f"{tokens} tokens, {lines} lines"
+                    if is_ignored_token:
+                        tooltip_text += "\n(Ignored in coloring)"
+                    tooltip_text += "\nCtrl+Click to copy breakup request\nAlt+Click to toggle ignore"
+        else:
+            # Filename Area
+            tooltip_text = "Double-click to open in editor.\nFile path display can be toggled via the tools icon."
 
-        # Filter Reason Hint
-        hidden_reasons = []
-        if is_ignored(os.path.join(self.base_dir, path), self.base_dir, self.parent.gitignore_patterns):
-            hidden_reasons.append("the .gitignore filter")
+            # Prefix with Full Path if currently showing only basename
+            if not self.ui_manager.show_full_paths:
+                basename = os.path.basename(path)
+                full_path_display = path.replace('/', os.sep)
+                if basename != full_path_display:
+                    tooltip_text = f"{full_path_display}\n\n{tooltip_text}"
 
-        filename = os.path.basename(path)
-        file_ext = os.path.splitext(filename.lower())[1]
-        extensions = {ext for ext in self.parent.file_extensions if ext.startswith('.')}
-        exact_filenames = {ext for ext in self.parent.file_extensions if not ext.startswith('.')}
-        if not (file_ext in extensions or filename.lower() in exact_filenames):
-            hidden_reasons.append("the filetype filter")
+            # Filter Reason Hint
+            hidden_reasons = []
+            if is_ignored(os.path.join(self.base_dir, path), self.base_dir, self.parent.gitignore_patterns):
+                hidden_reasons.append("the .gitignore filter")
 
-        if hidden_reasons:
-            hint = f"Normally hidden by {' and '.join(hidden_reasons)}."
-            if tooltip_text:
+            filename = os.path.basename(path)
+            file_ext = os.path.splitext(filename.lower())[1]
+            extensions = {ext for ext in self.parent.file_extensions if ext.startswith('.')}
+            exact_filenames = {ext for ext in self.parent.file_extensions if not ext.startswith('.')}
+            if not (file_ext in extensions or filename.lower() in exact_filenames):
+                hidden_reasons.append("the filetype filter")
+
+            if hidden_reasons:
+                hint = f"Normally hidden by {' and '.join(hidden_reasons)}."
                 tooltip_text += f"\n\n{hint}"
-            else:
-                tooltip_text = hint
-
-        # Token Stats Tooltip
-        if is_over_token_area and self.ui_manager.token_count_enabled:
-            tokens, lines = item_info.get('tokens', -1), item_info.get('lines', -1)
-            is_ignored_token = item_info.get('ignore_tokens', False)
-            stats_text = ""
-            if tokens >= 0:
-                stats_text = f"{tokens} tokens, {lines} lines"
-                if is_ignored_token:
-                    stats_text += "\n(Ignored in coloring)"
-                stats_text += "\nCtrl+Click to copy breakup request\nAlt+Click to toggle ignore"
-
-            if tooltip_text:
-                tooltip_text += f"\n\n{stats_text}"
-            else:
-                tooltip_text = stats_text
 
         if not tooltip_text: return
 
