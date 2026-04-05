@@ -28,6 +28,7 @@ const selectedIndices = ref(new Set())
 const lastSelectedIndex = ref(null)
 const currentExpandedDirs = ref(new Set(activeProject.expandedDirs))
 const isLoaded = ref(false)
+const isOrderPulseActive = ref(false)
 
 const TOKEN_COLOR_RANGE_MAX = 2500
 
@@ -237,7 +238,13 @@ const handleOrderRequest = async () => {
   if (listItems.value.length === 0) return
   // Pass a clean JSON copy to avoid proxy serialization issues on the Python bridge
   const cleanList = JSON.parse(JSON.stringify(listItems.value))
-  await copyOrderRequest(cleanList)
+  const success = await copyOrderRequest(cleanList)
+  if (success) {
+    isOrderPulseActive.value = true
+    setTimeout(() => {
+      isOrderPulseActive.value = false
+    }, 450)
+  }
 }
 
 // --- Save & Close Logic ---
@@ -356,7 +363,9 @@ const handleSave = async () => {
             <div class="flex items-center space-x-2">
               <button
                 @click="handleOrderRequest"
-                class="p-1.5 rounded border border-gray-600 hover:border-cm-blue text-gray-500 hover:text-cm-blue transition-colors"
+                class="p-1.5 rounded border border-gray-600 hover:border-cm-blue text-gray-500 hover:text-cm-blue transition-colors relative"
+                :class="{ 'click-pulse': isOrderPulseActive }"
+                :style="isOrderPulseActive ? { '--click-color': '#DE680888' } : {}"
                 title="Copy order request prompt"
               >
                 <ArrowDownUp class="w-4 h-4" />

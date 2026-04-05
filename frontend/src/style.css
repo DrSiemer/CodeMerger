@@ -15,3 +15,24 @@ body {
 input, textarea, .selectable {
   user-select: text;
 }
+
+/* Reusable tactile bloom effect */
+@keyframes click-bloom {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 var(--click-color);
+  }
+  20% {
+    transform: scale(0.92); /* Tactile "press" feel */
+    box-shadow: 0 0 0 4px var(--click-color);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 12px transparent; /* Expanding ring */
+  }
+}
+
+.click-pulse {
+  animation: click-bloom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  z-index: 10;
+}
