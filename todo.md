@@ -42,16 +42,16 @@
 ## Phase 3: File Manager & Drag-and-Drop
 *Goal: Rebuild the dual-pane file selection interface.*
 
-- [ ] **Layout:** Create a split-pane layout (Left: Available Files, Right: Merge Order).
-- [ ] **File Tree (Left):**
+- [x] **Layout:** Create a split-pane layout (Left: Available Files, Right: Merge Order).
+- [x] **File Tree (Left):**
     - Create a recursive Vue component `<FileTreeNode>` to render the nested directory structure returned by `api.get_file_tree()`.
     - Implement double-click to add files to the merge list.
     - Implement visual indicators (text color) for filtered or new files.
-- [ ] **Merge Order (Right):**
+- [x] **Merge Order (Right):**
     - Install `vuedraggable` (or `@formkit/drag-and-drop`) to handle the sortable list.
     - Bind the list to the selected files array. When reordered in Vue, send the new array to Python to update `ProjectConfig`.
-- [ ] **Token Counting:** Expose `get_token_count_for_text` to the API. Have Vue request token counts for selected files and display them, changing text color if the limit is exceeded.
-- [ ] **File Monitor:** Convert `FileMonitor` to use a Python background thread. When new files are detected, use `webview.windows[0].evaluate_js()` to trigger a Vue event that shows the "New Files" warning icon.
+- [x] **Token Counting:** Expose `get_token_count_for_text` to the API. Have Vue request token counts for selected files and display them, changing text color if the limit is exceeded.
+- [x] **File Monitor:** Convert `FileMonitor` to use a Python background thread. When new files are detected, use `webview.windows[0].evaluate_js()` to trigger a Vue event that shows the "New Files" warning icon.
 
 > **🛑 Human Verification Checkpoint 3:**
 > - Does the file tree accurately reflect the project folder and respect `.gitignore`?

@@ -6,9 +6,10 @@ import base64
 from src.core.secret_scanner import scan_for_secrets
 from src.core.merger import generate_output_string
 from src.core.project_config import ProjectConfig
-from src.core.utils import save_config, load_all_filetypes, save_filetypes
+from src.core.utils import save_config, load_all_filetypes, save_filetypes, parse_gitignore, get_token_count_for_text, is_ignored
 from src.core.registry import save_setting
 from src.core.paths import BUNDLE_DIR
+from src.ui.file_manager.file_tree_builder import build_file_tree_data
 
 log = logging.getLogger("CodeMerger")
 
@@ -35,11 +36,6 @@ class Api:
         """
         if not self._window:
             return
-
-        # We do not resize if the window is maximized as it can cause flickering
-        # or inconsistent behavior across different OS window managers.
-        # Note: PyWebView does not expose a simple 'is_maximized' property,
-        # so we rely on the resize call which the OS usually handles safely.
 
         current_w = self._window.width
         current_h = self._window.height
@@ -116,6 +112,9 @@ class Api:
             "project_color": project_config.project_color,
             "project_font_color": project_config.project_font_color,
             "total_tokens": project_config.total_tokens,
+            "selected_files": project_config.selected_files,
+            "unknown_files": project_config.unknown_files,
+            "expanded_dirs": list(project_config.expanded_dirs),
             "has_instructions": bool(project_config.intro_text or project_config.outro_text),
             "status_msg": status_msg
         }
@@ -163,31 +162,21 @@ class Api:
     def select_project(self):
         """
         Opens the native OS directory selection dialog.
-        Initializes the selected directory as a CodeMerger project and updates the active state.
-        Returns the project data dictionary, or None if cancelled.
         """
         if not self._window:
-            log.warning("select_project called but window reference is missing.")
             return None
 
         result = self._window.create_file_dialog(webview.FOLDER_DIALOG)
         if result and len(result) > 0:
             selected_path = result[0]
-            log.info(f"Directory selected via native dialog: {selected_path}")
-
-            # Update internal state and load/initialize the project
             if self.app_state.update_active_dir(selected_path):
                 project_config, status_msg = self.project_manager.load_project(selected_path)
                 return self._format_project_response(project_config, status_msg)
-
-        log.info("Directory selection cancelled.")
         return None
 
     def copy_code(self, use_wrapper):
         """
         Merges the selected files and copies the result to the clipboard.
-        Evaluates secret scanning and prompts the user via PyWebView dialogs if necessary.
-        Replaces the Tkinter-dependent `copy_project_to_clipboard` logic.
         """
         project_config = self.project_manager.get_current_project()
         if not project_config or not project_config.selected_files:
@@ -200,7 +189,6 @@ class Api:
             report = scan_for_secrets(base_dir, files_to_copy)
             if report:
                 warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
-                # create_confirmation_dialog returns True for OK, False for Cancel
                 proceed = self._window.create_confirmation_dialog("Secrets Detected", warning_message)
                 if not proceed:
                     return "Copy cancelled due to potential secrets."
@@ -217,6 +205,93 @@ class Api:
             return status_message
 
         return status_message or "Error: Could not generate content."
+
+    def get_file_tree(self, filter_text="", is_ext_filter=True, is_git_filter=True):
+        """Returns the project file tree data structure, enhanced with metadata."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return []
+
+        base_dir = project_config.base_dir
+        from src.core.utils import load_active_file_extensions
+        file_extensions = load_active_file_extensions()
+        gitignore_patterns = parse_gitignore(base_dir)
+        selected_paths = {f['path'] for f in project_config.selected_files}
+        unknown_files = set(project_config.unknown_files)
+
+        raw_tree = build_file_tree_data(
+            base_dir=base_dir,
+            file_extensions=file_extensions,
+            gitignore_patterns=gitignore_patterns,
+            filter_text=filter_text,
+            is_extension_filter_active=is_ext_filter,
+            selected_file_paths=selected_paths,
+            is_gitignore_filter_active=is_git_filter
+        )
+
+        # Inject is_new and is_filtered flags recursively
+        def inject_metadata(nodes):
+            for node in nodes:
+                rel_path = node['path']
+                node['is_new'] = rel_path in unknown_files
+
+                # Check if file is in selection but normally filtered
+                if rel_path in selected_paths:
+                    is_git_ignored = is_ignored(os.path.join(base_dir, rel_path), base_dir, gitignore_patterns)
+
+                    file_name_lower = node['name'].lower()
+                    file_ext = os.path.splitext(file_name_lower)[1]
+                    extensions_set = {ext for ext in file_extensions if ext.startswith('.')}
+                    exact_filenames_set = {ext for ext in file_extensions if not ext.startswith('.')}
+                    is_valid_ext = file_ext in extensions_set or file_name_lower in exact_filenames_set
+
+                    node['is_filtered'] = is_git_ignored or (not is_valid_ext)
+                else:
+                    node['is_filtered'] = False
+
+                if 'children' in node:
+                    inject_metadata(node['children'])
+
+        inject_metadata(raw_tree)
+        return raw_tree
+
+    def get_token_count(self, file_path):
+        """Calculates token count for a specific file relative to project root."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return 0
+
+        full_path = os.path.join(project_config.base_dir, file_path)
+        if not os.path.isfile(full_path):
+            return 0
+
+        try:
+            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+            return get_token_count_for_text(content)
+        except Exception:
+            return 0
+
+    def update_project_files(self, selected_files, total_tokens, expanded_dirs=None):
+        """Updates the project configuration with a new selection, order, and expansion state."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return False
+
+        project_config.selected_files = selected_files
+        project_config.total_tokens = total_tokens
+
+        if expanded_dirs is not None:
+            project_config.expanded_dirs = set(expanded_dirs)
+
+        # Clear unknown files for the active profile once user has interacted with the manager
+        project_config.unknown_files = []
+
+        current_paths = {f['path'] for f in selected_files}
+        project_config.known_files = sorted(list(set(project_config.known_files) | current_paths))
+
+        project_config.save()
+        return True
 
     def test(self):
         """A simple test method to verify the Vue -> Python bridge is working."""

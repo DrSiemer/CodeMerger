@@ -3,14 +3,16 @@ import { onMounted, ref, nextTick } from 'vue'
 import { useAppState } from './composables/useAppState'
 import ProjectSelectorModal from './components/ProjectSelectorModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import FileManagerModal from './components/FileManagerModal.vue'
 import {
-  Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine
+  Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle
 } from 'lucide-vue-next'
 
 const { activeProject, statusMessage, init, copyCode, renameProject, getImage } = useAppState()
 
 const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
+const showFileManagerModal = ref(false)
 const settingsTab = ref('application')
 
 // Image Assets
@@ -141,6 +143,16 @@ onMounted(() => {
 
       <!-- Right-aligned Header Actions -->
       <div class="flex items-center space-x-5 shrink-0 ml-4">
+        <!-- New Files Alert -->
+        <div
+          v-if="activeProject.newFileCount > 0"
+          class="flex items-center text-cm-blue cursor-pointer hover:brightness-125 transition-all"
+          title="New files detected! Click to manage."
+          @click="showFileManagerModal = true"
+        >
+          <AlertTriangle class="w-6 h-6" />
+        </div>
+
         <!-- Folder Icon -->
         <img
           v-if="activeProject.path && folderIcon"
@@ -159,6 +171,7 @@ onMounted(() => {
         <button
           class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2 px-6 rounded shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-[38px]"
           :disabled="!activeProject.path"
+          @click="showFileManagerModal = true"
         >
           Edit Merge List
         </button>
@@ -272,6 +285,10 @@ onMounted(() => {
       v-if="showSettingsModal"
       :initial-tab="settingsTab"
       @close="showSettingsModal = false"
+    />
+    <FileManagerModal
+      v-if="showFileManagerModal"
+      @close="showFileManagerModal = false"
     />
   </div>
 </template>

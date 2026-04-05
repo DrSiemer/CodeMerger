@@ -10,18 +10,19 @@ const recents = ref([])
 const searchQuery = ref('')
 const isLoaded = ref(false)
 
+const handleEscape = (e) => {
+  if (e.key === 'Escape') emit('close')
+}
+
+// Register lifecycle hooks at the top level
 onMounted(async () => {
+  document.addEventListener('keydown', handleEscape)
   recents.value = await getRecentProjects()
   isLoaded.value = true
+})
 
-  // Add escape key listener to close modal
-  const handleEscape = (e) => {
-    if (e.key === 'Escape') emit('close')
-  }
-  document.addEventListener('keydown', handleEscape)
-  onUnmounted(() => {
-    document.removeEventListener('keydown', handleEscape)
-  })
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleEscape)
 })
 
 const filteredRecents = computed(() => {

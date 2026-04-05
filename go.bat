@@ -3,7 +3,7 @@ setlocal
 
 REM Configuration
 set VENV_DIR=cm-venv
-set START_SCRIPT=src.codemerger
+set START_SCRIPT=run_webview.py
 set SPEC_FILE=codemerger.spec
 set FLAG=%1
 
@@ -25,6 +25,8 @@ if "%VIRTUAL_ENV%"=="" (
 
 REM Main Command Router
 if /I "%FLAG%"=="" goto :DefaultAction
+if /I "%FLAG%"=="dev" goto :DevAction
+if /I "%FLAG%"=="o" goto :OldUIAction
 if /I "%FLAG%"=="cmd" goto :OpenCmd
 if /I "%FLAG%"=="f" goto :FreezeReqs
 if /I "%FLAG%"=="b" goto :BuildFull
@@ -35,10 +37,18 @@ echo Unrecognized command: %FLAG%
 goto :eof
 
 :DefaultAction
-    echo Starting CodeMerger application...
-    REM Set environment variable to disable instance detection for dev launches
-    set CM_DEV_MODE=1
-    python -m %START_SCRIPT%
+    echo Starting CodeMerger (Web UI Mode)...
+    python %START_SCRIPT%
+    goto :eof
+
+:DevAction
+    echo Starting CodeMerger in DEV mode (Connecting to localhost:5173)...
+    python %START_SCRIPT% --dev
+    goto :eof
+
+:OldUIAction
+    echo Starting original CodeMerger (Tkinter UI) for reference...
+    python run.py
     goto :eof
 
 :OpenCmd
