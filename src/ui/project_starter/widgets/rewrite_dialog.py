@@ -192,11 +192,11 @@ class RewriteUnsignedDialog(Toplevel):
             messagebox.showwarning("Input Required", "Please paste the LLM response first.", parent=self)
             return
 
-        # 1. Extract Notes
+        # Extract Notes
         notes_match = re.search(r"<NOTES>(.*?)</NOTES>", raw_content, re.DOTALL | re.IGNORECASE)
         notes = notes_match.group(1).strip() if notes_match else ""
 
-        # 2. Extract remaining content (all content minus the notes block)
+        # Extract remaining content (all content minus the notes block)
         clean_content = re.sub(r"<NOTES>.*?</NOTES>", "", raw_content, flags=re.DOTALL | re.IGNORECASE).strip()
 
         if notes:

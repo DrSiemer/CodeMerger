@@ -394,6 +394,29 @@ class ActionHandlers:
             app.show_error_dialog("File Access Error", f"Could not access file to add it to the merge list:\n{path}")
         return None
 
+    def ensure_file_is_merged(self, rel_path):
+        """Ensures a file is present in the Merge List and marks it as 'seen' globally."""
+        project_config = self.app.project_manager.get_current_project()
+        if not project_config:
+            return
+
+        # 1. Add to Merge List if not already there
+        if not any(f['path'] == rel_path for f in project_config.selected_files):
+            new_entry = self._calculate_stats_for_file(rel_path)
+            if new_entry:
+                project_config.selected_files.append(new_entry)
+                # Recalculate total tokens
+                project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+
+        # 2. Global State Cleanup: mark as known to prevent "New File" alerts
+        project_config.known_files = sorted(list(set(project_config.known_files) | {rel_path}))
+
+        # 3. Profile State Cleanup: remove from active unknown tracker
+        project_config.unknown_files = [f for f in project_config.unknown_files if f != rel_path]
+
+        project_config.save()
+        self.app.button_manager.update_button_states()
+
     def apply_changes_from_clipboard(self, force_toggle_feedback=False):
         app = self.app
         project_config = app.project_manager.get_current_project()
@@ -421,7 +444,7 @@ class ActionHandlers:
         self.app.last_ai_response = plan
         self.app.button_manager.update_button_states()
 
-        def do_execute(filtered_updates=None, filtered_creations=None, filtered_deletions=None):
+        def do_execute(filtered_updates=None, filtered_creations=None, filtered_deletions=None, is_changes_tab_active=False):
             """Writes files to disk. Returns True on success, False if cancelled or error."""
 
             # Use provided lists (from Review window) or default to the full parsed plan
@@ -432,9 +455,15 @@ class ActionHandlers:
             # If we are not in a review window and there are creations OR deletions, warn the user.
             if not dialog_to_close:
                 warning_parts = []
-                if creations:
-                    warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
-                if deletions:
+
+                # Creations: Warning is suppressed if count is below setting limit OR user is looking at Changes tab.
+                creation_threshold = self.app.app_state.config.get('new_file_alert_threshold', 5)
+                if creations and not is_changes_tab_active:
+                    if len(creations) > creation_threshold:
+                        warning_parts.append(f"CREATE {len(creations)} file(s):\n- " + "\n- ".join(creations.keys()))
+
+                # Deletions: ALWAYS warn for safety.
+                if deletions and not is_changes_tab_active:
                     warning_parts.append(f"DELETE {len(deletions)} file(s):\n- " + "\n- ".join(deletions))
 
                 if warning_parts:
@@ -452,6 +481,12 @@ class ActionHandlers:
 
             if success:
                 self.app.helpers.show_compact_toast(final_message)
+
+                # Automatic Addition of written files (creations AND updates) to the Merge List
+                processed_paths = set(updates.keys()) | set(creations.keys())
+                for rel_path in processed_paths:
+                    self.ensure_file_is_merged(rel_path)
+
                 if creations or deletions:
                     self.app.file_monitor.perform_new_file_check()
 
@@ -508,15 +543,22 @@ class ActionHandlers:
             if plan and on_apply is None:
                 project = self.app.project_manager.get_current_project()
                 if project:
-                    def do_execute_cached(u=None, c_list=None, d=None):
+                    def do_execute_cached(u=None, c_list=None, d=None, is_changes_tab_active=False):
                         # Re-use the existing do_execute logic
                         updates = u if u is not None else plan.get('updates', {})
                         creations = c_list if c_list is not None else plan.get('creations', {})
                         deletions = d if d is not None else plan.get('deletions_proposed', [])
 
+                        # Pass the tab state to ensure warnings are handled correctly for cached resumes
                         success, final_message = change_applier.execute_plan(project.base_dir, updates, creations, deletions)
                         if success:
                             self.app.helpers.show_compact_toast(final_message)
+
+                            # Auto-merge logic for cached apply
+                            all_paths = set(updates.keys()) | set(creations.keys())
+                            for rel_path in all_paths:
+                                self.ensure_file_is_merged(rel_path)
+
                             self.app.button_manager.update_button_states()
                             return True
                         else:
@@ -529,7 +571,7 @@ class ActionHandlers:
             self.app.helpers.show_compact_toast("No AI response review available yet.")
             return
 
-        from ..feedback_dialog import FeedbackDialog
+        from ..feedback.feedback_dialog import FeedbackDialog
 
         dialog_parent = self.app
         if self.app.view_manager.current_state == 'compact' and self.app.view_manager.compact_mode_window and self.app.view_manager.compact_mode_window.winfo_exists():

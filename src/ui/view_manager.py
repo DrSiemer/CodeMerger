@@ -183,8 +183,8 @@ class ViewManager:
 
         # Decision Engine: Do we use the user's manual placement or recalculate?
         # Recalculation only occurs if:
-        # 1. We have never saved a position.
-        # 2. The main window has moved to a DIFFERENT physical monitor since the last compact use.
+        # - We have never saved a position.
+        # - The main window has moved to a DIFFERENT physical monitor since the last compact use.
         current_monitor = self.main_window.current_monitor_handle
 
         monitor_changed = self.compact_last_monitor_handle != current_monitor

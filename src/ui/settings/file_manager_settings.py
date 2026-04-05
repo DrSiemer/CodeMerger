@@ -9,6 +9,7 @@ class FileManagerSettingsFrame(Frame):
         self.token_count_enabled = vars['token_count_enabled']
         self.token_limit = vars['token_limit']
         self.add_all_warning_threshold = vars['add_all_warning_threshold']
+        self.new_file_alert_threshold = vars['new_file_alert_threshold']
 
         self._create_widgets()
 
@@ -46,6 +47,18 @@ class FileManagerSettingsFrame(Frame):
         self.files_label = Label(add_all_frame, text="files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
         self.files_label.pack(side='left', padx=(5, 0))
 
+        # Apply Changes Creation Warning Threshold
+        alert_frame = Frame(container, bg=c.DARK_BG)
+        alert_frame.pack(fill='x', expand=True, pady=(5, 0))
+        self.alert_threshold_label = Label(alert_frame, text="New file alert threshold:", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.alert_threshold_label.pack(side='left', padx=(0, 10))
+
+        self.alert_threshold_entry = Entry(alert_frame, textvariable=self.new_file_alert_threshold, width=6, bg=c.TEXT_INPUT_BG, fg=c.TEXT_COLOR, insertbackground=c.TEXT_COLOR, relief='flat', font=c.FONT_NORMAL, validate='key', validatecommand=vcmd)
+        self.alert_threshold_entry.pack(side='left')
+
+        self.files_label_alert = Label(alert_frame, text="files", bg=c.DARK_BG, fg=c.TEXT_COLOR, font=c.FONT_NORMAL)
+        self.files_label_alert.pack(side='left', padx=(5, 0))
+
     def register_info(self, info_mgr):
         """Registers granular components with Info Mode."""
         info_mgr.register(self.tokens_chk, "set_fm_tokens")
@@ -55,6 +68,9 @@ class FileManagerSettingsFrame(Frame):
         info_mgr.register(self.threshold_label, "set_fm_threshold")
         info_mgr.register(self.threshold_entry, "set_fm_threshold")
         info_mgr.register(self.files_label, "set_fm_threshold")
+        info_mgr.register(self.alert_threshold_label, "set_fm_alert_threshold")
+        info_mgr.register(self.alert_threshold_entry, "set_fm_alert_threshold")
+        info_mgr.register(self.files_label_alert, "set_fm_alert_threshold")
 
     def _validate_integer(self, value_if_allowed):
         if value_if_allowed == "": return True

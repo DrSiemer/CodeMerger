@@ -105,23 +105,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'hint': "Please ask the AI to correct its output format."
         }
 
-    # Pre-processing for common LLM formatting errors
-    markdown_text_processed = re.sub(r'(' + re.escape(PREFIX) + r'File: [^`\n]+ ---\s*)\`\`\`', r'\1\n```', markdown_text)
-
-    lines = markdown_text_processed.split('\n')
-    processed_lines = []
-    for line in lines:
-        stripped_line = line.strip()
-        if stripped_line.endswith('```') and stripped_line != '```':
-            pos = line.rfind('```')
-            processed_lines.append(line[:pos])
-            processed_lines.append(line[pos:])
-        else:
-            processed_lines.append(line)
-    markdown_text_processed = '\n'.join(processed_lines)
-
-    markdown_text_processed = re.sub(r'```(' + re.escape(EOF_MARKER) + r')', r'```\n\n\1', markdown_text_processed)
-
     # Identify all blocks chronologically
     all_blocks = []
 
@@ -134,7 +117,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         else:
             pattern = re.compile(rf'<{tag}>(.*?)</{tag}>', re.DOTALL | re.IGNORECASE)
 
-        for match in pattern.finditer(markdown_text_processed):
+        for match in pattern.finditer(markdown_text):
             content = match.group(1).strip()
             content_lower = content.lower().strip('.')
 
@@ -170,13 +153,21 @@ def parse_and_plan_changes(base_dir, markdown_text):
         deletions_proposed = [m.strip().replace('\\', '/') for m in del_matches if m.strip()]
 
     # Identify file blocks
-    file_block_regex = re.escape(PREFIX) + r'File: [`\']([^\n`\']+)[\'`] ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n```\s*[\r\n]+' + re.escape(EOF_MARKER)
-    for match in re.finditer(file_block_regex, markdown_text_processed, re.DOTALL):
+    file_block_regex = re.compile(
+        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s+'   # Header
+        r'```[^\n]*\s+'                                                          # Opening Backticks
+        r'(?P<content>(?:(?!\n' + re.escape(EOF_MARKER) + r').)*?)'              # Content (Negative Lookahead)
+        r'\s+```\s+'                                                             # Closing Backticks
+        r'^' + re.escape(EOF_MARKER),                                            # Footer
+        re.DOTALL | re.MULTILINE
+    )
+
+    for match in file_block_regex.finditer(markdown_text):
         all_blocks.append({
             'type': 'file',
-            'path': match.group(1).strip().replace('\\', '/'),
+            'path': match.group('path').strip().replace('\\', '/'),
             'span': match.span(),
-            'content': match.group(2)
+            'content': match.group('content').strip() # Content is cleaned of wrapper whitespace
         })
 
     # Sort blocks by starting position to identify chronological order
@@ -188,7 +179,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
     for block in all_blocks:
         # Check for gap before this block
-        gap_text = markdown_text_processed[last_end:block['span'][0]].strip()
+        gap_text = markdown_text[last_end:block['span'][0]].strip()
         if gap_text:
             ordered_segments.append({
                 'type': 'orphan',
@@ -208,7 +199,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         last_end = block['span'][1]
 
     # Check for trailing orphan commentary
-    final_gap = markdown_text_processed[last_end:].strip()
+    final_gap = markdown_text[last_end:].strip()
     if final_gap:
         ordered_segments.append({
             'type': 'orphan',
@@ -219,12 +210,34 @@ def parse_and_plan_changes(base_dir, markdown_text):
     files_to_update = {}
     files_to_create = {}
     invalid_chars_pattern = r'[<>:"|?*]'
+    base_dir_abs = os.path.abspath(base_dir)
 
+    # Validate Proposed Deletions (Critical Security Step)
+    for rel_path in deletions_proposed:
+        if re.search(invalid_chars_pattern, rel_path):
+            return {
+                'status': 'ERROR',
+                'message': f"Error: The deletion path '{rel_path}' contains invalid characters."
+            }
+
+        try:
+            full_path = os.path.abspath(os.path.join(base_dir_abs, rel_path))
+            if os.path.commonpath([base_dir_abs, full_path]) != base_dir_abs:
+                return {
+                    'status': 'ERROR',
+                    'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."
+                }
+        except (ValueError, Exception):
+            return {
+                'status': 'ERROR',
+                'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."
+            }
+
+    # Validate and Plan File Blocks (Updates/Creations)
     file_blocks = [b for b in all_blocks if b['type'] == 'file']
     for b in file_blocks:
         rel_path = b['path']
         content = b['content']
-        full_path = os.path.normpath(os.path.join(base_dir, rel_path))
 
         if re.search(invalid_chars_pattern, rel_path):
             return {
@@ -232,7 +245,14 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'message': f"Error: The file path '{rel_path}' contains invalid characters."
             }
 
-        if not full_path.startswith(os.path.normpath(base_dir)):
+        try:
+            full_path = os.path.abspath(os.path.join(base_dir_abs, rel_path))
+            if os.path.commonpath([base_dir_abs, full_path]) != base_dir_abs:
+                return {
+                    'status': 'ERROR',
+                    'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."
+                }
+        except (ValueError, Exception):
             return {
                 'status': 'ERROR',
                 'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."

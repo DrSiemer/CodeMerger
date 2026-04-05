@@ -109,6 +109,8 @@ class FileManagerWindow(Toplevel):
         """Attaches detailed help messages to the List Editor widgets."""
         mgr = self.info_mgr
         mgr.register(self.tree, "fm_tree")
+
+        # Merge Order List default documentation
         mgr.register(self.merge_order_list, "fm_list")
 
         # Filtering
@@ -123,7 +125,6 @@ class FileManagerWindow(Toplevel):
 
         # Stats and List Tools
         mgr.register(self.merge_order_details_label, "fm_tokens")
-        mgr.register(self.merge_order_list, "fm_tokens_item")
         mgr.register(self.order_request_button, "fm_order")
         mgr.register(self.toggle_paths_button, "fm_list_tools")
         mgr.register(self.tree_action_button, "fm_tree_action")

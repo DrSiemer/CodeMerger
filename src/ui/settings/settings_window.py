@@ -71,6 +71,7 @@ class SettingsWindow(Toplevel):
             'token_limit': StringVar(value=str(self.config.get('token_limit', 0) if self.config.get('token_limit', 0) != 0 else "")),
             'enable_compact_mode_on_minimize': BooleanVar(value=self.config.get('enable_compact_mode_on_minimize', True)),
             'add_all_warning_threshold': StringVar(value=str(self.config.get('add_all_warning_threshold', c.ADD_ALL_WARNING_THRESHOLD_DEFAULT))),
+            'new_file_alert_threshold': StringVar(value=str(self.config.get('new_file_alert_threshold', c.NEW_FILE_ALERT_THRESHOLD_DEFAULT))),
             'default_parent_folder': StringVar(value=self.config.get('default_parent_folder', ''))
         }
 
@@ -175,6 +176,12 @@ class SettingsWindow(Toplevel):
             config['add_all_warning_threshold'] = int(add_all_val) if add_all_val else c.ADD_ALL_WARNING_THRESHOLD_DEFAULT
         except ValueError:
             config['add_all_warning_threshold'] = c.ADD_ALL_WARNING_THRESHOLD_DEFAULT
+
+        try:
+            alert_val = self.vars['new_file_alert_threshold'].get()
+            config['new_file_alert_threshold'] = int(alert_val) if alert_val else c.NEW_FILE_ALERT_THRESHOLD_DEFAULT
+        except ValueError:
+            config['new_file_alert_threshold'] = c.NEW_FILE_ALERT_THRESHOLD_DEFAULT
 
         save_config(config)
         save_setting('AutomaticUpdates', self.vars['check_for_updates'].get())

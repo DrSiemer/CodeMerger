@@ -30,10 +30,42 @@ class DiffViewer(tk.Frame):
         self.text_widget.tag_configure("remove", background=c.DIFF_REMOVE_BG, foreground=c.DIFF_REMOVE_FG)
         self.text_widget.tag_configure("header", foreground=c.DIFF_HEADER_FG, font=("Consolas", 10, "bold"))
 
+        # Binding to update height when window/container resizes (influences wrap points)
+        self.text_widget.bind("<Configure>", self._adjust_height_to_content)
+
         self._generate_diff(old_text, new_text)
+
+    def _adjust_height_to_content(self, event=None):
+        """Calculates and sets the widget height based on visual lines to prevent internal scrolling."""
+        if not self.winfo_exists():
+            return
+        try:
+            # We use "displaylines" to account for word wrapping.
+            # "end-1c" excludes the trailing newline Tkinter automatically appends.
+            result = self.text_widget.count("1.0", "end-1c", "displaylines")
+            if result:
+                actual_lines = result[0]
+                # We add +1 as a buffer to account for internal padding and prevent
+                # the "one line short" scrolling artifact.
+                self.text_widget.config(height=max(1, actual_lines + 1))
+        except tk.TclError:
+            pass
 
     def _generate_diff(self, old_text, new_text):
         """Calculates the diff and populates the text widget with tags."""
+        # Plain view for new files (no old content)
+        if not old_text:
+            self.text_widget.config(state='normal')
+            self.text_widget.delete("1.0", tk.END)
+            if new_text:
+                self.text_widget.insert(tk.END, new_text)
+            else:
+                self.text_widget.insert(tk.END, "(File is empty)")
+
+            self.text_widget.config(state='disabled')
+            self.after_idle(self._adjust_height_to_content)
+            return
+
         old_lines = old_text.splitlines() if old_text else []
         new_lines = new_text.splitlines() if new_text else []
 
@@ -42,7 +74,6 @@ class DiffViewer(tk.Frame):
         self.text_widget.config(state='normal')
         self.text_widget.delete("1.0", tk.END)
 
-        line_count = 0
         for line in diff:
             tag = None
             if line.startswith('+') and not line.startswith('+++'):
@@ -56,12 +87,11 @@ class DiffViewer(tk.Frame):
                 self.text_widget.insert(tk.END, line + "\n", tag)
             else:
                 self.text_widget.insert(tk.END, line + "\n")
-            line_count += 1
 
         if not diff:
             self.text_widget.insert(tk.END, "(No changes detected in file content)")
-            line_count = 1
 
-        # Adjust height to fit all lines perfectly
-        self.text_widget.config(height=line_count)
         self.text_widget.config(state='disabled')
+
+        # Adjust height to fit all lines perfectly after insertion
+        self.after_idle(self._adjust_height_to_content)
