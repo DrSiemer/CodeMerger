@@ -78,6 +78,12 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/core/change_applier.py`: Expanded the placeholder-bypass in `get_section` to catch verbose LLM hallucinations (e.g., "No conceptual questions were asked") to ensure segments remain cleanly empty when no valid content is generated.
 - `src/core/change_applier.py`: The parser for tagged sections (specifically ANSWERS) is permissive with closing tags, accepting either the full closing tag or a truncated version to handle frequent LLM output cutoff issues.
 
+### PyWebView & Web UI
+
+- **Smart Growth Mechanism**: To prevent "stuck" states where complex modals (like Settings or File Manager) are clipped due to a small main window size, components use a `resizeWindow` hook on mount. This calls the backend `ensure_window_size` API, which grows the window to `max(current, requested)` dimensions. It never shrinks the window, respecting user-defined larger layouts.
+- **Base64 Asset Pipeline**: Local images are served to the frontend via a `get_image_base64` API method. This bypasses security restrictions and path inconsistencies associated with serving local filesystem files directly in a WebView environment.
+- **API Bridge Protection**: Properties in the Python `Api` class prefixed with an underscore (e.g., `self._window`) are ignored by PyWebView during JS API generation. This is used to store internal references without triggering premature DOM evaluation or crashes during the startup handshake.
+
 ### User Interface (`src/ui`)
 
 - **Tkinter/Tcl Sequence Formatting**: Passing a Python list or tuple to a Tkinter widget (like `Text` or `Label`) causes the string to be rendered with leading/trailing curly braces `{}`. This happens because Tcl interprets Python sequences as Tcl lists. Always use defensive coercion: `text = "\n".join(val) if isinstance(val, (list, tuple)) else val` before inserting into widgets.

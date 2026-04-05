@@ -38,12 +38,13 @@ def main():
             sys.exit(1)
 
     # Create the main PyWebView window
+    # Resized to 1200x780 to comfortably accommodate Modals and complex layouts
     window = webview.create_window(
         "CodeMerger",
         url=url,
         js_api=api,
-        width=1100,
-        height=800,
+        width=1200,
+        height=780,
         min_size=(800, 600),
         background_color='#2E2E2E' # Matches DARK_BG
     )

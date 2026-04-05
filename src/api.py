@@ -2,11 +2,13 @@ import webview
 import os
 import logging
 import pyperclip
+import base64
 from src.core.secret_scanner import scan_for_secrets
 from src.core.merger import generate_output_string
 from src.core.project_config import ProjectConfig
 from src.core.utils import save_config, load_all_filetypes, save_filetypes
 from src.core.registry import save_setting
+from src.core.paths import BUNDLE_DIR
 
 log = logging.getLogger("CodeMerger")
 
@@ -25,6 +27,49 @@ class Api:
     def set_window(self, window):
         """Sets the active PyWebView window reference."""
         self._window = window
+
+    def ensure_window_size(self, width, height):
+        """
+        Requests the main window to expand to the specified dimensions if it is
+        currently smaller. This prevents large modals from being clipped.
+        """
+        if not self._window:
+            return
+
+        # We do not resize if the window is maximized as it can cause flickering
+        # or inconsistent behavior across different OS window managers.
+        # Note: PyWebView does not expose a simple 'is_maximized' property,
+        # so we rely on the resize call which the OS usually handles safely.
+
+        current_w = self._window.width
+        current_h = self._window.height
+
+        target_w = max(current_w, width)
+        target_h = max(current_h, height)
+
+        if target_w != current_w or target_h != current_h:
+            log.info(f"Expanding window to {target_w}x{target_h} to accommodate content.")
+            self._window.resize(target_w, target_h)
+
+    def get_image_base64(self, filename):
+        """
+        Reads an image from the assets directory and returns a Base64 data URL.
+        Allows the frontend to use local project assets.
+        """
+        path = os.path.join(BUNDLE_DIR, 'assets', filename)
+        if not os.path.exists(path):
+            return ""
+
+        try:
+            with open(path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+                # Determine mime type based on extension
+                ext = os.path.splitext(filename)[1].lower().strip('.')
+                mime = f"image/{ext}" if ext != 'ico' else "image/x-icon"
+                return f"data:{mime};base64,{encoded_string}"
+        except Exception as e:
+            log.error(f"Failed to encode image {filename}: {e}")
+            return ""
 
     def get_app_config(self):
         """Returns the global application configuration, integrating registry settings."""
@@ -104,6 +149,16 @@ class Api:
                 project_config, status_msg = self.project_manager.load_project(path)
                 return self._format_project_response(project_config, status_msg)
         return None
+
+    def rename_project(self, new_name):
+        """Updates the name of the currently active project."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config or not new_name.strip():
+            return None
+
+        project_config.project_name = new_name.strip()
+        project_config.save()
+        return self._format_project_response(project_config, f"Project renamed to '{new_name.strip()}'")
 
     def select_project(self):
         """

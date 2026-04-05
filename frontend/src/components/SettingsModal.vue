@@ -14,7 +14,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
-const { config, saveConfig, getFiletypes, saveFiletypes } = useAppState()
+const { config, saveConfig, getFiletypes, saveFiletypes, resizeWindow } = useAppState()
 
 const localConfig = ref({})
 const activeTab = ref(props.initialTab)
@@ -26,6 +26,10 @@ const newDesc = ref('')
 const searchQuery = ref('')
 
 onMounted(async () => {
+  // Smart Growth: Ensure the main window is large enough for the settings layout
+  // 1000x700 is the recommended comfortable footprint for settings.
+  await resizeWindow(1000, 700)
+
   // Deep clone to prevent mutating global state before saving
   localConfig.value = JSON.parse(JSON.stringify(config.value))
   localFiletypes.value = await getFiletypes()

@@ -42,6 +42,19 @@ export function useAppState() {
     }
   }
 
+  const getImage = async (filename) => {
+    if (window.pywebview) {
+      return await window.pywebview.api.get_image_base64(filename)
+    }
+    return ""
+  }
+
+  const resizeWindow = async (width, height) => {
+    if (window.pywebview) {
+      await window.pywebview.api.ensure_window_size(width, height)
+    }
+  }
+
   const saveConfig = async (newConfig) => {
     if (window.pywebview) {
       const success = await window.pywebview.api.save_app_config(newConfig)
@@ -92,11 +105,13 @@ export function useAppState() {
     }
   }
 
-  const getRecentProjects = async () => {
+  const renameProject = async (newName) => {
     if (window.pywebview) {
-      return await window.pywebview.api.get_recent_projects()
+      const proj = await window.pywebview.api.rename_project(newName)
+      if (proj) {
+        applyProjectData(proj)
+      }
     }
-    return []
   }
 
   const removeRecentProject = async (path) => {
@@ -118,12 +133,15 @@ export function useAppState() {
     activeProject,
     statusMessage,
     init,
+    getImage,
+    resizeWindow,
     saveConfig,
     getFiletypes,
     saveFiletypes,
     selectProject,
     loadProject,
-    getRecentProjects,
+    renameProject,
+    getRecentProjects: async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : [],
     removeRecentProject,
     copyCode
   }
