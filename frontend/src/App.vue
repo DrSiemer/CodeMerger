@@ -10,7 +10,7 @@ import {
   Settings, Copy, ClipboardPaste, BookOpen, Info, PenLine, AlertTriangle, Eye
 } from 'lucide-vue-next'
 
-const { activeProject, statusMessage, lastAiResponse, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles, selectColor, processPaste } = useAppState()
+const { activeProject, statusMessage, statusVisible, lastAiResponse, init, copyCode, renameProject, getImage, openProjectFolder, addAllNewFiles, clearUnknownFiles, selectColor, processPaste, copyCleanupPrompt } = useAppState()
 
 const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
@@ -19,6 +19,8 @@ const showReviewModal = ref(false)
 const showInstructionsModal = ref(false)
 const settingsTab = ref('application')
 const reviewMode = ref('new') // 'new' or 'resume'
+
+const cleanupPulse = ref(false)
 
 // Image Assets
 const starterIcon = ref('')
@@ -98,6 +100,14 @@ const handlePasteChanges = async () => {
 const openExistingReview = () => {
   reviewMode.value = 'resume'
   showReviewModal.value = true
+}
+
+const handleCleanup = async () => {
+  cleanupPulse.value = true
+  await copyCleanupPrompt()
+  setTimeout(() => {
+    cleanupPulse.value = false
+  }, 450)
 }
 
 const handleNewFilesClick = async (event) => {
@@ -281,7 +291,15 @@ onMounted(() => {
         <div v-if="activeProject.path" class="w-full max-w-[620px] border border-gray-600 rounded bg-cm-dark-bg p-6 flex flex-col shadow-sm">
           <div class="flex justify-between items-center mb-5">
             <h2 class="text-[17px] font-medium text-white">Actions</h2>
-            <button class="text-gray-500 hover:text-gray-300 text-sm font-mono font-bold transition-colors" title="Copy comment cleanup prompt">//</button>
+            <button
+              @click="handleCleanup"
+              class="text-gray-500 hover:text-gray-300 text-sm font-mono font-bold transition-colors relative"
+              :class="{ 'click-pulse': cleanupPulse }"
+              :style="cleanupPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
+              title="Copy comment cleanup prompt"
+            >
+              //
+            </button>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -341,7 +359,12 @@ onMounted(() => {
 
     <!-- Status Bar -->
     <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px]">
-      <div class="tracking-wide truncate pr-4">{{ statusMessage }}</div>
+      <div
+        class="tracking-wide truncate pr-4"
+        :class="statusVisible ? 'opacity-100' : 'opacity-0 transition-opacity duration-1000'"
+      >
+        {{ statusMessage }}
+      </div>
       <button class="text-gray-400 hover:text-white transition-colors shrink-0" title="Toggle Info Mode">
         <Info class="w-5 h-5" />
       </button>

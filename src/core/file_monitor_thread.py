@@ -66,27 +66,49 @@ class FileMonitorThread(threading.Thread):
                 gitignore_patterns=gitignore_patterns
             )
 
-            # Detect new files specifically for the active profile
             known_set = set(project_config.known_files)
             current_set = set(all_files)
 
-            brand_new = current_set - known_set
+            config_changed = False
 
+            # Detect and Prune physically deleted files
+            missing_from_scan = known_set - current_set
+            truly_deleted = set()
+            if missing_from_scan:
+                for rel_path in missing_from_scan:
+                    if not os.path.exists(os.path.join(base_dir, rel_path)):
+                        truly_deleted.add(rel_path)
+
+            if truly_deleted:
+                log.info(f"Detected {len(truly_deleted)} physically deleted files. Pruning configuration.")
+                project_config.known_files = sorted(list(known_set - truly_deleted))
+                for p_data in project_config.profiles.values():
+                    orig_len = len(p_data.get('selected_files', []))
+                    p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] not in truly_deleted]
+                    p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f not in truly_deleted]
+                    if len(p_data['selected_files']) != orig_len:
+                        p_data['total_tokens'] = sum(f.get('tokens', 0) for f in p_data['selected_files'])
+                config_changed = True
+                # Force refresh in UI to reflect removal
+                self.window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+
+            # Detect brand new files
+            brand_new = current_set - set(project_config.known_files)
             if brand_new:
-                # Update known files to prevent repeat alerts
-                project_config.known_files = sorted(list(known_set | brand_new))
+                log.info(f"Detected {len(brand_new)} brand new files.")
+                project_config.known_files = sorted(list(set(project_config.known_files) | brand_new))
+                for p_data in project_config.profiles.values():
+                    p_unknown = set(p_data.get('unknown_files', []))
+                    p_unknown.update(brand_new)
+                    p_data['unknown_files'] = sorted(list(p_unknown))
+                config_changed = True
 
-                # Add to profile unknowns
-                p_unknown = set(project_config.unknown_files)
-                p_unknown.update(brand_new)
-                project_config.unknown_files = sorted(list(p_unknown))
-
-                project_config.save()
-
-                # Notify Vue frontend
+                # Notify Vue frontend of new files for the alert counter
                 count = len(project_config.unknown_files)
-                log.info(f"Detected {len(brand_new)} new files. Total unknown: {count}")
                 self.window.evaluate_js(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')
+
+            if config_changed:
+                project_config.save()
 
         except Exception as e:
             log.error(f"Error during background file scan: {e}")

@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 
 // Define state variables OUTSIDE the composable function to create a global singleton.
 const config = ref({})
@@ -15,12 +15,38 @@ const activeProject = reactive({
   outroText: '',
   newFileCount: 0
 })
-const statusMessage = ref('Initializing...')
+const statusMessage = ref('')
+const statusVisible = ref(false)
 const lastAiResponse = ref(null)
 
 // Persistence for AI Review Window
 const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted'
 const planOriginalContents = ref({}) // path -> string content (for undo)
+
+let statusTimeout = null
+let statusFadeTimeout = null
+
+// Watcher to handle status message auto-clear and fading
+watch(statusMessage, (newVal) => {
+  // Clear any existing timers when a new message arrives
+  if (statusTimeout) clearTimeout(statusTimeout)
+  if (statusFadeTimeout) clearTimeout(statusFadeTimeout)
+
+  if (newVal) {
+    // Show immediately
+    statusVisible.value = true
+
+    // Step 1: Start fading after 5 seconds (to finish at 6s)
+    statusFadeTimeout = setTimeout(() => {
+      statusVisible.value = false
+    }, 5000)
+
+    // Step 2: Fully clear text after transition is complete
+    statusTimeout = setTimeout(() => {
+      statusMessage.value = ''
+    }, 6100)
+  }
+})
 
 export function useAppState() {
   const applyProjectData = (projData) => {
@@ -196,6 +222,13 @@ export function useAppState() {
     return false
   }
 
+  const copyCleanupPrompt = async () => {
+    if (window.pywebview) {
+      const msg = await window.pywebview.api.copy_comment_cleanup_prompt()
+      statusMessage.value = msg
+    }
+  }
+
   // --- AI Feedback & Change Applier ---
 
   const processPaste = async () => {
@@ -318,6 +351,7 @@ export function useAppState() {
     config,
     activeProject,
     statusMessage,
+    statusVisible,
     lastAiResponse,
     planFileStates,
     planOriginalContents,
@@ -345,6 +379,7 @@ export function useAppState() {
     applyFileChange,
     deleteFile,
     copyAdmonishment,
-    saveInstructions
+    saveInstructions,
+    copyCleanupPrompt
   }
 }

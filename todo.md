@@ -81,7 +81,24 @@
 
 ---
 
-## Phase 5: Project Starter Wizard
+## Phase 5: Compact Mode & Window Management
+*Goal: Replicate the always-on-top, draggable mini-window integration.*
+
+- [ ] **Window State Handling:** In Python, subscribe to the `events.minimized` event on the main PyWebView window.
+- [ ] **Compact Window Creation:** When minimized, Python should hide the main window and create a *second* PyWebView window (`frameless=True`, `on_top=True`, `width=250`, `height=100`) pointing to a specific Vue route (e.g., `/#/compact`).
+- [ ] **Compact UI:** Build the minimal Vue view containing the title, Adaptive Copy button, and Paste button.
+- [ ] **OS Dragging:** Add CSS `--webkit-app-region: drag` (or PyWebView equivalent) to the compact window header to allow native OS dragging.
+- [ ] **Restoration:** Double-clicking the header or clicking close should trigger an API call that destroys the compact window and restores the main window.
+
+> **🛑 Human Verification Checkpoint 6:**
+> - Does minimizing the main app instantly spawn the compact widget?
+> - Is the widget always on top of other applications?
+> - Can you drag the widget around the screen?
+> - Does restoring the main window work seamlessly?
+
+---
+
+## Phase 6: Project Starter Wizard
 *Goal: Rebuild the multi-step form and the Segmented Markdown Reviewer.*
 
 - [ ] **Stepper UI:** Build a tabbed/stepper component for navigation (Details -> Base Files -> Concept -> Stack -> TODO -> Generate).
@@ -98,23 +115,6 @@
 > - Do the LLM prompt copy buttons work?
 > - Can you lock/unlock segments in the Reviewer?
 > - Does the final "Create Project" button successfully scaffold the boilerplate folder on disk?
-
----
-
-## Phase 6: Compact Mode & Window Management
-*Goal: Replicate the always-on-top, draggable mini-window integration.*
-
-- [ ] **Window State Handling:** In Python, subscribe to the `events.minimized` event on the main PyWebView window.
-- [ ] **Compact Window Creation:** When minimized, Python should hide the main window and create a *second* PyWebView window (`frameless=True`, `on_top=True`, `width=250`, `height=100`) pointing to a specific Vue route (e.g., `/#/compact`).
-- [ ] **Compact UI:** Build the minimal Vue view containing the title, Adaptive Copy button, and Paste button.
-- [ ] **OS Dragging:** Add CSS `--webkit-app-region: drag` (or PyWebView equivalent) to the compact window header to allow native OS dragging.
-- [ ] **Restoration:** Double-clicking the header or clicking close should trigger an API call that destroys the compact window and restores the main window.
-
-> **🛑 Human Verification Checkpoint 6:**
-> - Does minimizing the main app instantly spawn the compact widget?
-> - Is the widget always on top of other applications?
-> - Can you drag the widget around the screen?
-> - Does restoring the main window work seamlessly?
 
 ---
 
