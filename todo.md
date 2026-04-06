@@ -23,7 +23,7 @@
 *Goal: Rebuild the main dashboard structure and connect it to the `App_State` and `Project_Config` logic.*
 
 - [x] **State Management:** Set up a Vue composable (e.g., `useAppState.js`) to fetch the initial config from Python on mount and sync changes back.
-- [x] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
+-[x] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
 - [x] **Project Loading:** Implement the "Select Project" flow. Vue calls `api.select_project()` -> Python utilizes `ProjectManager` -> returns `ProjectConfig` dict -> Vue updates UI.
 - [x] **Modals:** Implement basic Vue modals for:
     - Settings (Application, File Manager, Prompts, Editor, Starter).
@@ -65,13 +65,13 @@
 *Goal: Rebuild the Markdown rendering and interactive diff comparison.*
 
 - [x] **Dependencies:** In `frontend/`, run `npm install` to ensure `markdown-it` and `diff` are available. (Note: Utilizing Vite 8 / Rolldown ecosystem).
-- [x] **Markdown Rendering:** Install `markdown-it` in Vue. Create a `<MarkdownRenderer>` component to display AI commentary safely.
+-[x] **Markdown Rendering:** Install `markdown-it` in Vue. Create a `<MarkdownRenderer>` component to display AI commentary safely.
 - [x] **Paste Logic:** Connect the "Paste Changes" button. Vue sends clipboard text to Python -> Python parses it -> returns the structured JSON plan.
 - [x] **Review Modal (Tabs):** Create a tabbed modal (Intro, Changes, Answers, Verification).
 - [x] **Diff Viewer:**
     - Expose original and new file content to Vue.
     - Use a library like `diff2html` or a simple custom Vue component that compares the two strings and renders green/red highlighted lines.
-- [x] **Interactive File List:** Rebuild the file list where users can click "Accept", "Discard", or "Undo" on individual files, triggering the respective Python file-system actions.
+-[x] **Interactive File List:** Rebuild the file list where users can click "Accept", "Discard", or "Undo" on individual files, triggering the respective Python file-system actions.
 
 > **🛑 Human Verification Checkpoint 4:**
 > - When pasting an AI response, does the Review Modal appear?
@@ -85,7 +85,7 @@
 *Goal: Replicate the always-on-top, draggable mini-window integration.*
 
 - [x] **Window State Handling:** In Python, subscribe to the `events.minimized` event on the main PyWebView window.
-- [x] **Compact Window Creation:** When minimized, Python should hide the main window and create a *second* PyWebView window (`frameless=True`, `on_top=True`, `width=250`, `height=100`) pointing to a specific Vue route (e.g., `/#/compact`).
+- [x] **Compact Window Creation:** When minimized, Python should hide the main window and create a *second* PyWebView window (`frameless=True`, `on_top=True`, `width=100`, `height=120`) pointing to a specific Vue route (e.g., `/#/compact`).
 - [x] **Compact UI:** Build the minimal Vue view containing the title, Adaptive Copy button, and Paste button.
 - [x] **OS Dragging:** Add CSS `--webkit-app-region: drag` (or PyWebView equivalent) to the compact window header to allow native OS dragging.
 - [x] **Restoration:** Double-clicking the header or clicking close should trigger an API call that destroys the compact window and restores the main window.
@@ -103,7 +103,7 @@
 
 - [ ] **Stepper UI:** Build a tabbed/stepper component for navigation (Details -> Base Files -> Concept -> Stack -> TODO -> Generate).
 - [ ] **State Syncing:** Ensure Vue maintains the draft state (Goal, Experience, LLM responses) and syncs with Python's `session_manager.py` on step changes.
-- [ ] **Segmented Reviewer:**
+-[ ] **Segmented Reviewer:**
     - Build a layout with a Sidebar (Segments) and Main Area (Editor/Renderer).
     - Implement the Lock/Unlock (Sign-off) toggles.
     - Implement the "Edit/Render" toggle switching between a `<textarea>` and the `<MarkdownRenderer>`.

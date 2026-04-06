@@ -63,7 +63,7 @@ class StarterUIBuilder:
     def refresh_tabs(self):
         if not self.dialog.tabs_frame: return
         for t in self.dialog.tabs: t.destroy()
-        self.dialog.tabs =[]
+        self.dialog.tabs = []
         active_steps = self.dialog.navigation.get_active_steps()
         for i, step_id in enumerate(active_steps):
             name = self.dialog.steps_map[step_id]

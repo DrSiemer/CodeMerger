@@ -32,7 +32,7 @@ def get_concept_prompt(project_data, questions_map):
     friendly_map = {k: v["label"] for k, v in questions_map.items()}
     segment_instructions = SegmentManager.build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
-    parts =[
+    parts = [
         p.STARTER_CONCEPT_PROMPT_INTRO,
         "\n### User Goal\n```\n" + user_goal.strip() + "\n```",
         get_base_project_content(project_data),
@@ -46,7 +46,7 @@ def get_stack_prompt(project_data):
     """Constructs the prompt for Step 4: Stack."""
     concept = project_data.get("concept_md", "")
     experience = project_data.get("stack_experience", "")
-    parts =[
+    parts = [
         p.STARTER_STACK_PROMPT_INTRO,
         "\n### Developer Experience\n```\n" + (experience if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
         "\n### Project Concept\n```markdown\n" + concept + "\n```",
@@ -73,7 +73,7 @@ def get_todo_prompt(project_data, questions_map):
     valid_headers = [v for k, v in c.TODO_PHASES.items()]
     headers_str = ", ".join([f'"{h}"' for h in valid_headers])
 
-    parts =[
+    parts = [
         p.STARTER_TODO_PROMPT_INTRO,
         "\n### Tech Stack\n" + stack,
         "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",

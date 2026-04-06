@@ -19,6 +19,10 @@ const statusMessage = ref('')
 const statusVisible = ref(false)
 const lastAiResponse = ref(null)
 
+// Assets
+const logoMask = ref('')
+const logoMaskSmall = ref('')
+
 // AI Review State
 const showReviewModal = ref(false)
 const reviewMode = ref('new') // 'new' or 'resume'
@@ -85,6 +89,11 @@ export function useAppState() {
   const init = async () => {
     if (window.pywebview) {
       config.value = await window.pywebview.api.get_app_config()
+
+      // Load static assets into global store immediately
+      logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
+      logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
+
       const proj = await window.pywebview.api.get_current_project()
       applyProjectData(proj)
 
@@ -381,6 +390,8 @@ export function useAppState() {
     revertToCompactOnClose,
     planFileStates,
     planOriginalContents,
+    logoMask,
+    logoMaskSmall,
     init,
     getImage,
     resizeWindow,

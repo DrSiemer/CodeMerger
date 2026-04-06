@@ -86,7 +86,7 @@ class StarterProjectCreator:
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []
-        merge_order_exclusion_list =['.gitignore', 'project-starter.json', '2do.txt']
+        merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt']
 
         for f in files_created:
              norm = f.replace('\\', '/')

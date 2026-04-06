@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref, nextTick } from 'vue'
+import { onMounted, onUnmounted, ref, nextTick, computed } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import ProjectSelectorModal from '../components/ProjectSelectorModal.vue'
 import SettingsModal from '../components/SettingsModal.vue'
@@ -20,6 +20,7 @@ const {
   revertToCompactOnClose,
   planFileStates,
   planOriginalContents,
+  logoMask,
   copyCode,
   renameProject,
   getImage,
@@ -52,8 +53,6 @@ const isStarterHovered = ref(false)
 const folderIcon = ref('')
 const folderActiveIcon = ref('')
 const isFolderHovered = ref(false)
-
-const logoMask = ref('')
 
 // Interaction state
 let clickTimer = null
@@ -144,7 +143,7 @@ const handleCopy = async (useWrapper) => {
   if (useWrapper) {
     isCopyingInstructions.value = true
   } else {
-    isCopyingOnly.value = true
+    isCopyingOnly = true
   }
 
   try {
@@ -164,8 +163,24 @@ const loadAssets = async () => {
   starterActiveIcon.value = await getImage('project_starter_active.png')
   folderIcon.value = await getImage('folder.png')
   folderActiveIcon.value = await getImage('folder_active.png')
-  logoMask.value = await getImage('logo_mask.png')
 }
+
+// Robust Computed Style for the Project Swatch
+const swatchStyle = computed(() => {
+  if (!activeProject.path || !logoMask.value) return {}
+
+  return {
+    backgroundColor: activeProject.color,
+    '-webkit-mask-image': `url(${logoMask.value})`,
+    '-webkit-mask-size': 'contain',
+    '-webkit-mask-repeat': 'no-repeat',
+    '-webkit-mask-position': 'center',
+    'mask-image': `url(${logoMask.value})`,
+    'mask-size': 'contain',
+    'mask-repeat': 'no-repeat',
+    'mask-position': 'center'
+  }
+})
 
 const closeReviewModal = () => {
   showReviewModal.value = false
@@ -216,15 +231,7 @@ onUnmounted(() => {
         <div
           v-if="activeProject.path && logoMask"
           class="w-12 h-12 cursor-pointer shrink-0"
-          :style="{
-            backgroundColor: activeProject.color,
-            maskImage: `url(${logoMask})`,
-            webkitMaskImage: `url(${logoMask})`,
-            maskSize: 'contain',
-            webkitMaskSize: 'contain',
-            maskRepeat: 'no-repeat',
-            webkitMaskRepeat: 'no-repeat'
-          }"
+          :style="swatchStyle"
           @click="selectColor"
           title="Change project color"
         ></div>
@@ -247,7 +254,7 @@ onUnmounted(() => {
               @keyup.enter="saveName"
               @keyup.esc="cancelEditing"
               @blur="saveName"
-              class="bg-cm-input-bg text-white border border-cm-blue rounded px-2 py-1 text-2xl font-bold w-full focus:outline-none"
+              class="bg-cm-input-bg text-white border border-cm-blue rounded px-2 py-1 text-4xl font-thin tracking-[0.01em] w-full focus:outline-none"
             >
           </div>
           <div
@@ -256,7 +263,7 @@ onUnmounted(() => {
             title="Click to select project, double-click to edit title"
             @click="handleTitleInteraction"
           >
-            <h1 class="text-2xl font-bold tracking-tight truncate" :class="{'text-gray-500': !activeProject.path}">
+            <h1 class="text-4xl font-thin tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
               {{ activeProject.name || '(no active project)' }}
             </h1>
             <button

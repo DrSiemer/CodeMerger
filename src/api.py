@@ -27,6 +27,7 @@ class Api:
         # Prefixing with an underscore prevents PyWebView from inspecting this attribute
         # during JS API generation, which avoids a premature DOM evaluation crash.
         self._window_manager = None
+        self._color_picker_active = False
         self.app_state = app_state
         self.project_manager = project_manager
 
@@ -184,31 +185,39 @@ class Api:
 
     def select_color(self):
         """Opens a native color picker and updates the project color."""
+        if self._color_picker_active:
+            return None
+
         from tkinter import colorchooser, Tk
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return None
 
-        # Create a temporary hidden Tk root to host the dialog
-        root = Tk()
-        root.withdraw()
-        root.attributes("-topmost", True)
+        self._color_picker_active = True
+        try:
+            # Create a temporary hidden Tk root to host the dialog
+            root = Tk()
+            root.withdraw()
+            root.attributes("-topmost", True)
 
-        result = colorchooser.askcolor(
-            title="Choose project color",
-            initialcolor=project_config.project_color,
-            parent=root
-        )
+            result = colorchooser.askcolor(
+                title="Choose project color",
+                initialcolor=project_config.project_color,
+                parent=root
+            )
 
-        root.destroy()
+            root.destroy()
 
-        if result and result[1]:
-            new_hex = result[1]
-            project_config.project_color = new_hex
-            from src.core.project_config import _calculate_font_color
-            project_config.project_font_color = _calculate_font_color(new_hex)
-            project_config.save()
-            return self._format_project_response(project_config, "Project color updated.")
+            if result and result[1]:
+                new_hex = result[1]
+                project_config.project_color = new_hex
+                from src.core.project_config import _calculate_font_color
+                project_config.project_font_color = _calculate_font_color(new_hex)
+                project_config.save()
+                return self._format_project_response(project_config, "Project color updated.")
+        finally:
+            self._color_picker_active = False
+
         return None
 
     def copy_code(self, use_wrapper):
@@ -249,7 +258,7 @@ class Api:
         """Returns the project file tree data structure, enhanced with metadata."""
         project_config = self.project_manager.get_current_project()
         if not project_config:
-            return []
+            return[]
 
         base_dir = project_config.base_dir
         from src.core.utils import load_active_file_extensions
@@ -567,6 +576,8 @@ class Api:
         """Explicitly moves the Compact window to target coordinates."""
         if self._window_manager and self._window_manager.compact_window:
             self._window_manager.compact_window.move(int(x), int(y))
+            self._window_manager.compact_mode_last_x = int(x)
+            self._window_manager.compact_mode_last_y = int(y)
 
     def close_app(self):
         """Immediately terminates the application."""

@@ -41,7 +41,7 @@ class ProjectStarterDialog(tk.Toplevel):
 
         self.current_view = None
         self.tabs_frame = None
-        self.tabs =[]
+        self.tabs = []
 
         self.steps_map = {
             1: "Details",

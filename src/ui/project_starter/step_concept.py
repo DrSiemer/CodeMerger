@@ -192,7 +192,7 @@ class ConceptView(tk.Frame):
         self.editor_is_active = True
         self.generation_mode_active = False
 
-        qs =["Is this concept clearly explained?", "Did we miss anything?"]
+        qs = ["Is this concept clearly explained?", "Did we miss anything?"]
         self.reviewer = FullTextReviewer(self, "Review Full Concept", content, qs, self._on_merged_change, self._open_rewrite, self._get_prompt_context, self.starter_controller)
         self.reviewer.pack(fill="both", expand=True)
 
