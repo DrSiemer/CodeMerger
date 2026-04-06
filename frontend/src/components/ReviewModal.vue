@@ -27,7 +27,9 @@ const {
   deleteFile,
   copyAdmonishment,
   resizeWindow,
-  processPaste
+  processPaste,
+  editorFontSize,
+  handleZoom
 } = useAppState()
 
 // State management
@@ -245,12 +247,12 @@ const getPendingCount = computed(() => {
       </div>
 
       <!-- Scrollable Tab Content -->
-      <div ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg">
+      <div ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg" @wheel.ctrl.prevent="handleZoom">
         <div v-for="tab in tabs" :key="tab.id" v-show="activeTab === tab.id" class="p-8">
 
           <!-- Standard Content Tabs -->
           <template v-if="tab.id !== 'changes'">
-            <MarkdownRenderer :content="tab.content" />
+            <MarkdownRenderer :content="tab.content" :fontSize="editorFontSize" />
           </template>
 
           <!-- Interactive Changes Tab -->
@@ -274,7 +276,7 @@ const getPendingCount = computed(() => {
                   </div>
                 </button>
                 <div v-if="showCommentary" class="p-4 border-t border-gray-700 bg-cm-dark-bg">
-                  <MarkdownRenderer :content="tab.content" />
+                  <MarkdownRenderer :content="tab.content" :fontSize="editorFontSize" />
                 </div>
               </div>
 
@@ -310,7 +312,7 @@ const getPendingCount = computed(() => {
                       </div>
                     </div>
                     <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
-                      <DiffViewer :old-text="planOriginalContents[path]" :new-text="content" />
+                      <DiffViewer :old-text="planOriginalContents[path]" :new-text="content" :fontSize="editorFontSize" />
                     </div>
                   </div>
                 </div>
@@ -339,7 +341,7 @@ const getPendingCount = computed(() => {
                       </div>
                     </div>
                     <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
-                      <DiffViewer :new-text="content" />
+                      <DiffViewer :new-text="content" :fontSize="editorFontSize" />
                     </div>
                   </div>
                 </div>
@@ -368,7 +370,7 @@ const getPendingCount = computed(() => {
                   </div>
                   <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
                     <!-- For deletions, DiffViewer shows current content as 'removed' -->
-                    <DiffViewer :old-text="planOriginalContents[path]" new-text="" />
+                    <DiffViewer :old-text="planOriginalContents[path]" new-text="" :fontSize="editorFontSize" />
                   </div>
                 </div>
               </div>

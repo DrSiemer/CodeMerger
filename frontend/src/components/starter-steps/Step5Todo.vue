@@ -29,7 +29,9 @@ const {
   generateTodoPrompt,
   parseStarterSegments,
   mapParsedSegmentsToKeys,
-  assembleStarterDocument
+  assembleStarterDocument,
+  editorFontSize,
+  handleZoom
 } = useAppState()
 
 const activeSegmentKey = ref(null)
@@ -117,15 +119,15 @@ const mergeTodo = async () => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col">
+  <div class="h-full flex flex-col" @wheel.ctrl.prevent="handleZoom">
     <template v-if="pData.todo_md">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-bold text-white">Review TODO Plan</h3>
         <button @click="reviewerEditMode = !reviewerEditMode" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
       </div>
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden text-gray-100">
-        <textarea v-if="reviewerEditMode" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none"></textarea>
-        <div v-else class="w-full h-full p-6 overflow-y-auto custom-scrollbar"><MarkdownRenderer :content="pData.todo_md" /></div>
+        <textarea v-if="reviewerEditMode" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+        <div v-else class="w-full h-full p-6 overflow-y-auto custom-scrollbar"><MarkdownRenderer :content="pData.todo_md" :fontSize="editorFontSize" /></div>
       </div>
     </template>
 
@@ -142,8 +144,8 @@ const mergeTodo = async () => {
                 <button @click="reviewerEditMode = !reviewerEditMode" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
             </div>
             <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
-                <textarea v-if="reviewerEditMode" v-model="pData.todo_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans text-sm leading-relaxed"></textarea>
-                <div v-else class="w-full h-full overflow-y-auto p-6 custom-scrollbar"><MarkdownRenderer :content="pData.todo_segments[activeSegmentKey]" /></div>
+                <textarea v-if="reviewerEditMode" v-model="pData.todo_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+                <div v-else class="w-full h-full overflow-y-auto p-6 custom-scrollbar"><MarkdownRenderer :content="pData.todo_segments[activeSegmentKey]" :fontSize="editorFontSize" /></div>
             </div>
             <div class="shrink-0 pt-4 flex justify-between">
                 <button @click="toggleSignoff(activeSegmentKey, pData.todo_signoffs)" class="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors">
@@ -168,7 +170,7 @@ const mergeTodo = async () => {
 
         <div class="bg-gray-800 p-4 rounded border border-gray-700">
           <div class="text-gray-300 mb-2"><span class="font-bold text-white">2.</span> Paste LLM Response (with tags)</div>
-          <textarea v-model="pData.todo_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" placeholder="Paste response here..."></textarea>
+          <textarea v-model="pData.todo_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste response here..."></textarea>
           <div class="flex justify-end mt-3">
             <button @click="processTodo" :disabled="!pData.todo_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-6 py-2 rounded shadow transition-colors disabled:opacity-50 font-bold">Process & Review</button>
           </div>

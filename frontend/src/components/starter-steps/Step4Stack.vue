@@ -8,7 +8,7 @@ const props = defineProps({
   }
 })
 
-const { generateStackPrompt } = useAppState()
+const { generateStackPrompt, editorFontSize, handleZoom } = useAppState()
 
 const copyToClipboard = async (text, buttonEvent) => {
   await navigator.clipboard.writeText(text)
@@ -40,9 +40,9 @@ const processStack = () => {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto space-y-6 w-full text-gray-100">
+  <div class="max-w-3xl mx-auto space-y-6 w-full text-gray-100" @wheel.ctrl.prevent="handleZoom">
     <h3 class="text-2xl font-bold text-white">Tech Stack</h3>
-    <textarea v-model="pData.stack_experience" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" placeholder="List your known languages, frameworks, and environment details..."></textarea>
+    <textarea v-model="pData.stack_experience" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="List your known languages, frameworks, and environment details..."></textarea>
 
     <div class="flex justify-between items-center bg-gray-800 p-4 rounded border border-gray-700 mt-4">
        <div class="text-gray-300"><span class="font-bold text-white">1.</span> Copy prompt for LLM</div>
@@ -51,7 +51,7 @@ const processStack = () => {
 
     <div class="bg-gray-800 p-4 rounded border border-gray-700">
        <div class="text-gray-300 mb-2"><span class="font-bold text-white">2.</span> Paste LLM Response or Type Stack</div>
-       <textarea v-model="pData.stack_llm_response" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" placeholder='["Vue", "Python"]'></textarea>
+       <textarea v-model="pData.stack_llm_response" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder='["Vue", "Python"]'></textarea>
        <div class="flex justify-end mt-3">
          <button @click="processStack" :disabled="!pData.stack_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-6 py-2 rounded shadow transition-colors disabled:opacity-50 font-bold">Process List</button>
        </div>

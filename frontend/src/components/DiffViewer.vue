@@ -10,6 +10,10 @@ const props = defineProps({
   newText: {
     type: String,
     default: ''
+  },
+  fontSize: {
+    type: Number,
+    default: 13
   }
 })
 
@@ -38,7 +42,10 @@ const diffLines = computed(() => {
 </script>
 
 <template>
-  <div class="bg-[#1A1A1A] border border-gray-700 rounded overflow-hidden font-mono text-xs leading-5 selectable">
+  <div
+    class="bg-[#1A1A1A] border border-gray-700 rounded overflow-hidden font-mono leading-normal selectable"
+    :style="{ fontSize: fontSize + 'px' }"
+  >
     <div v-if="diffLines.length === 0" class="p-4 text-gray-500 italic">
       No changes detected in file content.
     </div>

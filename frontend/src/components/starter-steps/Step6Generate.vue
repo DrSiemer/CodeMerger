@@ -16,7 +16,9 @@ const {
   generateMasterPrompt,
   createStarterProject,
   createStarterProjectOverwrite,
-  selectDirectory
+  selectDirectory,
+  editorFontSize,
+  handleZoom
 } = useAppState()
 
 const copyToClipboard = async (text, buttonEvent) => {
@@ -67,7 +69,7 @@ const createProject = async () => {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto w-full space-y-8 text-gray-100 pb-8">
+  <div class="max-w-3xl mx-auto w-full space-y-8 text-gray-100 pb-8" @wheel.ctrl.prevent="handleZoom">
     <h3 class="text-2xl font-bold text-white">Finalize & Generate</h3>
     <div class="bg-gray-800 p-8 rounded border border-gray-700 space-y-6">
       <div class="space-y-3">
@@ -81,7 +83,7 @@ const createProject = async () => {
       <div class="pt-6 border-t border-gray-700 flex flex-col space-y-4">
         <label class="block text-gray-300 font-bold text-sm uppercase">2. Creation Prompt</label>
         <button @click="copyMasterPrompt" class="bg-cm-blue text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-500 transition-colors">Copy Final Creation Prompt</button>
-        <textarea v-model="pData.generate_llm_response" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" placeholder="Paste generated code blocks here..."></textarea>
+        <textarea v-model="pData.generate_llm_response" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
       </div>
     </div>
     <div class="flex justify-end mt-4">

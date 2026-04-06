@@ -32,6 +32,9 @@ const showReviewModal = ref(false)
 const reviewMode = ref('new') // 'new' or 'resume'
 const revertToCompactOnClose = ref(false)
 
+// Editor Scaling State
+const editorFontSize = ref(14)
+
 // Persistence for AI Review Window
 const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted'
 const planOriginalContents = ref({}) // path -> string content (for undo)
@@ -60,6 +63,11 @@ watch(statusMessage, (newVal) => {
     }, 6100)
   }
 })
+
+const handleZoom = (e) => {
+  const delta = e.deltaY > 0 ? -1 : 1
+  editorFontSize.value = Math.max(8, Math.min(editorFontSize.value + delta, 40))
+}
 
 export function useAppState() {
   const applyProjectData = (projData) => {
@@ -406,6 +414,8 @@ export function useAppState() {
     folderActiveIcon,
     starterIcon,
     starterActiveIcon,
+    editorFontSize,
+    handleZoom,
     init,
     getImage,
     resizeWindow,
