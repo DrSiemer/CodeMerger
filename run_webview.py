@@ -60,8 +60,9 @@ class WindowManager:
             "CM-Compact",
             url=compact_url,
             js_api=self.api,
-            width=155,
+            width=100,
             height=160,
+            min_size=(100, 160),
             frameless=True,
             on_top=True,
             hidden=True, # Start hidden for instant show later
@@ -79,8 +80,8 @@ class WindowManager:
         # Intercept the close event so it toggles visibility instead of killing the window
         self.compact_window.events.closing += self._on_compact_closing
 
-        # Start PyWebView loop (Debug disabled by default)
-        webview.start(debug=False)
+        # Start PyWebView loop (debug=True allows Ctrl+Shift+I)
+        webview.start(debug=True)
 
     def _on_main_minimized(self):
         """Triggered when the user minimizes the main window."""
@@ -99,8 +100,15 @@ class WindowManager:
             self._transitioning = False
 
     def _on_window_closed(self):
-        """Forcefully exits the entire process to kill background threads and Chromium."""
-        self.exit_all()
+        """
+        Triggered when the main dashboard is closed.
+        Cleanup must be graceful to avoid Error 1411 (Chrome_WidgetWin unregister failure).
+        """
+        if self.compact_window:
+            try:
+                self.compact_window.destroy()
+            except:
+                pass
 
     def _on_compact_closing(self):
         """Prevents the compact window from being destroyed; restores main instead."""
@@ -133,10 +141,11 @@ class WindowManager:
         self._transitioning = False
 
     def exit_all(self):
-        """Closes all windows and exits the process forcefully."""
+        """Closes all windows gracefully to allow process to exit naturally."""
         self.monitor.update_window(None)
-        # Force destruction of all child processes and threads
-        os._exit(0)
+        if self.main_window:
+            self.main_window.destroy()
+        # Compact window is destroyed via the main_window.events.closed handler
 
 def main():
     setup_logging()
