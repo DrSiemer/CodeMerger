@@ -84,11 +84,11 @@
 ## Phase 5: Compact Mode & Window Management
 *Goal: Replicate the always-on-top, draggable mini-window integration.*
 
-- [ ] **Window State Handling:** In Python, subscribe to the `events.minimized` event on the main PyWebView window.
-- [ ] **Compact Window Creation:** When minimized, Python should hide the main window and create a *second* PyWebView window (`frameless=True`, `on_top=True`, `width=250`, `height=100`) pointing to a specific Vue route (e.g., `/#/compact`).
-- [ ] **Compact UI:** Build the minimal Vue view containing the title, Adaptive Copy button, and Paste button.
-- [ ] **OS Dragging:** Add CSS `--webkit-app-region: drag` (or PyWebView equivalent) to the compact window header to allow native OS dragging.
-- [ ] **Restoration:** Double-clicking the header or clicking close should trigger an API call that destroys the compact window and restores the main window.
+- [x] **Window State Handling:** In Python, subscribe to the `events.minimized` event on the main PyWebView window.
+- [x] **Compact Window Creation:** When minimized, Python should hide the main window and create a *second* PyWebView window (`frameless=True`, `on_top=True`, `width=250`, `height=100`) pointing to a specific Vue route (e.g., `/#/compact`).
+- [x] **Compact UI:** Build the minimal Vue view containing the title, Adaptive Copy button, and Paste button.
+- [x] **OS Dragging:** Add CSS `--webkit-app-region: drag` (or PyWebView equivalent) to the compact window header to allow native OS dragging.
+- [x] **Restoration:** Double-clicking the header or clicking close should trigger an API call that destroys the compact window and restores the main window.
 
 > **🛑 Human Verification Checkpoint 6:**
 > - Does minimizing the main app instantly spawn the compact widget?

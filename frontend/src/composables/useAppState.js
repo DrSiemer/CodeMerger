@@ -19,6 +19,11 @@ const statusMessage = ref('')
 const statusVisible = ref(false)
 const lastAiResponse = ref(null)
 
+// AI Review State
+const showReviewModal = ref(false)
+const reviewMode = ref('new') // 'new' or 'resume'
+const revertToCompactOnClose = ref(false)
+
 // Persistence for AI Review Window
 const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted'
 const planOriginalContents = ref({}) // path -> string content (for undo)
@@ -229,6 +234,24 @@ export function useAppState() {
     }
   }
 
+  const restoreMainWindow = async () => {
+    if (window.pywebview) {
+      await window.pywebview.api.restore_main_window()
+    }
+  }
+
+  const minimizeWindow = async () => {
+    if (window.pywebview) {
+      await window.pywebview.api.minimize_window()
+    }
+  }
+
+  const closeApp = async () => {
+    if (window.pywebview) {
+      await window.pywebview.api.close_app()
+    }
+  }
+
   // --- AI Feedback & Change Applier ---
 
   const processPaste = async () => {
@@ -353,6 +376,9 @@ export function useAppState() {
     statusMessage,
     statusVisible,
     lastAiResponse,
+    showReviewModal,
+    reviewMode,
+    revertToCompactOnClose,
     planFileStates,
     planOriginalContents,
     init,
@@ -380,6 +406,9 @@ export function useAppState() {
     deleteFile,
     copyAdmonishment,
     saveInstructions,
-    copyCleanupPrompt
+    copyCleanupPrompt,
+    restoreMainWindow,
+    minimizeWindow,
+    closeApp
   }
 }

@@ -2,6 +2,7 @@ import sys
 import os
 import webview
 import logging
+import time
 from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir
@@ -14,59 +15,152 @@ from src.core.utils import load_active_file_extensions
 
 log = logging.getLogger("CodeMerger")
 
+class WindowManager:
+    """
+    Coordinates the visibility and lifecycle of the main application window
+    and the minimalist compact widget using a persistent window strategy.
+    """
+    def __init__(self, api, monitor, dev_mode=False):
+        self.api = api
+        self.monitor = monitor
+        self.dev_mode = dev_mode
+        self.main_window = None
+        self.compact_window = None
+
+        # State lock to prevent race conditions during mode switches
+        self._transitioning = False
+
+        # Configuration for production vs dev URL
+        if dev_mode:
+            self.base_url = "http://localhost:5173"
+        else:
+            bundle_dir = get_bundle_dir()
+            self.base_url = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
+
+    def start(self):
+        """Initializes both windows immediately for fast switching."""
+
+        # 1. Create Main Window
+        self.main_window = webview.create_window(
+            "CodeMerger",
+            url=self.base_url,
+            js_api=self.api,
+            width=1200,
+            height=780,
+            min_size=(800, 600),
+            background_color='#2E2E2E'
+        )
+
+        # 2. Create Compact Window (Hidden by default)
+        compact_url = f"{self.base_url}#/compact"
+        if not self.dev_mode:
+            compact_url = f"file://{self.base_url}#/compact"
+
+        self.compact_window = webview.create_window(
+            "CM-Compact",
+            url=compact_url,
+            js_api=self.api,
+            width=190,
+            height=180,
+            frameless=True,
+            on_top=True,
+            hidden=True, # Start hidden for instant show later
+            background_color='#2E2E2E'
+        )
+
+        self.api.set_window_manager(self)
+        self.monitor.update_window(self.main_window)
+
+        # Dashboard Events
+        self.main_window.events.minimized += self._on_main_minimized
+        self.main_window.events.closed += self._on_window_closed
+
+        # Compact Events
+        # Intercept the close event so it toggles visibility instead of killing the window
+        self.compact_window.events.closing += self._on_compact_closing
+
+        # Start PyWebView loop
+        webview.start(debug=self.dev_mode)
+
+    def _on_main_minimized(self):
+        """Triggered when the user minimizes the main window."""
+        if self._transitioning:
+            return
+
+        config = self.api.app_state.config
+        if config.get('enable_compact_mode_on_minimize', True):
+            self._transitioning = True
+
+            # Sequence matters: hide main before showing compact to prevent dual-visibility
+            self.main_window.hide()
+            time.sleep(0.05) # Allow Z-order buffer
+            self.show_compact()
+
+            self._transitioning = False
+
+    def _on_window_closed(self):
+        """Clears the monitor window reference to prevent evaluate_js on dead objects."""
+        self.monitor.update_window(None)
+
+    def _on_compact_closing(self):
+        """Prevents the compact window from being destroyed; restores main instead."""
+        self.restore_main()
+        return False # Prevent actual window destruction
+
+    def show_compact(self):
+        """Instantly displays the minimalist compact window."""
+        if self.compact_window:
+            self.compact_window.show()
+            self.monitor.update_window(self.compact_window)
+
+    def restore_main(self):
+        """Instantly switches back to the full dashboard."""
+        if self._transitioning:
+            return
+
+        self._transitioning = True
+
+        if self.compact_window:
+            self.compact_window.hide()
+
+        if self.main_window:
+            # Brief sleep to allow OS to release the Z-order before main shows
+            time.sleep(0.05)
+            self.main_window.show()
+            self.main_window.restore()
+            self.monitor.update_window(self.main_window)
+
+        self._transitioning = False
+
+    def exit_all(self):
+        """Closes all windows and exits the process."""
+        self.monitor.update_window(None)
+        # Force destruction to bypass the 'closing' interceptor
+        os._exit(0)
+
 def main():
-    # Initialize logging
     setup_logging()
 
     # Initialize Core Application Logic
     app_state = AppState()
     project_manager = ProjectManager(load_active_file_extensions)
 
-    # Initialize the Python API bridge
+    # Initialize API
     api = Api(app_state, project_manager)
 
-    # Detect if we should run in dev mode (connect to Vite local server)
-    dev_mode = "--dev" in sys.argv
-
-    if dev_mode:
-        url = "http://localhost:5173"
-        print("Running in DEV mode. Make sure 'npm run dev' is running in the frontend folder.")
-    else:
-        # In production, point to the built Vue assets
-        bundle_dir = get_bundle_dir()
-        url = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
-
-        if not os.path.exists(url):
-            print(f"Error: Production build not found at {url}")
-            print("Please run 'npm run build' in the frontend directory first.")
-            sys.exit(1)
-
-    # Create the main PyWebView window
-    # Resized to 1200x780 to comfortably accommodate Modals and complex layouts
-    window = webview.create_window(
-        "CodeMerger",
-        url=url,
-        js_api=api,
-        width=1200,
-        height=780,
-        min_size=(800, 600),
-        background_color='#2E2E2E' # Matches DARK_BG
-    )
-
-    # Link the window reference to the API for native dialogs
-    api.set_window(window)
-
     # Initialize background file monitor
-    monitor = FileMonitorThread(window, app_state, project_manager)
+    monitor = FileMonitorThread(None, app_state, project_manager)
     monitor.start()
 
-    # Start the application loop. This call blocks until the window is closed.
-    webview.start(debug=dev_mode)
+    # Launch via Manager
+    dev_mode = "--dev" in sys.argv
+    manager = WindowManager(api, monitor, dev_mode=dev_mode)
 
-    # After the UI loop returns, perform cleanup.
-    # Note: Logic moved here from on_closed event to avoid Win32 race conditions (Error 1411).
-    log.info("Window closed. Terminating application.")
-    monitor.stop()
+    try:
+        manager.start()
+    finally:
+        log.info("Window context lost. Terminating background services.")
+        monitor.stop()
 
 if __name__ == '__main__':
     main()

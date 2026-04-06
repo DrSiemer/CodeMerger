@@ -26,31 +26,32 @@ class Api:
     def __init__(self, app_state, project_manager):
         # Prefixing with an underscore prevents PyWebView from inspecting this attribute
         # during JS API generation, which avoids a premature DOM evaluation crash.
-        self._window = None
+        self._window_manager = None
         self.app_state = app_state
         self.project_manager = project_manager
 
-    def set_window(self, window):
-        """Sets the active PyWebView window reference."""
-        self._window = window
+    def set_window_manager(self, mgr):
+        """Links the Api to the central window orchestration logic."""
+        self._window_manager = mgr
 
     def ensure_window_size(self, width, height):
         """
         Requests the main window to expand to the specified dimensions if it is
         currently smaller. This prevents large modals from being clipped.
         """
-        if not self._window:
+        if not self._window_manager or not self._window_manager.main_window:
             return
 
-        current_w = self._window.width
-        current_h = self._window.height
+        win = self._window_manager.main_window
+        current_w = win.width
+        current_h = win.height
 
         target_w = max(current_w, width)
         target_h = max(current_h, height)
 
         if target_w != current_w or target_h != current_h:
             log.info(f"Expanding window to {target_w}x{target_h} to accommodate content.")
-            self._window.resize(target_w, target_h)
+            win.resize(target_w, target_h)
 
     def get_image_base64(self, filename):
         """
@@ -170,10 +171,10 @@ class Api:
         """
         Opens the native OS directory selection dialog.
         """
-        if not self._window:
+        if not self._window_manager or not self._window_manager.main_window:
             return None
 
-        result = self._window.create_file_dialog(webview.FOLDER_DIALOG)
+        result = self._window_manager.main_window.create_file_dialog(webview.FOLDER_DIALOG)
         if result and len(result) > 0:
             selected_path = result[0]
             if self.app_state.update_active_dir(selected_path):
@@ -225,7 +226,9 @@ class Api:
             report = scan_for_secrets(base_dir, files_to_copy)
             if report:
                 warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
-                proceed = self._window.create_confirmation_dialog("Secrets Detected", warning_message)
+                # Confirmation needs to happen on whatever window is active
+                active_win = self._window_manager.compact_window if self._window_manager.compact_window.visible else self._window_manager.main_window
+                proceed = active_win.create_confirmation_dialog("Secrets Detected", warning_message)
                 if not proceed:
                     return "Copy cancelled due to potential secrets."
 
@@ -318,8 +321,8 @@ class Api:
             project_config.unknown_files = []
             project_config.save()
             # Notify UI
-            if self._window:
-                self._window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
+            if self._window_manager and self._window_manager.main_window:
+                self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
             return True
         return False
 
@@ -373,8 +376,8 @@ class Api:
         project_config.save()
 
         # Manually trigger the event to clear the counter in UI immediately
-        if self._window:
-            self._window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
+        if self._window_manager and self._window_manager.main_window:
+            self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
 
         return self._format_project_response(project_config, f"Added {added_count} new file(s) to merge list.")
 
@@ -405,7 +408,7 @@ class Api:
         if not project_config or not selected_files:
             return "Failed to generate request: No files selected."
 
-        # Temporarily apply provided selection to merger logic
+        # Temporarily apply provided selection to logic
         orig_selection = project_config.selected_files
         project_config.selected_files = selected_files
 
@@ -500,6 +503,75 @@ class Api:
         except Exception as e:
             log.error(f"Failed to open folder: {e}")
             return f"Error opening folder: {e}"
+
+    # --- Window Management ---
+
+    def get_compact_window_pos(self):
+        """Explicitly returns the screen coordinates of the Compact window."""
+        if self._window_manager and self._window_manager.compact_window:
+            win = self._window_manager.compact_window
+            return {'x': win.x, 'y': win.y}
+        return {'x': 0, 'y': 0}
+
+    def restore_main_window(self):
+        """Triggers the WindowManager to close the compact view and restore the main window."""
+        if self._window_manager:
+            self._window_manager.restore_main()
+            return True
+        return False
+
+    def request_remote_paste(self, revert_on_close):
+        """
+        Special cross-window method called by Compact mode.
+        Reads clipboard, parses plan, and notifies the Main window to show review.
+        """
+        if not self._window_manager or not self._window_manager.main_window:
+            return False
+
+        text = pyperclip.paste()
+        if not text or not text.strip():
+            return False
+
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return False
+
+        plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
+        if plan.get('status') == 'ERROR':
+            # We don't alert here to avoid focus stealing artifacts on Compact Mode
+            return False
+
+        # Prepare payload for Main Window
+        payload = {
+            'plan': plan,
+            'revertOnClose': revert_on_close
+        }
+        json_payload = json.dumps(payload)
+
+        # Inject command into main window's memory
+        js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-paste', {{ detail: {json_payload} }}))"
+        try:
+            self._window_manager.main_window.evaluate_js(js_cmd)
+            self._window_manager.restore_main()
+            return True
+        except Exception as e:
+            log.error(f"Failed to trigger remote paste: {e}")
+            return False
+
+    def minimize_window(self):
+        """Programmatically minimizes the active window."""
+        if self._window_manager and self._window_manager.main_window:
+            self._window_manager.main_window.minimize()
+
+    def move_compact_window(self, x, y):
+        """Explicitly moves the Compact window to target coordinates."""
+        if self._window_manager and self._window_manager.compact_window:
+            self._window_manager.compact_window.move(int(x), int(y))
+
+    def close_app(self):
+        """Immediately terminates the application."""
+        if self._window_manager:
+            self._window_manager.exit_all()
 
     # --- AI Feedback / Change Applier Integration ---
 

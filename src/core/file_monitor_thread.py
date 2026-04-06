@@ -19,10 +19,13 @@ class FileMonitorThread(threading.Thread):
         self.app_state = app_state
         self.project_manager = project_manager
         self._stop_event = threading.Event()
-        self._last_scan_count = 0
 
     def stop(self):
         self._stop_event.set()
+
+    def update_window(self, window):
+        """Updates the window reference used for JS evaluation."""
+        self.window = window
 
     def run(self):
         log.info("File Monitor background thread started.")
@@ -33,11 +36,27 @@ class FileMonitorThread(threading.Thread):
 
             # Wait for the interval defined in settings (default 5s)
             interval = config.get('new_file_check_interval', 5)
+
             # Sleep in short bursts to remain responsive to stop event
             for _ in range(interval * 2):
                 if self._stop_event.is_set():
                     break
                 time.sleep(0.5)
+
+    def _safe_eval(self, js_code):
+        """
+        Executes JavaScript in the current window context.
+        Catching System.ObjectDisposedException (as a generic Exception) to
+        prevent crashes when a window is closed while a scan finishes.
+        """
+        if not self.window:
+            return
+
+        try:
+            self.window.evaluate_js(js_code)
+        except Exception:
+            # Silently ignore errors caused by calling evaluate_js on a disposed/closed window
+            pass
 
     def _perform_check(self):
         project_config = self.project_manager.get_current_project()
@@ -53,7 +72,7 @@ class FileMonitorThread(threading.Thread):
             if project_config.has_external_changes():
                 log.info("External changes detected in .allcode. Triggering UI reload.")
                 project_config.load()
-                self.window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
             # Scan for new files
             from .utils import load_active_file_extensions
@@ -89,8 +108,9 @@ class FileMonitorThread(threading.Thread):
                     if len(p_data['selected_files']) != orig_len:
                         p_data['total_tokens'] = sum(f.get('tokens', 0) for f in p_data['selected_files'])
                 config_changed = True
+
                 # Force refresh in UI to reflect removal
-                self.window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
             # Detect brand new files
             brand_new = current_set - set(project_config.known_files)
@@ -105,7 +125,7 @@ class FileMonitorThread(threading.Thread):
 
                 # Notify Vue frontend of new files for the alert counter
                 count = len(project_config.unknown_files)
-                self.window.evaluate_js(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')
+                self._safe_eval(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')
 
             if config_changed:
                 project_config.save()
