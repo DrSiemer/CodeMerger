@@ -80,8 +80,11 @@ class WindowManager:
         # Intercept the close event so it toggles visibility instead of killing the window
         self.compact_window.events.closing += self._on_compact_closing
 
-        # Start PyWebView loop (debug=True allows Ctrl+Shift+I)
-        webview.start(debug=True)
+        # Prevent DevTools from opening automatically when debug mode is enabled
+        webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
+
+        # Start PyWebView loop (debug mode allows Ctrl+Shift+I in dev)
+        webview.start(debug=self.dev_mode)
 
     def _on_main_minimized(self):
         """Triggered when the user minimizes the main window."""
