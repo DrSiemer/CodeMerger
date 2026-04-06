@@ -143,19 +143,15 @@ const handleCopy = async (useWrapper) => {
   if (useWrapper) {
     isCopyingInstructions.value = true
   } else {
-    isCopyingOnly = true
+    isCopyingOnly.value = true
   }
 
   try {
-    await handleCopyAction(useWrapper)
+    await copyCode(useWrapper)
   } finally {
     isCopyingInstructions.value = false
     isCopyingOnly.value = false
   }
-}
-
-const handleCopyAction = async (useWrapper) => {
-  await copyCode(useWrapper)
 }
 
 const loadAssets = async () => {
@@ -349,18 +345,6 @@ onUnmounted(() => {
         </button>
       </div>
 
-      <!-- AI Response Review Button -->
-      <div class="absolute bottom-4 right-6" v-if="lastAiResponse">
-        <button
-          @click="openExistingReview"
-          class="bg-orange-600 hover:bg-orange-500 text-white font-bold py-2 px-6 rounded shadow-lg transition-all flex items-center space-x-2"
-          title="Review latest AI response"
-        >
-          <Eye class="w-5 h-5" />
-          <span>AI Response Review</span>
-        </button>
-      </div>
-
       <!-- Actions Box Container -->
       <div class="flex-grow flex items-center justify-center pb-4">
         <div v-if="activeProject.path" class="w-full max-w-[620px] border border-gray-600 rounded bg-cm-dark-bg p-6 flex flex-col shadow-sm">
@@ -418,18 +402,32 @@ onUnmounted(() => {
             <!-- Small Buttons -->
             <button
               @click="showInstructionsModal = true"
-              class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+              class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
             >
               <BookOpen class="w-4 h-4" />
               <span>Define Instructions</span>
             </button>
-            <button
-              @click="handlePasteChanges"
-              class="bg-cm-green hover:bg-green-600 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
-            >
-              <ClipboardPaste class="w-4 h-4" />
-              <span>Paste Changes</span>
-            </button>
+
+            <!-- Paste Group -->
+            <div class="flex flex-col space-y-4">
+              <button
+                @click="handlePasteChanges"
+                class="w-full bg-cm-green hover:bg-green-600 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+              >
+                <ClipboardPaste class="w-4 h-4" />
+                <span>Paste Changes</span>
+              </button>
+
+              <button
+                v-if="lastAiResponse"
+                @click="openExistingReview"
+                class="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+                title="Review latest AI response"
+              >
+                <Eye class="w-4 h-4" />
+                <span>AI Response Review</span>
+              </button>
+            </div>
           </div>
         </div>
 
