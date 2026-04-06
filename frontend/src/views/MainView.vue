@@ -6,6 +6,7 @@ import SettingsModal from '../components/SettingsModal.vue'
 import FileManagerModal from '../components/FileManagerModal.vue'
 import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
+import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import {
   Settings, Copy, ClipboardPaste, BookOpen, PenLine, AlertTriangle, Eye, Loader2, Info
 } from 'lucide-vue-next'
@@ -21,9 +22,12 @@ const {
   planFileStates,
   planOriginalContents,
   logoMask,
+  folderIcon,
+  folderActiveIcon,
+  starterIcon,
+  starterActiveIcon,
   copyCode,
   renameProject,
-  getImage,
   openProjectFolder,
   addAllNewFiles,
   clearUnknownFiles,
@@ -37,6 +41,7 @@ const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
 const showFileManagerModal = ref(false)
 const showInstructionsModal = ref(false)
+const showStarterModal = ref(false)
 const settingsTab = ref('application')
 
 const cleanupPulse = ref(false)
@@ -45,22 +50,11 @@ const cleanupPulse = ref(false)
 const isCopyingInstructions = ref(false)
 const isCopyingOnly = ref(false)
 
-// Image Assets
-const starterIcon = ref('')
-const starterActiveIcon = ref('')
 const isStarterHovered = ref(false)
-
-const folderIcon = ref('')
-const folderActiveIcon = ref('')
 const isFolderHovered = ref(false)
 
 // Interaction state
 let clickTimer = null
-
-// Title Editing State
-const isEditingName = ref(false)
-const tempName = ref('')
-const nameInput = ref(null)
 
 const handleTitleInteraction = () => {
   if (!activeProject.path) return
@@ -78,6 +72,11 @@ const handleTitleInteraction = () => {
     }, 250)
   }
 }
+
+// Title Editing State
+const isEditingName = ref(false)
+const tempName = ref('')
+const nameInput = ref(null)
 
 const startEditing = () => {
   tempName.value = activeProject.name
@@ -154,13 +153,6 @@ const handleCopy = async (useWrapper) => {
   }
 }
 
-const loadAssets = async () => {
-  starterIcon.value = await getImage('project_starter.png')
-  starterActiveIcon.value = await getImage('project_starter_active.png')
-  folderIcon.value = await getImage('folder.png')
-  folderActiveIcon.value = await getImage('folder_active.png')
-}
-
 // Robust Computed Style for the Project Swatch
 const swatchStyle = computed(() => {
   if (!activeProject.path || !logoMask.value) return {}
@@ -209,7 +201,6 @@ const onRemotePasteRequest = (event) => {
 }
 
 onMounted(() => {
-  loadAssets()
   window.addEventListener('cm-remote-paste', onRemotePasteRequest)
 })
 
@@ -219,7 +210,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex-grow flex flex-col overflow-hidden">
+  <div class="flex-grow flex flex-col overflow-hidden text-gray-100 bg-cm-dark-bg font-sans">
     <!-- Top Bar -->
     <header class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
       <div class="flex items-center space-x-4 min-w-0 flex-grow">
@@ -289,7 +280,7 @@ onUnmounted(() => {
         <!-- Folder Icon -->
         <img
           v-if="activeProject.path && folderIcon"
-          :src="isFolderHovered ? folderActiveIcon : folderIcon"
+          :src="isFolderHovered ? (folderActiveIcon || folderIcon) : folderIcon"
           class="w-7 h-auto cursor-pointer transition-opacity"
           title="Open project folder (Ctrl+Click: Copy Path, Alt+Click: Open Console)"
           @click="openProjectFolder($event)"
@@ -317,16 +308,23 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="flex items-center space-x-6">
+      <div class="flex items-center space-x-3">
+        <!-- Project Starter Icon Button -->
         <button
-          v-if="starterIcon"
-          class="hover:opacity-80 transition-opacity p-1"
-          title="Launch Project Starter Wizard"
+          class="hover:brightness-110 transition-all p-1 flex items-center justify-center"
+          title="Project Starter"
           @mouseenter="isStarterHovered = true"
           @mouseleave="isStarterHovered = false"
+          @click="showStarterModal = true"
         >
-          <img :src="isStarterHovered ? starterActiveIcon : starterIcon" class="w-7 h-7" />
+          <img
+            v-if="starterIcon"
+            :src="isStarterHovered ? (starterActiveIcon || starterIcon) : starterIcon"
+            class="w-7 h-7"
+            alt="Project Starter"
+          />
         </button>
+
         <button
           @click="showProjectModal = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
@@ -438,7 +436,7 @@ onUnmounted(() => {
       </div>
     </main>
 
-    <!-- Status Bar (Moved into MainView) -->
+    <!-- Status Bar -->
     <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px] z-50">
       <div
         class="tracking-wide truncate pr-4"
@@ -473,6 +471,10 @@ onUnmounted(() => {
     <InstructionsModal
       v-if="showInstructionsModal"
       @close="showInstructionsModal = false"
+    />
+    <ProjectStarterModal
+      v-if="showStarterModal"
+      @close="showStarterModal = false"
     />
   </div>
 </template>

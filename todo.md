@@ -23,7 +23,7 @@
 *Goal: Rebuild the main dashboard structure and connect it to the `App_State` and `Project_Config` logic.*
 
 - [x] **State Management:** Set up a Vue composable (e.g., `useAppState.js`) to fetch the initial config from Python on mount and sync changes back.
--[x] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
+- [x] **Main Layout:** Build the Top Bar (Project selector, title, folder icon), Main Content Area, and Status Bar.
 - [x] **Project Loading:** Implement the "Select Project" flow. Vue calls `api.select_project()` -> Python utilizes `ProjectManager` -> returns `ProjectConfig` dict -> Vue updates UI.
 - [x] **Modals:** Implement basic Vue modals for:
     - Settings (Application, File Manager, Prompts, Editor, Starter).
@@ -65,13 +65,13 @@
 *Goal: Rebuild the Markdown rendering and interactive diff comparison.*
 
 - [x] **Dependencies:** In `frontend/`, run `npm install` to ensure `markdown-it` and `diff` are available. (Note: Utilizing Vite 8 / Rolldown ecosystem).
--[x] **Markdown Rendering:** Install `markdown-it` in Vue. Create a `<MarkdownRenderer>` component to display AI commentary safely.
+- [x] **Markdown Rendering:** Install `markdown-it` in Vue. Create a `<MarkdownRenderer>` component to display AI commentary safely.
 - [x] **Paste Logic:** Connect the "Paste Changes" button. Vue sends clipboard text to Python -> Python parses it -> returns the structured JSON plan.
 - [x] **Review Modal (Tabs):** Create a tabbed modal (Intro, Changes, Answers, Verification).
 - [x] **Diff Viewer:**
     - Expose original and new file content to Vue.
     - Use a library like `diff2html` or a simple custom Vue component that compares the two strings and renders green/red highlighted lines.
--[x] **Interactive File List:** Rebuild the file list where users can click "Accept", "Discard", or "Undo" on individual files, triggering the respective Python file-system actions.
+- [x] **Interactive File List:** Rebuild the file list where users can click "Accept", "Discard", or "Undo" on individual files, triggering the respective Python file-system actions.
 
 > **🛑 Human Verification Checkpoint 4:**
 > - When pasting an AI response, does the Review Modal appear?
@@ -98,20 +98,20 @@
 
 ---
 
-## Phase 6: Project Starter Wizard
+## Phase 6: Project Starter
 *Goal: Rebuild the multi-step form and the Segmented Markdown Reviewer.*
 
-- [ ] **Stepper UI:** Build a tabbed/stepper component for navigation (Details -> Base Files -> Concept -> Stack -> TODO -> Generate).
-- [ ] **State Syncing:** Ensure Vue maintains the draft state (Goal, Experience, LLM responses) and syncs with Python's `session_manager.py` on step changes.
--[ ] **Segmented Reviewer:**
+- [x] **Stepper UI:** Build a tabbed component for navigation (Details -> Base Files -> Concept -> Stack -> TODO -> Generate).
+- [x] **State Syncing:** Ensure Vue maintains the draft state (Goal, Experience, LLM responses) and syncs with the background session file on step changes.
+- [x] **Segmented Reviewer:**
     - Build a layout with a Sidebar (Segments) and Main Area (Editor/Renderer).
     - Implement the Lock/Unlock (Sign-off) toggles.
     - Implement the "Edit/Render" toggle switching between a `<textarea>` and the `<MarkdownRenderer>`.
-- [ ] **Prompt Generation:** Connect Vue buttons to Python to generate prompts and automatically copy them to the clipboard.
-- [ ] **Generation Step:** Connect the final "Create Project Files" button to trigger `StarterProjectCreator` in Python, followed by displaying the Success view.
+- [x] **Prompt Generation:** Connect Vue buttons to Python to generate prompts and automatically copy them to the clipboard.
+- [x] **Generation Step:** Connect the final "Create Project Files" button to trigger the creation logic in Python, followed by displaying the Success view.
 
 > **🛑 Human Verification Checkpoint 5:**
-> - Can you navigate through the wizard steps without losing drafted text?
+> - Can you navigate through the starter steps without losing drafted text?
 > - Do the LLM prompt copy buttons work?
 > - Can you lock/unlock segments in the Reviewer?
 > - Does the final "Create Project" button successfully scaffold the boilerplate folder on disk?

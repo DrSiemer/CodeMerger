@@ -19,9 +19,13 @@ const statusMessage = ref('')
 const statusVisible = ref(false)
 const lastAiResponse = ref(null)
 
-// Assets
+// Global Shared Assets
 const logoMask = ref('')
 const logoMaskSmall = ref('')
+const folderIcon = ref('')
+const folderActiveIcon = ref('')
+const starterIcon = ref('')
+const starterActiveIcon = ref('')
 
 // AI Review State
 const showReviewModal = ref(false)
@@ -90,9 +94,14 @@ export function useAppState() {
     if (window.pywebview) {
       config.value = await window.pywebview.api.get_app_config()
 
-      // Load static assets into global store immediately
+      // Load all shared assets into global store once the bridge is available
       logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
       logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
+
+      folderIcon.value = await window.pywebview.api.get_image_base64('folder.png')
+      folderActiveIcon.value = await window.pywebview.api.get_image_base64('folder_active.png')
+      starterIcon.value = await window.pywebview.api.get_image_base64('project_starter.png')
+      starterActiveIcon.value = await window.pywebview.api.get_image_base64('project_starter_active.png')
 
       const proj = await window.pywebview.api.get_current_project()
       applyProjectData(proj)
@@ -109,7 +118,8 @@ export function useAppState() {
 
   const getImage = async (filename) => {
     if (window.pywebview) {
-      return await window.pywebview.api.get_image_base64(filename)
+      const result = await window.pywebview.api.get_image_base64(filename)
+      return result
     }
     return ""
   }
@@ -392,6 +402,10 @@ export function useAppState() {
     planOriginalContents,
     logoMask,
     logoMaskSmall,
+    folderIcon,
+    folderActiveIcon,
+    starterIcon,
+    starterActiveIcon,
     init,
     getImage,
     resizeWindow,
@@ -420,6 +434,30 @@ export function useAppState() {
     copyCleanupPrompt,
     restoreMainWindow,
     minimizeWindow,
-    closeApp
+    closeApp,
+    getStarterSession: async () => window.pywebview ? await window.pywebview.api.get_starter_session() : {},
+    saveStarterSession: async (data) => window.pywebview ? await window.pywebview.api.save_starter_session(data) : true,
+    clearStarterSession: async () => window.pywebview ? await window.pywebview.api.clear_starter_session() : true,
+    exportStarterConfig: async (data) => window.pywebview ? await window.pywebview.api.export_starter_config(data) : false,
+    loadStarterConfig: async () => window.pywebview ? await window.pywebview.api.load_starter_config() : null,
+    getConceptQuestions: async () => window.pywebview ? await window.pywebview.api.get_concept_questions() : {},
+    getTodoQuestions: async () => window.pywebview ? await window.pywebview.api.get_todo_questions() : {},
+    getTodoTemplate: async () => window.pywebview ? await window.pywebview.api.get_todo_template() : "",
+    getBaseProjectData: async (path) => window.pywebview ? await window.pywebview.api.get_base_project_data(path) : null,
+    getBaseFileTree: async (path, filter, ext, git, sel) => window.pywebview ? await window.pywebview.api.get_base_file_tree(path, filter, ext, git, sel) : [],
+    getTokenCountForPath: async (base, rel) => window.pywebview ? await window.pywebview.api.get_token_count_for_path(base, rel) : 0,
+    generateConceptPrompt: async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_concept_prompt(data, qMap) : "",
+    generateStackPrompt: async (data) => window.pywebview ? await window.pywebview.api.generate_stack_prompt(data) : "",
+    generateTodoPrompt: async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_todo_prompt(data, qMap) : "",
+    generateMasterPrompt: async (data) => window.pywebview ? await window.pywebview.api.generate_master_prompt(data) : "",
+    parseStarterSegments: async (text) => window.pywebview ? await window.pywebview.api.parse_starter_segments(text) : {},
+    assembleStarterDocument: async (segments, order, names) => window.pywebview ? await window.pywebview.api.assemble_starter_document(segments, order, names) : "",
+    getStarterRewritePrompt: async (inst, targets, ref, names, data, merged) => window.pywebview ? await window.pywebview.api.get_starter_rewrite_prompt(inst, targets, ref, names, data, merged) : "",
+    getStarterSyncPrompt: async (k, names, data, targets, ref) => window.pywebview ? await window.pywebview.api.get_starter_sync_prompt(k, names, data, targets, ref) : "",
+    getStarterQuestionPrompt: async (ctx, name, text, q) => window.pywebview ? await window.pywebview.api.get_starter_question_prompt(ctx, name, text, q) : "",
+    mapParsedSegmentsToKeys: async (parsed, names) => window.pywebview ? await window.pywebview.api.map_parsed_segments_to_keys(parsed, names) : {},
+    createStarterProject: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project(output, includeRef, pitch, data) : null,
+    createStarterProjectOverwrite: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project_overwrite(output, includeRef, pitch, data) : null,
+    selectDirectory: async () => window.pywebview ? await window.pywebview.api.select_directory() : null
   }
 }
