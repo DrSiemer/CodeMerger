@@ -209,6 +209,13 @@ class WindowManager:
         if config.get('enable_compact_mode_on_minimize', True):
             self._transitioning = True
             try:
+                # Anchor the restored bounds before hiding to ensure the OS
+                # has correct data when restoring from the taskbar later.
+                if self.main_last_x is not None and self.main_last_y is not None:
+                    self.main_window.move(int(self.main_last_x), int(self.main_last_y))
+                if self.main_last_w and self.main_last_h:
+                    self.main_window.resize(int(self.main_last_w), int(self.main_last_h))
+
                 self.main_window.hide()
                 self.show_compact()
             finally:
@@ -306,6 +313,13 @@ class WindowManager:
                 self.compact_window.hide()
 
             if self.main_window:
+                # Force restored dimensions and position before showing to prevent
+                # intermittent oversized animation artifacts on Windows.
+                if self.main_last_x is not None and self.main_last_y is not None:
+                    self.main_window.move(int(self.main_last_x), int(self.main_last_y))
+                if self.main_last_w and self.main_last_h:
+                    self.main_window.resize(int(self.main_last_w), int(self.main_last_h))
+
                 self.main_window.show()
                 self.main_window.restore()
                 self.monitor.update_window(self.main_window)
