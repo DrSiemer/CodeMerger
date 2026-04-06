@@ -109,9 +109,45 @@ const handleClose = (event) => {
   }
 }
 
-// Simplified name display as requested
-const titleText = computed(() => {
-  return activeProject.name || 'CodeMerger'
+// Logic for project name abbreviation - Ported exactly from Python logic
+const titleAbbr = computed(() => {
+  const name = activeProject.name || 'CodeMerger'
+  const maxLen = 8
+  const chars = [...name]
+
+  // Identify uppercase indices
+  const capitalIndices = []
+  for (let i = 0; i < chars.length; i++) {
+    if (chars[i] >= 'A' && chars[i] <= 'Z') {
+      capitalIndices.push(i)
+    }
+  }
+
+  if (capitalIndices.length > 1) {
+    // Identify lowercase indices
+    const lowercaseIndices = []
+    for (let i = 0; i < chars.length; i++) {
+      if (chars[i] >= 'a' && chars[i] <= 'z') {
+        lowercaseIndices.push(i)
+      }
+    }
+
+    const lowercaseNeeded = maxLen - capitalIndices.length
+    let indicesToKeep = []
+
+    if (lowercaseNeeded > 0) {
+      indicesToKeep = [...capitalIndices, ...lowercaseIndices.slice(0, lowercaseNeeded)]
+    } else {
+      indicesToKeep = capitalIndices.slice(0, maxLen)
+    }
+
+    // Sort to maintain relative character positions
+    indicesToKeep.sort((a, b) => a - b)
+    return indicesToKeep.map(i => chars[i]).join('')
+  } else {
+    const noSpaceTitle = name.replace(/\s/g, '')
+    return noSpaceTitle.slice(0, maxLen)
+  }
 })
 
 const copyButtonText = computed(() => {
@@ -134,7 +170,7 @@ const copyButtonText = computed(() => {
           class="text-[11px] font-black tracking-widest uppercase truncate px-1 py-0.5 rounded leading-none"
           :style="{ color: activeProject.fontColor === 'dark' ? '#000000' : '#FFFFFF', backgroundColor: activeProject.color || '#666666' }"
         >
-          {{ titleText }}
+          {{ titleAbbr }}
         </span>
       </div>
 
@@ -164,7 +200,7 @@ const copyButtonText = computed(() => {
       <button
         @click="handleCopy"
         :disabled="isCopying"
-        class="w-full text-[11px] font-bold py-2.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight"
+        class="w-full text-[11px] font-bold py-2.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
         :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
         title="Copy Prompt (Ctrl+Click for Code Only)"
       >
