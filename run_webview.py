@@ -60,8 +60,8 @@ class WindowManager:
             "CM-Compact",
             url=compact_url,
             js_api=self.api,
-            width=190,
-            height=180,
+            width=155,
+            height=160,
             frameless=True,
             on_top=True,
             hidden=True, # Start hidden for instant show later
@@ -79,8 +79,8 @@ class WindowManager:
         # Intercept the close event so it toggles visibility instead of killing the window
         self.compact_window.events.closing += self._on_compact_closing
 
-        # Start PyWebView loop
-        webview.start(debug=self.dev_mode)
+        # Start PyWebView loop (Debug disabled by default)
+        webview.start(debug=False)
 
     def _on_main_minimized(self):
         """Triggered when the user minimizes the main window."""
@@ -99,8 +99,8 @@ class WindowManager:
             self._transitioning = False
 
     def _on_window_closed(self):
-        """Clears the monitor window reference to prevent evaluate_js on dead objects."""
-        self.monitor.update_window(None)
+        """Forcefully exits the entire process to kill background threads and Chromium."""
+        self.exit_all()
 
     def _on_compact_closing(self):
         """Prevents the compact window from being destroyed; restores main instead."""
@@ -133,9 +133,9 @@ class WindowManager:
         self._transitioning = False
 
     def exit_all(self):
-        """Closes all windows and exits the process."""
+        """Closes all windows and exits the process forcefully."""
         self.monitor.update_window(None)
-        # Force destruction to bypass the 'closing' interceptor
+        # Force destruction of all child processes and threads
         os._exit(0)
 
 def main():

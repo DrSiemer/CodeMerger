@@ -11,7 +11,8 @@ const {
   getImage,
   copyCode,
   restoreMainWindow,
-  closeApp
+  closeApp,
+  openProjectFolder
 } = useAppState()
 
 const isCopying = ref(false)
@@ -46,6 +47,12 @@ onUnmounted(() => {
 const startDrag = async (e) => {
   // Guard: ensure button clicks don't trigger dragging
   if (e.target.closest('button')) return
+
+  // Alt-click: Open console in project folder
+  if (e.altKey) {
+    openProjectFolder({ ctrlKey: false, altKey: true })
+    return
+  }
 
   // Capture screen position of the mouse
   startMouseX = e.screenX
@@ -102,20 +109,12 @@ const handleClose = (event) => {
   }
 }
 
-// Logic for project name abbreviation
-const titleAbbr = computed(() => {
-  const name = activeProject.name || 'CodeMerger'
-  const maxLen = 8
-  const caps = name.match(/[A-Z]/g) || []
-
-  if (caps.length > 1) {
-    return caps.join('').slice(0, maxLen)
-  }
-  return name.replace(/\s/g, '').slice(0, maxLen)
+// Simplified name display as requested
+const titleText = computed(() => {
+  return activeProject.name || 'CodeMerger'
 })
 
 const copyButtonText = computed(() => {
-  if (isCopying.value) return 'Merging...'
   return activeProject.hasInstructions ? 'Copy Prompt (i)' : 'Copy Prompt'
 })
 </script>
@@ -130,12 +129,12 @@ const copyButtonText = computed(() => {
       title="Double-click to restore"
     >
       <div class="flex items-center space-x-2 min-w-0 pointer-events-none">
-        <img v-if="appIcon" :src="appIcon" class="w-3.5 h-3.5" />
+        <img v-if="appIcon" :src="appIcon" class="w-4 h-4" />
         <span
-          class="text-[9px] font-black tracking-widest uppercase truncate px-1 py-0.5 rounded leading-none"
+          class="text-[11px] font-black tracking-widest uppercase truncate px-1 py-0.5 rounded leading-none"
           :style="{ color: activeProject.fontColor === 'dark' ? '#000000' : '#FFFFFF', backgroundColor: activeProject.color || '#666666' }"
         >
-          {{ titleAbbr }}
+          {{ titleText }}
         </span>
       </div>
 
@@ -150,16 +149,16 @@ const copyButtonText = computed(() => {
         <button
           @mousedown.stop
           @click="handleClose"
-          class="text-gray-500 hover:text-white transition-colors"
+          class="text-gray-400 hover:text-white transition-colors"
           title="Restore dashboard (Ctrl+Click to exit)"
         >
-          <Minimize2 class="w-3.5 h-3.5" />
+          <Minimize2 class="w-4 h-4" />
         </button>
       </div>
     </div>
 
-    <!-- Content Stack -->
-    <div class="flex-grow flex flex-col p-3 space-y-3 justify-center items-center">
+    <!-- Content Stack - Tightened Spacing -->
+    <div class="flex-grow flex flex-col p-1.5 space-y-1.5 justify-center">
 
       <!-- Adaptive Copy Button -->
       <button
@@ -169,15 +168,15 @@ const copyButtonText = computed(() => {
         :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
         title="Copy Prompt (Ctrl+Click for Code Only)"
       >
-        <Loader2 v-if="isCopying" class="w-3 h-3 animate-spin" />
-        <span class="truncate px-1">{{ copyButtonText }}</span>
+        <Loader2 v-if="isCopying" class="w-3.5 h-3.5 animate-spin" />
+        <span v-else class="truncate px-1">{{ copyButtonText }}</span>
       </button>
 
       <!-- Paste & Review Bar -->
-      <div class="w-full flex items-center space-x-2">
+      <div class="w-full flex items-center space-x-1.5">
         <button
           @click="handlePaste"
-          class="flex-grow bg-cm-green hover:bg-green-600 text-white font-bold py-2 rounded text-[11px] transition-all active:scale-95 shadow"
+          class="flex-grow bg-cm-green hover:bg-green-600 text-white font-bold py-2.5 rounded text-[11px] transition-all active:scale-95 shadow"
           title="Paste response from AI"
         >
           Paste
@@ -186,10 +185,10 @@ const copyButtonText = computed(() => {
         <button
           v-if="lastAiResponse"
           @click="restoreMainWindow"
-          class="bg-orange-600 hover:bg-orange-500 text-white w-9 py-2 rounded flex items-center justify-center transition-all active:scale-95 shadow"
+          class="bg-orange-600 hover:bg-orange-500 text-white w-4 py-2.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0"
           title="View response review"
         >
-          <Eye class="w-4 h-4" />
+          <!-- Small vertical orange bar matching original UI -->
         </button>
       </div>
     </div>
