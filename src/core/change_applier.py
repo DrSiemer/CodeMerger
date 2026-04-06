@@ -21,7 +21,7 @@ def apply_single_file(base_dir, rel_path, content):
             os.makedirs(dir_path, exist_ok=True)
 
         sanitized_content = _sanitize_content(path, content)
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, 'w', encoding='utf-8', newline='\n') as f:
             f.write(sanitized_content)
         return True, ""
     except IOError as e:
@@ -38,14 +38,28 @@ def delete_single_file(base_dir, rel_path):
         return False, str(e)
 
 def _sanitize_content(path, content):
-    """Cleans up whitespace and line endings"""
+    """
+    Normalizes content for writing and comparison.
+    1. Converts CRLF to LF to prevent phantom diffs in WebView.
+    2. Strips trailing whitespace from every line.
+    3. Collapses consecutive empty lines.
+    """
+    if not content:
+        return ""
+
+    # Step 1: Normalize line endings to LF (PyWebView/JS Standard)
+    content = content.replace('\r\n', '\n').replace('\r', '\n')
+
     lines = content.split('\n')
+    # Step 2: Strip trailing whitespace
     lines = [line.rstrip() for line in lines]
 
     _, extension = os.path.splitext(path)
+    # Markdown files often use double-spacing intentionally; we preserve them there
     if extension.lower() == '.md':
-        return '\n'.join(lines)
+        return '\n'.join(lines).strip()
 
+    # Step 3: Collapse multiple empty lines for code files
     collapsed_lines = []
     last_line_was_empty = False
     for line in lines:
@@ -54,7 +68,8 @@ def _sanitize_content(path, content):
             continue
         collapsed_lines.append(line)
         last_line_was_empty = is_empty
-    return '\n'.join(collapsed_lines)
+
+    return '\n'.join(collapsed_lines).strip()
 
 def execute_plan(base_dir, updates, creations, deletions=None):
     """Writes the planned changes to the filesystem and deletes files marked for removal"""
@@ -88,6 +103,9 @@ def parse_and_plan_changes(base_dir, markdown_text):
     Parses markdown using custom file wrappers, plans changes, and returns
     a dictionary describing the plan. This does NOT write any files.
     """
+    # Normalize input line endings immediately to simplify regex matching
+    markdown_text = markdown_text.replace('\r\n', '\n').replace('\r', '\n')
+
     # Define markers using concatenation to prevent self-detection
     PREFIX = "--- "
     FILE_LABEL = "File: "
@@ -154,10 +172,10 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
     # Identify file blocks
     file_block_regex = re.compile(
-        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s+'   # Header
-        r'```[^\n]*\s+'                                                          # Opening Backticks
-        r'(?P<content>(?:(?!\n' + re.escape(EOF_MARKER) + r').)*?)'              # Content (Negative Lookahead)
-        r'\s+```\s+'                                                             # Closing Backticks
+        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\n'    # Header
+        r'```[^\n]*\n'                                                          # Opening Backticks
+        r'(?P<content>.*?)'                                                     # Content
+        r'\n```\s*\n'                                                           # Closing Backticks
         r'^' + re.escape(EOF_MARKER),                                            # Footer
         re.DOTALL | re.MULTILINE
     )
@@ -167,7 +185,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'type': 'file',
             'path': match.group('path').strip().replace('\\', '/'),
             'span': match.span(),
-            'content': match.group('content').strip() # Content is cleaned of wrapper whitespace
+            'content': match.group('content')
         })
 
     # Sort blocks by starting position to identify chronological order

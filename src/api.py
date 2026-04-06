@@ -596,11 +596,21 @@ class Api:
         return plan
 
     def get_file_content(self, rel_path):
-        """Reads and returns the current content of a file relative to project root."""
+        """
+        Reads and returns the current content of a file.
+        Passes content through the sanitization pipeline to ensure the "Old"
+        text matches the formatting rules of the "New" text for the diff viewer.
+        """
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return None
-        return change_applier.get_current_file_content(project_config.base_dir, rel_path)
+
+        raw_content = change_applier.get_current_file_content(project_config.base_dir, rel_path)
+        if raw_content is None:
+            return None
+
+        # Standardize for the frontend diff tool
+        return change_applier._sanitize_content(rel_path, raw_content)
 
     def apply_single_file_change(self, rel_path, content):
         """
@@ -614,9 +624,11 @@ class Api:
         success, err = change_applier.apply_single_file(project_config.base_dir, rel_path, content)
         if success:
             # Synchronize configuration metadata
+            # Using the SANITIZED version for token counting consistency
+            sanitized = change_applier._sanitize_content(rel_path, content)
             full_path = os.path.join(project_config.base_dir, rel_path)
-            tokens = get_token_count_for_text(content)
-            lines = content.count('\n') + 1
+            tokens = get_token_count_for_text(sanitized)
+            lines = sanitized.count('\n') + 1
             mtime = os.path.getmtime(full_path)
             f_hash = get_file_hash(full_path)
 
