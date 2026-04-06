@@ -26,6 +26,7 @@ class WindowManager:
         self.dev_mode = dev_mode
         self.main_window = None
         self.compact_window = None
+        self._is_shutting_down = False
 
         # State lock to prevent race conditions during mode switches
         self._transitioning = False
@@ -61,8 +62,8 @@ class WindowManager:
             url=compact_url,
             js_api=self.api,
             width=100,
-            height=160,
-            min_size=(100, 160),
+            height=120,
+            min_size=(100, 120),
             frameless=True,
             on_top=True,
             hidden=True, # Start hidden for instant show later
@@ -74,6 +75,7 @@ class WindowManager:
 
         # Dashboard Events
         self.main_window.events.minimized += self._on_main_minimized
+        self.main_window.events.closing += self._on_main_closing
         self.main_window.events.closed += self._on_window_closed
 
         # Compact Events
@@ -102,19 +104,30 @@ class WindowManager:
 
             self._transitioning = False
 
+    def _on_main_closing(self):
+        """
+        Triggered when the main dashboard is about to close.
+        Destroying the compact window here prevents WebView2 shutdown race conditions
+        that cause Error 1411.
+        """
+        self._is_shutting_down = True
+        if self.compact_window:
+            try:
+                self.compact_window.destroy()
+            except Exception:
+                pass
+
     def _on_window_closed(self):
         """
         Triggered when the main dashboard is closed.
         Cleanup must be graceful to avoid Error 1411 (Chrome_WidgetWin unregister failure).
         """
-        if self.compact_window:
-            try:
-                self.compact_window.destroy()
-            except:
-                pass
+        pass
 
     def _on_compact_closing(self):
         """Prevents the compact window from being destroyed; restores main instead."""
+        if self._is_shutting_down:
+            return # Allow destruction
         self.restore_main()
         return False # Prevent actual window destruction
 
@@ -145,10 +158,13 @@ class WindowManager:
 
     def exit_all(self):
         """Closes all windows gracefully to allow process to exit naturally."""
+        self._is_shutting_down = True
         self.monitor.update_window(None)
         if self.main_window:
-            self.main_window.destroy()
-        # Compact window is destroyed via the main_window.events.closed handler
+            try:
+                self.main_window.destroy()
+            except Exception:
+                pass
 
 def main():
     setup_logging()
