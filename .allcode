@@ -943,10 +943,10 @@
         },
         {
           "path": "src/api.py",
-          "mtime": 1775515030.945706,
-          "hash": "2e99edf8b32fb130fd47805aa3e750a4811c5c39",
-          "tokens": 11185,
-          "lines": 1217
+          "mtime": 1775515711.1097548,
+          "hash": "cc7d3dde93ccf45bbbf5f171eba44942c217e699",
+          "tokens": 187,
+          "lines": 25
         },
         {
           "path": "frontend/postcss.config.js",
@@ -964,10 +964,10 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "mtime": 1775515221.9278128,
-          "hash": "5136c4fa9cf8f5fcac1726b49cb1c7a3c498137e",
-          "tokens": 3792,
-          "lines": 465
+          "mtime": 1775516099.4337735,
+          "hash": "e1d2bf6cc746366d48fdb494266a4b9e6596a6ac",
+          "tokens": 3783,
+          "lines": 463
         },
         {
           "path": "frontend/src/components/ProjectSelectorModal.vue",
@@ -1055,76 +1055,125 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "mtime": 1775515357.9199002,
-          "hash": "fa68b6d525e645391e5ad3149bdba6283789005d",
-          "tokens": 8726,
-          "lines": 734
+          "mtime": 1775516099.4347737,
+          "hash": "a387e02cd9c19bc01879cff016b5706b942cfa93",
+          "tokens": 8829,
+          "lines": 749
         },
         {
           "path": "src/api_parts/base_api.py",
           "mtime": 1775515711.10576,
-          "hash": "1609-1775515711.10576",
+          "hash": "03fe0ec72efbe9ec15acb79f51b9a3e640ca46bf",
           "tokens": 299,
           "lines": 33
         },
         {
           "path": "src/api_parts/changes_api.py",
           "mtime": 1775515711.1087563,
-          "hash": "6118-1775515711.1087563",
+          "hash": "82ae5b6656025c87a46884a0664e65af2ec35502",
           "tokens": 1240,
           "lines": 128
         },
         {
           "path": "src/api_parts/starter_api.py",
-          "mtime": 1775515711.1087563,
-          "hash": "22965-1775515711.1087563",
-          "tokens": 4783,
-          "lines": 461
+          "mtime": 1775516099.4327734,
+          "hash": "f89fa8d6ca469160b959a71073afe3db22a58e49",
+          "tokens": 5109,
+          "lines": 504
         },
         {
           "path": "src/api_parts/__init__.py",
           "mtime": 1775515711.1047559,
-          "hash": "30-1775515711.1047559",
+          "hash": "4233226c512e2cb21c2219b0ecb816117d49fc18",
           "tokens": 5,
           "lines": 1
         },
         {
           "path": "src/api_parts/config_api.py",
           "mtime": 1775515711.1067595,
-          "hash": "2572-1775515711.1067595",
+          "hash": "3f4515a1b701d45842bec3c524ede171f8dc27f2",
           "tokens": 473,
           "lines": 66
         },
         {
           "path": "src/api_parts/file_api.py",
           "mtime": 1775515711.1077561,
-          "hash": "9599-1775515711.1077561",
+          "hash": "0231f7fa01a3b0096873252a70423de0e1869e53",
           "tokens": 1838,
           "lines": 218
         },
         {
           "path": "src/api_parts/window_api.py",
-          "mtime": 1775515711.10576,
-          "hash": "3523-1775515711.10576",
-          "tokens": 726,
-          "lines": 87
+          "mtime": 1775515845.0695221,
+          "hash": "3c80f2fa26edaee18f422298c9f68d7823e39673",
+          "tokens": 676,
+          "lines": 83
         },
         {
           "path": "src/api_parts/clipboard_api.py",
           "mtime": 1775515711.1077561,
-          "hash": "3759-1775515711.1077561",
+          "hash": "f303156ff4b1829518738fa038ac445bab2b6365",
           "tokens": 713,
           "lines": 94
         },
         {
           "path": "src/api_parts/project_api.py",
           "mtime": 1775515711.1067595,
-          "hash": "7586-1775515711.1067595",
+          "hash": "f95f1947b38f5df08091b76a4390871e781d7a46",
           "tokens": 1370,
           "lines": 178
+        },
+        {
+          "path": "frontend/src/components/starter-steps/Step1Details.vue",
+          "mtime": 1775516455.5981221,
+          "hash": "2376-1775516455.5981221",
+          "tokens": 599,
+          "lines": 58
+        },
+        {
+          "path": "frontend/src/components/starter-steps/Step3Concept.vue",
+          "mtime": 1775516455.6021218,
+          "hash": "8101-1775516455.6021218",
+          "tokens": 2020,
+          "lines": 174
+        },
+        {
+          "path": "frontend/src/components/starter-steps/Step6Generate.vue",
+          "mtime": 1775516455.6041222,
+          "hash": "4488-1775516455.6041222",
+          "tokens": 1112,
+          "lines": 110
+        },
+        {
+          "path": "frontend/src/components/starter-steps/Step2BaseFiles.vue",
+          "mtime": 1775516455.5991235,
+          "hash": "4353-1775516455.5991235",
+          "tokens": 1082,
+          "lines": 113
+        },
+        {
+          "path": "frontend/src/components/starter-steps/Step4Stack.vue",
+          "mtime": 1775516455.6031234,
+          "hash": "3267-1775516455.6031234",
+          "tokens": 823,
+          "lines": 81
+        },
+        {
+          "path": "frontend/src/components/starter-steps/Step5Todo.vue",
+          "mtime": 1775516455.6031234,
+          "hash": "8549-1775516455.6031234",
+          "tokens": 2125,
+          "lines": 195
+        },
+        {
+          "path": "frontend/src/components/starter-steps/StepSuccess.vue",
+          "mtime": 1775516455.6061234,
+          "hash": "1026-1775516455.6061234",
+          "tokens": 259,
+          "lines": 27
         }
       ],
-      "total_tokens": 247235,
+      "total_tokens": 244627,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nLet's continue with the steps in `todo.md`. You can update checkmarks and add tasks or remove deprecated tasks, but DO NOT truncate todo.md!\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1179,6 +1228,13 @@
     "frontend/src/components/ProjectStarterModal.vue",
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
+    "frontend/src/components/starter-steps/Step1Details.vue",
+    "frontend/src/components/starter-steps/Step2BaseFiles.vue",
+    "frontend/src/components/starter-steps/Step3Concept.vue",
+    "frontend/src/components/starter-steps/Step4Stack.vue",
+    "frontend/src/components/starter-steps/Step5Todo.vue",
+    "frontend/src/components/starter-steps/Step6Generate.vue",
+    "frontend/src/components/starter-steps/StepSuccess.vue",
     "frontend/src/composables/useAppState.js",
     "frontend/src/main.js",
     "frontend/src/router/index.js",
