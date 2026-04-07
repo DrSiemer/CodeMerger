@@ -400,7 +400,7 @@ class ActionHandlers:
         if not project_config:
             return
 
-        # 1. Add to Merge List if not already there
+        # Add to Merge List if not already there
         if not any(f['path'] == rel_path for f in project_config.selected_files):
             new_entry = self._calculate_stats_for_file(rel_path)
             if new_entry:
@@ -408,10 +408,10 @@ class ActionHandlers:
                 # Recalculate total tokens
                 project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
 
-        # 2. Global State Cleanup: mark as known to prevent "New File" alerts
+        # Global State Cleanup: mark as known to prevent "New File" alerts
         project_config.known_files = sorted(list(set(project_config.known_files) | {rel_path}))
 
-        # 3. Profile State Cleanup: remove from active unknown tracker
+        # Profile State Cleanup: remove from active unknown tracker
         project_config.unknown_files = [f for f in project_config.unknown_files if f != rel_path]
 
         project_config.save()

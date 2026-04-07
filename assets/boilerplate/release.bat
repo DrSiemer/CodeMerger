@@ -14,7 +14,7 @@ if not defined VERSION_FILE (
     exit /b 1
 )
 
-:: --- 1. Get Version ---
+:: --- Get Version ---
 call :GetVersion "%VERSION_FILE%"
 if !errorlevel! neq 0 (
     echo Aborting: version file error.
@@ -23,7 +23,7 @@ if !errorlevel! neq 0 (
 set "VERSION_TAG=v!VERSION!"
 echo Version found: !VERSION_TAG!
 
-:: --- 2. Check Git Status ---
+:: --- Check Git Status ---
 git diff-index --quiet HEAD --
 if !errorlevel! neq 0 (
     echo.
@@ -33,7 +33,7 @@ if !errorlevel! neq 0 (
 )
 echo ✓ Git working directory clean.
 
-:: --- 3. Check Branch ---
+:: --- Check Branch ---
 set "CURRENT_BRANCH="
 for /f "tokens=*" %%b in ('git branch --show-current 2^>nul') do set "CURRENT_BRANCH=%%b"
 if /I not "!CURRENT_BRANCH!"=="master" if /I not "!CURRENT_BRANCH!"=="main" (
@@ -44,7 +44,7 @@ if /I not "!CURRENT_BRANCH!"=="master" if /I not "!CURRENT_BRANCH!"=="main" (
 )
 echo ✓ On primary branch ('!CURRENT_BRANCH!').
 
-:: --- 4. Handle Existing Tag ---
+:: --- Handle Existing Tag ---
 echo Checking for existing remote/local tag '!VERSION_TAG!'...
 git rev-parse "!VERSION_TAG!" >nul 2>&1
 if !errorlevel! equ 0 (
@@ -57,7 +57,7 @@ if !errorlevel! equ 0 (
     git push origin --delete !VERSION_TAG! >nul 2>&1
 )
 
-:: --- 5. Create and Push New Tag ---
+:: --- Create and Push New Tag ---
 echo.
 echo Creating new annotated tag !VERSION_TAG!...
 git tag -a "!VERSION_TAG!" -m "Release !VERSION_TAG!"

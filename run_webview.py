@@ -117,7 +117,7 @@ class WindowManager:
     def start(self):
         """Initializes both windows immediately for fast switching."""
 
-        # 1. Create Main Window
+        # Create Main Window
         self.main_window = webview.create_window(
             "CodeMerger",
             url=self.base_url,
@@ -128,7 +128,7 @@ class WindowManager:
             background_color='#2E2E2E'
         )
 
-        # 2. Create Compact Window (Hidden by default)
+        # Create Compact Window (Hidden by default)
         compact_url = f"{self.base_url}#/compact"
         if not self.dev_mode:
             compact_url = f"file://{self.base_url}#/compact"

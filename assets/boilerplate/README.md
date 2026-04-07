@@ -8,7 +8,7 @@ See [concept.md](concept.md) for a detailed breakdown of the application's featu
 
 Follow these steps to get your development environment set up and running.
 
-### 1. Prerequisites
+### Prerequisites
 
 Based on the **[CodeStack]** stack, you will need the following tools installed on your system:
 
@@ -18,7 +18,7 @@ Based on the **[CodeStack]** stack, you will need the following tools installed 
 - **[Database, e.g., PostgreSQL, SQLite]:** The database system.
 - **[Any other required CLI tools, e.g., Docker]:** Any other tools needed.
 
-### 2. Clone and Initialize the Repository
+### Clone and Initialize the Repository
 
 First, get the code. Then, it's highly recommended to initialize it as your own Git repository and connect it to a remote like GitHub.
 
@@ -37,7 +37,7 @@ git commit -m "Initial commit from boilerplate"
 # git push -u origin main
 ```
 
-### 3. Install Dependencies & Run
+### Install Dependencies & Run
 
 This project uses a `go.bat` script to streamline common tasks.
 
