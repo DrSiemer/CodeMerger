@@ -125,7 +125,7 @@ def _populate_tabs(window):
 
         if stype == 'tag':
             tag_name = seg['tag']
-            if tag_name == "DELETED FILES": continue
+            if tag_name in ["DELETED FILES", "UNCHANGED"]: continue
 
             if tag_name == "VERIFICATION" and not changes_tab_added and has_file_blocks:
                 window.changes.add_interactive_changes_tab()

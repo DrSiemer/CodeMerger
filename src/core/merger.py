@@ -82,7 +82,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 5. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
    - ONLY output files that have actually been modified.
    - If a file's final code is **byte-for-byte identical** to the original input provided in this prompt, **DO NOT** include it in your output.
-   - You may list names of unchanged files at the end of your response, but do not wrap them in code blocks.
+   - **UNCHANGED FILES (LAST RESORT ONLY):** If you feel a strict compulsion to acknowledge files you didn't modify, use the optional `<UNCHANGED>` block at the very end of your response. DO NOT output this block if you can simply stop yourself from outputting unchanged files. It is only here to prevent you from wasting tokens on unmodified code blocks.
 
 6. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
@@ -95,7 +95,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
 
-7. **DELETE & VERIFICATION (POST-CODE):**
+7. **DELETE, VERIFICATION & UNCHANGED (POST-CODE):**
    Immediately following the final "--- End of file ---" marker, provide these sections:
 
    <DELETED FILES>
@@ -108,6 +108,10 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    <VERIFICATION>
    - Steps to test the changes.
    </VERIFICATION>
+
+   <UNCHANGED>
+   (OPTIONAL: You may list the names of unchanged files here to satisfy any compulsion to acknowledge them without outputting their code. Omit this block entirely if possible.)
+   </UNCHANGED>
 
 ==========
 

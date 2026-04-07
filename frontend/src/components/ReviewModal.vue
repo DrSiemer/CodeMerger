@@ -60,7 +60,7 @@ const tabs = computed(() => {
       } else if (seg.tag === 'VERIFICATION' && hasContent) {
         list.push({ id: 'verification', name: 'Verification', icon: ShieldCheck, content: seg.content, color: 'text-cm-green' })
       }
-      // Note: DELETED FILES tab intentionally omitted as it's merged into Changes
+      // Note: DELETED FILES and UNCHANGED tabs intentionally omitted as they are handled elsewhere or ignored
     } else if (seg.type === 'orphan' && hasContent) {
       list.push({ id: 'unformatted', name: 'Unformatted Output', icon: AlertTriangle, content: seg.content, color: 'text-yellow-500' })
     }

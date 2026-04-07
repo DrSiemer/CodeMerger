@@ -114,12 +114,13 @@ class ChangesApi:
         ANS_W = "ANS" + "WERS" + " TO DIR" + "ECT USER QUE" + "STIONS"
         CHA_N = "CHA" + "NGES"
         VER_I = "VER" + "IFI" + "CATION"
+        UNC_H = "UNC" + "HANGED"
 
         msg = (
             "Please follow the output format strictly as described in your instructions. "
             "Your previous response did not fully comply with the required formatting standards. "
             "Specifically, please ensure that:\n"
-            f"- ALL commentary and explanations are placed inside the mandatory XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}).\n"
+            f"- ALL commentary and explanations must be placed inside one of the allowed XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}, {LT}{UNC_H}{RT}).\n"
             "- No text or commentary exists outside of these tags.\n"
             f"- File markers are present and correctly formatted ({PRE}File: `path` --- and {PRE}End of file ---).\n"
             "- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.\n"

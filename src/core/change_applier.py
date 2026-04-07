@@ -127,7 +127,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     all_blocks = []
 
     # Identify tagged sections
-    tags = ["ANSWERS TO DIRECT USER QUESTIONS", "INTRO", "CHANGES", "DELETED FILES", "VERIFICATION"]
+    tags = ["ANSWERS TO DIRECT USER QUESTIONS", "INTRO", "CHANGES", "DELETED FILES", "VERIFICATION", "UNCHANGED"]
     for tag in tags:
         # Accept truncated closing tag as well
         if tag == "ANSWERS TO DIRECT USER QUESTIONS":
