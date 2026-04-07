@@ -107,6 +107,98 @@ class ChangesApi:
 
         return success, err
 
+    def claim_last_plan(self):
+        """Used by the main window to retrieve a plan prepared by the compact window."""
+        plan = self._last_parsed_plan
+        self._last_parsed_plan = None
+        return plan
+
+    def apply_full_plan(self, plan):
+        """
+        Executes a bulk update plan and synchronizes metadata for all processed files.
+        Used for 'Auto-Apply' (Ctrl-click) workflows.
+        """
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return False, "No active project."
+
+        updates = plan.get('updates', {})
+        creations = plan.get('creations', {})
+        deletions = plan.get('deletions_proposed', [])
+        skipped = set(plan.get('skipped_files', []))
+
+        # Filter plans based on skipped status
+        actual_updates = {p: c for p, c in updates.items() if p not in skipped}
+        actual_deletions = [p for p in deletions if p not in skipped]
+
+        success, msg = change_applier.execute_plan(
+            project_config.base_dir, actual_updates, creations, actual_deletions
+        )
+
+        if success:
+            # Process Metadata Sync for all created or updated files
+            all_changed_paths = set(actual_updates.keys()) | set(creations.keys())
+
+            for rel_path in all_changed_paths:
+                full_path = os.path.join(project_config.base_dir, rel_path)
+                if not os.path.isfile(full_path):
+                    continue
+
+                mtime = os.path.getmtime(full_path)
+                f_hash = get_file_hash(full_path)
+
+                # Get content to calculate tokens/lines
+                try:
+                    with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        raw = f.read()
+                    sanitized = change_applier._sanitize_content(rel_path, raw)
+                    tokens = get_token_count_for_text(sanitized)
+                    lines = sanitized.count('\n') + 1
+                except Exception:
+                    tokens, lines = 0, 0
+
+                # Ensure file is marked as known globally
+                if rel_path not in project_config.known_files:
+                    project_config.known_files.append(rel_path)
+
+                # Update selected_files and total_tokens for the active profile
+                found_in_active = False
+                for f_info in project_config.selected_files:
+                    if f_info['path'] == rel_path:
+                        f_info.update({'tokens': tokens, 'lines': lines, 'mtime': mtime, 'hash': f_hash})
+                        found_in_active = True
+                        break
+
+                if not found_in_active:
+                    project_config.selected_files.append({
+                        'path': rel_path, 'tokens': tokens, 'lines': lines,
+                        'mtime': mtime, 'hash': f_hash
+                    })
+
+            # Cleanup globally after processing all additions
+            project_config.known_files.sort()
+
+            # Handle global cleanup for deleted files
+            if actual_deletions:
+                for rel_path in actual_deletions:
+                    if rel_path in project_config.known_files:
+                        project_config.known_files.remove(rel_path)
+
+                    # Remove from all profiles
+                    for p_data in project_config.profiles.values():
+                        p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] != rel_path]
+                        p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f != rel_path]
+
+            # Recalculate total tokens for active profile
+            project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
+
+            project_config.save()
+
+            if skipped:
+                msg = f"Updated {len(all_changed_paths)} file(s). {len(skipped)} file(s) already up to date."
+
+        return success, msg
+
     def get_admonishment_prompt(self):
         """Generates a specialized prompt for corrected AI output format."""
         LT, RT, PRE = "<", ">", "--- "

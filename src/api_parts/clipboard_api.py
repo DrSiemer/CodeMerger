@@ -44,42 +44,73 @@ class ClipboardApi:
 
         return status_message or "Error: Could not generate content."
 
-    def request_remote_paste(self, revert_on_close):
+    def request_remote_paste(self, revert_on_close, auto_apply):
         """
         Special cross-window method called by Compact mode.
-        Reads clipboard, parses plan, and notifies the Main window to show review.
+        Reads clipboard, parses plan, and either applies it or notifies the Main window to show review.
         """
         if not self._window_manager or not self._window_manager.main_window:
             return False
 
         text = pyperclip.paste()
         if not text or not text.strip():
-            return False
+            return "Clipboard is empty."
 
         project_config = self.project_manager.get_current_project()
         if not project_config:
-            return False
+            return "No active project."
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
         if plan.get('status') == 'ERROR':
             # We don't alert here to avoid focus stealing artifacts on Compact Mode
             return False
 
-        # Prepare payload for Main Window
-        payload = {
-            'plan': plan,
-            'revertOnClose': revert_on_close
-        }
-        json_payload = json.dumps(payload)
+        # AUTO-APPLY LOGIC (Ctrl-click behavior)
+        if auto_apply and plan.get('status') != 'UNFORMATTED':
+            creations = plan.get('creations', {})
+            updates = plan.get('updates', {})
+            deletions = plan.get('deletions_proposed', [])
+            skipped = set(plan.get('skipped_files', []))
 
-        # Inject command into main window's memory
-        js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-paste', {{ detail: {json_payload} }}))"
+            # Filter out no-ops to see if there is actually work to do
+            actual_updates = {p: c for p, c in updates.items() if p not in skipped}
+            actual_deletions = [p for p in deletions if p not in skipped]
+
+            if not actual_updates and not creations and not actual_deletions:
+                return "Everything is already up to date."
+
+            threshold = self.app_state.config.get('new_file_alert_threshold', 5)
+
+            dangerous_actions = []
+            if len(creations) > threshold:
+                dangerous_actions.append(f"CREATE {len(creations)} file(s)")
+            if actual_deletions:
+                dangerous_actions.append(f"DELETE {len(actual_deletions)} file(s)")
+
+            proceed = True
+            if dangerous_actions:
+                msg = "This operation will perform the following actions:\n\n- " + "\n- ".join(dangerous_actions) + "\n\nDo you want to proceed?"
+                # Compact window is always visible during this call
+                proceed = self._window_manager.compact_window.create_confirmation_dialog("Confirm File Actions", msg)
+
+            if proceed:
+                success, msg = self.apply_full_plan(plan)
+                if success:
+                    # Notify UI of the side-effect application
+                    self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                    return msg
+
+        # FALLBACK: Send signal to Main Window for review
+        # We store the plan on the API instance to avoid breaking JS evaluation with large payloads
+        self._last_parsed_plan = plan
+
+        js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-paste-request', {{ detail: {{ revertOnClose: {'true' if revert_on_close else 'false'} }} }}))"
         try:
             self._window_manager.main_window.evaluate_js(js_cmd)
             self._window_manager.restore_main()
             return True
         except Exception as e:
-            log.error(f"Failed to trigger remote paste: {e}")
+            log.error(f"Failed to trigger remote paste signal: {e}")
             return False
 
     def get_clipboard_text(self):

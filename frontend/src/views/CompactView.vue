@@ -12,7 +12,8 @@ const {
   copyCode,
   restoreMainWindow,
   closeApp,
-  openProjectFolder
+  openProjectFolder,
+  statusMessage
 } = useAppState()
 
 const isCopying = ref(false)
@@ -94,10 +95,16 @@ const handleCopy = async (event) => {
   }
 }
 
-const handlePaste = async () => {
+const handlePaste = async (event) => {
   if (window.pywebview) {
-    // We call a special remote-paste method that targets the main window's browser context
-    await window.pywebview.api.request_remote_paste(true)
+    // We call a special remote-paste method that targets the main window's browser context.
+    // Holding Ctrl triggers 'Auto-Apply' (matching Tkinter behavior).
+    const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey)
+
+    // Display returned status messages (e.g. "Already up to date")
+    if (typeof result === 'string') {
+      statusMessage.value = result
+    }
   }
 }
 
@@ -109,7 +116,10 @@ const handleClose = (event) => {
   }
 }
 
-// Logic for project name abbreviation - Ported exactly from Python logic
+/**
+ * Logic for project name abbreviation - EXACT port from Tkinter version.
+ * Prioritizes capital letters, then fills remaining 8 slots with lowercase from the start.
+ */
 const titleAbbr = computed(() => {
   const name = activeProject.name || 'CodeMerger'
   const maxLen = 8
@@ -145,6 +155,7 @@ const titleAbbr = computed(() => {
     indicesToKeep.sort((a, b) => a - b)
     return indicesToKeep.map(i => chars[i]).join('')
   } else {
+    // Fallback for single-case or short names
     const noSpaceTitle = name.replace(/\s/g, '')
     return noSpaceTitle.slice(0, maxLen)
   }
@@ -167,7 +178,7 @@ const copyButtonText = computed(() => {
       <div class="flex items-center space-x-2 min-w-0 pointer-events-none">
         <img v-if="appIcon" :src="appIcon" class="w-4 h-4" />
         <span
-          class="text-[11px] font-black tracking-widest uppercase truncate px-1 py-0.5 rounded leading-none"
+          class="text-[9px] font-black tracking-widest px-1 py-0.5 rounded leading-none whitespace-nowrap overflow-hidden"
           :style="{ color: activeProject.fontColor === 'dark' ? '#000000' : '#FFFFFF', backgroundColor: activeProject.color || '#666666' }"
         >
           {{ titleAbbr }}
@@ -213,7 +224,7 @@ const copyButtonText = computed(() => {
         <button
           @click="handlePaste"
           class="flex-grow bg-cm-green hover:bg-green-600 text-white font-bold py-2.5 rounded text-[11px] transition-all active:scale-95 shadow"
-          title="Paste response from AI"
+          title="Paste response from AI (Ctrl+Click to auto-apply)"
         >
           Paste
         </button>

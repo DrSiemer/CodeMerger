@@ -34,7 +34,8 @@ const {
   selectColor,
   processPaste,
   copyCleanupPrompt,
-  minimizeWindow
+  minimizeWindow,
+  claimLastPlan
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -178,8 +179,17 @@ const closeReviewModal = () => {
   }
 }
 
-const onRemotePasteRequest = (event) => {
-  const { plan, revertOnClose } = event.detail
+/**
+ * Handles paste requests originating from the Compact window.
+ * Mirrored logic from useAppState.js processPaste() to ensure 'skipped'
+ * files are correctly identified.
+ */
+const onRemotePasteRequest = async (event) => {
+  const { revertOnClose } = event.detail
+
+  // Claim the pre-parsed plan from the Python state
+  const plan = await claimLastPlan()
+  if (!plan) return
 
   lastAiResponse.value = plan
   revertToCompactOnClose.value = revertOnClose
@@ -192,20 +202,22 @@ const onRemotePasteRequest = (event) => {
   const updates = plan.updates || {}
   const creations = plan.creations || {}
   const deletions = plan.deletions_proposed || []
+  const skipped = plan.skipped_files || []
 
-  Object.keys(updates).forEach(p => planFileStates.value[p] = 'pending')
+  // Initialize states, correctly marking 'No changes' files as skipped
+  Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
   Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
-  deletions.forEach(p => planFileStates.value[p] = 'pending')
+  deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
 
   showReviewModal.value = true
 }
 
 onMounted(() => {
-  window.addEventListener('cm-remote-paste', onRemotePasteRequest)
+  window.addEventListener('cm-remote-paste-request', onRemotePasteRequest)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('cm-remote-paste', onRemotePasteRequest)
+  window.removeEventListener('cm-remote-paste-request', onRemotePasteRequest)
 })
 </script>
 

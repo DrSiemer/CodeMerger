@@ -38,7 +38,7 @@ const revertToCompactOnClose = ref(false)
 const editorFontSize = ref(15)
 
 // Persistence for AI Review Window
-const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted'
+const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted' | 'skipped'
 const planOriginalContents = ref({}) // path -> string content (for undo)
 
 let statusTimeout = null
@@ -311,10 +311,12 @@ export function useAppState() {
       const updates = plan.updates || {}
       const creations = plan.creations || {}
       const deletions = plan.deletions_proposed || []
+      const skipped = plan.skipped_files || []
 
-      Object.keys(updates).forEach(p => planFileStates.value[p] = 'pending')
+      // CRITICAL: Initialize states including the new 'skipped' status
+      Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
       Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
-      deletions.forEach(p => planFileStates.value[p] = 'pending')
+      deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
 
       return true
     } catch (err) {
@@ -475,6 +477,7 @@ export function useAppState() {
     createStarterProject: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project(output, includeRef, pitch, data) : null,
     createStarterProjectOverwrite: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project_overwrite(output, includeRef, pitch, data) : null,
     selectDirectory: async () => window.pywebview ? await window.pywebview.api.select_directory() : null,
-    openPath: async (path) => window.pywebview ? await window.pywebview.api.open_path(path) : false
+    openPath: async (path) => window.pywebview ? await window.pywebview.api.open_path(path) : false,
+    claimLastPlan: async () => window.pywebview ? await window.pywebview.api.claim_last_plan() : null
   }
 }

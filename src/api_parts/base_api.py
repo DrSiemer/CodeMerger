@@ -6,6 +6,10 @@ class BaseApi:
         # during JS API generation, which avoids a premature DOM evaluation crash.
         self._window_manager = None
         self._color_picker_active = False
+
+        # Stored plan for cross-window handoffs (Compact -> Main)
+        self._last_parsed_plan = None
+
         self.app_state = app_state
         self.project_manager = project_manager
 

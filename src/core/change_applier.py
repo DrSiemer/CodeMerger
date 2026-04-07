@@ -42,7 +42,7 @@ def _sanitize_content(path, content):
     Normalizes content for writing and comparison.
     1. Converts CRLF to LF to prevent phantom diffs in WebView.
     2. Strips trailing whitespace from every line.
-    3. Collapses consecutive empty lines.
+    3. Collapses consecutive empty lines (non-Markdown only).
     """
     if not content:
         return ""
@@ -180,15 +180,39 @@ def parse_and_plan_changes(base_dir, markdown_text):
         re.DOTALL | re.MULTILINE
     )
 
+    # State tracking for planned changes
+    files_to_update = {}
+    files_to_create = {}
+    skipped_files = [] # Tracks paths that are already identical or missing for deletion
+
     for match in file_block_regex.finditer(markdown_text):
+        rel_path = match.group('path').strip().replace('\\', '/')
+
+        # CRITICAL: Sanitize content IMMEDIATELY to prevent phantom diffs from trailing whitespace
+        sanitized_new = _sanitize_content(rel_path, match.group('content'))
+
         all_blocks.append({
             'type': 'file',
-            'path': match.group('path').strip().replace('\\', '/'),
+            'path': rel_path,
             'span': match.span(),
-            'content': match.group('content')
+            'content': sanitized_new
         })
 
-    # Sort blocks by starting position to identify chronological order
+        # Check for NO-OP against existing disk content
+        if os.path.isfile(os.path.join(base_dir, rel_path)):
+            old_raw = get_current_file_content(base_dir, rel_path)
+            if old_raw is not None:
+                # Sanitize the local file EXACTLY the same way as the LLM input
+                sanitized_old = _sanitize_content(rel_path, old_raw)
+
+                if sanitized_old == sanitized_new:
+                    skipped_files.append(rel_path)
+
+            files_to_update[rel_path] = sanitized_new
+        else:
+            files_to_create[rel_path] = sanitized_new
+
+    # Sort blocks by starting position to identify chronological order for UI tabs
     all_blocks.sort(key=lambda x: x['span'][0])
 
     # Map orphans (unformatted gaps between valid blocks)
@@ -224,67 +248,23 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'content': final_gap
         })
 
-    # Validation and planning for file changes
-    files_to_update = {}
-    files_to_create = {}
+    # Validate Paths (Critical Security Step)
     invalid_chars_pattern = r'[<>:"|?*]'
     base_dir_abs = os.path.abspath(base_dir)
 
-    # Validate Proposed Deletions (Critical Security Step)
     for rel_path in deletions_proposed:
         if re.search(invalid_chars_pattern, rel_path):
-            return {
-                'status': 'ERROR',
-                'message': f"Error: The deletion path '{rel_path}' contains invalid characters."
-            }
-
+            return {'status': 'ERROR', 'message': f"Error: The deletion path '{rel_path}' contains invalid characters."}
         try:
             full_path = os.path.abspath(os.path.join(base_dir_abs, rel_path))
             if os.path.commonpath([base_dir_abs, full_path]) != base_dir_abs:
-                return {
-                    'status': 'ERROR',
-                    'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."
-                }
+                return {'status': 'ERROR', 'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."}
+
+            # NO-OP check for deletions: if file is already gone
+            if not os.path.isfile(full_path):
+                skipped_files.append(rel_path)
         except (ValueError, Exception):
-            return {
-                'status': 'ERROR',
-                'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."
-            }
-
-    # Validate and Plan File Blocks (Updates/Creations)
-    file_blocks = [b for b in all_blocks if b['type'] == 'file']
-    for b in file_blocks:
-        rel_path = b['path']
-        content = b['content']
-
-        if re.search(invalid_chars_pattern, rel_path):
-            return {
-                'status': 'ERROR',
-                'message': f"Error: The file path '{rel_path}' contains invalid characters."
-            }
-
-        try:
-            full_path = os.path.abspath(os.path.join(base_dir_abs, rel_path))
-            if os.path.commonpath([base_dir_abs, full_path]) != base_dir_abs:
-                return {
-                    'status': 'ERROR',
-                    'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."
-                }
-        except (ValueError, Exception):
-            return {
-                'status': 'ERROR',
-                'message': f"Error: Path '{rel_path}' attempts to access a location outside the project directory."
-            }
-
-        if os.path.isfile(full_path):
-            files_to_update[rel_path] = content
-        elif os.path.isdir(full_path):
-            return {
-                'status': 'ERROR',
-                'message': f"Error: The path '{rel_path}' points to a directory, not a file."
-            }
-        else:
-            files_to_create[rel_path] = content
+            return {'status': 'ERROR', 'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."}
 
     # Helper to extract flat tag content for compatibility
     def get_tag_content(tag_name):
@@ -297,6 +277,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         'updates': files_to_update,
         'creations': files_to_create,
         'deletions_proposed': deletions_proposed,
+        'skipped_files': skipped_files, # Returned to frontend for "No changes" labeling
         'answers': get_tag_content("ANSWERS TO DIRECT USER QUESTIONS"),
         'intro': get_tag_content("INTRO"),
         'changes': get_tag_content("CHANGES"),

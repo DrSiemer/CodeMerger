@@ -204,6 +204,11 @@ const handlePasteNext = async () => {
 const getPendingCount = computed(() => {
   return Object.values(planFileStates.value).filter(s => s === 'pending').length
 })
+
+const getSkippedMessage = (path) => {
+  const isDeletion = lastAiResponse.value?.deletions_proposed?.includes(path)
+  return isDeletion ? 'Already deleted' : 'No changes'
+}
 </script>
 
 <template>
@@ -292,12 +297,15 @@ const getPendingCount = computed(() => {
                       <div class="flex items-center space-x-3 min-w-0">
                         <span
                           class="font-mono text-sm truncate"
-                          :class="planFileStates[path] === 'pending' ? 'text-gray-200' : 'text-gray-500 line-through'"
+                          :class="['pending', 'skipped'].includes(planFileStates[path]) ? (planFileStates[path] === 'skipped' ? 'text-[#888888]' : 'text-gray-200') : 'text-gray-500 line-through'"
                         >{{ path }}</span>
                       </div>
 
                       <div class="flex items-center space-x-2 shrink-0">
-                        <template v-if="planFileStates[path] === 'pending'">
+                        <template v-if="planFileStates[path] === 'skipped'">
+                          <span class="text-xs font-bold text-gray-500 px-3 py-1 bg-gray-800 rounded">{{ getSkippedMessage(path) }}</span>
+                        </template>
+                        <template v-else-if="planFileStates[path] === 'pending'">
                           <button @click="toggleDiff(path)" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors flex items-center">
                             <Eye class="w-3.5 h-3.5 mr-1.5" />
                             Diff
@@ -355,9 +363,15 @@ const getPendingCount = computed(() => {
                 </div>
                 <div v-for="path in lastAiResponse.deletions_proposed" :key="path" class="border border-gray-700 rounded bg-cm-input-bg/30 mb-3">
                   <div class="p-3 flex items-center justify-between">
-                    <span class="font-mono text-sm text-gray-200" :class="{'text-gray-500 line-through': planFileStates[path] === 'deleted'}">{{ path }}</span>
+                    <span
+                      class="font-mono text-sm truncate"
+                      :class="['pending', 'skipped'].includes(planFileStates[path]) ? (planFileStates[path] === 'skipped' ? 'text-[#888888]' : 'text-gray-200') : 'text-gray-500 line-through'"
+                    >{{ path }}</span>
                     <div class="flex items-center space-x-2">
-                      <template v-if="planFileStates[path] === 'pending'">
+                      <template v-if="planFileStates[path] === 'skipped'">
+                        <span class="text-xs font-bold text-gray-500 px-3 py-1 bg-gray-800 rounded">{{ getSkippedMessage(path) }}</span>
+                      </template>
+                      <template v-else-if="planFileStates[path] === 'pending'">
                         <button @click="toggleDiff(path)" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors">View</button>
                         <button @click="acceptChange(path, 'delete')" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-3 py-1 rounded transition-colors">Accept Delete</button>
                         <button @click="discardChange(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Keep</button>
