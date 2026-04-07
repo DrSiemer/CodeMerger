@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Upload } from 'lucide-vue-next'
+import { Upload, Copy, Check } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -22,19 +22,43 @@ const {
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.generate_llm_response)
+const isPathCopied = ref(false)
+
+const isFolderValid = computed(() => {
+  return props.pData.parent_folder && props.pData.parent_folder.trim() !== ''
+})
+
+const fullPathPreview = computed(() => {
+  if (!props.pData.name || !props.pData.parent_folder) return ''
+
+  // Mirror Python sanitize_project_name logic
+  const sanitizedName = props.pData.name
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+
+  const parent = props.pData.parent_folder.replace(/\//g, '\\')
+  return `${parent}\\${sanitizedName}`
+})
 
 const copyToClipboard = async (text, buttonEvent) => {
   await navigator.clipboard.writeText(text)
-  const target = buttonEvent.target
+  const target = buttonEvent.currentTarget
   const originalText = target.innerText
   target.innerText = "Copied!"
-  setTimeout(() => { target.innerText = originalText }, 2000)
+  setTimeout(() => { if (target) target.innerText = originalText }, 2000)
+}
+
+const copyPathToClipboard = async () => {
+  if (!fullPathPreview.value) return
+  await navigator.clipboard.writeText(fullPathPreview.value)
+  isPathCopied.value = true
+  setTimeout(() => { isPathCopied.value = false }, 2000)
 }
 
 const browseParentFolder = async () => {
   const folder = await selectDirectory()
   if (folder) {
-    // Normalization logic
     const normalized = folder.replace(/\//g, '\\')
     props.pData.parent_folder = normalized
   }
@@ -73,7 +97,7 @@ const createProject = async () => {
 
 <template>
   <div class="max-w-3xl mx-auto w-full space-y-8 text-gray-100 pb-8" @wheel.ctrl.prevent="handleZoom">
-    <h3 class="text-2xl font-bold text-white">Finalize & Generate</h3>
+    <h3 class="text-2xl font-bold text-white">Finalize and Generate</h3>
     <div class="bg-gray-800 p-8 rounded border border-gray-700 space-y-6">
       <div class="space-y-3">
         <label class="block text-gray-300 font-bold text-sm uppercase">1. Destination Folder</label>
@@ -81,12 +105,32 @@ const createProject = async () => {
           <input v-model="pData.parent_folder" type="text" class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-2 text-sm outline-none focus:border-cm-blue">
           <button @click="browseParentFolder" class="bg-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-600 font-bold">Browse</button>
         </div>
-        <div v-if="pData.name && pData.parent_folder" class="text-cm-blue text-xs font-mono">Full path: {{ pData.parent_folder }}\{{ pData.name.replace(/\s+/g, '-') }}</div>
+
+        <div
+          v-if="fullPathPreview"
+          class="bg-black/20 border border-cm-blue/20 rounded p-2 flex items-center justify-between group cursor-pointer hover:bg-black/30 transition-colors"
+          @click="copyPathToClipboard"
+          title="Click to copy full path"
+        >
+          <div class="flex flex-col min-w-0">
+            <span class="text-[10px] text-gray-500 font-bold uppercase tracking-tight select-none">Full Project path (sanitized)</span>
+            <span class="text-cm-blue text-xs font-mono truncate select-none">{{ fullPathPreview }}</span>
+          </div>
+          <div class="shrink-0 ml-4 opacity-40 group-hover:opacity-100 transition-opacity">
+            <Check v-if="isPathCopied" class="w-4 h-4 text-cm-green" />
+            <Copy v-else class="w-4 h-4 text-cm-blue" />
+          </div>
+        </div>
       </div>
-      <div class="pt-6 border-t border-gray-700 flex flex-col space-y-4">
+
+      <div v-if="isFolderValid" class="pt-6 border-t border-gray-700 flex flex-col space-y-4">
         <label class="block text-gray-300 font-bold text-sm uppercase">2. Creation Prompt</label>
         <button @click="copyMasterPrompt" class="bg-cm-blue text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-500 transition-colors">Copy Final Creation Prompt</button>
-        <textarea v-if="showPasteArea" v-model="pData.generate_llm_response" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
+
+        <div v-if="showPasteArea" class="pt-4 flex flex-col space-y-3">
+          <label class="block text-gray-300 font-bold text-sm uppercase">3. Paste the LLM Output</label>
+          <textarea v-model="pData.generate_llm_response" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
+        </div>
       </div>
     </div>
     <div class="flex justify-end mt-4">

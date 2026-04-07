@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
-import { Play, Save, Upload, Trash2, LogOut, X } from 'lucide-vue-next'
+import { Leaf, Save, Upload, Trash2, LogOut, X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 import Step1Details from './starter-steps/Step1Details.vue'
@@ -28,6 +28,7 @@ const {
 const currentStep = ref(1)
 const maxAccessibleStep = ref(1)
 const isLoading = ref(true)
+const isResetting = ref(false)
 
 const toastMessage = ref('')
 const showToast = ref(false)
@@ -82,11 +83,9 @@ onMounted(async () => {
   if (saved && Object.keys(saved).length > 0) {
     Object.assign(pData, saved)
     recalcProgress()
-    if (saved.current_step && saved.current_step <= maxAccessibleStep.value) {
-      currentStep.value = saved.current_step
-    } else {
-      currentStep.value = maxAccessibleStep.value
-    }
+
+    // Always navigate to the farthest reachable phase when opening the starter.
+    currentStep.value = maxAccessibleStep.value
   } else {
     pData.parent_folder = config.value?.default_parent_folder || ''
     pData.stack_experience = config.value?.user_experience || ''
@@ -102,6 +101,7 @@ onUnmounted(() => {
 })
 
 watch(() => pData, () => {
+  if (isResetting.value) return
   recalcProgress()
   saveState()
 }, { deep: true })
@@ -125,7 +125,7 @@ const recalcProgress = () => {
 }
 
 const saveState = async () => {
-  if (isLoading.value) return
+  if (isLoading.value || isResetting.value) return
   await saveStarterSession({ current_step: currentStep.value, ...pData })
 }
 
@@ -151,51 +151,62 @@ const importConfig = async () => {
   if (loadedData) {
     Object.assign(pData, loadedData)
     recalcProgress()
-    if (loadedData.current_step && loadedData.current_step <= maxAccessibleStep.value) {
-      currentStep.value = loadedData.current_step
-    } else {
-      currentStep.value = maxAccessibleStep.value
-    }
+
+    // Always navigate to the farthest reachable phase when loading a config.
+    currentStep.value = maxAccessibleStep.value
+
     saveState()
     showToastNotification("Config loaded successfully.")
   }
 }
 
+/**
+ * Resets all reactive data and deletes the session file from disk.
+ */
+const performReset = async () => {
+  isResetting.value = true
+
+  await clearStarterSession()
+
+  pData.name = ''
+  pData.parent_folder = config.value?.default_parent_folder || ''
+  pData.stack = ''
+  pData.stack_experience = config.value?.user_experience || ''
+  pData.goal = ''
+  pData.concept_md = ''
+  pData.todo_md = ''
+  pData.base_project_path = ''
+  pData.base_project_files = []
+  pData.include_base_reference = true
+
+  pData.concept_llm_response = ''
+  pData.stack_llm_response = ''
+  pData.todo_llm_response = ''
+  pData.generate_llm_response = ''
+
+  pData.concept_segments = {}
+  pData.concept_signoffs = {}
+  pData.concept_baselines = {}
+  pData.todo_phases = []
+  pData.todo_segments = {}
+  pData.todo_signoffs = {}
+  pData.todo_baselines = {}
+
+  currentStep.value = 1
+  maxAccessibleStep.value = 1
+
+  isResetting.value = false
+}
+
 const clearAll = async () => {
   if (confirm("Are you sure you want to clear all project data and start fresh?")) {
-    await clearStarterSession()
-
-    pData.name = ''
-    pData.parent_folder = config.value?.default_parent_folder || ''
-    pData.stack = ''
-    pData.stack_experience = config.value?.user_experience || ''
-    pData.goal = ''
-    pData.concept_md = ''
-    pData.todo_md = ''
-    pData.base_project_path = ''
-    pData.base_project_files = []
-    pData.include_base_reference = true
-
-    pData.concept_llm_response = ''
-    pData.stack_llm_response = ''
-    pData.todo_llm_response = ''
-    pData.generate_llm_response = ''
-
-    pData.concept_segments = {}
-    pData.concept_signoffs = {}
-    pData.concept_baselines = {}
-    pData.todo_phases = []
-    pData.todo_segments = {}
-    pData.todo_signoffs = {}
-    pData.todo_baselines = {}
-
-    currentStep.value = 1
-    maxAccessibleStep.value = 1
-    successScreenData.value = null
+    await performReset()
   }
 }
 
-const onProjectCreated = (res) => {
+const onProjectCreated = async (res) => {
+  // Clearing the project starter state immediately upon successful generation
+  await performReset()
   successScreenData.value = res
 }
 
@@ -216,6 +227,18 @@ const isNextDisabled = computed(() => {
     return !hasResponse;
   }
   return false;
+})
+
+const isStarterEmpty = computed(() => {
+  return !pData.name.trim() &&
+         !pData.goal.trim() &&
+         !pData.base_project_path &&
+         !pData.concept_md &&
+         !pData.todo_md &&
+         !pData.concept_llm_response &&
+         !pData.stack_llm_response &&
+         !pData.todo_llm_response &&
+         !pData.generate_llm_response
 })
 
 const goToStep = (step) => {
@@ -274,7 +297,7 @@ const nextStep = () => {
       <!-- Header -->
       <div class="bg-cm-top-bar border-b border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-4">
-          <Play class="w-6 h-6 text-cm-blue" />
+          <Leaf class="w-6 h-6 text-cm-blue" />
           <h2 class="text-xl font-bold text-white">Project Starter <span v-if="pData.name" class="text-gray-500 font-medium">/ {{ pData.name }}</span></h2>
         </div>
 
@@ -298,9 +321,9 @@ const nextStep = () => {
 
           <div class="w-px h-6 bg-gray-600 mx-2"></div>
 
-          <button @click="emit('close')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" title="Close Project Starter">
+          <button @click="emit('close')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
             <LogOut class="w-4 h-4" />
-            <span class="text-sm font-bold">Save and Exit</span>
+            <span class="text-sm font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
           </button>
         </div>
       </div>
@@ -322,9 +345,9 @@ const nextStep = () => {
         </button>
       </div>
 
-      <!-- Body -->
-      <div class="flex-grow overflow-hidden flex flex-col bg-cm-dark-bg items-center">
-        <div class="w-full max-w-6xl flex-grow flex flex-col p-8 overflow-hidden">
+      <!-- Body: Full scrollable region for all content below the tabs -->
+      <div class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg flex flex-col items-center h-0 min-h-0">
+        <div class="w-full max-w-6xl flex-grow flex flex-col p-8 min-h-0">
           <Step1Details v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
           <Step2BaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
           <Step3Concept v-if="currentStep === 3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />

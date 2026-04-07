@@ -111,6 +111,22 @@ class ProjectApi:
             return result[0]
         return None
 
+    def open_path(self, path):
+        """Opens a specific directory path in the OS file explorer."""
+        if not path or not os.path.isdir(path):
+            return False
+        try:
+            if sys.platform == "win32":
+                os.startfile(path)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+            return True
+        except Exception as e:
+            log.error(f"Failed to open path {path}: {e}")
+            return False
+
     def open_project_folder(self, is_ctrl=False, is_alt=False):
         """
         Handles folder icon interactions:

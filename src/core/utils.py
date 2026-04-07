@@ -109,6 +109,7 @@ def _get_default_config_dict():
         'active_directory': '',
         'default_editor': '',
         'user_experience': '',
+        'default_parent_folder': '',
         'scan_for_secrets': False,
         'last_update_check': None,
         'enable_new_file_check': True,
@@ -183,7 +184,7 @@ def load_config():
         migration_occurred = True
 
     for old_key in ['default_parent_folder', 'check_for_updates', 'line_count_threshold', 'token_count_threshold']:
-        if old_key in loaded_config:
+        if old_key in loaded_config and old_key != 'default_parent_folder':
             loaded_config.pop(old_key)
             migration_occurred = True
 

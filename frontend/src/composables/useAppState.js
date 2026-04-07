@@ -474,6 +474,7 @@ export function useAppState() {
     mapParsedSegmentsToKeys: async (parsed, names) => window.pywebview ? await window.pywebview.api.map_parsed_segments_to_keys(parsed, names) : {},
     createStarterProject: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project(output, includeRef, pitch, data) : null,
     createStarterProjectOverwrite: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project_overwrite(output, includeRef, pitch, data) : null,
-    selectDirectory: async () => window.pywebview ? await window.pywebview.api.select_directory() : null
+    selectDirectory: async () => window.pywebview ? await window.pywebview.api.select_directory() : null,
+    openPath: async (path) => window.pywebview ? await window.pywebview.api.open_path(path) : false
   }
 }

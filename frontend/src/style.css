@@ -16,6 +16,11 @@ input, textarea, .selectable {
   user-select: text;
 }
 
+/* Enforce fixed dimensions for all text areas */
+textarea {
+  resize: none !important;
+}
+
 /* Reusable tactile bloom effect */
 @keyframes click-bloom {
   0% {
