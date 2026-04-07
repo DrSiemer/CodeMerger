@@ -117,7 +117,7 @@ class WindowManager:
         return (0, 0, 1920, 1080)
 
     def start(self):
-        """Initializes both windows immediately for fast switching."""
+        """Initializes primary windows immediately for transition."""
 
         # Load icon for splash
         logo_base64 = ""
@@ -157,7 +157,7 @@ class WindowManager:
             background_color='#1A1A1A'
         )
 
-        # Create Main Window
+        # Create Main Window (Hidden initially to load background)
         self.main_window = webview.create_window(
             "CodeMerger",
             url=self.base_url,
@@ -169,26 +169,7 @@ class WindowManager:
             hidden=True
         )
 
-        # Create Compact Window (Hidden by default)
-        compact_url = f"{self.base_url}#/compact"
-        if not self.dev_mode:
-            compact_url = f"file://{self.base_url}#/compact"
-
-        self.compact_window = webview.create_window(
-            "CM-Compact",
-            url=compact_url,
-            js_api=self.api,
-            width=100,
-            height=120,
-            min_size=(100, 120),
-            frameless=True,
-            on_top=True,
-            hidden=True, # Start hidden for instant show later
-            background_color='#2E2E2E'
-        )
-
         self.api.set_window_manager(self)
-        self.monitor.update_window(self.main_window)
 
         # Dashboard Events
         self.main_window.events.minimized += self._on_main_minimized
@@ -206,23 +187,52 @@ class WindowManager:
         except AttributeError:
             pass
 
-        # Compact Events
-        # Intercept the close event so it toggles visibility instead of killing the window
-        self.compact_window.events.closing += self._on_compact_closing
-
         # Prevent DevTools from opening automatically when debug mode is enabled
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
 
         # Start PyWebView loop (debug mode allows Ctrl+Shift+I in dev)
         webview.start(debug=self.dev_mode)
 
+    def _create_compact_window(self):
+        """Lazily instantiates the compact mode window only after the main UI is ready."""
+        if self.compact_window:
+            return
+
+        compact_url = f"{self.base_url}#/compact"
+        if not self.dev_mode:
+            compact_url = f"file://{self.base_url}#/compact"
+
+        self.compact_window = webview.create_window(
+            "CM-Compact",
+            url=compact_url,
+            js_api=self.api,
+            width=100,
+            height=120,
+            min_size=(100, 120),
+            frameless=True,
+            on_top=True,
+            hidden=True,
+            background_color='#2E2E2E'
+        )
+        self.compact_window.events.closing += self._on_compact_closing
+
     def show_main_and_close_splash(self):
         """Called via API when frontend is ready."""
         if self.main_window:
             self.main_window.show()
+
         if self.splash_window:
             self.splash_window.destroy()
             self.splash_window = None
+
+        # Start background monitor now that loading phase is over
+        if self.monitor:
+            self.monitor.update_window(self.main_window)
+            if not self.monitor.is_alive():
+                self.monitor.start()
+
+        # Initialize Compact Mode browser instance lazily
+        self._create_compact_window()
 
     def _on_main_moved(self, x, y):
         # Ignore off-screen coordinates (-32000) but keep valid (even negative) ones from maximized state
@@ -245,7 +255,8 @@ class WindowManager:
         try:
             if self.compact_window:
                 self.compact_window.hide()
-            self.monitor.update_window(self.main_window)
+            if self.monitor:
+                self.monitor.update_window(self.main_window)
         finally:
             self._transitioning = False
 
@@ -349,7 +360,8 @@ class WindowManager:
 
             self.compact_window.move(int(target_x), int(target_y))
             self.compact_window.show()
-            self.monitor.update_window(self.compact_window)
+            if self.monitor:
+                self.monitor.update_window(self.compact_window)
 
     def restore_main(self):
         """Instantly switches back to the full dashboard."""
@@ -371,14 +383,16 @@ class WindowManager:
 
                 self.main_window.show()
                 self.main_window.restore()
-                self.monitor.update_window(self.main_window)
+                if self.monitor:
+                    self.monitor.update_window(self.main_window)
         finally:
             self._transitioning = False
 
     def exit_all(self):
         """Closes all windows gracefully to allow process to exit naturally."""
         self._is_shutting_down = True
-        self.monitor.update_window(None)
+        if self.monitor:
+            self.monitor.update_window(None)
         if self.main_window:
             try:
                 self.main_window.destroy()
@@ -395,9 +409,8 @@ def main():
     # Initialize API
     api = Api(app_state, project_manager)
 
-    # Initialize background file monitor
+    # Initialize background file monitor (do NOT start it yet to keep startup lightweight)
     monitor = FileMonitorThread(None, app_state, project_manager)
-    monitor.start()
 
     # Launch via Manager
     dev_mode = "--dev" in sys.argv

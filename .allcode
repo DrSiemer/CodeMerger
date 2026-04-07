@@ -22,13 +22,6 @@
           "lines": 130
         },
         {
-          "path": "todo.md",
-          "mtime": 1775512808.1886358,
-          "hash": "e1edbafd9b5b45c641b3eae270648bb7b9f2566e",
-          "tokens": 2211,
-          "lines": 137
-        },
-        {
           "path": "requirements.txt",
           "mtime": 1775391509.8918169,
           "hash": "b915f79e064bd786c1006407c5977719cf4d0620",
@@ -37,14 +30,14 @@
         },
         {
           "path": "run.py",
-          "mtime": 1772545862.9148824,
-          "hash": "0171f0345556bf0145d65b50baf26e2a40af3bfb",
-          "tokens": 21,
-          "lines": 4
+          "mtime": 1775545867.9132633,
+          "hash": "876f5e4dc6327a3e265802c7da98f4a446e8e18d",
+          "tokens": 461,
+          "lines": 55
         },
         {
           "path": "src/codemerger.py",
-          "mtime": 1774794037.4418178,
+          "mtime": 1775519855.1846733,
           "hash": "3946126fa4dfd0120fd549a2df216f14297215b3",
           "tokens": 381,
           "lines": 57
@@ -87,7 +80,7 @@
         },
         {
           "path": "src/core/logger.py",
-          "mtime": 1774794037.4438186,
+          "mtime": 1775519855.1856725,
           "hash": "2de77ab523dbbf7a561ddb8450afa12b2313c4b6",
           "tokens": 455,
           "lines": 69
@@ -263,7 +256,7 @@
         },
         {
           "path": "src/ui/compact_status.py",
-          "mtime": 1772545862.902881,
+          "mtime": 1775519002.1306274,
           "hash": "5fcc5c7d016f22e07ea032140dc173553d3de2a4",
           "tokens": 447,
           "lines": 53
@@ -333,9 +326,9 @@
         },
         {
           "path": "src/ui/app_window_parts/action_handlers.py",
-          "mtime": 1775309330.9444897,
-          "hash": "2b5722912eb1d9b3eb14068399472238f15a303a",
-          "tokens": 5002,
+          "mtime": 1775545463.0383089,
+          "hash": "55371b6e129447a0f58f53883687e84ad56808b3",
+          "tokens": 4993,
           "lines": 580
         },
         {
@@ -767,9 +760,9 @@
         },
         {
           "path": "assets/boilerplate/README.md",
-          "mtime": 1772545862.911881,
-          "hash": "27e24f9fb377a1a7586eb8611a4382cf9c5b551b",
-          "tokens": 511,
+          "mtime": 1775545417.7361257,
+          "hash": "65c15296398091daf4bab94dd2a0fc5e74940c4f",
+          "tokens": 502,
           "lines": 59
         },
         {
@@ -788,9 +781,9 @@
         },
         {
           "path": "assets/boilerplate/release.bat",
-          "mtime": 1772545862.913882,
-          "hash": "6b5ca8c44e0945263511db9a6b79ad2c68208a05",
-          "tokens": 837,
+          "mtime": 1775545434.3470418,
+          "hash": "a419ea5505e50be3175a27d86487c0e7524f0ec8",
+          "tokens": 822,
           "lines": 95
         },
         {
@@ -887,10 +880,10 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1775431818.9550006,
-          "hash": "424e768a08fb1f6a4d3a604acc4f6d87c489cf31",
-          "tokens": 208,
-          "lines": 41
+          "mtime": 1775551327.6324182,
+          "hash": "a2ff2ab93db86b215d6ef5258f7fd02a36bf5a9f",
+          "tokens": 341,
+          "lines": 60
         },
         {
           "path": "frontend/src/main.js",
@@ -908,7 +901,7 @@
         },
         {
           "path": "frontend/index.html",
-          "mtime": 1775404004.5597265,
+          "mtime": 1775518416.2686281,
           "hash": "3eb67b9377ed0955948fc26d9c4d2aaf08758478",
           "tokens": 112,
           "lines": 13
@@ -936,14 +929,14 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1775506408.962062,
-          "hash": "329b1202bb6dc188d59bb9b56d3367cb1c2b442e",
-          "tokens": 2851,
-          "lines": 364
+          "mtime": 1775551327.6324182,
+          "hash": "73cd584725fecef3078b9ef106fbf38f2dd27ca0",
+          "tokens": 3449,
+          "lines": 425
         },
         {
           "path": "src/api.py",
-          "mtime": 1775515711.1097548,
+          "mtime": 1775518416.2706242,
           "hash": "cc7d3dde93ccf45bbbf5f171eba44942c217e699",
           "tokens": 187,
           "lines": 25
@@ -964,10 +957,10 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "mtime": 1775516099.4337735,
-          "hash": "e1d2bf6cc746366d48fdb494266a4b9e6596a6ac",
-          "tokens": 3783,
-          "lines": 463
+          "mtime": 1775518416.2676265,
+          "hash": "b5ac485467e8cc41a19c63cc2b39624d44187bb4",
+          "tokens": 3852,
+          "lines": 473
         },
         {
           "path": "frontend/src/components/ProjectSelectorModal.vue",
@@ -1006,24 +999,24 @@
         },
         {
           "path": "frontend/src/components/DiffViewer.vue",
-          "mtime": 1775422005.7946897,
-          "hash": "e4647d91b0ce2df269473957e0e1f092af367405",
-          "tokens": 557,
-          "lines": 84
+          "mtime": 1775517111.7025456,
+          "hash": "f1cbe62c262ecf3cc054284385f48c15720f0856",
+          "tokens": 588,
+          "lines": 91
         },
         {
           "path": "frontend/src/components/MarkdownRenderer.vue",
-          "mtime": 1775422005.7946897,
-          "hash": "2e45c03640136eccce6c7412f098b45633c7b191",
-          "tokens": 552,
-          "lines": 82
+          "mtime": 1775548166.5448768,
+          "hash": "9456f569ee5d7f1a2a214748f73466975746ec88",
+          "tokens": 635,
+          "lines": 98
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "mtime": 1775430227.9699476,
-          "hash": "d70ceec40d02f93e3cd74e4f0cb33d5f08f0d43e",
-          "tokens": 4678,
-          "lines": 428
+          "mtime": 1775516780.3786283,
+          "hash": "346e4d18d5d9a186e6ee8c72169fc3d96b6962a4",
+          "tokens": 4724,
+          "lines": 430
         },
         {
           "path": "frontend/src/components/InstructionsModal.vue",
@@ -1055,10 +1048,10 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "mtime": 1775516099.4347737,
-          "hash": "a387e02cd9c19bc01879cff016b5706b942cfa93",
-          "tokens": 8829,
-          "lines": 749
+          "mtime": 1775516551.12258,
+          "hash": "ffdf1d8bda36d8e814915af6c82b99458bbe9ef4",
+          "tokens": 2262,
+          "lines": 248
         },
         {
           "path": "src/api_parts/base_api.py",
@@ -1104,10 +1097,10 @@
         },
         {
           "path": "src/api_parts/window_api.py",
-          "mtime": 1775515845.0695221,
-          "hash": "3c80f2fa26edaee18f422298c9f68d7823e39673",
-          "tokens": 676,
-          "lines": 83
+          "mtime": 1775545938.8965497,
+          "hash": "f517414faba64ba9d353b5dca8318b7398ddb29a",
+          "tokens": 733,
+          "lines": 91
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -1126,54 +1119,54 @@
         {
           "path": "frontend/src/components/starter-steps/Step1Details.vue",
           "mtime": 1775516455.5981221,
-          "hash": "2376-1775516455.5981221",
+          "hash": "bfd43b329afda7b2fc41cf05cd63fce1fc3bae90",
           "tokens": 599,
           "lines": 58
         },
         {
           "path": "frontend/src/components/starter-steps/Step3Concept.vue",
-          "mtime": 1775516455.6021218,
-          "hash": "8101-1775516455.6021218",
-          "tokens": 2020,
-          "lines": 174
+          "mtime": 1775550932.652569,
+          "hash": "808096a97e63f90f8e5aa540028575257c648ba1",
+          "tokens": 2921,
+          "lines": 273
         },
         {
           "path": "frontend/src/components/starter-steps/Step6Generate.vue",
-          "mtime": 1775516455.6041222,
-          "hash": "4488-1775516455.6041222",
-          "tokens": 1112,
-          "lines": 110
+          "mtime": 1775516780.381628,
+          "hash": "79eac81d3c7ad138e77a1d18563ab7c5dec47e69",
+          "tokens": 1141,
+          "lines": 112
         },
         {
           "path": "frontend/src/components/starter-steps/Step2BaseFiles.vue",
           "mtime": 1775516455.5991235,
-          "hash": "4353-1775516455.5991235",
+          "hash": "7f6d8dd2aed2cb0917178bec08a6bef077b01758",
           "tokens": 1082,
           "lines": 113
         },
         {
           "path": "frontend/src/components/starter-steps/Step4Stack.vue",
-          "mtime": 1775516455.6031234,
-          "hash": "3267-1775516455.6031234",
-          "tokens": 823,
+          "mtime": 1775516780.380629,
+          "hash": "6328cddd9bb0dd99c5f152df2e799e6f1c2f67a3",
+          "tokens": 863,
           "lines": 81
         },
         {
           "path": "frontend/src/components/starter-steps/Step5Todo.vue",
-          "mtime": 1775516455.6031234,
-          "hash": "8549-1775516455.6031234",
-          "tokens": 2125,
-          "lines": 195
+          "mtime": 1775550932.6535697,
+          "hash": "96d8a444171abff185b48256957de01414aff963",
+          "tokens": 2953,
+          "lines": 290
         },
         {
           "path": "frontend/src/components/starter-steps/StepSuccess.vue",
           "mtime": 1775516455.6061234,
-          "hash": "1026-1775516455.6061234",
+          "hash": "85c07eb0790c3d1e0f29aa357d574c9880695ad5",
           "tokens": 259,
           "lines": 27
         }
       ],
-      "total_tokens": 244627,
+      "total_tokens": 239071,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1372,7 +1365,6 @@
     "src/ui/widgets/switch_button.py",
     "src/ui/widgets/two_column_list.py",
     "src/ui/window_utils.py",
-    "todo.md",
     "updater_gui.py",
     "version.txt"
   ]

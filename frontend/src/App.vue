@@ -11,7 +11,8 @@ onMounted(() => {
     // Run core initialization logic
     await init()
 
-    // Small delay to allow CSS transitions and initial paint to stabilize
+    // Reduced delay to allow initial paint to stabilize before hiding splash.
+    // This improves perceived startup speed.
     setTimeout(async () => {
       if (window.pywebview) {
         // ONLY signal ready if we are on the main dashboard route.
@@ -20,7 +21,7 @@ onMounted(() => {
           await window.pywebview.api.signal_ui_ready()
         }
       }
-    }, 150)
+    }, 50)
   }
 
   if (window.pywebview) {
