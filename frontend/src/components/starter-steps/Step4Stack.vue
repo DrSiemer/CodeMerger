@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -9,6 +10,8 @@ const props = defineProps({
 })
 
 const { generateStackPrompt, editorFontSize, handleZoom } = useAppState()
+
+const showPasteArea = ref(!!props.pData.stack_llm_response)
 
 const copyToClipboard = async (text, buttonEvent) => {
   await navigator.clipboard.writeText(text)
@@ -21,6 +24,7 @@ const copyToClipboard = async (text, buttonEvent) => {
 const generateStack = async (e) => {
   const prompt = await generateStackPrompt(props.pData)
   await copyToClipboard(prompt, e)
+  showPasteArea.value = true
 }
 
 const processStack = () => {
@@ -49,7 +53,7 @@ const processStack = () => {
        <button @click="generateStack" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy Stack Prompt</button>
     </div>
 
-    <div class="bg-gray-800 p-4 rounded border border-gray-700">
+    <div v-if="showPasteArea" class="bg-gray-800 p-4 rounded border border-gray-700 mt-4">
        <div class="text-gray-300 mb-2"><span class="font-bold text-white">2.</span> Paste LLM Response or Type Stack</div>
        <textarea v-model="pData.stack_llm_response" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder='["Vue", "Python"]'></textarea>
        <div class="flex justify-end mt-3">

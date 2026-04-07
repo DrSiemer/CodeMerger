@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { Upload } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
@@ -21,6 +21,8 @@ const {
   handleZoom
 } = useAppState()
 
+const showPasteArea = ref(!!props.pData.generate_llm_response)
+
 const copyToClipboard = async (text, buttonEvent) => {
   await navigator.clipboard.writeText(text)
   const target = buttonEvent.target
@@ -41,6 +43,7 @@ const browseParentFolder = async () => {
 const copyMasterPrompt = async (e) => {
   const prompt = await generateMasterPrompt(props.pData)
   await copyToClipboard(prompt, e)
+  showPasteArea.value = true
 }
 
 const isGenerateReady = computed(() => {
@@ -83,7 +86,7 @@ const createProject = async () => {
       <div class="pt-6 border-t border-gray-700 flex flex-col space-y-4">
         <label class="block text-gray-300 font-bold text-sm uppercase">2. Creation Prompt</label>
         <button @click="copyMasterPrompt" class="bg-cm-blue text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-500 transition-colors">Copy Final Creation Prompt</button>
-        <textarea v-model="pData.generate_llm_response" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
+        <textarea v-if="showPasteArea" v-model="pData.generate_llm_response" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
       </div>
     </div>
     <div class="flex justify-end mt-4">

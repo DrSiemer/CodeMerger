@@ -26,6 +26,8 @@ const folderIcon = ref('')
 const folderActiveIcon = ref('')
 const starterIcon = ref('')
 const starterActiveIcon = ref('')
+const lockedIcon = ref('')
+const unlockedIcon = ref('')
 
 // AI Review State
 const showReviewModal = ref(false)
@@ -110,6 +112,8 @@ export function useAppState() {
       folderActiveIcon.value = await window.pywebview.api.get_image_base64('folder_active.png')
       starterIcon.value = await window.pywebview.api.get_image_base64('project_starter.png')
       starterActiveIcon.value = await window.pywebview.api.get_image_base64('project_starter_active.png')
+      lockedIcon.value = await window.pywebview.api.get_image_base64('locked.png')
+      unlockedIcon.value = await window.pywebview.api.get_image_base64('unlocked.png')
 
       const proj = await window.pywebview.api.get_current_project()
       applyProjectData(proj)
@@ -414,6 +418,8 @@ export function useAppState() {
     folderActiveIcon,
     starterIcon,
     starterActiveIcon,
+    lockedIcon,
+    unlockedIcon,
     editorFontSize,
     handleZoom,
     init,

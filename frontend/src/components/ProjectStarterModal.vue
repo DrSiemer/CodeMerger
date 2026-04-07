@@ -197,6 +197,15 @@ const activeStepsList = computed(() => {
   return steps
 })
 
+const isNextDisabled = computed(() => {
+  if (currentStep.value === 1 && !pData.name.trim()) return true;
+  if (currentStep.value === 3) {
+    const hasResponse = pData.concept_llm_response.trim() || pData.concept_md || Object.keys(pData.concept_segments).length > 0;
+    return !hasResponse;
+  }
+  return false;
+})
+
 const goToStep = (step) => {
   if (step <= maxAccessibleStep.value || step === 2) {
     currentStep.value = step
@@ -211,7 +220,36 @@ const prevStep = () => {
 
 const nextStep = () => {
   const idx = activeStepsList.value.indexOf(currentStep.value)
-  if (idx < activeStepsList.value.length - 1) goToStep(activeStepsList.value[idx + 1])
+  if (idx < activeStepsList.value.length - 1) {
+    const targetStep = activeStepsList.value[idx + 1]
+
+    if (currentStep.value === 3) {
+      if (Object.keys(pData.concept_segments).length > 0) {
+        alert("You must merge the concept segments into a final document before proceeding.")
+        return
+      }
+      if (!pData.concept_md) {
+        alert("The concept document cannot be empty.")
+        return
+      }
+    }
+    if (currentStep.value === 5) {
+      if (Object.keys(pData.todo_segments).length > 0) {
+        alert("You must merge the TODO plan into a final document before proceeding.")
+        return
+      }
+      if (!pData.todo_md) {
+        alert("The TODO plan cannot be empty.")
+        return
+      }
+    }
+
+    if (targetStep > maxAccessibleStep.value) {
+      maxAccessibleStep.value = targetStep
+    }
+
+    goToStep(targetStep)
+  }
 }
 </script>
 
@@ -292,7 +330,7 @@ const nextStep = () => {
           v-if="currentStep < 6"
           @click="nextStep"
           class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-10 rounded shadow-md transition-all text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-          :disabled="currentStep > maxAccessibleStep && currentStep !== 2"
+          :disabled="isNextDisabled"
         >
           Next &gt;
         </button>

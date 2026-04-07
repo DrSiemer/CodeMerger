@@ -1,6 +1,5 @@
 <script setup>
 import { ref, nextTick } from 'vue'
-import { CheckCircle } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 
@@ -31,12 +30,15 @@ const {
   mapParsedSegmentsToKeys,
   assembleStarterDocument,
   editorFontSize,
-  handleZoom
+  handleZoom,
+  lockedIcon,
+  unlockedIcon
 } = useAppState()
 
 const activeSegmentKey = ref(null)
 const reviewerEditMode = ref(false)
 const scrollRef = ref(null)
+const showPasteArea = ref(!!props.pData.todo_llm_response)
 
 const toggleReviewerEditMode = async (event = null, isContextual = false) => {
   let anchorText = ''
@@ -160,6 +162,7 @@ const allSigned = (signoffs) => Object.values(signoffs).every(v => v === true)
 const generateTodo = async (e) => {
   const prompt = await generateTodoPrompt(props.pData, props.todoQuestionsMap)
   await copyToClipboard(prompt, e)
+  showPasteArea.value = true
 }
 
 const processTodo = async () => {
@@ -224,9 +227,16 @@ const mergeTodo = async () => {
 
     <template v-else-if="Object.keys(pData.todo_segments).length">
        <div class="flex h-full min-h-0 text-gray-100">
-          <div class="w-64 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
-            <div v-for="key in Object.keys(pData.todo_segments)" :key="key" @click="activeSegmentKey = key; reviewerEditMode = false" class="p-3 rounded cursor-pointer border transition-all" :class="activeSegmentKey === key ? 'bg-cm-blue/20 border-cm-blue text-white' : 'border-transparent text-gray-400 hover:bg-gray-800'">
-              {{ TODO_PHASES[key] || key }}
+          <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
+            <div v-for="key in Object.keys(pData.todo_segments)" :key="key"
+                 @click="activeSegmentKey = key; reviewerEditMode = false"
+                 class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"
+                 :class="activeSegmentKey === key ? 'bg-cm-blue/20 border-cm-blue text-white' : 'border-transparent text-gray-400 hover:bg-gray-800'">
+              <span class="truncate pr-2">{{ TODO_PHASES[key] || key }}</span>
+              <button @click.stop="toggleSignoff(key, pData.todo_signoffs)" class="shrink-0 opacity-70 hover:opacity-100 transition-opacity" :title="pData.todo_signoffs[key] ? 'Unlock' : 'Lock'">
+                <img v-if="pData.todo_signoffs[key] && lockedIcon" :src="lockedIcon" class="h-4 w-auto object-contain" />
+                <img v-else-if="!pData.todo_signoffs[key] && unlockedIcon" :src="unlockedIcon" class="h-4 w-auto object-contain" />
+              </button>
             </div>
           </div>
           <div class="flex-grow pl-6 flex flex-col min-w-0">
@@ -240,13 +250,10 @@ const mergeTodo = async () => {
                   <MarkdownRenderer :content="pData.todo_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
                 </div>
             </div>
-            <div class="shrink-0 pt-4 flex justify-between">
-                <button @click="toggleSignoff(activeSegmentKey, pData.todo_signoffs)" class="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors">
-                    <CheckCircle class="w-5 h-5" :class="pData.todo_signoffs[activeSegmentKey] ? 'text-cm-green' : 'text-gray-600'"/>
-                    <span>{{ pData.todo_signoffs[activeSegmentKey] ? 'Locked' : 'Lock for Merge' }}</span>
-                </button>
-                <button v-if="allSigned(pData.todo_signoffs)" @click="mergeTodo" class="bg-cm-green text-white px-8 py-2 rounded font-bold shadow">Merge & Finalize</button>
-                <button v-else @click="handleSignoffAndNext(activeSegmentKey, pData.todo_signoffs, Object.keys(pData.todo_segments))" class="bg-cm-blue text-white px-8 py-2 rounded font-bold shadow">Lock & Next</button>
+            <div class="shrink-0 pt-4 flex justify-end space-x-4">
+                <button v-if="pData.todo_signoffs[activeSegmentKey]" @click="toggleSignoff(activeSegmentKey, pData.todo_signoffs)" class="bg-cm-green hover:bg-green-600 text-white px-8 py-2 rounded font-bold shadow transition-colors">Unlock</button>
+                <button v-else @click="handleSignoffAndNext(activeSegmentKey, pData.todo_signoffs, Object.keys(pData.todo_segments))" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Lock & Next</button>
+                <button v-if="allSigned(pData.todo_signoffs)" @click="mergeTodo" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Merge & Finalize</button>
             </div>
           </div>
         </div>
@@ -261,7 +268,7 @@ const mergeTodo = async () => {
           <button @click="generateTodo" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy TODO Prompt</button>
         </div>
 
-        <div class="bg-gray-800 p-4 rounded border border-gray-700">
+        <div v-if="showPasteArea" class="bg-gray-800 p-4 rounded border border-gray-700 mt-4">
           <div class="text-gray-300 mb-2"><span class="font-bold text-white">2.</span> Paste LLM Response (with tags)</div>
           <textarea v-model="pData.todo_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste response here..."></textarea>
           <div class="flex justify-end mt-3">
