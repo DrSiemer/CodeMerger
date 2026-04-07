@@ -1,8 +1,10 @@
 <script setup>
-import { ref, nextTick, computed } from 'vue'
+import { ref, nextTick, computed, onMounted } from 'vue'
 import { CheckCircle } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
+import RewriteModal from './RewriteModal.vue'
+import NotesModal from './NotesModal.vue'
 
 const props = defineProps({
   pData: {
@@ -32,6 +34,22 @@ const activeSegmentKey = ref(null)
 const reviewerEditMode = ref(false)
 const scrollRef = ref(null)
 const showPasteArea = ref(!!props.pData.concept_llm_response)
+
+// Rewrite Modals State
+const showRewriteModal = ref(false)
+const rewriteContext = ref(null)
+const rewriteIsMergedMode = ref(false)
+const showNotesModal = ref(false)
+const notesContent = ref('')
+
+onMounted(() => {
+  // If we have existing segments, find the first unlocked one to show
+  if (Object.keys(props.pData.concept_segments).length) {
+    const keys = CONCEPT_ORDER.filter(k => props.pData.concept_segments[k] !== undefined)
+    const firstUnlocked = keys.find(k => !props.pData.concept_signoffs[k])
+    activeSegmentKey.value = firstUnlocked || keys[0]
+  }
+})
 
 const isGoalFilled = computed(() => {
   return props.pData.goal.trim().length > 0
@@ -141,6 +159,14 @@ const renderSegmentTitle = (key, map) => {
   return map[key]?.label || map[key] || key
 }
 
+const getFriendlyNames = () => {
+  const friendly = {}
+  for (const k in props.conceptQuestionsMap) {
+    friendly[k] = props.conceptQuestionsMap[k].label || k
+  }
+  return friendly
+}
+
 const toggleSignoff = (key, dataRef) => {
   dataRef[key] = !dataRef[key]
   if (dataRef[key] && activeSegmentKey.value === key) {
@@ -187,35 +213,95 @@ const processConcept = async () => {
     return
   }
 
-  const friendly = {}
-  for (const k in props.conceptQuestionsMap) friendly[k] = props.conceptQuestionsMap[k].label || k
-
+  const friendly = getFriendlyNames()
   const mapped = await mapParsedSegmentsToKeys(parsed, friendly)
   props.pData.concept_segments = mapped
   props.pData.concept_signoffs = {}
   Object.keys(mapped).forEach(k => props.pData.concept_signoffs[k] = false)
   props.pData.concept_llm_response = ''
-  activeSegmentKey.value = Object.keys(mapped)[0]
+
+  const keys = CONCEPT_ORDER.filter(k => mapped[k] !== undefined)
+  activeSegmentKey.value = keys[0] || Object.keys(mapped)[0]
   reviewerEditMode.value = false
 }
 
 const mergeConcept = async () => {
-  const friendly = {}
-  for (const k in props.conceptQuestionsMap) friendly[k] = props.conceptQuestionsMap[k].label || k
-  const md = await assembleStarterDocument(props.pData.concept_segments, CONCEPT_ORDER, friendly)
+  const md = await assembleStarterDocument(props.pData.concept_segments, CONCEPT_ORDER, getFriendlyNames())
   props.pData.concept_md = md
   props.pData.concept_segments = {}
   props.pData.concept_signoffs = {}
   activeSegmentKey.value = null
 }
+
+const stripMarkdownWrapper = (text) => {
+  let clean = text.trim()
+  if (clean.startsWith("```") && clean.endsWith("```")) {
+    const firstNewline = clean.indexOf('\n')
+    if (firstNewline !== -1) {
+      return clean.substring(firstNewline + 1, clean.length - 3).trim()
+    }
+  }
+  return clean
+}
+
+// --- Rewrite Logic ---
+const openRewriteModal = (isMergedMode) => {
+  rewriteIsMergedMode.value = isMergedMode
+  if (isMergedMode) {
+    rewriteContext.value = {
+      keys: ['full_content'],
+      names: { full_content: 'Full Concept' },
+      data: { full_content: props.pData.concept_md },
+      signoffs: {}
+    }
+  } else {
+    rewriteContext.value = {
+      keys: Object.keys(props.pData.concept_segments),
+      names: getFriendlyNames(),
+      data: props.pData.concept_segments,
+      signoffs: props.pData.concept_signoffs
+    }
+  }
+  showRewriteModal.value = true
+}
+
+const handleRewriteApply = async ({ cleanContent, notes }) => {
+  showRewriteModal.value = false
+
+  if (notes) {
+    notesContent.value = notes
+    showNotesModal.value = true
+  }
+
+  if (rewriteIsMergedMode.value) {
+    props.pData.concept_md = stripMarkdownWrapper(cleanContent)
+  } else {
+    const parsed = await parseStarterSegments(cleanContent)
+    if (!parsed || !Object.keys(parsed).length) {
+      alert("Could not parse segments.")
+      return
+    }
+
+    const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
+
+    for (const key in mapped) {
+      if (props.pData.concept_segments[key] !== undefined && !props.pData.concept_signoffs[key]) {
+        props.pData.concept_segments[key] = mapped[key]
+      }
+    }
+  }
+}
 </script>
 
 <template>
-  <div class="h-full flex flex-col" @wheel.ctrl.prevent="handleZoom">
+  <div class="h-full flex flex-col relative" @wheel.ctrl.prevent="handleZoom">
     <template v-if="pData.concept_md">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-bold text-white">Review Concept</h3>
-        <button @click="toggleReviewerEditMode(null, false)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+        <div class="flex space-x-3">
+          <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
+          <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+        </div>
       </div>
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden">
         <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
@@ -241,7 +327,10 @@ const mergeConcept = async () => {
          <div class="flex-grow pl-6 flex flex-col min-w-0">
            <div class="flex justify-between items-center mb-4">
                <h3 class="text-xl font-bold text-white">{{ renderSegmentTitle(activeSegmentKey, conceptQuestionsMap) }}</h3>
-               <button v-if="!pData.concept_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+               <div class="flex space-x-2">
+                 <button v-if="!pData.concept_signoffs[activeSegmentKey]" @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
+                 <button v-if="!pData.concept_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+               </div>
            </div>
            <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
                <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
@@ -271,6 +360,20 @@ const mergeConcept = async () => {
         </div>
       </div>
     </template>
+
+    <!-- Overlay Modals -->
+    <RewriteModal
+      v-if="showRewriteModal"
+      :contextData="rewriteContext"
+      :isMergedMode="rewriteIsMergedMode"
+      @close="showRewriteModal = false"
+      @apply="handleRewriteApply"
+    />
+    <NotesModal
+      v-if="showNotesModal"
+      :notes="notesContent"
+      @close="showNotesModal = false"
+    />
   </div>
 </template>
 

@@ -1,7 +1,9 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
+import RewriteModal from './RewriteModal.vue'
+import NotesModal from './NotesModal.vue'
 
 const props = defineProps({
   pData: {
@@ -39,6 +41,27 @@ const activeSegmentKey = ref(null)
 const reviewerEditMode = ref(false)
 const scrollRef = ref(null)
 const showPasteArea = ref(!!props.pData.todo_llm_response)
+
+// Rewrite Modals State
+const showRewriteModal = ref(false)
+const rewriteContext = ref(null)
+const rewriteIsMergedMode = ref(false)
+const showNotesModal = ref(false)
+const notesContent = ref('')
+
+onMounted(() => {
+  // If we have existing segments, find the first unlocked one to show
+  const keys = Object.keys(props.pData.todo_segments)
+  if (keys.length) {
+    // Ensure deployment is last if present
+    if (keys.includes('deployment')) {
+      keys.splice(keys.indexOf('deployment'), 1)
+      keys.push('deployment')
+    }
+    const firstUnlocked = keys.find(k => !props.pData.todo_signoffs[k])
+    activeSegmentKey.value = firstUnlocked || keys[0]
+  }
+})
 
 const toggleReviewerEditMode = async (event = null, isContextual = false) => {
   let anchorText = ''
@@ -136,6 +159,17 @@ const copyToClipboard = async (text, buttonEvent) => {
   setTimeout(() => { target.innerText = originalText }, 2000)
 }
 
+const getFriendlyNames = () => {
+  const friendly = {}
+  for (const k in props.todoQuestionsMap) {
+    friendly[k] = props.todoQuestionsMap[k].label || k
+  }
+  if (Object.keys(friendly).length === 0) {
+    return TODO_PHASES
+  }
+  return friendly
+}
+
 const toggleSignoff = (key, dataRef) => {
   dataRef[key] = !dataRef[key]
   if (dataRef[key] && activeSegmentKey.value === key) {
@@ -180,9 +214,7 @@ const processTodo = async () => {
     return
   }
 
-  const friendly = {}
-  for (const k in props.todoQuestionsMap) friendly[k] = props.todoQuestionsMap[k].label || k
-
+  const friendly = getFriendlyNames()
   const mapped = await mapParsedSegmentsToKeys(parsed, friendly)
   props.pData.todo_segments = mapped
   props.pData.todo_signoffs = {}
@@ -199,29 +231,88 @@ const processTodo = async () => {
 }
 
 const mergeTodo = async () => {
-  const friendly = {}
-  for (const k in props.todoQuestionsMap) friendly[k] = props.todoQuestionsMap[k].label || k
-
   const keys = Object.keys(props.pData.todo_segments)
   if (keys.includes('deployment')) {
     keys.splice(keys.indexOf('deployment'), 1)
     keys.push('deployment')
   }
 
-  const md = await assembleStarterDocument(props.pData.todo_segments, keys, friendly)
+  const md = await assembleStarterDocument(props.pData.todo_segments, keys, getFriendlyNames())
   props.pData.todo_md = md
   props.pData.todo_segments = {}
   props.pData.todo_signoffs = {}
   activeSegmentKey.value = null
 }
+
+const stripMarkdownWrapper = (text) => {
+  let clean = text.trim()
+  if (clean.startsWith("```") && clean.endsWith("```")) {
+    const firstNewline = clean.indexOf('\n')
+    if (firstNewline !== -1) {
+      return clean.substring(firstNewline + 1, clean.length - 3).trim()
+    }
+  }
+  return clean
+}
+
+// --- Rewrite Logic ---
+const openRewriteModal = (isMergedMode) => {
+  rewriteIsMergedMode.value = isMergedMode
+  if (isMergedMode) {
+    rewriteContext.value = {
+      keys: ['full_content'],
+      names: { full_content: 'Full TODO Plan' },
+      data: { full_content: props.pData.todo_md },
+      signoffs: {}
+    }
+  } else {
+    rewriteContext.value = {
+      keys: Object.keys(props.pData.todo_segments),
+      names: getFriendlyNames(),
+      data: props.pData.todo_segments,
+      signoffs: props.pData.todo_signoffs
+    }
+  }
+  showRewriteModal.value = true
+}
+
+const handleRewriteApply = async ({ cleanContent, notes }) => {
+  showRewriteModal.value = false
+
+  if (notes) {
+    notesContent.value = notes
+    showNotesModal.value = true
+  }
+
+  if (rewriteIsMergedMode.value) {
+    props.pData.todo_md = stripMarkdownWrapper(cleanContent)
+  } else {
+    const parsed = await parseStarterSegments(cleanContent)
+    if (!parsed || !Object.keys(parsed).length) {
+      alert("Could not parse segments.")
+      return
+    }
+
+    const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
+
+    for (const key in mapped) {
+      if (props.pData.todo_segments[key] !== undefined && !props.pData.todo_signoffs[key]) {
+        props.pData.todo_segments[key] = mapped[key]
+      }
+    }
+  }
+}
 </script>
 
 <template>
-  <div class="h-full flex flex-col" @wheel.ctrl.prevent="handleZoom">
+  <div class="h-full flex flex-col relative" @wheel.ctrl.prevent="handleZoom">
     <template v-if="pData.todo_md">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-bold text-white">Review TODO Plan</h3>
-        <button @click="toggleReviewerEditMode(null, false)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+        <div class="flex space-x-3">
+          <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
+          <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+        </div>
       </div>
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden text-gray-100">
         <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
@@ -248,7 +339,10 @@ const mergeTodo = async () => {
           <div class="flex-grow pl-6 flex flex-col min-w-0">
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h3 class="text-xl font-bold text-white">{{ TODO_PHASES[activeSegmentKey] || activeSegmentKey }}</h3>
-                <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+                <div class="flex space-x-2">
+                  <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
+                  <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+                </div>
             </div>
             <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
                 <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
@@ -283,6 +377,20 @@ const mergeTodo = async () => {
         </div>
       </div>
     </template>
+
+    <!-- Overlay Modals -->
+    <RewriteModal
+      v-if="showRewriteModal"
+      :contextData="rewriteContext"
+      :isMergedMode="rewriteIsMergedMode"
+      @close="showRewriteModal = false"
+      @apply="handleRewriteApply"
+    />
+    <NotesModal
+      v-if="showNotesModal"
+      :notes="notesContent"
+      @close="showNotesModal = false"
+    />
   </div>
 </template>
 

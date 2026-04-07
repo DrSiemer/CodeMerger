@@ -1164,9 +1164,23 @@
           "hash": "85c07eb0790c3d1e0f29aa357d574c9880695ad5",
           "tokens": 259,
           "lines": 27
+        },
+        {
+          "path": "frontend/src/components/starter-steps/RewriteModal.vue",
+          "mtime": 1775568458.7325687,
+          "hash": "5212-1775568458.7325687",
+          "tokens": 1277,
+          "lines": 152
+        },
+        {
+          "path": "frontend/src/components/starter-steps/NotesModal.vue",
+          "mtime": 1775568458.7335691,
+          "hash": "1437-1775568458.7335691",
+          "tokens": 365,
+          "lines": 48
         }
       ],
-      "total_tokens": 239071,
+      "total_tokens": 240713,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1221,6 +1235,8 @@
     "frontend/src/components/ProjectStarterModal.vue",
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
+    "frontend/src/components/starter-steps/NotesModal.vue",
+    "frontend/src/components/starter-steps/RewriteModal.vue",
     "frontend/src/components/starter-steps/Step1Details.vue",
     "frontend/src/components/starter-steps/Step2BaseFiles.vue",
     "frontend/src/components/starter-steps/Step3Concept.vue",
