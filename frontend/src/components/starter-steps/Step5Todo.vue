@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, nextTick, onMounted, watch } from 'vue'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
@@ -61,6 +61,15 @@ onMounted(() => {
     const firstUnlocked = keys.find(k => !props.pData.todo_signoffs[k])
     activeSegmentKey.value = firstUnlocked || keys[0]
   }
+})
+
+// Scroll to top when switching segments
+watch(activeSegmentKey, () => {
+  nextTick(() => {
+    if (scrollRef.value) {
+      scrollRef.value.scrollTop = 0
+    }
+  })
 })
 
 const toggleReviewerEditMode = async (event = null, isContextual = false) => {
