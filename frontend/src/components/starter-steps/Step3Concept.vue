@@ -1,5 +1,6 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
+import { CheckCircle } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 
@@ -142,6 +143,9 @@ const renderSegmentTitle = (key, map) => {
 
 const toggleSignoff = (key, dataRef) => {
   dataRef[key] = !dataRef[key]
+  if (dataRef[key] && activeSegmentKey.value === key) {
+    reviewerEditMode.value = false
+  }
 }
 
 const handleSignoffAndNext = (key, signoffsRef, keysArray) => {
@@ -161,6 +165,7 @@ const handleSignoffAndNext = (key, signoffsRef, keysArray) => {
       return
     }
   }
+  reviewerEditMode.value = false
 }
 
 const allSigned = (signoffs) => {
@@ -236,12 +241,12 @@ const mergeConcept = async () => {
          <div class="flex-grow pl-6 flex flex-col min-w-0">
            <div class="flex justify-between items-center mb-4">
                <h3 class="text-xl font-bold text-white">{{ renderSegmentTitle(activeSegmentKey, conceptQuestionsMap) }}</h3>
-               <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+               <button v-if="!pData.concept_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
            </div>
            <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
                <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
                <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
-                 <MarkdownRenderer :content="pData.concept_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
+                 <MarkdownRenderer :content="pData.concept_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!pData.concept_signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
                </div>
            </div>
            <div class="shrink-0 pt-4 flex justify-end space-x-4">

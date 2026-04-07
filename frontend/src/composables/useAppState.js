@@ -35,7 +35,7 @@ const reviewMode = ref('new') // 'new' or 'resume'
 const revertToCompactOnClose = ref(false)
 
 // Editor Scaling State
-const editorFontSize = ref(14)
+const editorFontSize = ref(15)
 
 // Persistence for AI Review Window
 const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted'
