@@ -18,7 +18,8 @@ defineEmits(['dblclick'])
 const md = markdownit({
   html: false,
   linkify: true,
-  typographer: true
+  typographer: true,
+  breaks: true
 })
 
 const renderedHtml = computed(() => {
