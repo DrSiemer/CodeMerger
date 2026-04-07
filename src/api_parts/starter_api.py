@@ -53,9 +53,14 @@ class StarterApi:
             save_filename=initial_file
         )
 
-        if filepath and len(filepath) > 0:
+        if filepath:
+            actual_path = filepath[0] if isinstance(filepath, (list, tuple)) else filepath
+            if not actual_path: return False
+            if not actual_path.lower().endswith('.json'):
+                actual_path += '.json'
+
             try:
-                with open(filepath[0], "w", encoding="utf-8") as f:
+                with open(actual_path, "w", encoding="utf-8") as f:
                     json.dump(data, f, indent=2)
                 return True
             except Exception as e:
@@ -73,9 +78,12 @@ class StarterApi:
             file_types=("JSON files (*.json)", "All files (*.*)")
         )
 
-        if filepath and len(filepath) > 0:
+        if filepath:
+            actual_path = filepath[0] if isinstance(filepath, (list, tuple)) else filepath
+            if not actual_path: return None
+
             try:
-                with open(filepath[0], "r", encoding="utf-8") as f:
+                with open(actual_path, "r", encoding="utf-8") as f:
                     return json.load(f)
             except Exception as e:
                 log.error(f"Failed to load config: {e}")
