@@ -8,6 +8,10 @@ const props = defineProps({
   pData: {
     type: Object,
     required: true
+  },
+  isLookingBack: {
+    type: Boolean,
+    default: false
   }
 })
 

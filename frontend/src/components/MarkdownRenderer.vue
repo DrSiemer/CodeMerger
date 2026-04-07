@@ -16,7 +16,7 @@ const props = defineProps({
 defineEmits(['dblclick'])
 
 const md = markdownit({
-  html: false,
+  html: true, // Enabled to allow styled checkbox spans
   linkify: true,
   typographer: true,
   breaks: true
@@ -24,7 +24,14 @@ const md = markdownit({
 
 const renderedHtml = computed(() => {
   if (!props.content) return ''
-  return md.render(props.content)
+
+  // Pre-process task lists before rendering markdown
+  // Matches "- [ ] " or "- [x] " at the start of lines, preserving indentation
+  const processed = props.content
+    .replace(/^(\s*)-\s+\[ \]\s+/gm, '$1- <span class="cm-todo-unfilled">☐</span> ')
+    .replace(/^(\s*)-\s+\[x\]\s+/gim, '$1- <span class="cm-todo-filled">☑</span> ')
+
+  return md.render(processed)
 })
 </script>
 
@@ -42,6 +49,25 @@ const renderedHtml = computed(() => {
 /* Allow selection inside the renderer */
 .selectable {
   user-select: text !important;
+}
+
+/* Custom Checkbox Styles */
+.cm-todo-unfilled {
+  color: #6B7280; /* Gray-500 */
+  font-family: "Segoe UI Symbol", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-weight: bold;
+  margin-right: 4px;
+  font-size: 1.1em;
+  vertical-align: -1px;
+}
+
+.cm-todo-filled {
+  color: #0078D4; /* CM Blue */
+  font-family: "Segoe UI Symbol", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  font-weight: bold;
+  margin-right: 4px;
+  font-size: 1.1em;
+  vertical-align: -1px;
 }
 
 /* Remove top margin from the first element in the prose container */
@@ -65,6 +91,13 @@ const renderedHtml = computed(() => {
 .prose li {
   display: list-item !important;
   margin-bottom: 0.25em !important;
+}
+
+/* Ensure our custom checkboxes don't double up with bullets */
+.prose li:has(> .cm-todo-unfilled),
+.prose li:has(> .cm-todo-filled) {
+  list-style-type: none !important;
+  margin-left: -0.2em; /* Adjust for removed bullet */
 }
 
 .prose h1, .prose h2, .prose h3 {
