@@ -238,6 +238,10 @@ const processConcept = async () => {
 }
 
 const mergeConcept = async () => {
+  if (!confirm("Merge all segments into a single document?\n\nThis cannot be undone.")) {
+    return
+  }
+
   const md = await assembleStarterDocument(props.pData.concept_segments, CONCEPT_ORDER, getFriendlyNames())
   props.pData.concept_md = md
   props.pData.concept_segments = {}

@@ -244,6 +244,10 @@ const processTodo = async () => {
 }
 
 const mergeTodo = async () => {
+  if (!confirm("Merge all segments into a single document?\n\nThis cannot be undone.")) {
+    return
+  }
+
   const keys = Object.keys(props.pData.todo_segments)
   if (keys.includes('deployment')) {
     keys.splice(keys.indexOf('deployment'), 1)
