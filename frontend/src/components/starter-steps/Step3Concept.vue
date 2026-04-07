@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { CheckCircle } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
@@ -28,6 +28,99 @@ const {
 
 const activeSegmentKey = ref(null)
 const reviewerEditMode = ref(false)
+const scrollRef = ref(null)
+
+const toggleReviewerEditMode = async (event = null, isContextual = false) => {
+  let anchorText = ''
+  let contentRatio = 0
+  const isDoubleclick = isContextual && event
+
+  const el = scrollRef.value
+  if (el) {
+    if (!reviewerEditMode.value) {
+      // --- CAPTURE STATE: RENDER -> EDIT ---
+      if (isDoubleclick) {
+        anchorText = window.getSelection().toString().trim().split('\n')[0].substring(0, 50)
+      } else {
+        const rect = el.getBoundingClientRect()
+        // Find visible text at the top
+        const topEl = document.elementFromPoint(rect.left + 50, rect.top + 20)
+        if (topEl) {
+          anchorText = topEl.innerText?.trim().split('\n')[0].substring(0, 40) || ''
+        }
+      }
+      contentRatio = el.scrollTop / el.scrollHeight
+    } else {
+      // --- CAPTURE STATE: EDIT -> RENDER ---
+      const text = el.value
+      contentRatio = el.scrollTop / el.scrollHeight
+      const targetCharIdx = Math.floor(text.length * contentRatio)
+      anchorText = text.substring(targetCharIdx, targetCharIdx + 60).trim().split('\n')[0]
+    }
+  }
+
+  // Switch mode
+  reviewerEditMode.value = !reviewerEditMode.value
+
+  await nextTick()
+
+  // 100ms delay allows the browser to finalize layout/wrapping in the new view
+  setTimeout(() => {
+    const newEl = scrollRef.value
+    if (!newEl) return
+
+    if (reviewerEditMode.value) {
+      // --- APPLY SCROLL: EDIT MODE (Textarea) ---
+      const fullText = newEl.value
+      let foundIdx = -1
+
+      if (anchorText) {
+        // Search for snippet, prioritizing current scroll depth for duplicates
+        const startSearch = Math.floor(fullText.length * contentRatio)
+        foundIdx = fullText.indexOf(anchorText, Math.max(0, startSearch - 300))
+        if (foundIdx === -1) foundIdx = fullText.indexOf(anchorText)
+      }
+
+      if (foundIdx !== -1) {
+        const charRatio = foundIdx / fullText.length
+        const offset = isDoubleclick ? 0.3 : 0.05
+
+        // FOCUS & SELECT (Blocking native scroll jump)
+        newEl.focus({ preventScroll: true })
+        newEl.setSelectionRange(foundIdx, foundIdx + anchorText.length)
+
+        // MANUAL SCROLL OVERRIDE
+        // We set it twice to ensure it sticks after the browser focus event processing
+        const setPos = () => {
+          newEl.scrollTop = (charRatio * newEl.scrollHeight) - (newEl.clientHeight * offset)
+        }
+        setPos()
+        requestAnimationFrame(setPos)
+      } else {
+        newEl.scrollTop = contentRatio * newEl.scrollHeight
+      }
+    } else {
+      // --- APPLY SCROLL: RENDER MODE (Markdown) ---
+      let scrolled = false
+      if (anchorText) {
+        const walker = document.createTreeWalker(newEl, NodeFilter.SHOW_TEXT, null, false)
+        let node
+        while (node = walker.nextNode()) {
+          if (node.textContent.includes(anchorText)) {
+            node.parentElement.scrollIntoView({ block: 'start', behavior: 'instant' })
+            newEl.scrollTop -= (newEl.clientHeight * 0.05)
+            scrolled = true
+            break
+          }
+        }
+      }
+
+      if (!scrolled) {
+        newEl.scrollTop = contentRatio * newEl.scrollHeight
+      }
+    }
+  }, 100)
+}
 
 const copyToClipboard = async (text, buttonEvent) => {
   await navigator.clipboard.writeText(text)
@@ -110,11 +203,13 @@ const mergeConcept = async () => {
     <template v-if="pData.concept_md">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-bold text-white">Review Concept</h3>
-        <button @click="reviewerEditMode = !reviewerEditMode" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+        <button @click="toggleReviewerEditMode(null, false)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
       </div>
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden">
-        <textarea v-if="reviewerEditMode" v-model="pData.concept_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
-        <div v-else class="w-full h-full p-6 overflow-y-auto custom-scrollbar"><MarkdownRenderer :content="pData.concept_md" :fontSize="editorFontSize" /></div>
+        <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+        <div v-else ref="scrollRef" class="w-full h-full p-6 overflow-y-auto custom-scrollbar">
+          <MarkdownRenderer :content="pData.concept_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
+        </div>
       </div>
     </template>
     <template v-else-if="Object.keys(pData.concept_segments).length">
@@ -127,11 +222,13 @@ const mergeConcept = async () => {
          <div class="flex-grow pl-6 flex flex-col">
            <div class="flex justify-between items-center mb-4">
                <h3 class="text-xl font-bold text-white">{{ renderSegmentTitle(activeSegmentKey, conceptQuestionsMap) }}</h3>
-               <button @click="reviewerEditMode = !reviewerEditMode" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+               <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
            </div>
            <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
-               <textarea v-if="reviewerEditMode" v-model="pData.concept_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
-               <div v-else class="w-full h-full overflow-y-auto p-6 custom-scrollbar"><MarkdownRenderer :content="pData.concept_segments[activeSegmentKey]" :fontSize="editorFontSize" /></div>
+               <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+               <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
+                 <MarkdownRenderer :content="pData.concept_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
+               </div>
            </div>
            <div class="shrink-0 pt-4 flex justify-between">
                <button @click="toggleSignoff(activeSegmentKey, pData.concept_signoffs)" class="flex items-center space-x-2 text-sm text-gray-400 hover:text-white transition-colors">
@@ -148,10 +245,10 @@ const mergeConcept = async () => {
       <div class="max-w-3xl mx-auto w-full space-y-6">
         <h3 class="text-2xl font-bold text-white">Project Concept</h3>
         <p class="text-gray-400">Describe what you want to build in a few sentences. The LLM will use this to generate the core sections.</p>
-        <textarea v-model="pData.goal" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue" :style="{ fontSize: editorFontSize + 'px' }" placeholder="e.g. A desktop tool that bundles project code..."></textarea>
+        <textarea v-model="pData.goal" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="e.g. A desktop tool that bundles project code..."></textarea>
         <div class="bg-gray-800 p-6 rounded border border-gray-700 space-y-4">
           <button @click="generateConcept" class="w-full bg-cm-blue text-white font-bold py-3 rounded">1. Copy Prompt for LLM</button>
-          <textarea v-model="pData.concept_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste LLM response here..."></textarea>
+          <textarea v-model="pData.concept_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste LLM response here..."></textarea>
           <button @click="processConcept" :disabled="!pData.concept_llm_response" class="w-full bg-cm-green text-white font-bold py-3 rounded disabled:opacity-50">2. Process & Review</button>
         </div>
       </div>

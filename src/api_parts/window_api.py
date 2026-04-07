@@ -27,6 +27,14 @@ class WindowApi:
             log.info(f"Expanding window to {target_w}x{target_h} to accommodate content.")
             win.resize(target_w, target_h)
 
+    def signal_ui_ready(self):
+        """
+        Called by the frontend (Vue) once the app is mounted and rendered.
+        Triggers the transition from Splash to Main Window.
+        """
+        if self._window_manager:
+            self._window_manager.show_main_and_close_splash()
+
     def get_image_base64(self, filename):
         """
         Reads an image from the assets directory and returns a Base64 data URL.

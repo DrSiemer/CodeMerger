@@ -13,6 +13,8 @@ const props = defineProps({
   }
 })
 
+defineEmits(['dblclick'])
+
 const md = markdownit({
   html: false,
   linkify: true,
@@ -30,6 +32,7 @@ const renderedHtml = computed(() => {
     class="prose prose-invert max-w-none leading-relaxed text-gray-300 prose-headings:text-white prose-a:text-cm-blue prose-code:text-[#DEB887] prose-pre:bg-cm-input-bg prose-pre:border prose-pre:border-gray-700 selectable"
     :style="{ fontSize: fontSize + 'px' }"
     v-html="renderedHtml"
+    @dblclick="$emit('dblclick', $event)"
   >
   </div>
 </template>

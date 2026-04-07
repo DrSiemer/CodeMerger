@@ -1,15 +1,33 @@
 <script setup>
 import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAppState } from './composables/useAppState'
 
 const { init } = useAppState()
+const route = useRoute()
 
 onMounted(() => {
+  const signalReady = async () => {
+    // Run core initialization logic
+    await init()
+
+    // Small delay to allow CSS transitions and initial paint to stabilize
+    setTimeout(async () => {
+      if (window.pywebview) {
+        // ONLY signal ready if we are on the main dashboard route.
+        // This prevents the hidden Compact window from closing the splash prematurely.
+        if (route.path === '/') {
+          await window.pywebview.api.signal_ui_ready()
+        }
+      }
+    }, 150)
+  }
+
   if (window.pywebview) {
-    init()
+    signalReady()
   } else {
     window.addEventListener('pywebviewready', () => {
-      init()
+      signalReady()
     })
   }
 })

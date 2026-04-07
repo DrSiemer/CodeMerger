@@ -3,9 +3,10 @@ import os
 import webview
 import logging
 import time
+import base64
 from src.api import Api
 from src.core.logger import setup_logging
-from src.core.paths import get_bundle_dir
+from src.core.paths import get_bundle_dir, LOGO_MASK_PATH
 from src.core.file_monitor_thread import FileMonitorThread
 
 # Import core backend logic
@@ -26,6 +27,7 @@ class WindowManager:
         self.dev_mode = dev_mode
         self.main_window = None
         self.compact_window = None
+        self.splash_window = None
         self._is_shutting_down = False
 
         # State lock to prevent race conditions during mode switches
@@ -117,6 +119,44 @@ class WindowManager:
     def start(self):
         """Initializes both windows immediately for fast switching."""
 
+        # Load icon for splash
+        logo_base64 = ""
+        if os.path.exists(LOGO_MASK_PATH):
+            try:
+                with open(LOGO_MASK_PATH, "rb") as f:
+                    logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode('utf-8')}"
+            except Exception:
+                pass
+
+        splash_html = f"""
+        <body style="background:#1A1A1A; color:#FFFFFF; font-family:'Segoe UI', sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; overflow:hidden; user-select:none;">
+            <div style="text-align:center;">
+                <img src="{logo_base64}" style="width:64px; height:64px; margin-bottom:20px; opacity:0.9;">
+                <h1 style="font-weight:100; font-size:28px; letter-spacing:4px; margin:0; color:#eee;">CODEMERGER</h1>
+                <div style="margin-top:15px; display:flex; align-items:center; justify-content:center;">
+                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 1.5s infinite ease-in-out;"></div>
+                    <p style="color:#0078D4; font-size:11px; margin:0; font-weight:bold; letter-spacing:1px; opacity:0.8; text-transform:uppercase;">Initializing Interface</p>
+                </div>
+            </div>
+            <style>
+                @keyframes pulse {{
+                    0%, 100% {{ opacity: 0.3; transform: scale(0.8); }}
+                    50% {{ opacity: 1; transform: scale(1.2); }}
+                }}
+            </style>
+        </body>
+        """
+
+        self.splash_window = webview.create_window(
+            "CM-Splash",
+            html=splash_html,
+            width=400, height=280,
+            frameless=True,
+            on_top=True,
+            hidden=False,
+            background_color='#1A1A1A'
+        )
+
         # Create Main Window
         self.main_window = webview.create_window(
             "CodeMerger",
@@ -125,7 +165,8 @@ class WindowManager:
             width=1200,
             height=780,
             min_size=(800, 600),
-            background_color='#2E2E2E'
+            background_color='#2E2E2E',
+            hidden=True
         )
 
         # Create Compact Window (Hidden by default)
@@ -174,6 +215,14 @@ class WindowManager:
 
         # Start PyWebView loop (debug mode allows Ctrl+Shift+I in dev)
         webview.start(debug=self.dev_mode)
+
+    def show_main_and_close_splash(self):
+        """Called via API when frontend is ready."""
+        if self.main_window:
+            self.main_window.show()
+        if self.splash_window:
+            self.splash_window.destroy()
+            self.splash_window = None
 
     def _on_main_moved(self, x, y):
         # Ignore off-screen coordinates (-32000) but keep valid (even negative) ones from maximized state
@@ -357,7 +406,6 @@ def main():
     try:
         manager.start()
     finally:
-        log.info("Window context lost. Terminating background services.")
         monitor.stop()
 
 if __name__ == '__main__':
