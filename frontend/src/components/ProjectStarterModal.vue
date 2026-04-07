@@ -197,6 +197,8 @@ const activeStepsList = computed(() => {
   return steps
 })
 
+const isLookingBack = computed(() => currentStep.value < maxAccessibleStep.value)
+
 const isNextDisabled = computed(() => {
   if (currentStep.value === 1 && !pData.name.trim()) return true;
   if (currentStep.value === 3) {
@@ -313,11 +315,11 @@ const nextStep = () => {
       <!-- Body -->
       <div class="flex-grow overflow-hidden flex flex-col bg-cm-dark-bg items-center">
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 overflow-hidden">
-          <Step1Details v-if="currentStep === 1" :pData="pData" @next="nextStep" />
-          <Step2BaseFiles v-if="currentStep === 2" :pData="pData" />
-          <Step3Concept v-if="currentStep === 3" :pData="pData" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
-          <Step4Stack v-if="currentStep === 4" :pData="pData" @next="nextStep" />
-          <Step5Todo v-if="currentStep === 5" :pData="pData" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
+          <Step1Details v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <Step2BaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
+          <Step3Concept v-if="currentStep === 3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
+          <Step4Stack v-if="currentStep === 4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <Step5Todo v-if="currentStep === 5" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
           <Step6Generate v-if="currentStep === 6" :pData="pData" @projectCreated="onProjectCreated" />
         </div>
       </div>

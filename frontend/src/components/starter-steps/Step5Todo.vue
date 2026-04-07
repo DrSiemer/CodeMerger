@@ -15,6 +15,10 @@ const props = defineProps({
   todoQuestionsMap: {
     type: Object,
     required: true
+  },
+  isLookingBack: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -392,7 +396,7 @@ const handleReset = () => {
         </div>
       </div>
 
-      <div class="shrink-0 pt-6 flex justify-end">
+      <div v-if="!isLookingBack" class="shrink-0 pt-6 flex justify-end">
         <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
           Next Step: Generate Files
           <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -403,9 +407,6 @@ const handleReset = () => {
     <template v-else-if="Object.keys(pData.todo_segments).length">
        <div class="flex h-full min-h-0 text-gray-100">
           <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
-            <div class="p-2 mb-4 border-b border-gray-700 flex justify-center">
-              <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
-            </div>
             <div v-for="key in Object.keys(pData.todo_segments)" :key="key"
                  @click="activeSegmentKey = key; reviewerEditMode = false"
                  class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"

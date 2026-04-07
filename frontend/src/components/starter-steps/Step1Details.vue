@@ -6,6 +6,10 @@ const props = defineProps({
   pData: {
     type: Object,
     required: true
+  },
+  isLookingBack: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -52,7 +56,7 @@ const browseBaseProject = async () => {
           </div>
         </div>
 
-        <div v-if="pData.name.trim()" class="pt-8 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div v-if="pData.name.trim() && !isLookingBack" class="pt-8 animate-in fade-in slide-in-from-top-2 duration-300">
             <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center">
               Next Step &gt;
             </button>

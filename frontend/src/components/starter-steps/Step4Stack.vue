@@ -7,6 +7,10 @@ const props = defineProps({
   pData: {
     type: Object,
     required: true
+  },
+  isLookingBack: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -218,7 +222,7 @@ const handleReset = () => {
           placeholder="Python 3.10&#10;FastAPI&#10;Tailwind CSS"
         ></textarea>
 
-        <div class="shrink-0 pt-6 flex justify-end">
+        <div v-if="!isLookingBack" class="shrink-0 pt-6 flex justify-end">
           <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
             Next Step: TODO Plan
             <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
