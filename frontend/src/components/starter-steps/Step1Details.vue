@@ -61,8 +61,9 @@ const browseBaseProject = async () => {
     </div>
 
     <div class="mt-auto pt-8">
-      <div class="bg-cm-blue/10 border border-cm-blue/30 rounded p-4 text-sm text-blue-100 leading-relaxed italic shadow-inner">
-        Tip: It is highly recommended to start a fresh chat with your LLM before pasting prompts from this starter.
+      <div class="bg-cm-blue/10 border border-cm-blue/30 rounded p-4 text-sm text-blue-100 leading-relaxed italic shadow-inner space-y-2">
+        <p>Tip: It is highly recommended to start a fresh chat with your LLM before pasting prompts from this starter.</p>
+        <p>Note: All project documentation is written in <span class="font-bold">Markdown</span>. See the <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-cm-blue hover:underline not-italic font-bold ml-1">Basic Syntax Guide</a> for formatting tips.</p>
       </div>
     </div>
   </div>

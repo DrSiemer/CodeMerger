@@ -1,6 +1,6 @@
 <script setup>
 import { ref, nextTick, computed, onMounted, watch } from 'vue'
-import { CheckCircle, HelpCircle } from 'lucide-vue-next'
+import { CheckCircle, HelpCircle, ChevronRight } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
@@ -17,6 +17,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const emit = defineEmits(['next'])
 
 const CONCEPT_ORDER = ["problem_statement", "core_principles", "key_features", "user_flows", "tech_constraints"]
 
@@ -356,11 +358,18 @@ const getMergedQuestionPrompt = async (question) => {
         :getPrompt="getMergedQuestionPrompt"
       />
 
-      <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden">
-        <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+      <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden flex flex-col">
+        <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable shrink-0" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
         <div v-else ref="scrollRef" class="w-full h-full p-6 overflow-y-auto custom-scrollbar">
           <MarkdownRenderer :content="pData.concept_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
         </div>
+      </div>
+
+      <div class="shrink-0 pt-6 flex justify-end">
+        <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
+          Next Step: Tech Stack
+          <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+        </button>
       </div>
     </template>
 
@@ -417,7 +426,7 @@ const getMergedQuestionPrompt = async (question) => {
        </div>
     </template>
     <template v-else>
-      <div class="max-w-3xl mx-auto w-full space-y-6">
+      <div class="max-w-3xl mx-auto w-full space-y-6 text-gray-100">
         <h3 class="text-2xl font-bold text-white">Project Concept</h3>
         <p class="text-gray-400">Describe what you want to build in a few sentences. The LLM will use this to generate the core sections.</p>
         <textarea v-model="pData.goal" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="e.g. A desktop tool that bundles project code..."></textarea>

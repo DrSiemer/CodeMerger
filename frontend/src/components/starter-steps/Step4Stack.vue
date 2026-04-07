@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { ChevronRight, Save, RotateCcw } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -9,22 +10,72 @@ const props = defineProps({
   }
 })
 
-const { generateStackPrompt, editorFontSize, handleZoom } = useAppState()
+const emit = defineEmits(['next'])
 
-const showPasteArea = ref(!!props.pData.stack_llm_response)
+const { config, saveConfig, generateStackPrompt, editorFontSize, handleZoom } = useAppState()
 
+// Sub-states: 'input' | 'pasting' | 'review'
+const viewState = ref(props.pData.stack ? 'review' : (props.pData.stack_llm_response ? 'pasting' : 'input'))
+
+/**
+ * Robust copy helper that handles async text generation and UI feedback.
+ * CRITICAL: Must capture target synchronously before any await.
+ */
 const copyToClipboard = async (text, buttonEvent) => {
-  await navigator.clipboard.writeText(text)
-  const target = buttonEvent.target
-  const originalText = target.innerText
-  target.innerText = "Copied!"
-  setTimeout(() => { target.innerText = originalText }, 2000)
+  const target = buttonEvent.currentTarget
+  if (!target) return
+
+  try {
+    // Resolve text if a Promise was passed (common for API calls)
+    const content = await text
+    await navigator.clipboard.writeText(content)
+
+    // Provide visual feedback
+    const originalText = target.innerText
+    target.innerText = "Copied!"
+
+    setTimeout(() => {
+      if (target) target.innerText = originalText
+    }, 2000)
+  } catch (err) {
+    console.error("Failed to copy:", err)
+  }
 }
 
-const generateStack = async (e) => {
-  const prompt = await generateStackPrompt(props.pData)
-  await copyToClipboard(prompt, e)
-  showPasteArea.value = true
+// --- Default Experience Management ---
+
+const loadDefaultExperience = () => {
+  const defaultExp = config.value.user_experience || ''
+  if (!defaultExp) {
+    alert("No default experience has been saved yet.")
+    return
+  }
+
+  if (props.pData.stack_experience.trim() && !confirm("This will overwrite your current input with your saved default experience. Continue?")) {
+    return
+  }
+
+  props.pData.stack_experience = defaultExp
+}
+
+const saveDefaultExperience = async () => {
+  const currentExp = props.pData.stack_experience.trim()
+
+  if (!currentExp && !confirm("You are about to save an empty string as your default. This will clear your saved experience profile. Continue?")) {
+    return
+  }
+
+  // Update global config via API
+  const newConfig = { ...config.value, user_experience: currentExp }
+  await saveConfig(newConfig)
+}
+
+// --- Navigation & Processing ---
+
+const goToPasting = async (e) => {
+  // Pass the promise directly; the helper will resolve it and manage the button UI
+  await copyToClipboard(generateStackPrompt(props.pData), e)
+  viewState.value = 'pasting'
 }
 
 const processStack = () => {
@@ -35,36 +86,147 @@ const processStack = () => {
     if (startIdx === -1 || endIdx === -1) throw new Error("No JSON")
     const jsonStr = raw.substring(startIdx, endIdx + 1).replace(/'/g, '"')
     const list = JSON.parse(jsonStr)
-    props.pData.stack = list.join(', ')
+    // PRESENTATION: Join with newlines for the editor instead of commas
+    props.pData.stack = list.join('\n')
     props.pData.stack_llm_response = ''
+    viewState.value = 'review'
   } catch (err) {
-    alert("Could not parse JSON list.")
+    alert("Could not parse JSON list. Please ensure the LLM returned a valid array format.")
+  }
+}
+
+const handleReset = () => {
+  if (confirm("Reset tech stack selection and return to input?")) {
+    props.pData.stack = ''
+    props.pData.stack_llm_response = ''
+    viewState.value = 'input'
   }
 }
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto space-y-6 w-full text-gray-100" @wheel.ctrl.prevent="handleZoom">
-    <h3 class="text-2xl font-bold text-white">Tech Stack</h3>
-    <textarea v-model="pData.stack_experience" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="List your known languages, frameworks, and environment details..."></textarea>
+  <div class="h-full flex flex-col text-gray-100" @wheel.ctrl.prevent="handleZoom">
 
-    <div class="flex justify-between items-center bg-gray-800 p-4 rounded border border-gray-700 mt-4">
-       <div class="text-gray-300"><span class="font-bold text-white">1.</span> Copy prompt for LLM</div>
-       <button @click="generateStack" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy Stack Prompt</button>
-    </div>
+    <!-- PHASE 1: EXPERIENCE INPUT -->
+    <template v-if="viewState === 'input'">
+      <div class="flex flex-col h-full space-y-4">
+        <div class="shrink-0">
+          <h3 class="text-2xl font-bold text-white">Your Experience & Environment</h3>
+          <p class="text-gray-400 mt-1">List your known languages, frameworks, and environment details. This context helps the LLM suggest a compatible stack.</p>
+        </div>
 
-    <div v-if="showPasteArea" class="bg-gray-800 p-4 rounded border border-gray-700 mt-4">
-       <div class="text-gray-300 mb-2"><span class="font-bold text-white">2.</span> Paste LLM Response or Type Stack</div>
-       <textarea v-model="pData.stack_llm_response" class="w-full h-24 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder='["Vue", "Python"]'></textarea>
-       <div class="flex justify-end mt-3">
-         <button @click="processStack" :disabled="!pData.stack_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-6 py-2 rounded shadow transition-colors disabled:opacity-50 font-bold">Process List</button>
-       </div>
-    </div>
+        <textarea
+          v-model="pData.stack_experience"
+          class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar text-lg leading-relaxed selectable"
+          :style="{ fontSize: editorFontSize + 'px' }"
+          placeholder="e.g. I am a senior Python developer comfortable with Flask. I use Windows 11 and want to build a lightweight desktop app..."
+        ></textarea>
 
-    <div v-if="pData.stack" class="mt-8 p-4 border border-cm-blue rounded bg-cm-blue/10">
-       <div class="font-bold text-white mb-2">Final Selected Stack:</div>
-       <div class="text-cm-blue font-mono">{{ pData.stack }}</div>
-    </div>
+        <div class="shrink-0 flex items-center justify-between bg-gray-800/50 p-4 rounded border border-gray-700">
+          <div class="flex items-center space-x-3">
+            <button
+              @click="loadDefaultExperience"
+              class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 text-sm font-bold"
+              title="Load saved experience from settings"
+            >
+              <RotateCcw class="w-4 h-4" />
+              <span>Load Default</span>
+            </button>
+            <button
+              @click="saveDefaultExperience"
+              class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 text-sm font-bold"
+              title="Save current text as your app-wide default"
+            >
+              <Save class="w-4 h-4" />
+              <span>Save as Default</span>
+            </button>
+          </div>
+
+          <button
+            @click="goToPasting"
+            class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2.5 rounded shadow-lg transition-all font-bold flex items-center"
+          >
+            Copy Stack Prompt
+            <ChevronRight class="w-4 h-4 ml-2" />
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- PHASE 2: PASTE RESPONSE -->
+    <template v-else-if="viewState === 'pasting'">
+      <div class="flex flex-col h-full space-y-4">
+        <div class="shrink-0">
+          <h3 class="text-2xl font-bold text-white">Generate Stack</h3>
+          <p class="text-gray-400 mt-1">Paste the JSON recommendation from the LLM below to extract your code stack.</p>
+        </div>
+
+        <div class="shrink-0 flex items-center justify-between bg-cm-blue/10 border border-cm-blue/30 p-4 rounded text-sm">
+          <div class="flex items-center space-x-3 text-blue-100">
+            <span class="font-bold text-cm-blue">Step 1:</span>
+            <span>Paste the prompt into your LLM and copy its JSON response.</span>
+          </div>
+          <button
+            @click="copyToClipboard(generateStackPrompt(pData), $event)"
+            class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-1.5 rounded text-xs font-bold transition-colors"
+          >
+            Re-copy Prompt
+          </button>
+        </div>
+
+        <div class="flex flex-col flex-grow min-h-0">
+          <div class="flex items-center space-x-2 text-gray-200 font-bold mb-2 text-sm">
+            <span class="text-cm-blue">Step 2:</span>
+            <span>Paste LLM Response</span>
+          </div>
+          <textarea
+            v-model="pData.stack_llm_response"
+            class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar font-mono text-base selectable"
+            :style="{ fontSize: editorFontSize + 'px' }"
+            placeholder='Example response: ["Python 3.10", "FastAPI", "SQLite"]'
+          ></textarea>
+        </div>
+
+        <div class="shrink-0 flex items-center justify-between pt-2">
+          <button @click="viewState = 'input'" class="text-gray-500 hover:text-gray-300 font-bold text-sm">Back to Experience</button>
+          <button
+            @click="processStack"
+            :disabled="!pData.stack_llm_response.trim()"
+            class="bg-cm-green hover:bg-green-600 text-white px-10 py-3 rounded shadow-lg transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Process & Review Stack
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- PHASE 3: REVIEW & EDIT -->
+    <template v-else-if="viewState === 'review'">
+      <div class="flex flex-col h-full space-y-4">
+        <div class="shrink-0 flex items-center justify-between">
+          <div>
+            <h3 class="text-2xl font-bold text-white">Final Code Stack</h3>
+            <p class="text-gray-400 mt-1">Review and manually adjust the technologies. Use one line per subject.</p>
+          </div>
+          <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+        </div>
+
+        <textarea
+          v-model="pData.stack"
+          class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar text-xl font-mono leading-relaxed selectable shrink-0"
+          :style="{ fontSize: editorFontSize + 'px' }"
+          placeholder="Python 3.10&#10;FastAPI&#10;Tailwind CSS"
+        ></textarea>
+
+        <div class="shrink-0 pt-6 flex justify-end">
+          <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
+            Next Step: TODO Plan
+            <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      </div>
+    </template>
+
   </div>
 </template>
 

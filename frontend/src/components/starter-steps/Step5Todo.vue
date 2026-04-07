@@ -1,7 +1,7 @@
 <script setup>
 import { ref, nextTick, onMounted, watch, computed } from 'vue'
 import { useAppState } from '../../composables/useAppState'
-import { HelpCircle } from 'lucide-vue-next'
+import { HelpCircle, ChevronRight } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
 import NotesModal from './NotesModal.vue'
@@ -17,6 +17,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const emit = defineEmits(['next'])
 
 const TODO_PHASES = {
     "setup": "Environment Setup",
@@ -347,7 +349,7 @@ const getMergedQuestionPrompt = async (question) => {
 <template>
   <div class="h-full flex flex-col relative" @wheel.ctrl.prevent="handleZoom">
     <template v-if="pData.todo_md">
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 shrink-0">
         <h3 class="text-2xl font-bold text-white">Review TODO Plan</h3>
         <div class="flex space-x-3">
           <button
@@ -369,11 +371,18 @@ const getMergedQuestionPrompt = async (question) => {
         :getPrompt="getMergedQuestionPrompt"
       />
 
-      <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden text-gray-100">
-        <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+      <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden text-gray-100 flex flex-col min-h-0">
+        <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable shrink-0" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
         <div v-else ref="scrollRef" class="w-full h-full p-6 overflow-y-auto custom-scrollbar">
           <MarkdownRenderer :content="pData.todo_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
         </div>
+      </div>
+
+      <div class="shrink-0 pt-6 flex justify-end">
+        <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
+          Next Step: Generate Files
+          <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+        </button>
       </div>
     </template>
 

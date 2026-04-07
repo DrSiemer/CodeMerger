@@ -315,9 +315,9 @@ const nextStep = () => {
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 overflow-hidden">
           <Step1Details v-if="currentStep === 1" :pData="pData" @next="nextStep" />
           <Step2BaseFiles v-if="currentStep === 2" :pData="pData" />
-          <Step3Concept v-if="currentStep === 3" :pData="pData" :conceptQuestionsMap="conceptQuestionsMap" />
-          <Step4Stack v-if="currentStep === 4" :pData="pData" />
-          <Step5Todo v-if="currentStep === 5" :pData="pData" :todoQuestionsMap="todoQuestionsMap" />
+          <Step3Concept v-if="currentStep === 3" :pData="pData" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
+          <Step4Stack v-if="currentStep === 4" :pData="pData" @next="nextStep" />
+          <Step5Todo v-if="currentStep === 5" :pData="pData" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
           <Step6Generate v-if="currentStep === 6" :pData="pData" @projectCreated="onProjectCreated" />
         </div>
       </div>
