@@ -1,9 +1,11 @@
 <script setup>
-import { ref, nextTick, onMounted, watch } from 'vue'
+import { ref, nextTick, onMounted, watch, computed } from 'vue'
 import { useAppState } from '../../composables/useAppState'
+import { HelpCircle } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
 import NotesModal from './NotesModal.vue'
+import ReviewerQuestions from './ReviewerQuestions.vue'
 
 const props = defineProps({
   pData: {
@@ -31,6 +33,7 @@ const {
   parseStarterSegments,
   mapParsedSegmentsToKeys,
   assembleStarterDocument,
+  getStarterQuestionPrompt,
   editorFontSize,
   handleZoom,
   lockedIcon,
@@ -41,6 +44,7 @@ const activeSegmentKey = ref(null)
 const reviewerEditMode = ref(false)
 const scrollRef = ref(null)
 const showPasteArea = ref(!!props.pData.todo_llm_response)
+const showQuestions = ref(false)
 
 // Rewrite Modals State
 const showRewriteModal = ref(false)
@@ -100,7 +104,7 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
     }
   }
 
-  // Toggle mode
+  // Switch mode
   reviewerEditMode.value = !reviewerEditMode.value
 
   await nextTick()
@@ -311,6 +315,29 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
     }
   }
 }
+
+// --- Questions Context Accessors ---
+
+const getSegmentedQuestionPrompt = async (question) => {
+  let context = ""
+  const names = getFriendlyNames()
+  const keys = Object.keys(props.pData.todo_segments)
+
+  for (const k of keys) {
+    if (k === activeSegmentKey.value) continue
+    const txt = props.pData.todo_segments[k].trim()
+    if (txt) context += `--- Context: ${names[k] || k} ---\n${txt}\n\n`
+  }
+
+  const name = names[activeSegmentKey.value] || activeSegmentKey.value
+  const text = props.pData.todo_segments[activeSegmentKey.value]
+  return await getStarterQuestionPrompt(context, name, text, question)
+}
+
+const getMergedQuestionPrompt = async (question) => {
+  const context = `--- Project Concept ---\n${props.pData.concept_md}`
+  return await getStarterQuestionPrompt(context, "TODO Plan", props.pData.todo_md, question)
+}
 </script>
 
 <template>
@@ -319,10 +346,25 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-bold text-white">Review TODO Plan</h3>
         <div class="flex space-x-3">
+          <button
+            @click="showQuestions = !showQuestions"
+            class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
+            :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+          >
+            <HelpCircle class="w-4 h-4" />
+            <span>Questions</span>
+          </button>
           <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
           <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
         </div>
       </div>
+
+      <ReviewerQuestions
+        v-if="showQuestions"
+        :questions="['Does this plan accurately reflect the project concept?', 'Are the steps actionable and well-sequenced?', 'Is anything critical missing from the environment setup?']"
+        :getPrompt="getMergedQuestionPrompt"
+      />
+
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden text-gray-100">
         <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
         <div v-else ref="scrollRef" class="w-full h-full p-6 overflow-y-auto custom-scrollbar">
@@ -349,10 +391,26 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h3 class="text-xl font-bold text-white">{{ TODO_PHASES[activeSegmentKey] || activeSegmentKey }}</h3>
                 <div class="flex space-x-2">
+                  <button
+                    v-if="!pData.todo_signoffs[activeSegmentKey]"
+                    @click="showQuestions = !showQuestions"
+                    class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
+                    :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+                  >
+                    <HelpCircle class="w-3 h-3" />
+                    <span>Questions</span>
+                  </button>
                   <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
                   <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
                 </div>
             </div>
+
+            <ReviewerQuestions
+              v-if="showQuestions && !pData.todo_signoffs[activeSegmentKey]"
+              :questions="todoQuestionsMap[activeSegmentKey]?.questions || []"
+              :getPrompt="getSegmentedQuestionPrompt"
+            />
+
             <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
                 <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
                 <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
