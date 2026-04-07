@@ -313,27 +313,13 @@ const nextStep = () => {
       <!-- Body -->
       <div class="flex-grow overflow-hidden flex flex-col bg-cm-dark-bg items-center">
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 overflow-hidden">
-          <Step1Details v-if="currentStep === 1" :pData="pData" />
+          <Step1Details v-if="currentStep === 1" :pData="pData" @next="nextStep" />
           <Step2BaseFiles v-if="currentStep === 2" :pData="pData" />
           <Step3Concept v-if="currentStep === 3" :pData="pData" :conceptQuestionsMap="conceptQuestionsMap" />
           <Step4Stack v-if="currentStep === 4" :pData="pData" />
           <Step5Todo v-if="currentStep === 5" :pData="pData" :todoQuestionsMap="todoQuestionsMap" />
           <Step6Generate v-if="currentStep === 6" :pData="pData" @projectCreated="onProjectCreated" />
         </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
-        <button v-if="currentStep > 1" @click="prevStep" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors text-sm">&lt; Back</button>
-        <div v-else></div>
-        <button
-          v-if="currentStep < 6"
-          @click="nextStep"
-          class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-10 rounded shadow-md transition-all text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-          :disabled="isNextDisabled"
-        >
-          Next &gt;
-        </button>
       </div>
     </template>
 

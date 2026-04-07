@@ -9,6 +9,8 @@ const props = defineProps({
   }
 })
 
+defineEmits(['next'])
+
 const { selectDirectory, getBaseProjectData } = useAppState()
 
 const browseBaseProject = async () => {
@@ -48,6 +50,12 @@ const browseBaseProject = async () => {
             </button>
             <span class="text-gray-400 font-mono text-sm break-all">{{ pData.base_project_path || 'No base project selected' }}</span>
           </div>
+        </div>
+
+        <div v-if="pData.name.trim()" class="pt-8 animate-in fade-in slide-in-from-top-2 duration-300">
+            <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center">
+              Next Step &gt;
+            </button>
         </div>
       </div>
     </div>
