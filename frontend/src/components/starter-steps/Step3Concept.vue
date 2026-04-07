@@ -232,7 +232,7 @@ const processConcept = async () => {
   props.pData.concept_segments = mapped
   props.pData.concept_signoffs = {}
   Object.keys(mapped).forEach(k => props.pData.concept_signoffs[k] = false)
-  props.pData.concept_llm_response = ''
+  props.pData.concept_md = ''
 
   const keys = CONCEPT_ORDER.filter(k => mapped[k] !== undefined)
   activeSegmentKey.value = keys[0] || Object.keys(mapped)[0]
@@ -331,6 +331,19 @@ const getMergedQuestionPrompt = async (question) => {
   const context = `--- User Goal ---\n${props.pData.goal}`
   return await getStarterQuestionPrompt(context, "Full Concept", props.pData.concept_md, question)
 }
+
+const handleReset = () => {
+  if (confirm("Are you sure you want to start over? This will clear current progress for the Concept step.")) {
+    props.pData.concept_segments = {}
+    props.pData.concept_signoffs = {}
+    props.pData.concept_md = ""
+    props.pData.concept_llm_response = ""
+    activeSegmentKey.value = null
+    reviewerEditMode.value = false
+    showPasteArea.value = false
+    showQuestions.value = false
+  }
+}
 </script>
 
 <template>
@@ -339,6 +352,7 @@ const getMergedQuestionPrompt = async (question) => {
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-2xl font-bold text-white">Review Concept</h3>
         <div class="flex space-x-3">
+          <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest mr-2">Start Over</button>
           <button
             @click="showQuestions = !showQuestions"
             class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
@@ -376,6 +390,9 @@ const getMergedQuestionPrompt = async (question) => {
     <template v-else-if="Object.keys(pData.concept_segments).length">
        <div class="flex h-full min-h-0">
          <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
+           <div class="p-2 mb-4 border-b border-gray-700 flex justify-center">
+             <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+           </div>
            <div v-for="key in Object.keys(pData.concept_segments)" :key="key"
                 @click="activeSegmentKey = key; reviewerEditMode = false"
                 class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"

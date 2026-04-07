@@ -344,6 +344,19 @@ const getMergedQuestionPrompt = async (question) => {
   const context = `--- Project Concept ---\n${props.pData.concept_md}`
   return await getStarterQuestionPrompt(context, "TODO Plan", props.pData.todo_md, question)
 }
+
+const handleReset = () => {
+  if (confirm("Are you sure you want to start over? This will clear current progress for the TODO step.")) {
+    props.pData.todo_segments = {}
+    props.pData.todo_signoffs = {}
+    props.pData.todo_md = ""
+    props.pData.todo_llm_response = ""
+    activeSegmentKey.value = null
+    reviewerEditMode.value = false
+    showPasteArea.value = false
+    showQuestions.value = false
+  }
+}
 </script>
 
 <template>
@@ -352,6 +365,7 @@ const getMergedQuestionPrompt = async (question) => {
       <div class="flex items-center justify-between mb-4 shrink-0">
         <h3 class="text-2xl font-bold text-white">Review TODO Plan</h3>
         <div class="flex space-x-3">
+          <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest mr-2">Start Over</button>
           <button
             @click="showQuestions = !showQuestions"
             class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
@@ -389,6 +403,9 @@ const getMergedQuestionPrompt = async (question) => {
     <template v-else-if="Object.keys(pData.todo_segments).length">
        <div class="flex h-full min-h-0 text-gray-100">
           <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
+            <div class="p-2 mb-4 border-b border-gray-700 flex justify-center">
+              <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+            </div>
             <div v-for="key in Object.keys(pData.todo_segments)" :key="key"
                  @click="activeSegmentKey = key; reviewerEditMode = false"
                  class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"
