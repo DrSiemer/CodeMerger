@@ -33,9 +33,11 @@ class StarterState:
 
             "concept_segments": {},
             "concept_signoffs": {},
+            "concept_baselines": {},
             "todo_phases": [],
             "todo_segments": {},
             "todo_signoffs": {},
+            "todo_baselines": {}
         }
 
         self.project_data["name"].trace_add("write", self.save)
@@ -71,9 +73,11 @@ class StarterState:
 
             "concept_segments": c_segs,
             "concept_signoffs": self.project_data.get("concept_signoffs", {}),
+            "concept_baselines": self.project_data.get("concept_baselines", {}),
             "todo_phases": self.project_data.get("todo_phases", []),
             "todo_segments": t_segs,
-            "todo_signoffs": self.project_data.get("todo_signoffs", {})
+            "todo_signoffs": self.project_data.get("todo_signoffs", {}),
+            "todo_baselines": self.project_data.get("todo_baselines", {})
         }
 
     def save(self, *args):
@@ -101,12 +105,14 @@ class StarterState:
         # Load Concept
         self.project_data["concept_segments"] = loaded_data.get("concept_segments", {})
         self.project_data["concept_signoffs"] = loaded_data.get("concept_signoffs", {})
+        self.project_data["concept_baselines"] = loaded_data.get("concept_baselines", {})
         self.project_data["concept_md"] = loaded_data.get("concept_md", "")
 
         # Load TODO
         self.project_data["todo_phases"] = loaded_data.get("todo_phases", [])
         self.project_data["todo_segments"] = loaded_data.get("todo_segments", {})
         self.project_data["todo_signoffs"] = loaded_data.get("todo_signoffs", {})
+        self.project_data["todo_baselines"] = loaded_data.get("todo_baselines", {})
         self.project_data["todo_md"] = loaded_data.get("todo_md", "")
 
         # Recalc validity to set the initial accessible step
@@ -135,9 +141,11 @@ class StarterState:
         self.project_data["include_base_reference"].set(True)
         self.project_data["concept_segments"] = {}
         self.project_data["concept_signoffs"] = {}
+        self.project_data["concept_baselines"] = {}
         self.project_data["todo_phases"] = []
         self.project_data["todo_segments"] = {}
         self.project_data["todo_signoffs"] = {}
+        self.project_data["todo_baselines"] = {}
         session_manager.clear_default_session()
         self.current_step = 1
         self.max_accessible_step = 1

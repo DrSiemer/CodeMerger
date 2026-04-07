@@ -1,11 +1,12 @@
 <script setup>
 import { ref, nextTick, onMounted, watch, computed } from 'vue'
 import { useAppState } from '../../composables/useAppState'
-import { HelpCircle, ChevronRight } from 'lucide-vue-next'
+import { HelpCircle, ChevronRight, Check, X as XIcon } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
 import NotesModal from './NotesModal.vue'
 import ReviewerQuestions from './ReviewerQuestions.vue'
+import DiffViewer from '../DiffViewer.vue'
 
 const props = defineProps({
   pData: {
@@ -191,13 +192,20 @@ const getFriendlyNames = () => {
 
 const toggleSignoff = (key, dataRef) => {
   dataRef[key] = !dataRef[key]
-  if (dataRef[key] && activeSegmentKey.value === key) {
-    reviewerEditMode.value = false
+  if (dataRef[key]) {
+    if (activeSegmentKey.value === key) {
+      reviewerEditMode.value = false
+    }
+    // Automatically accept diff when locking
+    props.pData.todo_baselines[key] = undefined
   }
 }
 
 const handleSignoffAndNext = (key, signoffsRef, keysArray) => {
   signoffsRef[key] = true
+  // Automatically accept diff when locking
+  props.pData.todo_baselines[key] = undefined
+
   const idx = keysArray.indexOf(key)
   for (let i = idx + 1; i < keysArray.length; i++) {
     if (!signoffsRef[keysArray[i]]) {
@@ -237,6 +245,7 @@ const processTodo = async () => {
   const mapped = await mapParsedSegmentsToKeys(parsed, friendly)
   props.pData.todo_segments = mapped
   props.pData.todo_signoffs = {}
+  props.pData.todo_baselines = {}
   Object.keys(props.pData.todo_segments).forEach(k => props.pData.todo_signoffs[k] = false)
   props.pData.todo_llm_response = ''
 
@@ -264,6 +273,7 @@ const mergeTodo = async () => {
   props.pData.todo_md = md
   props.pData.todo_segments = {}
   props.pData.todo_signoffs = {}
+  props.pData.todo_baselines = {}
   activeSegmentKey.value = null
 }
 
@@ -308,6 +318,7 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
   }
 
   if (rewriteIsMergedMode.value) {
+    props.pData.todo_baselines['__merged__'] = props.pData.todo_md
     props.pData.todo_md = stripMarkdownWrapper(cleanContent)
   } else {
     const parsed = await parseStarterSegments(cleanContent)
@@ -320,9 +331,28 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
 
     for (const key in mapped) {
       if (props.pData.todo_segments[key] !== undefined && !props.pData.todo_signoffs[key]) {
+        props.pData.todo_baselines[key] = props.pData.todo_segments[key]
         props.pData.todo_segments[key] = mapped[key]
       }
     }
+  }
+}
+
+const acceptDiff = () => {
+  if (props.pData.todo_md) {
+    props.pData.todo_baselines['__merged__'] = undefined
+  } else if (activeSegmentKey.value) {
+    props.pData.todo_baselines[activeSegmentKey.value] = undefined
+  }
+}
+
+const refuseDiff = () => {
+  if (props.pData.todo_md && props.pData.todo_baselines['__merged__']) {
+    props.pData.todo_md = props.pData.todo_baselines['__merged__']
+    props.pData.todo_baselines['__merged__'] = undefined
+  } else if (activeSegmentKey.value && props.pData.todo_baselines[activeSegmentKey.value]) {
+    props.pData.todo_segments[activeSegmentKey.value] = props.pData.todo_baselines[activeSegmentKey.value]
+    props.pData.todo_baselines[activeSegmentKey.value] = undefined
   }
 }
 
@@ -353,6 +383,7 @@ const handleReset = () => {
   if (confirm("Are you sure you want to start over? This will clear current progress for the TODO step.")) {
     props.pData.todo_segments = {}
     props.pData.todo_signoffs = {}
+    props.pData.todo_baselines = {}
     props.pData.todo_md = ""
     props.pData.todo_llm_response = ""
     activeSegmentKey.value = null
@@ -370,16 +401,36 @@ const handleReset = () => {
         <h3 class="text-2xl font-bold text-white">Review TODO Plan</h3>
         <div class="flex space-x-3">
           <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest mr-2">Start Over</button>
-          <button
-            @click="showQuestions = !showQuestions"
-            class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
-            :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
-          >
-            <HelpCircle class="w-4 h-4" />
-            <span>Questions</span>
-          </button>
-          <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
-          <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+
+          <div v-if="pData.todo_baselines['__merged__']" class="flex space-x-2">
+            <button
+              @click="refuseDiff"
+              class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2 bg-gray-700 text-red-400 hover:bg-red-900/40"
+            >
+              <XIcon class="w-4 h-4" />
+              <span>Refuse</span>
+            </button>
+            <button
+              @click="acceptDiff"
+              class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2 bg-cm-green text-white hover:brightness-110"
+            >
+              <Check class="w-4 h-4" />
+              <span>Accept Diff</span>
+            </button>
+          </div>
+
+          <template v-if="!pData.todo_baselines['__merged__']">
+            <button
+              @click="showQuestions = !showQuestions"
+              class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
+              :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+            >
+              <HelpCircle class="w-4 h-4" />
+              <span>Questions</span>
+            </button>
+            <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
+            <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+          </template>
         </div>
       </div>
 
@@ -392,7 +443,13 @@ const handleReset = () => {
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden text-gray-100 flex flex-col min-h-0">
         <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable shrink-0" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
         <div v-else ref="scrollRef" class="w-full h-full p-6 overflow-y-auto custom-scrollbar">
-          <MarkdownRenderer :content="pData.todo_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
+          <DiffViewer
+            v-if="pData.todo_baselines['__merged__']"
+            :oldText="pData.todo_baselines['__merged__']"
+            :newText="pData.todo_md"
+            :fontSize="editorFontSize"
+          />
+          <MarkdownRenderer v-else :content="pData.todo_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
         </div>
       </div>
 
@@ -411,7 +468,10 @@ const handleReset = () => {
                  @click="activeSegmentKey = key; reviewerEditMode = false"
                  class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"
                  :class="activeSegmentKey === key ? 'bg-cm-blue/20 border-cm-blue text-white' : 'border-transparent text-gray-400 hover:bg-gray-800'">
-              <span class="truncate pr-2">{{ TODO_PHASES[key] || key }}</span>
+              <div class="flex items-center space-x-2 truncate">
+                <div v-if="pData.todo_baselines[key]" class="w-1.5 h-1.5 rounded-full bg-cm-green shrink-0"></div>
+                <span class="truncate pr-2">{{ TODO_PHASES[key] || key }}</span>
+              </div>
               <button @click.stop="toggleSignoff(key, pData.todo_signoffs)" class="shrink-0 opacity-70 hover:opacity-100 transition-opacity" :title="pData.todo_signoffs[key] ? 'Unlock' : 'Lock'">
                 <img v-if="pData.todo_signoffs[key] && lockedIcon" :src="lockedIcon" class="h-4 w-auto object-contain" />
                 <img v-else-if="!pData.todo_signoffs[key] && unlockedIcon" :src="unlockedIcon" class="h-4 w-auto object-contain" />
@@ -422,17 +482,35 @@ const handleReset = () => {
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h3 class="text-xl font-bold text-white">{{ TODO_PHASES[activeSegmentKey] || activeSegmentKey }}</h3>
                 <div class="flex space-x-2">
-                  <button
-                    v-if="!pData.todo_signoffs[activeSegmentKey]"
-                    @click="showQuestions = !showQuestions"
-                    class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
-                    :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
-                  >
-                    <HelpCircle class="w-3 h-3" />
-                    <span>Questions</span>
-                  </button>
-                  <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
-                  <button v-if="!pData.todo_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+                  <div v-if="pData.todo_baselines[activeSegmentKey] && !pData.todo_signoffs[activeSegmentKey]" class="flex space-x-2">
+                    <button
+                      @click="refuseDiff"
+                      class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1 bg-gray-700 text-red-400 hover:bg-red-900/40"
+                    >
+                      <XIcon class="w-3 h-3" />
+                      <span>Refuse</span>
+                    </button>
+                    <button
+                      @click="acceptDiff"
+                      class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1 bg-cm-green text-white hover:brightness-110"
+                    >
+                      <Check class="w-3 h-3" />
+                      <span>Accept Diff</span>
+                    </button>
+                  </div>
+
+                  <template v-if="!pData.todo_signoffs[activeSegmentKey] && !pData.todo_baselines[activeSegmentKey]">
+                    <button
+                      @click="showQuestions = !showQuestions"
+                      class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
+                      :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+                    >
+                      <HelpCircle class="w-3 h-3" />
+                      <span>Questions</span>
+                    </button>
+                    <button @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
+                    <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+                  </template>
                 </div>
             </div>
 
@@ -445,7 +523,13 @@ const handleReset = () => {
             <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
                 <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.todo_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
                 <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
-                  <MarkdownRenderer :content="pData.todo_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!pData.todo_signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
+                  <DiffViewer
+                    v-if="pData.todo_baselines[activeSegmentKey]"
+                    :oldText="pData.todo_baselines[activeSegmentKey]"
+                    :newText="pData.todo_segments[activeSegmentKey]"
+                    :fontSize="editorFontSize"
+                  />
+                  <MarkdownRenderer v-else :content="pData.todo_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!pData.todo_signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
                 </div>
             </div>
             <div class="shrink-0 pt-4 flex justify-end space-x-4">

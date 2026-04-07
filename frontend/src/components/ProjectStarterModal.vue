@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Play, Save, Upload, Trash2, LogOut, X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
@@ -52,9 +52,11 @@ const pData = reactive({
 
   concept_segments: {},
   concept_signoffs: {},
+  concept_baselines: {},
   todo_phases: [],
   todo_segments: {},
-  todo_signoffs: {}
+  todo_signoffs: {},
+  todo_baselines: {}
 })
 
 const conceptQuestionsMap = ref({})
@@ -91,6 +93,12 @@ onMounted(async () => {
   }
 
   isLoading.value = false
+})
+
+onUnmounted(() => {
+  // Automatic acceptance of all pending diffs on exit
+  pData.concept_baselines = {}
+  pData.todo_baselines = {}
 })
 
 watch(() => pData, () => {
@@ -175,9 +183,11 @@ const clearAll = async () => {
 
     pData.concept_segments = {}
     pData.concept_signoffs = {}
+    pData.concept_baselines = {}
     pData.todo_phases = []
     pData.todo_segments = {}
     pData.todo_signoffs = {}
+    pData.todo_baselines = {}
 
     currentStep.value = 1
     maxAccessibleStep.value = 1

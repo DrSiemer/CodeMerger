@@ -43,30 +43,32 @@ const diffLines = computed(() => {
 
 <template>
   <div
-    class="bg-[#1A1A1A] border border-gray-700 rounded overflow-hidden font-mono leading-normal selectable"
+    class="bg-[#1A1A1A] border border-gray-700 rounded overflow-hidden font-mono leading-relaxed selectable h-fit"
     :style="{ fontSize: fontSize + 'px' }"
   >
     <div v-if="diffLines.length === 0" class="p-4 text-gray-500 italic">
       No changes detected in file content.
     </div>
 
-    <div v-else class="overflow-x-auto custom-scrollbar">
+    <div v-else class="flex flex-col min-w-0">
       <div
         v-for="(line, idx) in diffLines"
         :key="idx"
-        class="flex min-w-max"
+        class="flex min-w-0 border-b border-gray-800/30 last:border-0"
         :class="{
           'bg-[#1e301e] text-[#a7f0a7]': line.added,
           'bg-[#3a1e1e] text-[#f0a7a7]': line.removed,
           'text-gray-400': !line.added && !line.removed
         }"
       >
-        <!-- Line prefix -->
-        <div class="w-8 shrink-0 text-center select-none opacity-50 border-r border-gray-800 mr-2">
+        <!-- Line prefix - Fixed width, no wrap -->
+        <div class="w-8 shrink-0 text-center select-none opacity-50 border-r border-gray-800 mr-2 py-0.5">
           {{ line.added ? '+' : (line.removed ? '-' : ' ') }}
         </div>
-        <!-- Text content -->
-        <div class="whitespace-pre px-2">{{ line.text }}</div>
+        <!-- Text content - Allow wrapping -->
+        <div class="whitespace-pre-wrap break-words px-2 py-0.5 flex-grow min-w-0">
+          {{ line.text || ' ' }}
+        </div>
       </div>
     </div>
   </div>
@@ -75,17 +77,5 @@ const diffLines = computed(() => {
 <style scoped>
 .selectable {
   user-select: text !important;
-}
-
-.custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 3px;
 }
 </style>

@@ -1,11 +1,12 @@
 <script setup>
 import { ref, nextTick, computed, onMounted, watch } from 'vue'
-import { CheckCircle, HelpCircle, ChevronRight } from 'lucide-vue-next'
+import { CheckCircle, HelpCircle, ChevronRight, Check, X as XIcon } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
 import NotesModal from './NotesModal.vue'
 import ReviewerQuestions from './ReviewerQuestions.vue'
+import DiffViewer from '../DiffViewer.vue'
 
 const props = defineProps({
   pData: {
@@ -187,13 +188,20 @@ const getFriendlyNames = () => {
 
 const toggleSignoff = (key, dataRef) => {
   dataRef[key] = !dataRef[key]
-  if (dataRef[key] && activeSegmentKey.value === key) {
-    reviewerEditMode.value = false
+  if (dataRef[key]) {
+    if (activeSegmentKey.value === key) {
+      reviewerEditMode.value = false
+    }
+    // Automatically accept diff when locking
+    props.pData.concept_baselines[key] = undefined
   }
 }
 
 const handleSignoffAndNext = (key, signoffsRef, keysArray) => {
   signoffsRef[key] = true
+  // Automatically accept diff when locking
+  props.pData.concept_baselines[key] = undefined
+
   const idx = keysArray.indexOf(key)
   for (let i = idx + 1; i < keysArray.length; i++) {
     if (!signoffsRef[keysArray[i]]) {
@@ -235,6 +243,7 @@ const processConcept = async () => {
   const mapped = await mapParsedSegmentsToKeys(parsed, friendly)
   props.pData.concept_segments = mapped
   props.pData.concept_signoffs = {}
+  props.pData.concept_baselines = {}
   Object.keys(mapped).forEach(k => props.pData.concept_signoffs[k] = false)
   props.pData.concept_md = ''
 
@@ -252,6 +261,7 @@ const mergeConcept = async () => {
   props.pData.concept_md = md
   props.pData.concept_segments = {}
   props.pData.concept_signoffs = {}
+  props.pData.concept_baselines = {}
   activeSegmentKey.value = null
 }
 
@@ -296,6 +306,7 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
   }
 
   if (rewriteIsMergedMode.value) {
+    props.pData.concept_baselines['__merged__'] = props.pData.concept_md
     props.pData.concept_md = stripMarkdownWrapper(cleanContent)
   } else {
     const parsed = await parseStarterSegments(cleanContent)
@@ -308,9 +319,28 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
 
     for (const key in mapped) {
       if (props.pData.concept_segments[key] !== undefined && !props.pData.concept_signoffs[key]) {
+        props.pData.concept_baselines[key] = props.pData.concept_segments[key]
         props.pData.concept_segments[key] = mapped[key]
       }
     }
+  }
+}
+
+const acceptDiff = () => {
+  if (props.pData.concept_md) {
+    props.pData.concept_baselines['__merged__'] = undefined
+  } else if (activeSegmentKey.value) {
+    props.pData.concept_baselines[activeSegmentKey.value] = undefined
+  }
+}
+
+const refuseDiff = () => {
+  if (props.pData.concept_md && props.pData.concept_baselines['__merged__']) {
+    props.pData.concept_md = props.pData.concept_baselines['__merged__']
+    props.pData.concept_baselines['__merged__'] = undefined
+  } else if (activeSegmentKey.value && props.pData.concept_baselines[activeSegmentKey.value]) {
+    props.pData.concept_segments[activeSegmentKey.value] = props.pData.concept_baselines[activeSegmentKey.value]
+    props.pData.concept_baselines[activeSegmentKey.value] = undefined
   }
 }
 
@@ -340,6 +370,7 @@ const handleReset = () => {
   if (confirm("Are you sure you want to start over? This will clear current progress for the Concept step.")) {
     props.pData.concept_segments = {}
     props.pData.concept_signoffs = {}
+    props.pData.concept_baselines = {}
     props.pData.concept_md = ""
     props.pData.concept_llm_response = ""
     activeSegmentKey.value = null
@@ -357,16 +388,36 @@ const handleReset = () => {
         <h3 class="text-2xl font-bold text-white">Review Concept</h3>
         <div class="flex space-x-3">
           <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest mr-2">Start Over</button>
-          <button
-            @click="showQuestions = !showQuestions"
-            class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
-            :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
-          >
-            <HelpCircle class="w-4 h-4" />
-            <span>Questions</span>
-          </button>
-          <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
-          <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+
+          <div v-if="pData.concept_baselines['__merged__']" class="flex space-x-2">
+            <button
+              @click="refuseDiff"
+              class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2 bg-gray-700 text-red-400 hover:bg-red-900/40"
+            >
+              <XIcon class="w-4 h-4" />
+              <span>Refuse</span>
+            </button>
+            <button
+              @click="acceptDiff"
+              class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2 bg-cm-green text-white hover:brightness-110"
+            >
+              <Check class="w-4 h-4" />
+              <span>Accept Diff</span>
+            </button>
+          </div>
+
+          <template v-if="!pData.concept_baselines['__merged__']">
+            <button
+              @click="showQuestions = !showQuestions"
+              class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
+              :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+            >
+              <HelpCircle class="w-4 h-4" />
+              <span>Questions</span>
+            </button>
+            <button @click="openRewriteModal(true)" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
+            <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
+          </template>
         </div>
       </div>
 
@@ -379,7 +430,13 @@ const handleReset = () => {
       <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden flex flex-col">
         <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_md" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable shrink-0" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
         <div v-else ref="scrollRef" class="w-full h-full p-6 overflow-y-auto custom-scrollbar">
-          <MarkdownRenderer :content="pData.concept_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
+          <DiffViewer
+            v-if="pData.concept_baselines['__merged__']"
+            :oldText="pData.concept_baselines['__merged__']"
+            :newText="pData.concept_md"
+            :fontSize="editorFontSize"
+          />
+          <MarkdownRenderer v-else :content="pData.concept_md" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
         </div>
       </div>
 
@@ -401,7 +458,10 @@ const handleReset = () => {
                 @click="activeSegmentKey = key; reviewerEditMode = false"
                 class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"
                 :class="activeSegmentKey === key ? 'bg-cm-blue/20 border-cm-blue text-white' : 'border-transparent text-gray-400 hover:bg-gray-800'">
-             <span class="truncate pr-2">{{ renderSegmentTitle(key, conceptQuestionsMap) }}</span>
+             <div class="flex items-center space-x-2 truncate">
+                <div v-if="pData.concept_baselines[key]" class="w-1.5 h-1.5 rounded-full bg-cm-green shrink-0"></div>
+                <span class="truncate pr-2">{{ renderSegmentTitle(key, conceptQuestionsMap) }}</span>
+             </div>
              <button @click.stop="toggleSignoff(key, pData.concept_signoffs)" class="shrink-0 opacity-70 hover:opacity-100 transition-opacity" :title="pData.concept_signoffs[key] ? 'Unlock' : 'Lock'">
                <img v-if="pData.concept_signoffs[key] && lockedIcon" :src="lockedIcon" class="h-4 w-auto object-contain" />
                <img v-else-if="!pData.concept_signoffs[key] && unlockedIcon" :src="unlockedIcon" class="h-4 w-auto object-contain" />
@@ -412,17 +472,35 @@ const handleReset = () => {
            <div class="flex justify-between items-center mb-4">
                <h3 class="text-xl font-bold text-white">{{ renderSegmentTitle(activeSegmentKey, conceptQuestionsMap) }}</h3>
                <div class="flex space-x-2">
-                 <button
-                    v-if="!pData.concept_signoffs[activeSegmentKey]"
-                    @click="showQuestions = !showQuestions"
-                    class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
-                    :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
-                  >
-                    <HelpCircle class="w-3 h-3" />
-                    <span>Questions</span>
-                  </button>
-                 <button v-if="!pData.concept_signoffs[activeSegmentKey]" @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
-                 <button v-if="!pData.concept_signoffs[activeSegmentKey]" @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+                 <div v-if="pData.concept_baselines[activeSegmentKey] && !pData.concept_signoffs[activeSegmentKey]" class="flex space-x-2">
+                   <button
+                     @click="refuseDiff"
+                     class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1 bg-gray-700 text-red-400 hover:bg-red-900/40"
+                   >
+                     <XIcon class="w-3 h-3" />
+                     <span>Refuse</span>
+                   </button>
+                   <button
+                     @click="acceptDiff"
+                     class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1 bg-cm-green text-white hover:brightness-110"
+                   >
+                     <Check class="w-3 h-3" />
+                     <span>Accept Diff</span>
+                   </button>
+                 </div>
+
+                 <template v-if="!pData.concept_signoffs[activeSegmentKey] && !pData.concept_baselines[activeSegmentKey]">
+                   <button
+                      @click="showQuestions = !showQuestions"
+                      class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
+                      :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+                    >
+                      <HelpCircle class="w-3 h-3" />
+                      <span>Questions</span>
+                    </button>
+                   <button @click="openRewriteModal(false)" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
+                   <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+                 </template>
                </div>
            </div>
 
@@ -435,7 +513,13 @@ const handleReset = () => {
            <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
                <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="pData.concept_segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
                <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
-                 <MarkdownRenderer :content="pData.concept_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!pData.concept_signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
+                 <DiffViewer
+                    v-if="pData.concept_baselines[activeSegmentKey]"
+                    :oldText="pData.concept_baselines[activeSegmentKey]"
+                    :newText="pData.concept_segments[activeSegmentKey]"
+                    :fontSize="editorFontSize"
+                  />
+                 <MarkdownRenderer v-else :content="pData.concept_segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!pData.concept_signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
                </div>
            </div>
            <div class="shrink-0 pt-4 flex justify-end space-x-4">
