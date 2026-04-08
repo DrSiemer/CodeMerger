@@ -35,12 +35,18 @@ class WindowManager:
         # Load persisted geometry from config
         geom = self.api.app_state.config.get('main_window_geom', {})
 
+        # Position memory is preserved to maintain monitor-anchor strategy.
         self.main_last_x = geom.get('x')
         self.main_last_y = geom.get('y')
-        self.main_last_w = geom.get('w', 1200)
-        self.main_last_h = geom.get('h', 780)
 
-        # Position Persistence and Monitor Tracking
+        # [TRANSIENT DIMENSIONS]
+        # Main dashboard dimensions are reset on every application start.
+        # While tracked in memory for flicker-free restoration during a session,
+        # they are not loaded from or saved to persistent storage.
+        self.main_last_w = 1200
+        self.main_last_h = 780
+
+        # Compact Mode Position Persistence and Monitor Tracking
         self.compact_mode_last_x = geom.get('compact_x')
         self.compact_mode_last_y = geom.get('compact_y')
         self.compact_last_monitor_handle = None
@@ -231,7 +237,7 @@ class WindowManager:
         """Transition from splash to main interface, ensuring the window pins to the correct monitor."""
         if self.main_window:
             # Re-apply dimensions and coordinates IMMEDIATELY before showing to prevent OS-level jumps.
-            # This ensures the window anchors to the correct workspace if it was restored from a different monitor.
+            # Dimensions here reflect the transient in-memory state or the launch defaults.
             if self.main_last_w is not None and self.main_last_h is not None:
                 self.main_window.resize(int(self.main_last_w), int(self.main_last_h))
             if self.main_last_x is not None and self.main_last_y is not None:
@@ -284,11 +290,11 @@ class WindowManager:
         try:
             self._update_main_bounds()
             if self.main_last_x is not None and self.main_last_y is not None:
+                # [TRANSIENT DIMENSIONS]
+                # Only x, y, and compact coordinates are persisted. w and h are discarded.
                 self.api.app_state.config['main_window_geom'] = {
                     'x': self.main_last_x,
                     'y': self.main_last_y,
-                    'w': self.main_last_w,
-                    'h': self.main_last_h,
                     'compact_x': self.compact_mode_last_x,
                     'compact_y': self.compact_mode_last_y
                 }
