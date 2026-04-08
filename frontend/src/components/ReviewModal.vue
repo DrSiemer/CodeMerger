@@ -29,6 +29,7 @@ const {
   resizeWindow,
   processPaste,
   editorFontSize,
+  hasPendingChanges,
   handleZoom
 } = useAppState()
 
@@ -38,7 +39,7 @@ const activeTab = ref('')
 const showCommentary = ref(false)
 const tabContentContainer = ref(null)
 
-// Categorize segments from the plan
+// Categorize segments from the plan into dedicated tab objects
 const tabs = computed(() => {
   const list = []
   if (!lastAiResponse.value) return list
@@ -60,7 +61,6 @@ const tabs = computed(() => {
       } else if (seg.tag === 'VERIFICATION' && hasContent) {
         list.push({ id: 'verification', name: 'Verification', icon: ShieldCheck, content: seg.content, color: 'text-cm-green' })
       }
-      // Note: DELETED FILES and UNCHANGED tabs intentionally omitted as they are handled elsewhere or ignored
     } else if (seg.type === 'orphan' && hasContent) {
       list.push({ id: 'unformatted', name: 'Unformatted Output', icon: AlertTriangle, content: seg.content, color: 'text-yellow-500' })
     }
@@ -90,14 +90,14 @@ onMounted(async () => {
     const hasVerification = tabs.value.find(t => t.id === 'verification')
     const hasUnformatted = tabs.value.find(t => t.id === 'unformatted')
 
-    if (props.mode === 'resume' && hasVerification) {
-      // Re-opening: Go to testing steps
+    // PRIORITY: If changes are pending, always go to Changes tab (Requirement)
+    if (hasPendingChanges.value) {
+      activeTab.value = 'changes'
+    } else if (props.mode === 'resume' && hasVerification) {
       activeTab.value = 'verification'
     } else if (props.mode === 'new' && hasIntro) {
-      // Fresh paste: Go to plan intro
       activeTab.value = 'intro'
     } else if (hasUnformatted && !hasFormattingTags.value) {
-      // Fallback for format errors
       activeTab.value = 'unformatted'
     } else {
       activeTab.value = tabs.value[0].id
@@ -121,7 +121,6 @@ const toggleDiff = async (path) => {
 
 const acceptChange = async (path, type) => {
   if (type === 'delete') {
-    // Capture original for undo before deleting
     if (planOriginalContents.value[path] === undefined) {
       planOriginalContents.value[path] = await getFileContent(path)
     }
@@ -129,7 +128,6 @@ const acceptChange = async (path, type) => {
     if (success) planFileStates.value[path] = 'deleted'
   } else {
     const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
-    // Capture original for undo if it's an update
     if (type === 'modify' && planOriginalContents.value[path] === undefined) {
       planOriginalContents.value[path] = await getFileContent(path)
     }
@@ -192,7 +190,6 @@ const handlePasteNext = async () => {
       activeTab.value = hasIntro ? 'intro' : tabs.value[0].id
     }
 
-    // Reset scroll position to top for the new content
     if (tabContentContainer.value) {
       tabContentContainer.value.scrollTop = 0
     }
@@ -203,6 +200,13 @@ const handlePasteNext = async () => {
 
 const getPendingCount = computed(() => {
   return Object.values(planFileStates.value).filter(s => s === 'pending').length
+})
+
+// Acceptance Label Logic: transitions from Apply All to Apply All Remaining as work progresses
+const applyAllLabel = computed(() => {
+  const states = Object.values(planFileStates.value)
+  const hasInteracted = states.some(s => ['applied', 'rejected', 'deleted'].includes(s))
+  return hasInteracted ? 'Apply All Remaining' : 'Apply All'
 })
 
 const getSkippedMessage = (path) => {
@@ -251,7 +255,7 @@ const getSkippedMessage = (path) => {
         </button>
       </div>
 
-      <!-- Scrollable Tab Content -->
+      <!-- Scrollable Tab Content Container -->
       <div ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg" @wheel.ctrl.prevent="handleZoom">
         <div v-for="tab in tabs" :key="tab.id" v-show="activeTab === tab.id" class="p-8">
 
@@ -418,7 +422,7 @@ const getSkippedMessage = (path) => {
             class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-12 rounded shadow-md transition-all flex items-center"
           >
             <CheckCircle class="w-4 h-4 mr-2" />
-            Apply All Pending
+            {{ applyAllLabel }}
           </button>
         </div>
       </div>

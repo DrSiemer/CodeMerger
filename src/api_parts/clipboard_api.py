@@ -1,6 +1,7 @@
 import json
 import logging
 import pyperclip
+import time
 from src.core.secret_scanner import scan_for_secrets
 from src.core.merger import generate_output_string
 from src.core import change_applier
@@ -25,8 +26,8 @@ class ClipboardApi:
             report = scan_for_secrets(base_dir, files_to_copy)
             if report:
                 warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
-                # Confirmation needs to happen on whatever window is active
-                active_win = self._window_manager.compact_window if self._window_manager.compact_window.visible else self._window_manager.main_window
+                # Coordination: Confirmation needs to happen on whatever window is active
+                active_win = self._window_manager.compact_window if (self._window_manager.compact_window and self._window_manager.compact_window.visible) else self._window_manager.main_window
                 proceed = active_win.create_confirmation_dialog("Secrets Detected", warning_message)
                 if not proceed:
                     return "Copy cancelled due to potential secrets."
@@ -52,6 +53,15 @@ class ClipboardApi:
         if not self._window_manager or not self._window_manager.main_window:
             return False
 
+        # OVERWRITE CHECK: Ask user if they want to discard unapplied changes in memory
+        if self.check_for_pending_changes():
+            msg = "An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?"
+            # Use compact window as it currently has focus during this request
+            proceed = self._window_manager.compact_window.create_confirmation_dialog("Confirm Overwrite", msg)
+            if not proceed:
+                return False
+
+        # Access system clipboard using Python to bypass browser permission restrictions
         text = pyperclip.paste()
         if not text or not text.strip():
             return "Clipboard is empty."
@@ -62,8 +72,10 @@ class ClipboardApi:
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
         if plan.get('status') == 'ERROR':
-            # We don't alert here to avoid focus stealing artifacts on Compact Mode
             return False
+
+        # Store for persistence across window handoffs
+        self._last_parsed_plan = plan
 
         # AUTO-APPLY LOGIC (Ctrl-click behavior)
         if auto_apply and plan.get('status') != 'UNFORMATTED':
@@ -80,34 +92,31 @@ class ClipboardApi:
                 return "Everything is already up to date."
 
             threshold = self.app_state.config.get('new_file_alert_threshold', 5)
-
             dangerous_actions = []
-            if len(creations) > threshold:
-                dangerous_actions.append(f"CREATE {len(creations)} file(s)")
-            if actual_deletions:
-                dangerous_actions.append(f"DELETE {len(actual_deletions)} file(s)")
+            if len(creations) > threshold: dangerous_actions.append(f"CREATE {len(creations)} file(s)")
+            if actual_deletions: dangerous_actions.append(f"DELETE {len(actual_deletions)} file(s)")
 
             proceed = True
             if dangerous_actions:
                 msg = "This operation will perform the following actions:\n\n- " + "\n- ".join(dangerous_actions) + "\n\nDo you want to proceed?"
-                # Compact window is always visible during this call
                 proceed = self._window_manager.compact_window.create_confirmation_dialog("Confirm File Actions", msg)
 
             if proceed:
                 success, msg = self.apply_full_plan(plan)
                 if success:
-                    # Notify UI of the side-effect application
                     self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
                     return msg
 
         # FALLBACK: Send signal to Main Window for review
-        # We store the plan on the API instance to avoid breaking JS evaluation with large payloads
-        self._last_parsed_plan = plan
+        # Restore main window FIRST to ensure the Vue instance is active and ready to receive events.
+        self._window_manager.restore_main()
+
+        # Give the OS and Browser a moment to render/focus before sending the event
+        time.sleep(0.1)
 
         js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-paste-request', {{ detail: {{ revertOnClose: {'true' if revert_on_close else 'false'} }} }}))"
         try:
             self._window_manager.main_window.evaluate_js(js_cmd)
-            self._window_manager.restore_main()
             return True
         except Exception as e:
             log.error(f"Failed to trigger remote paste signal: {e}")

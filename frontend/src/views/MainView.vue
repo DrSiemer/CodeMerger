@@ -35,7 +35,8 @@ const {
   processPaste,
   copyCleanupPrompt,
   minimizeWindow,
-  claimLastPlan
+  claimLastPlan,
+  hasPendingChanges
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -54,7 +55,7 @@ const isCopyingOnly = ref(false)
 const isStarterHovered = ref(false)
 const isFolderHovered = ref(false)
 
-// Interaction state
+// Interaction state to distinguish between single and double clicks on the project title
 let clickTimer = null
 
 const handleTitleInteraction = () => {
@@ -154,7 +155,7 @@ const handleCopy = async (useWrapper) => {
   }
 }
 
-// Robust Computed Style for the Project Swatch
+// Robust Computed Style for the Project Swatch using the Base64 mask pipeline
 const swatchStyle = computed(() => {
   if (!activeProject.path || !logoMask.value) return {}
 
@@ -180,14 +181,12 @@ const closeReviewModal = () => {
 }
 
 /**
- * Handles paste requests originating from the Compact window.
- * Mirrored logic from useAppState.js processPaste() to ensure 'skipped'
- * files are correctly identified.
+ * Handles paste handoff requests originating from the Compact window context.
  */
 const onRemotePasteRequest = async (event) => {
   const { revertOnClose } = event.detail
 
-  // Claim the pre-parsed plan from the Python state
+  // Claim the pre-parsed plan from the Python session state
   const plan = await claimLastPlan()
   if (!plan) return
 
@@ -204,7 +203,7 @@ const onRemotePasteRequest = async (event) => {
   const deletions = plan.deletions_proposed || []
   const skipped = plan.skipped_files || []
 
-  // Initialize states, correctly marking 'No changes' files as skipped
+  // Initialize handled states, accounting for byte-for-byte identical files
   Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
   Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
   deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
@@ -226,7 +225,7 @@ onUnmounted(() => {
     <!-- Top Bar -->
     <header class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
       <div class="flex items-center space-x-4 min-w-0 flex-grow">
-        <!-- Masked Logo Color Swatch -->
+        <!-- Masked Logo Swatch -->
         <div
           v-if="activeProject.path && logoMask"
           class="w-12 h-12 cursor-pointer shrink-0"
@@ -244,7 +243,6 @@ onUnmounted(() => {
           title="Change project color"
         ></div>
 
-        <!-- Title & Rename Logic -->
         <div class="flex items-center min-w-0 flex-grow text-white">
           <div v-if="isEditingName" class="flex items-center space-x-2 w-full max-w-md">
             <input
@@ -277,9 +275,8 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Right-aligned Header Actions -->
       <div class="flex items-center space-x-5 shrink-0 ml-4">
-        <!-- New Files Alert -->
+        <!-- New Files Alert (Syncs with background monitor thread) -->
         <div
           v-if="activeProject.newFileCount > 0 && !showFileManagerModal"
           class="flex items-center text-cm-green cursor-pointer hover:brightness-125 transition-all"
@@ -313,7 +310,6 @@ onUnmounted(() => {
           Edit Merge List
         </button>
 
-        <!-- Profiles -->
         <div class="flex items-center space-x-2" v-if="activeProject.path">
           <span class="text-white bg-cm-input-bg px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] flex items-center">Default</span>
           <button class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-9 rounded flex items-center justify-center font-bold transition-colors" title="Add Profile">+</button>
@@ -346,16 +342,14 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- Main Dashboard Content -->
     <main class="flex-grow flex flex-col relative bg-cm-dark-bg">
-      <!-- Bottom-Left Tools -->
       <div class="absolute bottom-4 left-6 flex flex-col">
         <button @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings">
           <Settings class="w-7 h-7" />
         </button>
       </div>
 
-      <!-- Actions Box Container -->
       <div class="flex-grow flex items-center justify-center pb-4">
         <div v-if="activeProject.path" class="w-full max-w-[620px] border border-gray-600 rounded bg-cm-dark-bg p-6 flex flex-col shadow-sm">
           <div class="flex justify-between items-center mb-5">
@@ -409,7 +403,6 @@ onUnmounted(() => {
               </button>
             </template>
 
-            <!-- Small Buttons -->
             <button
               @click="showInstructionsModal = true"
               class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
@@ -418,11 +411,12 @@ onUnmounted(() => {
               <span>Define Instructions</span>
             </button>
 
-            <!-- Paste Group -->
             <div class="flex flex-col space-y-4">
+              <!-- Orange Attention styling when changes are pending in memory (Requirement) -->
               <button
                 @click="handlePasteChanges"
-                class="w-full bg-cm-green hover:bg-green-600 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+                class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+                :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
               >
                 <ClipboardPaste class="w-4 h-4" />
                 <span>Paste Changes</span>
@@ -434,21 +428,21 @@ onUnmounted(() => {
                 class="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
                 title="Review latest AI response"
               >
-                <Eye class="w-4 h-4" />
+                <!-- Icon turns orange to signal unapplied work -->
+                <Eye class="w-4 h-4" :class="hasPendingChanges ? 'text-[#DE6808]' : 'text-white'" />
                 <span>AI Response Review</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Empty State -->
         <div v-else class="mb-4 text-gray-500 text-[17px]">
           Select a project to get started
         </div>
       </div>
     </main>
 
-    <!-- Status Bar -->
+    <!-- Global Status Bar -->
     <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px] z-50">
       <div
         class="tracking-wide truncate pr-4"
@@ -461,49 +455,19 @@ onUnmounted(() => {
       </button>
     </footer>
 
-    <!-- Modals -->
-    <ProjectSelectorModal
-      v-if="showProjectModal"
-      @close="showProjectModal = false"
-    />
-    <SettingsModal
-      v-if="showSettingsModal"
-      :initial-tab="settingsTab"
-      @close="showSettingsModal = false"
-    />
-    <FileManagerModal
-      v-if="showFileManagerModal"
-      @close="showFileManagerModal = false"
-    />
-    <ReviewModal
-      v-if="showReviewModal"
-      :mode="reviewMode"
-      @close="closeReviewModal"
-    />
-    <InstructionsModal
-      v-if="showInstructionsModal"
-      @close="showInstructionsModal = false"
-    />
-    <ProjectStarterModal
-      v-if="showStarterModal"
-      @close="showStarterModal = false"
-    />
+    <!-- Modal Layers -->
+    <ProjectSelectorModal v-if="showProjectModal" @close="showProjectModal = false" />
+    <SettingsModal v-if="showSettingsModal" :initial-tab="settingsTab" @close="showSettingsModal = false" />
+    <FileManagerModal v-if="showFileManagerModal" @close="showFileManagerModal = false" />
+    <ReviewModal v-if="showReviewModal" :mode="reviewMode" @close="closeReviewModal" />
+    <InstructionsModal v-if="showInstructionsModal" @close="showInstructionsModal = false" />
+    <ProjectStarterModal v-if="showStarterModal" @close="showStarterModal = false" />
   </div>
 </template>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #2E2E2E;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #777;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #2E2E2E; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #777; }
 </style>

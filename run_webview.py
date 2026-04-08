@@ -55,6 +55,8 @@ class WindowManager:
             return None
 
         main_x, main_y = self.main_window.x, self.main_window.y
+        # Monitor handle detection: ignore off-screen coordinates provided by Windows
+        # when a window is minimized (usually -32000) to avoid clearing saved positions.
         if main_x <= -32000 or main_y <= -32000:
             if getattr(self, 'main_last_x', None) is not None:
                 main_x, main_y = self.main_last_x, self.main_last_y
@@ -70,7 +72,7 @@ class WindowManager:
                 from ctypes import wintypes
                 user32 = ctypes.windll.user32
 
-                # Approximate center of the window
+                # Approximate center of the window for robust monitor identifying
                 x = main_x + (main_w // 2)
                 y = main_y + (main_h // 2)
 
@@ -81,7 +83,7 @@ class WindowManager:
             except Exception:
                 pass
 
-        # Fallback identifier based on rough coordinates
+        # Fallback identifier based on rough coordinates if Win32 API fails
         return f"{main_x // 1920}_{main_y // 1080}"
 
     def _get_monitor_work_area(self, h_monitor):
@@ -119,7 +121,7 @@ class WindowManager:
     def start(self):
         """Initializes primary windows immediately for transition."""
 
-        # Helper to load and encode splash frames
+        # Helper to load and encode splash frames for the Base64 asset pipeline
         def get_b64(path):
             if os.path.exists(path):
                 try:
@@ -136,7 +138,7 @@ class WindowManager:
         <body style="background:#1A1A1A; color:#FFFFFF; font-family:'Segoe UI', sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; overflow:hidden; user-select:none;">
             <div style="text-align:center;">
                 <div style="position:relative; width:64px; height:64px; margin: 0 auto 20px;">
-                    <!-- Layering strategy: absolute stacking -->
+                    <!-- Layering strategy: absolute stacking for the logo animation -->
                     <img src="{s1_b64}" class="logo logo-1">
                     <img src="{s2_b64}" class="logo logo-2">
                     <img src="{s3_b64}" class="logo logo-3">
@@ -187,7 +189,7 @@ class WindowManager:
             background_color='#1A1A1A'
         )
 
-        # Create Main Window (Hidden initially to load background)
+        # Create Main Window (Hidden initially to allow the browser to load background UI)
         self.main_window = webview.create_window(
             "CodeMerger",
             url=self.base_url,
@@ -201,7 +203,7 @@ class WindowManager:
 
         self.api.set_window_manager(self)
 
-        # Dashboard Events
+        # Dashboard Visibility Events
         self.main_window.events.minimized += self._on_main_minimized
         self.main_window.events.closing += self._on_main_closing
         self.main_window.events.closed += self._on_window_closed
@@ -210,7 +212,7 @@ class WindowManager:
             self.main_window.events.moved += self._on_main_moved
             self.main_window.events.resized += self._on_main_resized
 
-            # Ensures compact window is hidden if OS forcefully restores main window
+            # Strict Window Mutual Exclusion: ensure compact window is hidden if OS restores main window
             self.main_window.events.restored += self._on_main_restored
             self.main_window.events.maximized += self._on_main_restored
             self.main_window.events.shown += self._on_main_restored
@@ -220,7 +222,7 @@ class WindowManager:
         # Prevent DevTools from opening automatically when debug mode is enabled
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
 
-        # Start PyWebView loop (debug mode allows Ctrl+Shift+I in dev)
+        # Start PyWebView loop
         webview.start(debug=self.dev_mode)
 
     def _create_compact_window(self):
@@ -265,7 +267,7 @@ class WindowManager:
         self._create_compact_window()
 
     def _on_main_moved(self, x, y):
-        # Ignore off-screen coordinates (-32000) but keep valid (even negative) ones from maximized state
+        # Ignore off-screen coordinates (-32000) but keep valid ones from maximized state
         if x > -32000 and y > -32000:
             self.main_last_x = x
             self.main_last_y = y
@@ -299,8 +301,11 @@ class WindowManager:
         if config.get('enable_compact_mode_on_minimize', True):
             self._transitioning = True
             try:
-                # Anchor the restored bounds before hiding to ensure the OS
-                # has correct data when restoring from the taskbar later.
+                # Minimizing to Compact Mode while the Response Review is open should close it automatically
+                self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-close-review"))')
+
+                # Window Restore Artifact Fix: explicitly re-apply coordinates before hiding
+                # so the OS has correct bounds when restoring from the taskbar later.
                 if self.main_last_x is not None and self.main_last_y is not None:
                     self.main_window.move(int(self.main_last_x), int(self.main_last_y))
                 if self.main_last_w and self.main_last_h:
@@ -315,7 +320,7 @@ class WindowManager:
         """
         Triggered when the main dashboard is about to close.
         Destroying the compact window here prevents WebView2 shutdown race conditions
-        that cause Error 1411.
+        that cause Error 1411 (Failed to unregister class Chrome_WidgetWin_0).
         """
         self._is_shutting_down = True
         if self.compact_window:
@@ -327,14 +332,14 @@ class WindowManager:
     def _on_window_closed(self):
         """
         Triggered when the main dashboard is closed.
-        Cleanup must be graceful to avoid Error 1411 (Chrome_WidgetWin unregister failure).
+        Cleanup must be graceful to avoid Chromium unregistration failures.
         """
         pass
 
     def _on_compact_closing(self):
-        """Prevents the compact window from being destroyed; restores main instead."""
+        """Graceful Shutdown: Prevents compact window destruction; restores main instead."""
         if self._is_shutting_down:
-            return # Allow destruction
+            return # Allow destruction during app exit
         self.restore_main()
         return False # Prevent actual window destruction
 
@@ -346,7 +351,7 @@ class WindowManager:
             if self.compact_last_monitor_handle is None:
                 self.compact_last_monitor_handle = current_monitor
 
-            # If the MAIN window changed monitors since last time, invalidate compact position
+            # Position Persistence: Invalidate memory if the main window changed monitors
             monitor_changed = self.compact_last_monitor_handle != current_monitor
             if monitor_changed:
                 self.compact_mode_last_x = None
@@ -358,7 +363,7 @@ class WindowManager:
             if self.compact_mode_last_x is not None:
                 target_x, target_y = self.compact_mode_last_x, self.compact_mode_last_y
 
-                # Clamp the saved position to the bounds of the monitor it currently resides on
+                # Clamp the saved position to the monitor bounds it currently resides on
                 if sys.platform == "win32":
                     try:
                         import ctypes
@@ -404,8 +409,7 @@ class WindowManager:
                 self.compact_window.hide()
 
             if self.main_window:
-                # Force restored dimensions and position before showing to prevent
-                # intermittent oversized animation artifacts on Windows.
+                # Force restored dimensions and position before showing to prevent artifacts
                 if self.main_last_x is not None and self.main_last_y is not None:
                     self.main_window.move(int(self.main_last_x), int(self.main_last_y))
                 if self.main_last_w and self.main_last_h:

@@ -13,23 +13,31 @@ const {
   restoreMainWindow,
   closeApp,
   openProjectFolder,
+  checkPendingChanges,
   statusMessage
 } = useAppState()
 
 const isCopying = ref(false)
 const appIcon = ref('')
+const hasPendingChangesInternal = ref(false)
 
-// Manual Window Dragging State
+// Manual Window Dragging State: tracked manually to coordinate with PyWebView's borderless window logic
 let isDragging = false
 let startMouseX = 0
 let startMouseY = 0
 let startWinX = 0
 let startWinY = 0
 
+// Interval for updating the notification status locally in the compact view context
+let statusCheckInterval = null
+
 const onBlur = () => {
-  // Critical Failsafe: if the window loses focus, drop any dragging state
-  // to prevent the "cursor capture" bug.
+  // Failsafe: drop dragging state if window loses focus
   isDragging = false
+}
+
+const updatePendingStatus = async () => {
+  hasPendingChangesInternal.value = await checkPendingChanges()
 }
 
 onMounted(async () => {
@@ -37,34 +45,38 @@ onMounted(async () => {
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
   window.addEventListener('blur', onBlur)
+
+  // Initial check on mount
+  await updatePendingStatus()
+
+  // Regular check to stay reactive to Main Window interactions or background state updates
+  statusCheckInterval = setInterval(updatePendingStatus, 2000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove)
   window.removeEventListener('mouseup', onMouseUp)
   window.removeEventListener('blur', onBlur)
+  if (statusCheckInterval) clearInterval(statusCheckInterval)
 })
 
 const startDrag = async (e) => {
   // Guard: ensure button clicks don't trigger dragging
   if (e.target.closest('button')) return
 
-  // Alt-click: Open console in project folder
+  // Alt-click: Open clean console in project folder (Requirement)
   if (e.altKey) {
     openProjectFolder({ ctrlKey: false, altKey: true })
     return
   }
 
-  // Capture screen position of the mouse
+  // Capture screen position of the mouse and actual window coordinates from bridge
   startMouseX = e.screenX
   startMouseY = e.screenY
-
-  // Fetch actual window coordinates from Python bridge (Compact specific API)
   const pos = await window.pywebview.api.get_compact_window_pos()
   startWinX = pos.x
   startWinY = pos.y
 
-  // Set dragging state only after data is ready to prevent jump artifacts
   isDragging = true
 }
 
@@ -74,11 +86,8 @@ const onMouseMove = (e) => {
   const deltaX = e.screenX - startMouseX
   const deltaY = e.screenY - startMouseY
 
-  const newX = startWinX + deltaX
-  const newY = startWinY + deltaY
-
-  // Move the compact window specifically
-  window.pywebview.api.move_compact_window(newX, newY)
+  // Move the compact window specifically via Python bridge
+  window.pywebview.api.move_compact_window(startWinX + deltaX, startWinY + deltaY)
 }
 
 const onMouseUp = () => {
@@ -97,11 +106,12 @@ const handleCopy = async (event) => {
 
 const handlePaste = async (event) => {
   if (window.pywebview) {
-    // We call a special remote-paste method that targets the main window's browser context.
-    // Holding Ctrl triggers 'Auto-Apply' (matching Tkinter behavior).
+    // request_remote_paste logic handles Overwrite Confirmation and Hand-off internally
     const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey)
 
-    // Display returned status messages (e.g. "Already up to date")
+    // Immediate refresh of indicator
+    await updatePendingStatus()
+
     if (typeof result === 'string') {
       statusMessage.value = result
     }
@@ -109,23 +119,20 @@ const handlePaste = async (event) => {
 }
 
 const handleClose = (event) => {
-  if (event.ctrlKey) {
-    closeApp()
-  } else {
-    restoreMainWindow()
-  }
+  // Restore dashboard on normal click, Exit app on Ctrl+Click
+  if (event.ctrlKey) closeApp()
+  else restoreMainWindow()
 }
 
 /**
- * Logic for project name abbreviation - EXACT port from Tkinter version.
- * Prioritizes capital letters, then fills remaining 8 slots with lowercase from the start.
+ * Logic for project name abbreviation - EXACT port from original Tkinter tool.
+ * Prioritizes capital letters, then fills remaining slots with lowercase from the start.
  */
 const titleAbbr = computed(() => {
   const name = activeProject.name || 'CodeMerger'
   const maxLen = 8
   const chars = [...name]
 
-  // Identify uppercase indices
   const capitalIndices = []
   for (let i = 0; i < chars.length; i++) {
     if (chars[i] >= 'A' && chars[i] <= 'Z') {
@@ -134,7 +141,6 @@ const titleAbbr = computed(() => {
   }
 
   if (capitalIndices.length > 1) {
-    // Identify lowercase indices
     const lowercaseIndices = []
     for (let i = 0; i < chars.length; i++) {
       if (chars[i] >= 'a' && chars[i] <= 'z') {
@@ -151,11 +157,9 @@ const titleAbbr = computed(() => {
       indicesToKeep = capitalIndices.slice(0, maxLen)
     }
 
-    // Sort to maintain relative character positions
     indicesToKeep.sort((a, b) => a - b)
     return indicesToKeep.map(i => chars[i]).join('')
   } else {
-    // Fallback for single-case or short names
     const noSpaceTitle = name.replace(/\s/g, '')
     return noSpaceTitle.slice(0, maxLen)
   }
@@ -168,7 +172,7 @@ const copyButtonText = computed(() => {
 
 <template>
   <div class="h-full flex flex-col bg-cm-dark-bg border border-gray-600 select-none overflow-hidden font-sans">
-    <!-- Manual Drag Header -->
+    <!-- Header Draggable Bar -->
     <div
       class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move"
       @mousedown="startDrag"
@@ -186,13 +190,12 @@ const copyButtonText = computed(() => {
       </div>
 
       <div class="flex items-center space-x-1.5 shrink-0">
-        <!-- Alert icon if new files -->
+        <!-- New Files Alert (Blinks green) -->
         <AlertTriangle
           v-if="activeProject.newFileCount > 0"
           class="w-3.5 h-3.5 text-cm-green animate-pulse"
           title="New files detected!"
         />
-
         <button
           @mousedown.stop
           @click="handleClose"
@@ -204,10 +207,9 @@ const copyButtonText = computed(() => {
       </div>
     </div>
 
-    <!-- Content Stack - Tightened Spacing -->
+    <!-- Actions Area -->
     <div class="flex-grow flex flex-col p-1.5 space-y-1.5 justify-center">
-
-      <!-- Adaptive Copy Button -->
+      <!-- Adaptive Copy Button (Switches logic based on project instructions) -->
       <button
         @click="handleCopy"
         :disabled="isCopying"
@@ -219,23 +221,26 @@ const copyButtonText = computed(() => {
         <span v-else class="truncate px-1">{{ copyButtonText }}</span>
       </button>
 
-      <!-- Paste & Review Bar -->
+      <!-- Paste & Review Logic Row -->
       <div class="w-full flex items-center space-x-1.5">
+        <!-- Orange styling when changes are pending in memory (Requirement) -->
         <button
           @click="handlePaste"
-          class="flex-grow bg-cm-green hover:bg-green-600 text-white font-bold py-2.5 rounded text-[11px] transition-all active:scale-95 shadow"
+          class="relative flex-grow text-white font-bold py-2.5 rounded text-[11px] transition-all active:scale-95 shadow"
+          :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
           title="Paste response from AI (Ctrl+Click to auto-apply)"
         >
-          Paste
+          <span>Paste</span>
         </button>
 
         <button
           v-if="lastAiResponse"
           @click="restoreMainWindow"
-          class="bg-orange-600 hover:bg-orange-500 text-white w-4 py-2.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0"
+          class="bg-gray-800 hover:bg-gray-700 text-white w-6 py-2.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0"
           title="View response review"
         >
-          <!-- Small vertical orange bar matching original UI -->
+          <!-- Eye icon color mirrors the pending changes state -->
+          <Eye class="w-3 h-3" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
         </button>
       </div>
     </div>
@@ -243,8 +248,6 @@ const copyButtonText = computed(() => {
 </template>
 
 <style scoped>
-/* Ensure dragging doesn't interfere with child interactions */
-button {
-  -webkit-app-region: no-drag;
-}
+/* Standard PyWebView override to allow button interaction inside draggable areas */
+button { -webkit-app-region: no-drag; }
 </style>

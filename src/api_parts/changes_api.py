@@ -15,7 +15,21 @@ class ChangesApi:
             return {"status": "ERROR", "message": "No active project loaded."}
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
+
+        # Store for internal tracking of unapplied changes across windows
+        self._last_parsed_plan = plan
         return plan
+
+    def sync_plan_states(self, states):
+        """
+        Synchronizes the review progress from the frontend to the backend.
+        'states' is a dict of { rel_path: 'pending'|'applied'|'rejected'|'deleted'|'skipped' }
+        Used to determine if the Paste button should turn orange.
+        """
+        if self._last_parsed_plan:
+            self._last_parsed_plan['file_states'] = states
+            return True
+        return False
 
     def get_file_content(self, rel_path):
         """
@@ -31,7 +45,7 @@ class ChangesApi:
         if raw_content is None:
             return None
 
-        # Standardize for the frontend diff tool
+        # Sanitization Pipeline: Standardize for the frontend diff tool to prevent phantom diff artifacts
         return change_applier._sanitize_content(rel_path, raw_content)
 
     def apply_single_file_change(self, rel_path, content):
@@ -46,7 +60,6 @@ class ChangesApi:
         success, err = change_applier.apply_single_file(project_config.base_dir, rel_path, content)
         if success:
             # Synchronize configuration metadata
-            # Using the SANITIZED version for token counting consistency
             sanitized = change_applier._sanitize_content(rel_path, content)
             full_path = os.path.join(project_config.base_dir, rel_path)
             tokens = get_token_count_for_text(sanitized)
@@ -55,7 +68,6 @@ class ChangesApi:
             f_hash = get_file_hash(full_path)
 
             file_was_in_active_list = False
-            # Update stats in all profiles to maintain cache consistency
             for p_name, p_data in project_config.profiles.items():
                 found = False
                 for f_info in p_data.get('selected_files', []):
@@ -67,57 +79,79 @@ class ChangesApi:
                 if found:
                     p_data['total_tokens'] = sum(f.get('tokens', 0) for f in p_data['selected_files'])
 
-            # Ensure file is part of the merge list (matching the Tkinter tool behavior)
             if not file_was_in_active_list:
                 project_config.selected_files.append({
                     'path': rel_path, 'tokens': tokens, 'lines': lines,
                     'mtime': mtime, 'hash': f_hash
                 })
-                # Mark as known globally to prevent "New File" alerts
                 if rel_path not in project_config.known_files:
                     project_config.known_files.append(rel_path)
                     project_config.known_files.sort()
 
-            project_config.save()
+            # Update backend tracking state for unapplied changes notification
+            if self._last_parsed_plan:
+                if 'file_states' not in self._last_parsed_plan:
+                    self._last_parsed_plan['file_states'] = {}
+                self._last_parsed_plan['file_states'][rel_path] = 'applied'
 
+            project_config.save()
         return success, err
 
     def delete_file(self, rel_path):
-        """
-        Removes file from disk and automatically removes it from all project profiles.
-        """
+        """Removes file from disk and automatically removes it from all project profiles."""
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return False, "No active project."
 
         success, err = change_applier.delete_single_file(project_config.base_dir, rel_path)
         if success:
-            # Prune from global known files
             if rel_path in project_config.known_files:
                 project_config.known_files.remove(rel_path)
 
-            # Remove from all profile-specific selection lists
             for p_data in project_config.profiles.values():
                 p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] != rel_path]
                 p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f != rel_path]
-                # Re-calculate total tokens for each profile
                 p_data['total_tokens'] = sum(f.get('tokens', 0) for f in p_data['selected_files'])
 
-            project_config.save()
+            # Update backend tracking state for unapplied changes notification
+            if self._last_parsed_plan:
+                if 'file_states' not in self._last_parsed_plan:
+                    self._last_parsed_plan['file_states'] = {}
+                self._last_parsed_plan['file_states'][rel_path] = 'deleted'
 
+            project_config.save()
         return success, err
 
     def claim_last_plan(self):
-        """Used by the main window to retrieve a plan prepared by the compact window."""
-        plan = self._last_parsed_plan
-        self._last_parsed_plan = None
-        return plan
+        """Used by the main window to retrieve a plan prepared by the compact window Browser context."""
+        return self._last_parsed_plan
+
+    def check_for_pending_changes(self):
+        """
+        Returns True if the current response in memory has unapplied changes.
+        Used to display notification colors in the Paste buttons.
+        """
+        if not self._last_parsed_plan:
+            return False
+
+        states = self._last_parsed_plan.get('file_states', {})
+        skipped = set(self._last_parsed_plan.get('skipped_files', []))
+
+        # Check updates/creations
+        for p in self._last_parsed_plan.get('updates', {}):
+            if p not in skipped and states.get(p, 'pending') == 'pending':
+                return True
+        for p in self._last_parsed_plan.get('creations', {}):
+            if states.get(p, 'pending') == 'pending':
+                return True
+        for p in self._last_parsed_plan.get('deletions_proposed', []):
+            if p not in skipped and states.get(p, 'pending') == 'pending':
+                return True
+
+        return False
 
     def apply_full_plan(self, plan):
-        """
-        Executes a bulk update plan and synchronizes metadata for all processed files.
-        Used for 'Auto-Apply' (Ctrl-click) workflows.
-        """
+        """Executes a bulk update plan and synchronizes metadata for all processed files."""
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return False, "No active project."
@@ -127,7 +161,6 @@ class ChangesApi:
         deletions = plan.get('deletions_proposed', [])
         skipped = set(plan.get('skipped_files', []))
 
-        # Filter plans based on skipped status
         actual_updates = {p: c for p, c in updates.items() if p not in skipped}
         actual_deletions = [p for p in deletions if p not in skipped]
 
@@ -136,18 +169,13 @@ class ChangesApi:
         )
 
         if success:
-            # Process Metadata Sync for all created or updated files
             all_changed_paths = set(actual_updates.keys()) | set(creations.keys())
 
             for rel_path in all_changed_paths:
                 full_path = os.path.join(project_config.base_dir, rel_path)
-                if not os.path.isfile(full_path):
-                    continue
-
+                if not os.path.isfile(full_path): continue
                 mtime = os.path.getmtime(full_path)
                 f_hash = get_file_hash(full_path)
-
-                # Get content to calculate tokens/lines
                 try:
                     with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
                         raw = f.read()
@@ -157,45 +185,37 @@ class ChangesApi:
                 except Exception:
                     tokens, lines = 0, 0
 
-                # Ensure file is marked as known globally
                 if rel_path not in project_config.known_files:
                     project_config.known_files.append(rel_path)
 
-                # Update selected_files and total_tokens for the active profile
                 found_in_active = False
                 for f_info in project_config.selected_files:
                     if f_info['path'] == rel_path:
                         f_info.update({'tokens': tokens, 'lines': lines, 'mtime': mtime, 'hash': f_hash})
                         found_in_active = True
                         break
-
                 if not found_in_active:
-                    project_config.selected_files.append({
-                        'path': rel_path, 'tokens': tokens, 'lines': lines,
-                        'mtime': mtime, 'hash': f_hash
-                    })
+                    project_config.selected_files.append({'path': rel_path, 'tokens': tokens, 'lines': lines, 'mtime': mtime, 'hash': f_hash})
 
-            # Cleanup globally after processing all additions
             project_config.known_files.sort()
 
-            # Handle global cleanup for deleted files
             if actual_deletions:
                 for rel_path in actual_deletions:
-                    if rel_path in project_config.known_files:
-                        project_config.known_files.remove(rel_path)
-
-                    # Remove from all profiles
+                    if rel_path in project_config.known_files: project_config.known_files.remove(rel_path)
                     for p_data in project_config.profiles.values():
                         p_data['selected_files'] = [f for f in p_data.get('selected_files', []) if f['path'] != rel_path]
                         p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f != rel_path]
 
-            # Recalculate total tokens for active profile
             project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
 
-            project_config.save()
+            # Mark all as applied in tracking plan for UI consistency
+            if self._last_parsed_plan:
+                states = self._last_parsed_plan.setdefault('file_states', {})
+                for p in all_changed_paths: states[p] = 'applied'
+                for p in actual_deletions: states[p] = 'deleted'
 
-            if skipped:
-                msg = f"Updated {len(all_changed_paths)} file(s). {len(skipped)} file(s) already up to date."
+            project_config.save()
+            if skipped: msg = f"Updated {len(all_changed_paths)} file(s). {len(skipped)} file(s) already up to date."
 
         return success, msg
 

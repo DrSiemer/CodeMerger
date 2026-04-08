@@ -1,4 +1,4 @@
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 
 // Define state variables OUTSIDE the composable function to create a global singleton.
 const config = ref({})
@@ -66,6 +66,14 @@ watch(statusMessage, (newVal) => {
   }
 })
 
+// Sync Plan States to backend whenever they change.
+// This is critical for Compact Mode orange indicator and Overwrite warnings.
+watch(planFileStates, (newStates) => {
+  if (window.pywebview && Object.keys(newStates).length > 0) {
+    window.pywebview.api.sync_plan_states(JSON.parse(JSON.stringify(newStates)))
+  }
+}, { deep: true })
+
 const handleZoom = (e) => {
   const delta = e.deltaY > 0 ? -1 : 1
   editorFontSize.value = Math.max(8, Math.min(editorFontSize.value + delta, 40))
@@ -124,6 +132,12 @@ export function useAppState() {
       })
       window.addEventListener('cm-project-reloaded', () => {
         init() // Re-fetch all data on external config change
+      })
+
+      // Cross-window Event Listener: Close review modal when entering compact mode (Requirement)
+      window.addEventListener('cm-close-review', () => {
+        showReviewModal.value = false
+        revertToCompactOnClose.value = false
       })
     }
   }
@@ -285,8 +299,23 @@ export function useAppState() {
 
   // --- AI Feedback & Change Applier ---
 
+  const hasPendingChanges = computed(() => {
+    if (!lastAiResponse.value) return false
+    const states = Object.values(planFileStates.value)
+    if (states.length === 0) return false
+    return states.some(s => s === 'pending')
+  })
+
   const processPaste = async () => {
     if (!window.pywebview) return false
+
+    // OVERWRITE CHECK (Main Dashboard flow)
+    if (hasPendingChanges.value) {
+      if (!confirm("An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?")) {
+        return false
+      }
+    }
+
     try {
       // Use Python backend to access system clipboard bypassing browser prompts
       const text = await window.pywebview.api.get_clipboard_text()
@@ -313,7 +342,7 @@ export function useAppState() {
       const deletions = plan.deletions_proposed || []
       const skipped = plan.skipped_files || []
 
-      // CRITICAL: Initialize states including the new 'skipped' status
+      // CRITICAL: Initialize states including the new 'skipped' status for NO-OP files
       Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
       Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
       deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
@@ -423,6 +452,7 @@ export function useAppState() {
     lockedIcon,
     unlockedIcon,
     editorFontSize,
+    hasPendingChanges,
     handleZoom,
     init,
     getImage,
@@ -478,6 +508,8 @@ export function useAppState() {
     createStarterProjectOverwrite: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project_overwrite(output, includeRef, pitch, data) : null,
     selectDirectory: async () => window.pywebview ? await window.pywebview.api.select_directory() : null,
     openPath: async (path) => window.pywebview ? await window.pywebview.api.open_path(path) : false,
-    claimLastPlan: async () => window.pywebview ? await window.pywebview.api.claim_last_plan() : null
+    claimLastPlan: async () => window.pywebview ? await window.pywebview.api.claim_last_plan() : null,
+    checkPendingChanges: async () => window.pywebview ? await window.pywebview.api.check_for_pending_changes() : false,
+    syncPlanStates: async (states) => window.pywebview ? await window.pywebview.api.sync_plan_states(states) : false
   }
 }
