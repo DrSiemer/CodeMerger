@@ -50,6 +50,10 @@ ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
 LOGO_MASK_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask.png')
 LOGO_MASK_SMALL_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask_small.png')
 
+SPLASH_1_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_1.png')
+SPLASH_2_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_2.png')
+SPLASH_3_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_3.png')
+
 NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
 NEW_FILES_MANY_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles_many.png')
 

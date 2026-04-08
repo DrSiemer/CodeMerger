@@ -6,7 +6,7 @@ import time
 import base64
 from src.api import Api
 from src.core.logger import setup_logging
-from src.core.paths import get_bundle_dir, LOGO_MASK_PATH
+from src.core.paths import get_bundle_dir, SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_3_PATH
 from src.core.file_monitor_thread import FileMonitorThread
 
 # Import core backend logic
@@ -119,19 +119,28 @@ class WindowManager:
     def start(self):
         """Initializes primary windows immediately for transition."""
 
-        # Load icon for splash
-        logo_base64 = ""
-        if os.path.exists(LOGO_MASK_PATH):
-            try:
-                with open(LOGO_MASK_PATH, "rb") as f:
-                    logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode('utf-8')}"
-            except Exception:
-                pass
+        # Helper to load and encode splash frames
+        def get_b64(path):
+            if os.path.exists(path):
+                try:
+                    with open(path, "rb") as f:
+                        return f"data:image/png;base64,{base64.b64encode(f.read()).decode('utf-8')}"
+                except Exception: return ""
+            return ""
+
+        s1_b64 = get_b64(SPLASH_1_PATH)
+        s2_b64 = get_b64(SPLASH_2_PATH)
+        s3_b64 = get_b64(SPLASH_3_PATH)
 
         splash_html = f"""
         <body style="background:#1A1A1A; color:#FFFFFF; font-family:'Segoe UI', sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; overflow:hidden; user-select:none;">
             <div style="text-align:center;">
-                <img src="{logo_base64}" style="width:64px; height:64px; margin-bottom:20px; opacity:0.9;">
+                <div style="position:relative; width:64px; height:64px; margin: 0 auto 20px;">
+                    <!-- Layering strategy: absolute stacking -->
+                    <img src="{s1_b64}" class="logo logo-1">
+                    <img src="{s2_b64}" class="logo logo-2">
+                    <img src="{s3_b64}" class="logo logo-3">
+                </div>
                 <h1 style="font-weight:100; font-size:28px; letter-spacing:4px; margin:0; color:#eee;">CODEMERGER</h1>
                 <div style="margin-top:15px; display:flex; align-items:center; justify-content:center;">
                     <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 1.5s infinite ease-in-out;"></div>
@@ -139,6 +148,27 @@ class WindowManager:
                 </div>
             </div>
             <style>
+                .logo {{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 64px;
+                    height: 64px;
+                    opacity: 0;
+                }}
+                /* Logo 1 is instant */
+                .logo-1 {{ opacity: 1; }}
+
+                /* Transition 1: starts after 1.5s, takes 3s. Ends at 4.5s. */
+                .logo-2 {{ animation: fade-over 3s linear forwards 1.5s; }}
+
+                /* Transition 2: starts 1s early (at 3.5s), takes 3s. Ends at 6.5s. */
+                .logo-3 {{ animation: fade-over 3s linear forwards 3.5s; }}
+
+                @keyframes fade-over {{
+                    from {{ opacity: 0; }}
+                    to {{ opacity: 1; }}
+                }}
                 @keyframes pulse {{
                     0%, 100% {{ opacity: 0.3; transform: scale(0.8); }}
                     50% {{ opacity: 1; transform: scale(1.2); }}
@@ -354,7 +384,7 @@ class WindowManager:
 
                 mon_x, mon_y, mon_right, mon_bottom = self._get_monitor_work_area(current_monitor)
                 target_x = max(mon_x + margin, min(ideal_x, mon_right - widget_w - margin))
-                target_y = max(mon_y + margin, min(ideal_y, mon_bottom - widget_h - margin))
+                target_y = max(mon_y, min(ideal_y, mon_bottom - widget_h - margin))
 
             self.compact_last_monitor_handle = current_monitor
 
