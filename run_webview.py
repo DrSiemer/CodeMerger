@@ -166,8 +166,19 @@ class WindowManager:
         </body>
         """
 
+        # --- Target Monitor Anchor Strategy ---
+        # Identify which monitor the application is destined for to ensure the splash appears in a consistent location.
+        target_monitor = self._get_main_window_monitor()
+        mon_left, mon_top, mon_right, mon_bottom = self._get_monitor_work_area(target_monitor)
+
+        # Center the splash screen on the target monitor
+        splash_w, splash_h = 400, 280
+        splash_x = int(mon_left + (mon_right - mon_left) // 2 - (splash_w // 2))
+        splash_y = int(mon_top + (mon_bottom - mon_top) // 2 - (splash_h // 2))
+
         self.splash_window = webview.create_window(
-            "CM-Splash", html=splash_html, width=400, height=280,
+            "CM-Splash", html=splash_html, width=splash_w, height=splash_h,
+            x=splash_x, y=splash_y,
             frameless=True, on_top=True, background_color='#1A1A1A'
         )
 
@@ -217,8 +228,18 @@ class WindowManager:
         self.compact_window.events.closing += self._on_compact_closing
 
     def show_main_and_close_splash(self):
+        """Transition from splash to main interface, ensuring the window pins to the correct monitor."""
         if self.main_window:
+            # Re-apply dimensions and coordinates IMMEDIATELY before showing to prevent OS-level jumps.
+            # This ensures the window anchors to the correct workspace if it was restored from a different monitor.
+            if self.main_last_w is not None and self.main_last_h is not None:
+                self.main_window.resize(int(self.main_last_w), int(self.main_last_h))
+            if self.main_last_x is not None and self.main_last_y is not None:
+                self.main_window.move(int(self.main_last_x), int(self.main_last_y))
+
             self.main_window.show()
+
+            # Schedule bounds update after rendering has stabilized
             import threading
             threading.Timer(0.5, self._update_main_bounds).start()
 
