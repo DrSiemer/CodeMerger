@@ -65,14 +65,13 @@ STARTER_CONCEPT_PROMPT_CORE_INSTR = """
 3. **Readability & Formatting:** Use frequent line breaks and short paragraphs to avoid dense blocks of text. Utilize Markdown elements (bullet points, bolding) to ensure the document is highly readable and visually structured.
 """
 
-STARTER_STACK_PROMPT_INTRO = "Based on the project concept and the developer's experience, recommend the best technical stack for this project."
+STARTER_STACK_PROMPT_INTRO = "Act as a Senior Software Architect. Your goal is to select the leanest, most performant technical stack for the project below."
 
 STARTER_STACK_PROMPT_INSTR = """
-### Instructions
-1. Analyze requirements against known skills.
-2. Return the recommended stack as a raw JSON list of strings.
+### Constraints
+1. **Strict Filtering:** Use the "Developer Experience" ONLY to choose between viable paths. If a technology in that list does not directly solve a requirement in the "Project Concept," EXCLUDE it.
+2. Return ONLY a raw JSON list of strings representing the final stack.
    - Example: ["Python 3.10", "Flask"]
-3. Return ONLY the JSON.
 """
 
 STARTER_TODO_PROMPT_INTRO = """You are a Technical Project Manager.
