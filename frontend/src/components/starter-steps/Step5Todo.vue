@@ -1,7 +1,7 @@
 <script setup>
-import { ref, nextTick, onMounted, watch, computed } from 'vue'
+import { ref, nextTick, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useAppState } from '../../composables/useAppState'
-import { HelpCircle, ChevronRight, Check, X as XIcon } from 'lucide-vue-next'
+import { HelpCircle, ChevronRight, Check, X as XIcon, CheckCheck } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
 import NotesModal from './NotesModal.vue'
@@ -72,6 +72,10 @@ onMounted(() => {
     const firstUnlocked = keys.find(k => !props.pData.todo_signoffs[k])
     activeSegmentKey.value = firstUnlocked || keys[0]
   }
+})
+
+onUnmounted(() => {
+  if (acceptAllTimer) clearTimeout(acceptAllTimer)
 })
 
 // Scroll to top when switching segments
@@ -356,6 +360,30 @@ const refuseDiff = () => {
   }
 }
 
+const hasPendingDiffs = computed(() => {
+  return Object.keys(props.pData.todo_baselines).some(k => k !== '__merged__' && props.pData.todo_baselines[k] !== undefined)
+})
+
+const acceptAllConfirm = ref(false)
+let acceptAllTimer = null
+
+const handleAcceptAllClick = () => {
+  if (acceptAllConfirm.value) {
+    for (const k in props.pData.todo_baselines) {
+      if (k !== '__merged__') {
+        props.pData.todo_baselines[k] = undefined
+      }
+    }
+    acceptAllConfirm.value = false
+    clearTimeout(acceptAllTimer)
+  } else {
+    acceptAllConfirm.value = true
+    acceptAllTimer = setTimeout(() => {
+      acceptAllConfirm.value = false
+    }, 2500)
+  }
+}
+
 // --- Questions Context Accessors ---
 
 const getSegmentedQuestionPrompt = async (question) => {
@@ -464,6 +492,19 @@ const handleReset = () => {
     <template v-else-if="Object.keys(pData.todo_segments).length">
        <div class="flex h-full min-h-0 text-gray-100">
           <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
+            <div class="p-2 mb-4 border-b border-gray-700 flex flex-col items-center space-y-3 pb-3">
+              <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+              <button
+                 v-if="hasPendingDiffs"
+                 @click="handleAcceptAllClick"
+                 class="transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center px-3 py-1.5 rounded border select-none w-full justify-center"
+                 :class="acceptAllConfirm ? 'bg-cm-green text-white border-cm-green' : 'text-cm-green hover:text-green-400 bg-cm-green/10 border-cm-green/30 hover:bg-cm-green/20'"
+                 title="Accept all pending segment diffs"
+               >
+                <CheckCheck class="w-3.5 h-3.5 mr-1.5 shrink-0" />
+                <span class="truncate">{{ acceptAllConfirm ? 'Click to confirm' : 'Accept All Diffs' }}</span>
+              </button>
+            </div>
             <div v-for="key in Object.keys(pData.todo_segments)" :key="key"
                  @click="activeSegmentKey = key; reviewerEditMode = false"
                  class="p-3 rounded cursor-pointer border transition-all flex items-center justify-between group"
@@ -542,7 +583,7 @@ const handleReset = () => {
     </template>
 
     <template v-else>
-      <div class="max-w-3xl mx-auto space-y-6 w-full text-gray-100">
+      <div class="max-w-3xl mx-auto w-full space-y-6 text-gray-100">
         <h3 class="text-2xl font-bold text-white">Generate TODO Plan</h3>
 
         <div class="flex justify-between items-center bg-gray-800 p-4 rounded border border-gray-700 mt-4">

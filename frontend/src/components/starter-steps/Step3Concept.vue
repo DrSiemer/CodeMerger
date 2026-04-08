@@ -1,6 +1,6 @@
 <script setup>
-import { ref, nextTick, computed, onMounted, watch } from 'vue'
-import { CheckCircle, HelpCircle, ChevronRight, Check, X as XIcon } from 'lucide-vue-next'
+import { ref, nextTick, computed, onMounted, onUnmounted, watch } from 'vue'
+import { CheckCircle, HelpCircle, ChevronRight, Check, X as XIcon, CheckCheck } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import RewriteModal from './RewriteModal.vue'
@@ -59,6 +59,10 @@ onMounted(() => {
     const firstUnlocked = keys.find(k => !props.pData.concept_signoffs[k])
     activeSegmentKey.value = firstUnlocked || keys[0]
   }
+})
+
+onUnmounted(() => {
+  if (acceptAllTimer) clearTimeout(acceptAllTimer)
 })
 
 // Scroll to top when switching segments
@@ -344,6 +348,30 @@ const refuseDiff = () => {
   }
 }
 
+const hasPendingDiffs = computed(() => {
+  return Object.keys(props.pData.concept_baselines).some(k => k !== '__merged__' && props.pData.concept_baselines[k] !== undefined)
+})
+
+const acceptAllConfirm = ref(false)
+let acceptAllTimer = null
+
+const handleAcceptAllClick = () => {
+  if (acceptAllConfirm.value) {
+    for (const k in props.pData.concept_baselines) {
+      if (k !== '__merged__') {
+        props.pData.concept_baselines[k] = undefined
+      }
+    }
+    acceptAllConfirm.value = false
+    clearTimeout(acceptAllTimer)
+  } else {
+    acceptAllConfirm.value = true
+    acceptAllTimer = setTimeout(() => {
+      acceptAllConfirm.value = false
+    }, 2500)
+  }
+}
+
 // --- Questions Context Accessors ---
 
 const getSegmentedQuestionPrompt = async (question) => {
@@ -451,8 +479,18 @@ const handleReset = () => {
     <template v-else-if="Object.keys(pData.concept_segments).length">
        <div class="flex h-full min-h-0">
          <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
-           <div class="p-2 mb-4 border-b border-gray-700 flex justify-center">
+           <div class="p-2 mb-4 border-b border-gray-700 flex flex-col items-center space-y-3 pb-3">
              <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+             <button
+                v-if="hasPendingDiffs"
+                @click="handleAcceptAllClick"
+                class="transition-colors text-[10px] font-bold uppercase tracking-widest flex items-center px-3 py-1.5 rounded border select-none w-full justify-center"
+                :class="acceptAllConfirm ? 'bg-cm-green text-white border-cm-green' : 'text-cm-green hover:text-green-400 bg-cm-green/10 border-cm-green/30 hover:bg-cm-green/20'"
+                title="Accept all pending segment diffs"
+              >
+               <CheckCheck class="w-3.5 h-3.5 mr-1.5 shrink-0" />
+               <span class="truncate">{{ acceptAllConfirm ? 'Click to confirm' : 'Accept All Diffs' }}</span>
+             </button>
            </div>
            <div v-for="key in Object.keys(pData.concept_segments)" :key="key"
                 @click="activeSegmentKey = key; reviewerEditMode = false"
