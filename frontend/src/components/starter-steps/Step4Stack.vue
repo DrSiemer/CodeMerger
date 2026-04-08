@@ -23,27 +23,13 @@ const viewState = ref(props.pData.stack ? 'review' : (props.pData.stack_llm_resp
 
 /**
  * Robust copy helper that handles async text generation and UI feedback.
- * CRITICAL: Must capture target synchronously before any await.
  */
-const copyToClipboard = async (text, buttonEvent) => {
-  const target = buttonEvent.currentTarget
-  if (!target) return
-
-  try {
-    // Resolve text if a Promise was passed (common for API calls)
-    const content = await text
-    await navigator.clipboard.writeText(content)
-
-    // Provide visual feedback
-    const originalText = target.innerText
-    target.innerText = "Copied!"
-
-    setTimeout(() => {
-      if (target) target.innerText = originalText
-    }, 2000)
-  } catch (err) {
-    console.error("Failed to copy:", err)
-  }
+const copyToClipboard = async (text, el) => {
+  if (!el) return
+  await navigator.clipboard.writeText(text)
+  const originalText = el.innerText
+  el.innerText = "Copied!"
+  setTimeout(() => { if (el) el.innerText = originalText }, 2000)
 }
 
 // --- Default Experience Management ---
@@ -77,8 +63,9 @@ const saveDefaultExperience = async () => {
 // --- Navigation & Processing ---
 
 const goToPasting = async (e) => {
-  // Pass the promise directly; the helper will resolve it and manage the button UI
-  await copyToClipboard(generateStackPrompt(props.pData), e)
+  const btn = e.currentTarget // Capture immediately
+  const prompt = await generateStackPrompt(props.pData)
+  await copyToClipboard(prompt, btn)
   viewState.value = 'pasting'
 }
 
@@ -171,7 +158,7 @@ const handleReset = () => {
             <span>Paste the prompt into your LLM and copy its JSON response.</span>
           </div>
           <button
-            @click="copyToClipboard(generateStackPrompt(pData), $event)"
+            @click="goToPasting"
             class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-1.5 rounded text-xs font-bold transition-colors"
           >
             Re-copy Prompt

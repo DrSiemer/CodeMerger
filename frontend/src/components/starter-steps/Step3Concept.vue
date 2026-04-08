@@ -74,10 +74,6 @@ watch(activeSegmentKey, () => {
   })
 })
 
-const isGoalFilled = computed(() => {
-  return props.pData.goal.trim().length > 0
-})
-
 const toggleReviewerEditMode = async (event = null, isContextual = false) => {
   let anchorText = ''
   let contentRatio = 0
@@ -170,12 +166,12 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
   }, 100)
 }
 
-const copyToClipboard = async (text, buttonEvent) => {
+const copyToClipboard = async (text, el) => {
+  if (!el) return
   await navigator.clipboard.writeText(text)
-  const target = buttonEvent.target
-  const originalText = target.innerText
-  target.innerText = "Copied!"
-  setTimeout(() => { target.innerText = originalText }, 2000)
+  const originalText = el.innerText
+  el.innerText = "Copied!"
+  setTimeout(() => { if (el) el.innerText = originalText }, 2000)
 }
 
 const renderSegmentTitle = (key, map) => {
@@ -228,9 +224,14 @@ const allSigned = (signoffs) => {
   return Object.values(signoffs).every(v => v === true)
 }
 
+const isGoalFilled = computed(() => {
+  return props.pData.goal.trim().length > 0
+})
+
 const generateConcept = async (e) => {
+  const btn = e.currentTarget // Capture immediately before async bridge call
   const prompt = await generateConceptPrompt(props.pData, props.conceptQuestionsMap)
-  await copyToClipboard(prompt, e)
+  await copyToClipboard(prompt, btn)
   showPasteArea.value = true
 }
 

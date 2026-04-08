@@ -41,12 +41,12 @@ const fullPathPreview = computed(() => {
   return `${parent}\\${sanitizedName}`
 })
 
-const copyToClipboard = async (text, buttonEvent) => {
+const copyToClipboard = async (text, el) => {
+  if (!el) return
   await navigator.clipboard.writeText(text)
-  const target = buttonEvent.currentTarget
-  const originalText = target.innerText
-  target.innerText = "Copied!"
-  setTimeout(() => { if (target) target.innerText = originalText }, 2000)
+  const originalText = el.innerText
+  el.innerText = "Copied!"
+  setTimeout(() => { if (el) el.innerText = originalText }, 2000)
 }
 
 const copyPathToClipboard = async () => {
@@ -65,8 +65,9 @@ const browseParentFolder = async () => {
 }
 
 const copyMasterPrompt = async (e) => {
+  const btn = e.currentTarget
   const prompt = await generateMasterPrompt(props.pData)
-  await copyToClipboard(prompt, e)
+  await copyToClipboard(prompt, btn)
   showPasteArea.value = true
 }
 
