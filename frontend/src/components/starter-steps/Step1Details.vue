@@ -1,5 +1,5 @@
 <script setup>
-import { FolderPlus } from 'lucide-vue-next'
+import { FolderPlus, ArrowUp, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -29,6 +29,11 @@ const browseBaseProject = async () => {
     }
   }
 }
+
+const clearBaseProject = () => {
+  props.pData.base_project_path = ''
+  props.pData.base_project_files = []
+}
 </script>
 
 <template>
@@ -50,17 +55,32 @@ const browseBaseProject = async () => {
           <div class="flex items-center space-x-4 mt-3">
             <button @click="browseBaseProject" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded font-semibold transition-colors flex items-center shrink-0">
               <FolderPlus class="w-5 h-5 mr-2" />
-              Select base project
+              {{ pData.base_project_path ? 'Change base project' : 'Select base project' }}
             </button>
-            <span class="text-gray-400 font-mono text-sm break-all">{{ pData.base_project_path || 'No base project selected' }}</span>
+
+            <div v-if="pData.base_project_path" class="flex items-center space-x-3 bg-cm-input-bg border border-gray-600 rounded px-4 py-2 max-w-full overflow-hidden">
+              <span class="text-gray-300 font-mono text-sm truncate">{{ pData.base_project_path }}</span>
+              <button @click="clearBaseProject" class="text-gray-500 hover:text-red-400 p-1 rounded transition-colors shrink-0" title="Clear base project">
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
+            <span v-else class="text-gray-400 font-mono text-sm break-all">No base project selected</span>
           </div>
         </div>
 
-        <div v-if="pData.name.trim() && !isLookingBack" class="pt-8 animate-in fade-in slide-in-from-top-2 duration-300">
-            <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center">
-              Next Step &gt;
-            </button>
-        </div>
+        <!-- Prominent hint replacing the Next button -->
+        <transition name="fade">
+          <div v-if="pData.name?.trim()" class="mt-8 bg-cm-blue/20 border-2 border-cm-blue rounded-lg p-5 flex items-start space-x-4 shadow-lg">
+            <ArrowUp class="w-7 h-7 text-cm-blue shrink-0 animate-bounce mt-0.5" />
+            <div>
+              <h4 class="text-white font-bold text-lg">Ready to proceed</h4>
+              <p class="text-blue-100 mt-1.5 leading-relaxed">
+                Use the <strong>navigation tabs on the top</strong> to go to the next phases.
+              </p>
+            </div>
+          </div>
+        </transition>
+
       </div>
     </div>
 
