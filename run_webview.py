@@ -343,6 +343,13 @@ class WindowManager:
         try:
             if self.compact_window: self.compact_window.hide()
             if self.main_window:
+                # Re-apply dimensions and coordinates before showing to prevent OS window manager
+                # from animating the restoration from a screen-sized/maximized artifact state
+                if self.main_last_w is not None and self.main_last_h is not None:
+                    self.main_window.resize(int(self.main_last_w), int(self.main_last_h))
+                if self.main_last_x is not None and self.main_last_y is not None:
+                    self.main_window.move(int(self.main_last_x), int(self.main_last_y))
+
                 self.main_window.show()
                 self.main_window.restore()
                 if self.monitor:
