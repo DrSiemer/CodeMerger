@@ -31,23 +31,24 @@ if /I "%FLAG%"=="cmd" goto :OpenCmd
 if /I "%FLAG%"=="f" goto :FreezeReqs
 if /I "%FLAG%"=="b" goto :BuildFull
 if /I "%FLAG%"=="ba" goto :BuildAppOnly
+if /I "%FLAG%"=="bo" goto :BuildOldUI
 if /I "%FLAG%"=="bi" goto :BuildInstallerOnly
 if /I "%FLAG%"=="r" goto :HandleRelease
 echo Unrecognized command: %FLAG%
 goto :eof
 
 :DefaultAction
-    echo Starting CodeMerger (Web UI Mode)...
+    echo Starting CodeMerger (Web UI Mode)
     python %START_SCRIPT%
     goto :eof
 
 :DevAction
-    echo Starting CodeMerger in DEV mode (Connecting to localhost:5173)...
+    echo Starting CodeMerger in DEV mode (Connecting to localhost:5173)
     python %START_SCRIPT% --dev
     goto :eof
 
 :OldUIAction
-    echo Starting original CodeMerger (Tkinter UI) for reference...
+    echo Starting original CodeMerger (Tkinter UI) for reference
     python run.py
     goto :eof
 
@@ -82,7 +83,25 @@ goto :eof
     set "VERSION=%MAJOR_VER%.%MINOR_VER%.%REVISION_VER%"
     exit /b 0
 
+:BuildFrontend
+    echo.
+    echo ===================================
+    echo Compiling Vue Frontend
+    echo ===================================
+    cd frontend
+    call npm install
+    call npm run build
+    cd ..
+    if %errorlevel% neq 0 (
+        echo FATAL: Frontend compilation failed.
+        exit /b 1
+    )
+    exit /b 0
+
 :BuildFull
+    call :BuildFrontend
+    if %errorlevel% neq 0 goto :eof
+
     call :RunPyInstaller
     if %errorlevel% neq 0 goto :eof
 
@@ -96,14 +115,30 @@ goto :eof
     goto :eof
 
 :BuildAppOnly
+    call :BuildFrontend
+    if %errorlevel% neq 0 goto :eof
+
     call :RunPyInstaller
+    goto :eof
+
+:BuildOldUI
+    echo.
+    echo ===================================
+    echo Starting Legacy Tkinter Build
+    echo ===================================
+    set SPEC_FILE=codemerger_legacy.spec
+
+    call :RunPyInstaller
+    if %errorlevel% neq 0 goto :eof
+
+    call :BuildInstaller
     goto :eof
 
 :RunPyInstaller
     setlocal
     echo.
     echo Starting PyInstaller Build Process
-    echo Deleting old build folders...
+    echo Deleting old build folders
     rmdir /s /q dist 2>nul
     rmdir /s /q build 2>nul
     rmdir /s /q dist-installer 2>nul
@@ -135,7 +170,7 @@ goto :eof
         exit /b 1
     )
 
-    echo Deleting old installer folder...
+    echo Deleting old installer folder
     rmdir /s /q dist-installer 2>nul
 
     call :GetVersion
@@ -153,7 +188,7 @@ goto :eof
         exit /b 1
     )
 
-    echo Compiling installer with Inno Setup for v!VERSION!...
+    echo Compiling installer with Inno Setup for v!VERSION!
     "!INNO_SETUP_PATH!" setup.iss /dMyAppVersion="!VERSION!"
 
     if !errorlevel! neq 0 (
@@ -203,7 +238,7 @@ goto :eof
     echo Found version tag: !VERSION_TAG!
 
     REM --- Forcefully clean up any existing tags with the same name ---
-    echo Checking for existing tags to determine release comment...
+    echo Checking for existing tags to determine release comment
     set "IS_RETRIGGER=0"
     REM Check if tag exists locally OR remotely to set the flag
     git rev-parse "!VERSION_TAG!" >nul 2>nul
@@ -212,7 +247,7 @@ goto :eof
     if %errorlevel% equ 0 set "IS_RETRIGGER=1"
 
     REM Now, unconditionally delete remote and local tags, ignoring errors
-    echo Cleaning up old tags...
+    echo Cleaning up old tags
     git push origin --delete !VERSION_TAG! >nul 2>nul
     git tag -d !VERSION_TAG! >nul 2>nul
     echo Cleanup complete.
@@ -242,7 +277,7 @@ goto :eof
     echo Release comment: !COMMENT!
 
     REM Create and push tag
-    echo Creating annotated tag !VERSION_TAG!...
+    echo Creating annotated tag !VERSION_TAG!
     git tag -a "!VERSION_TAG!" -m "!COMMENT!"
     if %errorlevel% neq 0 (
         echo FATAL: Failed to create tag. Aborting.
@@ -250,7 +285,7 @@ goto :eof
         goto :eof
     )
 
-    echo Pushing new tag !VERSION_TAG! to origin...
+    echo Pushing new tag !VERSION_TAG! to origin
     git push origin !VERSION_TAG!
     echo.
     echo Release Action Triggered!

@@ -2,12 +2,7 @@
 import os
 import sys
 
-# Tcl/Tk Correct Folder Mapping
 def get_tcl_tk_datas():
-    """
-    Finds Tcl/Tk and maps the CONTENTS of the versioned folders
-    directly into _tcl_data and _tk_data to satisfy PyInstaller hooks.
-    """
     prefixes = [sys.prefix, getattr(sys, 'base_prefix', sys.prefix)]
     tcl_tk_datas = []
 
@@ -30,14 +25,13 @@ def get_tcl_tk_datas():
                 return tcl_tk_datas
     return []
 
-# Load the Tcl/Tk data once
 tcl_tk_data_bundle = get_tcl_tk_datas()
 
-# Main Application Analysis
 app_data_files = [
     ('assets', 'assets'),
     ('default_filetypes.json', '.'),
-    ('version.txt', '.')
+    ('version.txt', '.'),
+    ('frontend/dist', 'frontend/dist')
 ]
 app_data_files.extend(tcl_tk_data_bundle)
 
@@ -45,7 +39,7 @@ app_icon_path = 'assets/icon.ico'
 install_icon_path = 'assets/install.ico'
 
 a = Analysis(
-    ['run.py'],
+    ['run_webview.py'],
     pathex=[],
     binaries=[],
     datas=app_data_files,
@@ -54,7 +48,8 @@ a = Analysis(
         'tiktoken_ext.openai_public',
         'detect_secrets.plugins',
         'rich',
-        'markdown2'
+        'markdown2',
+        'webview.platforms.edgechromium'
     ],
     hookspath=[],
     hooksconfig={},
@@ -81,7 +76,6 @@ exe = EXE(
     icon=app_icon_path
 )
 
-# Updater GUI Launcher Analysis
 updater_datas = [(install_icon_path, 'assets')]
 updater_datas.extend(tcl_tk_data_bundle)
 
@@ -114,7 +108,6 @@ updater_exe = EXE(
     icon=install_icon_path
 )
 
-# Collection
 coll = COLLECT(
     exe,
     updater_exe,

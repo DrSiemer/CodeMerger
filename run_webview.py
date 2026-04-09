@@ -5,6 +5,7 @@ import logging
 import traceback
 import time
 import base64
+from pathlib import Path
 from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir, SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_3_PATH
@@ -57,6 +58,7 @@ class WindowManager:
         else:
             bundle_dir = get_bundle_dir()
             self.base_url = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
+            log.info(f"Base URL set to bundled path: {self.base_url}")
 
     def _update_main_bounds(self):
         """Safely captures the main window bounds, strictly ignoring minimized (-32000) states."""
@@ -219,12 +221,24 @@ class WindowManager:
         except AttributeError: pass
 
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
-        webview.start(debug=self.dev_mode)
+        # [TEMPORARY DEBUG ENABLED] - Allows you to right-click -> Inspect in the build.
+        webview.start(gui='edgechromium', debug=True)
 
     def _create_compact_window(self):
         if self.compact_window: return
-        compact_url = f"{self.base_url}#/compact"
-        if not self.dev_mode: compact_url = f"file://{self.base_url}#/compact"
+
+        if self.dev_mode:
+            compact_url = f"{self.base_url}#/compact"
+        else:
+            # Check for asset existence to log errors in the build
+            if not os.path.exists(self.base_url):
+                log.error(f"CRITICAL: Frontend index.html not found at {self.base_url}")
+                return
+
+            # Path.as_uri() is the most robust way to generate file:/// URLs for WebView2
+            base_uri = Path(self.base_url).as_uri()
+            compact_url = f"{base_uri}#/compact"
+            log.info(f"Constructed compact URL: {compact_url}")
 
         self.compact_window = webview.create_window(
             "CM-Compact", url=compact_url, js_api=self.api,
@@ -392,6 +406,7 @@ class WindowManager:
 
 def main():
     setup_logging()
+    monitor = None
     try:
         app_state = AppState()
         project_manager = ProjectManager(load_active_file_extensions)
@@ -401,13 +416,32 @@ def main():
         dev_mode = "--dev" in sys.argv
         manager = WindowManager(api, monitor, dev_mode=dev_mode)
         manager.start()
-    except Exception:
-        print("\n[FATAL ERROR] Application failed to start:")
-        traceback.print_exc()
-        input("\nPress Enter to exit...")
+    except Exception as e:
+        error_details = traceback.format_exc()
+        log.error(f"Fatal error during startup:\n{error_details}")
+        try:
+            import tkinter as tk
+            from tkinter import messagebox
+            root = tk.Tk()
+            root.withdraw()
+            root.attributes("-topmost", True)
+            messagebox.showerror(
+                "CodeMerger - Startup Error",
+                f"The application failed to start:\n{str(e)}\n\n"
+                "HINT: This error often happens if Windows is blocking required DLL files. "
+                "Please right-click the CodeMerger.exe file, select 'Properties', and check "
+                " the 'Unblock' box at the bottom right. Then try running it again.",
+                parent=root
+            )
+            root.destroy()
+        except Exception:
+            pass
     finally:
-        try: monitor.stop()
-        except: pass
+        try:
+            if monitor:
+                monitor.stop()
+        except Exception:
+            pass
 
 if __name__ == '__main__':
     main()
