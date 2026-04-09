@@ -1216,7 +1216,12 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": []
+      "unknown_files": [
+        "src/api_parts/starter_api_parsing.py",
+        "src/api_parts/starter_api_prompts.py",
+        "src/api_parts/starter_api_scaffold.py",
+        "src/api_parts/starter_api_session.py"
+      ]
     }
   },
   "known_files": [
@@ -1285,6 +1290,10 @@
     "src/api_parts/file_api.py",
     "src/api_parts/project_api.py",
     "src/api_parts/starter_api.py",
+    "src/api_parts/starter_api_parsing.py",
+    "src/api_parts/starter_api_prompts.py",
+    "src/api_parts/starter_api_scaffold.py",
+    "src/api_parts/starter_api_session.py",
     "src/api_parts/window_api.py",
     "src/app_state.py",
     "src/codemerger.py",
