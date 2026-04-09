@@ -171,12 +171,13 @@ def parse_and_plan_changes(base_dir, markdown_text):
         deletions_proposed = [m.strip().replace('\\', '/') for m in del_matches if m.strip()]
 
     # Identify file blocks
+    # Updated: Replaced \n with \s*\n+ after header to handle optional empty lines/trailing space
     file_block_regex = re.compile(
-        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\n'    # Header
-        r'```[^\n]*\n'                                                          # Opening Backticks
-        r'(?P<content>.*?)'                                                     # Content
-        r'\n```\s*\n'                                                           # Closing Backticks
-        r'^' + re.escape(EOF_MARKER),                                            # Footer
+        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s*\n+' # Header
+        r'```[^\n]*\n'                # Opening Backticks
+        r'(?P<content>.*?)'           # Content
+        r'\n```\s*\n'                 # Closing Backticks
+        r'^' + re.escape(EOF_MARKER), # Footer
         re.DOTALL | re.MULTILINE
     )
 
