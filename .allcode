@@ -1192,9 +1192,51 @@
           "hash": "807fdce1c570c4db8f83f77e710d745118b47bf1",
           "tokens": 2551,
           "lines": 224
+        },
+        {
+          "path": "src/api_parts/starter_api_parsing.py",
+          "mtime": 1775729410.0698042,
+          "hash": "1935-1775729410.0698042",
+          "tokens": 412,
+          "lines": 41
+        },
+        {
+          "path": "src/api_parts/starter_api_prompts.py",
+          "mtime": 1775729410.0698042,
+          "hash": "9483-1775729410.0698042",
+          "tokens": 1947,
+          "lines": 189
+        },
+        {
+          "path": "src/api_parts/starter_api_scaffold.py",
+          "mtime": 1775729410.07081,
+          "hash": "8793-1775729410.07081",
+          "tokens": 1861,
+          "lines": 183
+        },
+        {
+          "path": "src/api_parts/starter_api_session.py",
+          "mtime": 1775729410.0692992,
+          "hash": "4162-1775729410.0692992",
+          "tokens": 843,
+          "lines": 108
+        },
+        {
+          "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
+          "mtime": 1775736042.9474657,
+          "hash": "7488-1775736042.9474657",
+          "tokens": 1849,
+          "lines": 180
+        },
+        {
+          "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
+          "mtime": 1775736042.9474657,
+          "hash": "12336-1775736042.9474657",
+          "tokens": 3090,
+          "lines": 272
         }
       ],
-      "total_tokens": 258045,
+      "total_tokens": 268047,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1216,12 +1258,7 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": [
-        "src/api_parts/starter_api_parsing.py",
-        "src/api_parts/starter_api_prompts.py",
-        "src/api_parts/starter_api_scaffold.py",
-        "src/api_parts/starter_api_session.py"
-      ]
+      "unknown_files": []
     }
   },
   "known_files": [
@@ -1265,6 +1302,8 @@
     "frontend/src/components/starter-steps/Step5Todo.vue",
     "frontend/src/components/starter-steps/Step6Generate.vue",
     "frontend/src/components/starter-steps/StepSuccess.vue",
+    "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
+    "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
     "frontend/src/composables/useAppState.js",
     "frontend/src/main.js",
     "frontend/src/router/index.js",
