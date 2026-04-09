@@ -1,13 +1,10 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import {
-  X, Search, Filter, GitBranch, Milestone,
-  Trash2, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
-  RotateCcw, Save, CheckSquare, ArrowDownUp
-} from 'lucide-vue-next'
+import { X, RotateCcw, Save } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
-import FileTreeNode from './FileTreeNode.vue'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
+import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
+import FileManagerRightPanel from './FileManagerRightPanel.vue'
 
 const emit = defineEmits(['close'])
 const { activeProject, getFileTree, resizeWindow, updateProjectFiles, copyOrderRequest, clearUnknownFiles, statusMessage } = useAppState()
@@ -19,18 +16,15 @@ const [mergeListRef, listItems] = useDragAndDrop(
 )
 
 // State
+const rightPanelRef = ref(null)
 const fileTree = ref([])
 const filterText = ref('')
 const isExtFilter = ref(true)
 const isGitFilter = ref(true)
 const showFullPaths = ref(false)
-const selectedIndices = ref(new Set())
-const lastSelectedIndex = ref(null)
 const currentExpandedDirs = ref(new Set(activeProject.expandedDirs))
 const isLoaded = ref(false)
 const isOrderPulseActive = ref(false)
-
-const TOKEN_COLOR_RANGE_MAX = 2500
 
 onMounted(async () => {
   await resizeWindow(1100, 800)
@@ -44,18 +38,12 @@ const refreshTree = async () => {
   fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value)
 }
 
-/**
- * Deep-scans the tree for new files, expands their parents, and scrolls to the first one.
- */
 const autoHandleNewFiles = async () => {
   const newFiles = []
-
   const traverse = (nodes) => {
     nodes.forEach(node => {
       if (node.type === 'file' && node.is_new) {
         newFiles.push(node.path)
-
-        // Parse path to expand all parent directories
         const parts = node.path.split('/')
         let currentPath = ''
         for (let i = 0; i < parts.length - 1; i++) {
@@ -63,33 +51,22 @@ const autoHandleNewFiles = async () => {
           currentExpandedDirs.value.add(currentPath)
         }
       }
-
       if (node.children) traverse(node.children)
     })
   }
-
   traverse(fileTree.value)
-
   if (newFiles.length > 0) {
     newFiles.sort()
-    // Identifies the ID format defined in FileTreeNode
     const firstTargetId = `node-${newFiles[0].replace(/[\\/.]/g, '-')}`
-
     await nextTick()
-
-    // 100ms delay ensures the browser layout engine has finalized the expanded folders
     setTimeout(() => {
       const el = document.getElementById(firstTargetId)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 100)
   }
 }
 
-watch([filterText, isExtFilter, isGitFilter], () => {
-  refreshTree()
-})
+watch([filterText, isExtFilter, isGitFilter], () => refreshTree())
 
 const totalTokens = computed(() => {
   return listItems.value.reduce((acc, f) => {
@@ -104,45 +81,6 @@ const tokenColorClass = computed(() => {
   return 'text-gray-400'
 })
 
-const getTokenColor = (file) => {
-  if (!file) return 'text-gray-500'
-  if (file.ignoreTokens) return 'text-gray-600'
-  const count = file.tokens
-  if (!count || count < 0) return 'text-gray-500'
-
-  const tokenValues = listItems.value.map(f => f?.tokens || 0)
-  const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, TOKEN_COLOR_RANGE_MAX) : TOKEN_COLOR_RANGE_MAX
-  const p = count / maxInList
-  if (p < 0.2) return 'text-gray-500'
-  if (p < 0.4) return 'text-gray-400'
-  if (p < 0.6) return 'text-[#B77B06]'
-  if (p < 0.8) return 'text-[#DE6808]'
-  return 'text-[#DF2622]'
-}
-
-// --- Enhanced Selection Logic ---
-
-const handleFileClick = (index, event) => {
-  if (event.shiftKey && lastSelectedIndex.value !== null) {
-    const start = Math.min(lastSelectedIndex.value, index)
-    const end = Math.max(lastSelectedIndex.value, index)
-    selectedIndices.value.clear()
-    for (let i = start; i <= end; i++) selectedIndices.value.add(i)
-  } else if (event.ctrlKey) {
-    if (selectedIndices.value.has(index)) selectedIndices.value.delete(index)
-    else {
-      selectedIndices.value.add(index)
-      lastSelectedIndex.value = index
-    }
-  } else {
-    selectedIndices.value.clear()
-    selectedIndices.value.add(index)
-    lastSelectedIndex.value = index
-  }
-}
-
-// --- Token Interaction (Alt: Ignore, Ctrl: Breakup) ---
-
 const handleTokenInteraction = (index, event) => {
   event.stopPropagation()
   const item = listItems.value[index]
@@ -153,20 +91,16 @@ const handleTokenInteraction = (index, event) => {
   } else if (event.ctrlKey) {
     const path = item.path
     const breakupMsg = `\`${path}\` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality.`
-
     navigator.clipboard.writeText(breakupMsg)
     statusMessage.value = `Copied breakup request for ${path.split('/').pop()}`
   }
 }
 
-// --- Actions from Tree ---
-
 const toggleFileSelect = (path) => {
   const idx = listItems.value.findIndex(f => f.path === path)
   if (idx !== -1) {
     listItems.value.splice(idx, 1)
-    selectedIndices.value.clear()
-    lastSelectedIndex.value = null
+    rightPanelRef.value?.clearSelection()
   } else {
     window.pywebview.api.get_token_count(path).then(tokens => {
       listItems.value.push({ path, tokens, ignoreTokens: false })
@@ -198,101 +132,15 @@ const addAll = () => {
   })
 }
 
-// --- Navigation Helpers ---
-
-const scrollToSelection = (alignToTop = false) => {
-  nextTick(() => {
-    const selectedEl = mergeListRef.value?.querySelector('.bg-cm-blue')
-    if (selectedEl) {
-      selectedEl.scrollIntoView({ behavior: 'smooth', block: alignToTop ? 'start' : 'nearest' })
-    }
-  })
-}
-
-// --- Reorder Logic ---
-
-const moveSelectionToTop = () => {
-  if (selectedIndices.value.size === 0) return
-  const sortedIndices = Array.from(selectedIndices.value).sort((a, b) => a - b)
-  const itemsToMove = sortedIndices.map(i => listItems.value[i])
-  for (let i = sortedIndices.length - 1; i >= 0; i--) listItems.value.splice(sortedIndices[i], 1)
-  listItems.value.unshift(...itemsToMove)
-  selectedIndices.value.clear()
-  for (let i = 0; i < itemsToMove.length; i++) selectedIndices.value.add(i)
-  lastSelectedIndex.value = 0
-  scrollToSelection(true)
-}
-
-const moveSelectionUp = () => {
-  const sortedIndices = Array.from(selectedIndices.value).sort((a, b) => a - b)
-  if (sortedIndices.length === 0 || sortedIndices[0] === 0) return
-  const newIndices = new Set()
-  sortedIndices.forEach(i => {
-    const item = listItems.value.splice(i, 1)[0]
-    listItems.value.splice(i - 1, 0, item)
-    newIndices.add(i - 1)
-  })
-  selectedIndices.value = newIndices
-  lastSelectedIndex.value = Array.from(newIndices)[0]
-  scrollToSelection()
-}
-
-const moveSelectionDown = () => {
-  const sortedIndices = Array.from(selectedIndices.value).sort((a, b) => b - a)
-  if (sortedIndices.length === 0 || sortedIndices[0] === listItems.value.length - 1) return
-  const newIndices = new Set()
-  sortedIndices.forEach(i => {
-    const item = listItems.value.splice(i, 1)[0]
-    listItems.value.splice(i + 1, 0, item)
-    newIndices.add(i + 1)
-  })
-  selectedIndices.value = newIndices
-  lastSelectedIndex.value = Array.from(newIndices)[0]
-  scrollToSelection()
-}
-
-const moveSelectionToBottom = () => {
-  if (selectedIndices.value.size === 0) return
-  const sortedIndices = Array.from(selectedIndices.value).sort((a, b) => a - b)
-  const itemsToMove = sortedIndices.map(i => listItems.value[i])
-  for (let i = sortedIndices.length - 1; i >= 0; i--) listItems.value.splice(sortedIndices[i], 1)
-  listItems.value.push(...itemsToMove)
-  selectedIndices.value.clear()
-  const startIdx = listItems.value.length - itemsToMove.length
-  for (let i = 0; i < itemsToMove.length; i++) selectedIndices.value.add(startIdx + i)
-  lastSelectedIndex.value = startIdx
-  scrollToSelection(true)
-}
-
-const removeSelected = () => {
-  const sortedIndices = Array.from(selectedIndices.value).sort((a, b) => b - a)
-  sortedIndices.forEach(i => listItems.value.splice(i, 1))
-  selectedIndices.value.clear()
-  lastSelectedIndex.value = null
-}
-
-const clearAll = () => {
-  if (confirm('Are you sure you want to clear the entire merge list?')) {
-    listItems.value.splice(0, listItems.value.length)
-    selectedIndices.value.clear()
-    lastSelectedIndex.value = null
-  }
-}
-
 const handleOrderRequest = async () => {
   if (listItems.value.length === 0) return
-  // Pass a clean JSON copy to avoid proxy serialization issues on the Python bridge
   const cleanList = JSON.parse(JSON.stringify(listItems.value))
   const success = await copyOrderRequest(cleanList)
   if (success) {
     isOrderPulseActive.value = true
-    setTimeout(() => {
-      isOrderPulseActive.value = false
-    }, 450)
+    setTimeout(() => { isOrderPulseActive.value = false }, 450)
   }
 }
-
-// --- Save & Close Logic ---
 
 const hasUnsavedChanges = computed(() => {
   if (listItems.value.length !== activeProject.selectedFiles.length) return true
@@ -336,147 +184,35 @@ const handleSave = async () => {
 
       <!-- Main Content Split -->
       <div class="flex-grow flex min-h-0 overflow-hidden">
+        <FileManagerLeftPanel
+          :fileTree="fileTree"
+          v-model:filterText="filterText"
+          v-model:isExtFilter="isExtFilter"
+          v-model:isGitFilter="isGitFilter"
+          :selectedPaths="listItems.map(f => f.path)"
+          :expandedDirs="currentExpandedDirs"
+          @toggle-select="toggleFileSelect"
+          @toggle-expand="toggleFolderExpand"
+          @add-all="addAll"
+        />
 
-        <!-- Left Panel: Available Files -->
-        <div class="w-1/2 flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold text-gray-200">Available Files</h3>
-            <div class="flex items-center space-x-2">
-              <button
-                @click="isGitFilter = !isGitFilter"
-                class="p-1.5 rounded border transition-colors"
-                :class="isGitFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
-                title="Toggle Gitignore Filter"
-              >
-                <GitBranch class="w-4 h-4" />
-              </button>
-              <button
-                @click="isExtFilter = !isExtFilter"
-                class="p-1.5 rounded border transition-colors"
-                :class="isExtFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
-                title="Toggle Extension Filter"
-              >
-                <Filter class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Filter Search -->
-          <div class="relative mb-4">
-            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <input
-              v-model="filterText"
-              type="text"
-              placeholder="Filter tree..."
-              class="w-full bg-cm-input-bg text-white pl-10 pr-4 py-2 rounded border border-gray-600 focus:border-cm-blue outline-none text-sm"
-            >
-          </div>
-
-          <!-- File Tree -->
-          <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2">
-            <FileTreeNode
-              v-for="node in fileTree"
-              :key="node.path"
-              :node="node"
-              :selected-paths="listItems.map(f => f.path)"
-              :initial-expanded-paths="activeProject.expandedDirs"
-              @toggle-select="toggleFileSelect"
-              @toggle-expand="toggleFolderExpand"
-            />
-          </div>
-
-          <div class="flex justify-end pt-2">
-            <button
-              @click="addAll"
-              class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded text-sm transition-colors flex items-center"
-            >
-              <CheckSquare class="w-4 h-4 mr-2" />
-              Add all
-            </button>
-          </div>
-        </div>
-
-        <!-- Right Panel: Merge Order -->
-        <div class="w-1/2 flex flex-col p-5 bg-cm-dark-bg">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center space-x-3 min-w-0">
-              <h3 class="font-semibold text-gray-200 shrink-0">Merge Order</h3>
-              <span :class="tokenColorClass" class="text-sm font-mono pt-0.5 truncate">
-                ({{ listItems.length }} files, {{ totalTokens.toLocaleString() }} tokens)
-              </span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <button
-                @click="handleOrderRequest"
-                class="p-1.5 rounded border border-gray-600 hover:border-cm-blue text-gray-500 hover:text-cm-blue transition-colors relative"
-                :class="{ 'click-pulse': isOrderPulseActive }"
-                :style="isOrderPulseActive ? { '--click-color': '#DE680888' } : {}"
-                title="Copy order request prompt"
-              >
-                <ArrowDownUp class="w-4 h-4" />
-              </button>
-              <button
-                @click="showFullPaths = !showFullPaths"
-                class="p-1.5 rounded border transition-colors"
-                :class="showFullPaths ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
-                title="Toggle Path Visibility"
-              >
-                <Milestone class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Merge List -->
-          <div class="flex-grow overflow-y-auto custom-scrollbar mb-2 pr-2">
-            <ul ref="mergeListRef" class="space-y-1">
-              <li
-                v-for="(file, index) in listItems"
-                :key="file.path"
-                class="group flex items-center border rounded p-2 text-sm transition-colors"
-                :class="selectedIndices.has(index) ? 'bg-cm-blue border-cm-blue' : 'bg-cm-input-bg border-gray-700 hover:border-gray-500'"
-                @click="handleFileClick(index, $event)"
-              >
-                <div class="drag-handle cursor-grab active:cursor-grabbing mr-3 text-gray-600 group-hover:text-gray-400" @click.stop>
-                  <div class="grid grid-cols-2 gap-0.5 w-3">
-                    <div v-for="n in 6" :key="n" class="w-1 h-1 bg-current rounded-full"></div>
-                  </div>
-                </div>
-
-                <span class="flex-grow truncate pr-4" :class="selectedIndices.has(index) ? 'text-white font-medium' : 'text-gray-200'">
-                  {{ showFullPaths ? file.path : file.path.split('/').pop() }}
-                </span>
-
-                <div
-                  class="flex items-center space-x-3 shrink-0 cursor-help"
-                  @click="handleTokenInteraction(index, $event)"
-                  title="Alt+Click: Toggle Ignore tokens | Ctrl+Click: Copy refactor request"
-                >
-                  <span class="text-xs font-mono" :class="selectedIndices.has(index) ? 'text-blue-100 font-bold' : getTokenColor(file)">
-                    {{ file.ignoreTokens ? `[${file.tokens?.toLocaleString()}]` : (file.tokens?.toLocaleString() || '?') }}
-                  </span>
-                </div>
-              </li>
-            </ul>
-            <div v-if="listItems.length === 0" class="h-full flex items-center justify-center text-gray-600 italic">
-              No files selected to merge.
-            </div>
-          </div>
-
-          <!-- Reorder Toolbar -->
-          <div class="flex items-center justify-center space-x-2 pt-2">
-            <button @click="moveSelectionToTop" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
-            <button @click="moveSelectionUp" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
-            <button @click="removeSelected" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded hover:bg-red-900/50 hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>
-            <button @click="moveSelectionDown" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Down"><ArrowDown class="w-4 h-4" /></button>
-            <button @click="moveSelectionToBottom" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Bottom"><ArrowDownToLine class="w-4 h-4" /></button>
-          </div>
-        </div>
+        <FileManagerRightPanel
+          ref="rightPanelRef"
+          :listItems="listItems"
+          :mergeListRef="mergeListRef"
+          :totalTokens="totalTokens"
+          :tokenColorClass="tokenColorClass"
+          v-model:showFullPaths="showFullPaths"
+          :isOrderPulseActive="isOrderPulseActive"
+          @token-interaction="handleTokenInteraction"
+          @order-request="handleOrderRequest"
+        />
       </div>
 
       <!-- Footer Actions -->
       <div class="px-6 py-2 border-t border-gray-700 bg-cm-top-bar flex justify-between shrink-0">
         <button
-          @click="clearAll"
+          @click="listItems.splice(0, listItems.length)"
           class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm"
         >
           <RotateCcw class="w-3.5 h-3.5 mr-2" />
@@ -484,16 +220,10 @@ const handleSave = async () => {
         </button>
 
         <div class="flex items-center space-x-3">
-          <button
-            @click="handleCancel"
-            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
-          >
+          <button @click="handleCancel" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm">
             Cancel
           </button>
-          <button
-            @click="handleSave"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
-          >
+          <button @click="handleSave" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm">
             <Save class="w-4 h-4 mr-2" />
             Update Project
           </button>
@@ -503,19 +233,3 @@ const handleSave = async () => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-</style>
