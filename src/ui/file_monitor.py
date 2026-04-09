@@ -1,8 +1,11 @@
 import os
+import logging
 from ..core.utils import parse_gitignore
 from ..core.file_scanner import get_all_matching_files
 from .. import constants as c
 from ..core.merger import recalculate_token_count
+
+log = logging.getLogger("CodeMerger")
 
 class FileMonitor:
     """
@@ -112,6 +115,10 @@ class FileMonitor:
                     truly_deleted_files.add(rel_path)
 
         if truly_deleted_files:
+            log.info(f"Detected {len(truly_deleted_files)} missing files. Pruning.")
+            for rel_path in sorted(list(truly_deleted_files)):
+                log.info(f" - Removed: {rel_path}")
+
             project_config.known_files = list(known_set - truly_deleted_files)
             for p_name, p_data in project_config.profiles.items():
                 orig_selection = len(p_data.get('selected_files', []))
@@ -125,6 +132,10 @@ class FileMonitor:
         # Handle Brand New Files
         brand_new_files = current_set - set(project_config.known_files)
         if brand_new_files:
+            log.info(f"Detected {len(brand_new_files)} brand new files.")
+            for rel_path in sorted(list(brand_new_files)):
+                log.info(f" - New: {rel_path}")
+
             project_config.known_files.extend(list(brand_new_files))
             for p_data in project_config.profiles.values():
                 p_unknown = set(p_data.get('unknown_files', []))
