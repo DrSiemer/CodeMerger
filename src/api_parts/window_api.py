@@ -10,25 +10,33 @@ class WindowApi:
 
     def ensure_window_size(self, width, height):
         """
-        Requests the main window to expand to the specified dimensions if it is
-        currently smaller. This prevents large modals from being clipped.
+        Requests the main window to expand to the specified logical dimensions.
+        Multiplies requested size by the backend scale factor to ensure it matches
+        physical pixel expectations on high-DPI monitors.
         """
         if not self._window_manager or not self._window_manager.main_window:
             return
 
         win = self._window_manager.main_window
-        current_w = win.width
-        current_h = win.height
+        scale = self._window_manager._get_scale_factor()
 
-        # Compare requested size against current scale-corrected bounds
-        target_w = max(current_w, width)
-        target_h = max(current_h, height)
+        # win.width and win.height report physical pixels on Windows
+        current_phys_w = win.width
+        current_phys_h = win.height
 
-        if target_w != current_w or target_h != current_h:
-            log.info(f"[UI-Resize] Growth requested: {current_w}x{current_h} -> {target_w}x{target_h}")
-            win.resize(target_w, target_h)
+        # Convert logical pixels from frontend to physical pixels for backend comparison
+        target_phys_w = int(width * scale)
+        target_phys_h = int(height * scale)
+
+        # Only grow, never shrink
+        new_phys_w = max(current_phys_w, target_phys_w)
+        new_phys_h = max(current_phys_h, target_phys_h)
+
+        if new_phys_w != current_phys_w or new_phys_h != current_phys_h:
+            log.info(f"[UI-Resize] Scaling growth: {current_phys_w}x{current_phys_h} -> {new_phys_w}x{new_phys_h} (Scale: {scale})")
+            win.resize(new_phys_w, new_phys_h)
         else:
-            log.debug(f"[UI-Resize] Requested {width}x{height} is already accommodated by current {current_w}x{current_h}")
+            log.debug(f"[UI-Resize] Logical {width}x{height} is already met by physical {current_phys_w}x{current_phys_h}")
 
     def signal_ui_ready(self):
         """
