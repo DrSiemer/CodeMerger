@@ -7,9 +7,12 @@ import hashlib
 import tempfile
 import time
 import sys
+import logging
 from pathlib import Path
 from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
 from .utils import get_token_count_for_text
+
+log = logging.getLogger("CodeMerger")
 
 def _get_file_hash(full_path):
     try:
@@ -267,8 +270,16 @@ class ProjectConfig:
                         lines = content.count('\n') + 1
                         cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
                     except OSError: continue
+                else:
+                    log.info(f"File missing from disk, removing from selection: {f_path}")
         else:
             for f_info in original_selection:
+                f_path = f_info.get('path')
+                full_path = os.path.join(self.base_dir, f_path)
+                if not os.path.isfile(full_path):
+                    log.info(f"File missing from disk, removing from selection: {f_path}")
+                    continue
+
                 if 'tokens' not in f_info or 'lines' not in f_info:
                     profile_was_updated = True
                 cleaned_selection.append(f_info)
@@ -355,8 +366,8 @@ class ProjectConfig:
     def get_profile_names(self):
         return sorted(list(self.profiles.keys()))
 
-    def create_new_profile(self, new_name, copy_files, copy_instructions):
-        if new_name in self.profiles:
+    def create_new_profile(self, name, copy_files, copy_instructions):
+        if name in self.profiles:
             return False
 
         if copy_files or copy_instructions:
@@ -372,7 +383,7 @@ class ProjectConfig:
         else:
             new_profile = self._create_empty_profile()
 
-        self.profiles[new_name] = new_profile
+        self.profiles[name] = new_profile
         return True
 
     def delete_profile(self, profile_name_to_delete):
