@@ -35,11 +35,23 @@ class FeedbackLogicController:
         window.protocol("WM_DELETE_WINDOW", self.on_close_request if window.on_apply_executor else window.destroy)
         window.bind("<Configure>", self.on_configure)
 
-        # Tab Selection
-        if window.force_verification and 'verification' in window.tab_indices:
-            window.notebook.select(window.tab_indices['verification'])
-        elif window.notebook.tabs():
-            window.notebook.select(0)
+        # Tab Selection Logic (State Aware)
+        has_pending = any(s == "pending" for s in window.file_states.values())
+
+        if window.force_verification:
+            # Mode: Resume (Re-opened)
+            if has_pending and 'changes' in window.tab_indices:
+                window.notebook.select(window.tab_indices['changes'])
+            elif 'verification' in window.tab_indices:
+                window.notebook.select(window.tab_indices['verification'])
+            elif window.notebook.tabs():
+                window.notebook.select(0)
+        else:
+            # Mode: New (Just pasted)
+            if 'intro' in window.tab_indices:
+                window.notebook.select(window.tab_indices['intro'])
+            elif window.notebook.tabs():
+                window.notebook.select(0)
 
         self.window.deiconify()
 

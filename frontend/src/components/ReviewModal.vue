@@ -84,23 +84,36 @@ const hasFormattingTags = computed(() => lastAiResponse.value?.has_any_tags)
 onMounted(async () => {
   await resizeWindow(1100, 850)
 
-  // Determine initial active tab based on opening mode
+  // Initialization: Logic for state-aware initial tab selection
   if (tabs.value.length > 0) {
-    const hasIntro = tabs.value.find(t => t.id === 'intro')
-    const hasVerification = tabs.value.find(t => t.id === 'verification')
-    const hasUnformatted = tabs.value.find(t => t.id === 'unformatted')
+    const tabIds = tabs.value.map(t => t.id)
 
-    // PRIORITY: If changes are pending, always go to Changes tab (Requirement)
-    if (hasPendingChanges.value) {
-      activeTab.value = 'changes'
-    } else if (props.mode === 'resume' && hasVerification) {
-      activeTab.value = 'verification'
-    } else if (props.mode === 'new' && hasIntro) {
-      activeTab.value = 'intro'
-    } else if (hasUnformatted && !hasFormattingTags.value) {
-      activeTab.value = 'unformatted'
+    if (props.mode === 'resume') {
+      // Priority 1: Unaccepted changes exist -> Changes Tab
+      if (hasPendingChanges.value && tabIds.includes('changes')) {
+        activeTab.value = 'changes'
+      }
+      // Priority 2: Re-opened after acceptance -> Verification Tab
+      else if (tabIds.includes('verification')) {
+        activeTab.value = 'verification'
+      }
+      // Fallback
+      else {
+        activeTab.value = tabIds[0]
+      }
     } else {
-      activeTab.value = tabs.value[0].id
+      // Priority 1: Default for new responses -> Intro Tab
+      if (tabIds.includes('intro')) {
+        activeTab.value = 'intro'
+      }
+      // Priority 2: If no Intro but unformatted exists -> Unformatted
+      else if (hasUnformatted.value && !hasFormattingTags.value) {
+        activeTab.value = 'unformatted'
+      }
+      // Fallback
+      else {
+        activeTab.value = tabIds[0]
+      }
     }
   }
 })

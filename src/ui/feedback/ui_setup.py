@@ -128,6 +128,7 @@ def _populate_tabs(window):
             if tag_name in ["DELETED FILES", "UNCHANGED"]: continue
 
             if tag_name == "VERIFICATION" and not changes_tab_added and has_file_blocks:
+                window.tab_indices['changes'] = current_idx
                 window.changes.add_interactive_changes_tab()
                 changes_tab_added = True
                 current_idx += 1
@@ -135,22 +136,27 @@ def _populate_tabs(window):
             title = tag_name.replace("ANSWERS TO DIRECT USER QUESTIONS", "Answers").title()
             icon = window._gray_accent
             info_key = "review_tab_placeholder"
-            if "INTRO" in tag_name: info_key = "review_tab_intro"
+            if "INTRO" in tag_name:
+                info_key = "review_tab_intro"
+                window.tab_indices['intro'] = current_idx
             elif "CHANGES" in tag_name:
                 icon = window._blue_accent; info_key = "review_tab_changes"
+                window.tab_indices['changes'] = current_idx
                 changes_tab_added = True
             elif "ANSWERS" in tag_name: icon = window._cyan_accent; info_key = "review_tab_answers"
-            elif "VERIFICATION" in tag_name: icon = window._green_accent; info_key = "review_tab_verification"
+            elif "VERIFICATION" in tag_name:
+                icon = window._green_accent; info_key = "review_tab_verification"
+                window.tab_indices['verification'] = current_idx
             elif "DELETED" in tag_name: icon = window._red_accent; info_key = "review_tab_delete"
 
             _add_standard_tab(window, title, content, icon=icon, info_key=info_key)
-            if "VERIFICATION" in tag_name: window.tab_indices['verification'] = current_idx
             current_idx += 1
         elif stype == 'orphan':
             _add_unformatted_tab(window, "Unformatted output", content)
             current_idx += 1
 
     if not changes_tab_added and has_file_blocks:
+        window.tab_indices['changes'] = current_idx
         window.changes.add_interactive_changes_tab()
 
     if current_idx == 0:
