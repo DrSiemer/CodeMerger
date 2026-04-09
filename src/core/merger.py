@@ -143,7 +143,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (Testing steps)
 </VERIFICATION>"""
 
-        automation_warning = "CRITICAL: I am using an automated parser. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file, even unchanged ones."
+        automation_warning = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file, even unchanged ones."
 
         final_parts = [f"# {project_title}"]
 
