@@ -23,6 +23,7 @@ import logging
 import traceback
 import time
 import base64
+import threading
 from pathlib import Path
 from src.api import Api
 from src.core.logger import setup_logging
@@ -77,7 +78,8 @@ class WindowManager:
             self.base_url = "http://localhost:5173"
         else:
             bundle_dir = get_bundle_dir()
-            self.base_url = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
+            # Store as absolute path string
+            self.base_url = os.path.abspath(os.path.join(bundle_dir, 'frontend', 'dist', 'index.html'))
 
         # Initialize Updater
         app_version = load_app_version()
@@ -107,29 +109,35 @@ class WindowManager:
 
     def _update_main_bounds(self):
         """Safely captures the main window bounds, strictly ignoring minimized (-32000) states."""
-        if not self.main_window:
+        if not self.main_window or self._is_shutting_down:
             return
 
-        scale = self._get_scale_factor()
+        try:
+            scale = self._get_scale_factor()
 
-        # Dimensions are reported by PyWebView as physical pixels
-        x = self.main_window.x
-        y = self.main_window.y
-        w = self.main_window.width
-        h = self.main_window.height
+            # Dimensions are reported by PyWebView as physical pixels
+            # Wrapping access in a try-block because the native window might be
+            # destroyed mid-call during app exit.
+            x = self.main_window.x
+            y = self.main_window.y
+            w = self.main_window.width
+            h = self.main_window.height
 
-        # Logic for normal window state only
-        if x is not None and x > -30000 and x != -8:
-            self.main_last_x = x
-        if y is not None and y > -30000 and y != -8:
-            self.main_last_y = y
+            # Logic for normal window state only
+            if x is not None and x > -30000 and x != -8:
+                self.main_last_x = x
+            if y is not None and y > -30000 and y != -8:
+                self.main_last_y = y
 
-        # Thresholds (800/600) are logical units; compare against scaled physical units.
-        if w is not None and w >= (800 * scale):
-            # Save logically so restoration remains consistent across different screens
-            self.main_last_w = w / scale
-        if h is not None and h >= (600 * scale):
-            self.main_last_h = h / scale
+            # Thresholds (800/600) are logical units; compare against scaled physical units.
+            if w is not None and w >= (800 * scale):
+                # Save logically so restoration remains consistent across different screens
+                self.main_last_w = w / scale
+            if h is not None and h >= (600 * scale):
+                self.main_last_h = h / scale
+        except (TypeError, Exception):
+            # Native handle is already gone
+            pass
 
     def _get_main_window_monitor(self):
         """
@@ -251,10 +259,13 @@ class WindowManager:
                 temp_scale = dpi.value / 96.0
             except Exception: pass
 
+        # Production URI conversion
+        load_url = self.base_url if self.dev_mode else Path(self.base_url).as_uri()
+
         # Force window placement to loaded config if available
         main_kwargs = {
             "title": "CodeMerger",
-            "url": self.base_url,
+            "url": load_url,
             "js_api": self.api,
             "width": int(self.main_last_w * temp_scale),
             "height": int(self.main_last_h * temp_scale),
@@ -284,8 +295,13 @@ class WindowManager:
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
 
         # Silent Background Update Check
-        import threading
         threading.Timer(2.0, self.updater.check_for_updates).start()
+
+        # [FAIL-SAFE TIMEOUT]
+        # If the frontend fails to signal ready (e.g. Vite takes too long to cold start),
+        # force show the main window after 10 seconds so the dev can see console errors.
+        if self.dev_mode:
+            threading.Timer(10.0, self.show_main_and_close_splash).start()
 
         webview.start(gui='edgechromium', debug=self.dev_mode)
 
@@ -310,7 +326,7 @@ class WindowManager:
 
     def show_main_and_close_splash(self):
         """Transition from splash to main interface, ensuring the window pins to the correct monitor."""
-        if self.main_window:
+        if self.main_window and self.main_window.hidden:
             # Scale awareness: Resize the physical window based on the logical target and current monitor DPI
             scale = self._get_scale_factor()
 
@@ -324,7 +340,6 @@ class WindowManager:
             self.main_window.show()
 
             # Schedule bounds update after rendering has stabilized
-            import threading
             threading.Timer(0.5, self._update_main_bounds).start()
 
         if self.splash_window:
@@ -516,6 +531,10 @@ def main():
                 monitor.stop()
         except Exception:
             pass
+
+    # Ensure the process terminates cleanly and instantly on exit
+    # to signal orchestration tools (concurrently) to shut down.
+    os._exit(0)
 
 if __name__ == '__main__':
     main()

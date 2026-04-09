@@ -15,11 +15,10 @@ onMounted(() => {
     // This improves perceived startup speed.
     setTimeout(async () => {
       if (window.pywebview) {
-        // ONLY signal ready if we are on the main dashboard route.
-        // This prevents the hidden Compact window from closing the splash prematurely.
-        if (route.path === '/') {
-          await window.pywebview.api.signal_ui_ready()
-        }
+        // Signal ready to transition from Splash to Main UI.
+        // We signal regardless of route to ensure the transition completes
+        // even if the router hasn't fully synchronized the initial '/' path.
+        await window.pywebview.api.signal_ui_ready()
       }
     }, 50)
   }

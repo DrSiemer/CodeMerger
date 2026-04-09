@@ -98,15 +98,19 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 
 - Make sure you have [Python](https://www.python.org/downloads/) installed (and added to your PATH)
 - Make sure you have [Inno Setup](https://jrsoftware.org/isdl.php) installed
-- Run `go` to start
-- Run `go b` to build executable and installer
-- Run `go ba` to build the executable only
-- Run `go bi` to build the installer only (requires a prior successful build)
-- Run `go r` to push or update a release on Github using Actions
+- Before starting development, run `npm install` in the `/frontend` directory.
+
+### Commands
+
+- `go`: Starts the app using the **Production Bundle**. This uses the pre-compiled files in `/frontend/dist`. Use this to verify the app before building.
+- `go dev`: Starts the app in **Development Mode**. It uses `concurrently` to launch the Vite development server and the Python backend at once. This enables Hot Module Replacement (instant UI updates as you save code).
+- `go fe`: Manually start the Vite development server only.
+- `go api`: Manually start the Python backend in dev-link mode (expects Vite at localhost:5173).
+- `go b`: Build the full application (compile frontend + bundle executable + create installer).
+- `go ba`: Build the executable only.
+- `go r`: Push or update a release on Github using Actions.
     - Update `/version.txt` if you want to create a new release
     - You can add a comment to the release like this: `go r "Comment"`
-    - The release will be a draft, you'll need to finalize it on github.com
-- Run the Inno Setup with a log like this: `CodeMerger_Setup.exe /LOG="setup.log"`
 - When the app is installed, config can be found in `%APPDATA%\CodeMerger`
 
 

@@ -29,6 +29,8 @@ if "%VIRTUAL_ENV%"=="" (
 REM Main Command Router
 if /I "%FLAG%"=="" goto :DefaultAction
 if /I "%FLAG%"=="dev" goto :DevAction
+if /I "%FLAG%"=="api" goto :ApiAction
+if /I "%FLAG%"=="fe" goto :FrontendAction
 if /I "%FLAG%"=="o" goto :OldUIAction
 if /I "%FLAG%"=="cmd" goto :OpenCmd
 if /I "%FLAG%"=="f" goto :FreezeReqs
@@ -43,13 +45,33 @@ goto :eof
 :DefaultAction
     echo Starting CodeMerger (Web UI Mode)
 
+    REM Check if production frontend is built
+    if not exist "frontend\dist\index.html" (
+        echo Production frontend not found. Building now...
+        call :BuildFrontend
+    )
+
     python %START_SCRIPT%
     goto :eof
 
 :DevAction
-    echo Starting CodeMerger in DEV mode (Connecting to localhost:5173)
+    echo Starting Frontend and API concurrently...
+
+    call npm run dev
+    goto :eof
+
+:ApiAction
+    echo Starting CodeMerger API only (Connecting to localhost:5173)
 
     python %START_SCRIPT% --dev
+    goto :eof
+
+:FrontendAction
+    echo Starting Vue Frontend Dev Server
+
+    cd frontend
+    call npm run dev
+    cd ..
     goto :eof
 
 :OldUIAction

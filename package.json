@@ -1,0 +1,10 @@
+{
+  "name": "codemerger-root",
+  "version": "1.0.0",
+  "description": "Development orchestration scripts for CodeMerger",
+  "scripts": {
+    "dev": "npm run dev-all --prefix frontend"
+  },
+  "author": "",
+  "license": "ISC"
+}
