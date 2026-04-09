@@ -38,10 +38,12 @@ goto :Usage
     goto :eof
 
 :FreezeReqs
+    call :CheckUv
+    if !errorlevel! neq 0 goto :eof
     call :ActivateVenv
     if !errorlevel! neq 0 goto :eof
     echo Freezing dependencies to requirements.txt...
-    pip freeze > requirements.txt
+    uv pip freeze > requirements.txt
     echo Done.
     goto :eof
 
@@ -54,7 +56,9 @@ goto :Usage
 
     if /I "%ARG2%"=="cpu" (
         echo Forcing CPU-only PyTorch installation...
-        pip install --force-reinstall torch torchaudio
+        call :CheckUv
+        if !errorlevel! neq 0 goto :eof
+        uv pip install --force-reinstall torch torchaudio
     )
 
     echo Deleting old build folders...
@@ -80,25 +84,39 @@ goto :Usage
     call release.bat %VERSION_FILE%
     goto :eof
 
+:CheckUv
+    where uv >nul 2>nul
+    if !errorlevel! neq 0 (
+        echo.
+        echo ############################################################
+        echo # ERROR: 'uv' not found.
+        echo # This project uses 'uv' for high-performance Python setup.
+        echo # Please install it: https://github.com/astral-sh/uv
+        echo ############################################################
+        echo.
+        exit /b 1
+    )
+    exit /b 0
+
 :ActivateVenv
     if defined VIRTUAL_ENV exit /b 0
 
     if not exist "%VENV_DIR%\Scripts\activate" (
+        call :CheckUv
+        if !errorlevel! neq 0 exit /b 1
+
         echo.
-        echo Virtual environment not found. Running one-time setup...
-        python -m venv %VENV_DIR%
+        echo Virtual environment not found. Creating with uv...
+        uv venv %VENV_DIR%
         if !errorlevel! neq 0 (
-            echo ERROR: Failed to create venv. Verify Python installation and PATH.
+            echo ERROR: Failed to create venv with uv.
             exit /b 1
         )
         call %VENV_DIR%\Scripts\activate
-        echo.
-        echo --- Upgrading Core Packaging Tools ---
-        python -m pip install --upgrade pip setuptools wheel
         if exist requirements.txt (
             echo.
-            echo --- Installing Application Requirements ---
-            pip install -r requirements.txt
+            echo --- Installing Application Requirements with uv ---
+            uv pip install -r requirements.txt
             if !errorlevel! neq 0 exit /b 1
         )
         echo.
