@@ -100,6 +100,9 @@ class FileMonitorThread(threading.Thread):
 
             if truly_deleted:
                 log.info(f"Detected {len(truly_deleted)} physically deleted files. Pruning configuration.")
+                for rel_path in sorted(list(truly_deleted)):
+                    log.info(f"  [REMOVED] {rel_path}")
+
                 project_config.known_files = sorted(list(known_set - truly_deleted))
                 for p_data in project_config.profiles.values():
                     orig_len = len(p_data.get('selected_files', []))
@@ -116,6 +119,9 @@ class FileMonitorThread(threading.Thread):
             brand_new = current_set - set(project_config.known_files)
             if brand_new:
                 log.info(f"Detected {len(brand_new)} brand new files.")
+                for rel_path in sorted(list(brand_new)):
+                    log.info(f"  [NEW]     {rel_path}")
+
                 project_config.known_files = sorted(list(set(project_config.known_files) | brand_new))
                 for p_data in project_config.profiles.values():
                     p_unknown = set(p_data.get('unknown_files', []))
