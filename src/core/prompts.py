@@ -15,6 +15,7 @@ DO:
 - use only concise, single-sentence, unnumbered comments without trailing punctuation or XML tags
 - always place closing triple backticks (```) on their own, new line
 - Present Tense: All rationale in comments must be in the present tense (e.g., 'Checks for null' instead of 'Checked for null')
+- Layout Preservation: Mirror the original line-wrapping and structural layout exactly.
 
 Do NOT:
 - remove my original comments
