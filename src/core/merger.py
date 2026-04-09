@@ -41,7 +41,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         block_header = f"{PREFIX}{FILE_LABEL}`{path}` ---"
         block_footer = f"{PREFIX}{EOF_LABEL} ---"
 
-        output_blocks.append(f"{block_header}\n\n```{language}\n{content}\n```\n\n{block_footer}")
+        output_blocks.append(f"{block_header}\n```{language}\n{content}\n```\n{block_footer}")
 
     merged_code = '\n\n'.join(output_blocks)
 
