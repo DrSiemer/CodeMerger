@@ -1,5 +1,21 @@
 import sys
 import os
+import ctypes
+
+# --- DPI AWARENESS BOOTSTRAP ---
+# Must be called before any UI elements or windows are initialized to ensure
+# Windows calculates coordinates and scaling correctly on High DPI displays.
+if sys.platform == "win32":
+    try:
+        # DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 is the modern standard for High DPI support
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except Exception:
+        try:
+            # Fallback for older versions of Windows 10
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
+
 import webview
 import logging
 import traceback
@@ -10,6 +26,8 @@ from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir, SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_3_PATH
 from src.core.file_monitor_thread import FileMonitorThread
+from src.core.updater import Updater
+from src.core.utils import load_app_version
 
 # Import core backend logic
 from src.app_state import AppState
@@ -58,7 +76,10 @@ class WindowManager:
         else:
             bundle_dir = get_bundle_dir()
             self.base_url = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
-            log.info(f"Base URL set to bundled path: {self.base_url}")
+
+        # Initialize Updater
+        app_version = load_app_version()
+        self.updater = Updater(None, self.api.app_state, app_version)
 
     def _update_main_bounds(self):
         """Safely captures the main window bounds, strictly ignoring minimized (-32000) states."""
@@ -221,8 +242,12 @@ class WindowManager:
         except AttributeError: pass
 
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
-        # [TEMPORARY DEBUG ENABLED] - Allows you to right-click -> Inspect in the build.
-        webview.start(gui='edgechromium', debug=True)
+
+        # Silent Background Update Check
+        import threading
+        threading.Timer(2.0, self.updater.check_for_updates).start()
+
+        webview.start(gui='edgechromium', debug=self.dev_mode)
 
     def _create_compact_window(self):
         if self.compact_window: return
@@ -230,15 +255,8 @@ class WindowManager:
         if self.dev_mode:
             compact_url = f"{self.base_url}#/compact"
         else:
-            # Check for asset existence to log errors in the build
-            if not os.path.exists(self.base_url):
-                log.error(f"CRITICAL: Frontend index.html not found at {self.base_url}")
-                return
-
-            # Path.as_uri() is the most robust way to generate file:/// URLs for WebView2
             base_uri = Path(self.base_url).as_uri()
             compact_url = f"{base_uri}#/compact"
-            log.info(f"Constructed compact URL: {compact_url}")
 
         self.compact_window = webview.create_window(
             "CM-Compact", url=compact_url, js_api=self.api,

@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 import logging
+import tkinter as tk
 from datetime import datetime
 from urllib import request, error
 from tkinter import messagebox
@@ -15,12 +16,27 @@ log = logging.getLogger("CodeMerger")
 class Updater:
     """
     Handles checking for application updates from a GitHub repository.
+    Works for both Tkinter and PyWebView frontend environments.
     """
     def __init__(self, parent, app_state, current_version):
         self.parent = parent
         self.state = app_state
         self.current_version = current_version
         self.repo_url = c.GITHUB_API_URL
+
+    def _get_dialog_parent(self):
+        """
+        Creates a hidden temporary Tk root if no parent is available.
+        Ensures popups don't crash when called from the Webview backend.
+        """
+        if self.parent and hasattr(self.parent, 'winfo_exists') and self.parent.winfo_exists():
+            return self.parent
+
+        # Fallback for Webview mode
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        return root
 
     def _should_check_for_updates(self):
         """
@@ -82,6 +98,7 @@ class Updater:
         Performs a user-initiated update check and provides direct feedback.
         """
         log.info("Performing manual update check.")
+        dialog_root = self._get_dialog_parent()
         try:
             with request.urlopen(self.repo_url) as response:
                 if response.status == 200:
@@ -97,25 +114,31 @@ class Updater:
                         messagebox.showinfo(
                             "Up to Date",
                             f"You are running the latest version of CodeMerger ({self.current_version}).",
-                            parent=self.parent
+                            parent=dialog_root
                         )
                 else:
-                    self.parent.show_error_dialog(
+                    messagebox.showerror(
                         "Update Check Failed",
-                        f"Could not check for updates. Server returned status {response.status}."
+                        f"Could not check for updates. Server returned status {response.status}.",
+                        parent=dialog_root
                     )
         except error.URLError as e:
             log.error(f"Manual update check failed: {e.reason}")
-            self.parent.show_error_dialog(
+            messagebox.showerror(
                 "Update Check Failed",
-                f"Could not check for updates. Please check your internet connection.\n\nDetails: {e.reason}"
+                f"Could not check for updates. Please check your internet connection.\n\nDetails: {e.reason}",
+                parent=dialog_root
             )
         except Exception as e:
             log.exception("An unexpected error occurred during manual update check.")
-            self.parent.show_error_dialog(
+            messagebox.showerror(
                 "Update Check Failed",
-                f"An unexpected error occurred while checking for updates.\n\nDetails: {e}"
+                f"An unexpected error occurred while checking for updates.\n\nDetails: {e}",
+                parent=dialog_root
             )
+        finally:
+            if dialog_root != self.parent:
+                dialog_root.destroy()
 
     def _is_newer(self, latest_str, current_str):
         """
@@ -149,7 +172,8 @@ class Updater:
             "Do you want to proceed?"
         )
 
-        if messagebox.askyesno("Update Available", message, parent=self.parent):
+        dialog_root = self._get_dialog_parent()
+        if messagebox.askyesno("Update Available", message, parent=dialog_root):
             self.start_update_process(release_data)
         else:
             log.info("User declined the update.")
@@ -163,7 +187,8 @@ class Updater:
 
         if not download_url:
             log.error("Could not find a downloadable setup file in the latest release assets.")
-            self.parent.show_error_dialog("Update Error", "Could not find a downloadable installer in the release.")
+            dialog_root = self._get_dialog_parent()
+            messagebox.showerror("Update Error", "Could not find a downloadable installer in the release.", parent=dialog_root)
             return
 
         updater_exe_path = ""
@@ -176,7 +201,8 @@ class Updater:
 
         if not os.path.exists(updater_exe_path):
             log.critical(f"Updater executable 'updater_gui.exe' not found at expected path: {updater_exe_path}")
-            self.parent.show_error_dialog("Update Error", f"The updater application is missing and could not be found.\n\nChecked path: {updater_exe_path}\n\nPlease reinstall CodeMerger.")
+            dialog_root = self._get_dialog_parent()
+            messagebox.showerror("Update Error", f"The updater application is missing and could not be found.\n\nChecked path: {updater_exe_path}\n\nPlease reinstall CodeMerger.", parent=dialog_root)
             return
 
         try:
@@ -194,10 +220,14 @@ class Updater:
             )
 
             log.info("Updater launched. Exiting main application.")
-            # Exit the main application
-            self.parent.destroy()
-            sys.exit(0)
+
+            # Coordination with PyWebView logic: use exit_all if available
+            if hasattr(self.parent, 'exit_all'):
+                self.parent.exit_all()
+            else:
+                sys.exit(0)
 
         except Exception as e:
             log.exception("Failed to launch the updater process.")
-            self.parent.show_error_dialog("Update Error", f"Failed to launch the updater process: {e}")
+            dialog_root = self._get_dialog_parent()
+            messagebox.showerror("Update Error", f"Failed to launch the updater process: {e}", parent=dialog_root)

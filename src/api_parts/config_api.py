@@ -31,6 +31,13 @@ class ConfigApi:
             log.error(f"Error saving config: {e}")
             return False
 
+    def check_for_updates_manual(self):
+        """Triggers a manual update check via the central Updater logic."""
+        if self._window_manager and hasattr(self._window_manager, 'updater'):
+            self._window_manager.updater.check_for_updates_manual()
+            return True
+        return False
+
     def get_filetypes(self):
         """Returns the array of indexed filetypes."""
         return load_all_filetypes()

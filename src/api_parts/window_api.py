@@ -20,12 +20,15 @@ class WindowApi:
         current_w = win.width
         current_h = win.height
 
+        # Compare requested size against current scale-corrected bounds
         target_w = max(current_w, width)
         target_h = max(current_h, height)
 
         if target_w != current_w or target_h != current_h:
-            log.info(f"Expanding window to {target_w}x{target_h} to accommodate content.")
+            log.info(f"[UI-Resize] Growth requested: {current_w}x{current_h} -> {target_w}x{target_h}")
             win.resize(target_w, target_h)
+        else:
+            log.debug(f"[UI-Resize] Requested {width}x{height} is already accommodated by current {current_w}x{current_h}")
 
     def signal_ui_ready(self):
         """
