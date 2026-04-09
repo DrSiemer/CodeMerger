@@ -10,7 +10,7 @@ import FileTreeNode from './FileTreeNode.vue'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 
 const emit = defineEmits(['close'])
-const { activeProject, getFileTree, resizeWindow, updateProjectFiles, copyOrderRequest, statusMessage } = useAppState()
+const { activeProject, getFileTree, resizeWindow, updateProjectFiles, copyOrderRequest, clearUnknownFiles, statusMessage } = useAppState()
 
 // Reorderable list setup
 const [mergeListRef, listItems] = useDragAndDrop(
@@ -35,11 +35,56 @@ const TOKEN_COLOR_RANGE_MAX = 2500
 onMounted(async () => {
   await resizeWindow(1100, 800)
   await refreshTree()
+  await autoHandleNewFiles()
+  await clearUnknownFiles()
   isLoaded.value = true
 })
 
 const refreshTree = async () => {
   fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value)
+}
+
+/**
+ * Deep-scans the tree for new files, expands their parents, and scrolls to the first one.
+ */
+const autoHandleNewFiles = async () => {
+  const newFiles = []
+
+  const traverse = (nodes) => {
+    nodes.forEach(node => {
+      if (node.type === 'file' && node.is_new) {
+        newFiles.push(node.path)
+
+        // Parse path to expand all parent directories
+        const parts = node.path.split('/')
+        let currentPath = ''
+        for (let i = 0; i < parts.length - 1; i++) {
+          currentPath += (i === 0 ? '' : '/') + parts[i]
+          currentExpandedDirs.value.add(currentPath)
+        }
+      }
+
+      if (node.children) traverse(node.children)
+    })
+  }
+
+  traverse(fileTree.value)
+
+  if (newFiles.length > 0) {
+    newFiles.sort()
+    // Identifies the ID format defined in FileTreeNode
+    const firstTargetId = `node-${newFiles[0].replace(/[\\/.]/g, '-')}`
+
+    await nextTick()
+
+    // 100ms delay ensures the browser layout engine has finalized the expanded folders
+    setTimeout(() => {
+      const el = document.getElementById(firstTargetId)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }, 100)
+  }
 }
 
 watch([filterText, isExtFilter, isGitFilter], () => {

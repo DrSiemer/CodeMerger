@@ -107,7 +107,6 @@ const openSettings = (tab = 'application') => {
 }
 
 const openFileManager = async () => {
-  await clearUnknownFiles()
   showFileManagerModal.value = true
 }
 
@@ -334,7 +333,7 @@ onUnmounted(() => {
         </button>
 
         <button
-          @click="showProjectModal = true"
+          @click="showProjectModal.value = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
         >
           Select Project

@@ -63,17 +63,20 @@ const isFolderComplete = computed(() => {
 
 const textClass = computed(() => {
   if (props.node.type === 'file') {
-    // Priority 1: Filtered files (Purple)
+    // Priority 1: New Files (High-contrast Green)
+    if (props.node.is_new) return 'text-[#40C040] font-bold'
+
+    // Priority 2: Filtered files (Purple)
     if (isFileSelected.value && props.node.is_filtered) return 'text-[#BB86FC]'
 
-    // Priority 2: Selected files (Medium Grey - accounted for)
+    // Priority 3: Selected files (Medium Grey - accounted for)
     if (isFileSelected.value) return 'text-[#888888]'
 
-    // Priority 3: __init__.py (Darkest Grey - boilerplate)
+    // Priority 4: __init__.py (Darkest Grey - boilerplate)
     if (IGNORED_FOR_COMPLETENESS.includes(props.node.name)) return 'text-gray-600'
 
-    // Priority 4: Normal files (Bright or Green if new)
-    return props.node.is_new ? 'text-[#40C040]' : 'text-gray-200 group-hover:text-white'
+    // Priority 5: Normal files (Bright)
+    return 'text-gray-200 group-hover:text-white'
   } else {
     // Directory coloring: Dark if complete, else Bright
     return isFolderComplete.value ? 'text-gray-600' : 'text-gray-200 font-medium'
@@ -103,7 +106,7 @@ const onChildToggleExpand = (data) => {
 </script>
 
 <template>
-  <div class="select-none">
+  <div :id="`node-${node.path.replace(/[\\/.]/g, '-')}`" class="select-none">
     <div
       class="flex items-center py-1 hover:bg-cm-blue/10 cursor-pointer rounded transition-colors group"
       :style="{ paddingLeft: `${level * 16}px` }"
@@ -127,7 +130,11 @@ const onChildToggleExpand = (data) => {
         />
         <template v-else>
           <CheckSquare v-if="isFileSelected" class="w-4 h-4 text-cm-blue" />
-          <Square v-else class="w-4 h-4 text-gray-600 group-hover:text-gray-400" />
+          <Square
+            v-else
+            class="w-4 h-4"
+            :class="node.is_new ? 'text-[#40C040]' : 'text-gray-600 group-hover:text-gray-400'"
+          />
         </template>
       </div>
 
