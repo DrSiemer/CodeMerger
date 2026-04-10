@@ -59,7 +59,10 @@ const isFolderHovered = ref(false)
 let clickTimer = null
 
 const handleTitleInteraction = () => {
-  if (!activeProject.path) return
+  if (!activeProject.path) {
+    showProjectModal.value = true
+    return
+  }
 
   if (clickTimer) {
     // Second click detected within 250ms -> Double Click (Rename)
@@ -333,7 +336,7 @@ onUnmounted(() => {
         </button>
 
         <button
-          @click="showProjectModal.value = true"
+          @click="showProjectModal = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
         >
           Select Project
