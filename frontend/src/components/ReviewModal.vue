@@ -337,7 +337,7 @@ const getSkippedMessage = (path) => {
                       </div>
                     </div>
                     <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
-                      <DiffViewer :old-text="planOriginalContents[path]" :new-text="content" :fontSize="editorFontSize" />
+                      <DiffViewer :old-text="planOriginalContents[path]" :new-text="content" :fontSize="editorFontSize" :filename="path" />
                     </div>
                   </div>
                 </div>
@@ -366,7 +366,7 @@ const getSkippedMessage = (path) => {
                       </div>
                     </div>
                     <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
-                      <DiffViewer :new-text="content" :fontSize="editorFontSize" />
+                      <DiffViewer :new-text="content" :fontSize="editorFontSize" :filename="path" />
                     </div>
                   </div>
                 </div>
@@ -401,7 +401,7 @@ const getSkippedMessage = (path) => {
                   </div>
                   <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
                     <!-- For deletions, DiffViewer shows current content as 'removed' -->
-                    <DiffViewer :old-text="planOriginalContents[path]" new-text="" :fontSize="editorFontSize" />
+                    <DiffViewer :old-text="planOriginalContents[path]" new-text="" :fontSize="editorFontSize" :filename="path" />
                   </div>
                 </div>
               </div>

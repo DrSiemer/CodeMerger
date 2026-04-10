@@ -11,6 +11,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  filename: {
+    type: String,
+    default: 'file'
+  },
   fontSize: {
     type: Number,
     default: 13
@@ -18,21 +22,49 @@ const props = defineProps({
 })
 
 const diffLines = computed(() => {
-  // Use jsdiff to compute line-level changes
-  const changes = Diff.diffLines(props.oldText || '', props.newText || '')
+  // Use structuredPatch to get unified diff metadata (headers, hunk markers, and truncation)
+  const patch = Diff.structuredPatch(
+    props.filename,
+    props.filename,
+    props.oldText || '',
+    props.newText || '',
+    '',
+    '',
+    { context: 3 }
+  )
 
-  // Format into rows with metadata for rendering
+  if (!patch || patch.hunks.length === 0) {
+    return []
+  }
+
   const rows = []
-  changes.forEach(part => {
-    const lines = part.value.split('\n')
-    // Remove the trailing empty string from split if it exists
-    if (lines[lines.length - 1] === '') lines.pop()
 
-    lines.forEach(line => {
+  // Add the traditional File Headers
+  rows.push({ prefix: '---', text: props.filename, type: 'header' })
+  rows.push({ prefix: '+++', text: props.filename, type: 'header' })
+
+  // Process hunks sequentially
+  patch.hunks.forEach(hunk => {
+    // Add Hunk Header (@@ -start,len +start,len @@)
+    rows.push({
+      prefix: '@@',
+      text: `-${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`,
+      type: 'header'
+    })
+
+    // Process individual lines in the hunk
+    hunk.lines.forEach(line => {
+      const char = line[0]
+      const content = line.substring(1)
+      let type = 'context'
+
+      if (char === '+') type = 'add'
+      else if (char === '-') type = 'remove'
+
       rows.push({
-        text: line,
-        added: part.added,
-        removed: part.removed
+        prefix: char,
+        text: content,
+        type: type
       })
     })
   })
@@ -56,16 +88,17 @@ const diffLines = computed(() => {
         :key="idx"
         class="flex min-w-0 border-b border-gray-800/30 last:border-0"
         :class="{
-          'bg-[#1e301e] text-[#a7f0a7]': line.added,
-          'bg-[#3a1e1e] text-[#f0a7a7]': line.removed,
-          'text-gray-400': !line.added && !line.removed
+          'bg-[#1e301e] text-[#a7f0a7]': line.type === 'add',
+          'bg-[#3a1e1e] text-[#f0a7a7]': line.type === 'remove',
+          'text-[#85b5d5] font-bold': line.type === 'header',
+          'text-gray-400': line.type === 'context'
         }"
       >
-        <!-- Line prefix - Fixed width, no wrap -->
-        <div class="w-8 shrink-0 text-center select-none opacity-50 border-r border-gray-800 mr-2 py-0.5">
-          {{ line.added ? '+' : (line.removed ? '-' : ' ') }}
+        <!-- Line prefix (Gutter) -->
+        <div class="w-10 shrink-0 text-center select-none opacity-50 border-r border-gray-800 mr-2 py-0.5">
+          {{ line.prefix }}
         </div>
-        <!-- Text content - Allow wrapping -->
+        <!-- Text content -->
         <div class="whitespace-pre-wrap break-words px-2 py-0.5 flex-grow min-w-0">
           {{ line.text || ' ' }}
         </div>
