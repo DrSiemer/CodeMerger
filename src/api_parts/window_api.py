@@ -54,6 +54,11 @@ class WindowApi:
         applied_w_phys = max(curr_w_phys, target_w_phys)
         applied_h_phys = max(curr_h_phys, target_h_phys)
 
+        # FIX: If the window is already large enough, do absolutely nothing.
+        # This prevents accidental "restoration" of maximized windows.
+        if applied_w_phys <= curr_w_phys and applied_h_phys <= curr_h_phys:
+            return
+
         # 5. Position Logic (Physical)
         # Calculate new position by expanding outward from current physical center
         center_x_phys = curr_x_phys + (curr_w_phys // 2)
