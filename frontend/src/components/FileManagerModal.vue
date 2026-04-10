@@ -230,12 +230,21 @@ const handleSave = async () => {
 
         <div class="flex items-center space-x-6">
           <div class="flex items-center space-x-3">
-            <button @click="handleCancel" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm" v-info="'fm_cancel'">
-              Cancel
+            <button
+              @click="handleCancel"
+              class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
+              v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
+            >
+              {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
             </button>
-            <button @click="handleSave" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm" v-info="'fm_save'">
+            <button
+              v-if="hasUnsavedChanges"
+              @click="handleSave"
+              class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
+              v-info="'fm_save'"
+            >
               <Save class="w-4 h-4 mr-2" />
-              Update Project
+              Save Merge List
             </button>
           </div>
 

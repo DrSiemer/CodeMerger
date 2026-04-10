@@ -151,7 +151,7 @@ defineExpose({
       <div class="flex items-center space-x-2">
         <button
           @click="emit('order-request')"
-          class="p-1.5 rounded border border-gray-600 hover:border-cm-blue text-gray-500 hover:text-cm-blue transition-colors relative"
+          class="p-1.5 rounded border border-gray-600 enabled:hover:border-cm-blue text-gray-500 enabled:hover:text-cm-blue transition-colors relative"
           :class="{ 'click-pulse': isOrderPulseActive }"
           :style="isOrderPulseActive ? { '--click-color': '#DE680888' } : {}"
           title="Copy order request prompt"
@@ -210,11 +210,11 @@ defineExpose({
 
     <!-- Reorder Toolbar -->
     <div class="flex items-center justify-center space-x-2 pt-2">
-      <button @click="moveSelectionToTop" v-info="'fm_sort_top'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
-      <button @click="moveSelectionUp" v-info="'fm_sort_up'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
-      <button @click="removeSelected" v-info="'fm_sort_remove'" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded hover:bg-red-900/50 hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>
-      <button @click="moveSelectionDown" v-info="'fm_sort_down'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Down"><ArrowDown class="w-4 h-4" /></button>
-      <button @click="moveSelectionToBottom" v-info="'fm_sort_bottom'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Bottom"><ArrowDownToLine class="w-4 h-4" /></button>
+      <button @click="moveSelectionToTop" v-info="'fm_sort_top'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
+      <button @click="moveSelectionUp" v-info="'fm_sort_up'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
+      <button @click="removeSelected" v-info="'fm_sort_remove'" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-red-900/50 enabled:hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>
+      <button @click="moveSelectionDown" v-info="'fm_sort_down'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Down"><ArrowDown class="w-4 h-4" /></button>
+      <button @click="moveSelectionToBottom" v-info="'fm_sort_bottom'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Bottom"><ArrowDownToLine class="w-4 h-4" /></button>
     </div>
   </div>
 </template>
