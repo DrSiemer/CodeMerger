@@ -31,6 +31,7 @@ from src.core.paths import get_bundle_dir, SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_
 from src.core.file_monitor_thread import FileMonitorThread
 from src.core.updater import Updater
 from src.core.utils import load_app_version
+from src import constants as c
 
 # Import core backend logic
 from src.app_state import AppState
@@ -223,7 +224,8 @@ class WindowManager:
 
         self.compact_window = webview.create_window(
             "CM-Compact", url=compact_url, js_api=self.api,
-            width=250, height=180, min_size=(10, 10),
+            width=c.COMPACT_WINDOW_WIDTH_LOGICAL, height=c.COMPACT_WINDOW_HEIGHT_LOGICAL,
+            min_size=(10, 10),
             frameless=True, on_top=True, hidden=True, background_color='#2E2E2E'
         )
         self.compact_window.events.closing += self._on_compact_closing
@@ -299,7 +301,7 @@ class WindowManager:
         scale = self._get_scale_factor(h_mon)
         m_l, m_t, m_r, m_b = self._get_monitor_work_area_phys(h_mon)
 
-        w_phys, h_phys = int(250 * scale), int(180 * scale)
+        w_phys, h_phys = int(c.COMPACT_WINDOW_WIDTH_LOGICAL * scale), int(c.COMPACT_WINDOW_HEIGHT_LOGICAL * scale)
 
         if self.compact_mode_last_x is not None and self.compact_mode_last_y is not None:
             t_x_phys, t_y_phys = int(self.compact_mode_last_x * scale), int(self.compact_mode_last_y * scale)
@@ -311,7 +313,8 @@ class WindowManager:
         t_x_phys = max(m_l + m, min(t_x_phys, m_r - w_phys - m))
         t_y_phys = max(m_t + m, min(t_y_phys, m_b - h_phys - m))
 
-        self.compact_window.resize(int(w_phys), int(h_phys))
+        # Runtime resize requires Physical units | move requires Logical units
+        self.compact_window.resize(w_phys, h_phys)
         self.compact_window.move(int(t_x_phys / scale), int(t_y_phys / scale))
         self.compact_window.show()
         self.compact_window.restore()
