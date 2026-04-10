@@ -218,6 +218,9 @@ const getPendingCount = computed(() => {
 // Acceptance Label Logic: transitions from Apply All to Apply All Remaining as work progresses
 const applyAllLabel = computed(() => {
   const states = Object.values(planFileStates.value)
+  const totalProposed = states.filter(s => s !== 'skipped').length
+  if (totalProposed === 1) return 'Apply'
+
   const hasInteracted = states.some(s => ['applied', 'rejected', 'deleted'].includes(s))
   return hasInteracted ? 'Apply All Remaining' : 'Apply All'
 })

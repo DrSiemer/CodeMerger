@@ -284,8 +284,15 @@ class FeedbackChangesController:
         if not hasattr(window, 'apply_btn'): return
         has_pending = any(s == "pending" for s in window.file_states.values())
         if has_pending:
+            total_proposed = sum(1 for s in window.file_states.values() if s != "skipped")
             manual = any(s in ["applied", "deleted", "rejected"] for s in window.file_states.values())
-            window.apply_btn.config(text="Apply All Remaining" if manual else "Apply All")
+
+            if total_proposed == 1:
+                btn_text = "Apply"
+            else:
+                btn_text = "Apply All Remaining" if manual else "Apply All"
+
+            window.apply_btn.config(text=btn_text)
             if not window.apply_btn.winfo_ismapped():
                 window.cancel_btn.pack_forget()
                 window.apply_btn.pack(side="right")
