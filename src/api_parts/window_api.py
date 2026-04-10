@@ -1,6 +1,8 @@
 import os
 import logging
 import base64
+import time
+import threading
 from src.core.paths import BUNDLE_DIR
 
 log = logging.getLogger("CodeMerger")
@@ -10,33 +12,88 @@ class WindowApi:
 
     def ensure_window_size(self, width, height):
         """
-        Requests the main window to expand to the specified logical dimensions.
-        Multiplies requested size by the backend scale factor to ensure it matches
-        physical pixel expectations on high-DPI monitors.
+        Requests the main window to expand to specified dimensions.
+        Calculates all logic in Physical Pixels but implements Hybrid-Domain execution
+        (move is logical, resize is physical) to overcome high-DPI behavior quirks.
         """
         if not self._window_manager or not self._window_manager.main_window:
             return
 
-        win = self._window_manager.main_window
-        scale = self._window_manager._get_scale_factor()
+        mgr = self._window_manager
+        win = mgr.main_window
 
-        # win.width and win.height report physical pixels on Windows
-        current_phys_w = win.width
-        current_phys_h = win.height
+        # 1. Capture Scaling and Physical Environment
+        h_mon = mgr._get_target_monitor_handle()
+        m_l_phys, m_t_phys, m_r_phys, m_b_phys = mgr._get_monitor_work_area_phys(h_mon)
+        scale = mgr._get_scale_factor(h_mon)
 
-        # Convert logical pixels from frontend to physical pixels for backend comparison
-        target_phys_w = int(width * scale)
-        target_phys_h = int(height * scale)
+        m_w_phys, m_h_phys = m_r_phys - m_l_phys, m_b_phys - m_t_phys
+
+        # 2. Capture Current State (Physical Pixels)
+        curr_w_phys = win.width
+        curr_h_phys = win.height
+        curr_x_phys = win.x
+        curr_y_phys = win.y
+
+        # 3. Define Physical Targets
+        target_w_phys = int(width * scale)
+        target_h_phys = int(height * scale)
+
+        # 4. Strict Safety Clamp (Physical)
+        # If target exceeds monitor physical resolution, shrink just enough to fit
+        margin_phys = int(40 * scale)
+        max_allowed_w = m_w_phys - (margin_phys * 2)
+        max_allowed_h = m_h_phys - (margin_phys * 2)
+
+        if target_w_phys > max_allowed_w:
+            target_w_phys = max_allowed_w
+        if target_h_phys > max_allowed_h:
+            target_h_phys = max_allowed_h
 
         # Only grow, never shrink
-        new_phys_w = max(current_phys_w, target_phys_w)
-        new_phys_h = max(current_phys_h, target_phys_h)
+        applied_w_phys = max(curr_w_phys, target_w_phys)
+        applied_h_phys = max(curr_h_phys, target_h_phys)
 
-        if new_phys_w != current_phys_w or new_phys_h != current_phys_h:
-            log.info(f"[UI-Resize] Scaling growth: {current_phys_w}x{current_phys_h} -> {new_phys_w}x{new_phys_h} (Scale: {scale})")
-            win.resize(new_phys_w, new_phys_h)
-        else:
-            log.debug(f"[UI-Resize] Logical {width}x{height} is already met by physical {current_phys_w}x{current_phys_h}")
+        # 5. Position Logic (Physical)
+        # Calculate new position by expanding outward from current physical center
+        center_x_phys = curr_x_phys + (curr_w_phys // 2)
+        center_y_phys = curr_y_phys + (curr_h_phys // 2)
+
+        new_x_phys = center_x_phys - (applied_w_phys // 2)
+        new_y_phys = center_y_phys - (applied_h_phys // 2)
+
+        # 6. Physical Boundary "Shove" (Keep on screen)
+        if new_x_phys + applied_w_phys > m_r_phys - margin_phys:
+            new_x_phys = (m_r_phys - margin_phys) - applied_w_phys
+
+        if new_x_phys < m_l_phys + margin_phys:
+            new_x_phys = m_l_phys + margin_phys
+
+        if new_y_phys + applied_h_phys > m_b_phys - margin_phys:
+            new_y_phys = (m_b_phys - margin_phys) - applied_h_phys
+
+        if new_y_phys < m_t_phys + margin_phys:
+            new_y_phys = m_t_phys + margin_phys
+
+        # 7. HYBRID DOMAIN EXECUTION
+        # resize() consumes PHYSICAL | move() consumes LOGICAL
+        exec_w_phys = int(applied_w_phys)
+        exec_h_phys = int(applied_h_phys)
+        exec_x_log = int(new_x_phys / scale)
+        exec_y_log = int(new_y_phys / scale)
+
+        # Sequenced Execution to prevent OS drops
+        win.move(exec_x_log, exec_y_log)
+
+        def apply_resize_sequenced():
+            if win:
+                win.resize(exec_w_phys, exec_h_phys)
+
+        threading.Timer(0.02, apply_resize_sequenced).start()
+
+        # Update manager memory (Logical for persistence)
+        mgr.main_last_w, mgr.main_last_h = applied_w_phys, applied_h_phys
+        mgr.main_last_x, mgr.main_last_y = new_x_phys, new_y_phys
 
     def signal_ui_ready(self):
         """
@@ -68,18 +125,9 @@ class WindowApi:
 
     def get_compact_window_pos(self):
         """
-        Returns the true physical coordinates of the Compact window to initialize drag logic.
-        Eliminates the (0,0) jump bug by asking the OS directly if possible.
+        Returns the true LOGICAL coordinates of the Compact window to initialize drag logic.
         """
         if self._window_manager:
-            # Source of truth 1: Actual window properties
-            if self._window_manager.compact_window:
-                x = self._window_manager.compact_window.x
-                y = self._window_manager.compact_window.y
-                if x is not None and y is not None and x > -30000:
-                    return {'x': x, 'y': y}
-
-            # Source of truth 2: Saved persistent state
             x = self._window_manager.compact_mode_last_x
             y = self._window_manager.compact_mode_last_y
             if x is not None and y is not None:
@@ -101,15 +149,12 @@ class WindowApi:
 
     def move_compact_window(self, x, y):
         """
-        Moves the Compact window and captures coordinates for persistence.
+        Moves the Compact window. Expects and tracks LOGICAL coordinates.
         """
         if self._window_manager and self._window_manager.compact_window:
-            new_x, new_y = int(x), int(y)
-            self._window_manager.compact_window.move(new_x, new_y)
-
-            # Persist coordinates in the manager state so they survive maximizes/restores
-            self._window_manager.compact_mode_last_x = new_x
-            self._window_manager.compact_mode_last_y = new_y
+            self._window_manager.compact_window.move(int(x), int(y))
+            self._window_manager.compact_mode_last_x = x
+            self._window_manager.compact_mode_last_y = y
 
     def close_app(self):
         """Immediately terminates the application."""

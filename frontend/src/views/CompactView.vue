@@ -14,25 +14,25 @@ const {
   closeApp,
   openProjectFolder,
   checkPendingChanges,
-  statusMessage
+  statusMessage,
+  init
 } = useAppState()
 
 const isCopying = ref(false)
 const appIcon = ref('')
 const hasPendingChangesInternal = ref(false)
 
-// Manual Window Dragging State: tracked manually to coordinate with PyWebView's borderless window logic
+// Manual Window Dragging State
 let isDragging = false
 let startMouseX = 0
 let startMouseY = 0
 let startWinX = 0
 let startWinY = 0
 
-// Interval for updating the notification status locally in the compact view context
+// Interval for updating the notification status locally
 let statusCheckInterval = null
 
 const onBlur = () => {
-  // Failsafe: drop dragging state if window loses focus
   isDragging = false
 }
 
@@ -41,15 +41,15 @@ const updatePendingStatus = async () => {
 }
 
 onMounted(async () => {
+  // Ensure app state is loaded if compact mode is entry point
+  await init()
+
   appIcon.value = await getImage('icon.ico')
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
   window.addEventListener('blur', onBlur)
 
-  // Initial check on mount
   await updatePendingStatus()
-
-  // Regular check to stay reactive to Main Window interactions or background state updates
   statusCheckInterval = setInterval(updatePendingStatus, 2000)
 })
 
@@ -61,18 +61,18 @@ onUnmounted(() => {
 })
 
 const startDrag = async (e) => {
-  // Guard: ensure button clicks don't trigger dragging
   if (e.target.closest('button')) return
 
-  // Alt-click: Open clean console in project folder (Requirement)
   if (e.altKey) {
     openProjectFolder({ ctrlKey: false, altKey: true })
     return
   }
 
-  // Capture screen position of the mouse and actual window coordinates from bridge
+  // Mouse coordinates (pure logical)
   startMouseX = e.screenX
   startMouseY = e.screenY
+
+  // Get current logical window coordinates from bridge
   const pos = await window.pywebview.api.get_compact_window_pos()
   startWinX = pos.x
   startWinY = pos.y
@@ -83,11 +83,11 @@ const startDrag = async (e) => {
 const onMouseMove = (e) => {
   if (!isDragging) return
 
-  const deltaX = e.screenX - startMouseX
-  const deltaY = e.screenY - startMouseY
+  // Calculate deltas in pure logical pixels and map 1:1 to the backend
+  const deltaXLogical = e.screenX - startMouseX
+  const deltaYLogical = e.screenY - startMouseY
 
-  // Move the compact window specifically via Python bridge
-  window.pywebview.api.move_compact_window(startWinX + deltaX, startWinY + deltaY)
+  window.pywebview.api.move_compact_window(startWinX + deltaXLogical, startWinY + deltaYLogical)
 }
 
 const onMouseUp = () => {
@@ -106,12 +106,8 @@ const handleCopy = async (event) => {
 
 const handlePaste = async (event) => {
   if (window.pywebview) {
-    // request_remote_paste logic handles Overwrite Confirmation and Hand-off internally
     const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey)
-
-    // Immediate refresh of indicator
     await updatePendingStatus()
-
     if (typeof result === 'string') {
       statusMessage.value = result
     }
@@ -119,15 +115,10 @@ const handlePaste = async (event) => {
 }
 
 const handleClose = (event) => {
-  // Restore dashboard on normal click, Exit app on Ctrl+Click
   if (event.ctrlKey) closeApp()
   else restoreMainWindow()
 }
 
-/**
- * Logic for project name abbreviation - EXACT port from original Tkinter tool.
- * Prioritizes capital letters, then fills remaining slots with lowercase from the start.
- */
 const titleAbbr = computed(() => {
   const name = activeProject.name || 'CodeMerger'
   const maxLen = 8
@@ -208,12 +199,12 @@ const copyButtonText = computed(() => {
     </div>
 
     <!-- Actions Area -->
-    <div class="flex-grow flex flex-col p-1.5 space-y-1.5 justify-center">
+    <div class="flex flex-col p-1.5 space-y-1.5">
       <!-- Adaptive Copy Button (Switches logic based on project instructions) -->
       <button
         @click="handleCopy"
         :disabled="isCopying"
-        class="w-full text-[11px] font-bold py-2.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
+        class="w-full text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
         :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
         title="Copy Prompt (Ctrl+Click for Code Only)"
       >
@@ -223,10 +214,10 @@ const copyButtonText = computed(() => {
 
       <!-- Paste & Review Logic Row -->
       <div class="w-full flex items-center space-x-1.5">
-        <!-- Orange styling when changes are pending in memory (Requirement) -->
+        <!-- Orange styling when changes are pending in memory -->
         <button
           @click="handlePaste"
-          class="relative flex-grow text-white font-bold py-2.5 rounded text-[11px] transition-all active:scale-95 shadow"
+          class="relative flex-grow text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-8"
           :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
           title="Paste response from AI (Ctrl+Click to auto-apply)"
         >
@@ -236,11 +227,11 @@ const copyButtonText = computed(() => {
         <button
           v-if="lastAiResponse"
           @click="restoreMainWindow"
-          class="bg-gray-800 hover:bg-gray-700 text-white w-6 py-2.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0"
+          class="bg-gray-800 hover:bg-gray-700 text-white w-8 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
           title="View response review"
         >
           <!-- Eye icon color mirrors the pending changes state -->
-          <Eye class="w-3 h-3" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
+          <Eye class="w-3.5 h-3.5" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
         </button>
       </div>
     </div>
