@@ -44,7 +44,7 @@ const handleCopy = async () => {
 </script>
 
 <template>
-  <div class="bg-cm-status-bg border border-gray-700 rounded-lg p-5 mb-4 shadow-inner" v-info="'starter_seg_questions'">
+  <div class="bg-cm-status-bg border border-gray-700 rounded-lg p-5 mb-4 shadow-inner" v-info="'starter_questions_panel'">
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center space-x-2">
         <span class="text-[10px] font-black text-cm-blue uppercase tracking-[0.2em]">Review Question</span>
@@ -79,6 +79,7 @@ const handleCopy = async () => {
       <button
         @click="handleCopy"
         :disabled="!questions.length"
+        v-info="'starter_questions_copy'"
         class="flex items-center space-x-2 px-4 py-2 rounded text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
         :class="isCopied ? 'bg-cm-green text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-200'"
       >

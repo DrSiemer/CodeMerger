@@ -336,7 +336,7 @@ const nextStep = () => {
 
           <div class="w-px h-6 bg-gray-600 mx-2"></div>
 
-          <button @click="emit('close')" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
+          <button @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
             <LogOut class="w-4 h-4" />
             <span class="text-sm font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
           </button>
