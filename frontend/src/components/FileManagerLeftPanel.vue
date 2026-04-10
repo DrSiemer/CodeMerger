@@ -31,6 +31,7 @@ const emit = defineEmits([
           class="p-1.5 rounded border transition-colors"
           :class="isGitFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
           title="Toggle Gitignore Filter"
+          v-info="'fm_filter_git'"
         >
           <GitBranch class="w-4 h-4" />
         </button>
@@ -39,6 +40,7 @@ const emit = defineEmits([
           class="p-1.5 rounded border transition-colors"
           :class="isExtFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
           title="Toggle Extension Filter"
+          v-info="'fm_filter_ext'"
         >
           <Filter class="w-4 h-4" />
         </button>
@@ -54,11 +56,12 @@ const emit = defineEmits([
         type="text"
         placeholder="Filter tree..."
         class="w-full bg-cm-input-bg text-white pl-10 pr-4 py-2 rounded border border-gray-600 focus:border-cm-blue outline-none text-sm"
+        v-info="'fm_filter_text'"
       >
     </div>
 
     <!-- File Tree -->
-    <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2">
+    <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2" v-info="'fm_tree'">
       <FileTreeNode
         v-for="node in fileTree"
         :key="node.path"
@@ -74,6 +77,7 @@ const emit = defineEmits([
       <button
         @click="emit('add-all')"
         class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded text-sm transition-colors flex items-center"
+        v-info="'fm_add_all'"
       >
         <CheckSquare class="w-4 h-4 mr-2" />
         Add all

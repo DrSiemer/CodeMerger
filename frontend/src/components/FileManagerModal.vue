@@ -1,13 +1,18 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { X, RotateCcw, Save } from 'lucide-vue-next'
+import { X, RotateCcw, Save, Info } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
 import FileManagerRightPanel from './FileManagerRightPanel.vue'
+import InfoPanel from './InfoPanel.vue'
 
 const emit = defineEmits(['close'])
-const { activeProject, getFileTree, resizeWindow, updateProjectFiles, copyOrderRequest, clearUnknownFiles, statusMessage } = useAppState()
+const {
+  activeProject, getFileTree, resizeWindow, updateProjectFiles,
+  copyOrderRequest, clearUnknownFiles, statusMessage,
+  infoModeActive, toggleInfoMode
+} = useAppState()
 
 // Reorderable list setup
 const [mergeListRef, listItems] = useDragAndDrop(
@@ -209,23 +214,33 @@ const handleSave = async () => {
         />
       </div>
 
+      <!-- Shared Info Panel Component -->
+      <InfoPanel />
+
       <!-- Footer Actions -->
-      <div class="px-6 py-2 border-t border-gray-700 bg-cm-top-bar flex justify-between shrink-0">
+      <div class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
         <button
           @click="listItems.splice(0, listItems.length)"
           class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm"
+          v-info="'fm_remove_all'"
         >
           <RotateCcw class="w-3.5 h-3.5 mr-2" />
           Clear List
         </button>
 
-        <div class="flex items-center space-x-3">
-          <button @click="handleCancel" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm">
-            Cancel
-          </button>
-          <button @click="handleSave" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm">
-            <Save class="w-4 h-4 mr-2" />
-            Update Project
+        <div class="flex items-center space-x-6">
+          <div class="flex items-center space-x-3">
+            <button @click="handleCancel" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm" v-info="'fm_cancel'">
+              Cancel
+            </button>
+            <button @click="handleSave" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm" v-info="'fm_save'">
+              <Save class="w-4 h-4 mr-2" />
+              Update Project
+            </button>
+          </div>
+
+          <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors shrink-0" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
+            <Info class="w-5 h-5" />
           </button>
         </div>
       </div>

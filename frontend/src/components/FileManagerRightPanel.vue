@@ -144,7 +144,7 @@ defineExpose({
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center space-x-3 min-w-0">
         <h3 class="font-semibold text-gray-200 shrink-0">Merge Order</h3>
-        <span :class="tokenColorClass" class="text-sm font-mono pt-0.5 truncate">
+        <span :class="tokenColorClass" class="text-sm font-mono pt-0.5 truncate" v-info="'fm_tokens'">
           ({{ listItems.length }} files, {{ totalTokens.toLocaleString() }} tokens)
         </span>
       </div>
@@ -155,6 +155,7 @@ defineExpose({
           :class="{ 'click-pulse': isOrderPulseActive }"
           :style="isOrderPulseActive ? { '--click-color': '#DE680888' } : {}"
           title="Copy order request prompt"
+          v-info="'fm_order'"
         >
           <ArrowDownUp class="w-4 h-4" />
         </button>
@@ -163,6 +164,7 @@ defineExpose({
           class="p-1.5 rounded border transition-colors"
           :class="showFullPaths ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
           title="Toggle Path Visibility"
+          v-info="'fm_list_tools'"
         >
           <Milestone class="w-4 h-4" />
         </button>
@@ -170,7 +172,7 @@ defineExpose({
     </div>
 
     <!-- Merge List -->
-    <div class="flex-grow overflow-y-auto custom-scrollbar mb-2 pr-2">
+    <div class="flex-grow overflow-y-auto custom-scrollbar mb-2 pr-2" v-info="'fm_list'">
       <ul ref="mergeListRef" class="space-y-1">
         <li
           v-for="(file, index) in listItems"
@@ -193,6 +195,7 @@ defineExpose({
             class="flex items-center space-x-3 shrink-0 cursor-help"
             @click="emit('token-interaction', index, $event)"
             title="Alt+Click: Toggle Ignore tokens | Ctrl+Click: Copy refactor request"
+            v-info="'fm_tokens_item'"
           >
             <span class="text-xs font-mono" :class="selectedIndices.has(index) ? 'text-blue-100 font-bold' : getTokenColor(file)">
               {{ file.ignoreTokens ? `[${file.tokens?.toLocaleString()}]` : (file.tokens?.toLocaleString() || '?') }}
@@ -207,11 +210,11 @@ defineExpose({
 
     <!-- Reorder Toolbar -->
     <div class="flex items-center justify-center space-x-2 pt-2">
-      <button @click="moveSelectionToTop" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
-      <button @click="moveSelectionUp" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
-      <button @click="removeSelected" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded hover:bg-red-900/50 hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>
-      <button @click="moveSelectionDown" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Down"><ArrowDown class="w-4 h-4" /></button>
-      <button @click="moveSelectionToBottom" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Bottom"><ArrowDownToLine class="w-4 h-4" /></button>
+      <button @click="moveSelectionToTop" v-info="'fm_sort_top'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
+      <button @click="moveSelectionUp" v-info="'fm_sort_up'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
+      <button @click="removeSelected" v-info="'fm_sort_remove'" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded hover:bg-red-900/50 hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>
+      <button @click="moveSelectionDown" v-info="'fm_sort_down'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Down"><ArrowDown class="w-4 h-4" /></button>
+      <button @click="moveSelectionToBottom" v-info="'fm_sort_bottom'" class="p-2 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Bottom"><ArrowDownToLine class="w-4 h-4" /></button>
     </div>
   </div>
 </template>

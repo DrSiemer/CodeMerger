@@ -8,7 +8,7 @@ import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
-import { INFO_MESSAGES } from '../utils/infoMessages'
+import InfoPanel from '../components/InfoPanel.vue'
 import {
   Settings, Copy, ClipboardPaste, BookOpen, PenLine, AlertTriangle, Eye, Loader2, Info
 } from 'lucide-vue-next'
@@ -29,7 +29,6 @@ const {
   starterIcon,
   starterActiveIcon,
   infoModeActive,
-  currentInfoText,
   toggleInfoMode,
   copyCode,
   renameProject,
@@ -498,12 +497,8 @@ onUnmounted(() => {
       </div>
     </main>
 
-    <!-- Info Panel -->
-    <div v-if="infoModeActive" class="bg-[#1A1A1A] border-t border-gray-700 h-[80px] shrink-0 flex items-center px-6">
-      <p :class="currentInfoText === INFO_MESSAGES.default ? 'text-gray-500' : 'text-gray-300'" class="text-[13px] leading-relaxed">
-        {{ currentInfoText }}
-      </p>
-    </div>
+    <!-- Shared Info Panel Component -->
+    <InfoPanel />
 
     <!-- Global Status Bar -->
     <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px] z-50">
