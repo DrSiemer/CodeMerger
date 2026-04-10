@@ -252,7 +252,7 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
       <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden" v-info="'starter_view_toggle'">
           <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
           <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
-            <DiffViewer v-if="baselines[activeSegmentKey]" :oldText="baselines[activeSegmentKey]" :newText="segments[activeSegmentKey]" :fontSize="editorFontSize" />
+            <DiffViewer v-if="baselines[activeSegmentKey]" :oldText="baselines[activeSegmentKey]" :newText="segments[activeSegmentKey]" :fontSize="editorFontSize" :fullContext="true" />
             <MarkdownRenderer v-else :content="segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
           </div>
       </div>

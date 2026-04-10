@@ -18,16 +18,63 @@ const props = defineProps({
   fontSize: {
     type: Number,
     default: 13
+  },
+  fullContext: {
+    type: Boolean,
+    default: false
   }
 })
 
 const diffLines = computed(() => {
-  // Use structuredPatch to get unified diff metadata (headers, hunk markers, and truncation)
+  const oldStr = props.oldText || ''
+  const newStr = props.newText || ''
+
+  // --- FULL TEXT MODE (Used in Project Starter) ---
+  // This mode shows every single line of the text without Git metadata headers.
+  if (props.fullContext) {
+    const changes = Diff.diffLines(oldStr, newStr)
+    const rows = []
+
+    changes.forEach(part => {
+      // Split the value into lines while preserving empty lines
+      const lines = part.value.split('\n')
+
+      // If the part ends with a newline, the last element of split is an empty string
+      // created by the trailing newline. We remove it to avoid double-spacing blocks.
+      if (lines[lines.length - 1] === '') {
+        lines.pop()
+      }
+
+      lines.forEach(line => {
+        let type = 'context'
+        let prefix = ' '
+
+        if (part.added) {
+          type = 'add'
+          prefix = '+'
+        } else if (part.removed) {
+          type = 'remove'
+          prefix = '-'
+        }
+
+        rows.push({
+          prefix,
+          text: line,
+          type
+        })
+      })
+    })
+
+    return rows
+  }
+
+  // --- TRUNCATED DIFF MODE (Used in Dashboard / AI Response Review) ---
+  // Standard patch logic with headers and hunk markers.
   const patch = Diff.structuredPatch(
     props.filename,
     props.filename,
-    props.oldText || '',
-    props.newText || '',
+    oldStr,
+    newStr,
     '',
     '',
     { context: 3 }
@@ -39,11 +86,11 @@ const diffLines = computed(() => {
 
   const rows = []
 
-  // Add the traditional File Headers
+  // Add traditional File Headers
   rows.push({ prefix: '---', text: props.filename, type: 'header' })
   rows.push({ prefix: '+++', text: props.filename, type: 'header' })
 
-  // Process hunks sequentially
+  // Process hunks
   patch.hunks.forEach(hunk => {
     // Add Hunk Header (@@ -start,len +start,len @@)
     rows.push({
@@ -52,7 +99,6 @@ const diffLines = computed(() => {
       type: 'header'
     })
 
-    // Process individual lines in the hunk
     hunk.lines.forEach(line => {
       const char = line[0]
       const content = line.substring(1)

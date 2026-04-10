@@ -224,7 +224,7 @@ const applyChanges = () => {
       <InfoPanel />
 
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end shrink-0">
-        <button @click="emit('close')" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm mr-3">Cancel</button>
+        <button v-info="'rewrite_cancel'" @click="emit('close')" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm mr-3">Cancel</button>
         <button @click="applyChanges" v-info="'rewrite_apply'" :disabled="!response.trim()" class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-8 rounded transition-colors text-sm">Apply Changes</button>
       </div>
 

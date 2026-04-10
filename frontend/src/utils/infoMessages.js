@@ -48,6 +48,7 @@ export const INFO_MESSAGES = {
   // Project Starter
   "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
   "starter_nav_next": "Next Step: Proceed to the next phase. Validates current input before moving.",
+  "starter_nav_reset": "Reset Step: Clear the current form or editor to start this specific step over.",
   "starter_header_save": "Save Config: Export your current project configuration (concept, stack, plan) to a JSON file.",
   "starter_header_load": "Load Config: Restore a previously saved project configuration.",
   "starter_header_clear": "Clear All: Completely reset the project starter to the beginning.",
@@ -67,6 +68,7 @@ export const INFO_MESSAGES = {
   "starter_gen_parent": "Parent Folder: The directory where your new project folder will be created.",
   "starter_gen_prompt": "Master Prompt: Copies the final boilerplate instruction to your clipboard. Paste this into your LLM to generate the initial codebase.",
   "starter_gen_create": "Create Project: Parse the LLM's code blocks and write the final files to disk to initialize your project.",
+  "starter_gen_process": "Process Response: Analyze the pasted LLM output to populate the internal drafts.",
   "starter_seg_nav": "Segment Navigation: Jump between different sections of the generated document.",
   "starter_seg_indicator": "Lock Status: Toggle the sign-off status for this segment. Locked segments are used as immutable references in 'Rewrite' operations.",
   "starter_seg_questions": "Questions Toggle: Show or hide the guiding questions panel to help refine the quality of this segment.",
@@ -83,5 +85,6 @@ export const INFO_MESSAGES = {
   "rewrite_instruction": "Modification Instruction: Tell the AI what you want to change in the project drafts (e.g., 'Use a more formal tone' or 'Add a SQLite database').",
   "rewrite_copy_prompt": "Generate Prompt: Compiles your instructions with the current drafts and locked segments into a single prompt for the LLM.",
   "rewrite_response": "Paste Response: Paste the LLM's updated content here to refresh the drafts.",
-  "rewrite_apply": "Apply Changes: Process the response and update the starter drafts. Any summary notes from the AI will be displayed."
+  "rewrite_apply": "Apply Changes: Process the response and update the starter drafts. Any summary notes from the AI will be displayed.",
+  "rewrite_cancel": "Cancel: Discard the current rewrite session and return to the project review without applying any changes."
 };

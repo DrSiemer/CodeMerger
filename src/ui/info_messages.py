@@ -333,5 +333,8 @@ INFO_MESSAGES = {
     "rewrite_apply": (
         "Apply Changes: Processes the response and updates the project starter drafts. Any change notes "
         "provided by the AI in <NOTES> tags will be displayed for your review."
+    ),
+    "rewrite_cancel": (
+        "Cancel: Discard the current rewrite session and return to the project review without applying any changes."
     )
 }

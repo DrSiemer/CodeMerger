@@ -160,7 +160,7 @@ const acceptDiff = () => {
     <div class="flex-grow bg-cm-input-bg border border-gray-700 rounded overflow-hidden flex flex-col min-h-0">
       <textarea v-if="reviewerEditMode" v-info="reviewInfoKey || 'starter_view_toggle'" ref="scrollRef" v-model="localContent" class="w-full h-full p-6 bg-cm-input-bg text-gray-100 font-mono outline-none selectable shrink-0" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
       <div v-else ref="scrollRef" v-info="reviewInfoKey || 'starter_view_toggle'" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
-        <DiffViewer v-if="baselines && baselines['__merged__']" :oldText="baselines['__merged__']" :newText="localContent" :fontSize="editorFontSize" />
+        <DiffViewer v-if="baselines && baselines['__merged__']" :oldText="baselines['__merged__']" :newText="localContent" :fontSize="editorFontSize" :fullContext="true" />
         <MarkdownRenderer v-else :content="localContent" :fontSize="editorFontSize" @dblclick="toggleReviewerEditMode($event, true)" />
       </div>
     </div>

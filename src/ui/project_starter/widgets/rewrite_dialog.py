@@ -50,6 +50,7 @@ class RewriteUnsignedDialog(Toplevel):
         self.info_mgr.register(self.instruction_text, "rewrite_instruction")
         self.info_mgr.register(self.copy_btn, "rewrite_copy_prompt")
         self.info_mgr.register(self.response_text, "rewrite_response")
+        self.info_mgr.register(self.btn_cancel, "rewrite_cancel")
         self.info_mgr.register(self.btn_apply, "rewrite_apply")
         self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
@@ -101,8 +102,8 @@ class RewriteUnsignedDialog(Toplevel):
         btn_frame = Frame(footer_frame, bg=c.DARK_BG)
         btn_frame.pack(side='right')
 
-        btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
-        btn_cancel.pack(side="left", padx=(0, 10))
+        self.btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
+        self.btn_cancel.pack(side="left", padx=(0, 10))
 
         self.btn_apply = RoundedButton(btn_frame, text="Apply Changes", command=self._on_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
         self.btn_apply.pack(side="left")
