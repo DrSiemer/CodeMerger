@@ -413,8 +413,8 @@ const getSkippedMessage = (path) => {
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end shrink-0">
-        <div class="flex items-center space-x-3">
+      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between shrink-0">
+        <div class="flex items-center">
           <button
             v-if="getPendingCount === 0"
             @click="handlePasteNext"
@@ -423,6 +423,8 @@ const getSkippedMessage = (path) => {
             <ClipboardPaste class="w-4 h-4 mr-2" />
             Paste Next
           </button>
+        </div>
+        <div class="flex items-center space-x-3">
           <button
             @click="emit('close')"
             class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors"
