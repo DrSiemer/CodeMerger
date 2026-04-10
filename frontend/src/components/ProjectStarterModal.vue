@@ -364,8 +364,4 @@ const nextStep = () => {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-.custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
 </style>

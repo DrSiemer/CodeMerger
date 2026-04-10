@@ -41,3 +41,20 @@ textarea {
   animation: click-bloom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   z-index: 10;
 }
+
+/* Global Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
