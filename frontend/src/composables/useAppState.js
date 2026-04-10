@@ -7,6 +7,8 @@ const activeProject = reactive({
   name: null,
   color: null,
   fontColor: null,
+  activeProfile: 'Default',
+  profiles: ['Default'],
   totalTokens: 0,
   selectedFiles: [],
   expandedDirs: [],
@@ -86,12 +88,15 @@ export function useAppState() {
       activeProject.name = projData.project_name
       activeProject.color = projData.project_color
       activeProject.fontColor = projData.project_font_color
+      activeProject.activeProfile = projData.active_profile || 'Default'
+      activeProject.profiles = projData.profiles || ['Default']
       activeProject.totalTokens = projData.total_tokens
       activeProject.selectedFiles = projData.selected_files || []
       activeProject.expandedDirs = projData.expanded_dirs || []
       activeProject.hasInstructions = projData.has_instructions
       activeProject.introText = projData.intro_text || ''
       activeProject.outroText = projData.outro_text || ''
+      activeProject.newFileCount = projData.new_file_count || 0
       if (projData.status_msg) {
         statusMessage.value = projData.status_msg
       }
@@ -99,11 +104,14 @@ export function useAppState() {
       activeProject.path = null
       activeProject.name = null
       activeProject.color = null
+      activeProject.activeProfile = 'Default'
+      activeProject.profiles = ['Default']
       activeProject.selectedFiles = []
       activeProject.expandedDirs = []
       activeProject.hasInstructions = false
       activeProject.introText = ''
       activeProject.outroText = ''
+      activeProject.newFileCount = 0
       statusMessage.value = 'No project selected'
     }
   }
@@ -229,6 +237,31 @@ export function useAppState() {
       return await window.pywebview.api.remove_recent_project(path)
     }
     return []
+  }
+
+  const switchProfile = async (name) => {
+    if (window.pywebview) {
+      const proj = await window.pywebview.api.switch_profile(name)
+      if (proj) applyProjectData(proj)
+    }
+  }
+
+  const createProfile = async (name, copyFiles, copyInstructions) => {
+    if (window.pywebview) {
+      const proj = await window.pywebview.api.create_profile(name, copyFiles, copyInstructions)
+      if (proj) {
+        applyProjectData(proj)
+        return true
+      }
+    }
+    return false
+  }
+
+  const deleteProfile = async (name) => {
+    if (window.pywebview) {
+      const proj = await window.pywebview.api.delete_profile(name)
+      if (proj) applyProjectData(proj)
+    }
   }
 
   const copyCode = async (useWrapper) => {
@@ -466,6 +499,9 @@ export function useAppState() {
     renameProject,
     getRecentProjects: async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : [],
     removeRecentProject,
+    switchProfile,
+    createProfile,
+    deleteProfile,
     copyCode,
     openProjectFolder,
     clearUnknownFiles,

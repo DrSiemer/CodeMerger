@@ -7,6 +7,7 @@ import FileManagerModal from '../components/FileManagerModal.vue'
 import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
+import NewProfileModal from '../components/NewProfileModal.vue'
 import {
   Settings, Copy, ClipboardPaste, BookOpen, PenLine, AlertTriangle, Eye, Loader2, Info
 } from 'lucide-vue-next'
@@ -36,7 +37,9 @@ const {
   copyCleanupPrompt,
   minimizeWindow,
   claimLastPlan,
-  hasPendingChanges
+  hasPendingChanges,
+  switchProfile,
+  deleteProfile
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -44,6 +47,7 @@ const showSettingsModal = ref(false)
 const showFileManagerModal = ref(false)
 const showInstructionsModal = ref(false)
 const showStarterModal = ref(false)
+const showNewProfileModal = ref(false)
 const settingsTab = ref('application')
 
 const cleanupPulse = ref(false)
@@ -154,6 +158,27 @@ const handleCopy = async (useWrapper) => {
   } finally {
     isCopyingInstructions.value = false
     isCopyingOnly.value = false
+  }
+}
+
+// --- Profile Management ---
+const prevProfile = async () => {
+  const profiles = activeProject.profiles
+  const idx = profiles.indexOf(activeProject.activeProfile)
+  const prevIdx = (idx - 1 + profiles.length) % profiles.length
+  await switchProfile(profiles[prevIdx])
+}
+
+const nextProfile = async () => {
+  const profiles = activeProject.profiles
+  const idx = profiles.indexOf(activeProject.activeProfile)
+  const nextIdx = (idx + 1) % profiles.length
+  await switchProfile(profiles[nextIdx])
+}
+
+const deleteProfileHandler = async () => {
+  if (confirm(`Are you sure you want to delete the profile '${activeProject.activeProfile}'?\nThis cannot be undone.`)) {
+    await deleteProfile(activeProject.activeProfile)
   }
 }
 
@@ -313,8 +338,19 @@ onUnmounted(() => {
         </button>
 
         <div class="flex items-center space-x-2" v-if="activeProject.path">
-          <span class="text-white bg-cm-input-bg px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] flex items-center">Default</span>
-          <button class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-9 rounded flex items-center justify-center font-bold transition-colors" title="Add Profile">+</button>
+          <!-- Multi-profile navigator -->
+          <div v-if="activeProject.profiles.length > 1" class="flex items-center">
+            <button @click="prevProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-l border border-gray-600 border-r-0 flex items-center justify-center transition-colors" title="Previous Profile">&lt;</button>
+            <span class="text-white bg-cm-input-bg px-4 py-2 text-sm font-medium border-y border-gray-600 h-[38px] flex items-center min-w-[80px] justify-center truncate">{{ activeProject.activeProfile }}</span>
+            <button @click="nextProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-r border border-gray-600 border-l-0 flex items-center justify-center transition-colors" title="Next Profile">&gt;</button>
+          </div>
+
+          <!-- Single profile view -->
+          <span v-else class="text-white bg-cm-input-bg px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] flex items-center truncate max-w-[120px]">{{ activeProject.activeProfile }}</span>
+
+          <button @click="showNewProfileModal = true" class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Add Profile">+</button>
+
+          <button v-if="activeProject.profiles.length > 1 && activeProject.activeProfile !== 'Default'" @click="deleteProfileHandler" class="border border-gray-500 hover:bg-red-900/50 hover:text-red-400 hover:border-red-400 text-gray-300 w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Delete Profile">-</button>
         </div>
       </div>
 
@@ -464,5 +500,6 @@ onUnmounted(() => {
     <ReviewModal v-if="showReviewModal" :mode="reviewMode" @close="closeReviewModal" />
     <InstructionsModal v-if="showInstructionsModal" @close="showInstructionsModal = false" />
     <ProjectStarterModal v-if="showStarterModal" @close="showStarterModal = false" />
+    <NewProfileModal v-if="showNewProfileModal" @close="showNewProfileModal = false" />
   </div>
 </template>

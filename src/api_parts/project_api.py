@@ -192,3 +192,42 @@ class ProjectApi:
         except Exception as e:
             log.error(f"Failed to open folder: {e}")
             return f"Error opening folder: {e}"
+
+    def switch_profile(self, profile_name):
+        """Switches the active profile and returns updated project data."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        if profile_name in project_config.profiles and profile_name != project_config.active_profile_name:
+            project_config.active_profile_name = profile_name
+            project_config.save()
+            return self._format_project_response(project_config, f"Switched to profile: {profile_name}")
+        return None
+
+    def create_profile(self, name, copy_files, copy_instructions):
+        """Creates a new profile and sets it as active."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        if project_config.create_new_profile(name, copy_files, copy_instructions):
+            project_config.active_profile_name = name
+            project_config.save()
+            return self._format_project_response(project_config, f"Created and switched to profile: {name}")
+        return self._format_project_response(project_config, f"Error: Profile '{name}' already exists.")
+
+    def delete_profile(self, name):
+        """Deletes a profile and falls back to Default."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        if name == "Default":
+            return self._format_project_response(project_config, "Cannot delete the Default profile.")
+
+        if project_config.delete_profile(name):
+            project_config.active_profile_name = "Default"
+            project_config.save()
+            return self._format_project_response(project_config, f"Profile '{name}' deleted.")
+        return self._format_project_response(project_config, f"Error: Could not delete profile '{name}'.")
