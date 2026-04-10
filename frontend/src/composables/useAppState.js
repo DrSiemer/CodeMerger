@@ -1,4 +1,5 @@
 import { ref, reactive, watch, computed } from 'vue'
+import { INFO_MESSAGES } from '../utils/infoMessages'
 
 // Define state variables OUTSIDE the composable function to create a global singleton.
 const config = ref({})
@@ -30,6 +31,28 @@ const starterIcon = ref('')
 const starterActiveIcon = ref('')
 const lockedIcon = ref('')
 const unlockedIcon = ref('')
+
+// Info Mode State
+const infoModeActive = ref(true)
+const activeInfoStack = ref([])
+
+const currentInfoText = computed(() => {
+  if (activeInfoStack.value.length > 0) {
+    const key = activeInfoStack.value[activeInfoStack.value.length - 1]
+    return INFO_MESSAGES[key] || INFO_MESSAGES['default']
+  }
+  return INFO_MESSAGES['default']
+})
+
+const setHoverInfo = (key) => {
+  if (!activeInfoStack.value.includes(key)) {
+    activeInfoStack.value.push(key)
+  }
+}
+
+const clearHoverInfo = (key) => {
+  activeInfoStack.value = activeInfoStack.value.filter(k => k !== key)
+}
 
 // AI Review State
 const showReviewModal = ref(false)
@@ -116,9 +139,38 @@ export function useAppState() {
     }
   }
 
+  const getImage = async (filename) => {
+    if (window.pywebview) {
+      const result = await window.pywebview.api.get_image_base64(filename)
+      return result
+    }
+    return ""
+  }
+
+  const resizeWindow = async (width, height) => {
+    if (window.pywebview) {
+      await window.pywebview.api.ensure_window_size(width, height)
+    }
+  }
+
+  const toggleInfoMode = async () => {
+    infoModeActive.value = !infoModeActive.value
+    if (window.pywebview) {
+      const newConfig = { ...config.value, info_mode_active: infoModeActive.value }
+      await window.pywebview.api.save_app_config(newConfig)
+
+      // Minimum height logic: Ensure window is at least 550 if info is enabled
+      if (infoModeActive.value) {
+        // Use current width but force growth if height is below the threshold
+        await resizeWindow(window.innerWidth, 550)
+      }
+    }
+  }
+
   const init = async () => {
     if (window.pywebview) {
       config.value = await window.pywebview.api.get_app_config()
+      infoModeActive.value = config.value.info_mode_active ?? true
 
       // Load all shared assets into global store once the bridge is available
       logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
@@ -147,20 +199,6 @@ export function useAppState() {
         showReviewModal.value = false
         revertToCompactOnClose.value = false
       })
-    }
-  }
-
-  const getImage = async (filename) => {
-    if (window.pywebview) {
-      const result = await window.pywebview.api.get_image_base64(filename)
-      return result
-    }
-    return ""
-  }
-
-  const resizeWindow = async (width, height) => {
-    if (window.pywebview) {
-      await window.pywebview.api.ensure_window_size(width, height)
     }
   }
 
@@ -486,6 +524,11 @@ export function useAppState() {
     unlockedIcon,
     editorFontSize,
     hasPendingChanges,
+    infoModeActive,
+    currentInfoText,
+    setHoverInfo,
+    clearHoverInfo,
+    toggleInfoMode,
     handleZoom,
     init,
     getImage,

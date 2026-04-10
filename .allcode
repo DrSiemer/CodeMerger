@@ -1248,9 +1248,23 @@
           "hash": "3326-1775833500.1222546",
           "tokens": 822,
           "lines": 93
+        },
+        {
+          "path": "frontend/src/directives/vInfo.js",
+          "mtime": 1775835355.1830492,
+          "hash": "774-1775835355.1830492",
+          "tokens": 169,
+          "lines": 29
+        },
+        {
+          "path": "frontend/src/utils/infoMessages.js",
+          "mtime": 1775835355.1820486,
+          "hash": "19278-1775835355.1820486",
+          "tokens": 4122,
+          "lines": 151
         }
       ],
-      "total_tokens": 268939,
+      "total_tokens": 273230,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1320,9 +1334,11 @@
     "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
     "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
     "frontend/src/composables/useAppState.js",
+    "frontend/src/directives/vInfo.js",
     "frontend/src/main.js",
     "frontend/src/router/index.js",
     "frontend/src/style.css",
+    "frontend/src/utils/infoMessages.js",
     "frontend/src/views/CompactView.vue",
     "frontend/src/views/MainView.vue",
     "frontend/tailwind.config.js",

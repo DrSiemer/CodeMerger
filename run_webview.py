@@ -189,7 +189,10 @@ class WindowManager:
         )
 
         # Step 2: Main Window (Always center physically on boot)
-        m_w_log, m_h_log = 800, 500
+        # Determine initial minimum height based on Info Mode state
+        info_active = self.api.app_state.config.get('info_mode_active', True)
+        m_w_log, m_h_log = 800, 550 if info_active else 500
+
         m_x_phys = int(m_left + (m_w_phys - (m_w_log * scale)) / 2)
         m_y_phys = int(m_top + (m_h_phys - (m_h_log * scale)) / 2)
 
@@ -198,7 +201,7 @@ class WindowManager:
         self.main_window = webview.create_window(
             "CodeMerger", url=load_url, js_api=self.api,
             width=m_w_log, height=m_h_log, # Logical Size
-            min_size=(800, 500),
+            min_size=(800, m_h_log),
             background_color='#2E2E2E',
             hidden=True, x=m_x_phys, y=m_y_phys # Physical Position
         )

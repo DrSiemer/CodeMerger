@@ -8,6 +8,7 @@ import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
+import { INFO_MESSAGES } from '../utils/infoMessages'
 import {
   Settings, Copy, ClipboardPaste, BookOpen, PenLine, AlertTriangle, Eye, Loader2, Info
 } from 'lucide-vue-next'
@@ -27,6 +28,9 @@ const {
   folderActiveIcon,
   starterIcon,
   starterActiveIcon,
+  infoModeActive,
+  currentInfoText,
+  toggleInfoMode,
   copyCode,
   renameProject,
   openProjectFolder,
@@ -258,6 +262,7 @@ onUnmounted(() => {
           class="w-12 h-12 cursor-pointer shrink-0"
           :style="swatchStyle"
           @click="selectColor"
+          v-info="'color_swatch'"
           title="Change project color"
         ></div>
 
@@ -267,6 +272,7 @@ onUnmounted(() => {
           class="w-6 h-6 rounded cursor-pointer border border-gray-600 shadow-sm shrink-0"
           :style="{ backgroundColor: activeProject.color }"
           @click="selectColor"
+          v-info="'color_swatch'"
           title="Change project color"
         ></div>
 
@@ -286,6 +292,7 @@ onUnmounted(() => {
             class="flex items-center group cursor-pointer min-w-0"
             title="Click to select project, double-click to edit title"
             @click="handleTitleInteraction"
+            v-info="'project_name'"
           >
             <h1 class="text-4xl font-thin tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
               {{ activeProject.name || '(no active project)' }}
@@ -322,6 +329,7 @@ onUnmounted(() => {
           @click="openProjectFolder($event)"
           @mouseenter="isFolderHovered = true"
           @mouseleave="isFolderHovered = false"
+          v-info="'folder_icon'"
         />
       </div>
     </header>
@@ -333,13 +341,14 @@ onUnmounted(() => {
           class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2 px-6 rounded shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-[38px]"
           :disabled="!activeProject.path"
           @click="openFileManager"
+          v-info="'manage_files'"
         >
           Edit Merge List
         </button>
 
         <div class="flex items-center space-x-2" v-if="activeProject.path">
           <!-- Multi-profile navigator -->
-          <div v-if="activeProject.profiles.length > 1" class="flex items-center">
+          <div v-if="activeProject.profiles.length > 1" class="flex items-center" v-info="'profile_nav'">
             <button @click="prevProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-l border border-gray-600 border-r-0 flex items-center justify-center transition-colors" title="Previous Profile">&lt;</button>
             <span class="text-white bg-cm-input-bg px-4 py-2 text-sm font-medium border-y border-gray-600 h-[38px] flex items-center min-w-[80px] justify-center truncate">{{ activeProject.activeProfile }}</span>
             <button @click="nextProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-r border border-gray-600 border-l-0 flex items-center justify-center transition-colors" title="Next Profile">&gt;</button>
@@ -348,9 +357,9 @@ onUnmounted(() => {
           <!-- Single profile view -->
           <span v-else class="text-white bg-cm-input-bg px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] flex items-center truncate max-w-[120px]">{{ activeProject.activeProfile }}</span>
 
-          <button @click="showNewProfileModal = true" class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Add Profile">+</button>
+          <button @click="showNewProfileModal = true" class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Add Profile" v-info="'profile_add'">+</button>
 
-          <button v-if="activeProject.profiles.length > 1 && activeProject.activeProfile !== 'Default'" @click="deleteProfileHandler" class="border border-gray-500 hover:bg-red-900/50 hover:text-red-400 hover:border-red-400 text-gray-300 w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Delete Profile">-</button>
+          <button v-if="activeProject.profiles.length > 1 && activeProject.activeProfile !== 'Default'" @click="deleteProfileHandler" class="border border-gray-500 hover:bg-red-900/50 hover:text-red-400 hover:border-red-400 text-gray-300 w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Delete Profile" v-info="'profile_delete'">-</button>
         </div>
       </div>
 
@@ -362,6 +371,7 @@ onUnmounted(() => {
           @mouseenter="isStarterHovered = true"
           @mouseleave="isStarterHovered = false"
           @click="showStarterModal = true"
+          v-info="'starter'"
         >
           <img
             v-if="starterIcon"
@@ -374,6 +384,7 @@ onUnmounted(() => {
         <button
           @click="showProjectModal = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
+          v-info="'select_project'"
         >
           Select Project
         </button>
@@ -381,9 +392,9 @@ onUnmounted(() => {
     </div>
 
     <!-- Main Dashboard Content -->
-    <main class="flex-grow flex flex-col relative bg-cm-dark-bg">
+    <main class="flex-grow flex flex-col relative bg-cm-dark-bg min-h-0 overflow-y-auto">
       <div class="absolute bottom-4 left-6 flex flex-col">
-        <button @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings">
+        <button @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings" v-info="'settings'">
           <Settings class="w-7 h-7" />
         </button>
       </div>
@@ -398,6 +409,7 @@ onUnmounted(() => {
               :class="{ 'click-pulse': cleanupPulse }"
               :style="cleanupPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
               title="Copy comment cleanup prompt"
+              v-info="'cleanup'"
             >
               //
             </button>
@@ -411,6 +423,7 @@ onUnmounted(() => {
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt: includes code wrapped with custom intro/outro instructions"
+                v-info="'copy_with_instructions'"
               >
                 <Loader2 v-if="isCopyingInstructions" class="w-6 h-6 animate-spin" />
                 <span v-else>Copy with Instructions</span>
@@ -420,6 +433,7 @@ onUnmounted(() => {
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt: merges code and prepends the default context prompt"
+                v-info="'copy_code'"
               >
                 <Loader2 v-if="isCopyingOnly" class="w-6 h-6 animate-spin" />
                 <span v-else>Copy Code Only</span>
@@ -432,6 +446,7 @@ onUnmounted(() => {
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt: merges code and prepends the default context prompt"
+                v-info="'copy_code'"
               >
                 <Loader2 v-if="isCopyingOnly" class="w-6 h-6 animate-spin" />
                 <template v-else>
@@ -444,6 +459,7 @@ onUnmounted(() => {
             <button
               @click="showInstructionsModal = true"
               class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+              v-info="'instructions'"
             >
               <BookOpen class="w-4 h-4" />
               <span>Define Instructions</span>
@@ -455,6 +471,7 @@ onUnmounted(() => {
                 @click="handlePasteChanges"
                 class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
                 :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
+                v-info="'paste_changes'"
               >
                 <ClipboardPaste class="w-4 h-4" />
                 <span>Paste Changes</span>
@@ -465,6 +482,7 @@ onUnmounted(() => {
                 @click="openExistingReview"
                 class="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
                 title="Review latest AI response"
+                v-info="'response_review'"
               >
                 <!-- Icon turns orange to signal unapplied work -->
                 <Eye class="w-4 h-4" :class="hasPendingChanges ? 'text-[#DE6808]' : 'text-white'" />
@@ -480,6 +498,13 @@ onUnmounted(() => {
       </div>
     </main>
 
+    <!-- Info Panel -->
+    <div v-if="infoModeActive" class="bg-[#1A1A1A] border-t border-gray-700 h-[80px] shrink-0 flex items-center px-6">
+      <p :class="currentInfoText === INFO_MESSAGES.default ? 'text-gray-500' : 'text-gray-300'" class="text-[13px] leading-relaxed">
+        {{ currentInfoText }}
+      </p>
+    </div>
+
     <!-- Global Status Bar -->
     <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px] z-50">
       <div
@@ -488,7 +513,7 @@ onUnmounted(() => {
       >
         {{ statusMessage }}
       </div>
-      <button class="text-gray-400 hover:text-white transition-colors shrink-0" title="Toggle Info Mode">
+      <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors shrink-0" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
         <Info class="w-5 h-5" />
       </button>
     </footer>
