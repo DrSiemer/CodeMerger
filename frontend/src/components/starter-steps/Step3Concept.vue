@@ -193,6 +193,7 @@ const handleReset = () => {
         :questions="['Is this concept clearly explained?', 'Does the target audience match the goal?', 'Are there any major omissions in the feature list?']"
         :getQuestionPrompt="getMergedQuestionPrompt"
         :isLookingBack="isLookingBack"
+        reviewInfoKey="starter_concept_review"
         nextButtonText="Next Step: Tech Stack"
         @reset="handleReset"
         @rewrite="openRewriteModal(true)"
@@ -219,12 +220,12 @@ const handleReset = () => {
       <div class="max-w-3xl mx-auto w-full space-y-6 text-gray-100">
         <h3 class="text-2xl font-bold text-white">Project Concept</h3>
         <p class="text-gray-400">Describe what you want to build in a few sentences. The LLM will use this to generate the core sections.</p>
-        <textarea v-model="pData.goal" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="e.g. A desktop tool that bundles project code..."></textarea>
+        <textarea v-model="pData.goal" v-info="'starter_concept_goal'" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="e.g. A desktop tool that bundles project code..."></textarea>
         <div v-if="isGoalFilled || showPasteArea" class="bg-gray-800 p-6 rounded border border-gray-700 space-y-4">
-          <button v-if="isGoalFilled" @click="generateConcept" class="w-full bg-cm-blue text-white font-bold py-3 rounded">1. Copy Prompt for LLM</button>
+          <button v-if="isGoalFilled" @click="generateConcept" v-info="'starter_concept_gen'" class="w-full bg-cm-blue text-white font-bold py-3 rounded">1. Copy Prompt for LLM</button>
           <template v-if="showPasteArea">
-            <textarea v-model="pData.concept_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste LLM response here..."></textarea>
-            <button @click="processConcept" :disabled="!pData.concept_llm_response" class="w-full bg-cm-green text-white font-bold py-3 rounded disabled:opacity-50">2. Process & Review</button>
+            <textarea v-model="pData.concept_llm_response" v-info="'starter_gen_response'" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste LLM response here..."></textarea>
+            <button @click="processConcept" v-info="'starter_gen_process'" :disabled="!pData.concept_llm_response" class="w-full bg-cm-green text-white font-bold py-3 rounded disabled:opacity-50">2. Process & Review</button>
           </template>
         </div>
       </div>

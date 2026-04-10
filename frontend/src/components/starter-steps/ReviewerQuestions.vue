@@ -44,7 +44,7 @@ const handleCopy = async () => {
 </script>
 
 <template>
-  <div class="bg-cm-status-bg border border-gray-700 rounded-lg p-5 mb-4 shadow-inner">
+  <div class="bg-cm-status-bg border border-gray-700 rounded-lg p-5 mb-4 shadow-inner" v-info="'starter_seg_questions'">
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center space-x-2">
         <span class="text-[10px] font-black text-cm-blue uppercase tracking-[0.2em]">Review Question</span>

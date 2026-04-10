@@ -1,5 +1,5 @@
 <script setup>
-import { FolderPlus, ArrowUp, Trash2 } from 'lucide-vue-next'
+import { FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -45,7 +45,7 @@ const clearBaseProject = () => {
       </div>
 
       <div class="space-y-6">
-        <div>
+        <div v-info="'starter_details_name'">
           <label class="block text-gray-200 font-bold mb-2 uppercase tracking-wider text-xs">Project Name</label>
           <input v-model="pData.name" type="text" class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 focus:border-cm-blue outline-none text-lg" placeholder="e.g. My Next Big Idea">
         </div>
@@ -53,7 +53,7 @@ const clearBaseProject = () => {
         <div class="pt-6 border-t border-gray-700">
           <label class="block text-gray-200 font-bold mb-2 uppercase tracking-wider text-xs">Start from an existing project <span class="text-[#DE6808]">(OPTIONAL)</span></label>
           <div class="flex items-center space-x-4 mt-3">
-            <button @click="browseBaseProject" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded font-semibold transition-colors flex items-center shrink-0">
+            <button @click="browseBaseProject" v-info="'starter_details_base'" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded font-semibold transition-colors flex items-center shrink-0">
               <FolderPlus class="w-5 h-5 mr-2" />
               {{ pData.base_project_path ? 'Change base project' : 'Select base project' }}
             </button>
@@ -68,23 +68,10 @@ const clearBaseProject = () => {
           </div>
         </div>
 
-        <!-- Prominent hint replacing the Next button -->
-        <transition name="fade">
-          <div v-if="pData.name?.trim()" class="mt-8 bg-cm-blue/20 border-2 border-cm-blue rounded-lg p-5 flex items-start space-x-4 shadow-lg">
-            <ArrowUp class="w-7 h-7 text-cm-blue shrink-0 animate-bounce mt-0.5" />
-            <div>
-              <h4 class="text-white font-bold text-lg">Ready to proceed</h4>
-              <p class="text-blue-100 mt-1.5 leading-relaxed">
-                Use the <strong>navigation tabs on the top</strong> to go to the next phases.
-              </p>
-            </div>
-          </div>
-        </transition>
-
       </div>
     </div>
 
-    <div class="mt-auto pt-8">
+    <div class="mt-auto pt-8 pb-8">
       <div class="bg-cm-blue/10 border border-cm-blue/30 rounded p-4 text-sm text-blue-100 leading-relaxed italic shadow-inner space-y-2">
         <p>Tip: It is highly recommended to start a fresh chat with your LLM before pasting prompts from this starter.</p>
         <p>Note: All project documentation is written in <span class="font-bold">Markdown</span>. See the <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-cm-blue hover:underline not-italic font-bold ml-1">Basic Syntax Guide</a> for formatting tips.</p>

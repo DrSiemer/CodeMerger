@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
+import InfoPanel from '../InfoPanel.vue'
 
 const props = defineProps({
   contextData: {
@@ -192,6 +193,7 @@ const applyChanges = () => {
           <label class="text-white font-bold">1. Your Instruction</label>
           <textarea
             v-model="instruction"
+            v-info="'rewrite_instruction'"
             class="w-full h-24 bg-cm-input-bg border border-gray-700 text-gray-200 p-3 rounded outline-none focus:border-cm-blue custom-scrollbar text-sm"
             placeholder="e.g., Make the tone more professional, or change the primary user entity from Projects to Tasks..."
           ></textarea>
@@ -199,6 +201,7 @@ const applyChanges = () => {
             <button
               @click="generateAndCopy"
               :disabled="isCopyDisabled"
+              v-info="'rewrite_copy_prompt'"
               class="bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded text-sm font-bold transition-colors"
             >Generate & Copy Prompt</button>
           </div>
@@ -209,6 +212,7 @@ const applyChanges = () => {
           <label class="text-white font-bold">2. Paste LLM Response</label>
           <textarea
             v-model="response"
+            v-info="'rewrite_response'"
             class="flex-grow min-h-[150px] bg-cm-input-bg border border-gray-700 text-gray-200 p-3 rounded outline-none focus:border-cm-blue custom-scrollbar text-sm"
             placeholder="Paste the LLM's updated segments or document here..."
           ></textarea>
@@ -216,9 +220,12 @@ const applyChanges = () => {
 
       </div>
 
+      <!-- Dialog-Specific Info Panel -->
+      <InfoPanel />
+
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end shrink-0">
         <button @click="emit('close')" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm mr-3">Cancel</button>
-        <button @click="applyChanges" :disabled="!response.trim()" class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-8 rounded transition-colors text-sm">Apply Changes</button>
+        <button @click="applyChanges" v-info="'rewrite_apply'" :disabled="!response.trim()" class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-8 rounded transition-colors text-sm">Apply Changes</button>
       </div>
 
     </div>

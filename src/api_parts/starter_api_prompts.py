@@ -2,6 +2,7 @@ import os
 import logging
 from src.core import prompts as p
 from src import constants as c
+from src.core.paths import BOILERPLATE_DIR, REFERENCE_DIR
 
 log = logging.getLogger("CodeMerger")
 
@@ -45,9 +46,12 @@ class StarterApiPrompts:
         friendly_map = {k: v.get("label", k) for k, v in questions_map.items()} if questions_map else c.CONCEPT_SEGMENTS
         segment_instructions = self._build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
 
+        concept_template = self.get_concept_template()
+
         parts = [
             p.STARTER_CONCEPT_PROMPT_INTRO,
             "\n### User Goal\n```\n" + user_goal.strip() + "\n```",
+            "\n### Reference Template (Standard Concept Structure)\n```markdown\n" + concept_template + "\n```" if concept_template else "",
             self._get_base_project_content(project_data),
             "\n### Format Instructions",
             segment_instructions,
@@ -100,14 +104,16 @@ class StarterApiPrompts:
         prompt_content = ""
         try:
             files = sorted([
-                f for f in os.listdir(c.BOILERPLATE_DIR)
-                if os.path.isfile(os.path.join(c.BOILERPLATE_DIR, f))
+                f for f in os.listdir(BOILERPLATE_DIR)
+                if os.path.isfile(os.path.join(BOILERPLATE_DIR, f))
                 and f not in {'.DS_Store', 'Thumbs.db', '_start.txt'}
             ])
             for filename in files:
-                path = os.path.join(c.BOILERPLATE_DIR, filename)
+                path = os.path.join(BOILERPLATE_DIR, filename)
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
+                        # Include the '--- End of file ---' marker for consistency
+                        # This teaches the LLM the correct response format by example.
                         prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n--- End of file ---\n\n"
                 except Exception:
                     pass

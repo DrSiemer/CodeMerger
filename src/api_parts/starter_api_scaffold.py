@@ -8,6 +8,7 @@ from src.core.utils import parse_gitignore, load_config
 from src.ui.file_manager.file_tree_builder import build_file_tree_data
 from src import constants as c
 from src.core import prompts as p
+from src.core.paths import BOILERPLATE_DIR
 
 log = logging.getLogger("CodeMerger")
 

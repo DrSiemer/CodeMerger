@@ -188,7 +188,7 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
 
 <template>
   <div class="flex h-full min-h-0 text-gray-100" @wheel.ctrl.prevent="handleZoom">
-    <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2">
+    <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2" v-info="'starter_seg_nav'">
       <div class="p-2 mb-4 border-b border-gray-700 flex flex-col items-center space-y-3 pb-3">
         <button @click="$emit('reset')" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
         <button
@@ -209,7 +209,7 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
           <div v-if="baselines[key]" class="w-1.5 h-1.5 rounded-full bg-cm-green shrink-0"></div>
           <span class="truncate pr-2">{{ renderSegmentTitle(key) }}</span>
         </div>
-        <button @click.stop="toggleSignoff(key)" class="shrink-0 opacity-70 hover:opacity-100 transition-opacity" :title="signoffs[key] ? 'Unlock' : 'Lock'">
+        <button @click.stop="toggleSignoff(key)" v-info="'starter_seg_indicator'" class="shrink-0 opacity-70 hover:opacity-100 transition-opacity" :title="signoffs[key] ? 'Unlock' : 'Lock'">
           <img v-if="signoffs[key] && lockedIcon" :src="lockedIcon" class="h-4 w-auto object-contain" />
           <img v-else-if="!signoffs[key] && unlockedIcon" :src="unlockedIcon" class="h-4 w-auto object-contain" />
         </button>
@@ -231,13 +231,14 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
             <template v-if="!signoffs[activeSegmentKey] && !baselines[activeSegmentKey]">
               <button
                  @click="showQuestions = !showQuestions"
+                 v-info="'starter_seg_questions'"
                  class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
                  :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
                >
                  <HelpCircle class="w-3 h-3" /><span>Questions</span>
                </button>
-              <button @click="$emit('rewrite')" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
-              <button @click="toggleReviewerEditMode(null, false)" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
+              <button @click="$emit('rewrite')" v-info="'starter_seg_rewrite'" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
+              <button @click="toggleReviewerEditMode(null, false)" v-info="'starter_view_toggle'" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
             </template>
           </div>
       </div>
@@ -248,7 +249,7 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
         :getPrompt="getPromptForCurrentSegment"
       />
 
-      <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden">
+      <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden" v-info="'starter_view_toggle'">
           <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
           <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
             <DiffViewer v-if="baselines[activeSegmentKey]" :oldText="baselines[activeSegmentKey]" :newText="segments[activeSegmentKey]" :fontSize="editorFontSize" />
@@ -256,9 +257,9 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
           </div>
       </div>
       <div class="shrink-0 pt-4 flex justify-end space-x-4">
-          <button v-if="signoffs[activeSegmentKey]" @click="toggleSignoff(activeSegmentKey)" class="bg-cm-green hover:bg-green-600 text-white px-8 py-2 rounded font-bold shadow transition-colors">Unlock</button>
-          <button v-else @click="handleSignoffAndNext" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Lock & Next</button>
-          <button v-if="allSigned" @click="$emit('merge')" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Merge & Finalize</button>
+          <button v-if="signoffs[activeSegmentKey]" @click="toggleSignoff(activeSegmentKey)" v-info="'starter_seg_unlock'" class="bg-cm-green hover:bg-green-600 text-white px-8 py-2 rounded font-bold shadow transition-colors">Unlock</button>
+          <button v-else @click="handleSignoffAndNext" v-info="'starter_seg_signoff'" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Lock & Next</button>
+          <button v-if="allSigned" @click="$emit('merge')" v-info="'starter_seg_merge'" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Merge & Finalize</button>
       </div>
     </div>
   </div>

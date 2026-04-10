@@ -108,6 +108,7 @@ const handleReset = () => {
 
         <textarea
           v-model="pData.stack_experience"
+          v-info="'starter_stack_exp'"
           class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar text-lg leading-relaxed selectable"
           :style="{ fontSize: editorFontSize + 'px' }"
           placeholder="e.g. I am a senior Python developer comfortable with Flask. I use Windows 11 and want to build a lightweight desktop app..."
@@ -135,6 +136,7 @@ const handleReset = () => {
 
           <button
             @click="goToPasting"
+            v-info="'starter_stack_gen'"
             class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2.5 rounded shadow-lg transition-all font-bold flex items-center"
           >
             Copy Stack Prompt
@@ -159,6 +161,7 @@ const handleReset = () => {
           </div>
           <button
             @click="goToPasting"
+            v-info="'starter_stack_gen'"
             class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-1.5 rounded text-xs font-bold transition-colors"
           >
             Re-copy Prompt
@@ -172,6 +175,7 @@ const handleReset = () => {
           </div>
           <textarea
             v-model="pData.stack_llm_response"
+            v-info="'starter_gen_response'"
             class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar font-mono text-base selectable"
             :style="{ fontSize: editorFontSize + 'px' }"
             placeholder='Example response: ["Python 3.10", "FastAPI", "SQLite"]'
@@ -182,6 +186,7 @@ const handleReset = () => {
           <button @click="viewState = 'input'" class="text-gray-500 hover:text-gray-300 font-bold text-sm">Back to Experience</button>
           <button
             @click="processStack"
+            v-info="'starter_gen_process'"
             :disabled="!pData.stack_llm_response.trim()"
             class="bg-cm-green hover:bg-green-600 text-white px-10 py-3 rounded shadow-lg transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -204,6 +209,7 @@ const handleReset = () => {
 
         <textarea
           v-model="pData.stack"
+          v-info="'starter_stack_edit'"
           class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar text-xl font-mono leading-relaxed selectable shrink-0"
           :style="{ fontSize: editorFontSize + 'px' }"
           placeholder="Python 3.10&#10;FastAPI&#10;Tailwind CSS"

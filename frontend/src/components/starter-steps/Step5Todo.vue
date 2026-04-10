@@ -207,6 +207,7 @@ const handleReset = () => {
         :questions="['Does this plan accurately reflect the project concept?', 'Are the steps actionable and well-sequenced?', 'Is anything critical missing from the environment setup?']"
         :getQuestionPrompt="getMergedQuestionPrompt"
         :isLookingBack="isLookingBack"
+        reviewInfoKey="starter_todo_review"
         nextButtonText="Next Step: Generate Files"
         @reset="handleReset"
         @rewrite="openRewriteModal(true)"
@@ -235,14 +236,14 @@ const handleReset = () => {
 
         <div class="flex justify-between items-center bg-gray-800 p-4 rounded border border-gray-700 mt-4">
           <div class="text-gray-300"><span class="font-bold text-white">1.</span> Copy prompt for LLM</div>
-          <button @click="generateTodo" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy TODO Prompt</button>
+          <button @click="generateTodo" v-info="'starter_todo_gen'" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy TODO Prompt</button>
         </div>
 
         <div v-if="showPasteArea" class="bg-gray-800 p-4 rounded border border-gray-700 mt-4">
           <div class="text-gray-300 mb-2"><span class="font-bold text-white">2.</span> Paste LLM Response (with tags)</div>
-          <textarea v-model="pData.todo_llm_response" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste response here..."></textarea>
+          <textarea v-model="pData.todo_llm_response" v-info="'starter_gen_response'" class="w-full h-40 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste response here..."></textarea>
           <div class="flex justify-end mt-3">
-            <button @click="processTodo" :disabled="!pData.todo_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-6 py-2 rounded shadow transition-colors disabled:opacity-50 font-bold">Process & Review</button>
+            <button @click="processTodo" v-info="'starter_gen_process'" :disabled="!pData.todo_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-6 py-2 rounded shadow transition-colors disabled:opacity-50 font-bold">Process & Review</button>
           </div>
         </div>
       </div>

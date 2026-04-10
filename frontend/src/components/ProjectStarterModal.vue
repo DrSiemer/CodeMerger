@@ -10,6 +10,7 @@ import Step4Stack from './starter-steps/Step4Stack.vue'
 import Step5Todo from './starter-steps/Step5Todo.vue'
 import Step6Generate from './starter-steps/Step6Generate.vue'
 import StepSuccess from './starter-steps/StepSuccess.vue'
+import InfoPanel from './InfoPanel.vue'
 
 const emit = defineEmits(['close'])
 const {
@@ -221,12 +222,26 @@ const activeStepsList = computed(() => {
 const isLookingBack = computed(() => currentStep.value < maxAccessibleStep.value)
 
 const isNextDisabled = computed(() => {
-  if (currentStep.value === 1 && !pData.name.trim()) return true;
-  if (currentStep.value === 3) {
-    const hasResponse = pData.concept_llm_response.trim() || pData.concept_md || Object.keys(pData.concept_segments).length > 0;
-    return !hasResponse;
+  // Step 1: Name is mandatory
+  if (currentStep.value === 1) {
+    return !pData.name.trim()
   }
-  return false;
+
+  // Step 3 (Concept): Can only proceed if document is merged and segments are cleared
+  if (currentStep.value === 3) {
+    const hasMergedDoc = !!pData.concept_md.trim()
+    const hasActiveSegments = Object.keys(pData.concept_segments).length > 0
+    return !hasMergedDoc || hasActiveSegments
+  }
+
+  // Step 5 (TODO): Can only proceed if plan is merged and segments are cleared
+  if (currentStep.value === 5) {
+    const hasMergedDoc = !!pData.todo_md.trim()
+    const hasActiveSegments = Object.keys(pData.todo_segments).length > 0
+    return !hasMergedDoc || hasActiveSegments
+  }
+
+  return false
 })
 
 const isStarterEmpty = computed(() => {
@@ -309,13 +324,13 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
-          <button @click="exportConfig" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Save Configuration">
+          <button @click="exportConfig" v-info="'starter_header_save'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Save Configuration">
             <Save class="w-4 h-4"/>
           </button>
-          <button @click="importConfig" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Load Configuration">
+          <button @click="importConfig" v-info="'starter_header_load'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Load Configuration">
             <Upload class="w-4 h-4"/>
           </button>
-          <button @click="clearAll" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Clear and restart">
+          <button @click="clearAll" v-info="'starter_header_clear'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Clear and restart">
             <Trash2 class="w-4 h-4"/>
           </button>
 
@@ -357,6 +372,35 @@ const nextStep = () => {
         </div>
       </div>
     </template>
+
+    <!-- Modal-Specific Info Panel -->
+    <InfoPanel />
+
+    <!-- Navigation Bar at Bottom -->
+    <div v-if="!successScreenData" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
+        <div class="flex items-center space-x-3">
+             <button
+                v-if="currentStep > 1"
+                @click="prevStep"
+                v-info="'starter_nav_prev'"
+                class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded font-bold transition-all flex items-center"
+             >
+                &lt; Previous Step
+             </button>
+        </div>
+
+        <div class="flex items-center space-x-3">
+             <button
+                v-if="activeStepsList.indexOf(currentStep) < activeStepsList.length - 1"
+                @click="nextStep"
+                :disabled="isNextDisabled"
+                v-info="'starter_nav_next'"
+                class="bg-cm-blue hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white px-10 py-2 rounded font-bold shadow-lg transition-all flex items-center"
+             >
+                {{ currentStep === 4 && !pData.stack.trim() ? 'Skip Stack' : 'Next Step >' }}
+             </button>
+        </div>
+    </div>
 
   </div>
 </template>

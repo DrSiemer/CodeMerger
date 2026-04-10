@@ -64,15 +64,15 @@ const baseTotalTokens = computed(() => {
       </div>
       <div class="text-right">
         <div class="text-xs font-bold text-gray-500 uppercase">Starter Selection</div>
-        <div class="text-cm-blue font-mono font-bold">{{ pData.base_project_files.length }} files / {{ baseTotalTokens.toLocaleString() }} tokens</div>
+        <div class="text-cm-blue font-mono font-bold" v-info="'fm_tokens'">{{ pData.base_project_files.length }} files / {{ baseTotalTokens.toLocaleString() }} tokens</div>
       </div>
     </div>
 
     <div class="flex-grow flex min-h-0 border border-gray-700 rounded overflow-hidden">
-      <div class="w-1/2 flex flex-col bg-gray-900 border-r border-gray-700 p-4">
+      <div class="w-1/2 flex flex-col bg-gray-900 border-r border-gray-700 p-4" v-info="'fm_tree'">
         <div class="relative mb-4">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input v-model="baseFilterText" type="text" placeholder="Filter base project..." class="w-full bg-cm-input-bg text-white pl-10 pr-4 py-2 rounded border border-gray-700 outline-none text-sm">
+          <input v-model="baseFilterText" v-info="'fm_filter_text'" type="text" placeholder="Filter base project..." class="w-full bg-cm-input-bg text-white pl-10 pr-4 py-2 rounded border border-gray-700 outline-none text-sm">
         </div>
         <div class="flex-grow overflow-y-auto custom-scrollbar">
           <FileTreeNode
@@ -84,7 +84,7 @@ const baseTotalTokens = computed(() => {
           />
         </div>
       </div>
-      <div class="w-1/2 flex flex-col bg-cm-dark-bg p-4">
+      <div class="w-1/2 flex flex-col bg-cm-dark-bg p-4" v-info="'fm_list'">
         <div class="flex items-center justify-between mb-4">
           <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Merge Order</span>
         </div>

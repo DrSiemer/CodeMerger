@@ -85,24 +85,36 @@ class StarterApiSession:
 
     def get_concept_questions(self):
         """Loads guiding questions for the Concept step."""
+        path = os.path.join(REFERENCE_DIR, "concept_questions.json")
         try:
-            with open(os.path.join(REFERENCE_DIR, "concept_questions.json"), "r", encoding="utf-8") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception:
             return {}
 
     def get_todo_questions(self):
         """Loads guiding questions for the TODO step."""
+        path = os.path.join(REFERENCE_DIR, "todo_questions.json")
         try:
-            with open(os.path.join(REFERENCE_DIR, "todo_questions.json"), "r", encoding="utf-8") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
         except Exception:
             return {}
 
+    def get_concept_template(self):
+        """Returns the raw content of the reference concept template."""
+        path = os.path.join(REFERENCE_DIR, "concept.md")
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            return ""
+
     def get_todo_template(self):
         """Returns the raw content of the reference TODO template."""
+        path = os.path.join(REFERENCE_DIR, "todo.md")
         try:
-            with open(os.path.join(REFERENCE_DIR, "todo.md"), "r", encoding="utf-8") as f:
+            with open(path, "r", encoding="utf-8") as f:
                 return f.read()
         except Exception:
             return ""

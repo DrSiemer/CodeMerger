@@ -43,5 +43,42 @@ export const INFO_MESSAGES = {
   "fm_save": "Save Merge List: Commit your changes to the project's .allcode file and return to the main window.",
   "fm_remove_all": "Remove All: Clear the entire merge list for the current profile.",
   "fm_cancel": "Cancel: Exit the merge list editor without saving. Any additions, removals, or reordering performed since opening this window will be discarded.",
-  "fm_close": "Close: Exit the merge list editor. No changes have been detected."
+  "fm_close": "Close: Exit the merge list editor. No changes have been detected.",
+
+  // Project Starter
+  "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
+  "starter_nav_next": "Next Step: Proceed to the next phase. Validates current input before moving.",
+  "starter_header_save": "Save Config: Export your current project configuration (concept, stack, plan) to a JSON file.",
+  "starter_header_load": "Load Config: Restore a previously saved project configuration.",
+  "starter_header_clear": "Clear All: Completely reset the project starter to the beginning.",
+  "starter_details_name": "Project Name: The name of your application. This will be used for the folder name and the README title.",
+  "starter_details_base": "Base Project: Optionally select an existing folder to use as a reference. Useful for 'v2' rewrites or analyzing existing code.",
+  "starter_concept_goal": "User Goal: Describe what you want to build. This is the seed for the AI to generate the full concept.",
+  "starter_concept_gen": "Generate Concept: Copies a structured prompt to your clipboard. You must paste this into your LLM to generate the features list and user flow, then copy the result back here.",
+  "starter_concept_review": "Concept Review: Review and manually edit the generated project concept document.",
+  "starter_gen_response": "Paste Response: Paste the LLM's output here. CodeMerger will look for specific tags or file markers to process.",
+  "starter_gen_process": "Process Response: Analyze the pasted LLM output to populate the internal drafts.",
+  "starter_stack_exp": "Experience: List your known languages and frameworks. The AI will recommend a stack that matches your skills.",
+  "starter_stack_gen": "Generate Stack: Copies a prompt to your clipboard asking for technology recommendations.",
+  "starter_stack_edit": "Stack List: Review and manually adjust the suggested technologies. Use one per line.",
+  "starter_todo_gen": "Generate Plan: Copies a prompt to your clipboard to create a step-by-step implementation plan (todo.md).",
+  "starter_todo_review": "Plan Review: Review and manually edit the implementation tasks and phases.",
+  "starter_gen_parent": "Parent Folder: The directory where your new project folder will be created.",
+  "starter_gen_prompt": "Master Prompt: Copies the final boilerplate instruction to your clipboard. Paste this into your LLM to generate the initial codebase.",
+  "starter_gen_create": "Create Project: Parse the LLM's code blocks and write the final files to disk to initialize your project.",
+  "starter_seg_nav": "Segment Navigation: Jump between different sections of the generated document.",
+  "starter_seg_indicator": "Lock Status: Toggle the sign-off status for this segment. Locked segments are used as immutable references in 'Rewrite' operations.",
+  "starter_seg_questions": "Review Questions: See guiding questions to help you verify and refine the quality of this segment.",
+  "starter_seg_rewrite": "Rewrite Segments: Provide a specific instruction to rewrite all unsigned segments based on new feedback.",
+  "starter_seg_signoff": "Sign Off: Lock the current segment and move to the next incomplete section.",
+  "starter_seg_unlock": "Unlock: Release the lock on this segment to allow further manual edits or inclusion in a Rewrite.",
+  "starter_seg_merge": "Merge: Finalize and combine all individual segments into a single Markdown document.",
+  "starter_seg_sync": "Sync: Propagate your manual changes from this segment to other unsigned segments to maintain consistency.",
+  "starter_view_toggle": "View Toggle: Switch between a raw text editor for manual changes and a stylized Markdown preview.",
+
+  // Rewrite Dialog
+  "rewrite_instruction": "Modification Instruction: Tell the AI what you want to change in the project drafts (e.g., 'Use a more formal tone' or 'Add a SQLite database').",
+  "rewrite_copy_prompt": "Generate Prompt: Compiles your instructions with the current drafts and locked segments into a single prompt for the LLM.",
+  "rewrite_response": "Paste Response: Paste the LLM's updated content here to refresh the drafts.",
+  "rewrite_apply": "Apply Changes: Process the response and update the starter drafts. Any summary notes from the AI will be displayed."
 };
