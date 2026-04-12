@@ -150,7 +150,7 @@ const handleCopy = async (useWrapper) => {
   if (useWrapper) {
     isCopyingInstructions.value = true
   } else {
-    isCopyingOnly = true
+    isCopyingOnly.value = true
   }
 
   try {

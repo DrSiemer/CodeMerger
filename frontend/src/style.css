@@ -7,8 +7,18 @@ body {
   background-color: #2E2E2E;
   color: #FFFFFF;
   margin: 0;
-  font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+  /* Standard system font stack providing standard thin weights */
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   user-select: none; /* Prevent accidental text highlighting mimicking native feel */
+
+  /* Force Antialiasing for better rendering of thin weights in WebView */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Explicit reset for header weights to prevent browser bolding from overriding Tailwind classes */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: inherit;
 }
 
 /* Allow selection inside specific input fields and editors */

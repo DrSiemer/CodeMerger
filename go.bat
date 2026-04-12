@@ -28,6 +28,7 @@ if "%VIRTUAL_ENV%"=="" (
 
 REM Main Command Router
 if /I "%FLAG%"=="" goto :DefaultAction
+if /I "%FLAG%"=="br" goto :BuildAndRun
 if /I "%FLAG%"=="dev" goto :DevAction
 if /I "%FLAG%"=="api" goto :ApiAction
 if /I "%FLAG%"=="fe" goto :FrontendAction
@@ -57,6 +58,12 @@ goto :eof
     REM Using the venv python explicitly for consistency with go dev
     "%VENV_DIR%\Scripts\python.exe" %START_SCRIPT%
     goto :eof
+
+:BuildAndRun
+    echo Rebuilding production frontend...
+    call :BuildFrontend
+    echo Starting app...
+    goto :DefaultAction
 
 :DevAction
     echo Starting Frontend and API concurrently...
