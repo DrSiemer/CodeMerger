@@ -42,7 +42,7 @@ const handleCreate = async () => {
       <!-- Header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar">
         <h2 class="text-lg font-bold text-white">Create New Profile</h2>
-        <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors">
+        <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors" title="Close new profile dialog">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -81,6 +81,7 @@ const handleCreate = async () => {
           @click="emit('close')"
           v-info="'profile_cancel'"
           class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm"
+          title="Discard profile details and exit"
         >
           Cancel
         </button>
@@ -90,6 +91,7 @@ const handleCreate = async () => {
           :disabled="!profileName.trim()"
           v-info="'profile_create'"
           class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm"
+          title="Create the new project configuration profile"
         >
           Create
         </button>

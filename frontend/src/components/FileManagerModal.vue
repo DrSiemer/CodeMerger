@@ -216,7 +216,7 @@ const handleSave = async () => {
           <h2 class="text-xl font-bold text-white">Edit Merge List</h2>
           <span class="text-gray-500 text-sm font-medium">/ {{ activeProject.name }}</span>
         </div>
-        <button @click="handleCancel" class="text-gray-400 hover:text-white transition-colors">
+        <button @click="handleCancel" class="text-gray-400 hover:text-white transition-colors" title="Close merge list editor">
           <X class="w-6 h-6" />
         </button>
       </div>
@@ -260,6 +260,7 @@ const handleSave = async () => {
           id="btn-fm-clear-list"
           @click="listItems.splice(0, listItems.length)"
           class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm"
+          title="Clear the entire merge list for the current profile"
           v-info="'fm_remove_all'"
         >
           <RotateCcw class="w-3.5 h-3.5 mr-2" />
@@ -270,6 +271,7 @@ const handleSave = async () => {
           <button
             @click="handleCancel"
             class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
+            :title="hasUnsavedChanges ? 'Discard modifications and exit' : 'Exit merge list editor'"
             v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
           >
             {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
@@ -279,6 +281,7 @@ const handleSave = async () => {
             v-if="hasUnsavedChanges"
             @click="handleSave"
             class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
+            title="Commit changes and update the project merge list"
             v-info="'fm_save'"
           >
             <Save class="w-4 h-4 mr-2" />

@@ -15,7 +15,8 @@ const {
   openProjectFolder,
   checkPendingChanges,
   statusMessage,
-  init
+  init,
+  config
 } = useAppState()
 
 const isCopying = ref(false)
@@ -176,6 +177,13 @@ const titleAbbr = computed(() => {
 const copyButtonText = computed(() => {
   return activeProject.hasInstructions ? 'Copy Prompt (i)' : 'Copy Prompt'
 })
+
+const pasteTooltipText = computed(() => {
+  const showReview = config.value.show_feedback_on_paste ?? true
+  const base = showReview ? "Paste and Review changes" : "Paste and Apply changes immediately"
+  const override = showReview ? "Apply immediately" : "Apply with Review"
+  return `${base}\n(Ctrl-Click: ${override}, Alt-Click: manual window)`
+})
 </script>
 
 <template>
@@ -186,7 +194,7 @@ const copyButtonText = computed(() => {
       class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move"
       @mousedown="startDrag"
       @dblclick="restoreMainWindow"
-      title="Double-click to restore"
+      title="Double-click to restore. Alt-Click to open Command Prompt."
     >
       <div class="flex items-center space-x-2 min-w-0 pointer-events-none">
         <img v-if="appIcon" :src="appIcon" class="w-4 h-4" />
@@ -203,13 +211,13 @@ const copyButtonText = computed(() => {
         <AlertTriangle
           v-if="activeProject.newFileCount > 0"
           class="w-3.5 h-3.5 text-cm-green animate-pulse"
-          title="New files detected!"
+          title="New files detected! (Click to manage, Ctrl-Click to add all to merge list)"
         />
         <button
           @mousedown.stop
           @click="handleClose"
           class="text-gray-400 hover:text-white transition-colors"
-          title="Restore dashboard (Ctrl+Click to exit)"
+          title="Restore dashboard (Ctrl-Click to exit application)"
         >
           <Minimize2 class="w-4 h-4" />
         </button>
@@ -225,7 +233,7 @@ const copyButtonText = computed(() => {
         :disabled="isCopying"
         class="w-full text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
         :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
-        title="Copy Prompt (Ctrl+Click for Code Only)"
+        title="Copy Prompt (Ctrl-Click for Code Only)"
       >
         <Loader2 v-if="isCopying" class="w-3.5 h-3.5 animate-spin" />
         <span v-else class="truncate px-1">{{ copyButtonText }}</span>
@@ -239,7 +247,7 @@ const copyButtonText = computed(() => {
           @click="handlePaste"
           class="relative flex-grow text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-8"
           :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
-          title="Paste response from AI (Ctrl+Click to auto-apply)"
+          :title="pasteTooltipText"
         >
           <span>Paste</span>
         </button>

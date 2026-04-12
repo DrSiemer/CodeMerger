@@ -3,7 +3,7 @@
   "project_name": "CodeMerger",
   "project_color": "#808080",
   "project_font_color": "light",
-  "active_profile": "Default",
+  "active_profile": "tkinter",
   "profiles": {
     "Default": {
       "selected_files": [
@@ -312,17 +312,17 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "mtime": 1776016290.2203803,
-          "hash": "c962a9855114c210b6ec04b18aa1183e059aaeca",
-          "tokens": 4977,
-          "lines": 547
+          "mtime": 1776017371.784391,
+          "hash": "182fe049dcf7b491b34767b7799c199c09a4e175",
+          "tokens": 5166,
+          "lines": 562
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "mtime": 1776016290.2805479,
-          "hash": "25dfa4dbe43191a24cb588f5f9ae3d7c7cb1b895",
-          "tokens": 2101,
-          "lines": 265
+          "mtime": 1776017113.0975142,
+          "hash": "0f639c3356f9dbad6eeceddf42c8018bd3f14980",
+          "tokens": 2204,
+          "lines": 273
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -333,38 +333,38 @@
         },
         {
           "path": "frontend/src/components/ProjectSelectorModal.vue",
-          "mtime": 1776016290.3805602,
-          "hash": "386c6c062d19845c6b9dbc425253a35ea80e39bc",
-          "tokens": 1553,
-          "lines": 170
+          "mtime": 1776017113.1725154,
+          "hash": "32f618f9a2180254309a6cf9a3e24f844f159d97",
+          "tokens": 1646,
+          "lines": 179
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
-          "mtime": 1776016290.4375615,
-          "hash": "1243a1f06b01ce9f467343f839a55ec250283437",
-          "tokens": 4387,
-          "lines": 408
+          "mtime": 1776017113.5405169,
+          "hash": "ba7f68c5c76c98e86e060bc211243531ec3eef91",
+          "tokens": 4434,
+          "lines": 412
         },
         {
           "path": "frontend/src/components/InstructionsModal.vue",
-          "mtime": 1776016290.4935617,
-          "hash": "aad0fa1962a9b73797f00ef041fe90b5b785ff9d",
-          "tokens": 1155,
-          "lines": 122
+          "mtime": 1776017113.3905163,
+          "hash": "1ad262c1dfdb756be0340b895212d45be002bffb",
+          "tokens": 1180,
+          "lines": 124
         },
         {
           "path": "frontend/src/components/NewProfileModal.vue",
-          "mtime": 1776016290.5445626,
-          "hash": "35536fe1d0b40f227f803a20a92fc72b9f33ca5e",
-          "tokens": 893,
-          "lines": 100
+          "mtime": 1776017113.465516,
+          "hash": "a3967b0995a69f04d66231ffbc30c8f4f3ede562",
+          "tokens": 920,
+          "lines": 102
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "mtime": 1776016290.5935645,
-          "hash": "04b85de9de809dbe6d12f2c700ff6255a926644d",
-          "tokens": 2482,
-          "lines": 292
+          "mtime": 1776017113.3035178,
+          "hash": "c30bb69345c0384d5af029d71a6bc7fe8a8b2851",
+          "tokens": 2536,
+          "lines": 295
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
@@ -389,10 +389,10 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "mtime": 1776016782.331624,
-          "hash": "961d110154f97bb20284345ff97c91d815eed8d0",
-          "tokens": 5277,
-          "lines": 463
+          "mtime": 1776017113.23552,
+          "hash": "ac842f056063ab6be6488a20b5f7859d19963f67",
+          "tokens": 5504,
+          "lines": 469
         },
         {
           "path": "frontend/src/components/DiffViewer.vue",
@@ -445,10 +445,10 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "mtime": 1776016290.8226626,
-          "hash": "b649b929f74a54b8cccdc5105d337c938fe0684d",
-          "tokens": 3502,
-          "lines": 409
+          "mtime": 1776017113.612519,
+          "hash": "eef1ffdf9c3ab588ab06cbfb7e76c316931ab6fe",
+          "tokens": 3547,
+          "lines": 412
         },
         {
           "path": "frontend/src/components/starter-steps/Step1Details.vue",
@@ -648,7 +648,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 129789,
+      "total_tokens": 130599,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -972,17 +972,17 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "mtime": 1776016290.2203803,
-          "hash": "c962a9855114c210b6ec04b18aa1183e059aaeca",
-          "tokens": 4977,
-          "lines": 547
+          "mtime": 1776017371.784391,
+          "hash": "182fe049dcf7b491b34767b7799c199c09a4e175",
+          "tokens": 5166,
+          "lines": 562
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "mtime": 1776016290.2805479,
-          "hash": "25dfa4dbe43191a24cb588f5f9ae3d7c7cb1b895",
-          "tokens": 2101,
-          "lines": 265
+          "mtime": 1776017113.0975142,
+          "hash": "0f639c3356f9dbad6eeceddf42c8018bd3f14980",
+          "tokens": 2204,
+          "lines": 273
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -993,38 +993,38 @@
         },
         {
           "path": "frontend/src/components/ProjectSelectorModal.vue",
-          "mtime": 1776016290.3805602,
-          "hash": "386c6c062d19845c6b9dbc425253a35ea80e39bc",
-          "tokens": 1553,
-          "lines": 170
+          "mtime": 1776017113.1725154,
+          "hash": "32f618f9a2180254309a6cf9a3e24f844f159d97",
+          "tokens": 1646,
+          "lines": 179
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
-          "mtime": 1776016290.4375615,
-          "hash": "1243a1f06b01ce9f467343f839a55ec250283437",
-          "tokens": 4387,
-          "lines": 408
+          "mtime": 1776017113.5405169,
+          "hash": "ba7f68c5c76c98e86e060bc211243531ec3eef91",
+          "tokens": 4434,
+          "lines": 412
         },
         {
           "path": "frontend/src/components/InstructionsModal.vue",
-          "mtime": 1776016290.4935617,
-          "hash": "aad0fa1962a9b73797f00ef041fe90b5b785ff9d",
-          "tokens": 1155,
-          "lines": 122
+          "mtime": 1776017113.3905163,
+          "hash": "1ad262c1dfdb756be0340b895212d45be002bffb",
+          "tokens": 1180,
+          "lines": 124
         },
         {
           "path": "frontend/src/components/NewProfileModal.vue",
-          "mtime": 1776016290.5445626,
-          "hash": "35536fe1d0b40f227f803a20a92fc72b9f33ca5e",
-          "tokens": 893,
-          "lines": 100
+          "mtime": 1776017113.465516,
+          "hash": "a3967b0995a69f04d66231ffbc30c8f4f3ede562",
+          "tokens": 920,
+          "lines": 102
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "mtime": 1776016290.5935645,
-          "hash": "04b85de9de809dbe6d12f2c700ff6255a926644d",
-          "tokens": 2482,
-          "lines": 292
+          "mtime": 1776017113.3035178,
+          "hash": "c30bb69345c0384d5af029d71a6bc7fe8a8b2851",
+          "tokens": 2536,
+          "lines": 295
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
@@ -1049,10 +1049,10 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "mtime": 1776016782.331624,
-          "hash": "961d110154f97bb20284345ff97c91d815eed8d0",
-          "tokens": 5277,
-          "lines": 463
+          "mtime": 1776017113.23552,
+          "hash": "ac842f056063ab6be6488a20b5f7859d19963f67",
+          "tokens": 5504,
+          "lines": 469
         },
         {
           "path": "frontend/src/components/DiffViewer.vue",
@@ -1105,10 +1105,10 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "mtime": 1776016290.8226626,
-          "hash": "b649b929f74a54b8cccdc5105d337c938fe0684d",
-          "tokens": 3502,
-          "lines": 409
+          "mtime": 1776017113.612519,
+          "hash": "eef1ffdf9c3ab588ab06cbfb7e76c316931ab6fe",
+          "tokens": 3547,
+          "lines": 412
         },
         {
           "path": "frontend/src/components/starter-steps/Step1Details.vue",
@@ -1316,7 +1316,7 @@
           "ignore_tokens": true
         }
       ],
-      "total_tokens": 312285,
+      "total_tokens": 313095,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

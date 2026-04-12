@@ -4,7 +4,7 @@ import { X, Search, FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 const emit = defineEmits(['close'])
-const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow, infoModeActive } = useAppState()
+const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow, infoModeActive, openProjectFolder } = useAppState()
 
 const recents = ref([])
 const searchQuery = ref('')
@@ -43,7 +43,13 @@ const filteredRecents = computed(() => {
   )
 })
 
-const handleSelect = async (path) => {
+const handleSelect = async (path, event) => {
+  if (event.ctrlKey) {
+    if (window.pywebview) {
+      await window.pywebview.api.open_path(path)
+    }
+    return
+  }
   await loadProject(path)
   emit('close')
 }
@@ -68,7 +74,7 @@ const handleBrowse = async () => {
       <!-- Header -->
       <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
         <h2 class="text-xl font-bold text-white">Select Project</h2>
-        <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors">
+        <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors" title="Close project selector">
           <X class="w-5 h-5" />
         </button>
       </div>
@@ -95,6 +101,7 @@ const handleBrowse = async () => {
               v-if="searchQuery"
               @click="searchQuery = ''"
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              title="Clear search"
             >
               <X class="w-4 h-4" />
             </button>
@@ -112,8 +119,8 @@ const handleBrowse = async () => {
               v-for="proj in filteredRecents"
               :key="proj.path"
               class="group flex items-center justify-between bg-cm-input-bg hover:bg-gray-600 border border-transparent hover:border-gray-500 rounded p-2 cursor-pointer transition-colors"
-              @click="handleSelect(proj.path)"
-              :title="`${proj.path} (Click to open)`"
+              @click="handleSelect(proj.path, $event)"
+              :title="`${proj.path}\n(Click to load, Ctrl-Click to open folder in explorer)`"
             >
               <div class="flex items-center min-w-0 flex-grow">
                 <!-- Masked Logo Swatch -->
@@ -159,6 +166,7 @@ const handleBrowse = async () => {
           @click="handleBrowse"
           v-info="'sel_browse'"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors flex items-center"
+          title="Browse your computer for a project folder"
         >
           <FolderPlus class="w-4 h-4 mr-2" />
           Add project

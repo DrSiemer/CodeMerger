@@ -133,7 +133,7 @@ const addFiletype = () => {
           <h2 class="text-xl font-semibold text-white" v-info="activeTabInfoKey">
             {{ tabs.find(t => t.id === activeTab)?.name }}
           </h2>
-          <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors">
+          <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors" title="Close settings window">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -196,6 +196,7 @@ const addFiletype = () => {
                     @click="window.pywebview.api.check_for_updates_manual()"
                     v-info="'set_app_check_now'"
                     class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold py-1.5 px-4 rounded transition-colors"
+                    title="Bypass daily timer and check GitHub now"
                   >
                     Check for Updates Now
                   </button>
@@ -314,6 +315,7 @@ const addFiletype = () => {
                     @click="addFiletype"
                     :disabled="!newExt.trim()"
                     class="bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
+                    title="Add new extension to indexed types list"
                   >
                     <Plus class="w-4 h-4 mr-1" /> Add
                   </button>
@@ -389,6 +391,7 @@ const addFiletype = () => {
             @click="emit('close')"
             v-info="'settings_cancel'"
             class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-5 rounded mr-3 transition-colors"
+            title="Discard modifications and exit"
           >
             Cancel
           </button>
@@ -397,6 +400,7 @@ const addFiletype = () => {
             @click="handleSave"
             v-info="'settings_save'"
             class="bg-cm-blue hover:bg-blue-500 text-white font-medium py-2 px-5 rounded shadow-sm transition-colors"
+            title="Commit all settings to configuration"
           >
             Save Changes
           </button>

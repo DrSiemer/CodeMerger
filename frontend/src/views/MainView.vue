@@ -146,7 +146,11 @@ const handleNewFilesClick = async (event) => {
   }
 }
 
-const handleCopy = async (useWrapper) => {
+const handleCopy = async (useWrapper, event) => {
+  // If Ctrl is held during click, override the logical intent to 'Copy Code Only'
+  const finalUseWrapper = useWrapper && !event.ctrlKey
+
+  // Visual feedback: set spinner based on the specific button that was physically clicked
   if (useWrapper) {
     isCopyingInstructions.value = true
   } else {
@@ -154,7 +158,7 @@ const handleCopy = async (useWrapper) => {
   }
 
   try {
-    await copyCode(useWrapper)
+    await copyCode(finalUseWrapper)
   } finally {
     isCopyingInstructions.value = false
     isCopyingOnly.value = false
@@ -265,6 +269,13 @@ const handleShortcutPaste = async (event) => {
   }
 }
 
+const pasteTooltipText = computed(() => {
+  const showReview = config.value.show_feedback_on_paste ?? true
+  const base = showReview ? "Paste and Review changes (Ctrl+V)" : "Paste and Apply changes immediately (Ctrl+V)"
+  const override = showReview ? "Apply immediately" : "Apply with Review"
+  return `${base}\n(Ctrl-Click: ${override}, Alt-Click: open manual paste window)`
+})
+
 onMounted(() => {
   window.addEventListener('cm-remote-paste-request', onRemotePasteRequest)
   window.addEventListener('cm-shortcut-paste', handleShortcutPaste)
@@ -341,7 +352,7 @@ onUnmounted(() => {
         <div
           v-if="activeProject.newFileCount > 0 && !showFileManagerModal"
           class="flex items-center text-cm-green cursor-pointer hover:brightness-125 transition-all"
-          title="New files found. Click: Open manager, Ctrl+Click: Add all to merge"
+          title="New files found. Click: Open manager, Ctrl-Click: Add all to merge list"
           @click="handleNewFilesClick($event)"
         >
           <AlertTriangle class="w-6 h-6" />
@@ -352,7 +363,7 @@ onUnmounted(() => {
           v-if="activeProject.path && folderIcon"
           :src="isFolderHovered ? (folderActiveIcon || folderIcon) : folderIcon"
           class="w-7 h-auto cursor-pointer transition-opacity"
-          title="Open project folder (Ctrl+Click: Copy Path, Alt+Click: Open Console)"
+          title="Open project folder (Ctrl-Click: Copy Path, Alt-Click: Open Command Prompt)"
           @click="openProjectFolder($event)"
           @mouseenter="isFolderHovered = true"
           @mouseleave="isFolderHovered = false"
@@ -369,6 +380,7 @@ onUnmounted(() => {
           class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2 px-6 rounded shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-[38px]"
           :disabled="!activeProject.path"
           @click="openFileManager"
+          title="Manage selected files and their order"
           v-info="'manage_files'"
         >
           Edit Merge List
@@ -396,7 +408,7 @@ onUnmounted(() => {
         <button
           id="btn-starter"
           class="hover:brightness-110 transition-all p-1 flex items-center justify-center"
-          title="Project Starter"
+          title="Open Project Starter wizard"
           @mouseenter="isStarterHovered = true"
           @mouseleave="isStarterHovered = false"
           @click="showStarterModal = true"
@@ -414,6 +426,7 @@ onUnmounted(() => {
           id="btn-select-project"
           @click="showProjectModal = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
+          title="Open project selector"
           v-info="'select_project'"
         >
           Select Project
@@ -424,7 +437,7 @@ onUnmounted(() => {
     <!-- Main Dashboard Content -->
     <main id="dashboard-main" class="flex-grow flex flex-col relative bg-cm-dark-bg min-h-0 overflow-y-auto">
       <div class="absolute bottom-4 left-6 flex flex-col">
-        <button id="btn-settings" @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings" v-info="'settings'">
+        <button id="btn-settings" @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Application settings" v-info="'settings'">
           <Settings class="w-7 h-7" />
         </button>
       </div>
@@ -451,10 +464,10 @@ onUnmounted(() => {
             <template v-if="activeProject.hasInstructions">
               <button
                 id="btn-copy-with-instructions"
-                @click="handleCopy(true)"
+                @click="handleCopy(true, $event)"
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Copy Prompt: includes code wrapped with custom intro/outro instructions"
+                title="Copy Prompt with Instructions (Ctrl+C). Ctrl-Click to copy code only."
                 v-info="'copy_with_instructions'"
               >
                 <Loader2 v-if="isCopyingInstructions" class="w-6 h-6 animate-spin" />
@@ -462,10 +475,10 @@ onUnmounted(() => {
               </button>
               <button
                 id="btn-copy-code"
-                @click="handleCopy(false)"
+                @click="handleCopy(false, $event)"
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Copy Prompt: merges code and prepends the default context prompt"
+                title="Copy Code Only (Ctrl+Shift+C)"
                 v-info="'copy_code'"
               >
                 <Loader2 v-if="isCopyingOnly" class="w-6 h-6 animate-spin" />
@@ -476,10 +489,10 @@ onUnmounted(() => {
             <template v-else>
               <button
                 id="btn-copy-code"
-                @click="handleCopy(false)"
+                @click="handleCopy(false, $event)"
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Copy Prompt: merges code and prepends the default context prompt"
+                title="Copy Code Only (Ctrl+Shift+C)"
                 v-info="'copy_code'"
               >
                 <Loader2 v-if="isCopyingOnly" class="w-6 h-6 animate-spin" />
@@ -494,6 +507,7 @@ onUnmounted(() => {
               id="btn-define-instructions"
               @click="showInstructionsModal = true"
               class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+              title="Define project-specific instructions"
               v-info="'instructions'"
             >
               <BookOpen class="w-4 h-4" />
@@ -507,6 +521,7 @@ onUnmounted(() => {
                 @click="handlePasteChanges"
                 class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
                 :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
+                :title="pasteTooltipText"
                 v-info="'paste_changes'"
               >
                 <ClipboardPaste class="w-4 h-4" />

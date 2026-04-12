@@ -323,13 +323,13 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
-          <button id="btn-starter-save-config" @click="exportConfig" v-info="'starter_header_save'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Save Configuration">
+          <button id="btn-starter-save-config" @click="exportConfig" v-info="'starter_header_save'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Export configuration to JSON file">
             <Save class="w-4 h-4"/>
           </button>
-          <button id="btn-starter-load-config" @click="importConfig" v-info="'starter_header_load'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Load Configuration">
+          <button id="btn-starter-load-config" @click="importConfig" v-info="'starter_header_load'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Restore project configuration from JSON">
             <Upload class="w-4 h-4"/>
           </button>
-          <button id="btn-starter-clear-all" @click="clearAll" v-info="'starter_header_clear'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Clear and restart">
+          <button id="btn-starter-clear-all" @click="clearAll" v-info="'starter_header_clear'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Wipe all progress and start fresh">
             <Trash2 class="w-4 h-4"/>
           </button>
 
@@ -354,6 +354,7 @@ const nextStep = () => {
             (stepId <= maxAccessibleStep || stepId === 2) ? 'text-white font-bold hover:bg-white/5' : 'text-gray-500 cursor-not-allowed'
           ]"
           :disabled="stepId > maxAccessibleStep && stepId !== 2"
+          :title="`Jump to ${stepNames[stepId]} step`"
         >
           {{ index + 1 }}. {{ stepNames[stepId] }}
         </button>
@@ -381,6 +382,7 @@ const nextStep = () => {
                 @click="prevStep"
                 v-info="'starter_nav_prev'"
                 class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded font-bold transition-all flex items-center"
+                title="Return to the previous phase"
              >
                 &lt; Previous Step
              </button>
@@ -394,6 +396,7 @@ const nextStep = () => {
                 :disabled="isNextDisabled"
                 v-info="'starter_nav_next'"
                 class="bg-cm-blue hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white px-10 py-2 rounded font-bold shadow-lg transition-all flex items-center"
+                title="Proceed to the next phase"
              >
                 {{ currentStep === 4 && !pData.stack.trim() ? 'Skip Stack' : 'Next Step >' }}
              </button>
