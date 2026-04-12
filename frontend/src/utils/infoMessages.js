@@ -112,6 +112,11 @@ export const INFO_MESSAGES = {
   "starter_seg_sync": "Sync: Propagate your manual changes from this segment to other unsigned segments to maintain consistency.",
   "starter_view_toggle": "View Toggle: Switch between a raw text editor for manual changes and a stylized Markdown preview.",
 
+  "starter_success_path": "Project Location: The full path to your newly created project directory.",
+  "starter_success_open": "Open Folder: Reveal the new project directory in your system's file explorer.",
+  "starter_success_activate": "Activate Project: Load the new project into CodeMerger immediately and close the starter.",
+  "starter_success_exit": "Close: Exit the Project Starter. Your new project has been created on disk, but it will not be loaded as the active project in CodeMerger.",
+
   // Rewrite Dialog
   "rewrite_instruction": "Modification Instruction: Tell the AI what you want to change in the project drafts (e.g., 'Use a more formal tone' or 'Add a SQLite database').",
   "rewrite_copy_prompt": "Generate Prompt: Compiles your instructions with the current drafts and locked segments into a single prompt for the LLM.",
