@@ -4,7 +4,7 @@ import { X, Search, FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 const emit = defineEmits(['close'])
-const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow } = useAppState()
+const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow, infoModeActive } = useAppState()
 
 const recents = ref([])
 const searchQuery = ref('')
@@ -17,7 +17,12 @@ const handleEscape = (e) => {
 
 // Register lifecycle hooks at the top level
 onMounted(async () => {
-  await resizeWindow(800, 600)
+  // Dynamic Growth: Calculate required window height based on footer presence.
+  // Footer = 36px (Status Bar) + 80px (Info Panel if active).
+  const footerHeight = infoModeActive.value ? 116 : 36
+  // Force window to grow if it's too small to comfortably show the project list.
+  // This ensures the Content Area provides at least 500px for the modal.
+  await resizeWindow(800, 500 + footerHeight)
 
   document.addEventListener('keydown', handleEscape)
   recents.value = await getRecentProjects()
@@ -57,7 +62,8 @@ const handleBrowse = async () => {
 
 <template>
   <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-    <div class="bg-cm-dark-bg w-full max-w-[450px] rounded shadow-2xl border border-gray-600 flex flex-col max-h-[85vh]">
+    <!-- max-h-[90%] ensures the modal height adjusts to the parent Content Area (which shrinks when Info Mode is ON) -->
+    <div class="bg-cm-dark-bg w-full max-w-[450px] rounded shadow-2xl border border-gray-600 flex flex-col max-h-[90%]">
 
       <!-- Header -->
       <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
