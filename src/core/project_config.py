@@ -8,6 +8,7 @@ import tempfile
 import time
 import sys
 import logging
+import threading
 from pathlib import Path
 from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
 from .utils import get_token_count_for_text
@@ -59,6 +60,9 @@ class ProjectConfig:
 
         # Safety latch: prevent saving if an existing file failed to load correctly
         self._load_successful = False
+
+        # Reentrant lock to prevent thread collisions (Monitor vs API) during disk IO
+        self._lock = threading.RLock()
 
     @staticmethod
     def read_project_display_info(base_dir):
@@ -148,108 +152,109 @@ class ProjectConfig:
 
     def load(self):
         """Loads and reconciles project settings using defensive collision checks"""
-        data = {}
-        config_was_updated = False
-        files_were_cleaned_globally = False
+        with self._lock:
+            data = {}
+            config_was_updated = False
+            files_were_cleaned_globally = False
 
-        if not os.path.isfile(self.allcode_path):
-            self._load_successful = True # Valid state for new projects
-            return False
+            if not os.path.isfile(self.allcode_path):
+                self._load_successful = True # Valid state for new projects
+                return False
 
-        try:
-            self._last_mtime = os.path.getmtime(self.allcode_path)
+            try:
+                self._last_mtime = os.path.getmtime(self.allcode_path)
 
-            # Defensive: Don't load if the file is currently 0 bytes (mid-write lock)
-            if os.path.getsize(self.allcode_path) == 0:
-                raise RuntimeError("Config file is empty or locked.")
+                # Defensive: Don't load if the file is currently 0 bytes (mid-write lock)
+                if os.path.getsize(self.allcode_path) == 0:
+                    raise RuntimeError("Config file is empty or locked.")
 
-            with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
-                content = f.read()
-                if content:
-                    try:
-                        data = json.loads(content)
-                    except json.JSONDecodeError:
-                        # Attempt recovery from partial write artifacts
-                        json_start_index = content.find('{')
-                        if json_start_index != -1:
-                            json_content = content[json_start_index:]
-                            data = json.loads(json_content)
-                            config_was_updated = True
-                        else:
-                            raise RuntimeError("Config file contains no valid JSON.")
-        except (json.JSONDecodeError, IOError, OSError) as e:
-            raise RuntimeError(f"Failed to read project config: {e}")
+                with open(self.allcode_path, 'r', encoding='utf-8-sig') as f:
+                    content = f.read()
+                    if content:
+                        try:
+                            data = json.loads(content)
+                        except json.JSONDecodeError:
+                            # Attempt recovery from partial write artifacts
+                            json_start_index = content.find('{')
+                            if json_start_index != -1:
+                                json_content = content[json_start_index:]
+                                data = json.loads(json_content)
+                                config_was_updated = True
+                            else:
+                                raise RuntimeError("Config file contains no valid JSON.")
+            except (json.JSONDecodeError, IOError, OSError) as e:
+                raise RuntimeError(f"Failed to read project config: {e}")
 
-        # Final sanity check: if the file exists but we ended up with no data, abort to protect against wipe
-        if not data:
-            raise RuntimeError("Config file contained an empty JSON object.")
+            # Final sanity check: if the file exists but we ended up with no data, abort to protect against wipe
+            if not data:
+                raise RuntimeError("Config file contained an empty JSON object.")
 
-        self.project_name = data.get('project_name', os.path.basename(self.base_dir))
-        color_value = data.get('project_color')
-        font_color_value = data.get('project_font_color')
+            self.project_name = data.get('project_name', os.path.basename(self.base_dir))
+            color_value = data.get('project_color')
+            font_color_value = data.get('project_font_color')
 
-        if 'project_name' not in data: config_was_updated = True
-        if not color_value or not isinstance(color_value, str) or not re.match(r'^#[0-9a-fA-F]{6}$', color_value):
-            self.project_color = _generate_random_color()
-            config_was_updated = True
-        else:
-            self.project_color = color_value
+            if 'project_name' not in data: config_was_updated = True
+            if not color_value or not isinstance(color_value, str) or not re.match(r'^#[0-9a-fA-F]{6}$', color_value):
+                self.project_color = _generate_random_color()
+                config_was_updated = True
+            else:
+                self.project_color = color_value
 
-        if not font_color_value or font_color_value not in ['light', 'dark']:
-            self.project_font_color = _calculate_font_color(self.project_color)
-            config_was_updated = True
-        else:
-            self.project_font_color = font_color_value
+            if not font_color_value or font_color_value not in ['light', 'dark']:
+                self.project_font_color = _calculate_font_color(self.project_color)
+                config_was_updated = True
+            else:
+                self.project_font_color = font_color_value
 
-        # Profile Initialization
-        if 'profiles' in data and isinstance(data['profiles'], dict):
-            self.profiles = data.get('profiles', {})
-            self.active_profile_name = data.get('active_profile', 'Default')
-            if not self.profiles:
-                self.profiles['Default'] = self._create_empty_profile()
+            # Profile Initialization
+            if 'profiles' in data and isinstance(data['profiles'], dict):
+                self.profiles = data.get('profiles', {})
+                self.active_profile_name = data.get('active_profile', 'Default')
+                if not self.profiles:
+                    self.profiles['Default'] = self._create_empty_profile()
+                    self.active_profile_name = 'Default'
+                    config_was_updated = True
+            elif 'selected_files' in data:
+                # Reconcile legacy flat format
+                config_was_updated = True
+                default_profile = self._create_empty_profile()
+                default_profile['intro_text'] = data.get('intro_text', '')
+                default_profile['outro_text'] = data.get('outro_text', '')
+                default_profile['expanded_dirs'] = sorted(list(set(data.get('expanded_dirs', []))))
+                default_profile['selected_files'] = data.get('selected_files', [])
+                default_profile['total_tokens'] = data.get('total_tokens', 0)
+                self.profiles = {'Default': default_profile}
                 self.active_profile_name = 'Default'
-                config_was_updated = True
-        elif 'selected_files' in data:
-            # Reconcile legacy flat format
-            config_was_updated = True
-            default_profile = self._create_empty_profile()
-            default_profile['intro_text'] = data.get('intro_text', '')
-            default_profile['outro_text'] = data.get('outro_text', '')
-            default_profile['expanded_dirs'] = sorted(list(set(data.get('expanded_dirs', []))))
-            default_profile['selected_files'] = data.get('selected_files', [])
-            default_profile['total_tokens'] = data.get('total_tokens', 0)
-            self.profiles = {'Default': default_profile}
-            self.active_profile_name = 'Default'
-        else:
-            raise RuntimeError("Config file is malformed: missing project data keys.")
+            else:
+                raise RuntimeError("Config file is malformed: missing project data keys.")
 
-        # Known Files Extraction
-        all_found_known = set(data.get('known_files', []))
-        for p_data in self.profiles.values():
-            if 'known_files' in p_data:
-                all_found_known.update(p_data.pop('known_files', []))
-                config_was_updated = True
-            if 'unknown_files' not in p_data:
-                p_data['unknown_files'] = []
-                config_was_updated = True
+            # Known Files Extraction
+            all_found_known = set(data.get('known_files', []))
+            for p_data in self.profiles.values():
+                if 'known_files' in p_data:
+                    all_found_known.update(p_data.pop('known_files', []))
+                    config_was_updated = True
+                if 'unknown_files' not in p_data:
+                    p_data['unknown_files'] = []
+                    config_was_updated = True
 
-        self.known_files = sorted(list(all_found_known))
+            self.known_files = sorted(list(all_found_known))
 
-        for profile_name, profile_data in self.profiles.items():
-            profile_data['unknown_files'] = sorted(list(set(profile_data.get('unknown_files', []))))
-            files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
-            if files_cleaned_in_profile:
-                files_were_cleaned_globally = True
-            if profile_updated:
-                config_was_updated = True
+            for profile_name, profile_data in self.profiles.items():
+                profile_data['unknown_files'] = sorted(list(set(profile_data.get('unknown_files', []))))
+                files_cleaned_in_profile, profile_updated = self._clean_profile_files(profile_data)
+                if files_cleaned_in_profile:
+                    files_were_cleaned_globally = True
+                if profile_updated:
+                    config_was_updated = True
 
-        # Mark load as successful only after full data validation
-        self._load_successful = True
+            # Mark load as successful only after full data validation
+            self._load_successful = True
 
-        if config_was_updated or files_were_cleaned_globally:
-            self.save()
+            if config_was_updated or files_were_cleaned_globally:
+                self.save()
 
-        return files_were_cleaned_globally
+            return files_were_cleaned_globally
 
     def _clean_profile_files(self, profile_data):
         profile_was_updated = False
@@ -295,62 +300,63 @@ class ProjectConfig:
 
     def save(self):
         """Saves configuration using an atomic replacement to prevent data wipes during collisions"""
-        # Block saving if a previous load of an existing file failed
-        if os.path.isfile(self.allcode_path) and not self._load_successful:
-            return
+        with self._lock:
+            # Block saving if a previous load of an existing file failed
+            if os.path.isfile(self.allcode_path) and not self._load_successful:
+                return
 
-        final_data = {
-            "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
-            "project_name": self.project_name,
-            "project_color": self.project_color,
-            "project_font_color": self.project_font_color,
-            "active_profile": self.active_profile_name,
-            "profiles": self.profiles,
-            "known_files": sorted(list(set(self.known_files)))
-        }
+            final_data = {
+                "_info": "For information about this file, see: https://github.com/DrSiemer/CodeMerger/",
+                "project_name": self.project_name,
+                "project_color": self.project_color,
+                "project_font_color": self.project_font_color,
+                "active_profile": self.active_profile_name,
+                "profiles": self.profiles,
+                "known_files": sorted(list(set(self.known_files)))
+            }
 
-        fd, temp_path = tempfile.mkstemp(dir=self.base_dir, prefix='.allcode_tmp_')
-        try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
-                json.dump(final_data, f, indent=2)
+            fd, temp_path = tempfile.mkstemp(dir=self.base_dir, prefix='.allcode_tmp_')
+            try:
+                with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                    json.dump(final_data, f, indent=2)
 
-            # Windows specific: PermissionError/Access Denied on os.replace is common
-            # if the file is being read by the monitor thread or has a Hidden attribute.
-            max_retries = 5
-            is_windows = sys.platform == "win32"
-            was_hidden = False
+                # Windows specific: PermissionError/Access Denied on os.replace is common
+                # if the file is being read by the monitor thread or has a Hidden attribute.
+                max_retries = 5
+                is_windows = sys.platform == "win32"
+                was_hidden = False
 
-            for attempt in range(max_retries):
-                try:
-                    # Attempt to clear hidden attribute if on Windows to prevent Access Denied
-                    if is_windows and os.path.exists(self.allcode_path):
-                        import ctypes
-                        FILE_ATTRIBUTE_HIDDEN = 0x02
-                        attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
-                        if attrs != -1 and (attrs & FILE_ATTRIBUTE_HIDDEN):
-                            was_hidden = True
-                            ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs & ~FILE_ATTRIBUTE_HIDDEN)
+                for attempt in range(max_retries):
+                    try:
+                        # Attempt to clear hidden attribute if on Windows to prevent Access Denied
+                        if is_windows and os.path.exists(self.allcode_path):
+                            import ctypes
+                            FILE_ATTRIBUTE_HIDDEN = 0x02
+                            attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
+                            if attrs != -1 and (attrs & FILE_ATTRIBUTE_HIDDEN):
+                                was_hidden = True
+                                ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs & ~FILE_ATTRIBUTE_HIDDEN)
 
-                    os.replace(temp_path, self.allcode_path)
+                        os.replace(temp_path, self.allcode_path)
 
-                    # Restore hidden attribute if it was previously set
-                    if is_windows and was_hidden:
-                        attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
-                        if attrs != -1:
-                            ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs | FILE_ATTRIBUTE_HIDDEN)
+                        # Restore hidden attribute if it was previously set
+                        if is_windows and was_hidden:
+                            attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
+                            if attrs != -1:
+                                ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs | FILE_ATTRIBUTE_HIDDEN)
 
-                    break
-                except PermissionError:
-                    if attempt == max_retries - 1:
-                        raise
-                    time.sleep(0.1)
-        except Exception:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-            raise
+                        break
+                    except PermissionError:
+                        if attempt == max_retries - 1:
+                            raise
+                        time.sleep(0.1)
+            except Exception:
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                raise
 
-        if os.path.isfile(self.allcode_path):
-            self._last_mtime = os.path.getmtime(self.allcode_path)
+            if os.path.isfile(self.allcode_path):
+                self._last_mtime = os.path.getmtime(self.allcode_path)
 
     def has_external_changes(self):
         """Identifies file modifications on disk since the last internal access"""

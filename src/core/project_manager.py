@@ -1,4 +1,5 @@
 import os
+import threading
 from .project_config import ProjectConfig, _calculate_font_color
 from .utils import parse_gitignore
 from .file_scanner import get_all_matching_files
@@ -8,6 +9,8 @@ class ProjectManager:
     def __init__(self, get_active_file_extensions_func):
         self.project_config = None
         self.get_active_file_extensions = get_active_file_extensions_func
+        # Lock to ensure thread-safe access to the project_config reference and management ops
+        self._lock = threading.Lock()
 
     def _populate_new_project_files(self, project_config):
         """
@@ -30,82 +33,86 @@ class ProjectManager:
         it initializes a new one.
         Returns a tuple: (ProjectConfig object or None, status message string)
         """
-        if not path or not os.path.isdir(path):
-            self.project_config = None
-            return None, "No project selected"
+        with self._lock:
+            if not path or not os.path.isdir(path):
+                self.project_config = None
+                return None, "No project selected"
 
-        allcode_file = os.path.join(path, '.allcode')
-        is_new_project = not os.path.isfile(allcode_file)
+            allcode_file = os.path.join(path, '.allcode')
+            is_new_project = not os.path.isfile(allcode_file)
 
-        self.project_config = ProjectConfig(path)
+            self.project_config = ProjectConfig(path)
 
-        try:
-            files_were_cleaned = self.project_config.load()
-        except RuntimeError as e:
-            # Fatal error during load of an existing file: return None to prevent further damage
-            self.project_config = None
-            return None, str(e)
+            try:
+                files_were_cleaned = self.project_config.load()
+            except RuntimeError as e:
+                # Fatal error during load of an existing file: return None to prevent further damage
+                self.project_config = None
+                return None, str(e)
 
-        project_display_name = self.project_config.project_name
+            # Access name only after confirmed successful initialization
+            project_display_name = self.project_config.project_name
 
-        if is_new_project:
-            # Initialize a new project by scanning for all valid files
-            self._populate_new_project_files(self.project_config)
-            self.project_config.save()
-            status_message = f"Initialized new project: {project_display_name}."
-        elif files_were_cleaned:
-            status_message = f"Activated project: {project_display_name} - Cleaned missing files."
-        else:
-            status_message = f"Activated project: {project_display_name}."
+            if is_new_project:
+                # Initialize a new project by scanning for all valid files
+                self._populate_new_project_files(self.project_config)
+                self.project_config.save()
+                status_message = f"Initialized new project: {project_display_name}."
+            elif files_were_cleaned:
+                status_message = f"Activated project: {project_display_name} - Cleaned missing files."
+            else:
+                status_message = f"Activated project: {project_display_name}."
 
-        return self.project_config, status_message
+            return self.project_config, status_message
 
     def create_project_with_defaults(self, path, project_name, intro_text, outro_text, initial_selected_files=None, project_color=None):
         """
         Initializes a new project configuration at the specified path with default prompts.
         Optionally sets the initial selected files (merge list).
         """
-        if not path or not os.path.isdir(path):
-            return
+        with self._lock:
+            if not path or not os.path.isdir(path):
+                return
 
-        config = ProjectConfig(path)
-        # Apply the "normal" project name provided by the user
-        config.project_name = project_name
+            config = ProjectConfig(path)
+            # Apply the "normal" project name provided by the user
+            config.project_name = project_name
 
-        # Apply recommended color if provided by LLM
-        if project_color:
-            config.project_color = project_color
-            config.project_font_color = _calculate_font_color(project_color)
+            # Apply recommended color if provided by LLM
+            if project_color:
+                config.project_color = project_color
+                config.project_font_color = _calculate_font_color(project_color)
 
-        # Populate file list using the centralized logic
-        self._populate_new_project_files(config)
+            # Populate file list using the centralized logic
+            self._populate_new_project_files(config)
 
-        # If specific files were requested (e.g. from Wizard), set them now.
-        if initial_selected_files:
-            # Defensive check: Ensure items are dicts with 'path' keys
-            processed_selection = []
-            new_paths = set()
+            # If specific files were requested (e.g. from Wizard), set them now.
+            if initial_selected_files:
+                # Defensive check: Ensure items are dicts with 'path' keys
+                processed_selection = []
+                new_paths = set()
 
-            for item in initial_selected_files:
-                if isinstance(item, str):
-                    path_str = item
-                    processed_selection.append({'path': path_str})
-                    new_paths.add(path_str)
-                elif isinstance(item, dict) and 'path' in item:
-                    processed_selection.append(item)
-                    new_paths.add(item['path'])
+                for item in initial_selected_files:
+                    if isinstance(item, str):
+                        path_str = item
+                        processed_selection.append({'path': path_str})
+                        new_paths.add(path_str)
+                    elif isinstance(item, dict) and 'path' in item:
+                        processed_selection.append(item)
+                        new_paths.add(item['path'])
 
-            config.selected_files = processed_selection
+                config.selected_files = processed_selection
 
-            # CRITICAL: Ensure these files are added to known_files so they
-            # don't trigger "New File" alerts immediately upon opening.
-            config.known_files = sorted(list(set(config.known_files) | new_paths))
+                # CRITICAL: Ensure these files are added to known_files so they
+                # don't trigger "New File" alerts immediately upon opening.
+                config.known_files = sorted(list(set(config.known_files) | new_paths))
 
-        # Apply custom prompts
-        config.intro_text = intro_text
-        config.outro_text = outro_text
-        config.save()
+            # Apply custom prompts
+            config.intro_text = intro_text
+            config.outro_text = outro_text
+            config.save()
 
     def get_current_project(self):
         """Returns the currently active ProjectConfig object."""
-        return self.project_config
+        with self._lock:
+            return self.project_config
