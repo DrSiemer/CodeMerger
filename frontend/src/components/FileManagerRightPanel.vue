@@ -137,6 +137,15 @@ const handlePasteOrder = async () => {
   }
 }
 
+const scrollToSelection = (alignToTop = false) => {
+  nextTick(() => {
+    const selectedEl = props.mergeListRef.value?.querySelector('.bg-cm-blue')
+    if (selectedEl) {
+      selectedEl.scrollIntoView({ behavior: 'smooth', block: alignToTop ? 'start' : 'nearest' })
+    }
+  })
+}
+
 const scrollToPath = (path) => {
   const index = props.listItems.findIndex(f => f.path === path)
   if (index === -1) return
@@ -147,15 +156,6 @@ const scrollToPath = (path) => {
     const items = listEl.querySelectorAll('li')
     if (items[index]) {
       items[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
-  })
-}
-
-const scrollToSelection = (alignToTop = false) => {
-  nextTick(() => {
-    const selectedEl = props.mergeListRef.value?.querySelector('.bg-cm-blue')
-    if (selectedEl) {
-      selectedEl.scrollIntoView({ behavior: 'smooth', block: alignToTop ? 'start' : 'nearest' })
     }
   })
 }

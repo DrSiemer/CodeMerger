@@ -389,10 +389,10 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "mtime": 1776016290.7656603,
-          "hash": "254fbd64d6993849bce77c6f8aa385664944cac4",
-          "tokens": 5225,
-          "lines": 455
+          "mtime": 1776016782.331624,
+          "hash": "961d110154f97bb20284345ff97c91d815eed8d0",
+          "tokens": 5277,
+          "lines": 463
         },
         {
           "path": "frontend/src/components/DiffViewer.vue",
@@ -648,7 +648,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 129737,
+      "total_tokens": 129789,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1049,10 +1049,10 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "mtime": 1776016290.7656603,
-          "hash": "254fbd64d6993849bce77c6f8aa385664944cac4",
-          "tokens": 5225,
-          "lines": 455
+          "mtime": 1776016782.331624,
+          "hash": "961d110154f97bb20284345ff97c91d815eed8d0",
+          "tokens": 5277,
+          "lines": 463
         },
         {
           "path": "frontend/src/components/DiffViewer.vue",
@@ -1316,7 +1316,7 @@
           "ignore_tokens": true
         }
       ],
-      "total_tokens": 312233,
+      "total_tokens": 312285,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

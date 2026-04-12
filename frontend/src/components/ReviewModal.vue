@@ -420,34 +420,42 @@ const getSkippedMessage = (path) => {
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end space-x-3 shrink-0">
+      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex items-center shrink-0">
+        <!-- Left Aligned Group -->
         <button
           id="btn-review-paste-next"
           v-if="getPendingCount === 0"
           @click="handlePasteNext"
-          v-info="'review_apply'"
+          v-info="'paste_changes'"
           class="bg-cm-green hover:bg-green-600 text-white font-bold py-2 px-8 rounded shadow-md transition-all text-sm flex items-center justify-center whitespace-nowrap"
         >
           <ClipboardPaste class="w-4 h-4 mr-2" />
           <span>Paste Next</span>
         </button>
-        <button
-          @click="emit('close')"
-          v-info="getPendingCount === 0 ? 'review_close' : 'review_cancel'"
-          class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors text-sm flex items-center justify-center whitespace-nowrap"
-        >
-          {{ getPendingCount === 0 ? 'Close' : 'Cancel' }}
-        </button>
-        <button
-          id="btn-review-apply"
-          v-if="getPendingCount > 0"
-          @click="applyAllPending"
-          v-info="'review_apply'"
-          class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-12 rounded shadow-md transition-all text-sm flex items-center justify-center whitespace-nowrap"
-        >
-          <CheckCircle class="w-4 h-4 mr-2" />
-          <span>{{ applyAllLabel }}</span>
-        </button>
+
+        <!-- Dynamic Spacer ensures standard edge-alignment for primary/secondary buttons -->
+        <div class="flex-grow"></div>
+
+        <!-- Right Aligned Group -->
+        <div class="flex items-center space-x-3">
+          <button
+            @click="emit('close')"
+            v-info="getPendingCount === 0 ? 'review_close' : 'review_cancel'"
+            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors text-sm flex items-center justify-center whitespace-nowrap"
+          >
+            {{ getPendingCount === 0 ? 'Close' : 'Cancel' }}
+          </button>
+          <button
+            id="btn-review-apply"
+            v-if="getPendingCount > 0"
+            @click="applyAllPending"
+            v-info="'review_apply'"
+            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-12 rounded shadow-md transition-all text-sm flex items-center justify-center whitespace-nowrap"
+          >
+            <CheckCircle class="w-4 h-4 mr-2" />
+            <span>{{ applyAllLabel }}</span>
+          </button>
+        </div>
       </div>
 
     </div>
