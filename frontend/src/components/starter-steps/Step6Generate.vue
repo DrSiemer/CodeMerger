@@ -82,10 +82,14 @@ const isGenerateReady = computed(() => {
 const createProject = async () => {
   const pitchMatch = props.pData.generate_llm_response.match(/<PITCH>(.*?)<\/PITCH>/i)
   const pitch = pitchMatch ? pitchMatch[1].trim() : "a new project"
-  let res = await createStarterProject(props.pData.generate_llm_response, props.pData.include_base_reference, pitch, props.pData)
+
+  // Note: We no longer pass cleanData (pData) across the bridge to create the project.
+  // The Python backend now loads this data directly from the local session file
+  // to avoid bridge serialization errors and extremely large IPC payloads.
+  let res = await createStarterProject(props.pData.generate_llm_response, props.pData.include_base_reference, pitch)
 
   if (res?.status === 'EXISTS' && confirm("Project folder already exists. Overwrite?")) {
-    res = await createStarterProjectOverwrite(props.pData.generate_llm_response, props.pData.include_base_reference, pitch, props.pData)
+    res = await createStarterProjectOverwrite(props.pData.generate_llm_response, props.pData.include_base_reference, pitch)
   }
 
   if (res?.status === 'SUCCESS') {

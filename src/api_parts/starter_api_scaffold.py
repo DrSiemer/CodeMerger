@@ -2,6 +2,7 @@ import os
 import re
 import logging
 import webview
+import json
 from pathlib import Path
 from src.core.project_config import ProjectConfig
 from src.core.utils import parse_gitignore, load_config
@@ -52,10 +53,18 @@ class StarterApiScaffold:
         )
         return raw_tree
 
-    def create_starter_project(self, llm_output, include_base_reference, project_pitch, project_data):
+    def create_starter_project(self, llm_output, include_base_reference, project_pitch, _unused_data=None):
         """Initial check for directory existence before scaffolding project."""
+        # Load project data directly from the session file to bypass bridge limits and serialization issues
+        project_data = self.get_starter_session()
+        if not project_data or not isinstance(project_data, dict):
+            return {"status": "ERROR", "message": "Failed to load project data from session. Please ensure your project has a name."}
+
         raw_project_name = project_data.get("name", "")
         parent_folder = project_data.get("parent_folder", "")
+
+        if not raw_project_name or not parent_folder:
+             return {"status": "ERROR", "message": "Project name and parent folder are required."}
 
         color_match = re.search(r"<COLOR>(.*?)</COLOR>", llm_output, re.DOTALL | re.IGNORECASE)
         recommended_color = color_match.group(1).strip() if color_match else None
@@ -69,9 +78,13 @@ class StarterApiScaffold:
             return {"status": "EXISTS", "path": str(project_path)}
         return self._do_create_starter_project(project_path, raw_project_name, parent_folder, llm_output, include_base_reference, project_pitch, project_data, recommended_color)
 
-    def create_starter_project_overwrite(self, llm_output, include_base_reference, project_pitch, project_data):
+    def create_starter_project_overwrite(self, llm_output, include_base_reference, project_pitch, _unused_data=None):
         """Scaffolds project after user confirms directory overwrite."""
         import shutil
+        project_data = self.get_starter_session()
+        if not project_data or not isinstance(project_data, dict):
+            return {"status": "ERROR", "message": "Failed to load project data from session."}
+
         raw_project_name = project_data.get("name", "")
         parent_folder = project_data.get("parent_folder", "")
 
@@ -128,6 +141,18 @@ class StarterApiScaffold:
         if not found_any:
             return {"status": "ERROR", "message": "No valid file blocks found."}
 
+        # Write project-starter.json (Configuration State)
+        # ATOMIC WRITE: Dump to string first to ensure serialization succeeds before truncating file
+        try:
+            target_json = project_path / "project-starter.json"
+            json_str = json.dumps(project_data, indent=2)
+            with open(str(target_json), "w", encoding="utf-8") as f:
+                f.write(json_str)
+            files_created.append("project-starter.json")
+        except Exception as e:
+            log.error(f"Failed to write project-starter.json: {e}")
+
+        # Write documentation files
         try:
             concept_segs = project_data.get("concept_segments")
             concept_content = self.assemble_starter_document(concept_segs, c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if concept_segs else project_data.get("concept_md", "")
@@ -140,22 +165,20 @@ class StarterApiScaffold:
             if todo_content:
                 (project_path / "todo.md").write_text(todo_content, encoding="utf-8")
                 files_created.append("todo.md")
-        except Exception: pass
-
-        try:
-            with open(project_path / "project-starter.json", "w", encoding="utf-8") as f:
-                json.dump(project_data, f, indent=2)
-            files_created.append("project-starter.json")
-        except Exception: pass
+        except Exception as e:
+            log.error(f"Failed to write documentation files: {e}")
 
         if include_base_reference:
             ref_content = self._get_base_project_content(project_data)
             if ref_content:
-                (project_path / "project_reference.md").write_text(ref_content, encoding="utf-8")
-                files_created.append("project_reference.md")
+                try:
+                    (project_path / "project_reference.md").write_text(ref_content, encoding="utf-8")
+                    files_created.append("project_reference.md")
+                except Exception as e:
+                    log.error(f"Failed to write project_reference.md: {e}")
 
         conf = load_config()
-        intro = f"We are working on {project_pitch}.\n\nContinue work on the plan laid out in `todo.md`..."
+        intro = f"We are working on {project_pitch}.\n\nContinue work on the plan laid out in `todo.md`. If a bug is reported, fix it first. ONLY output `todo.md` (in full, without omissions) when explicitly updating checkbox status."
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []

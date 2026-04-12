@@ -1,8 +1,10 @@
 import os
 import logging
+import tkinter as tk
 from src.core import prompts as p
 from src import constants as c
 from src.core.paths import BOILERPLATE_DIR, REFERENCE_DIR
+from src.core.merger import get_language_from_path
 
 log = logging.getLogger("CodeMerger")
 
@@ -10,6 +12,10 @@ class StarterApiPrompts:
     """API methods handling construction of prompts for the Project Starter."""
 
     def _get_base_project_content(self, project_data):
+        # Defensive check to prevent 'NoneType' object has no attribute 'get'
+        if project_data is None:
+            project_data = {}
+
         base_path = project_data.get("base_project_path", "")
         base_files = project_data.get("base_project_files", [])
         if not base_path or not base_files:
@@ -22,7 +28,10 @@ class StarterApiPrompts:
             try:
                 with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                     content = f.read()
-                content_blocks.append(f"--- File: `{rel_path}` ---\n```\n{content}\n```\n")
+
+                # Use the imported function from merger core
+                language = get_language_from_path(rel_path)
+                content_blocks.append(f"--- File: `{rel_path}` ---\n```{language}\n{content}\n```\n")
             except Exception:
                 pass
         return "\n".join(content_blocks)
@@ -42,6 +51,8 @@ class StarterApiPrompts:
 
     def generate_concept_prompt(self, project_data, questions_map):
         """Constructs and returns the Concept generation prompt."""
+        if project_data is None: project_data = {}
+
         user_goal = project_data.get("goal", "")
         friendly_map = {k: v.get("label", k) for k, v in questions_map.items()} if questions_map else c.CONCEPT_SEGMENTS
         segment_instructions = self._build_prompt_instructions(c.CONCEPT_ORDER, friendly_map)
@@ -61,6 +72,8 @@ class StarterApiPrompts:
 
     def generate_stack_prompt(self, project_data):
         """Constructs and returns the Tech Stack recommendation prompt."""
+        if project_data is None: project_data = {}
+
         concept = project_data.get("concept_md", "")
         experience = project_data.get("stack_experience", "")
         parts = [
@@ -73,6 +86,8 @@ class StarterApiPrompts:
 
     def generate_todo_prompt(self, project_data, questions_map):
         """Constructs and returns the TODO plan generation prompt."""
+        if project_data is None: project_data = {}
+
         concept_md = project_data.get("concept_md")
         if not concept_md and project_data.get("concept_segments"):
             concept_md = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
@@ -95,6 +110,8 @@ class StarterApiPrompts:
 
     def generate_master_prompt(self, project_data):
         """Constructs and returns the final Project Boilerplate generation prompt."""
+        if project_data is None: project_data = {}
+
         name = project_data.get("name", "")
         stack = project_data.get("stack", "")
 
@@ -134,6 +151,8 @@ class StarterApiPrompts:
 
     def get_starter_rewrite_prompt(self, instruction, targets, references, names, data, is_merged_mode=False):
         """Generates a prompt for instructional rewriting of starter segments."""
+        if data is None: data = {}
+
         if is_merged_mode:
             target_blocks = [f"{data.get('full_content', '')}"]
             reference_blocks = []
@@ -170,6 +189,8 @@ class StarterApiPrompts:
 
     def get_starter_sync_prompt(self, active_key, friendly_names_map, segments_data, targets, references):
         """Generates a prompt for propagating manual changes to other segments."""
+        if segments_data is None: segments_data = {}
+
         target_context_str = "\n".join([f"--- Current Draft: {friendly_names_map.get(k, k)} ---\n{segments_data.get(k, '')}\n" for k in targets])
         ref_context_str = ""
         if references:
@@ -177,7 +198,7 @@ class StarterApiPrompts:
 
         return p.STARTER_SYNC_PROMPT_TEMPLATE.format(
             current_name=friendly_names_map.get(active_key, active_key),
-            content=segments_data[active_key],
+            content=segments_data.get(active_key, ""),
             ref_context=ref_context_str,
             target_context=target_context_str,
             target_instructions=self._build_prompt_instructions(targets, friendly_names_map)

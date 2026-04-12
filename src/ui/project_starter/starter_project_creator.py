@@ -64,12 +64,13 @@ class StarterProjectCreator:
                 (project_path / "todo.md").write_text(todo_content, encoding="utf-8")
                 files_created.append("todo.md")
         except Exception as e:
-            log.error(f"Failed to write mandatory documentation files: {e}")
+            log.error(f"Failed to write documentation files: {e}")
 
+        # Write project-starter.json (Configuration State)
         try:
             config_data = dialog.starter_state.get_dict()
             starter_json_path = project_path / "project-starter.json"
-            with open(starter_json_path, "w", encoding="utf-8") as f:
+            with open(str(starter_json_path), "w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=2)
             files_created.append("project-starter.json")
         except Exception as e:
