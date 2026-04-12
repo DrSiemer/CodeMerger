@@ -199,6 +199,9 @@ INFO_MESSAGES = {
         "When set, double-clicking files in the editor opens them directly in this application."
     ),
 
+    "settings_cancel": "Cancel: Close the settings window and discard any modifications made during this session.",
+    "settings_save": "Save Changes: Persist all modifications to the application configuration and update the interface immediately.",
+
     # Instructions Window
     "inst_intro": "Intro Instructions: This text is placed at the very top of your merged code block. Use it to introduce your project.",
     "inst_outro": "Outro Instructions: This text is placed at the bottom. Use it for code style rules or recurring constraints.",
@@ -257,6 +260,7 @@ INFO_MESSAGES = {
     "profile_copy_files": "Clone Selection: If checked, the new profile will start with the exact same files selected in your current merge list.",
     "profile_copy_inst": "Clone Instructions: If checked, the new profile will inherit the current custom Intro and Outro instructions.",
     "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk.",
+    "profile_cancel": "Cancel: Close the dialog without creating a new profile. Your current project configuration will remain unchanged.",
 
     # Project Starter
     "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
@@ -265,6 +269,10 @@ INFO_MESSAGES = {
     "starter_header_save": "Save Config: Export your current project configuration (concept, stack, plan) to a JSON file.",
     "starter_header_load": "Load Config: Restore a previously saved project configuration.",
     "starter_header_clear": "Clear All: Completely reset the project starter to the beginning.",
+    "starter_header_exit": (
+        "Save and Exit: Closes the Project Starter. If you have entered any data, it is automatically saved "
+        "to a persistent session file so you can resume your progress later."
+    ),
 
     "starter_details_name": "Project Name: The name of your application. This will be used for the folder name and the README title.",
     "starter_details_base": "Base Project: Optionally select an existing folder to use as a reference. Useful for 'v2' rewrites or analyzing existing code.",
@@ -310,6 +318,14 @@ INFO_MESSAGES = {
     "starter_seg_rewrite": "Rewrite: Provide a specific instruction to rewrite this segment and all unsigned segments.",
     "starter_seg_sync": "Sync: Propagate manual edits from this segment to other unsigned segments to keep the document consistent.",
     "starter_seg_questions": "Questions: See guiding questions to help you verify the quality of this segment.",
+    "starter_questions_panel": (
+        "Guiding Questions: Review these specific criteria to ensure the current segment is comprehensive "
+        "and accurate. Use the navigation arrows to cycle through different focus points."
+    ),
+    "starter_questions_copy": (
+        "Copy Question Prompt: Compiles the current segment's text, any surrounding context, and the selected "
+        "guiding question into a structured prompt. Paste this into your LLM to get specific feedback."
+    ),
     "starter_seg_unlock": "Unlock to Edit: Releases the sign-off for the current segment, allowing you to make manual edits or include it in a 'Rewrite' operation.",
     "starter_seg_merge": "Merge Segments: Finalizes the individual sections and assembles them into a single Markdown document for the next phase of the project.",
 
@@ -317,6 +333,11 @@ INFO_MESSAGES = {
         "View Toggle: Switch between a stylized Markdown preview and a raw text editor for manual adjustments. "
         "Be careful: manual changes could create a conflict with other segments. Use 'Rewrite' to avoid this."
     ),
+
+    "starter_success_path": "Project Location: The full path to your newly created project directory.",
+    "starter_success_open": "Open Folder: Reveal the new project directory in your system's file explorer.",
+    "starter_success_activate": "Activate Project: Load the new project into CodeMerger immediately and close the starter.",
+    "starter_success_exit": "Close: Exit the Project Starter.",
 
     # Rewrite Dialog
     "rewrite_instruction": (

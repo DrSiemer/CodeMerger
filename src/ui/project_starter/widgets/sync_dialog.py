@@ -5,6 +5,8 @@ from ...widgets.rounded_button import RoundedButton
 from ...widgets.scrollable_text import ScrollableText
 from ...window_utils import position_window
 from ...tooltip import ToolTip
+from ...info_manager import attach_info_mode
+from ...assets import assets
 
 class SyncUnsignedDialog(Toplevel):
     """
@@ -18,21 +20,46 @@ class SyncUnsignedDialog(Toplevel):
         self.on_apply_callback = on_apply_callback
         self.result = None
 
+        # Identify root App state for Info Mode
+        self.app = parent
+        while self.app and not hasattr(self.app, 'app_state'):
+            self.app = getattr(self.app, 'master', None)
+
         self.title("Sync Unsigned Segments")
         self.configure(bg=c.DARK_BG)
         self.transient(parent)
         self.grab_set()
 
+        # Ensure grid for info mode
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
         self._build_ui()
 
-        self.geometry("600x600")
+        # Dynamic Geometry
+        initial_w, initial_h = 600, 600
+        if self.app and self.app.app_state.info_mode_active:
+            initial_h += c.INFO_PANEL_HEIGHT
+
+        self.geometry(f"{initial_w}x{initial_h}")
         self.minsize(500, 500)
+
+        # Info Mode Integration
+        if self.app:
+            self.info_toggle_btn = Label(self, image=assets.info_icon, bg=c.DARK_BG, cursor="hand2")
+            self.info_mgr = attach_info_mode(self, self.app.app_state, manager_type='grid', grid_row=1, toggle_btn=self.info_toggle_btn)
+            self.info_mgr.register(self.copy_btn, "starter_seg_sync")
+            self.info_mgr.register(self.response_text, "rewrite_response")
+            self.info_mgr.register(self.btn_apply, "rewrite_apply")
+            self.info_mgr.register(self.btn_cancel, "rewrite_cancel")
+            self.info_mgr.register(self.info_toggle_btn, "info_toggle")
+
         position_window(self)
         self.deiconify()
 
     def _build_ui(self):
         main_frame = Frame(self, bg=c.DARK_BG, padx=20, pady=20)
-        main_frame.pack(fill="both", expand=True)
+        main_frame.grid(row=0, column=0, sticky="nsew")
         main_frame.grid_rowconfigure(3, weight=1)
         main_frame.grid_columnconfigure(0, weight=1)
 
@@ -44,9 +71,9 @@ class SyncUnsignedDialog(Toplevel):
         step1_frame = Frame(main_frame, bg=c.DARK_BG)
         step1_frame.grid(row=2, column=0, sticky="ew", pady=(0, 5))
         Label(step1_frame, text="1. Copy Prompt", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(side="left")
-        copy_btn = RoundedButton(step1_frame, text="Copy", command=lambda: self._copy_prompt(copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
-        copy_btn.pack(side="right")
-        ToolTip(copy_btn, "Copy the synchronization prompt to clipboard", delay=500)
+        self.copy_btn = RoundedButton(step1_frame, text="Copy", command=lambda: self._copy_prompt(self.copy_btn), bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=24, radius=4, cursor="hand2")
+        self.copy_btn.pack(side="right")
+        ToolTip(self.copy_btn, "Copy the synchronization prompt to clipboard", delay=500)
 
         # Step 2: Paste Response
         Label(main_frame, text="2. Paste Response", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).grid(row=4, column=0, sticky="w", pady=(15, 5))
@@ -58,12 +85,12 @@ class SyncUnsignedDialog(Toplevel):
         btn_frame = Frame(main_frame, bg=c.DARK_BG)
         btn_frame.grid(row=6, column=0, sticky="e")
 
-        btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
-        btn_cancel.pack(side="left", padx=(0, 10))
+        self.btn_cancel = RoundedButton(btn_frame, text="Cancel", command=self.destroy, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_NORMAL, width=90, height=30, cursor="hand2")
+        self.btn_cancel.pack(side="left", padx=(0, 10))
 
-        btn_apply = RoundedButton(btn_frame, text="Apply Changes", command=self._on_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
-        btn_apply.pack(side="left")
-        ToolTip(btn_apply, "Apply the synced content to your unlocked segments", delay=500)
+        self.btn_apply = RoundedButton(btn_frame, text="Apply Changes", command=self._on_apply, bg=c.BTN_BLUE, fg=c.BTN_BLUE_TEXT, font=c.FONT_NORMAL, width=120, height=30, cursor="hand2")
+        self.btn_apply.pack(side="left")
+        ToolTip(self.btn_apply, "Apply the synced content to your unlocked segments", delay=500)
 
     def _copy_prompt(self, btn):
         try:

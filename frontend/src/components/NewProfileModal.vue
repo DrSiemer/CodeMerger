@@ -78,6 +78,7 @@ const handleCreate = async () => {
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end space-x-3">
         <button
           @click="emit('close')"
+          v-info="'profile_cancel'"
           class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm"
         >
           Cancel

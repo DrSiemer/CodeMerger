@@ -17,7 +17,8 @@ class ApplicationSettingsFrame(Frame):
         self._create_widgets()
 
     def _create_widgets(self):
-        Label(self, text="Application settings", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(0, 5))
+        self.title_label = Label(self, text="Application settings", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
+        self.title_label.pack(anchor='w', pady=(0, 5))
         container = Frame(self, bg=c.DARK_BG)
         container.pack(fill='x', expand=True, pady=(0, 15), padx=(25, 0))
 
@@ -65,6 +66,7 @@ class ApplicationSettingsFrame(Frame):
 
     def register_info(self, info_mgr):
         """Registers granular components with Info Mode."""
+        info_mgr.register(self.title_label, "set_app")
         info_mgr.register(self.new_file_chk, "set_app_new_file")
         info_mgr.register(self.interval_label, "set_app_interval")
         info_mgr.register(self.interval_combo, "set_app_interval")

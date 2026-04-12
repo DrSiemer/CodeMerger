@@ -57,6 +57,10 @@ const tabs = [
   { id: 'editor', name: 'Editor', icon: Terminal, info: 'set_editor' }
 ]
 
+const activeTabInfoKey = computed(() => {
+  return tabs.find(t => t.id === activeTab.value)?.info || ''
+})
+
 // --- Filetypes Logic ---
 const filteredTypes = computed(() => {
   let list = localFiletypes.value
@@ -126,7 +130,7 @@ const addFiletype = () => {
       <div class="flex-grow flex flex-col h-full bg-cm-dark-bg min-w-0">
         <!-- Header -->
         <div class="flex justify-between items-center p-4 border-b border-gray-700 shrink-0">
-          <h2 class="text-xl font-semibold text-white">
+          <h2 class="text-xl font-semibold text-white" v-info="activeTabInfoKey">
             {{ tabs.find(t => t.id === activeTab)?.name }}
           </h2>
           <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors">

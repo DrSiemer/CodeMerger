@@ -70,6 +70,7 @@ class NewProfileDialog(Toplevel):
         self.info_mgr.register(self.copy_files_chk, "profile_copy_files")
         self.info_mgr.register(self.copy_inst_chk, "profile_copy_inst")
         self.info_mgr.register(ok_button, "profile_create")
+        self.info_mgr.register(cancel_button, "profile_cancel")
         self.info_mgr.register(self.info_toggle_btn, "info_toggle")
 
         self.update_idletasks()

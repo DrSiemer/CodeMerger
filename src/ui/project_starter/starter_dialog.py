@@ -134,6 +134,7 @@ class ProjectStarterDialog(tk.Toplevel):
         self.info_mgr.register(self.start_over_button, "starter_nav_reset")
         self.info_mgr.register(self.btn_save, "starter_header_save")
         self.info_mgr.register(self.btn_load, "starter_header_load")
+        self.info_mgr.register(self.exit_btn, "starter_header_exit")
         if hasattr(self, 'btn_clear'):
             self.info_mgr.register(self.btn_clear, "starter_header_clear")
 
@@ -151,13 +152,23 @@ class ProjectStarterDialog(tk.Toplevel):
         self.finished_successfully = True
         for w in self.content_frame.winfo_children(): w.destroy()
         self.nav_frame.grid_forget()
+
         def on_start_work():
             full_path = str(Path(parent_folder) / project_name)
             self.starter_state.reset()
             self.app.ui_callbacks.on_directory_selected(full_path)
             self.destroy()
             self.app.after(100, self.app.show_and_raise)
-        SuccessView(self.content_frame, project_name, files, on_start_work, parent_folder, project_color=project_color).pack(expand=True, fill="both")
+
+        view = SuccessView(self.content_frame, project_name, files, on_start_work, parent_folder, project_color=project_color)
+        view.pack(expand=True, fill="both")
+
+        # Register success screen elements with Info Mode
+        if hasattr(self, 'info_mgr'):
+            self.info_mgr.register(view.path_entry, "starter_success_path")
+            self.info_mgr.register(view.open_btn, "starter_success_open")
+            self.info_mgr.register(view.activate_btn, "starter_success_activate")
+            self.info_mgr.register(view.exit_btn, "starter_success_exit")
 
     def on_base_project_selected(self, path):
         self.ui_builder.refresh_tabs()

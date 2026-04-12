@@ -18,6 +18,14 @@ class ReviewerQuestions(Frame):
         self.current_q_list = []
         self.current_index = 0
 
+    def register_info(self, info_mgr):
+        """Registers the panel components with Info Mode."""
+        if not info_mgr: return
+        info_mgr.register(self, "starter_questions_panel")
+        # Copy button might be created later in update_for_segment
+        if hasattr(self, 'copy_btn'):
+            info_mgr.register(self.copy_btn, "starter_questions_copy")
+
     def update_for_segment(self, key):
         """Rebuilds the panel content for the specified segment."""
         self.current_key = key
@@ -53,6 +61,11 @@ class ReviewerQuestions(Frame):
         self.copy_btn = RoundedButton(btn_row, text="Copy Context & Question", command=self._copy_q_context, bg=c.BTN_GRAY_BG, fg=c.BTN_GRAY_TEXT, font=c.FONT_SMALL_BUTTON, height=26, cursor="hand2")
         self.copy_btn.pack(side="left")
         ToolTip(self.copy_btn, "Copy a prompt containing the current segment text and this question", delay=500)
+
+        # Register Info dynamically after creation
+        mgr = getattr(self.master.master.master, 'info_mgr', None) # Reach up to Dialog
+        if mgr:
+             mgr.register(self.copy_btn, "starter_questions_copy")
 
         self._refresh_display()
 

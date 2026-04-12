@@ -12,7 +12,8 @@ class EditorSettingsFrame(Frame):
         self._create_widgets()
 
     def _create_widgets(self):
-        Label(self, text="Default Editor", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR).pack(anchor='w', pady=(15, 5))
+        self.title_label = Label(self, text="Default Editor", font=c.FONT_BOLD, bg=c.DARK_BG, fg=c.TEXT_COLOR)
+        self.title_label.pack(anchor='w', pady=(15, 5))
         container = Frame(self, bg=c.DARK_BG)
         container.pack(fill='x', expand=True)
 
@@ -27,6 +28,7 @@ class EditorSettingsFrame(Frame):
 
     def register_info(self, info_mgr):
         """Registers granular components with Info Mode."""
+        info_mgr.register(self.title_label, "set_editor")
         info_mgr.register(self.path_entry, "set_editor_path")
         info_mgr.register(self.browse_btn, "set_editor_path")
         info_mgr.register(self.clear_btn, "set_editor_path")

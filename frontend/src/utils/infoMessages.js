@@ -28,6 +28,7 @@ export const INFO_MESSAGES = {
   "profile_copy_files": "Clone Selection: If checked, the new profile will start with the exact same files selected in your current merge list.",
   "profile_copy_inst": "Clone Instructions: If checked, the new profile will inherit the current custom Intro and Outro instructions.",
   "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk.",
+  "profile_cancel": "Cancel: Discard the new profile details and return to the main dashboard without making any changes.",
 
   // Project Selector
   "sel_list": "Recent Projects: Quickly switch to another CodeMerger project. Hover over an entry to see the full path and Ctrl-Click to open it's folder.",
@@ -112,6 +113,11 @@ export const INFO_MESSAGES = {
   "settings_cancel": "Cancel: Close the settings window and discard any modifications made during this session.",
   "settings_save": "Save Changes: Persist all modifications to the application configuration and update the interface immediately.",
 
+  "filetypes": "Manage Filetypes: Define which file extensions CodeMerger is allowed to index. Double-click an entry in the list to enable or disable it globally.",
+  "ft_list": "Indexed Types: Only files matching these extensions are scanned. Double-click to enable or disable.",
+  "ft_action": "Active Toggle: Delete custom extensions or toggle the active status of bundled default extensions.",
+  "ft_add": "Add Filetype: Type a new extension (e.g. .py or .js) and a short description to add it to the indexing list.",
+
   // Project Starter
   "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
   "starter_nav_next": "Next Step: Proceed to the next phase. Validates current input before moving.",
@@ -119,7 +125,7 @@ export const INFO_MESSAGES = {
   "starter_header_save": "Save Config: Export your current project configuration (concept, stack, plan) to a JSON file.",
   "starter_header_load": "Load Config: Restore a previously saved project configuration.",
   "starter_header_clear": "Clear All: Completely reset the project starter to the beginning.",
-  "starter_header_exit": "Save and Exit: Closes the Project Starter. If you have entered any data, it is automatically saved to a persistent session file so you can resume your progress later. If the starter is completely empty, it simply exits.",
+  "starter_header_exit": "Save and Exit: Closes the Project Starter. If you have entered any data, it is automatically saved to a persistent session file so you can resume your progress later.",
   "starter_details_name": "Project Name: The name of your application. This will be used for the folder name and the README title.",
   "starter_details_base": "Base Project: Optionally select an existing folder to use as a reference. Useful for 'v2' rewrites or analyzing existing code.",
   "starter_concept_goal": "User Goal: Briefly describe what you want to build. This is the seed for the AI to generate the full concept.",
@@ -135,7 +141,6 @@ export const INFO_MESSAGES = {
   "starter_gen_parent": "Parent Folder: The directory where your new project folder will be created.",
   "starter_gen_prompt": "Master Prompt: Copies the final boilerplate instruction to your clipboard. Paste this into your LLM to generate the initial codebase.",
   "starter_gen_create": "Create Project: Parse the LLM's code blocks and write the final files to disk to initialize your project.",
-  "starter_gen_process": "Process Response: Analyze the pasted LLM output to populate the internal drafts.",
   "starter_seg_nav": "Segment Navigation: Jump between different sections of the generated document.",
   "starter_seg_indicator": "Lock Status: Toggle the sign-off status for this segment. Locked segments are used as immutable references in 'Rewrite' operations.",
   "starter_seg_questions": "Questions Toggle: Show or hide the guiding questions panel to help refine the quality of this segment.",
@@ -151,7 +156,7 @@ export const INFO_MESSAGES = {
   "starter_success_path": "Project Location: The full path to your newly created project directory.",
   "starter_success_open": "Open Folder: Reveal the new project directory in your system's file explorer.",
   "starter_success_activate": "Activate Project: Load the new project into CodeMerger immediately and close the starter.",
-  "starter_success_exit": "Close: Exit the Project Starter. Your new project has been created on disk, but it will not be loaded as the active project in CodeMerger.",
+  "starter_success_exit": "Close: Exit the Project Starter.",
 
   // Rewrite Dialog
   "rewrite_instruction": "Modification Instruction: Tell the AI what you want to change in the project drafts (e.g., 'Use a more formal tone' or 'Add a SQLite database').",
