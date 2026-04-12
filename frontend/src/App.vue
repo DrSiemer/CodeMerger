@@ -10,7 +10,10 @@ const {
   statusMessage,
   statusVisible,
   infoModeActive,
-  toggleInfoMode
+  toggleInfoMode,
+  getClipboardText,
+  copyCode,
+  activeProject
 } = useAppState()
 const route = useRoute()
 
@@ -38,6 +41,60 @@ onMounted(() => {
       signalReady()
     })
   }
+
+  window.addEventListener('paste', (e) => {
+    e.preventDefault()
+  }, true)
+
+  window.addEventListener('keydown', async (e) => {
+    const isCtrl = e.ctrlKey || e.metaKey
+    const isShift = e.shiftKey
+    const key = e.key.toLowerCase()
+
+    if (isCtrl && key === 'v') {
+      e.preventDefault()
+
+      // Text Input Routing (Project Starter / Modals)
+      const activeEl = document.activeElement
+      const isInput = activeEl && (activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type === 'text'))
+
+      if (isInput) {
+        const text = await getClipboardText()
+        if (text) {
+          const start = activeEl.selectionStart
+          const end = activeEl.selectionEnd
+          const val = activeEl.value
+          activeEl.value = val.substring(0, start) + text + val.substring(end)
+          activeEl.selectionStart = activeEl.selectionEnd = start + text.length
+          activeEl.dispatchEvent(new Event('input', { bubbles: true }))
+        }
+        return
+      }
+
+      // Feature Routing
+      if (isCompact.value) {
+        // Notify Compact view to trigger its specific cross-window paste request
+        window.dispatchEvent(new CustomEvent('cm-compact-paste', { detail: { isAuto: isShift } }))
+      } else if (activeProject.path) {
+        // Notify Dashboard to trigger response review or auto-apply
+        window.dispatchEvent(new CustomEvent('cm-shortcut-paste', { detail: { toggleReview: isShift } }))
+      }
+    }
+
+    if (isCtrl && key === 'c') {
+      // Feature routing for Prompts (if no text is currently selected in UI)
+      const selection = window.getSelection().toString()
+      if (!selection && activeProject.path) {
+        e.preventDefault()
+        if (isCompact.value) {
+          window.dispatchEvent(new CustomEvent('cm-compact-copy', { detail: { codeOnly: isShift } }))
+        } else {
+          // Dashboard copy: Ctrl+C = with instructions, Ctrl+Shift+C = code only
+          await copyCode(!isShift)
+        }
+      }
+    }
+  })
 })
 </script>
 

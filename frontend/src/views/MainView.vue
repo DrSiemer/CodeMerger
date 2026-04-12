@@ -36,7 +36,10 @@ const {
   claimLastPlan,
   hasPendingChanges,
   switchProfile,
-  deleteProfile
+  deleteProfile,
+  config,
+  applyFullPlan,
+  statusMessage
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -147,7 +150,7 @@ const handleCopy = async (useWrapper) => {
   if (useWrapper) {
     isCopyingInstructions.value = true
   } else {
-    isCopyingOnly.value = true
+    isCopyingOnly = true
   }
 
   try {
@@ -235,12 +238,41 @@ const onRemotePasteRequest = async (event) => {
   showReviewModal.value = true
 }
 
+/**
+ * Handles global keyboard shortcuts dispatched from App.vue
+ */
+const handleShortcutPaste = async (event) => {
+  if (!activeProject.path) return
+
+  const { toggleReview } = event.detail
+  const success = await processPaste()
+
+  if (success) {
+    const autoShow = config.value.show_feedback_on_paste ?? true
+    // toggleReview (Shift+Ctrl+V) does the opposite of current settings
+    const shouldShow = toggleReview ? !autoShow : autoShow
+
+    if (shouldShow) {
+      reviewMode.value = 'new'
+      showReviewModal.value = true
+    } else {
+      // Instant Apply
+      const res = await applyFullPlan(lastAiResponse.value)
+      if (res && res[0]) {
+        statusMessage.value = res[1]
+      }
+    }
+  }
+}
+
 onMounted(() => {
   window.addEventListener('cm-remote-paste-request', onRemotePasteRequest)
+  window.addEventListener('cm-shortcut-paste', handleShortcutPaste)
 })
 
 onUnmounted(() => {
   window.removeEventListener('cm-remote-paste-request', onRemotePasteRequest)
+  window.removeEventListener('cm-shortcut-paste', handleShortcutPaste)
 })
 </script>
 
@@ -277,7 +309,7 @@ onUnmounted(() => {
               @keyup.enter="saveName"
               @keyup.esc="cancelEditing"
               @blur="saveName"
-              class="bg-cm-input-bg text-white border border-cm-blue rounded px-2 py-1 text-4xl font-thin tracking-[0.01em] w-full focus:outline-none"
+              class="bg-cm-input-bg text-white border border-cm-blue rounded px-2 py-1 text-4xl font-extralight tracking-[0.01em] w-full focus:outline-none"
             >
           </div>
           <div
@@ -287,7 +319,7 @@ onUnmounted(() => {
             @click="handleTitleInteraction"
             v-info="'project_name'"
           >
-            <h1 class="text-4xl font-thin tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
+            <h1 class="text-4xl font-extralight tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
               {{ activeProject.name || '(no active project)' }}
             </h1>
             <button

@@ -51,10 +51,10 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776004192.8896735,
-          "hash": "d4d0bf892f301d9901c69bdda1400fe5f146a1a8",
-          "tokens": 4039,
-          "lines": 398
+          "mtime": 1776014564.4637427,
+          "hash": "414428a56e036a58d17cf4634be1a848f5623696",
+          "tokens": 3917,
+          "lines": 396
         },
         {
           "path": "src/app_state.py",
@@ -263,9 +263,9 @@
         },
         {
           "path": "frontend/src/style.css",
-          "mtime": 1776003109.1673973,
-          "hash": "623f8c88f7c1f88c569de542fb15d7133db07073",
-          "tokens": 386,
+          "mtime": 1776014564.6597438,
+          "hash": "037a7e0862a96ae7c1682dab86443b153b4b63a8",
+          "tokens": 413,
           "lines": 60
         },
         {
@@ -312,10 +312,10 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "mtime": 1776003109.177397,
-          "hash": "7ca4a41204be7d0ed7e2bb25133f6b26ac5c8473",
-          "tokens": 4623,
-          "lines": 503
+          "mtime": 1776014564.7037468,
+          "hash": "b71f436af4c45f4ddacec9b2c5de95259321f486",
+          "tokens": 4841,
+          "lines": 535
         },
         {
           "path": "frontend/src/views/CompactView.vue",
@@ -648,7 +648,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 128435,
+      "total_tokens": 128558,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -711,10 +711,10 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776004192.8896735,
-          "hash": "d4d0bf892f301d9901c69bdda1400fe5f146a1a8",
-          "tokens": 4039,
-          "lines": 398
+          "mtime": 1776014564.4637427,
+          "hash": "414428a56e036a58d17cf4634be1a848f5623696",
+          "tokens": 3917,
+          "lines": 396
         },
         {
           "path": "src/app_state.py",
@@ -923,9 +923,9 @@
         },
         {
           "path": "frontend/src/style.css",
-          "mtime": 1776003109.1673973,
-          "hash": "623f8c88f7c1f88c569de542fb15d7133db07073",
-          "tokens": 386,
+          "mtime": 1776014564.6597438,
+          "hash": "037a7e0862a96ae7c1682dab86443b153b4b63a8",
+          "tokens": 413,
           "lines": 60
         },
         {
@@ -972,10 +972,10 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "mtime": 1776003109.177397,
-          "hash": "7ca4a41204be7d0ed7e2bb25133f6b26ac5c8473",
-          "tokens": 4623,
-          "lines": 503
+          "mtime": 1776014564.7037468,
+          "hash": "b71f436af4c45f4ddacec9b2c5de95259321f486",
+          "tokens": 4841,
+          "lines": 535
         },
         {
           "path": "frontend/src/views/CompactView.vue",
@@ -1316,7 +1316,7 @@
           "ignore_tokens": true
         }
       ],
-      "total_tokens": 310931,
+      "total_tokens": 311054,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

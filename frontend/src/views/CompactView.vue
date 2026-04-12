@@ -40,6 +40,17 @@ const updatePendingStatus = async () => {
   hasPendingChangesInternal.value = await checkPendingChanges()
 }
 
+/**
+ * Handles global shortcuts dispatched from App.vue while in Compact mode
+ */
+const onShortcutPaste = (e) => {
+  handlePaste({ ctrlKey: e.detail.isAuto })
+}
+
+const onShortcutCopy = (e) => {
+  handleCopy({ ctrlKey: e.detail.codeOnly })
+}
+
 onMounted(async () => {
   // Ensure app state is loaded if compact mode is entry point
   await init()
@@ -49,6 +60,10 @@ onMounted(async () => {
   window.addEventListener('mouseup', onMouseUp)
   window.addEventListener('blur', onBlur)
 
+  // Listen for redirected shortcuts
+  window.addEventListener('cm-compact-paste', onShortcutPaste)
+  window.addEventListener('cm-compact-copy', onShortcutCopy)
+
   await updatePendingStatus()
   statusCheckInterval = setInterval(updatePendingStatus, 2000)
 })
@@ -57,6 +72,8 @@ onUnmounted(() => {
   window.removeEventListener('mousemove', onMouseMove)
   window.removeEventListener('mouseup', onMouseUp)
   window.removeEventListener('blur', onBlur)
+  window.removeEventListener('cm-compact-paste', onShortcutPaste)
+  window.removeEventListener('cm-compact-copy', onShortcutCopy)
   if (statusCheckInterval) clearInterval(statusCheckInterval)
 })
 
