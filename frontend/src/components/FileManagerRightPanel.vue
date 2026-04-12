@@ -4,6 +4,7 @@ import {
   Milestone, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
   ArrowDownUp
 } from 'lucide-vue-next'
+import { useAppState } from '../composables/useAppState'
 
 const props = defineProps({
   listItems: Array,
@@ -16,10 +17,12 @@ const props = defineProps({
 
 const emit = defineEmits([
   'update:showFullPaths',
+  'file-click',
   'token-interaction',
   'order-request'
 ])
 
+const { openFile, statusMessage, getClipboardText } = useAppState()
 const selectedIndices = ref(new Set())
 const lastSelectedIndex = ref(null)
 
@@ -29,7 +32,7 @@ const getTokenColor = (file) => {
   if (!file) return 'text-gray-500'
   if (file.ignoreTokens) return 'text-gray-600'
   const count = file.tokens
-  if (!count || count < 0) return 'text-gray-500'
+  if (count === undefined || count === null || count < 0) return 'text-gray-500'
 
   const tokenValues = props.listItems.map(f => f?.tokens || 0)
   const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, TOKEN_COLOR_RANGE_MAX) : TOKEN_COLOR_RANGE_MAX
@@ -42,6 +45,9 @@ const getTokenColor = (file) => {
 }
 
 const handleFileClick = (index, event) => {
+  const item = props.listItems[index]
+  if (!item) return
+
   if (event.shiftKey && lastSelectedIndex.value !== null) {
     const start = Math.min(lastSelectedIndex.value, index)
     const end = Math.max(lastSelectedIndex.value, index)
@@ -57,7 +63,92 @@ const handleFileClick = (index, event) => {
     selectedIndices.value.clear()
     selectedIndices.value.add(index)
     lastSelectedIndex.value = index
+    emit('file-click', item.path)
   }
+}
+
+const handleFileDoubleClick = (index) => {
+  const item = props.listItems[index]
+  if (item) {
+    openFile(item.path)
+  }
+}
+
+const handleOrderClick = (event) => {
+  if (event.ctrlKey) {
+    handlePasteOrder()
+  } else {
+    emit('order-request')
+  }
+}
+
+const handlePasteOrder = async () => {
+  if (props.listItems.length === 0) {
+    statusMessage.value = "Merge order is empty, nothing to reorder."
+    return
+  }
+
+  try {
+    // CRITICAL: Using backend-bridged getClipboardText() to bypass browser permission dialogs.
+    const pastedText = await getClipboardText()
+    if (!pastedText || !pastedText.trim()) {
+      statusMessage.value = "Clipboard is empty."
+      return
+    }
+
+    const startIdx = pastedText.indexOf('[')
+    const endIdx = pastedText.lastIndexOf(']')
+    if (startIdx === -1 || endIdx === -1) {
+      throw new Error("Could not find a JSON array.")
+    }
+
+    const jsonStr = pastedText.substring(startIdx, endIdx + 1)
+    const newOrderList = JSON.parse(jsonStr)
+
+    if (!Array.isArray(newOrderList)) {
+      throw new Error("Parsed JSON is not a list.")
+    }
+
+    // Validation logic
+    const currentPathsSet = new Set(props.listItems.map(f => f.path))
+    const newPathsSet = new Set(newOrderList)
+
+    const missingFiles = [...currentPathsSet].filter(p => !newPathsSet.has(p))
+    const unknownFiles = [...newPathsSet].filter(p => !currentPathsSet.has(p))
+
+    if (missingFiles.length || unknownFiles.length) {
+      let errorMsg = "The provided file list is invalid.\n"
+      if (missingFiles.length) errorMsg += `\nMissing files:\n- ` + missingFiles.sort().join('\n- ')
+      if (unknownFiles.length) errorMsg += `\nUnknown files:\n- ` + unknownFiles.sort().join('\n- ')
+      alert(errorMsg)
+      return
+    }
+
+    // Reorder listItems in place
+    const pathMap = new Map(props.listItems.map(f => [f.path, f]))
+    const newOrderedItems = newOrderList.map(p => pathMap.get(p))
+
+    // Clear and refill listItems array
+    props.listItems.splice(0, props.listItems.length, ...newOrderedItems)
+    statusMessage.value = "File merge order updated from clipboard."
+
+  } catch (err) {
+    alert(`Could not parse the new file order.\n\nError: ${err.message}`)
+  }
+}
+
+const scrollToPath = (path) => {
+  const index = props.listItems.findIndex(f => f.path === path)
+  if (index === -1) return
+
+  nextTick(() => {
+    const listEl = props.mergeListRef.value
+    if (!listEl) return
+    const items = listEl.querySelectorAll('li')
+    if (items[index]) {
+      items[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    }
+  })
 }
 
 const scrollToSelection = (alignToTop = false) => {
@@ -135,7 +226,8 @@ defineExpose({
   clearSelection: () => {
     selectedIndices.value.clear()
     lastSelectedIndex.value = null
-  }
+  },
+  scrollToPath
 })
 </script>
 
@@ -150,11 +242,11 @@ defineExpose({
       </div>
       <div class="flex items-center space-x-2">
         <button
-          @click="emit('order-request')"
+          @click="handleOrderClick"
           class="p-1.5 rounded border border-gray-600 enabled:hover:border-cm-blue text-gray-500 enabled:hover:text-cm-blue transition-colors relative"
           :class="{ 'click-pulse': isOrderPulseActive }"
           :style="isOrderPulseActive ? { '--click-color': '#DE680888' } : {}"
-          title="Copy order request prompt"
+          title="Single-click: Copy request prompt | Ctrl+Click: Paste new order"
           v-info="'fm_order'"
         >
           <ArrowDownUp class="w-4 h-4" />
@@ -180,6 +272,8 @@ defineExpose({
           class="group flex items-center border rounded p-2 text-sm transition-colors"
           :class="selectedIndices.has(index) ? 'bg-cm-blue border-cm-blue' : 'bg-cm-input-bg border-gray-700 hover:border-gray-500'"
           @click="handleFileClick(index, $event)"
+          @dblclick="handleFileDoubleClick(index)"
+          :title="`${file.path} (Double-click to open)`"
         >
           <div class="drag-handle cursor-grab active:cursor-grabbing mr-3 text-gray-600 group-hover:text-gray-400" @click.stop>
             <div class="grid grid-cols-2 gap-0.5 w-3">
@@ -198,7 +292,7 @@ defineExpose({
             v-info="'fm_tokens_item'"
           >
             <span class="text-xs font-mono" :class="selectedIndices.has(index) ? 'text-blue-100 font-bold' : getTokenColor(file)">
-              {{ file.ignoreTokens ? `[${file.tokens?.toLocaleString()}]` : (file.tokens?.toLocaleString() || '?') }}
+              {{ file.ignoreTokens ? `[${file.tokens?.toLocaleString()}]` : ((file.tokens !== undefined && file.tokens !== null && file.tokens >= 0) ? file.tokens.toLocaleString() : '?') }}
             </span>
           </div>
         </li>

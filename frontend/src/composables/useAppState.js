@@ -387,6 +387,13 @@ export function useAppState() {
     return states.some(s => s === 'pending')
   })
 
+  const getClipboardText = async () => {
+    if (window.pywebview) {
+      return await window.pywebview.api.get_clipboard_text()
+    }
+    return ""
+  }
+
   const processPaste = async () => {
     if (!window.pywebview) return false
 
@@ -399,7 +406,7 @@ export function useAppState() {
 
     try {
       // Use Python backend to access system clipboard bypassing browser prompts
-      const text = await window.pywebview.api.get_clipboard_text()
+      const text = await getClipboardText()
 
       if (!text || !text.trim()) {
         statusMessage.value = "Clipboard is empty."
@@ -479,6 +486,13 @@ export function useAppState() {
       await navigator.clipboard.writeText(prompt)
       statusMessage.value = "Copied format correction prompt."
     }
+  }
+
+  const openFile = async (relPath) => {
+    if (window.pywebview) {
+      return await window.pywebview.api.open_file(relPath)
+    }
+    return false
   }
 
   // --- File Management ---
@@ -563,10 +577,12 @@ export function useAppState() {
     updateProjectFiles,
     copyOrderRequest,
     processPaste,
+    getClipboardText,
     getFileContent,
     applyFileChange,
     deleteFile,
     copyAdmonishment,
+    openFile,
     saveInstructions,
     copyCleanupPrompt,
     restoreMainWindow,
@@ -589,8 +605,8 @@ export function useAppState() {
     generateMasterPrompt: async (data) => window.pywebview ? await window.pywebview.api.generate_master_prompt(data) : "",
     parseStarterSegments: async (text) => window.pywebview ? await window.pywebview.api.parse_starter_segments(text) : {},
     assembleStarterDocument: async (segments, order, names) => window.pywebview ? await window.pywebview.api.assemble_starter_document(segments, order, names) : "",
-    getStarterRewritePrompt: async (inst, targets, ref, names, data, merged) => window.pywebview ? await window.pywebview.api.get_starter_rewrite_prompt(inst, targets, ref, names, data, merged) : "",
-    getStarterSyncPrompt: async (k, names, data, targets, ref) => window.pywebview ? await window.pywebview.api.get_starter_sync_prompt(k, names, data, targets, ref) : "",
+    getStarterRewritePrompt: async (inst, targets, Hacker, names, data, merged) => window.pywebview ? await window.pywebview.api.get_starter_rewrite_prompt(inst, targets, Hacker, names, data, merged) : "",
+    getStarterSyncPrompt: async (k, names, data, targets, Hacker) => window.pywebview ? await window.pywebview.api.get_starter_sync_prompt(k, names, data, targets, Hacker) : "",
     getStarterQuestionPrompt: async (ctx, name, text, q) => window.pywebview ? await window.pywebview.api.get_starter_question_prompt(ctx, name, text, q) : "",
     mapParsedSegmentsToKeys: async (parsed, names) => window.pywebview ? await window.pywebview.api.map_parsed_segments_to_keys(parsed, names) : {},
     createStarterProject: async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project(output, includeRef, pitch, data) : null,

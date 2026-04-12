@@ -2,6 +2,8 @@ import os
 import json
 import pyperclip
 import logging
+import subprocess
+import sys
 from src.core.utils import parse_gitignore, get_token_count_for_text, is_ignored, get_file_hash
 from src.ui.file_manager.file_tree_builder import build_file_tree_data
 from src.core.merger import generate_output_string
@@ -216,3 +218,32 @@ class FileApi:
         finally:
             # Restore original selection
             project_config.selected_files = orig_selection
+
+    def open_file(self, rel_path):
+        """Opens a specific project file in the OS default or configured editor."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return False
+
+        full_path = os.path.join(project_config.base_dir, rel_path)
+        if not os.path.isfile(full_path):
+            return False
+
+        # Check for configured editor
+        app_config = self.app_state.config
+        editor = app_config.get('default_editor', '')
+
+        try:
+            if editor and os.path.isfile(editor):
+                subprocess.Popen([editor, full_path])
+            else:
+                if sys.platform == "win32":
+                    os.startfile(full_path)
+                elif sys.platform == "darwin":
+                    subprocess.Popen(["open", full_path])
+                else:
+                    subprocess.Popen(["xdg-open", full_path])
+            return True
+        except Exception as e:
+            log.error(f"Failed to open file {rel_path}: {e}")
+            return False

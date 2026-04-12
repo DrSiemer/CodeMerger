@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { ChevronRight, ChevronDown, Folder, CheckSquare, Square } from 'lucide-vue-next'
+import { useAppState } from '../composables/useAppState'
 
 const props = defineProps({
   node: {
@@ -18,10 +19,15 @@ const props = defineProps({
   level: {
     type: Number,
     default: 0
+  },
+  highlightedPath: {
+    type: String,
+    default: null
   }
 })
 
-const emit = defineEmits(['toggle-select', 'toggle-expand'])
+const emit = defineEmits(['toggle-select', 'toggle-expand', 'file-click'])
+const { openFile } = useAppState()
 
 const isExpanded = ref(props.initialExpandedPaths.includes(props.node.path))
 
@@ -33,6 +39,7 @@ watch(() => props.initialExpandedPaths, (newPaths) => {
 }, { deep: true })
 
 const isFileSelected = computed(() => props.selectedPaths.includes(props.node.path))
+const isHighlighted = computed(() => props.highlightedPath === props.node.path)
 
 // --- Visual Completeness Logic (Mirrors Python UI) ---
 // Folders turn grey if all "relevant" (non-init) files inside are selected
@@ -83,10 +90,26 @@ const textClass = computed(() => {
   }
 })
 
-const handleClick = () => {
+const handleClick = (event) => {
   if (props.node.type === 'dir') {
     isExpanded.value = !isExpanded.value
     emit('toggle-expand', { path: props.node.path, expanded: isExpanded.value })
+  } else {
+    // File Click
+    if (event.ctrlKey) {
+      openFile(props.node.path)
+    } else {
+      emit('file-click', props.node.path)
+    }
+  }
+}
+
+const handleIconClick = (event) => {
+  event.stopPropagation()
+  if (props.node.type === 'file') {
+    emit('toggle-select', props.node.path)
+  } else {
+    handleClick(event)
   }
 }
 
@@ -100,6 +123,10 @@ const onChildToggleSelect = (path) => {
   emit('toggle-select', path)
 }
 
+const onChildFileClick = (path) => {
+  emit('file-click', path)
+}
+
 const onChildToggleExpand = (data) => {
   emit('toggle-expand', data)
 }
@@ -109,7 +136,8 @@ const onChildToggleExpand = (data) => {
   <div :id="`node-${node.path.replace(/[\\/.]/g, '-')}`" class="select-none">
     <div
       class="flex items-center py-1 hover:bg-cm-blue/10 cursor-pointer rounded transition-colors group"
-      :style="{ paddingLeft: `${level * 16}px` }"
+      :class="{ 'bg-cm-blue/20': isHighlighted }"
+      :style="{ paddingLeft: `${level * 20}px` }"
       @click="handleClick"
       @dblclick="handleDoubleClick"
     >
@@ -121,8 +149,8 @@ const onChildToggleExpand = (data) => {
         </template>
       </div>
 
-      <!-- Type Icon -->
-      <div class="w-5 flex shrink-0 justify-center mr-2">
+      <!-- Type Icon (Instant toggle click area) -->
+      <div class="w-5 flex shrink-0 justify-center mr-2" @click="handleIconClick">
         <Folder
           v-if="node.type === 'dir'"
           class="w-4 h-4"
@@ -142,7 +170,7 @@ const onChildToggleExpand = (data) => {
       <span
         class="text-sm truncate"
         :class="textClass"
-        :title="node.is_filtered ? 'Normally hidden by filters' : node.name"
+        :title="node.is_filtered ? 'Normally hidden by filters' : (node.type === 'file' ? `${node.name} (Ctrl+Click to open)` : node.name)"
       >
         {{ node.name }}
       </span>
@@ -156,8 +184,10 @@ const onChildToggleExpand = (data) => {
         :node="child"
         :selected-paths="selectedPaths"
         :initial-expanded-paths="initialExpandedPaths"
+        :highlightedPath="highlightedPath"
         :level="level + 1"
         @toggle-select="onChildToggleSelect"
+        @file-click="onChildFileClick"
         @toggle-expand="onChildToggleExpand"
       />
     </div>

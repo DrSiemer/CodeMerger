@@ -19,6 +19,7 @@ const [mergeListRef, listItems] = useDragAndDrop(
 )
 
 // State
+const leftPanelRef = ref(null)
 const rightPanelRef = ref(null)
 const fileTree = ref([])
 const filterText = ref('')
@@ -28,6 +29,9 @@ const showFullPaths = ref(false)
 const currentExpandedDirs = ref(new Set(activeProject.expandedDirs))
 const isLoaded = ref(false)
 const isOrderPulseActive = ref(false)
+
+// Subtle highlight state for tree synchronization
+const highlightedPath = ref(null)
 
 onMounted(async () => {
   await resizeWindow(1100, 800)
@@ -69,7 +73,10 @@ const autoHandleNewFiles = async () => {
   }
 }
 
-watch([filterText, isExtFilter, isGitFilter], () => refreshTree())
+watch([filterText, isExtFilter, isGitFilter], () => {
+  highlightedPath.value = null
+  refreshTree()
+})
 
 const totalTokens = computed(() => {
   return listItems.value.reduce((acc, f) => {
@@ -100,23 +107,49 @@ const handleTokenInteraction = (index, event) => {
 }
 
 const toggleFileSelect = (path) => {
-  const idx = listItems.value.findIndex(f => f.path === path)
-  if (idx !== -1) {
-    listItems.value.splice(idx, 1)
+  highlightedPath.value = null
+  const existingIdx = listItems.value.findIndex(f => f.path === path)
+
+  if (existingIdx !== -1) {
+    listItems.value.splice(existingIdx, 1)
     rightPanelRef.value?.clearSelection()
   } else {
+    // Start async token calculation
     window.pywebview.api.get_token_count(path).then(tokens => {
-      listItems.value.push({ path, tokens, ignoreTokens: false })
+      // CRITICAL: Re-check existence inside the callback to prevent double-adding
+      // if the user clicked multiple times during the async delay.
+      const doubleCheckIdx = listItems.value.findIndex(f => f.path === path)
+      if (doubleCheckIdx === -1) {
+        listItems.value.push({ path, tokens, ignoreTokens: false })
+
+        // When added, scroll right panel to see it
+        nextTick(() => {
+          rightPanelRef.value?.scrollToPath(path)
+        })
+      }
     })
   }
 }
 
+// --- Synchronized Scrolling ---
+const onLeftFileClick = (path) => {
+  highlightedPath.value = null
+  rightPanelRef.value?.scrollToPath(path)
+}
+
+const onRightFileClick = (path) => {
+  highlightedPath.value = path
+  leftPanelRef.value?.scrollToPath(path)
+}
+
 const toggleFolderExpand = ({ path, expanded }) => {
+  highlightedPath.value = null
   if (expanded) currentExpandedDirs.value.add(path)
   else currentExpandedDirs.value.delete(path)
 }
 
 const addAll = () => {
+  highlightedPath.value = null
   const allFiles = []
   const traverse = (nodes) => {
     for (const node of nodes) {
@@ -130,7 +163,10 @@ const addAll = () => {
   if (toAdd.length > 50 && !confirm(`Add ${toAdd.length} files to list?`)) return
   toAdd.forEach(path => {
     window.pywebview.api.get_token_count(path).then(tokens => {
-      listItems.value.push({ path, tokens, ignoreTokens: false })
+      // Same idempotency check for bulk operations
+      if (listItems.value.findIndex(f => f.path === path) === -1) {
+        listItems.value.push({ path, tokens, ignoreTokens: false })
+      }
     })
   })
 }
@@ -188,13 +224,16 @@ const handleSave = async () => {
       <!-- Main Content Split -->
       <div class="flex-grow flex min-h-0 overflow-hidden">
         <FileManagerLeftPanel
+          ref="leftPanelRef"
           :fileTree="fileTree"
           v-model:filterText="filterText"
           v-model:isExtFilter="isExtFilter"
           v-model:isGitFilter="isGitFilter"
           :selectedPaths="listItems.map(f => f.path)"
           :expandedDirs="currentExpandedDirs"
+          :highlightedPath="highlightedPath"
           @toggle-select="toggleFileSelect"
+          @file-click="onLeftFileClick"
           @toggle-expand="toggleFolderExpand"
           @add-all="addAll"
         />
@@ -207,6 +246,7 @@ const handleSave = async () => {
           :tokenColorClass="tokenColorClass"
           v-model:showFullPaths="showFullPaths"
           :isOrderPulseActive="isOrderPulseActive"
+          @file-click="onRightFileClick"
           @token-interaction="handleTokenInteraction"
           @order-request="handleOrderRequest"
         />

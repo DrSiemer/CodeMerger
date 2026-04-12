@@ -8,7 +8,8 @@ const props = defineProps({
   isExtFilter: Boolean,
   isGitFilter: Boolean,
   selectedPaths: Array,
-  expandedDirs: Object // Set
+  expandedDirs: Object, // Set
+  highlightedPath: String
 })
 
 const emit = defineEmits([
@@ -16,9 +17,20 @@ const emit = defineEmits([
   'update:isExtFilter',
   'update:isGitFilter',
   'toggle-select',
+  'file-click',
   'toggle-expand',
   'add-all'
 ])
+
+const scrollToPath = (path) => {
+  const id = `node-${path.replace(/[\\/.]/g, '-')}`
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  }
+}
+
+defineExpose({ scrollToPath })
 </script>
 
 <template>
@@ -68,7 +80,9 @@ const emit = defineEmits([
         :node="node"
         :selected-paths="selectedPaths"
         :initial-expanded-paths="Array.from(expandedDirs)"
+        :highlightedPath="highlightedPath"
         @toggle-select="(p) => emit('toggle-select', p)"
+        @file-click="(p) => emit('file-click', p)"
         @toggle-expand="(data) => emit('toggle-expand', data)"
       />
     </div>

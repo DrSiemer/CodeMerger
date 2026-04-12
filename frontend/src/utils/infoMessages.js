@@ -24,7 +24,7 @@ export const INFO_MESSAGES = {
   "profile_delete": "Delete Profile: Remove the currently active profile. The 'Default' profile cannot be deleted.",
 
   // File Manager
-  "fm_tree": "Available Files: Browse your project structure. Double-click files or folders to add them to the merge list. Green text indicates newly detected files. Purple text indicates files in your merge list that would normally be ignored by the Git or extension filters.",
+  "fm_tree": "Available Files: Browse your project structure. Click a checkbox to toggle selection, or Ctrl+Click a filename to open the file in your editor. Green text indicates newly detected files.",
   "fm_tree_action": "Merge Toggle: Adds or removes the currently selected files from the list.",
   "fm_list": "Merge Order: This list determines in what order the code will be presented to the AI. Files are merged from top to bottom. Click a file to select it for sorting or removal.",
   "fm_list_tools": "List Visibility: Toggle the display of full file paths or relative filenames in the merge list.",
@@ -32,8 +32,9 @@ export const INFO_MESSAGES = {
   "fm_filter_ext": "Filetype Filter: Toggle visibility of files not in your allowed extensions list. When ON, extra files are hidden.",
   "fm_filter_text": "Text Filter: Type to filter the tree and the merge list by filename.",
   "fm_tokens": "Total Tokens: A real-time estimate of context usage. As the grow count grows, the color changes from gray to yellow to red to warn you about LLM context limits.",
-  "fm_order": "Order Request: Click to copy a prompt asking the AI for the 'optimal' file order.",
-  "fm_tokens_item": "Token Stats: Shows the token count for this file. Text color shifts from gray to red as a file grows larger, helping you identify potential context bottlenecks. Ctrl-click to copy a breakup request (asking the AI to split the file). Alt-click to 'ignore' this file's tokens when calculating total context warnings.",
+  "fm_order": "Order Request: Click to copy a prompt asking for the optimal file order. Ctrl-click to directly apply a new order list from your clipboard.",
+  "fm_tokens_item": "Token Stats: Shows the token count for this file. Text color shifts from gray to red as a file grows larger. Ctrl-click to copy a breakup request. Alt-click to 'ignore' this file's tokens in coloring warnings.",
+  "fm_list_item": "Merge Item: Double-click to open this file in your editor. Click to select for sorting, which also scrolls the Available Files tree to this item with a subtle highlight.",
   "fm_sort_top": "Move to Top: Place the selected files at the beginning of the merge list.",
   "fm_sort_up": "Move Up: Shift the selected files one position higher in the order.",
   "fm_sort_down": "Move Down: Shift the selected files one position lower in the order.",
