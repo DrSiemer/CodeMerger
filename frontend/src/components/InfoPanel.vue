@@ -1,12 +1,10 @@
 <script setup>
-import { watch } from 'vue'
 import { useAppState, currentInfoText, infoModeActive } from '../composables/useAppState'
 import { INFO_MESSAGES } from '../utils/infoMessages'
 
 /**
- * Singleton refs are imported DIRECTLY from the useAppState module.
- * This hard-links reactivity between modals (triggering setHoverInfo)
- * and the footer regardless of stacking context.
+ * Singleton Refs imported directly from useAppState.js module scope.
+ * This hard-links reactivity between the modals and footer.
  */
 </script>
 
