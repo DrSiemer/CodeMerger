@@ -232,16 +232,17 @@ defineExpose({
 </script>
 
 <template>
-  <div class="w-1/2 flex flex-col p-5 bg-cm-dark-bg">
+  <div id="fm-merge-order" class="w-1/2 flex flex-col p-5 bg-cm-dark-bg">
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center space-x-3 min-w-0">
         <h3 class="font-semibold text-gray-200 shrink-0">Merge Order</h3>
-        <span :class="tokenColorClass" class="text-sm font-mono pt-0.5 truncate" v-info="'fm_tokens'">
+        <span id="fm-total-tokens" :class="tokenColorClass" class="text-sm font-mono pt-0.5 truncate" v-info="'fm_tokens'">
           ({{ listItems.length }} files, {{ totalTokens.toLocaleString() }} tokens)
         </span>
       </div>
       <div class="flex items-center space-x-2">
         <button
+          id="btn-fm-order-request"
           @click="handleOrderClick"
           class="p-1.5 rounded border border-gray-600 enabled:hover:border-cm-blue text-gray-500 enabled:hover:text-cm-blue transition-colors relative"
           :class="{ 'click-pulse': isOrderPulseActive }"
@@ -252,6 +253,7 @@ defineExpose({
           <ArrowDownUp class="w-4 h-4" />
         </button>
         <button
+          id="btn-fm-toggle-paths"
           @click="emit('update:showFullPaths', !showFullPaths)"
           class="p-1.5 rounded border transition-colors"
           :class="showFullPaths ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
@@ -304,7 +306,7 @@ defineExpose({
     </div>
 
     <!-- Reorder Toolbar -->
-    <div class="flex items-center justify-center space-x-2 pt-2">
+    <div id="fm-reorder-toolbar" class="flex items-center justify-center space-x-2 pt-2">
       <button @click="moveSelectionToTop" v-info="'fm_sort_top'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
       <button @click="moveSelectionUp" v-info="'fm_sort_up'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
       <button @click="removeSelected" v-info="'fm_sort_remove'" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-red-900/50 enabled:hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>

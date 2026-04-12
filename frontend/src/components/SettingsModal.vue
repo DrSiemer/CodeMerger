@@ -104,11 +104,11 @@ const addFiletype = () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div id="settings-modal" class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
     <div class="bg-cm-dark-bg w-full max-w-4xl h-[650px] rounded shadow-2xl border border-gray-600 flex overflow-hidden">
 
       <!-- Sidebar Navigation -->
-      <div class="w-48 bg-cm-top-bar border-r border-gray-700 flex flex-col shrink-0">
+      <div id="settings-sidebar" class="w-48 bg-cm-top-bar border-r border-gray-700 flex flex-col shrink-0">
         <div class="p-4 text-lg font-bold text-white mb-2">Settings</div>
 
         <div class="flex-grow flex flex-col px-2 space-y-1">
@@ -127,7 +127,7 @@ const addFiletype = () => {
       </div>
 
       <!-- Main Content Area -->
-      <div class="flex-grow flex flex-col h-full bg-cm-dark-bg min-w-0">
+      <div id="settings-viewport" class="flex-grow flex flex-col h-full bg-cm-dark-bg min-w-0">
         <!-- Header -->
         <div class="flex justify-between items-center p-4 border-b border-gray-700 shrink-0">
           <h2 class="text-xl font-semibold text-white" v-info="activeTabInfoKey">
@@ -192,6 +192,7 @@ const addFiletype = () => {
                 <!-- Manual Check Button inside the updates documentation scope -->
                 <div class="pl-7 pt-2">
                    <button
+                    id="btn-check-updates-now"
                     @click="window.pywebview.api.check_for_updates_manual()"
                     v-info="'set_app_check_now'"
                     class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold py-1.5 px-4 rounded transition-colors"
@@ -242,6 +243,7 @@ const addFiletype = () => {
               <!-- Search / Filter -->
               <div class="flex items-center space-x-3 shrink-0">
                 <input
+                  id="filetypes-search-input"
                   v-model="searchQuery"
                   type="text"
                   class="flex-grow bg-cm-input-bg text-white px-3 py-2 rounded border border-gray-600 focus:border-cm-blue focus:outline-none text-sm"
@@ -250,7 +252,7 @@ const addFiletype = () => {
               </div>
 
               <!-- List -->
-              <div class="border border-gray-600 rounded bg-cm-input-bg overflow-hidden shrink-0" v-info="'ft_list'">
+              <div id="filetypes-list-container" class="border border-gray-600 rounded bg-cm-input-bg overflow-hidden shrink-0" v-info="'ft_list'">
                 <table class="w-full text-sm text-left">
                   <thead class="text-gray-400 bg-gray-800">
                     <tr>
@@ -292,7 +294,7 @@ const addFiletype = () => {
               </div>
 
               <!-- Add New Section -->
-              <div class="bg-gray-800 p-4 rounded border border-gray-700 shrink-0" v-info="'ft_add'">
+              <div id="filetypes-add-form" class="bg-gray-800 p-4 rounded border border-gray-700 shrink-0" v-info="'ft_add'">
                 <h3 class="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider">Add New Filetype</h3>
                 <div class="flex space-x-3">
                   <input
@@ -391,6 +393,7 @@ const addFiletype = () => {
             Cancel
           </button>
           <button
+            id="btn-settings-save"
             @click="handleSave"
             v-info="'settings_save'"
             class="bg-cm-blue hover:bg-blue-500 text-white font-medium py-2 px-5 rounded shadow-sm transition-colors"

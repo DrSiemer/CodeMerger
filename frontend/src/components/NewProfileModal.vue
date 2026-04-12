@@ -36,7 +36,7 @@ const handleCreate = async () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div id="new-profile-modal" class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
     <div class="bg-cm-dark-bg w-full max-w-[400px] rounded shadow-2xl border border-gray-600 flex flex-col">
 
       <!-- Header -->
@@ -52,6 +52,7 @@ const handleCreate = async () => {
         <div>
           <label class="block text-gray-200 mb-2">Enter a unique name for the new profile:</label>
           <input
+            id="input-profile-name"
             ref="nameInput"
             v-model="profileName"
             v-info="'profile_name'"
@@ -84,6 +85,7 @@ const handleCreate = async () => {
           Cancel
         </button>
         <button
+          id="btn-profile-create"
           @click="handleCreate"
           :disabled="!profileName.trim()"
           v-info="'profile_create'"

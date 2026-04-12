@@ -277,13 +277,14 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex-grow flex flex-col overflow-hidden text-gray-100 bg-cm-dark-bg font-sans relative">
+  <div id="dashboard-view" class="flex-grow flex flex-col overflow-hidden text-gray-100 bg-cm-dark-bg font-sans relative">
     <!-- Top Bar -->
-    <header class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
+    <header id="dashboard-header" class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
       <div class="flex items-center space-x-4 min-w-0 flex-grow">
         <!-- Masked Logo Swatch -->
         <div
           v-if="activeProject.path && logoMask"
+          id="project-logo"
           class="w-12 h-12 cursor-pointer shrink-0"
           :style="swatchStyle"
           @click="selectColor"
@@ -294,6 +295,7 @@ onUnmounted(() => {
         <!-- Fallback if mask not loaded -->
         <div
           v-else-if="activeProject.path"
+          id="project-logo"
           class="w-6 h-6 rounded cursor-pointer border border-gray-600 shadow-sm shrink-0"
           :style="{ backgroundColor: activeProject.color }"
           @click="selectColor"
@@ -301,7 +303,7 @@ onUnmounted(() => {
           title="Change project color"
         ></div>
 
-        <div class="flex items-center min-w-0 flex-grow text-white">
+        <div id="project-name-container" class="flex items-center min-w-0 flex-grow text-white">
           <div v-if="isEditingName" class="flex items-center space-x-2 w-full max-w-md">
             <input
               ref="nameInput"
@@ -360,9 +362,10 @@ onUnmounted(() => {
     </header>
 
     <!-- Navigation Buttons Row -->
-    <div class="px-6 py-5 flex items-center justify-between bg-cm-dark-bg shrink-0">
+    <div id="dashboard-nav-actions" class="px-6 py-5 flex items-center justify-between bg-cm-dark-bg shrink-0">
       <div class="flex items-center space-x-4">
         <button
+          id="btn-edit-merge-list"
           class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2 px-6 rounded shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-[38px]"
           :disabled="!activeProject.path"
           @click="openFileManager"
@@ -371,7 +374,7 @@ onUnmounted(() => {
           Edit Merge List
         </button>
 
-        <div class="flex items-center space-x-2" v-if="activeProject.path">
+        <div id="profile-navigator" class="flex items-center space-x-2" v-if="activeProject.path">
           <!-- Multi-profile navigator -->
           <div v-if="activeProject.profiles.length > 1" class="flex items-center" v-info="'profile_nav'">
             <button @click="prevProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-l border border-gray-600 border-r-0 flex items-center justify-center transition-colors" title="Previous Profile">&lt;</button>
@@ -391,6 +394,7 @@ onUnmounted(() => {
       <div class="flex items-center space-x-3">
         <!-- Project Starter Icon Button -->
         <button
+          id="btn-starter"
           class="hover:brightness-110 transition-all p-1 flex items-center justify-center"
           title="Project Starter"
           @mouseenter="isStarterHovered = true"
@@ -407,6 +411,7 @@ onUnmounted(() => {
         </button>
 
         <button
+          id="btn-select-project"
           @click="showProjectModal = true"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
           v-info="'select_project'"
@@ -417,18 +422,19 @@ onUnmounted(() => {
     </div>
 
     <!-- Main Dashboard Content -->
-    <main class="flex-grow flex flex-col relative bg-cm-dark-bg min-h-0 overflow-y-auto">
+    <main id="dashboard-main" class="flex-grow flex flex-col relative bg-cm-dark-bg min-h-0 overflow-y-auto">
       <div class="absolute bottom-4 left-6 flex flex-col">
-        <button @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings" v-info="'settings'">
+        <button id="btn-settings" @click="openSettings('application')" class="text-gray-400 hover:text-white transition-colors" title="Settings" v-info="'settings'">
           <Settings class="w-7 h-7" />
         </button>
       </div>
 
       <div class="flex-grow flex items-center justify-center pb-4">
-        <div v-if="activeProject.path" class="w-full max-w-[620px] border border-gray-600 rounded bg-cm-dark-bg p-6 flex flex-col shadow-sm">
+        <div v-if="activeProject.path" id="dashboard-action-card" class="w-full max-w-[620px] border border-gray-600 rounded bg-cm-dark-bg p-6 flex flex-col shadow-sm">
           <div class="flex justify-between items-center mb-5">
             <h2 class="text-[17px] font-medium text-white">Actions</h2>
             <button
+              id="btn-comment-cleanup"
               @click="handleCleanup"
               class="text-gray-500 hover:text-gray-300 text-sm font-mono font-bold transition-colors relative"
               :class="{ 'click-pulse': cleanupPulse }"
@@ -444,6 +450,7 @@ onUnmounted(() => {
             <!-- Conditional Copy Button Layout -->
             <template v-if="activeProject.hasInstructions">
               <button
+                id="btn-copy-with-instructions"
                 @click="handleCopy(true)"
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
@@ -454,6 +461,7 @@ onUnmounted(() => {
                 <span v-else>Copy with Instructions</span>
               </button>
               <button
+                id="btn-copy-code"
                 @click="handleCopy(false)"
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
@@ -467,6 +475,7 @@ onUnmounted(() => {
 
             <template v-else>
               <button
+                id="btn-copy-code"
                 @click="handleCopy(false)"
                 :disabled="isCopyingInstructions || isCopyingOnly"
                 class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -482,6 +491,7 @@ onUnmounted(() => {
             </template>
 
             <button
+              id="btn-define-instructions"
               @click="showInstructionsModal = true"
               class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
               v-info="'instructions'"
@@ -493,6 +503,7 @@ onUnmounted(() => {
             <div class="flex flex-col space-y-4">
               <!-- Orange Attention styling when changes are pending in memory (Requirement) -->
               <button
+                id="btn-paste-changes"
                 @click="handlePasteChanges"
                 class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
                 :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
@@ -503,6 +514,7 @@ onUnmounted(() => {
               </button>
 
               <button
+                id="btn-response-review"
                 v-if="lastAiResponse"
                 @click="openExistingReview"
                 class="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"

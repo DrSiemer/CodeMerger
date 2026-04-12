@@ -303,13 +303,13 @@ const nextStep = () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 bg-cm-dark-bg z-50 flex flex-col overflow-hidden text-gray-100 font-sans">
+  <div id="project-starter-modal" class="absolute inset-0 bg-cm-dark-bg z-50 flex flex-col overflow-hidden text-gray-100 font-sans">
 
     <StepSuccess v-if="successScreenData" :successScreenData="successScreenData" @close="emit('close')" />
 
     <template v-else>
       <!-- Header -->
-      <div class="bg-cm-top-bar border-b border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
+      <div id="starter-header" class="bg-cm-top-bar border-b border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-4">
           <Leaf class="w-6 h-6 text-cm-blue" />
           <h2 class="text-xl font-bold text-white">Project Starter <span v-if="pData.name" class="text-gray-500 font-medium">/ {{ pData.name }}</span></h2>
@@ -323,19 +323,19 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
-          <button @click="exportConfig" v-info="'starter_header_save'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Save Configuration">
+          <button id="btn-starter-save-config" @click="exportConfig" v-info="'starter_header_save'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Save Configuration">
             <Save class="w-4 h-4"/>
           </button>
-          <button @click="importConfig" v-info="'starter_header_load'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Load Configuration">
+          <button id="btn-starter-load-config" @click="importConfig" v-info="'starter_header_load'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Load Configuration">
             <Upload class="w-4 h-4"/>
           </button>
-          <button @click="clearAll" v-info="'starter_header_clear'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Clear and restart">
+          <button id="btn-starter-clear-all" @click="clearAll" v-info="'starter_header_clear'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Clear and restart">
             <Trash2 class="w-4 h-4"/>
           </button>
 
           <div class="w-px h-6 bg-gray-600 mx-2"></div>
 
-          <button @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
+          <button id="btn-starter-exit" @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
             <LogOut class="w-4 h-4" />
             <span class="text-sm font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
           </button>
@@ -343,7 +343,7 @@ const nextStep = () => {
       </div>
 
       <!-- Tabs (Left aligned) -->
-      <div class="flex bg-gray-800 border-b border-gray-700 px-4 shrink-0 overflow-x-auto justify-start">
+      <div id="starter-tabs" class="flex bg-gray-800 border-b border-gray-700 px-4 shrink-0 overflow-x-auto justify-start">
         <button
           v-for="(stepId, index) in activeStepsList"
           :key="stepId"
@@ -360,7 +360,7 @@ const nextStep = () => {
       </div>
 
       <!-- Body: Full scrollable region for all content below the tabs -->
-      <div class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg flex flex-col items-center h-0 min-h-0">
+      <div id="starter-step-container" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg flex flex-col items-center h-0 min-h-0">
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 min-h-0">
           <Step1Details v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
           <Step2BaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
@@ -373,9 +373,10 @@ const nextStep = () => {
     </template>
 
     <!-- Navigation Bar at Bottom -->
-    <div v-if="!successScreenData" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
+    <div v-if="!successScreenData" id="starter-footer" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-3">
              <button
+                id="btn-starter-prev"
                 v-if="currentStep > 1"
                 @click="prevStep"
                 v-info="'starter_nav_prev'"
@@ -387,6 +388,7 @@ const nextStep = () => {
 
         <div class="flex items-center space-x-3">
              <button
+                id="btn-starter-next"
                 v-if="activeStepsList.indexOf(currentStep) < activeStepsList.length - 1"
                 @click="nextStep"
                 :disabled="isNextDisabled"

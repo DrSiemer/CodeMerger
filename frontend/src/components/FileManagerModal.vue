@@ -207,7 +207,7 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
+  <div id="file-manager-modal" class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
     <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[90vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
 
       <!-- Header -->
@@ -224,6 +224,7 @@ const handleSave = async () => {
       <!-- Main Content Split -->
       <div class="flex-grow flex min-h-0 overflow-hidden">
         <FileManagerLeftPanel
+          id="fm-left-panel"
           ref="leftPanelRef"
           :fileTree="fileTree"
           v-model:filterText="filterText"
@@ -239,6 +240,7 @@ const handleSave = async () => {
         />
 
         <FileManagerRightPanel
+          id="fm-right-panel"
           ref="rightPanelRef"
           :listItems="listItems"
           :mergeListRef="mergeListRef"
@@ -255,6 +257,7 @@ const handleSave = async () => {
       <!-- Footer Actions -->
       <div class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
         <button
+          id="btn-fm-clear-list"
           @click="listItems.splice(0, listItems.length)"
           class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm"
           v-info="'fm_remove_all'"
@@ -272,6 +275,7 @@ const handleSave = async () => {
             {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
           </button>
           <button
+            id="btn-fm-save"
             v-if="hasUnsavedChanges"
             @click="handleSave"
             class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"

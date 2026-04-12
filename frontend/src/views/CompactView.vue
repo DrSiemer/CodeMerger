@@ -179,9 +179,10 @@ const copyButtonText = computed(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-cm-dark-bg border border-gray-600 select-none overflow-hidden font-sans">
+  <div id="compact-view" class="h-full flex flex-col bg-cm-dark-bg border border-gray-600 select-none overflow-hidden font-sans">
     <!-- Header Draggable Bar -->
     <div
+      id="compact-move-bar"
       class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move"
       @mousedown="startDrag"
       @dblclick="restoreMainWindow"
@@ -216,9 +217,10 @@ const copyButtonText = computed(() => {
     </div>
 
     <!-- Actions Area -->
-    <div class="flex flex-col p-1.5 space-y-1.5">
+    <div id="compact-actions" class="flex flex-col p-1.5 space-y-1.5">
       <!-- Adaptive Copy Button (Switches logic based on project instructions) -->
       <button
+        id="btn-compact-copy"
         @click="handleCopy"
         :disabled="isCopying"
         class="w-full text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
@@ -233,6 +235,7 @@ const copyButtonText = computed(() => {
       <div class="w-full flex items-center space-x-1.5">
         <!-- Orange styling when changes are pending in memory -->
         <button
+          id="btn-compact-paste"
           @click="handlePaste"
           class="relative flex-grow text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-8"
           :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
@@ -242,6 +245,7 @@ const copyButtonText = computed(() => {
         </button>
 
         <button
+          id="btn-compact-review"
           v-if="lastAiResponse"
           @click="restoreMainWindow"
           class="bg-gray-800 hover:bg-gray-700 text-white w-8 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"

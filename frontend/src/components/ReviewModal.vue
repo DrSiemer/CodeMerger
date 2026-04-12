@@ -232,7 +232,7 @@ const getSkippedMessage = (path) => {
 </script>
 
 <template>
-  <div class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
+  <div id="review-modal" class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
     <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[92vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
 
       <!-- Header -->
@@ -250,6 +250,7 @@ const getSkippedMessage = (path) => {
           This response was not properly wrapped in the requested XML tags.
         </div>
         <button
+          id="btn-review-copy-correction"
           @click="copyAdmonishment"
           v-info="'review_admonish'"
           class="bg-[#DE6808] hover:bg-orange-500 text-white text-xs font-bold py-1.5 px-4 rounded transition-colors"
@@ -259,7 +260,7 @@ const getSkippedMessage = (path) => {
       </div>
 
       <!-- Tabs Navigation -->
-      <div class="flex bg-cm-top-bar border-b border-gray-700 px-4 shrink-0" v-info="'review_tabs'">
+      <div id="review-tabs" class="flex bg-cm-top-bar border-b border-gray-700 px-4 shrink-0" v-info="'review_tabs'">
         <button
           v-for="tab in tabs"
           :key="tab.id"
@@ -274,7 +275,7 @@ const getSkippedMessage = (path) => {
       </div>
 
       <!-- Scrollable Tab Content Container -->
-      <div ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg" @wheel.ctrl.prevent="handleZoom">
+      <div id="review-content-viewport" ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg" @wheel.ctrl.prevent="handleZoom">
         <div v-for="tab in tabs" :key="tab.id" v-show="activeTab === tab.id" class="p-8">
 
           <!-- Standard Content Tabs -->
@@ -421,6 +422,7 @@ const getSkippedMessage = (path) => {
       <!-- Footer Actions -->
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end space-x-3 shrink-0">
         <button
+          id="btn-review-paste-next"
           v-if="getPendingCount === 0"
           @click="handlePasteNext"
           v-info="'review_apply'"
@@ -437,6 +439,7 @@ const getSkippedMessage = (path) => {
           {{ getPendingCount === 0 ? 'Close' : 'Cancel' }}
         </button>
         <button
+          id="btn-review-apply"
           v-if="getPendingCount > 0"
           @click="applyAllPending"
           v-info="'review_apply'"

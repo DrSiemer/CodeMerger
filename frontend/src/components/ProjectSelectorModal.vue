@@ -61,9 +61,9 @@ const handleBrowse = async () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div id="project-selector-modal" class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
     <!-- max-h-[90%] ensures the modal height adjusts to the parent Content Area (which shrinks when Info Mode is ON) -->
-    <div class="bg-cm-dark-bg w-full max-w-[450px] rounded shadow-2xl border border-gray-600 flex flex-col max-h-[90%]">
+    <div id="project-selector-window" class="bg-cm-dark-bg w-full max-w-[450px] rounded shadow-2xl border border-gray-600 flex flex-col max-h-[90%]">
 
       <!-- Header -->
       <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
@@ -83,6 +83,7 @@ const handleBrowse = async () => {
           <span class="text-gray-400 text-sm">Filter:</span>
           <div class="relative flex-grow">
             <input
+              id="project-search-input"
               v-model="searchQuery"
               v-info="'sel_filter'"
               type="text"
@@ -101,7 +102,7 @@ const handleBrowse = async () => {
         </div>
 
         <!-- Scrollable List -->
-        <div class="flex-grow overflow-y-auto pr-1 min-h-[100px] custom-scrollbar" v-info="'sel_list'">
+        <div id="recent-projects-list" class="flex-grow overflow-y-auto pr-1 min-h-[100px] custom-scrollbar" v-info="'sel_list'">
           <div v-if="isLoaded && filteredRecents.length === 0 && recents.length > 0" class="text-gray-500 py-6 text-center">
             No projects match your filter.
           </div>
@@ -154,6 +155,7 @@ const handleBrowse = async () => {
       <!-- Footer -->
       <div class="px-5 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end rounded-b">
         <button
+          id="btn-browse-new-project"
           @click="handleBrowse"
           v-info="'sel_browse'"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors flex items-center"

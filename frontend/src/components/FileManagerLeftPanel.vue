@@ -34,7 +34,7 @@ defineExpose({ scrollToPath })
 </script>
 
 <template>
-  <div class="w-1/2 flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg">
+  <div id="fm-available-files" class="w-1/2 flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg">
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-semibold text-gray-200">Available Files</h3>
       <div class="flex items-center space-x-2">
@@ -63,6 +63,7 @@ defineExpose({ scrollToPath })
     <div class="relative mb-4">
       <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
       <input
+        id="fm-filter-input"
         :value="filterText"
         @input="emit('update:filterText', $event.target.value)"
         type="text"
@@ -89,6 +90,7 @@ defineExpose({ scrollToPath })
 
     <div class="flex justify-end pt-2">
       <button
+        id="btn-fm-add-all"
         @click="emit('add-all')"
         class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded text-sm transition-colors flex items-center"
         v-info="'fm_add_all'"
