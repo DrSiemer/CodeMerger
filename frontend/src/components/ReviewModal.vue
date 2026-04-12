@@ -251,6 +251,7 @@ const getSkippedMessage = (path) => {
         </div>
         <button
           @click="copyAdmonishment"
+          v-info="'review_admonish'"
           class="bg-[#DE6808] hover:bg-orange-500 text-white text-xs font-bold py-1.5 px-4 rounded transition-colors"
         >
           Copy Correction Prompt
@@ -258,11 +259,12 @@ const getSkippedMessage = (path) => {
       </div>
 
       <!-- Tabs Navigation -->
-      <div class="flex bg-cm-top-bar border-b border-gray-700 px-4 shrink-0">
+      <div class="flex bg-cm-top-bar border-b border-gray-700 px-4 shrink-0" v-info="'review_tabs'">
         <button
           v-for="tab in tabs"
           :key="tab.id"
           @click="activeTab = tab.id"
+          v-info="`review_tab_${tab.id}`"
           class="px-5 py-3 text-sm font-medium transition-all border-b-2 flex items-center space-x-2"
           :class="activeTab === tab.id ? 'border-cm-blue text-white bg-white/5' : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'"
         >
@@ -288,6 +290,7 @@ const getSkippedMessage = (path) => {
               <div v-if="tab.content" class="border border-gray-700 rounded bg-[#1A1A1A] overflow-hidden">
                 <button
                   @click="showCommentary = !showCommentary"
+                  v-info="'review_commentary'"
                   class="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
                 >
                   <div class="flex items-center space-x-3">
@@ -326,14 +329,14 @@ const getSkippedMessage = (path) => {
                           <span class="text-xs font-bold text-gray-500 px-3 py-1 bg-gray-800 rounded">{{ getSkippedMessage(path) }}</span>
                         </template>
                         <template v-else-if="planFileStates[path] === 'pending'">
-                          <button @click="toggleDiff(path)" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors flex items-center">
+                          <button @click="toggleDiff(path)" v-info="'review_diff'" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors flex items-center">
                             <Eye class="w-3.5 h-3.5 mr-1.5" />
                             Diff
                           </button>
-                          <button @click="acceptChange(path, 'modify')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">Accept</button>
-                          <button @click="discardChange(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Discard</button>
+                          <button @click="acceptChange(path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">Accept</button>
+                          <button @click="discardChange(path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Discard</button>
                         </template>
-                        <button v-else @click="undoChange(path, 'modify')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center">
+                        <button v-else @click="undoChange(path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center">
                           <Undo2 class="w-3.5 h-3.5 mr-1.5" />
                           Undo
                         </button>
@@ -358,11 +361,11 @@ const getSkippedMessage = (path) => {
                       <span class="font-mono text-sm text-gray-200" :class="{'text-gray-500 line-through': planFileStates[path] === 'applied'}">{{ path }}</span>
                       <div class="flex items-center space-x-2">
                         <template v-if="planFileStates[path] === 'pending'">
-                          <button @click="toggleDiff(path)" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors">View</button>
-                          <button @click="acceptChange(path, 'create')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">Accept</button>
-                          <button @click="discardChange(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Discard</button>
+                          <button @click="toggleDiff(path)" v-info="'review_diff'" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors">View</button>
+                          <button @click="acceptChange(path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">Accept</button>
+                          <button @click="discardChange(path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Discard</button>
                         </template>
-                        <button v-else @click="undoChange(path, 'create')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center">
+                        <button v-else @click="undoChange(path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center">
                           <Undo2 class="w-3.5 h-3.5 mr-1.5" />
                           Undo
                         </button>
@@ -392,11 +395,11 @@ const getSkippedMessage = (path) => {
                         <span class="text-xs font-bold text-gray-500 px-3 py-1 bg-gray-800 rounded">{{ getSkippedMessage(path) }}</span>
                       </template>
                       <template v-else-if="planFileStates[path] === 'pending'">
-                        <button @click="toggleDiff(path)" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors">View</button>
-                        <button @click="acceptChange(path, 'delete')" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-3 py-1 rounded transition-colors">Accept Delete</button>
-                        <button @click="discardChange(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Keep</button>
+                        <button @click="toggleDiff(path)" v-info="'review_diff'" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors">View</button>
+                        <button @click="acceptChange(path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-3 py-1 rounded transition-colors">Accept Delete</button>
+                        <button @click="discardChange(path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors">Keep</button>
                       </template>
-                      <button v-else @click="undoChange(path, 'delete')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center">
+                      <button v-else @click="undoChange(path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center">
                         <Undo2 class="w-3.5 h-3.5 mr-1.5" />
                         Undo
                       </button>
@@ -416,33 +419,32 @@ const getSkippedMessage = (path) => {
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between shrink-0">
-        <div class="flex items-center">
-          <button
-            v-if="getPendingCount === 0"
-            @click="handlePasteNext"
-            class="bg-cm-green hover:bg-green-600 text-white font-bold py-2 px-8 rounded shadow-md transition-all flex items-center"
-          >
-            <ClipboardPaste class="w-4 h-4 mr-2" />
-            Paste Next
-          </button>
-        </div>
-        <div class="flex items-center space-x-3">
-          <button
-            @click="emit('close')"
-            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors"
-          >
-            {{ getPendingCount === 0 ? 'Close' : 'Cancel' }}
-          </button>
-          <button
-            v-if="getPendingCount > 0"
-            @click="applyAllPending"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-12 rounded shadow-md transition-all flex items-center"
-          >
-            <CheckCircle class="w-4 h-4 mr-2" />
-            {{ applyAllLabel }}
-          </button>
-        </div>
+      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end space-x-3 shrink-0">
+        <button
+          v-if="getPendingCount === 0"
+          @click="handlePasteNext"
+          v-info="'review_apply'"
+          class="bg-cm-green hover:bg-green-600 text-white font-bold py-2 px-8 rounded shadow-md transition-all text-sm"
+        >
+          <ClipboardPaste class="w-4 h-4 mr-2" />
+          Paste Next
+        </button>
+        <button
+          @click="emit('close')"
+          v-info="getPendingCount === 0 ? 'review_close' : 'review_cancel'"
+          class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors text-sm"
+        >
+          {{ getPendingCount === 0 ? 'Close' : 'Cancel' }}
+        </button>
+        <button
+          v-if="getPendingCount > 0"
+          @click="applyAllPending"
+          v-info="'review_apply'"
+          class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-12 rounded shadow-md transition-all text-sm"
+        >
+          <CheckCircle class="w-4 h-4 mr-2" />
+          {{ applyAllLabel }}
+        </button>
       </div>
 
     </div>

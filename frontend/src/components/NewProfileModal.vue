@@ -4,14 +4,16 @@ import { X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 const emit = defineEmits(['close'])
-const { activeProject, createProfile } = useAppState()
+const { activeProject, createProfile, resizeWindow } = useAppState()
 
 const profileName = ref('')
 const copyFiles = ref(false)
 const copyInstructions = ref(false)
 const nameInput = ref(null)
 
-onMounted(() => {
+onMounted(async () => {
+  await resizeWindow(800, 550)
+
   nextTick(() => {
     nameInput.value?.focus()
   })
@@ -52,10 +54,10 @@ const handleCreate = async () => {
           <input
             ref="nameInput"
             v-model="profileName"
+            v-info="'profile_name'"
             type="text"
             class="w-full bg-cm-input-bg text-white px-3 py-2 rounded border border-gray-600 focus:border-cm-blue focus:outline-none"
             @keyup.enter="handleCreate"
-            v-info="'profile_name'"
           >
         </div>
 
@@ -83,8 +85,8 @@ const handleCreate = async () => {
         <button
           @click="handleCreate"
           :disabled="!profileName.trim()"
-          class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm"
           v-info="'profile_create'"
+          class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm"
         >
           Create
         </button>

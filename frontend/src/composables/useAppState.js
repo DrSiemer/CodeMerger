@@ -32,36 +32,43 @@ const starterActiveIcon = ref('')
 const lockedIcon = ref('')
 const unlockedIcon = ref('')
 
-// Info Mode State
-const infoModeActive = ref(true)
-const activeInfoStack = ref([])
-const currentInfoText = ref(INFO_MESSAGES['default'])
+// --- Info Mode State ---
+// Exported as constants to ensure Hard-Linked Reactivity across view boundaries.
+export const infoModeActive = ref(true)
+export const activeInfoStack = ref([])
+export const currentInfoText = ref(INFO_MESSAGES['default'])
 
 /**
- * Internal helper to update the visible text based on the current stack.
- * Ensures reactivity triggers even for module-level state.
+ * _resolveInfoText
+ * Centralized logic to update the currentInfoText ref based on the stack.
  */
 const _resolveInfoText = () => {
-  const stackSize = activeInfoStack.value.length;
-  if (stackSize > 0) {
-    const topKey = activeInfoStack.value[stackSize - 1];
+  const stack = activeInfoStack.value;
+  if (stack.length > 0) {
+    const topKey = stack[stack.length - 1];
     currentInfoText.value = INFO_MESSAGES[topKey] || INFO_MESSAGES['default'];
   } else {
     currentInfoText.value = INFO_MESSAGES['default'];
   }
 }
 
-const setHoverInfo = (key) => {
+/**
+ * setHoverInfo
+ * REFERENCE-REPLACEMENT REACTIVITY: We replace the array reference entirely.
+ * This ensures Vue 3 detects the change across template boundaries.
+ */
+export const setHoverInfo = (key) => {
   if (!activeInfoStack.value.includes(key)) {
-    // Replace array reference to ensure Vue 3 reactivity triggers across components
     activeInfoStack.value = [...activeInfoStack.value, key];
     _resolveInfoText();
   }
 }
 
-const clearHoverInfo = (key) => {
-  activeInfoStack.value = activeInfoStack.value.filter(k => k !== key);
-  _resolveInfoText();
+export const clearHoverInfo = (key) => {
+  if (activeInfoStack.value.includes(key)) {
+    activeInfoStack.value = activeInfoStack.value.filter(k => k !== key);
+    _resolveInfoText();
+  }
 }
 
 // AI Review State

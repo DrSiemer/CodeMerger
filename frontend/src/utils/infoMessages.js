@@ -23,6 +23,42 @@ export const INFO_MESSAGES = {
   "profile_add": "Add Profile: Create a new named configuration. Useful for separating different tasks like 'Backend' or 'Feature Development' within the same project.",
   "profile_delete": "Delete Profile: Remove the currently active profile. The 'Default' profile cannot be deleted.",
 
+  // New Profile Dialog
+  "profile_name": "Profile Name: Enter a unique label for this configuration (e.g. 'Frontend' or 'Feature Name').",
+  "profile_copy_files": "Clone Selection: If checked, the new profile will start with the exact same files selected in your current merge list.",
+  "profile_copy_inst": "Clone Instructions: If checked, the new profile will inherit the current custom Intro and Outro instructions.",
+  "profile_create": "Create Profile: Saves the new profile. New profiles have independent tracking for 'New Files' detected on disk.",
+
+  // Project Selector
+  "sel_list": "Recent Projects: Quickly switch to another CodeMerger project. Hover over an entry to see the full path and Ctrl-Click to open it's folder.",
+  "sel_filter": "Project Filter: Start typing to narrow down the list by folder name or display title.",
+  "sel_browse": "Add Project: Open a directory browser to select a new folder for use with CodeMerger.",
+  "sel_remove": "Remove Entry: Take this project off your recent list. This does not delete any files on your computer.",
+
+  // Instructions Window
+  "inst_intro": "Intro Instructions: This text is placed at the very top of your merged code block. Use it to introduce your project.",
+  "inst_outro": "Outro Instructions: This text is placed at the bottom. Use it for code style rules or recurring constraints.",
+  "inst_defaults": "Load Defaults: Click to wipe the current fields and load the global default prompts you defined in the Settings.",
+  "inst_save": "Save: Commit these instructions to the project's .allcode file. They are profile-specific.",
+
+  // AI Response Review
+  "review_tabs": "Review Tabs: Switch between the different sections of the AI's response (Intro, Changes, Answers, etc.) to review the commentary before applying.",
+  "review_tab_intro": "Intro: A technical implementation plan or architectural summary provided by the AI before the code.",
+  "review_tab_changes": "Changes: An interactive list of all file modifications. You can review individual file diffs, accept specific changes, or discard unwanted updates before applying the rest.",
+  "review_tab_answers": "Answers: The AI's responses to any conceptual or theoretical questions you asked.",
+  "review_tab_delete": "Delete: Files that the AI has identified as obsolete. (Note: CodeMerger does not automatically delete files from your disk).",
+  "review_tab_verification": "Verification: Steps provided by the AI to test and verify the applied changes.",
+  "review_tab_unformatted": "Unformatted Output: Text from the AI that was not properly wrapped in the requested XML tags. Review this carefully.",
+  "review_tab_placeholder": "Response Summary: The AI response contained only code blocks with no accompanying text or tagged sections.",
+  "review_auto_show": "Auto-Show Toggle: If unchecked, CodeMerger will instantly apply AI changes in the future without showing this review window first.",
+  "review_apply": "Apply Changes: Accept the proposed changes and write them to your project files.",
+  "review_cancel": "Cancel: Discard the proposed changes. Your project files will remain untouched.",
+  "review_close": "Close: Exit the review window.",
+  "review_admonish": "Copy Correction Prompt: Copies a prompt telling the AI that it failed to follow the required output format.",
+  "review_diff": "Diff Viewer: Toggle a line-by-line comparison between your local file and the AI version. Green highlights indicate additions, red indicates removals.",
+  "review_file_action": "File Actions: Choose to Accept or Discard changes for individual files. Handled files are crossed out in the list. You can 'Undo' a choice before applying the full update.",
+  "review_commentary": "AI Commentary: Read the specific technical explanation provided by the AI for the proposed changes.",
+
   // File Manager
   "fm_tree": "Available Files: Browse your project structure. Click a checkbox to toggle selection, or Ctrl+Click a filename to open the file in your editor. Green text indicates newly detected files.",
   "fm_tree_action": "Merge Toggle: Adds or removes the currently selected files from the list.",
@@ -51,7 +87,7 @@ export const INFO_MESSAGES = {
   "set_app_new_file": "File Monitoring: Monitors your project folder for new files added since your last session. Disable this if you do not want new file warnings or do not want to spend resources on it.",
   "set_app_interval": "Check Interval: How frequently CodeMerger scans the disk for changes. Lower values are more responsive, but may impact performance on slow drives.",
   "set_app_secrets": "Secret Scanning: Uses 'detect-secrets' to look for API keys or private credentials before you copy. Enable this to prevent accidentally sharing sensitive data with the language model.",
-  "set_app_feedback": "AI Response Review: Automatically open the response review window when wrapped sections are found.",
+  "set_app_feedback": "AI Response Review: Automatically open the response review window when wrapped sections can be found.",
   "set_app_compact": "Compact Mode: Automatically switches to the compact window when you minimize the main window. Useful for keeping CodeMerger easily accessible while working in your IDE.",
   "set_app_updates": "Automatic Updates: Checks GitHub for a new version once per day.",
   "set_app_check_now": "Check Now: Manually trigger an update check to see if a newer version of CodeMerger is available on GitHub, bypassing the automatic daily timer.",

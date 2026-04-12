@@ -9,7 +9,6 @@ export default {
   mounted(el, binding) {
     const { setHoverInfo, clearHoverInfo } = useAppState()
 
-    // Track state on the element instance for reactive updates and cleanup
     el._currentInfoKey = binding.value
     el._isHovered = false
 

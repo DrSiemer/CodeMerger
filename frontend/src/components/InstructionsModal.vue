@@ -61,6 +61,7 @@ const handleSave = async () => {
           </div>
           <textarea
             v-model="localIntro"
+            v-info="'inst_intro'"
             class="flex-grow min-h-[140px] bg-cm-input-bg border border-gray-700 text-gray-200 p-3 rounded outline-none focus:border-cm-blue custom-scrollbar text-sm leading-relaxed font-sans selectable"
             placeholder="Introduce your project and goals here..."
           ></textarea>
@@ -74,6 +75,7 @@ const handleSave = async () => {
           </div>
           <textarea
             v-model="localOutro"
+            v-info="'inst_outro'"
             class="flex-grow min-h-[140px] bg-cm-input-bg border border-gray-700 text-gray-200 p-3 rounded outline-none focus:border-cm-blue custom-scrollbar text-sm leading-relaxed font-sans selectable"
             placeholder="Add style guidelines or recurring constraints here..."
           ></textarea>
@@ -85,6 +87,7 @@ const handleSave = async () => {
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex items-center justify-between shrink-0">
         <button
           @click="loadDefaults"
+          v-info="'inst_defaults'"
           class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
           title="Wipe current fields and load global default prompts from Settings"
         >
@@ -101,6 +104,7 @@ const handleSave = async () => {
           </button>
           <button
             @click="handleSave"
+            v-info="'inst_save'"
             class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-10 rounded shadow-md transition-all flex items-center text-sm"
           >
             <Save class="w-4 h-4 mr-2" />

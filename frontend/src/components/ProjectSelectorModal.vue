@@ -4,7 +4,7 @@ import { X, Search, FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 const emit = defineEmits(['close'])
-const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage } = useAppState()
+const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow } = useAppState()
 
 const recents = ref([])
 const searchQuery = ref('')
@@ -17,6 +17,8 @@ const handleEscape = (e) => {
 
 // Register lifecycle hooks at the top level
 onMounted(async () => {
+  await resizeWindow(800, 600)
+
   document.addEventListener('keydown', handleEscape)
   recents.value = await getRecentProjects()
   logoMaskSmall.value = await getImage('logo_mask_small.png')
@@ -76,6 +78,7 @@ const handleBrowse = async () => {
           <div class="relative flex-grow">
             <input
               v-model="searchQuery"
+              v-info="'sel_filter'"
               type="text"
               class="w-full bg-cm-input-bg text-white px-3 py-1.5 rounded border border-transparent focus:border-cm-blue focus:outline-none text-sm"
               placeholder="Search name or path..."
@@ -92,7 +95,7 @@ const handleBrowse = async () => {
         </div>
 
         <!-- Scrollable List -->
-        <div class="flex-grow overflow-y-auto pr-1 min-h-[100px] custom-scrollbar">
+        <div class="flex-grow overflow-y-auto pr-1 min-h-[100px] custom-scrollbar" v-info="'sel_list'">
           <div v-if="isLoaded && filteredRecents.length === 0 && recents.length > 0" class="text-gray-500 py-6 text-center">
             No projects match your filter.
           </div>
@@ -131,6 +134,7 @@ const handleBrowse = async () => {
 
               <button
                 @click.stop="handleRemove(proj.path)"
+                v-info="'sel_remove'"
                 class="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2 focus:opacity-100 p-1"
                 title="Remove from recent list"
               >
@@ -145,6 +149,7 @@ const handleBrowse = async () => {
       <div class="px-5 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end rounded-b">
         <button
           @click="handleBrowse"
+          v-info="'sel_browse'"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors flex items-center"
         >
           <FolderPlus class="w-4 h-4 mr-2" />

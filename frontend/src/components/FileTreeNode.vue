@@ -150,7 +150,7 @@ const onChildToggleExpand = (data) => {
       </div>
 
       <!-- Type Icon (Instant toggle click area) -->
-      <div class="w-5 flex shrink-0 justify-center mr-2" @click="handleIconClick">
+      <div class="w-5 flex shrink-0 justify-center mr-2" @click="handleIconClick" v-info="'fm_tree_action'">
         <Folder
           v-if="node.type === 'dir'"
           class="w-4 h-4"

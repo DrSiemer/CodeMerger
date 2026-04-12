@@ -269,6 +269,7 @@ defineExpose({
         <li
           v-for="(file, index) in listItems"
           :key="file.path"
+          v-info="'fm_list_item'"
           class="group flex items-center border rounded p-2 text-sm transition-colors"
           :class="selectedIndices.has(index) ? 'bg-cm-blue border-cm-blue' : 'bg-cm-input-bg border-gray-700 hover:border-gray-500'"
           @click="handleFileClick(index, $event)"
