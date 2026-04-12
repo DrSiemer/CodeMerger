@@ -245,7 +245,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex-grow flex flex-col overflow-hidden text-gray-100 bg-cm-dark-bg font-sans">
+  <div class="flex-grow flex flex-col overflow-hidden text-gray-100 bg-cm-dark-bg font-sans relative">
     <!-- Top Bar -->
     <header class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
       <div class="flex items-center space-x-4 min-w-0 flex-grow">

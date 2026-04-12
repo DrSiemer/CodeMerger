@@ -35,23 +35,33 @@ const unlockedIcon = ref('')
 // Info Mode State
 const infoModeActive = ref(true)
 const activeInfoStack = ref([])
+const currentInfoText = ref(INFO_MESSAGES['default'])
 
-const currentInfoText = computed(() => {
-  if (activeInfoStack.value.length > 0) {
-    const key = activeInfoStack.value[activeInfoStack.value.length - 1]
-    return INFO_MESSAGES[key] || INFO_MESSAGES['default']
+/**
+ * Internal helper to update the visible text based on the current stack.
+ * Ensures reactivity triggers even for module-level state.
+ */
+const _resolveInfoText = () => {
+  const stackSize = activeInfoStack.value.length;
+  if (stackSize > 0) {
+    const topKey = activeInfoStack.value[stackSize - 1];
+    currentInfoText.value = INFO_MESSAGES[topKey] || INFO_MESSAGES['default'];
+  } else {
+    currentInfoText.value = INFO_MESSAGES['default'];
   }
-  return INFO_MESSAGES['default']
-})
+}
 
 const setHoverInfo = (key) => {
   if (!activeInfoStack.value.includes(key)) {
-    activeInfoStack.value.push(key)
+    // Replace array reference to ensure Vue 3 reactivity triggers across components
+    activeInfoStack.value = [...activeInfoStack.value, key];
+    _resolveInfoText();
   }
 }
 
 const clearHoverInfo = (key) => {
-  activeInfoStack.value = activeInfoStack.value.filter(k => k !== key)
+  activeInfoStack.value = activeInfoStack.value.filter(k => k !== key);
+  _resolveInfoText();
 }
 
 // AI Review State
