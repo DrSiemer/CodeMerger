@@ -1,6 +1,6 @@
 import os
-from ...core.utils import is_ignored
-from ... import constants as c
+from .utils import is_ignored
+from .. import constants as c
 
 def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_text="", is_extension_filter_active=True, selected_file_paths=None, is_gitignore_filter_active=True):
     """

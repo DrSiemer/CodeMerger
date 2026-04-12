@@ -5,7 +5,7 @@ import logging
 import subprocess
 import sys
 from src.core.utils import parse_gitignore, get_token_count_for_text, is_ignored, get_file_hash
-from src.ui.file_manager.file_tree_builder import build_file_tree_data
+from src.core.file_tree_builder import build_file_tree_data
 from src.core.merger import generate_output_string
 
 log = logging.getLogger("CodeMerger")

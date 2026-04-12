@@ -31,12 +31,10 @@ if /I "%FLAG%"=="" goto :DefaultAction
 if /I "%FLAG%"=="dev" goto :DevAction
 if /I "%FLAG%"=="api" goto :ApiAction
 if /I "%FLAG%"=="fe" goto :FrontendAction
-if /I "%FLAG%"=="o" goto :OldUIAction
 if /I "%FLAG%"=="cmd" goto :OpenCmd
 if /I "%FLAG%"=="f" goto :FreezeReqs
 if /I "%FLAG%"=="b" goto :BuildFull
 if /I "%FLAG%"=="ba" goto :BuildAppOnly
-if /I "%FLAG%"=="old" goto :BuildOldUI
 if /I "%FLAG%"=="bi" goto :BuildInstallerOnly
 if /I "%FLAG%"=="r" goto :HandleRelease
 echo Unrecognized command: %FLAG%
@@ -72,12 +70,6 @@ goto :eof
     cd frontend
     call npm run dev
     cd ..
-    goto :eof
-
-:OldUIAction
-    echo Starting original CodeMerger (Tkinter UI) for reference
-
-    python run.py
     goto :eof
 
 :OpenCmd
@@ -157,20 +149,6 @@ goto :eof
     if %errorlevel% neq 0 goto :eof
 
     call :RunPyInstaller
-    goto :eof
-
-:BuildOldUI
-    echo.
-    echo ===================================
-    echo Starting Legacy Tkinter Build
-
-    echo ===================================
-    set SPEC_FILE=codemerger_legacy.spec
-
-    call :RunPyInstaller
-    if %errorlevel% neq 0 goto :eof
-
-    call :BuildInstaller
     goto :eof
 
 :RunPyInstaller
