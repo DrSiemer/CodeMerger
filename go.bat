@@ -41,7 +41,8 @@ echo Unrecognized command: %FLAG%
 goto :eof
 
 :DefaultAction
-    echo Starting CodeMerger (Web UI Mode)
+    for /f "usebackq delims=" %%a in (`powershell -command "([DateTime]::Now).ToString('dddd, yyyy-MM-dd HH:mm:ss', [System.Globalization.CultureInfo]::GetCultureInfo('en-US'))"`) do set "LOGTIME=%%a"
+    echo Starting CodeMerger - %LOGTIME%
 
     REM Check if production frontend is built
     set BUILD_REQUIRED=0
