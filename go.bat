@@ -44,12 +44,17 @@ goto :eof
     echo Starting CodeMerger (Web UI Mode)
 
     REM Check if production frontend is built
-    if not exist "frontend\dist\index.html" (
-        echo Production frontend not found. Building now...
+    set BUILD_REQUIRED=0
+    if not exist "frontend\dist\index.html" set BUILD_REQUIRED=1
+    if not exist "frontend\dist\assets" set BUILD_REQUIRED=1
+
+    if "%BUILD_REQUIRED%"=="1" (
+        echo Production frontend not found or incomplete. Building now...
         call :BuildFrontend
     )
 
-    python %START_SCRIPT%
+    REM Using the venv python explicitly for consistency with go dev
+    "%VENV_DIR%\Scripts\python.exe" %START_SCRIPT%
     goto :eof
 
 :DevAction
@@ -61,7 +66,7 @@ goto :eof
 :ApiAction
     echo Starting CodeMerger API only (Connecting to localhost:5173)
 
-    python %START_SCRIPT% --dev
+    "%VENV_DIR%\Scripts\python.exe" %START_SCRIPT% --dev
     goto :eof
 
 :FrontendAction
@@ -119,7 +124,10 @@ goto :eof
 
     echo ===================================
     cd frontend
-    call npm install
+    if not exist "node_modules" (
+        echo Installing frontend dependencies...
+        call npm install
+    )
     call npm run build
     cd ..
     if %errorlevel% neq 0 (
@@ -217,7 +225,6 @@ goto :eof
     "!INNO_SETUP_PATH!" setup.iss /dMyAppVersion="!VERSION!"
 
     if !errorlevel! neq 0 (
-        echo.
         echo FATAL: Inno Setup build failed.
         endlocal
         exit /b 1

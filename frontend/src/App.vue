@@ -18,19 +18,17 @@ const isCompact = computed(() => route.path === '/compact')
 
 onMounted(() => {
   const signalReady = async () => {
-    // Run core initialization logic
     await init()
 
-    // Reduced delay to allow initial paint to stabilize before hiding splash.
-    // This improves perceived startup speed.
-    setTimeout(async () => {
-      if (window.pywebview) {
-        // Signal ready to transition from Splash to Main UI.
-        // We signal regardless of route to ensure the transition completes
-        // even if the router hasn't fully synchronized the initial '/' path.
+    const waitForBridgeAndSignal = async (attempts = 0) => {
+      if (window.pywebview && window.pywebview.api) {
         await window.pywebview.api.signal_ui_ready()
+      } else if (attempts < 150) {
+        setTimeout(() => waitForBridgeAndSignal(attempts + 1), 20)
       }
-    }, 50)
+    }
+
+    await waitForBridgeAndSignal()
   }
 
   if (window.pywebview) {

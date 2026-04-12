@@ -14,7 +14,7 @@ class WindowApi:
         """
         Requests the main window to expand to specified dimensions.
         Calculates all logic in Physical Pixels but implements Hybrid-Domain execution
-        (move is logical, resize is physical) to overcome high-DPI behavior quirks.
+        (move is logical, resize is physical) to overcome high-DPI behavior quirks
         """
         if not self._window_manager or not self._window_manager.main_window:
             return
@@ -102,15 +102,15 @@ class WindowApi:
 
     def signal_ui_ready(self):
         """
-        Called by the frontend (Vue) once the app is mounted and rendered.
-        Triggers the transition from Splash to Main Window.
+        Called by the frontend (Vue) once the app is mounted and rendered
+        Triggers the transition from Splash to Main Window with guaranteed visibility
         """
         if self._window_manager:
             self._window_manager.show_main_and_close_splash()
 
     def get_image_base64(self, filename):
         """
-        Reads an image from the assets directory and returns a Base64 data URL.
+        Reads an image from the assets directory and returns a Base64 data URL
         """
         path = os.path.abspath(os.path.join(BUNDLE_DIR, 'assets', filename))
 
@@ -130,7 +130,7 @@ class WindowApi:
 
     def get_compact_window_pos(self):
         """
-        Returns the true LOGICAL coordinates of the Compact window to initialize drag logic.
+        Returns the true LOGICAL coordinates of the Compact window to initialize drag logic
         """
         if self._window_manager:
             x = self._window_manager.compact_mode_last_x
@@ -141,20 +141,20 @@ class WindowApi:
         return {'x': 0, 'y': 0}
 
     def restore_main_window(self):
-        """Triggers the WindowManager to close the compact view and restore the main window."""
+        """Triggers the WindowManager to close the compact view and restore the main window"""
         if self._window_manager:
             self._window_manager.restore_main()
             return True
         return False
 
     def minimize_window(self):
-        """Programmatically minimizes the active window."""
+        """Programmatically minimizes the active window"""
         if self._window_manager and self._window_manager.main_window:
             self._window_manager.main_window.minimize()
 
     def move_compact_window(self, x, y):
         """
-        Moves the Compact window. Expects and tracks LOGICAL coordinates.
+        Moves the Compact window. Expects and tracks LOGICAL coordinates
         """
         if self._window_manager and self._window_manager.compact_window:
             self._window_manager.compact_window.move(int(x), int(y))
@@ -162,6 +162,6 @@ class WindowApi:
             self._window_manager.compact_mode_last_y = y
 
     def close_app(self):
-        """Immediately terminates the application."""
+        """Immediately terminates the application"""
         if self._window_manager:
             self._window_manager.exit_all()

@@ -24,7 +24,6 @@ import traceback
 import time
 import base64
 import threading
-from pathlib import Path
 from src.api import Api
 from src.core.logger import setup_logging
 from src.core.paths import get_bundle_dir, SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_3_PATH
@@ -62,6 +61,12 @@ class WindowManager:
         self.splash_window = None
         self._is_shutting_down = False
         self._transitioning = False
+        self._handshake_received = False
+        self._stop_failsafe = threading.Event()
+
+        # Timing for minimum splash visibility
+        self.start_time = time.time()
+        self.MIN_SPLASH_DURATION = 0.8
 
         # Load persisted geometry (Stored in PHYSICAL units)
         geom = self.api.app_state.config.get('main_window_geom', {})
@@ -74,7 +79,6 @@ class WindowManager:
         # Compact Mode Position (Logical)
         self.compact_mode_last_x = geom.get('compact_x')
         self.compact_mode_last_y = geom.get('compact_y')
-        self.compact_last_monitor_handle = None
 
         if dev_mode:
             self.base_url = "http://localhost:5173"
@@ -157,15 +161,15 @@ class WindowManager:
                 </div>
                 <h1 style="font-weight:100; font-size:28px; letter-spacing:4px; margin:0; color:#eee;">CODEMERGER</h1>
                 <div style="margin-top:15px; display:flex; align-items:center; justify-content:center;">
-                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 1.5s infinite ease-in-out;"></div>
+                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 0.8s infinite ease-in-out;"></div>
                     <p style="color:#0078D4; font-size:11px; margin:0; font-weight:bold; letter-spacing:1px; opacity:0.8; text-transform:uppercase;">Initializing Interface</p>
                 </div>
             </div>
             <style>
                 .logo {{ position: absolute; top: 0; left: 0; width: 64px; height: 64px; opacity: 0; }}
                 .logo-1 {{ opacity: 1; }}
-                .logo-2 {{ animation: fade-over 3s linear forwards 1.5s; }}
-                .logo-3 {{ animation: fade-over 3s linear forwards 3.5s; }}
+                .logo-2 {{ animation: fade-over 0.6s linear forwards 0.3s; }}
+                .logo-3 {{ animation: fade-over 0.6s linear forwards 0.6s; }}
                 @keyframes fade-over {{ from {{ opacity: 0; }} to {{ opacity: 1; }} }}
                 @keyframes pulse {{ 0%, 100% {{ opacity: 0.3; transform: scale(0.8); }} 50% {{ opacity: 1; transform: scale(1.2); }} }}
             </style>
@@ -185,27 +189,35 @@ class WindowManager:
         self.splash_window = webview.create_window(
             "CM-Splash", html=splash_html, width=s_w_log, height=s_h_log,
             x=s_x_phys, y=s_y_phys,
-            frameless=True, on_top=True, background_color='#1A1A1A'
+            frameless=True, on_top=True, background_color='#1A1A1A',
+            hidden=True
         )
 
         # Step 2: Main Window (Always center physically on boot)
-        # Determine initial minimum height based on Info Mode state
         info_active = self.api.app_state.config.get('info_mode_active', True)
         m_w_log, m_h_log = 800, 550 if info_active else 500
 
         m_x_phys = int(m_left + (m_w_phys - (m_w_log * scale)) / 2)
         m_y_phys = int(m_top + (m_h_phys - (m_h_log * scale)) / 2)
 
-        load_url = self.base_url if self.dev_mode else Path(self.base_url).as_uri()
-
+        # Passing self.base_url directly triggers PyWebView's internal HTTP server
+        # which bypasses file:// CORS restrictions for Vue 3 ES modules.
         self.main_window = webview.create_window(
-            "CodeMerger", url=load_url, js_api=self.api,
+            "CodeMerger", url=self.base_url, js_api=self.api,
             width=m_w_log, height=m_h_log, # Logical Size
             min_size=(800, m_h_log),
             background_color='#2E2E2E',
             hidden=True, x=m_x_phys, y=m_y_phys # Physical Position
         )
         self.api.set_window_manager(self)
+
+        # Warm-up delay for Splash
+        def show_splash_warm():
+            time.sleep(0.25)
+            if self.splash_window and not self._handshake_received:
+                self.splash_window.show()
+
+        threading.Thread(target=show_splash_warm, daemon=True).start()
 
         self.main_window.events.minimized += self._on_main_minimized
         self.main_window.events.closing += self._on_main_closing
@@ -218,12 +230,19 @@ class WindowManager:
             self.main_window.events.shown += self._on_main_restored
         except AttributeError: pass
 
+        def failsafe():
+            if self._stop_failsafe.wait(7): return
+            if not self._handshake_received:
+                self.show_main_and_close_splash()
+
+        threading.Thread(target=failsafe, daemon=True).start()
+
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
         webview.start(gui='edgechromium', debug=self.dev_mode)
 
     def _create_compact_window(self):
         if self.compact_window: return
-        compact_url = f"{self.base_url}#/compact" if self.dev_mode else f"{Path(self.base_url).as_uri()}#/compact"
+        compact_url = f"{self.base_url}#/compact"
 
         self.compact_window = webview.create_window(
             "CM-Compact", url=compact_url, js_api=self.api,
@@ -235,11 +254,20 @@ class WindowManager:
 
     def show_main_and_close_splash(self):
         """Transition from splash to main interface."""
+        if self._handshake_received or self._is_shutting_down: return
+        self._handshake_received = True
+        self._stop_failsafe.set()
+
+        elapsed = time.time() - self.start_time
+        if elapsed < self.MIN_SPLASH_DURATION:
+            time.sleep(self.MIN_SPLASH_DURATION - elapsed)
+
         if self.main_window and self.main_window.hidden:
             self.main_window.show()
 
         if self.splash_window:
-            self.splash_window.destroy()
+            try: self.splash_window.destroy()
+            except Exception: pass
             self.splash_window = None
 
         if self.monitor:
@@ -249,15 +277,15 @@ class WindowManager:
         self._create_compact_window()
 
     def _on_main_moved(self, x, y):
-        if self.main_window:
+        if self.main_window and not self._is_shutting_down:
             self.main_last_x, self.main_last_y = self.main_window.x, self.main_window.y
 
     def _on_main_resized(self, width, height):
-        if self.main_window:
+        if self.main_window and not self._is_shutting_down:
             self.main_last_w, self.main_last_h = self.main_window.width, self.main_window.height
 
     def _on_main_restored(self):
-        if self._transitioning: return
+        if self._transitioning or self._is_shutting_down: return
         self._transitioning = True
         try:
             if self.compact_window: self.compact_window.hide()
@@ -265,7 +293,7 @@ class WindowManager:
         finally: self._transitioning = False
 
     def _on_main_minimized(self):
-        if self._transitioning: return
+        if self._transitioning or self._is_shutting_down: return
         if self.api.app_state.config.get('enable_compact_mode_on_minimize', True):
             self._transitioning = True
             try:
@@ -275,7 +303,10 @@ class WindowManager:
             finally: self._transitioning = False
 
     def _on_main_closing(self):
+        if self._is_shutting_down: return
         self._is_shutting_down = True
+        self._stop_failsafe.set()
+
         try:
             if self.main_last_x is not None and self.main_last_y is not None:
                 self.api.app_state.config['main_window_geom'] = {
@@ -285,11 +316,12 @@ class WindowManager:
                     'compact_y': int(self.compact_mode_last_y) if self.compact_mode_last_y else None
                 }
                 save_config(self.api.app_state.config)
-        except Exception as e: log.error(f"Failed to save window geometry on exit: {e}")
+        except Exception: pass
 
-        if self.compact_window:
-            try: self.compact_window.destroy()
-            except Exception: pass
+        for win in [self.compact_window, self.splash_window]:
+            if win:
+                try: win.destroy()
+                except Exception: pass
 
     def _on_compact_closing(self):
         if self._is_shutting_down: return
@@ -297,8 +329,8 @@ class WindowManager:
         return False
 
     def show_compact(self):
-        """Displays compact window."""
-        if not self.compact_window: return
+        """Displays compact window using Hybrid coordination logic."""
+        if not self.compact_window or self._is_shutting_down: return
 
         h_mon = self._get_target_monitor_handle()
         scale = self._get_scale_factor(h_mon)
@@ -326,7 +358,7 @@ class WindowManager:
 
     def restore_main(self):
         """Switch back to the full dashboard."""
-        if self._transitioning: return
+        if self._transitioning or self._is_shutting_down: return
         self._transitioning = True
         try:
             if self.compact_window: self.compact_window.hide()
@@ -338,7 +370,6 @@ class WindowManager:
 
     def exit_all(self):
         self._is_shutting_down = True
-        if self.monitor: self.monitor.update_window(None)
         if self.main_window:
             try: self.main_window.destroy()
             except Exception: pass
@@ -355,13 +386,6 @@ def main():
         manager.start()
     except Exception as e:
         log.error(f"Fatal error during startup:\n{traceback.format_exc()}")
-        try:
-            import tkinter as tk
-            from tkinter import messagebox
-            root = tk.Tk(); root.withdraw(); root.attributes("-topmost", True)
-            messagebox.showerror("CodeMerger - Error", f"Failed to start:\n{str(e)}", parent=root)
-            root.destroy()
-        except Exception: pass
     finally:
         try:
             if monitor: monitor.stop()
