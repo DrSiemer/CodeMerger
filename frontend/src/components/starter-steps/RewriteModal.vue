@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
-import InfoPanel from '../InfoPanel.vue'
 
 const props = defineProps({
   contextData: {
@@ -165,7 +164,7 @@ const applyChanges = () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-black/70 z-[60]">
+  <div class="absolute inset-0 bg-black/70 z-[60]">
     <div
       ref="modalRef"
       class="bg-cm-dark-bg w-[700px] h-[750px] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden absolute"
@@ -219,9 +218,6 @@ const applyChanges = () => {
         </div>
 
       </div>
-
-      <!-- Dialog-Specific Info Panel -->
-      <InfoPanel />
 
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end shrink-0">
         <button v-info="'rewrite_cancel'" @click="emit('close')" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm mr-3">Cancel</button>

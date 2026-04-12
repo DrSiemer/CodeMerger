@@ -35,7 +35,7 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
     <div class="bg-cm-dark-bg w-full max-w-[700px] h-[600px] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
 
       <!-- Header -->

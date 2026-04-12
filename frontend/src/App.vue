@@ -1,10 +1,20 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppState } from './composables/useAppState'
+import InfoPanel from './components/InfoPanel.vue'
+import { Info } from 'lucide-vue-next'
 
-const { init } = useAppState()
+const {
+  init,
+  statusMessage,
+  statusVisible,
+  infoModeActive,
+  toggleInfoMode
+} = useAppState()
 const route = useRoute()
+
+const isCompact = computed(() => route.path === '/compact')
 
 onMounted(() => {
   const signalReady = async () => {
@@ -36,12 +46,33 @@ onMounted(() => {
 <template>
   <div class="h-screen w-screen bg-cm-dark-bg text-gray-100 flex flex-col font-sans selection:bg-cm-blue selection:text-white overflow-hidden">
 
-    <!-- View Slot -->
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
+    <!-- Content Area (Relative for absolute modals) -->
+    <div class="flex-grow relative overflow-hidden flex flex-col">
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </div>
+
+    <!-- Global Layout Footer (Hidden in Compact Mode) -->
+    <template v-if="!isCompact">
+      <!-- Shared Info Panel Component -->
+      <InfoPanel />
+
+      <!-- Global Status Bar -->
+      <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px] z-50">
+        <div
+          class="tracking-wide truncate pr-4"
+          :class="statusVisible ? 'opacity-100' : 'opacity-0 transition-opacity duration-1000'"
+        >
+          {{ statusMessage }}
+        </div>
+        <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors shrink-0" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
+          <Info class="w-5 h-5" />
+        </button>
+      </footer>
+    </template>
 
   </div>
 </template>

@@ -1,17 +1,15 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { X, RotateCcw, Save, Info } from 'lucide-vue-next'
+import { X, RotateCcw, Save } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
 import FileManagerRightPanel from './FileManagerRightPanel.vue'
-import InfoPanel from './InfoPanel.vue'
 
 const emit = defineEmits(['close'])
 const {
   activeProject, getFileTree, resizeWindow, updateProjectFiles,
-  copyOrderRequest, clearUnknownFiles, statusMessage,
-  infoModeActive, toggleInfoMode
+  copyOrderRequest, clearUnknownFiles, statusMessage
 } = useAppState()
 
 // Reorderable list setup
@@ -173,7 +171,7 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
+  <div class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
     <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[90vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
 
       <!-- Header -->
@@ -214,9 +212,6 @@ const handleSave = async () => {
         />
       </div>
 
-      <!-- Shared Info Panel Component -->
-      <InfoPanel />
-
       <!-- Footer Actions -->
       <div class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
         <button
@@ -228,28 +223,22 @@ const handleSave = async () => {
           Clear List
         </button>
 
-        <div class="flex items-center space-x-6">
-          <div class="flex items-center space-x-3">
-            <button
-              @click="handleCancel"
-              class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
-              v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
-            >
-              {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
-            </button>
-            <button
-              v-if="hasUnsavedChanges"
-              @click="handleSave"
-              class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
-              v-info="'fm_save'"
-            >
-              <Save class="w-4 h-4 mr-2" />
-              Save Merge List
-            </button>
-          </div>
-
-          <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors shrink-0" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
-            <Info class="w-5 h-5" />
+        <div class="flex items-center space-x-3">
+          <button
+            @click="handleCancel"
+            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
+            v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
+          >
+            {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
+          </button>
+          <button
+            v-if="hasUnsavedChanges"
+            @click="handleSave"
+            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
+            v-info="'fm_save'"
+          >
+            <Save class="w-4 h-4 mr-2" />
+            Save Merge List
           </button>
         </div>
       </div>

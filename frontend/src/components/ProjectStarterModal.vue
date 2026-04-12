@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
-import { Leaf, Save, Upload, Trash2, LogOut, X } from 'lucide-vue-next'
+import { Leaf, Save, Upload, Trash2, LogOut } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
 import Step1Details from './starter-steps/Step1Details.vue'
@@ -10,7 +10,6 @@ import Step4Stack from './starter-steps/Step4Stack.vue'
 import Step5Todo from './starter-steps/Step5Todo.vue'
 import Step6Generate from './starter-steps/Step6Generate.vue'
 import StepSuccess from './starter-steps/StepSuccess.vue'
-import InfoPanel from './InfoPanel.vue'
 
 const emit = defineEmits(['close'])
 const {
@@ -304,7 +303,7 @@ const nextStep = () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-cm-dark-bg z-50 flex flex-col overflow-hidden text-gray-100 font-sans">
+  <div class="absolute inset-0 bg-cm-dark-bg z-50 flex flex-col overflow-hidden text-gray-100 font-sans">
 
     <StepSuccess v-if="successScreenData" :successScreenData="successScreenData" @close="emit('close')" />
 
@@ -372,9 +371,6 @@ const nextStep = () => {
         </div>
       </div>
     </template>
-
-    <!-- Modal-Specific Info Panel -->
-    <InfoPanel />
 
     <!-- Navigation Bar at Bottom -->
     <div v-if="!successScreenData" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">

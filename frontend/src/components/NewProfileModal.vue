@@ -34,7 +34,7 @@ const handleCreate = async () => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+  <div class="absolute inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
     <div class="bg-cm-dark-bg w-full max-w-[400px] rounded shadow-2xl border border-gray-600 flex flex-col">
 
       <!-- Header -->
@@ -55,16 +55,17 @@ const handleCreate = async () => {
             type="text"
             class="w-full bg-cm-input-bg text-white px-3 py-2 rounded border border-gray-600 focus:border-cm-blue focus:outline-none"
             @keyup.enter="handleCreate"
+            v-info="'profile_name'"
           >
         </div>
 
         <div class="space-y-3">
-          <label class="flex items-center space-x-3 cursor-pointer">
+          <label class="flex items-center space-x-3 cursor-pointer" v-info="'profile_copy_files'">
             <input type="checkbox" v-model="copyFiles" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
             <span class="text-gray-200">Copy current file selection</span>
           </label>
 
-          <label class="flex items-center space-x-3 cursor-pointer">
+          <label class="flex items-center space-x-3 cursor-pointer" v-info="'profile_copy_inst'">
             <input type="checkbox" v-model="copyInstructions" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
             <span class="text-gray-200">Copy current instructions</span>
           </label>
@@ -83,6 +84,7 @@ const handleCreate = async () => {
           @click="handleCreate"
           :disabled="!profileName.trim()"
           class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm"
+          v-info="'profile_create'"
         >
           Create
         </button>

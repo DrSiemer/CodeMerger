@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
-  HelpCircle, Trash2, ShieldCheck, AlertTriangle,
+  HelpCircle, ShieldCheck, AlertTriangle,
   ChevronDown, ChevronRight, Eye, Undo2, BookOpen,
   ClipboardPaste
 } from 'lucide-vue-next'
@@ -232,7 +232,7 @@ const getSkippedMessage = (path) => {
 </script>
 
 <template>
-  <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
+  <div class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
     <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[92vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
 
       <!-- Header -->

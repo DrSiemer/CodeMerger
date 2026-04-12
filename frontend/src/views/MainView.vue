@@ -8,16 +8,13 @@ import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
-import InfoPanel from '../components/InfoPanel.vue'
 import {
-  Settings, Copy, ClipboardPaste, BookOpen, PenLine, AlertTriangle, Eye, Loader2, Info
+  Settings, Copy, ClipboardPaste, BookOpen, PenLine, AlertTriangle, Eye, Loader2
 } from 'lucide-vue-next'
 
 const {
   activeProject,
   lastAiResponse,
-  statusMessage,
-  statusVisible,
   showReviewModal,
   reviewMode,
   revertToCompactOnClose,
@@ -28,13 +25,10 @@ const {
   folderActiveIcon,
   starterIcon,
   starterActiveIcon,
-  infoModeActive,
-  toggleInfoMode,
   copyCode,
   renameProject,
   openProjectFolder,
   addAllNewFiles,
-  clearUnknownFiles,
   selectColor,
   processPaste,
   copyCleanupPrompt,
@@ -496,22 +490,6 @@ onUnmounted(() => {
         </div>
       </div>
     </main>
-
-    <!-- Shared Info Panel Component -->
-    <InfoPanel />
-
-    <!-- Global Status Bar -->
-    <footer class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px] z-50">
-      <div
-        class="tracking-wide truncate pr-4"
-        :class="statusVisible ? 'opacity-100' : 'opacity-0 transition-opacity duration-1000'"
-      >
-        {{ statusMessage }}
-      </div>
-      <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors shrink-0" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
-        <Info class="w-5 h-5" />
-      </button>
-    </footer>
 
     <!-- Modal Layers -->
     <ProjectSelectorModal v-if="showProjectModal" @close="showProjectModal = false" />
