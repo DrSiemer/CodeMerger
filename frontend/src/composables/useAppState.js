@@ -166,7 +166,8 @@ export function useAppState() {
 
   const resizeWindow = async (width, height) => {
     if (window.pywebview) {
-      await window.pywebview.api.ensure_window_size(width, height)
+      const footerHeight = infoModeActive.value ? 116 : 36
+      await window.pywebview.api.ensure_window_size(width, height + footerHeight)
     }
   }
 
@@ -176,10 +177,9 @@ export function useAppState() {
       const newConfig = { ...config.value, info_mode_active: infoModeActive.value }
       await window.pywebview.api.save_app_config(newConfig)
 
-      // Minimum height logic: Ensure window is at least 550 if info is enabled
+      // When enabling info mode, we must grow the window immediately so it doesn't overlap the dashboard content
       if (infoModeActive.value) {
-        // Use current width but force growth if height is below the threshold
-        await resizeWindow(window.innerWidth, 550)
+        await resizeWindow(window.innerWidth, window.innerHeight - 36)
       }
     }
   }
@@ -347,6 +347,13 @@ export function useAppState() {
         activeProject.newFileCount = 0
       }
     }
+  }
+
+  const clearStarterSession = async () => {
+    if (window.pywebview) {
+      return await window.pywebview.api.clear_starter_session()
+    }
+    return true
   }
 
   const saveInstructions = async (intro, outro) => {
@@ -597,7 +604,7 @@ export function useAppState() {
     closeApp,
     getStarterSession: async () => window.pywebview ? await window.pywebview.api.get_starter_session() : {},
     saveStarterSession: async (data) => window.pywebview ? await window.pywebview.api.save_starter_session(data) : true,
-    clearStarterSession: async () => window.pywebview ? await window.pywebview.api.clear_starter_session() : true,
+    clearStarterSession,
     exportStarterConfig: async (data) => window.pywebview ? await window.pywebview.api.export_starter_config(data) : false,
     loadStarterConfig: async () => window.pywebview ? await window.pywebview.api.load_starter_config() : null,
     getConceptQuestions: async () => window.pywebview ? await window.pywebview.api.get_concept_questions() : {},
