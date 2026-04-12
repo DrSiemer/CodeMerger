@@ -10,3 +10,4 @@ __pycache__/
 /config.json
 /filetypes.json
 /project_starter_session.json
+.vscode
