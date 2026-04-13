@@ -44,19 +44,36 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          cd ..
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+
       - name: Install dependencies
         run: pip install -r requirements.txt
+
       - name: Build with PyInstaller
         run: pyinstaller codemerger.spec
+
       - name: Compile Inno Setup installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
           path: setup.iss
           options: /dMyAppVersion=${{ github.ref_name }}
+
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -74,8 +91,9 @@ jobs:
       contents: write
     steps:
       - name: Download all build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/upload-artifact@v4
         with:
+          name: CodeMerger-windows-build
           path: artifacts
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
