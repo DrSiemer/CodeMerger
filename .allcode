@@ -3,16 +3,16 @@
   "project_name": "CodeMerger",
   "project_color": "#808080",
   "project_font_color": "light",
-  "active_profile": "Default",
+  "active_profile": "tkinter",
   "profiles": {
     "Default": {
       "selected_files": [
         {
           "path": "llm.md",
-          "mtime": 1776063480.8274877,
-          "hash": "92873969f568acbcff4d53e42e24c1ba9e1d9c4a",
-          "tokens": 3067,
-          "lines": 96
+          "mtime": 1776090776.0335107,
+          "hash": "747fe17e83fed77c407c278e371f483ea9098e57",
+          "tokens": 3154,
+          "lines": 97
         },
         {
           "path": "README.md",
@@ -790,9 +790,9 @@
         },
         {
           "path": "go.bat",
-          "mtime": 1776065881.8475347,
-          "hash": "5a2f3f0e8e0b1d24143401109427baf9146b03c4",
-          "tokens": 2318,
+          "mtime": 1776090776.1950028,
+          "hash": "d7fc28fc47854ea1a39d03cf21074861fba9eb6c",
+          "tokens": 2324,
           "lines": 330,
           "ignore_tokens": false
         },
@@ -825,7 +825,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 138605,
+      "total_tokens": 138698,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -857,10 +857,10 @@
       "selected_files": [
         {
           "path": "llm.md",
-          "mtime": 1776063480.8274877,
-          "hash": "92873969f568acbcff4d53e42e24c1ba9e1d9c4a",
-          "tokens": 3067,
-          "lines": 96
+          "mtime": 1776090776.0335107,
+          "hash": "747fe17e83fed77c407c278e371f483ea9098e57",
+          "tokens": 3154,
+          "lines": 97
         },
         {
           "path": "README.md",
@@ -1573,9 +1573,9 @@
         },
         {
           "path": "go.bat",
-          "mtime": 1776065881.8475347,
-          "hash": "5a2f3f0e8e0b1d24143401109427baf9146b03c4",
-          "tokens": 2318,
+          "mtime": 1776090776.1950028,
+          "hash": "d7fc28fc47854ea1a39d03cf21074861fba9eb6c",
+          "tokens": 2324,
           "lines": 330,
           "ignore_tokens": false
         },
@@ -1620,7 +1620,7 @@
           "hash": "6cbd5b7cb558dd93dd9e5238814334b2df85e17c"
         }
       ],
-      "total_tokens": 320137,
+      "total_tokens": 320230,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
