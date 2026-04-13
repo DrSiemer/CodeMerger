@@ -27,6 +27,7 @@ export const starterInfo = {
   "starter_seg_questions": "Questions Toggle: Show or hide the guiding questions panel to help refine the quality of this segment.",
   "starter_questions_panel": "Guiding Questions: Review these specific criteria to ensure the current segment is comprehensive and accurate. Use the navigation arrows to cycle through different focus points.",
   "starter_questions_copy": "Copy Question Prompt: Compiles the current segment's text, any surrounding context, and the selected guiding question into a structured prompt. Paste this into your LLM to get specific feedback or verification.",
+  "starter_questions_custom": "Custom Question: Type your own specific question or instruction for the AI regarding this content. This allows you to go beyond the prewritten guiding questions.",
   "starter_seg_rewrite": "Rewrite Segments: Provide a specific instruction to rewrite all unsigned segments based on new feedback.",
   "starter_seg_signoff": "Sign Off: Lock the current segment and move to the next incomplete section.",
   "starter_seg_unlock": "Unlock: Release the lock on this segment to allow further manual edits or inclusion in a Rewrite.",

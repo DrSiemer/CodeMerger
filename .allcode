@@ -378,8 +378,11 @@
         },
         {
           "path": "frontend/src/utils/info/starterInfo.js",
-          "tokens": 1142,
-          "ignoreTokens": false
+          "tokens": 1178,
+          "ignoreTokens": false,
+          "lines": 49,
+          "mtime": 1776113397.3384533,
+          "hash": "9403e32bf0cf0b7291ea03b1555b1d783dd722e7"
         },
         {
           "path": "frontend/src/views/MainView.vue",
@@ -572,8 +575,11 @@
         },
         {
           "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",
-          "tokens": 794,
-          "ignoreTokens": false
+          "tokens": 1224,
+          "ignoreTokens": false,
+          "lines": 133,
+          "mtime": 1776113397.2784495,
+          "hash": "8d7e025972e5d262231ba33e12862c984abc5c5a"
         },
         {
           "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
@@ -699,7 +705,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 139801,
+      "total_tokens": 140267,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
