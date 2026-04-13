@@ -14,6 +14,7 @@ if "%VIRTUAL_ENV%"=="" (
 
         python -m venv %VENV_DIR%
         call %VENV_DIR%\Scripts\activate
+        call %VENV_DIR%\Scripts\activate
         if exist requirements.txt (
             echo Installing required packages
 
@@ -53,7 +54,8 @@ goto :eof
     if not exist "frontend\dist\assets" set BUILD_REQUIRED=1
 
     if "%BUILD_REQUIRED%"=="1" (
-        echo Production frontend not found or incomplete. Building now...
+        echo Production frontend not found or incomplete. Building now
+
         call :BuildFrontend
     )
 
@@ -62,7 +64,8 @@ goto :eof
     goto :eof
 
 :DebugAction
-    echo Starting CodeMerger in Production Debug Mode (DevTools enabled)...
+    echo Starting CodeMerger in Production Debug Mode (DevTools enabled)
+
 
     REM Ensure frontend is built first
     if not exist "frontend\dist\index.html" (
@@ -73,20 +76,24 @@ goto :eof
     goto :eof
 
 :InstallFrontend
-    echo Installing node modules...
+    echo Installing node modules
+
     cd frontend
     call npm install
     cd ..
     goto :eof
 
 :BuildAndRun
-    echo Rebuilding production frontend...
+    echo Rebuilding production frontend
+
     call :BuildFrontend
-    echo Starting app...
+    echo Starting app
+
     goto :DefaultAction
 
 :DevAction
-    echo Starting Frontend and API concurrently...
+    echo Starting Frontend and API concurrently
+
 
     call npm run dev
     goto :eof
@@ -153,7 +160,8 @@ goto :eof
     echo ===================================
     cd frontend
     if not exist "node_modules" (
-        echo Installing frontend dependencies...
+        echo Installing frontend dependencies
+
         call npm install
     )
     call npm run build

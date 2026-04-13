@@ -28,6 +28,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 
 - **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
 - **Info Mode Key-Sync Requirement (CRITICAL):** When porting Info Mode features from Python to Web UI, a 1:1 mapping between `info_messages.py` (Python) and `infoMessages.js` (JavaScript) is MANDATORY. If a key is used in `v-info` but is missing from `infoMessages.js`, the system silently falls back to the default message. Since the text doesn't change, Vue's reactivity system will not trigger an update, resulting in the footer appearing "broken" or "frozen" even if events are firing. ALWAYS verify the frontend key dictionary exists before implementing hovers.
+- **Dots in batch files:** NEVER use triple dots (`...`) in Batch scripts (`.bat`), as they cannot handle it and you will break the scripts by doing that.
 
 ---
 
