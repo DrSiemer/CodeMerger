@@ -3,16 +3,16 @@
   "project_name": "CodeMerger",
   "project_color": "#808080",
   "project_font_color": "light",
-  "active_profile": "tkinter",
+  "active_profile": "Default",
   "profiles": {
     "Default": {
       "selected_files": [
         {
           "path": "llm.md",
-          "mtime": 1776090776.0335107,
-          "hash": "747fe17e83fed77c407c278e371f483ea9098e57",
-          "tokens": 3154,
-          "lines": 97
+          "mtime": 1776091942.3544965,
+          "hash": "3e48377b7d3d77bd3eacd7f1f39bdd0f85ac5a4d",
+          "tokens": 3455,
+          "lines": 101
         },
         {
           "path": "README.md",
@@ -23,8 +23,8 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776080667.7662795,
-          "hash": "51d83b214c308d0e9039c0507e83bf9b0c29fa3a",
+          "mtime": 1776092343.2568629,
+          "hash": "abb3e7448ee6212b3493cc26ae9f0d4e997ed755",
           "tokens": 1872,
           "lines": 222
         },
@@ -130,10 +130,10 @@
         },
         {
           "path": "src/core/updater.py",
-          "mtime": 1775740014.8103433,
-          "hash": "27e3d5da14f9b80bd4408008f2e383b8e7e6fa12",
-          "tokens": 1935,
-          "lines": 233
+          "mtime": 1776091942.3154233,
+          "hash": "811bdbc555cc1b988b7c69569d65014e1b805ad3",
+          "tokens": 2121,
+          "lines": 247
         },
         {
           "path": "src/core/file_monitor_thread.py",
@@ -228,17 +228,17 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 1994,
-          "lines": 229,
-          "mtime": 1776082870.51775,
-          "hash": "d4c0e790500bef2016601b4531262daaaecfe26f"
+          "tokens": 2052,
+          "lines": 235,
+          "mtime": 1776091942.266368,
+          "hash": "92842f5cc668b72fd80d72135a96ed8ee9a07b6f"
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776083084.6442702,
-          "hash": "339fccd829d27aca66dc2ba65a27f863ba103670",
-          "tokens": 455,
-          "lines": 63
+          "mtime": 1776091344.871271,
+          "hash": "8ccde1d4ee416459b2a0edc22d149257edaee015",
+          "tokens": 515,
+          "lines": 70
         },
         {
           "path": "frontend/package.json",
@@ -312,10 +312,10 @@
         },
         {
           "path": "frontend/src/composables/useSystem.js",
-          "tokens": 791,
-          "lines": 123,
-          "mtime": 1776082139.2064555,
-          "hash": "bb0cc63d3a8345376682f9d78be77c67a120128a"
+          "tokens": 838,
+          "lines": 131,
+          "mtime": 1776091571.7456646,
+          "hash": "ec6fba1adbb2bdecf6f9a124407d2d8bb2ab1ea3"
         },
         {
           "path": "frontend/src/composables/useProject.js",
@@ -414,10 +414,10 @@
         },
         {
           "path": "frontend/src/components/settings/SettingsAppTab.vue",
-          "tokens": 902,
-          "lines": 71,
-          "mtime": 1776089632.226904,
-          "hash": "a11a7dbbf718879a5fa09e44b32de5f41a831518"
+          "tokens": 1024,
+          "lines": 82,
+          "mtime": 1776091571.7955322,
+          "hash": "8fcb0497b6f67db83af169937b8951de6764314f"
         },
         {
           "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
@@ -790,10 +790,10 @@
         },
         {
           "path": "go.bat",
-          "mtime": 1776090776.1950028,
-          "hash": "d7fc28fc47854ea1a39d03cf21074861fba9eb6c",
-          "tokens": 2324,
-          "lines": 330,
+          "mtime": 1776091344.7189672,
+          "hash": "0e63079e6d94d07bdff2c830fdec9204e4df67d9",
+          "tokens": 2411,
+          "lines": 342,
           "ignore_tokens": false
         },
         {
@@ -823,9 +823,16 @@
           "hash": "46533fb7ab8721962f918b471392f04f066acb96",
           "tokens": 645,
           "lines": 87
+        },
+        {
+          "path": "version.txt",
+          "tokens": 11,
+          "lines": 3,
+          "mtime": 1776092343.4031677,
+          "hash": "d2532a5fba345a00023fa9aa5e064df4b75ba4bf"
         }
       ],
-      "total_tokens": 138698,
+      "total_tokens": 139559,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -857,10 +864,10 @@
       "selected_files": [
         {
           "path": "llm.md",
-          "mtime": 1776090776.0335107,
-          "hash": "747fe17e83fed77c407c278e371f483ea9098e57",
-          "tokens": 3154,
-          "lines": 97
+          "mtime": 1776091942.3544965,
+          "hash": "3e48377b7d3d77bd3eacd7f1f39bdd0f85ac5a4d",
+          "tokens": 3455,
+          "lines": 101
         },
         {
           "path": "README.md",
@@ -871,8 +878,8 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776080667.7662795,
-          "hash": "51d83b214c308d0e9039c0507e83bf9b0c29fa3a",
+          "mtime": 1776092343.2568629,
+          "hash": "abb3e7448ee6212b3493cc26ae9f0d4e997ed755",
           "tokens": 1872,
           "lines": 222
         },
@@ -985,10 +992,10 @@
         },
         {
           "path": "src/core/updater.py",
-          "mtime": 1775740014.8103433,
-          "hash": "27e3d5da14f9b80bd4408008f2e383b8e7e6fa12",
-          "tokens": 1935,
-          "lines": 233
+          "mtime": 1776091942.3154233,
+          "hash": "811bdbc555cc1b988b7c69569d65014e1b805ad3",
+          "tokens": 2121,
+          "lines": 247
         },
         {
           "path": "src/api_parts/base_api.py",
@@ -1068,15 +1075,18 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 1994,
-          "ignoreTokens": false
+          "tokens": 2052,
+          "ignoreTokens": false,
+          "lines": 235,
+          "mtime": 1776091942.266368,
+          "hash": "92842f5cc668b72fd80d72135a96ed8ee9a07b6f"
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776083084.6442702,
-          "hash": "339fccd829d27aca66dc2ba65a27f863ba103670",
-          "tokens": 455,
-          "lines": 63
+          "mtime": 1776091344.871271,
+          "hash": "8ccde1d4ee416459b2a0edc22d149257edaee015",
+          "tokens": 515,
+          "lines": 70
         },
         {
           "path": "frontend/package.json",
@@ -1149,8 +1159,11 @@
         },
         {
           "path": "frontend/src/composables/useSystem.js",
-          "tokens": 791,
-          "ignoreTokens": false
+          "tokens": 838,
+          "ignoreTokens": false,
+          "lines": 131,
+          "mtime": 1776091571.7456646,
+          "hash": "ec6fba1adbb2bdecf6f9a124407d2d8bb2ab1ea3"
         },
         {
           "path": "frontend/src/composables/useProject.js",
@@ -1573,10 +1586,10 @@
         },
         {
           "path": "go.bat",
-          "mtime": 1776090776.1950028,
-          "hash": "d7fc28fc47854ea1a39d03cf21074861fba9eb6c",
-          "tokens": 2324,
-          "lines": 330,
+          "mtime": 1776091344.7189672,
+          "hash": "0e63079e6d94d07bdff2c830fdec9204e4df67d9",
+          "tokens": 2411,
+          "lines": 342,
           "ignore_tokens": false
         },
         {
@@ -1618,9 +1631,16 @@
           "lines": 85,
           "mtime": 1776087064.1216009,
           "hash": "6cbd5b7cb558dd93dd9e5238814334b2df85e17c"
+        },
+        {
+          "path": "version.txt",
+          "tokens": 11,
+          "lines": 3,
+          "mtime": 1776092343.4031677,
+          "hash": "d2532a5fba345a00023fa9aa5e064df4b75ba4bf"
         }
       ],
-      "total_tokens": 320230,
+      "total_tokens": 320980,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

@@ -104,6 +104,13 @@ export function useSystem() {
     }
   }
 
+  const checkForUpdatesManual = async () => {
+    if (window.pywebview) {
+      return await window.pywebview.api.check_for_updates_manual()
+    }
+    return false
+  }
+
   return {
     resetEditorFontSize,
     handleZoom,
@@ -118,6 +125,7 @@ export function useSystem() {
     minimizeWindow,
     closeApp,
     selectEditorExecutable,
-    copyCleanupPrompt
+    copyCleanupPrompt,
+    checkForUpdatesManual
   }
 }

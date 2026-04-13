@@ -31,6 +31,7 @@ if /I "%FLAG%"=="" goto :DefaultAction
 if /I "%FLAG%"=="i" goto :InstallFrontend
 if /I "%FLAG%"=="br" goto :BuildAndRun
 if /I "%FLAG%"=="dev" goto :DevAction
+if /I "%FLAG%"=="debug" goto :DebugAction
 if /I "%FLAG%"=="api" goto :ApiAction
 if /I "%FLAG%"=="fe" goto :FrontendAction
 if /I "%FLAG%"=="cmd" goto :OpenCmd
@@ -58,6 +59,17 @@ goto :eof
 
     REM Using the venv python explicitly for consistency with go dev
     "%VENV_DIR%\Scripts\python.exe" %START_SCRIPT%
+    goto :eof
+
+:DebugAction
+    echo Starting CodeMerger in Production Debug Mode (DevTools enabled)...
+
+    REM Ensure frontend is built first
+    if not exist "frontend\dist\index.html" (
+        call :BuildFrontend
+    )
+
+    "%VENV_DIR%\Scripts\python.exe" %START_SCRIPT% --debug
     goto :eof
 
 :InstallFrontend

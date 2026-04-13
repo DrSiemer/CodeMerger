@@ -28,6 +28,7 @@ class Updater:
         """
         Creates a hidden temporary Tk root if no parent is available.
         Ensures popups don't crash when called from the Webview backend.
+        Forces the hidden root to the top so messageboxes appear over Webview.
         """
         if self.parent and hasattr(self.parent, 'winfo_exists') and self.parent.winfo_exists():
             return self.parent
@@ -35,7 +36,10 @@ class Updater:
         # Fallback for Webview mode
         root = tk.Tk()
         root.withdraw()
+        # CRITICAL: Force the hidden master window to the top of the OS z-order
+        # so that subsequent messagebox children inherit this elevation.
         root.attributes("-topmost", True)
+        root.lift()
         return root
 
     def _should_check_for_updates(self):
@@ -196,8 +200,18 @@ class Updater:
             base_path = os.path.dirname(sys.executable)
             updater_exe_path = os.path.join(base_path, "updater_gui.exe")
         else:
-            # This path is for running from source code.
-            updater_exe_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
+            # Development Mode Search
+            # Path 1: Project Root
+            root_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
+            # Path 2: Build Output folder (Common dev scenario)
+            build_path = os.path.join(BUNDLE_DIR, "dist", "CodeMerger", "updater_gui.exe")
+
+            if os.path.exists(root_path):
+                updater_exe_path = root_path
+            elif os.path.exists(build_path):
+                updater_exe_path = build_path
+            else:
+                updater_exe_path = root_path # Fallback to trigger the 'not found' error below
 
         if not os.path.exists(updater_exe_path):
             log.critical(f"Updater executable 'updater_gui.exe' not found at expected path: {updater_exe_path}")
@@ -219,13 +233,13 @@ class Updater:
                 close_fds=True
             )
 
-            log.info("Updater launched. Exiting main application.")
+            log.info("Updater launched. Force-terminating main application for update cycle.")
 
-            # Coordination with PyWebView logic: use exit_all if available
-            if hasattr(self.parent, 'exit_all'):
-                self.parent.exit_all()
-            else:
-                sys.exit(0)
+            # CRITICAL: We must use os._exit(0) to ensure the process vanishes from the
+            # OS process table immediately. Standard sys.exit() or window.destroy()
+            # might linger due to Chromium/COM cleanup, causing the updater_gui to
+            # hang while waiting for the PID to close.
+            os._exit(0)
 
         except Exception as e:
             log.exception("Failed to launch the updater process.")

@@ -25,10 +25,11 @@ class WindowManager:
     - PROPERTIES (win.x, win.width): All = PHYSICAL
     - EVENTS (moved, resized): All = LOGICAL
     """
-    def __init__(self, api, monitor, dev_mode=False):
+    def __init__(self, api, monitor, dev_mode=False, debug_mode=False):
         self.api = api
         self.monitor = monitor
         self.dev_mode = dev_mode
+        self.debug_mode = debug_mode
         self.main_window = None
         self.compact_window = None
         self.splash_window = None
@@ -61,7 +62,8 @@ class WindowManager:
             self.base_url = os.path.abspath(os.path.join(bundle_dir, 'frontend', 'dist', 'index.html'))
 
         app_version = load_app_version()
-        self.updater = Updater(None, self.api.app_state, app_version)
+        # Initialize updater with self as parent to allow access to exit_all()
+        self.updater = Updater(self, self.api.app_state, app_version)
 
     # --- Geometry Delegation ---
     def _get_scale_factor(self, h_monitor=None):
@@ -105,7 +107,7 @@ class WindowManager:
         threading.Thread(target=failsafe, daemon=True).start()
 
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
-        webview.start(gui='edgechromium', debug=self.dev_mode)
+        webview.start(gui='edgechromium', debug=self.debug_mode)
 
     def show_main_and_close_splash(self):
         if self._handshake_received or self._is_shutting_down: return
@@ -129,6 +131,10 @@ class WindowManager:
             if not self.monitor.is_alive(): self.monitor.start()
 
         create_compact_window(self)
+
+        # Trigger automatic update check on boot
+        if self.updater:
+            threading.Thread(target=self.updater.check_for_updates, daemon=True).start()
 
     # --- Window Events ---
     def _on_main_moved(self, x, y):

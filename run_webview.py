@@ -49,7 +49,14 @@ def main():
         project_manager = ProjectManager(load_active_file_extensions)
         api = Api(app_state, project_manager, newly_added_filetypes)
         monitor = FileMonitorThread(None, app_state, project_manager)
-        manager = WindowManager(api, monitor, dev_mode=("--dev" in sys.argv))
+
+        # Mode detection:
+        # --dev = Connect to localhost:5173 (Vite)
+        # --debug = Load Production Bundle + Enable DevTools
+        dev_mode = "--dev" in sys.argv
+        debug_mode = "--debug" in sys.argv or dev_mode
+
+        manager = WindowManager(api, monitor, dev_mode=dev_mode, debug_mode=debug_mode)
         manager.start()
     except Exception as e:
         log.error(f"Fatal error during startup:\n{traceback.format_exc()}")
