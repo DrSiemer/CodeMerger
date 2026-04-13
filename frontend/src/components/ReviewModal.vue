@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
   HelpCircle, ShieldCheck, AlertTriangle,
@@ -81,6 +81,16 @@ const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed ||
 const hasUnformatted = computed(() => tabs.value.some(t => t.id === 'unformatted'))
 const hasFormattingTags = computed(() => lastAiResponse.value?.has_any_tags)
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') {
+    if (getPendingCount.value > 0) {
+      if (confirm('You have pending changes in the review. Discard them?')) emit('close')
+    } else {
+      emit('close')
+    }
+  }
+}
+
 onMounted(async () => {
   await resizeWindow(1100, 850)
 
@@ -116,6 +126,12 @@ onMounted(async () => {
       }
     }
   }
+
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 // --- Logic Actions ---

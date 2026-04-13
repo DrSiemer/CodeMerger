@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { X, BookOpen, RotateCcw, Save } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 
@@ -9,12 +9,22 @@ const { activeProject, config, saveInstructions, resizeWindow } = useAppState()
 const localIntro = ref('')
 const localOutro = ref('')
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') emit('close')
+}
+
 onMounted(async () => {
   // Grow window to provide a comfortable text area footprint
   await resizeWindow(800, 650)
 
   localIntro.value = activeProject.introText || ''
   localOutro.value = activeProject.outroText || ''
+
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const loadDefaults = () => {

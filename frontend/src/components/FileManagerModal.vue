@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { X, RotateCcw, Save } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
@@ -33,12 +33,22 @@ const isOrderPulseActive = ref(false)
 // Subtle highlight state for tree synchronization
 const highlightedPath = ref(null)
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') handleCancel()
+}
+
 onMounted(async () => {
   await resizeWindow(1100, 800)
   await refreshTree()
   await autoHandleNewFiles()
   await clearUnknownFiles()
   isLoaded.value = true
+
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const refreshTree = async () => {

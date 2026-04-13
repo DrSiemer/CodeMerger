@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import {
   X, Settings, FolderClosed, Bot, Play,
   Terminal, FileCode2, Trash2, Plus, CheckSquare, Square
@@ -25,6 +25,10 @@ const newExt = ref('')
 const newDesc = ref('')
 const searchQuery = ref('')
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') emit('close')
+}
+
 onMounted(async () => {
   // Smart Growth: Ensure the main window is large enough for the settings layout
   // 1000x700 is the recommended comfortable footprint for settings.
@@ -33,6 +37,12 @@ onMounted(async () => {
   // Deep clone to prevent mutating global state before saving
   localConfig.value = JSON.parse(JSON.stringify(config.value))
   localFiletypes.value = await getFiletypes()
+
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const handleSave = async () => {

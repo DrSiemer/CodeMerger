@@ -73,6 +73,10 @@ const stepNames = {
   6: 'Generate'
 }
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') emit('close')
+}
+
 onMounted(async () => {
   await resizeWindow(1100, 850)
 
@@ -92,12 +96,16 @@ onMounted(async () => {
   }
 
   isLoading.value = false
+
+  window.addEventListener('keydown', handleKeyDown)
 })
 
 onUnmounted(() => {
   // Automatic acceptance of all pending diffs on exit
   pData.concept_baselines = {}
   pData.todo_baselines = {}
+
+  window.removeEventListener('keydown', handleKeyDown)
 })
 
 watch(() => pData, () => {
