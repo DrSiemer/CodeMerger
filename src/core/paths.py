@@ -99,5 +99,3 @@ INFO_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info.png')
 INFO_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info_active.png')
 
 REGISTRY_KEY_PATH = r"Software\CodeMerger"
-
-UPDATE_CLEANUP_FILE_PATH = os.path.join(PERSISTENT_DATA_DIR, 'update_cleanup.json')
