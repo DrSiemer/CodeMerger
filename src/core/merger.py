@@ -74,6 +74,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
    - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
    - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure. Byte-for-byte mirroring of unchanged lines is MANDATORY.
+   - Before outputting a modified file, perform a diff in your head: Are there any methods, imports, or logic blocks present in the original that are missing in the new version? If they were not explicitly marked for deletion, they MUST be restored.
 
 4. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
