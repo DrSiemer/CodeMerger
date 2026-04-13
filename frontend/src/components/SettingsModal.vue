@@ -49,7 +49,7 @@ const handleSave = async () => {
   // Sanitize numerical inputs
   localConfig.value.new_file_check_interval = parseInt(localConfig.value.new_file_check_interval) || 5
   localConfig.value.token_limit = parseInt(localConfig.value.token_limit) || 0
-  localConfig.value.add_all_warning_threshold = parseInt(localConfig.value.add_all_warning_threshold) || 100
+  localConfig.value.add_all_warning_threshold = parseInt(localConfig.value.add_all_warning_threshold) || 50
   localConfig.value.new_file_alert_threshold = parseInt(localConfig.value.new_file_alert_threshold) || 5
 
   // Save settings and filetypes sequentially

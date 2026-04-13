@@ -9,7 +9,7 @@ import FileManagerRightPanel from './FileManagerRightPanel.vue'
 const emit = defineEmits(['close'])
 const {
   activeProject, getFileTree, resizeWindow, updateProjectFiles,
-  copyOrderRequest, clearUnknownFiles, statusMessage
+  copyOrderRequest, clearUnknownFiles, statusMessage, config
 } = useAppState()
 
 // Reorderable list setup
@@ -170,7 +170,8 @@ const addAll = () => {
   traverse(fileTree.value)
   const currentPaths = new Set(listItems.value.map(f => f.path))
   const toAdd = allFiles.filter(p => !currentPaths.has(p))
-  if (toAdd.length > 50 && !confirm(`Add ${toAdd.length} files to list?`)) return
+  const threshold = config.value.add_all_warning_threshold || 50
+  if (toAdd.length > threshold && !confirm(`Add ${toAdd.length} files to list?`)) return
   toAdd.forEach(path => {
     window.pywebview.api.get_token_count(path).then(tokens => {
       // Same idempotency check for bulk operations
