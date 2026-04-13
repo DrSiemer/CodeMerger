@@ -6,9 +6,6 @@ on:
     tags:
       - 'v*'
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   validate-tag:
     name: Validate Release Tag
@@ -102,5 +99,4 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/CodeMerger_Setup.exe
-            artifacts/CodeMerger.exe
+            artifacts/**/*.exe
