@@ -390,7 +390,7 @@ class ProjectConfig:
             if os.path.getsize(self.allcode_path) == 0:
                 return False
             # Threshold of 0.1s ignores precision drift common during OS monitor scaling transitions
-            return abs(os.getmtime(self.allcode_path) - self._last_mtime) > 0.1
+            return abs(os.path.getmtime(self.allcode_path) - self._last_mtime) > 0.1
         except OSError:
             return False
 
