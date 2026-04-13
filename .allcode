@@ -3,7 +3,7 @@
   "project_name": "CodeMerger",
   "project_color": "#808080",
   "project_font_color": "light",
-  "active_profile": "tkinter",
+  "active_profile": "Default",
   "profiles": {
     "Default": {
       "selected_files": [
@@ -312,10 +312,10 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "mtime": 1776069299.5806444,
-          "hash": "8b2634aa9ca6c7cbe7bda8300ecead91f48a2d70",
-          "tokens": 5344,
-          "lines": 573
+          "mtime": 1776079753.6068702,
+          "hash": "596db7823e3a1f985be7c2d6564b037391c36d45",
+          "tokens": 1259,
+          "lines": 160
         },
         {
           "path": "frontend/src/views/CompactView.vue",
@@ -655,7 +655,7 @@
           "lines": 166
         }
       ],
-      "total_tokens": 137271,
+      "total_tokens": 130976,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -979,10 +979,10 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "mtime": 1776069299.5806444,
-          "hash": "8b2634aa9ca6c7cbe7bda8300ecead91f48a2d70",
-          "tokens": 5344,
-          "lines": 573
+          "mtime": 1776079753.6068702,
+          "hash": "596db7823e3a1f985be7c2d6564b037391c36d45",
+          "tokens": 1259,
+          "lines": 160
         },
         {
           "path": "frontend/src/views/CompactView.vue",
@@ -1334,9 +1334,30 @@
           "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
           "tokens": 2547,
           "ignoreTokens": false
+        },
+        {
+          "path": "frontend/src/components/dashboard/DashboardHeader.vue",
+          "tokens": 1493,
+          "lines": 191,
+          "mtime": 1776079753.6568785,
+          "hash": "c4566a7d640c72acaa2d3dd48871b98d50d2572a"
+        },
+        {
+          "path": "frontend/src/components/dashboard/DashboardNav.vue",
+          "tokens": 1171,
+          "lines": 103,
+          "mtime": 1776079753.701686,
+          "hash": "0cad561b96484a133e951b30f3c540b9c20d1ca8"
+        },
+        {
+          "path": "frontend/src/components/dashboard/DashboardActions.vue",
+          "tokens": 1859,
+          "lines": 189,
+          "mtime": 1776079753.7530403,
+          "hash": "8959834c6727f79e14993168fdc01bd2658accc5"
         }
       ],
-      "total_tokens": 136861,
+      "total_tokens": 315272,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1397,6 +1418,9 @@
     "frontend/src/components/ProjectStarterModal.vue",
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
+    "frontend/src/components/dashboard/DashboardActions.vue",
+    "frontend/src/components/dashboard/DashboardHeader.vue",
+    "frontend/src/components/dashboard/DashboardNav.vue",
     "frontend/src/components/review-tabs/ReviewChangesTab.vue",
     "frontend/src/components/starter-steps/NotesModal.vue",
     "frontend/src/components/starter-steps/ReviewerQuestions.vue",
