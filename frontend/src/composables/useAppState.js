@@ -77,7 +77,12 @@ const reviewMode = ref('new') // 'new' or 'resume'
 const revertToCompactOnClose = ref(false)
 
 // Editor Scaling State
-const editorFontSize = ref(15)
+const DEFAULT_FONT_SIZE = 15
+const editorFontSize = ref(DEFAULT_FONT_SIZE)
+
+const resetEditorFontSize = () => {
+  editorFontSize.value = DEFAULT_FONT_SIZE
+}
 
 // Persistence for AI Review Window
 const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted' | 'skipped'
@@ -561,6 +566,7 @@ export function useAppState() {
     lockedIcon,
     unlockedIcon,
     editorFontSize,
+    resetEditorFontSize,
     hasPendingChanges,
     infoModeActive,
     currentInfoText,

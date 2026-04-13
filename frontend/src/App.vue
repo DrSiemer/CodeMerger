@@ -13,7 +13,8 @@ const {
   toggleInfoMode,
   getClipboardText,
   copyCode,
-  activeProject
+  activeProject,
+  resetEditorFontSize
 } = useAppState()
 const route = useRoute()
 
@@ -93,6 +94,11 @@ onMounted(() => {
           await copyCode(!isShift)
         }
       }
+    }
+
+    if (isCtrl && key === '0') {
+      e.preventDefault()
+      resetEditorFontSize()
     }
   })
 })
