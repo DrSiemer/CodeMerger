@@ -210,7 +210,7 @@ class ProjectApi:
 
                     new_env['PATH'] = os.pathsep.join(cleaned_entries)
 
-                    subprocess.Popen('cmd.exe', concept_wd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
+                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
                     return "Opened clean console in project folder."
                 else:
                     return "Terminal feature only available on Windows."
