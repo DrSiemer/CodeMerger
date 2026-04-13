@@ -193,7 +193,7 @@ class ProjectApi:
 
                     new_env['PATH'] = os.pathsep.join(cleaned_entries)
 
-                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
+                    subprocess.Popen('cmd.exe', concept_wd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
                     return "Opened clean console in project folder."
                 else:
                     return "Terminal feature only available on Windows."
@@ -253,7 +253,11 @@ class ProjectApi:
             return self._format_project_response(project_config, "Cannot delete the Default profile.")
 
         if project_config.delete_profile(name):
-            project_config.active_profile_name = "Default"
             project_config.save()
+            if self._window_manager and self._window_manager.main_window:
+                count = len(project_config.unknown_files)
+                self._window_manager.main_window.evaluate_js(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')
+
             return self._format_project_response(project_config, f"Profile '{name}' deleted.")
+
         return self._format_project_response(project_config, f"Error: Could not delete profile '{name}'.")

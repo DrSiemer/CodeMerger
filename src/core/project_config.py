@@ -373,27 +373,36 @@ class ProjectConfig:
         return sorted(list(self.profiles.keys()))
 
     def create_new_profile(self, name, copy_files, copy_instructions):
-        if name in self.profiles:
-            return False
+        with self._lock:
+            if name in self.profiles:
+                return False
 
-        if copy_files or copy_instructions:
-            source_profile = self.get_active_profile()
-            new_profile = {
-                "selected_files": [dict(f) for f in source_profile.get('selected_files', [])] if copy_files else [],
-                "total_tokens": source_profile.get('total_tokens', 0) if copy_files else 0,
-                "intro_text": source_profile.get('intro_text', '') if copy_instructions else '',
-                "outro_text": source_profile.get('outro_text', '') if copy_instructions else '',
-                "expanded_dirs": source_profile.get('expanded_dirs', [])[:] if copy_files else [],
-                "unknown_files": source_profile.get('unknown_files', [])[:] if copy_files else []
-            }
-        else:
-            new_profile = self._create_empty_profile()
+            if copy_files or copy_instructions:
+                source_profile = self.get_active_profile()
+                new_profile = {
+                    "selected_files": [dict(f) for f in source_profile.get('selected_files', [])] if copy_files else [],
+                    "total_tokens": source_profile.get('total_tokens', 0) if copy_files else 0,
+                    "intro_text": source_profile.get('intro_text', '') if copy_instructions else '',
+                    "outro_text": source_profile.get('outro_text', '') if copy_instructions else '',
+                    "expanded_dirs": source_profile.get('expanded_dirs', [])[:] if copy_files else [],
+                    "unknown_files": source_profile.get('unknown_files', [])[:] if copy_files else []
+                }
+            else:
+                new_profile = self._create_empty_profile()
 
-        self.profiles[name] = new_profile
-        return True
+            self.profiles[name] = new_profile
+            return True
 
     def delete_profile(self, profile_name_to_delete):
-        if profile_name_to_delete == "Default" or profile_name_to_delete not in self.profiles:
-            return False
-        del self.profiles[profile_name_to_delete]
-        return True
+        """Removes a profile and resets the active pointer if necessary."""
+        with self._lock:
+            if profile_name_to_delete == "Default" or profile_name_to_delete not in self.profiles:
+                return False
+
+            del self.profiles[profile_name_to_delete]
+
+            # Revert to Default if the active profile was just removed
+            if self.active_profile_name == profile_name_to_delete:
+                self.active_profile_name = "Default"
+
+            return True
