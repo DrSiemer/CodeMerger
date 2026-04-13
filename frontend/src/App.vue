@@ -1,9 +1,9 @@
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, watch, nextTick, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppState } from './composables/useAppState'
 import InfoPanel from './components/InfoPanel.vue'
-import { Info } from 'lucide-vue-next'
+import { Info, Loader2 } from 'lucide-vue-next'
 
 const {
   init,
@@ -14,7 +14,9 @@ const {
   getClipboardText,
   copyCode,
   activeProject,
-  resetEditorFontSize
+  resetEditorFontSize,
+  isProjectLoading,
+  cancelLoadProject
 } = useAppState()
 const route = useRoute()
 
@@ -106,6 +108,28 @@ onMounted(() => {
 
 <template>
   <div id="app-wrapper" class="h-screen w-screen bg-cm-dark-bg text-gray-100 flex flex-col font-sans selection:bg-cm-blue selection:text-white overflow-hidden">
+
+    <!-- Global Loading Overlay -->
+    <transition name="fade">
+      <div
+        v-if="isProjectLoading"
+        id="loading-overlay"
+        class="fixed inset-0 bg-black/60 z-[100] flex flex-col items-center justify-center pointer-events-auto"
+      >
+        <div class="bg-cm-top-bar border border-gray-600 rounded-2xl p-10 shadow-2xl flex flex-col items-center space-y-5">
+          <Loader2 class="w-16 h-16 text-cm-blue animate-spin" />
+          <div class="text-xl font-bold tracking-widest text-white uppercase">Scanning Project</div>
+
+          <!-- Subtle Cancel Button -->
+          <button
+            @click="cancelLoadProject"
+            class="text-gray-500 hover:text-gray-300 text-xs font-bold uppercase tracking-tighter transition-colors border-b border-transparent hover:border-gray-500 pt-2"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </transition>
 
     <!-- Content Area (Relative for absolute modals) -->
     <div id="content-area" class="flex-grow relative overflow-hidden flex flex-col">

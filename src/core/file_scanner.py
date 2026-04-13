@@ -2,7 +2,7 @@ import os
 from ..core.utils import is_ignored
 from .. import constants as c
 
-def get_all_matching_files(base_dir, file_extensions, gitignore_patterns, always_include_paths=None):
+def get_all_matching_files(base_dir, file_extensions, gitignore_patterns, always_include_paths=None, cancel_event=None):
     """
     Scans the file system and returns a flat list of all matching file paths,
     respecting .gitignore.
@@ -14,14 +14,21 @@ def get_all_matching_files(base_dir, file_extensions, gitignore_patterns, always
         always_include_paths (set, optional): Set of relative paths to explicitly
                                               check and include if they exist,
                                               ignoring filters.
+        cancel_event (threading.Event, optional): Event to signal scan interruption.
     """
     extensions = {ext for ext in file_extensions if ext.startswith('.')}
     exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
     matching_files = []
 
     def _scan_dir(current_path):
+        if cancel_event and cancel_event.is_set():
+            return
+
         try:
             for entry in os.scandir(current_path):
+                if cancel_event and cancel_event.is_set():
+                    return
+
                 if entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE:
                     continue
 
@@ -40,6 +47,10 @@ def get_all_matching_files(base_dir, file_extensions, gitignore_patterns, always
             pass # Ignore permission errors etc
 
     _scan_dir(base_dir)
+
+    # If the process was cancelled, we skip post-processing as the result will be discarded.
+    if cancel_event and cancel_event.is_set():
+        return matching_files
 
     # Post-scan: Explicitly check and include specific paths (e.g., selected files)
     # that might have been filtered out by gitignore or extension filters.

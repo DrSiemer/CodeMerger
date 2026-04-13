@@ -12,31 +12,46 @@ class ProjectManager:
         # Lock to ensure thread-safe access to the project_config reference and management ops
         self._lock = threading.Lock()
 
-    def _populate_new_project_files(self, project_config):
+    def _populate_new_project_files(self, project_config, cancel_event=None):
         """
         Helper method to scan for files and populate the ProjectConfig for a new project.
         """
         all_project_files = get_all_matching_files(
             base_dir=project_config.base_dir,
             file_extensions=self.get_active_file_extensions(),
-            gitignore_patterns=parse_gitignore(project_config.base_dir)
+            gitignore_patterns=parse_gitignore(project_config.base_dir),
+            cancel_event=cancel_event
         )
-        project_config.known_files = all_project_files
 
-        # Start with an empty selection for new projects
+        if cancel_event and cancel_event.is_set():
+            return False
+
+        project_config.known_files = all_project_files
         project_config.selected_files = []
         project_config.total_tokens = 0
+        return True
 
-    def load_project(self, path):
+    def load_project(self, path, cancel_event=None):
         """
         Loads a project from a given path. If no .allcode file exists,
-        it initializes a new one.
+        it initializes a new one. Passing None unloads the current project.
         Returns a tuple: (ProjectConfig object or None, status message string)
         """
         with self._lock:
-            if not path or not os.path.isdir(path):
+            # Handle deactivation
+            if path is None:
                 self.project_config = None
-                return None, "No project selected"
+                return None, "No project active."
+
+            # Defensive: Ensure path is a string before passing to os.path APIs
+            if not isinstance(path, str):
+                log.error(f"ProjectManager received non-string path: {type(path)}")
+                self.project_config = None
+                return None, "Error: Invalid project path."
+
+            if not os.path.isdir(path):
+                self.project_config = None
+                return None, f"Path is not a directory: {path}"
 
             allcode_file = os.path.join(path, '.allcode')
             is_new_project = not os.path.isfile(allcode_file)
@@ -46,16 +61,19 @@ class ProjectManager:
             try:
                 files_were_cleaned = self.project_config.load()
             except RuntimeError as e:
-                # Fatal error during load of an existing file: return None to prevent further damage
                 self.project_config = None
                 return None, str(e)
 
-            # Access name only after confirmed successful initialization
             project_display_name = self.project_config.project_name
 
             if is_new_project:
                 # Initialize a new project by scanning for all valid files
-                self._populate_new_project_files(self.project_config)
+                success = self._populate_new_project_files(self.project_config, cancel_event=cancel_event)
+
+                if cancel_event and cancel_event.is_set():
+                    self.project_config = None
+                    return None, "Load cancelled."
+
                 self.project_config.save()
                 status_message = f"Initialized new project: {project_display_name}."
             elif files_were_cleaned:
@@ -75,20 +93,15 @@ class ProjectManager:
                 return
 
             config = ProjectConfig(path)
-            # Apply the "normal" project name provided by the user
             config.project_name = project_name
 
-            # Apply recommended color if provided by LLM
             if project_color:
                 config.project_color = project_color
                 config.project_font_color = _calculate_font_color(project_color)
 
-            # Populate file list using the centralized logic
             self._populate_new_project_files(config)
 
-            # If specific files were requested (e.g. from Wizard), set them now.
             if initial_selected_files:
-                # Defensive check: Ensure items are dicts with 'path' keys
                 processed_selection = []
                 new_paths = set()
 
@@ -102,12 +115,8 @@ class ProjectManager:
                         new_paths.add(item['path'])
 
                 config.selected_files = processed_selection
-
-                # CRITICAL: Ensure these files are added to known_files so they
-                # don't trigger "New File" alerts immediately upon opening.
                 config.known_files = sorted(list(set(config.known_files) | new_paths))
 
-            # Apply custom prompts
             config.intro_text = intro_text
             config.outro_text = outro_text
             config.save()

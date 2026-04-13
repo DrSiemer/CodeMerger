@@ -84,6 +84,9 @@ const resetEditorFontSize = () => {
   editorFontSize.value = DEFAULT_FONT_SIZE
 }
 
+// Indexing/Loading State
+const isProjectLoading = ref(false)
+
 // Persistence for AI Review Window
 const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted' | 'skipped'
 const planOriginalContents = ref({}) // path -> string content (for undo)
@@ -128,7 +131,7 @@ const handleZoom = (e) => {
 
 export function useAppState() {
   const applyProjectData = (projData) => {
-    if (projData) {
+    if (projData && projData.path) {
       activeProject.path = projData.path
       activeProject.name = projData.project_name
       activeProject.color = projData.project_color
@@ -146,18 +149,26 @@ export function useAppState() {
         statusMessage.value = projData.status_msg
       }
     } else {
+      // Logic for cancelled, deactivated, or invalid loads
       activeProject.path = null
       activeProject.name = null
       activeProject.color = null
+      activeProject.fontColor = null
       activeProject.activeProfile = 'Default'
       activeProject.profiles = ['Default']
+      activeProject.totalTokens = 0
       activeProject.selectedFiles = []
       activeProject.expandedDirs = []
       activeProject.hasInstructions = false
       activeProject.introText = ''
       activeProject.outroText = ''
       activeProject.newFileCount = 0
-      statusMessage.value = 'No project selected'
+
+      if (projData && projData.status_msg) {
+        statusMessage.value = projData.status_msg
+      } else {
+        statusMessage.value = 'No project active'
+      }
     }
   }
 
@@ -256,14 +267,11 @@ export function useAppState() {
 
   const selectProject = async () => {
     statusMessage.value = 'Waiting for selection...'
-    const proj = await window.pywebview.api.select_project()
-    if (proj !== undefined) {
-      applyProjectData(proj)
-      return proj
-    } else {
-      statusMessage.value = 'Selection cancelled'
-      return null
+    if (window.pywebview) {
+      const path = await window.pywebview.api.select_project()
+      return path
     }
+    return null
   }
 
   const selectColor = async () => {
@@ -276,10 +284,24 @@ export function useAppState() {
   }
 
   const loadProject = async (path) => {
+    if (!path) return
     statusMessage.value = 'Loading project...'
-    const proj = await window.pywebview.api.load_project(path)
-    if (proj) {
-      applyProjectData(proj)
+    isProjectLoading.value = true
+    try {
+      const proj = await window.pywebview.api.load_project(path)
+      if (proj && proj.path) {
+        applyProjectData(proj)
+      } else if (proj && proj.status_msg) {
+        statusMessage.value = proj.status_msg // "Load cancelled"
+      }
+    } finally {
+      isProjectLoading.value = false
+    }
+  }
+
+  const cancelLoadProject = async () => {
+    if (window.pywebview && isProjectLoading.value) {
+      await window.pywebview.api.cancel_load_project()
     }
   }
 
@@ -294,7 +316,13 @@ export function useAppState() {
 
   const removeRecentProject = async (path) => {
     if (window.pywebview) {
-      return await window.pywebview.api.remove_recent_project(path)
+      const result = await window.pywebview.api.remove_recent_project(path)
+
+      if (path === activeProject.path) {
+        applyProjectData(null)
+      }
+
+      return Array.isArray(result) ? result : []
     }
     return []
   }
@@ -567,6 +595,8 @@ export function useAppState() {
     unlockedIcon,
     editorFontSize,
     resetEditorFontSize,
+    isProjectLoading,
+    cancelLoadProject,
     hasPendingChanges,
     infoModeActive,
     currentInfoText,

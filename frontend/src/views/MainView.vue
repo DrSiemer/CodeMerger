@@ -39,7 +39,8 @@ const {
   deleteProfile,
   config,
   applyFullPlan,
-  statusMessage
+  statusMessage,
+  isProjectLoading
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -63,6 +64,8 @@ const isFolderHovered = ref(false)
 let clickTimer = null
 
 const handleTitleInteraction = () => {
+  if (isProjectLoading.value) return
+
   if (!activeProject.path) {
     showProjectModal.value = true
     return
@@ -332,11 +335,14 @@ onUnmounted(() => {
             @click="handleTitleInteraction"
             v-info="'project_name'"
           >
-            <h1 class="text-4xl font-extralight tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
+            <h1 v-if="isProjectLoading" class="text-4xl font-extralight tracking-[0.01em] whitespace-nowrap text-gray-500 loading-dots">
+              Loading
+            </h1>
+            <h1 v-else class="text-4xl font-extralight tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
               {{ activeProject.name || '(no active project)' }}
             </h1>
             <button
-              v-if="activeProject.path"
+              v-if="activeProject.path && !isProjectLoading"
               @click.stop="startEditing"
               class="shrink-0 p-1 ml-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-white"
               title="Edit project title"
@@ -378,7 +384,7 @@ onUnmounted(() => {
         <button
           id="btn-edit-merge-list"
           class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2 px-6 rounded shadow-sm disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors h-[38px]"
-          :disabled="!activeProject.path"
+          :disabled="!activeProject.path || isProjectLoading"
           @click="openFileManager"
           title="Manage selected files and their order"
           v-info="'manage_files'"
@@ -389,17 +395,17 @@ onUnmounted(() => {
         <div id="profile-navigator" class="flex items-center space-x-2" v-if="activeProject.path">
           <!-- Multi-profile navigator -->
           <div v-if="activeProject.profiles.length > 1" class="flex items-center" v-info="'profile_nav'">
-            <button @click="prevProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-l border border-gray-600 border-r-0 flex items-center justify-center transition-colors" title="Previous Profile">&lt;</button>
+            <button @click="prevProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-l border border-gray-600 border-r-0 flex items-center justify-center transition-colors" title="Previous Profile" :disabled="isProjectLoading">&lt;</button>
             <span class="text-white bg-cm-input-bg px-4 py-2 text-sm font-medium border-y border-gray-600 h-[38px] flex items-center min-w-[80px] justify-center truncate">{{ activeProject.activeProfile }}</span>
-            <button @click="nextProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-r border border-gray-600 border-l-0 flex items-center justify-center transition-colors" title="Next Profile">&gt;</button>
+            <button @click="nextProfile" class="w-7 h-[38px] bg-cm-input-bg text-gray-400 hover:text-white rounded-r border border-gray-600 border-l-0 flex items-center justify-center transition-colors" title="Next Profile" :disabled="isProjectLoading">&gt;</button>
           </div>
 
           <!-- Single profile view -->
           <span v-else class="text-white bg-cm-input-bg px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] flex items-center truncate max-w-[120px]">{{ activeProject.activeProfile }}</span>
 
-          <button @click="showNewProfileModal = true" class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Add Profile" v-info="'profile_add'">+</button>
+          <button @click="showNewProfileModal = true" class="border border-gray-500 hover:bg-gray-700 text-white w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Add Profile" v-info="'profile_add'" :disabled="isProjectLoading">+</button>
 
-          <button v-if="activeProject.profiles.length > 1 && activeProject.activeProfile !== 'Default'" @click="deleteProfileHandler" class="border border-gray-500 hover:bg-red-900/50 hover:text-red-400 hover:border-red-400 text-gray-300 w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Delete Profile" v-info="'profile_delete'">-</button>
+          <button v-if="activeProject.profiles.length > 1 && activeProject.activeProfile !== 'Default'" @click="deleteProfileHandler" class="border border-gray-500 hover:bg-red-900/50 hover:text-red-400 hover:border-red-400 text-gray-300 w-9 h-[38px] rounded flex items-center justify-center font-bold transition-colors" title="Delete Profile" v-info="'profile_delete'" :disabled="isProjectLoading">-</button>
         </div>
       </div>
 
@@ -413,6 +419,7 @@ onUnmounted(() => {
           @mouseleave="isStarterHovered = false"
           @click="showStarterModal = true"
           v-info="'starter'"
+          :disabled="isProjectLoading"
         >
           <img
             v-if="starterIcon"
@@ -425,6 +432,7 @@ onUnmounted(() => {
         <button
           id="btn-select-project"
           @click="showProjectModal = true"
+          :disabled="isProjectLoading"
           class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-2 px-6 rounded shadow-sm transition-colors h-[38px]"
           title="Open project selector"
           v-info="'select_project'"
@@ -465,7 +473,7 @@ onUnmounted(() => {
               <button
                 id="btn-copy-with-instructions"
                 @click="handleCopy(true, $event)"
-                :disabled="isCopyingInstructions || isCopyingOnly"
+                :disabled="isCopyingInstructions || isCopyingOnly || isProjectLoading"
                 class="bg-cm-blue hover:bg-blue-500 text-white font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Prompt with Instructions (Ctrl+C). Ctrl-Click to copy code only."
                 v-info="'copy_with_instructions'"
@@ -476,7 +484,7 @@ onUnmounted(() => {
               <button
                 id="btn-copy-code"
                 @click="handleCopy(false, $event)"
-                :disabled="isCopyingInstructions || isCopyingOnly"
+                :disabled="isCopyingInstructions || isCopyingOnly || isProjectLoading"
                 class="bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex flex-col items-center justify-center space-y-1 leading-tight disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Code Only (Ctrl+Shift+C)"
                 v-info="'copy_code'"
@@ -490,7 +498,7 @@ onUnmounted(() => {
               <button
                 id="btn-copy-code"
                 @click="handleCopy(false, $event)"
-                :disabled="isCopyingInstructions || isCopyingOnly"
+                :disabled="isCopyingInstructions || isCopyingOnly || isProjectLoading"
                 class="col-span-2 bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-[22px] rounded shadow-sm text-lg transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Copy Code Only (Ctrl+Shift+C)"
                 v-info="'copy_code'"
@@ -506,7 +514,8 @@ onUnmounted(() => {
             <button
               id="btn-define-instructions"
               @click="showInstructionsModal = true"
-              class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+              :disabled="isProjectLoading"
+              class="self-start w-full bg-gray-300 hover:bg-gray-200 text-gray-900 font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px] disabled:opacity-50"
               title="Define project-specific instructions"
               v-info="'instructions'"
             >
@@ -519,7 +528,8 @@ onUnmounted(() => {
               <button
                 id="btn-paste-changes"
                 @click="handlePasteChanges"
-                class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+                :disabled="isProjectLoading"
+                class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px] disabled:opacity-50"
                 :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
                 :title="pasteTooltipText"
                 v-info="'paste_changes'"
@@ -532,7 +542,8 @@ onUnmounted(() => {
                 id="btn-response-review"
                 v-if="lastAiResponse"
                 @click="openExistingReview"
-                class="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px]"
+                :disabled="isProjectLoading"
+                class="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px] disabled:opacity-50"
                 title="Review latest AI response"
                 v-info="'response_review'"
               >
@@ -544,7 +555,7 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <div v-else class="mb-4 text-gray-500 text-[17px]">
+        <div v-else-if="!isProjectLoading" class="mb-4 text-gray-500 text-[17px]">
           Select a project to get started
         </div>
       </div>

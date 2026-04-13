@@ -25,7 +25,8 @@ onMounted(async () => {
   await resizeWindow(800, 500 + footerHeight)
 
   document.addEventListener('keydown', handleEscape)
-  recents.value = await getRecentProjects()
+  const initialRecents = await getRecentProjects()
+  recents.value = Array.isArray(initialRecents) ? initialRecents : []
   logoMaskSmall.value = await getImage('logo_mask_small.png')
   isLoaded.value = true
 })
@@ -35,7 +36,7 @@ onUnmounted(() => {
 })
 
 const filteredRecents = computed(() => {
-  if (!searchQuery.value) return recents.value
+  if (!recents.value || !searchQuery.value) return recents.value || []
   const q = searchQuery.value.toLowerCase()
   return recents.value.filter(p =>
     p.name.toLowerCase().includes(q) ||
@@ -50,18 +51,26 @@ const handleSelect = async (path, event) => {
     }
     return
   }
-  await loadProject(path)
   emit('close')
+  await loadProject(path)
 }
 
-const handleRemove = async (path) => {
-  recents.value = await removeRecentProject(path)
+const handleRemove = async (proj) => {
+  const msg = `Are you sure you want to remove "${proj.name}" from your recent projects?\n\nThis will not delete the files on your disk, but CodeMerger will no longer track its selection settings for this folder.`
+
+  if (confirm(msg)) {
+    const result = await removeRecentProject(proj.path)
+    recents.value = Array.isArray(result) ? result : []
+  }
 }
 
 const handleBrowse = async () => {
-  const proj = await selectProject()
-  if (proj) {
+  const path = await selectProject()
+  if (path) {
     emit('close')
+    // Trigger loadProject ONLY after we have a valid path string from the OS picker.
+    // This ensures the overlay appears exactly when the scan starts.
+    await loadProject(path)
   }
 }
 </script>
@@ -147,7 +156,7 @@ const handleBrowse = async () => {
               </div>
 
               <button
-                @click.stop="handleRemove(proj.path)"
+                @click.stop="handleRemove(proj)"
                 v-info="'sel_remove'"
                 class="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2 focus:opacity-100 p-1"
                 title="Remove from recent list"

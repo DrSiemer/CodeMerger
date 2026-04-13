@@ -1,3 +1,5 @@
+import threading
+
 class BaseApi:
     """Provides base state and shared helper methods for the API mixins."""
 
@@ -9,6 +11,9 @@ class BaseApi:
 
         # Stored plan for cross-window handoffs (Compact -> Main)
         self._last_parsed_plan = None
+
+        # Cancellation event for long-running filesystem operations (Project Loading)
+        self._load_cancel_event = threading.Event()
 
         self.app_state = app_state
         self.project_manager = project_manager

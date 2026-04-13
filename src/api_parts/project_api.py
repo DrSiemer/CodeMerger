@@ -30,14 +30,55 @@ class ProjectApi:
     def remove_recent_project(self, path):
         """Removes a project from the recents list and returns the updated list."""
         self.app_state.remove_recent_project(path)
+
+        # If the project being removed is no longer in AppState's active directory,
+        # ensure the project manager unloads it.
+        if not self.app_state.active_directory:
+            self.project_manager.load_project(None)
+
         return self.get_recent_projects()
 
     def load_project(self, path):
         """Activates and loads a specific project path."""
+        # Unload request
+        if path is None:
+            self.project_manager.load_project(None)
+            return {"status_msg": "Project deactivated."}
+
+        # Defensive: Ensure path is a string before passing to filesystem APIs
+        if not isinstance(path, str):
+            log.error(f"API received non-string path for load_project: {type(path)}")
+            return {"status_msg": "Error: Invalid path type."}
+
         if path and os.path.isdir(path):
             if self.app_state.update_active_dir(path):
-                project_config, status_msg = self.project_manager.load_project(path)
+                # Reset cancellation event before starting a new load
+                self._load_cancel_event.clear()
+
+                project_config, status_msg = self.project_manager.load_project(path, cancel_event=self._load_cancel_event)
+
+                if self._load_cancel_event.is_set():
+                    return {"status_msg": "Load cancelled."}
+
                 return self._format_project_response(project_config, status_msg)
+        return None
+
+    def cancel_load_project(self):
+        """Signals the background load/scan process to stop immediately."""
+        log.info("Project load cancellation requested.")
+        self._load_cancel_event.set()
+        return True
+
+    def select_project(self):
+        """
+        Opens the native OS directory selection dialog and returns the selected path string.
+        """
+        if not self._window_manager or not self._window_manager.main_window:
+            return None
+
+        result = self._window_manager.main_window.create_file_dialog(webview.FOLDER_DIALOG)
+        if result and len(result) > 0:
+            return result[0]
         return None
 
     def rename_project(self, new_name):
@@ -49,21 +90,6 @@ class ProjectApi:
         project_config.project_name = new_name.strip()
         project_config.save()
         return self._format_project_response(project_config, f"Project renamed to '{new_name.strip()}'")
-
-    def select_project(self):
-        """
-        Opens the native OS directory selection dialog.
-        """
-        if not self._window_manager or not self._window_manager.main_window:
-            return None
-
-        result = self._window_manager.main_window.create_file_dialog(webview.FOLDER_DIALOG)
-        if result and len(result) > 0:
-            selected_path = result[0]
-            if self.app_state.update_active_dir(selected_path):
-                project_config, status_msg = self.project_manager.load_project(selected_path)
-                return self._format_project_response(project_config, status_msg)
-        return None
 
     def select_color(self):
         """Opens a native color picker and updates the project color."""
