@@ -106,6 +106,23 @@ class ProjectApi:
             # Create a temporary hidden Tk root to host the dialog
             root = Tk()
             root.withdraw()
+
+            # Coordination: Anchor the hidden root to the main window's position.
+            # This ensures the native color picker opens on the correct monitor.
+            if self._window_manager and self._window_manager.main_window:
+                try:
+                    win = self._window_manager.main_window
+                    if win.x is not None and win.y is not None:
+                        mgr = self._window_manager
+                        # PyWebView properties are Physical. Tkinter expects Logical.
+                        h_mon = mgr._get_target_monitor_handle()
+                        scale = mgr._get_scale_factor(h_mon)
+
+                        # Target top-left of application window (Logical units)
+                        root.geometry(f"+{int(win.x / scale)}+{int(win.y / scale)}")
+                except Exception:
+                    pass
+
             root.attributes("-topmost", True)
 
             result = colorchooser.askcolor(
