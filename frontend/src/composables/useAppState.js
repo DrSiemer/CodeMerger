@@ -677,6 +677,7 @@ export function useAppState() {
     openPath: async (path) => window.pywebview ? await window.pywebview.api.open_path(path) : false,
     claimLastPlan: async () => window.pywebview ? await window.pywebview.api.claim_last_plan() : null,
     checkPendingChanges: async () => window.pywebview ? await window.pywebview.api.check_for_pending_changes() : false,
-    syncPlanStates: async (states) => window.pywebview ? await window.pywebview.api.sync_plan_states(states) : false
+    syncPlanStates: async (states) => window.pywebview ? await window.pywebview.api.sync_plan_states(states) : false,
+    selectEditorExecutable: async () => window.pywebview ? await window.pywebview.api.select_editor_executable() : null
   }
 }

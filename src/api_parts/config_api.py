@@ -1,5 +1,7 @@
 import logging
 import pyperclip
+import webview
+import os
 from src.core.utils import save_config, load_all_filetypes, save_filetypes
 from src.core.registry import save_setting
 from src.core import prompts as p
@@ -75,3 +77,20 @@ class ConfigApi:
         except Exception as e:
             log.error(f"Failed to copy cleanup prompt: {e}")
             return "Failed to copy prompt."
+
+    def select_editor_executable(self):
+        """Opens a native file dialog to select the code editor executable."""
+        if not self._window_manager or not self._window_manager.main_window:
+            return None
+
+        # Windows typically uses .exe; other platforms are more varied
+        file_types = ("Executable files (*.exe)", "All files (*.*)") if os.name == 'nt' else ("All files (*.*)",)
+
+        result = self._window_manager.main_window.create_file_dialog(
+            webview.OPEN_DIALOG,
+            file_types=file_types
+        )
+
+        if result and len(result) > 0:
+            return result[0]
+        return None
