@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Eye, Undo2, BookOpen, ChevronDown, ChevronRight } from 'lucide-vue-next'
+import {
+  Eye, Undo2, BookOpen, ChevronDown, ChevronRight,
+  ChevronDownSquare, ChevronUpSquare
+} from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import DiffViewer from '../DiffViewer.vue'
 import { useAppState } from '../../composables/useAppState'
@@ -14,13 +17,17 @@ const props = defineProps({
     type: Set,
     required: true
   },
+  isAllExpanded: {
+    type: Boolean,
+    default: false
+  },
   getSkippedMessage: {
     type: Function,
     required: true
   }
 })
 
-const emit = defineEmits(['toggle-diff', 'accept', 'discard', 'undo'])
+const emit = defineEmits(['toggle-diff', 'toggle-all-diffs', 'accept', 'discard', 'undo'])
 
 const { lastAiResponse, planFileStates, planOriginalContents, editorFontSize } = useAppState()
 
@@ -30,10 +37,17 @@ const showCommentary = ref(false)
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
 const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed || []).length > 0)
+
+const totalFileCount = computed(() => {
+  const u = Object.keys(lastAiResponse.value?.updates || {}).length
+  const c = Object.keys(lastAiResponse.value?.creations || {}).length
+  const d = (lastAiResponse.value?.deletions_proposed || []).length
+  return u + c + d
+})
 </script>
 
 <template>
-  <div class="space-y-8 max-w-5xl mx-auto">
+  <div class="space-y-8 max-w-5xl mx-auto pb-12">
 
     <!-- AI Commentary Expandable -->
     <div v-if="commentary" class="border border-gray-700 rounded bg-[#1A1A1A] overflow-hidden">
@@ -56,6 +70,18 @@ const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed ||
       <div v-if="showCommentary" class="p-4 border-t border-gray-700 bg-cm-dark-bg">
         <MarkdownRenderer :content="commentary" :fontSize="editorFontSize" />
       </div>
+    </div>
+
+    <!-- Bulk Toggle Toolbar (Top) -->
+    <div v-if="totalFileCount > 1" class="flex justify-end items-center">
+      <button
+        @click="$emit('toggle-all-diffs')"
+        class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
+        :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs in this tab'"
+      >
+        <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-4 h-4" />
+        <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>
+      </button>
     </div>
 
     <!-- Updates -->
@@ -86,10 +112,16 @@ const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed ||
                 <button @click="$emit('accept', path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors" title="Apply change to this file">Accept</button>
                 <button @click="$emit('discard', path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors" title="Skip this file for now">Discard</button>
               </template>
-              <button v-else @click="$emit('undo', path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Revert to local disk version">
-                <Undo2 class="w-3.5 h-3.5 mr-1.5" />
-                Undo
-              </button>
+              <div v-else class="flex items-center space-x-2">
+                <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Inspect text changes for this applied file">
+                  <Eye class="w-3.5 h-3.5 mr-1.5" />
+                  Diff
+                </button>
+                <button @click="$emit('undo', path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Revert to local disk version">
+                  <Undo2 class="w-3.5 h-3.5 mr-1.5" />
+                  Undo
+                </button>
+              </div>
             </div>
           </div>
           <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
@@ -115,10 +147,16 @@ const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed ||
                 <button @click="$emit('accept', path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors" title="Create this new file">Accept</button>
                 <button @click="$emit('discard', path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors" title="Do not create this file">Discard</button>
               </template>
-              <button v-else @click="$emit('undo', path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Delete the newly created file">
-                <Undo2 class="w-3.5 h-3.5 mr-1.5" />
-                Undo
-              </button>
+              <div v-else class="flex items-center space-x-2">
+                <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="View file content for this newly created file">
+                  <Eye class="w-3.5 h-3.5 mr-1.5" />
+                  View
+                </button>
+                <button @click="$emit('undo', path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Delete the newly created file">
+                  <Undo2 class="w-3.5 h-3.5 mr-1.5" />
+                  Undo
+                </button>
+              </div>
             </div>
           </div>
           <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
@@ -149,10 +187,16 @@ const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed ||
               <button @click="$emit('accept', path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-3 py-1 rounded transition-colors" title="Delete this file from disk">Accept Delete</button>
               <button @click="$emit('discard', path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors" title="Keep this file">Keep</button>
             </template>
-            <button v-else @click="$emit('undo', path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Restore the deleted file">
-              <Undo2 class="w-3.5 h-3.5 mr-1.5" />
-              Undo
-            </button>
+            <div v-else class="flex items-center space-x-2">
+              <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="View file content that was deleted">
+                <Eye class="w-3.5 h-3.5 mr-1.5" />
+                View
+              </button>
+              <button @click="$emit('undo', path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Restore the deleted file">
+                <Undo2 class="w-3.5 h-3.5 mr-1.5" />
+                Undo
+              </button>
+            </div>
           </div>
         </div>
         <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
@@ -160,6 +204,18 @@ const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed ||
           <DiffViewer :old-text="planOriginalContents[path]" new-text="" :fontSize="editorFontSize" :filename="path" />
         </div>
       </div>
+    </div>
+
+    <!-- Bulk Toggle Toolbar (Bottom) -->
+    <div v-if="totalFileCount > 2" class="flex justify-end items-center pt-4">
+      <button
+        @click="$emit('toggle-all-diffs')"
+        class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
+        :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs in this tab'"
+      >
+        <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-4 h-4" />
+        <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>
+      </button>
     </div>
 
   </div>

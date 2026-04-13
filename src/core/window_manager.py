@@ -41,7 +41,7 @@ class WindowManager:
 
         # Timing for minimum splash visibility
         self.start_time = time.time()
-        self.MIN_SPLASH_DURATION = 0.8
+        self.MIN_SPLASH_DURATION = 0.4
 
         # Load persisted geometry (Stored in PHYSICAL units)
         geom = self.api.app_state.config.get('main_window_geom', {})
@@ -99,7 +99,7 @@ class WindowManager:
         threading.Thread(target=show_splash_warm, daemon=True).start()
 
         def failsafe():
-            if self._stop_failsafe.wait(3.5): return
+            if self._stop_failsafe.wait(10.0): return
             if not self._handshake_received:
                 log.warning("Frontend handshake timeout. Triggering failsafe show.")
                 self.show_main_and_close_splash()
@@ -122,9 +122,16 @@ class WindowManager:
             self.main_window.show()
 
         if self.splash_window:
-            try: self.splash_window.destroy()
-            except Exception: pass
-            self.splash_window = None
+            self.splash_window.hide()
+
+            def cleanup_splash():
+                time.sleep(5.0)
+                if self.splash_window:
+                    try: self.splash_window.destroy()
+                    except Exception: pass
+                    self.splash_window = None
+
+            threading.Thread(target=cleanup_splash, daemon=True).start()
 
         if self.monitor:
             self.monitor.update_window(self.main_window)

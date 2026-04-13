@@ -29,7 +29,8 @@ const {
   processPaste,
   editorFontSize,
   hasPendingChanges,
-  handleZoom
+  handleZoom,
+  statusMessage
 } = useAppState()
 
 // State management
@@ -143,6 +144,43 @@ const toggleDiff = async (path) => {
       planOriginalContents.value[path] = await getFileContent(path)
     }
     visibleDiffs.value.add(path)
+  }
+}
+
+const allReviewPaths = computed(() => {
+  const response = lastAiResponse.value
+  if (!response) return []
+  return [
+    ...Object.keys(response.updates || {}),
+    ...Object.keys(response.creations || {}),
+    ...(response.deletions_proposed || [])
+  ]
+})
+
+const isAllExpanded = computed(() => {
+  const paths = allReviewPaths.value
+  if (paths.length === 0) return false
+  return paths.every(p => visibleDiffs.value.has(p))
+})
+
+const toggleAllDiffs = async () => {
+  if (isAllExpanded.value) {
+    visibleDiffs.value.clear()
+  } else {
+    const paths = allReviewPaths.value
+    // Concurrent fetch for missing original contents
+    const missingPaths = paths.filter(p => planOriginalContents.value[p] === undefined)
+    if (missingPaths.length > 0) {
+      statusMessage.value = `Loading ${missingPaths.length} file(s)...`
+      try {
+        await Promise.all(missingPaths.map(async (path) => {
+          planOriginalContents.value[path] = await getFileContent(path)
+        }))
+      } finally {
+        statusMessage.value = ''
+      }
+    }
+    paths.forEach(p => visibleDiffs.value.add(p))
   }
 }
 
@@ -311,8 +349,10 @@ const getSkippedMessage = (path) => {
             v-else
             :commentary="tab.content"
             :visible-diffs="visibleDiffs"
+            :is-all-expanded="isAllExpanded"
             :get-skipped-message="getSkippedMessage"
             @toggle-diff="toggleDiff"
+            @toggle-all-diffs="toggleAllDiffs"
             @accept="acceptChange"
             @discard="discardChange"
             @undo="undoChange"

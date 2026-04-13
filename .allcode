@@ -23,7 +23,7 @@
         },
         {
           "path": "requirements.txt",
-          "mtime": 1776110900.5148358,
+          "mtime": 1776111452.178851,
           "hash": "281aa9cbdfd03d722b050293a3bef72b39eb42b0",
           "tokens": 216,
           "lines": 23
@@ -161,8 +161,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2052,
-          "ignoreTokens": false
+          "tokens": 2178,
+          "ignoreTokens": false,
+          "lines": 247,
+          "mtime": 1776111754.3410578,
+          "hash": "c3e4ecca84e58e0d6b9d7361c84ef7b657d288f7"
         },
         {
           "path": "src/core/window_main.py",
@@ -442,16 +445,19 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "tokens": 3421,
+          "tokens": 3705,
           "ignoreTokens": false,
-          "lines": 368,
-          "mtime": 1776110819.796799,
-          "hash": "efc5efc2c31907ef6fb58605b607d1da15fc1bfc"
+          "lines": 408,
+          "mtime": 1776111284.7451613,
+          "hash": "b12e76806db05ea615e5928e64f511f4903df46c"
         },
         {
           "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-          "tokens": 2547,
-          "ignoreTokens": false
+          "tokens": 3300,
+          "ignoreTokens": false,
+          "lines": 222,
+          "mtime": 1776111284.801186,
+          "hash": "e85fa246e179a93343cbfd9f1bc70b8af4e695f5"
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
@@ -687,7 +693,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 137689,
+      "total_tokens": 138852,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
