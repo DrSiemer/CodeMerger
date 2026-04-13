@@ -284,10 +284,10 @@
         },
         {
           "path": "frontend/src/utils/infoMessages.js",
-          "mtime": 1776075218.4074287,
-          "hash": "ff70cc713a2934283d912cefea5b267f2614d3af",
-          "tokens": 4179,
-          "lines": 170
+          "mtime": 1776082524.2240355,
+          "hash": "3c43e317bec51c56507d00e20e3fb24355b0e76a",
+          "tokens": 125,
+          "lines": 17
         },
         {
           "path": "frontend/src/composables/useAppState.js",
@@ -695,9 +695,44 @@
           "lines": 61,
           "mtime": 1776082139.3253777,
           "hash": "c15028c7c4c967392e477c2da07842da6c9c38fb"
+        },
+        {
+          "path": "frontend/src/utils/info/mainInfo.js",
+          "tokens": 1041,
+          "lines": 39,
+          "mtime": 1776082524.3674133,
+          "hash": "7d1b3fb851e8f440974c9b728b1991cd4668dc10"
+        },
+        {
+          "path": "frontend/src/utils/info/reviewInfo.js",
+          "tokens": 461,
+          "lines": 19,
+          "mtime": 1776082524.4270468,
+          "hash": "dad0e81c095e942ac9bc63fa116dfc59ce055654"
+        },
+        {
+          "path": "frontend/src/utils/info/fileManagerInfo.js",
+          "tokens": 636,
+          "lines": 24,
+          "mtime": 1776082524.4870584,
+          "hash": "61052493a65466b6d9f694934516ec340e1dce29"
+        },
+        {
+          "path": "frontend/src/utils/info/settingsInfo.js",
+          "tokens": 890,
+          "lines": 39,
+          "mtime": 1776082524.5246458,
+          "hash": "6458ca9ad1c6ac3e098cc25349e5f84a677ff67b"
+        },
+        {
+          "path": "frontend/src/utils/info/starterInfo.js",
+          "tokens": 1142,
+          "lines": 48,
+          "mtime": 1776082524.5628424,
+          "hash": "7b6e04bf60b422fca1efbf7c04d925913af6bb6b"
         }
       ],
-      "total_tokens": 131710,
+      "total_tokens": 127656,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -993,10 +1028,10 @@
         },
         {
           "path": "frontend/src/utils/infoMessages.js",
-          "mtime": 1776075218.4074287,
-          "hash": "ff70cc713a2934283d912cefea5b267f2614d3af",
-          "tokens": 4179,
-          "lines": 170
+          "mtime": 1776082524.2240355,
+          "hash": "3c43e317bec51c56507d00e20e3fb24355b0e76a",
+          "tokens": 125,
+          "lines": 17
         },
         {
           "path": "frontend/src/composables/useAppState.js",
@@ -1399,7 +1434,7 @@
           "hash": "8959834c6727f79e14993168fdc01bd2658accc5"
         }
       ],
-      "total_tokens": 315619,
+      "total_tokens": 311565,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1487,6 +1522,11 @@
     "frontend/src/main.js",
     "frontend/src/router/index.js",
     "frontend/src/style.css",
+    "frontend/src/utils/info/fileManagerInfo.js",
+    "frontend/src/utils/info/mainInfo.js",
+    "frontend/src/utils/info/reviewInfo.js",
+    "frontend/src/utils/info/settingsInfo.js",
+    "frontend/src/utils/info/starterInfo.js",
     "frontend/src/utils/infoMessages.js",
     "frontend/src/views/CompactView.vue",
     "frontend/src/views/MainView.vue",
