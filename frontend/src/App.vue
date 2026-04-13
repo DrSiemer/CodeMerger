@@ -26,12 +26,16 @@ const isCompact = computed(() => route.path === '/compact')
 
 onMounted(() => {
   const signalReady = async () => {
-    await init()
-
     const waitForBridgeAndSignal = async (attempts = 0) => {
+      // PyWebView injection can be slow on localhost, so we check specifically for the api object
       if (window.pywebview && window.pywebview.api) {
-        await window.pywebview.api.signal_ui_ready()
-      } else if (attempts < 150) {
+        try {
+          await window.pywebview.api.signal_ui_ready()
+          init()
+        } catch (err) {
+          console.error("Ready signal error:", err)
+        }
+      } else if (attempts < 200) { // Support slow dev startup (approx 4s total polling)
         setTimeout(() => waitForBridgeAndSignal(attempts + 1), 20)
       }
     }

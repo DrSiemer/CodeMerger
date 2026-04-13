@@ -59,7 +59,7 @@ class WindowManager:
         self.main_window = None
         self.compact_window = None
         self.splash_window = None
-        self._is_shutting_down = False
+        self._is_shut_down = False
         self._transitioning = False
         self._handshake_received = False
         self._stop_failsafe = threading.Event()
@@ -200,15 +200,15 @@ class WindowManager:
                 </div>
                 <h1 style="font-weight:100; font-size:28px; letter-spacing:4px; margin:0; color:#eee;">CODEMERGER</h1>
                 <div style="margin-top:15px; display:flex; align-items:center; justify-content:center;">
-                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 1.5s infinite ease-in-out;"></div>
+                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 0.8s infinite ease-in-out;"></div>
                     <p style="color:#0078D4; font-size:11px; margin:0; font-weight:bold; letter-spacing:1px; opacity:0.8; text-transform:uppercase;">Initializing Interface</p>
                 </div>
             </div>
             <style>
                 .logo {{ position: absolute; top: 0; left: 0; width: 64px; height: 64px; opacity: 0; }}
                 .logo-1 {{ opacity: 1; }}
-                .logo-2 {{ animation: fade-over 3s linear forwards 1.5s; }}
-                .logo-3 {{ animation: fade-over 3s linear forwards 3s; }}
+                .logo-2 {{ animation: fade-over 0.6s linear forwards 0.3s; }}
+                .logo-3 {{ animation: fade-over 0.6s linear forwards 0.6s; }}
                 @keyframes fade-over {{ from {{ opacity: 0; }} to {{ opacity: 1; }} }}
                 @keyframes pulse {{ 0%, 100% {{ opacity: 0.3; transform: scale(0.8); }} 50% {{ opacity: 1; transform: scale(1.2); }} }}
             </style>
@@ -271,7 +271,9 @@ class WindowManager:
         except AttributeError: pass
 
         def failsafe():
-            if self._stop_failsafe.wait(7): return
+            # Safety timer to ensure window shows even if handshake fails.
+            # Reduced to 3.5s for faster fallback in dev origin race conditions.
+            if self._stop_failsafe.wait(3.5): return
             if not self._handshake_received:
                 log.warning("Frontend handshake timeout. Triggering failsafe show.")
                 self.show_main_and_close_splash()
@@ -422,7 +424,7 @@ class WindowManager:
         t_x_phys = max(m_l + m, min(t_x_phys, m_r - w_phys - m))
         t_y_phys = max(m_t + m, min(t_y_phys, m_b - h_phys - m))
 
-        # Sync clamped physical coordinates back to logical state to prevent UI drag jumps
+        # Sync clamped physical coordinates back to logical state to prevent UI drag logic jumps
         self.compact_mode_last_x = t_x_phys / scale
         self.compact_mode_last_y = t_y_phys / scale
 
