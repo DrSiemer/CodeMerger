@@ -167,9 +167,9 @@ class FileApi:
         # Clear unknown files for the active profile
         project_config.unknown_files = []
 
-        # Ensure these files are marked as known globally
-        current_paths = {f['path'] for f in project_config.selected_files}
-        project_config.known_files = sorted(list(set(project_config.known_files) | current_paths))
+        # Ensure these files are marked as known globally and propagated to other profiles
+        current_paths = [f['path'] for f in project_config.selected_files]
+        project_config.update_known_files(current_paths, project_config.active_profile_name)
 
         project_config.save()
 
@@ -194,8 +194,9 @@ class FileApi:
         # Clear unknown files for the active profile once user has interacted with the manager
         project_config.unknown_files = []
 
-        current_paths = {f['path'] for f in selected_files}
-        project_config.known_files = sorted(list(set(project_config.known_files) | current_paths))
+        # Centralized update of known files to propagate alerts to other profiles
+        current_paths = [f['path'] for f in selected_files]
+        project_config.update_known_files(current_paths, project_config.active_profile_name)
 
         project_config.save()
         return True

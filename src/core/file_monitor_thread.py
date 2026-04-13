@@ -123,11 +123,7 @@ class FileMonitorThread(threading.Thread):
                 for rel_path in sorted(list(brand_new)):
                     log.info(f"  [NEW]     {rel_path}")
 
-                project_config.known_files = sorted(list(set(project_config.known_files) | brand_new))
-                for p_data in project_config.profiles.values():
-                    p_unknown = set(p_data.get('unknown_files', []))
-                    p_unknown.update(brand_new)
-                    p_data['unknown_files'] = sorted(list(p_unknown))
+                project_config.update_known_files(brand_new)
                 config_changed = True
 
                 # Notify Vue frontend of new files for the alert counter

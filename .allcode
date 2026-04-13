@@ -103,10 +103,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1774299923.2915604,
-          "hash": "2d0d8fc3a076b203d534580270c763124be76e12",
-          "tokens": 2936,
-          "lines": 340,
+          "mtime": 1776112714.293771,
+          "hash": "ec924f28154cfcf1c735f7e2dee5287a407e0650",
+          "tokens": 3932,
+          "lines": 464,
           "ignore_tokens": false
         },
         {
@@ -151,8 +151,11 @@
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "tokens": 1125,
-          "ignoreTokens": false
+          "tokens": 1069,
+          "ignoreTokens": false,
+          "lines": 137,
+          "mtime": 1776112714.484778,
+          "hash": "8977ccfe81d690c7d5d207d7ed09c7defd0827c2"
         },
         {
           "path": "src/core/window_geometry.py",
@@ -216,11 +219,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 2175,
+          "tokens": 2185,
           "ignoreTokens": false,
-          "lines": 267,
-          "mtime": 1776094900.0611691,
-          "hash": "2a36d35a17d2bb3f91f9d198de641a857902e7bb"
+          "lines": 268,
+          "mtime": 1776113001.0424373,
+          "hash": "1fe00f8d4ba34ecec669e714742015ebca5a1775"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -229,8 +232,11 @@
         },
         {
           "path": "src/api_parts/changes_api.py",
-          "tokens": 2545,
-          "ignoreTokens": false
+          "tokens": 2544,
+          "ignoreTokens": false,
+          "lines": 257,
+          "mtime": 1776113001.09644,
+          "hash": "200556d66455e138fb9f762ac26c942215406896"
         },
         {
           "path": "src/api_parts/starter_api_session.py",
@@ -693,7 +699,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 138852,
+      "total_tokens": 139801,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

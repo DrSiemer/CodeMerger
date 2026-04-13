@@ -431,3 +431,34 @@ class ProjectConfig:
                 self.active_profile_name = "Default"
 
             return True
+
+    def update_known_files(self, paths, originating_profile_name=None):
+        """
+        Updates the global known_files list. Any path that is truly new to the project
+        is added to the unknown_files list of all profiles EXCEPT the originating one.
+        If originating_profile_name is None, all profiles are updated.
+        """
+        if not paths:
+            return False
+
+        changed = False
+        known_set = set(self.known_files)
+
+        actually_new = []
+        for path in paths:
+            if path not in known_set:
+                actually_new.append(path)
+                known_set.add(path)
+                changed = True
+
+        if actually_new:
+            self.known_files = sorted(list(known_set))
+            for name, p_data in self.profiles.items():
+                if name == originating_profile_name:
+                    continue
+
+                p_unknown = set(p_data.get('unknown_files', []))
+                p_unknown.update(actually_new)
+                p_data['unknown_files'] = sorted(list(p_unknown))
+
+        return changed

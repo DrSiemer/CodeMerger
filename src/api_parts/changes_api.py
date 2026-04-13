@@ -85,9 +85,7 @@ class ChangesApi:
                     'path': rel_path, 'tokens': tokens, 'lines': lines,
                     'mtime': mtime, 'hash': f_hash
                 })
-                if rel_path not in project_config.known_files:
-                    project_config.known_files.append(rel_path)
-                    project_config.known_files.sort()
+                project_config.update_known_files([rel_path], project_config.active_profile_name)
 
             # Update backend tracking state for unapplied changes notification
             if self._last_parsed_plan:
@@ -186,9 +184,6 @@ class ChangesApi:
                 except Exception:
                     tokens, lines = 0, 0
 
-                if rel_path not in project_config.known_files:
-                    project_config.known_files.append(rel_path)
-
                 found_in_active = False
                 for f_info in project_config.selected_files:
                     if f_info['path'] == rel_path:
@@ -198,7 +193,8 @@ class ChangesApi:
                 if not found_in_active:
                     project_config.selected_files.append({'path': rel_path, 'tokens': tokens, 'lines': lines, 'mtime': mtime, 'hash': f_hash})
 
-            project_config.known_files.sort()
+            # Single-point registration for new file alerts across other profiles
+            project_config.update_known_files(list(all_changed_paths), project_config.active_profile_name)
 
             if actual_deletions:
                 for rel_path in actual_deletions:
