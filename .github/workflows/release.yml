@@ -48,7 +48,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Build Frontend
         run: |
@@ -79,7 +79,7 @@ jobs:
         with:
           name: CodeMerger-windows-build
           path: |
-            dist/CodeMerger.exe
+            dist/CodeMerger/CodeMerger.exe
             dist-installer/CodeMerger_Setup.exe
 
   # Create the GitHub Release
@@ -91,7 +91,7 @@ jobs:
       contents: write
     steps:
       - name: Download all build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/download-artifact@v4
         with:
           name: CodeMerger-windows-build
           path: artifacts
@@ -102,4 +102,5 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/CodeMerger-windows-build/dist-installer/CodeMerger_Setup.exe
+            artifacts/CodeMerger_Setup.exe
+            artifacts/CodeMerger.exe
