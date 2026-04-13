@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Ensure height propagation from the root for flex-grow and absolute positioning */
+html, body, #app {
+  height: 100%;
+}
+
 /* Base CodeMerger styles to override default browser resets */
 body {
   background-color: #2E2E2E;

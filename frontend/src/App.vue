@@ -125,7 +125,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app-wrapper" class="h-full w-full bg-cm-dark-bg text-gray-100 flex flex-col font-sans selection:bg-cm-blue selection:text-white overflow-hidden">
+  <div id="app-wrapper" class="h-screen w-full bg-cm-dark-bg text-gray-100 flex flex-col font-sans selection:bg-cm-blue selection:text-white overflow-hidden">
 
     <!-- Global Loading Overlay -->
     <transition name="fade">

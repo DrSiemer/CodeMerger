@@ -263,10 +263,10 @@
         },
         {
           "path": "frontend/src/style.css",
-          "mtime": 1776066831.944516,
-          "hash": "f4df69816d24be0f2ede7404d3e6f903a06e7be6",
-          "tokens": 592,
-          "lines": 83
+          "mtime": 1776082260.2275562,
+          "hash": "dbaa539db26200a11b5c7772785fae345ae5f856",
+          "tokens": 620,
+          "lines": 88
         },
         {
           "path": "frontend/src/main.js",
@@ -291,10 +291,10 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "mtime": 1776076252.2988462,
-          "hash": "d529243d58b71a6139a6696bb98d037469994468",
-          "tokens": 5497,
-          "lines": 683
+          "mtime": 1776082138.9887772,
+          "hash": "a5bce19eee193e64001e5ebfb633160c4896f84c",
+          "tokens": 863,
+          "lines": 102
         },
         {
           "path": "frontend/src/directives/vInfo.js",
@@ -305,10 +305,10 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1776080951.291679,
-          "hash": "847166302059e162839f91b30e1905115fb788f1",
-          "tokens": 1525,
-          "lines": 187
+          "mtime": 1776082260.3693871,
+          "hash": "3f663ac5d7d512ecc63ab1ef85aedfd2b90ba5bc",
+          "tokens": 1558,
+          "lines": 194
         },
         {
           "path": "frontend/src/views/MainView.vue",
@@ -653,9 +653,51 @@
           "hash": "8bd29b8fc7d872b7ddf12813ae66e0c0bfcf5f06",
           "tokens": 2547,
           "lines": 166
+        },
+        {
+          "path": "frontend/src/composables/globalState.js",
+          "tokens": 338,
+          "lines": 48,
+          "mtime": 1776082139.1303291,
+          "hash": "e2cfe045ce4e9e9cd750a7b89177c744353b2c61"
+        },
+        {
+          "path": "frontend/src/composables/infoMode.js",
+          "tokens": 284,
+          "lines": 38,
+          "mtime": 1776082139.1682894,
+          "hash": "b58afdcc516cd490bfb12210ff8735849e2f5570"
+        },
+        {
+          "path": "frontend/src/composables/useSystem.js",
+          "tokens": 791,
+          "lines": 123,
+          "mtime": 1776082139.2064555,
+          "hash": "bb0cc63d3a8345376682f9d78be77c67a120128a"
+        },
+        {
+          "path": "frontend/src/composables/useProject.js",
+          "tokens": 1522,
+          "lines": 219,
+          "mtime": 1776082139.243713,
+          "hash": "0bfb47fdfefa4ec1bd73b02d0e41a3e630db3669"
+        },
+        {
+          "path": "frontend/src/composables/useReview.js",
+          "tokens": 1105,
+          "lines": 142,
+          "mtime": 1776082139.2847545,
+          "hash": "4b6ff8c959df20c3696af0599b39390ad712bc82"
+        },
+        {
+          "path": "frontend/src/composables/useStarter.js",
+          "tokens": 1052,
+          "lines": 61,
+          "mtime": 1776082139.3253777,
+          "hash": "c15028c7c4c967392e477c2da07842da6c9c38fb"
         }
       ],
-      "total_tokens": 131191,
+      "total_tokens": 131710,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -930,10 +972,10 @@
         },
         {
           "path": "frontend/src/style.css",
-          "mtime": 1776066831.944516,
-          "hash": "f4df69816d24be0f2ede7404d3e6f903a06e7be6",
-          "tokens": 592,
-          "lines": 83
+          "mtime": 1776082260.2275562,
+          "hash": "dbaa539db26200a11b5c7772785fae345ae5f856",
+          "tokens": 620,
+          "lines": 88
         },
         {
           "path": "frontend/src/main.js",
@@ -958,10 +1000,10 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "mtime": 1776075232.354352,
-          "hash": "a47ce2ade36eba85273b323f4b9aea20e87734dc",
-          "tokens": 5470,
-          "lines": 682
+          "mtime": 1776082138.9887772,
+          "hash": "a5bce19eee193e64001e5ebfb633160c4896f84c",
+          "tokens": 863,
+          "lines": 102
         },
         {
           "path": "frontend/src/directives/vInfo.js",
@@ -972,10 +1014,10 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1776080951.291679,
-          "hash": "847166302059e162839f91b30e1905115fb788f1",
-          "tokens": 1525,
-          "lines": 187
+          "mtime": 1776082260.3693871,
+          "hash": "3f663ac5d7d512ecc63ab1ef85aedfd2b90ba5bc",
+          "tokens": 1558,
+          "lines": 194
         },
         {
           "path": "frontend/src/views/MainView.vue",
@@ -1357,7 +1399,7 @@
           "hash": "8959834c6727f79e14993168fdc01bd2658accc5"
         }
       ],
-      "total_tokens": 320165,
+      "total_tokens": 315619,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1434,7 +1476,13 @@
     "frontend/src/components/starter-steps/StepSuccess.vue",
     "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
     "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
+    "frontend/src/composables/globalState.js",
+    "frontend/src/composables/infoMode.js",
     "frontend/src/composables/useAppState.js",
+    "frontend/src/composables/useProject.js",
+    "frontend/src/composables/useReview.js",
+    "frontend/src/composables/useStarter.js",
+    "frontend/src/composables/useSystem.js",
     "frontend/src/directives/vInfo.js",
     "frontend/src/main.js",
     "frontend/src/router/index.js",
