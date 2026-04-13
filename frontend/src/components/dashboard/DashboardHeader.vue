@@ -104,8 +104,8 @@ const swatchStyle = computed(() => {
 </script>
 
 <template>
-  <header id="dashboard-header" class="bg-cm-top-bar px-6 py-4 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
-    <div class="flex items-center space-x-4 min-w-0 flex-grow">
+  <header id="dashboard-header" class="bg-cm-top-bar px-6 py-0 flex items-center justify-between border-b border-gray-700 h-[76px] shrink-0">
+    <div class="flex items-center space-x-4 min-w-0 flex-grow h-full">
       <!-- Masked Logo Swatch -->
       <div
         v-if="activeProject.path && logoMask"
@@ -121,35 +121,35 @@ const swatchStyle = computed(() => {
       <div
         v-else-if="activeProject.path"
         id="project-logo"
-        class="w-6 h-6 rounded cursor-pointer border border-gray-600 shadow-sm shrink-0"
+        class="w-10 h-10 rounded cursor-pointer border border-gray-600 shadow-sm shrink-0"
         :style="{ backgroundColor: activeProject.color }"
         @click="selectColor"
         v-info="'color_swatch'"
         title="Change project color"
       ></div>
 
-      <div id="project-name-container" class="flex items-center min-w-0 flex-grow text-white">
-        <div v-if="isEditingName" class="flex items-center space-x-2 w-full max-w-md">
+      <div id="project-name-container" class="flex items-center min-w-0 flex-grow text-white h-full">
+        <div v-if="isEditingName" class="flex items-center space-x-2 w-full max-w-md h-full">
           <input
             ref="nameInput"
             v-model="tempName"
             @keyup.enter="saveName"
             @keyup.esc="cancelEditing"
             @blur="saveName"
-            class="bg-cm-input-bg text-white border border-cm-blue rounded px-2 py-1 text-4xl font-extralight tracking-[0.01em] w-full focus:outline-none"
+            class="bg-cm-input-bg text-white border border-cm-blue rounded px-2 py-0 text-4xl font-extralight tracking-[0.01em] leading-none h-[60px] w-full focus:outline-none"
           >
         </div>
         <div
           v-else
-          class="flex items-center group cursor-pointer min-w-0"
+          class="flex items-center group cursor-pointer min-w-0 h-full"
           title="Click to select project, double-click to edit title"
           @click="handleTitleInteraction"
           v-info="'project_name'"
         >
-          <h1 v-if="isProjectLoading" class="text-4xl font-extralight tracking-[0.01em] whitespace-nowrap text-gray-500 loading-dots">
+          <h1 v-if="isProjectLoading" class="text-4xl font-extralight tracking-[0.01em] leading-none whitespace-nowrap text-gray-500 loading-dots">
             Loading
           </h1>
-          <h1 v-else class="text-4xl font-extralight tracking-[0.01em] whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
+          <h1 v-else class="text-4xl font-extralight tracking-[0.01em] leading-none whitespace-nowrap" :class="{'text-gray-500': !activeProject.path}">
             {{ activeProject.name || '(no active project)' }}
           </h1>
           <button
@@ -164,7 +164,7 @@ const swatchStyle = computed(() => {
       </div>
     </div>
 
-    <div class="flex items-center space-x-5 shrink-0 ml-4">
+    <div class="flex items-center space-x-5 shrink-0 ml-4 h-full">
       <!-- New Files Alert (Syncs with background monitor thread) -->
       <div
         v-if="activeProject.newFileCount > 0 && !isFileManagerOpen"
