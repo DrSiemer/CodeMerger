@@ -63,6 +63,7 @@ class WindowManager:
         self._transitioning = False
         self._handshake_received = False
         self._stop_failsafe = threading.Event()
+        self._current_main_monitor = None
 
         # Timing for minimum splash visibility
         self.start_time = time.time()
@@ -110,8 +111,18 @@ class WindowManager:
                 import ctypes
                 from ctypes import wintypes
 
+                wx, wy = 0, 0
                 if self.main_window:
-                    px, py = int(self.main_window.x + 20), int(self.main_window.y + 20)
+                    try:
+                        wx, wy = self.main_window.x, self.main_window.y
+                    except Exception:
+                        pass
+
+                # Prevent probing minimize coordinates (-32000)
+                if self.main_window and wx > -10000 and wy > -10000:
+                    px, py = int(wx + 20), int(wy + 20)
+                elif self.main_last_x is not None and self.main_last_y is not None:
+                    px, py = int(self.main_last_x + 20), int(self.main_last_y + 20)
                 else:
                     px = int(ctypes.windll.user32.GetSystemMetrics(0) / 2)
                     py = int(ctypes.windll.user32.GetSystemMetrics(1) / 2)
@@ -120,6 +131,34 @@ class WindowManager:
                 return ctypes.windll.user32.MonitorFromPoint(point, 2)
             except Exception: pass
         return None
+
+    def _get_monitor_from_logical(self, x_log, y_log):
+        """Identifies the monitor handle containing a specific logical coordinate."""
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                from ctypes import wintypes
+
+                monitors = []
+                def callback(hMonitor, hdcMonitor, lprcMonitor, dwData):
+                    monitors.append(hMonitor)
+                    return 1
+
+                MonitorEnumProc = ctypes.WINFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)
+                ctypes.windll.user32.EnumDisplayMonitors(0, None, MonitorEnumProc(callback), 0)
+
+                for h_mon in monitors:
+                    scale = self._get_scale_factor(h_mon)
+                    m_l, m_t, m_r, m_b = self._get_monitor_work_area_phys(h_mon)
+
+                    if (m_l / scale) <= x_log <= (m_r / scale) and (m_t / scale) <= y_log <= (m_b / scale):
+                        return h_mon
+
+                # Fallback physical guess
+                point = wintypes.POINT(int(x_log), int(y_log))
+                return ctypes.windll.user32.MonitorFromPoint(point, 2)
+            except Exception: pass
+        return self._get_target_monitor_handle()
 
     def _get_monitor_work_area_phys(self, h_monitor):
         """Fetches raw physical desktop bounds for a specific monitor handle."""
@@ -161,15 +200,15 @@ class WindowManager:
                 </div>
                 <h1 style="font-weight:100; font-size:28px; letter-spacing:4px; margin:0; color:#eee;">CODEMERGER</h1>
                 <div style="margin-top:15px; display:flex; align-items:center; justify-content:center;">
-                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 0.8s infinite ease-in-out;"></div>
+                    <div style="width:4px; height:4px; background:#0078D4; border-radius:50%; margin:0 3px; animation: pulse 1.5s infinite ease-in-out;"></div>
                     <p style="color:#0078D4; font-size:11px; margin:0; font-weight:bold; letter-spacing:1px; opacity:0.8; text-transform:uppercase;">Initializing Interface</p>
                 </div>
             </div>
             <style>
                 .logo {{ position: absolute; top: 0; left: 0; width: 64px; height: 64px; opacity: 0; }}
                 .logo-1 {{ opacity: 1; }}
-                .logo-2 {{ animation: fade-over 0.6s linear forwards 0.3s; }}
-                .logo-3 {{ animation: fade-over 0.6s linear forwards 0.6s; }}
+                .logo-2 {{ animation: fade-over 3s linear forwards 1.5s; }}
+                .logo-3 {{ animation: fade-over 3s linear forwards 3s; }}
                 @keyframes fade-over {{ from {{ opacity: 0; }} to {{ opacity: 1; }} }}
                 @keyframes pulse {{ 0%, 100% {{ opacity: 0.3; transform: scale(0.8); }} 50% {{ opacity: 1; transform: scale(1.2); }} }}
             </style>
@@ -210,6 +249,7 @@ class WindowManager:
             hidden=True, x=m_x_phys, y=m_y_phys # Physical Position
         )
         self.api.set_window_manager(self)
+        self._current_main_monitor = h_mon
 
         # Warm-up delay for Splash
         def show_splash_warm():
@@ -278,11 +318,40 @@ class WindowManager:
 
     def _on_main_moved(self, x, y):
         if self.main_window and not self._is_shutting_down:
-            self.main_last_x, self.main_last_y = self.main_window.x, self.main_window.y
+            try:
+                wx, wy = self.main_window.x, self.main_window.y
+                # Prevent recording Windows minimize position artifact (-32000)
+                if wx < -10000 or wy < -10000:
+                    return
+
+                self.main_last_x, self.main_last_y = wx, wy
+
+                current_mon = self._get_target_monitor_handle()
+                if current_mon:
+                    if self._current_main_monitor is None:
+                        self._current_main_monitor = current_mon
+                    elif self._current_main_monitor != current_mon:
+                        log.info("Main window moved to a different monitor. Resetting compact mode position.")
+                        self._current_main_monitor = current_mon
+                        self.compact_mode_last_x = None
+                        self.compact_mode_last_y = None
+            except Exception: pass
 
     def _on_main_resized(self, width, height):
         if self.main_window and not self._is_shutting_down:
-            self.main_last_w, self.main_last_h = self.main_window.width, self.main_window.height
+            try:
+                wx, wy = self.main_window.x, self.main_window.y
+                # Ignore minimized states causing bogus dimensions
+                if wx < -10000 or wy < -10000:
+                    return
+
+                ww, wh = self.main_window.width, self.main_window.height
+                # Ignore zero/tiny sizes generated during animation
+                if ww < 100 or wh < 100:
+                    return
+
+                self.main_last_w, self.main_last_h = ww, wh
+            except Exception: pass
 
     def _on_main_restored(self):
         if self._transitioning or self._is_shutting_down: return
@@ -332,7 +401,11 @@ class WindowManager:
         """Displays compact window using Hybrid coordination logic."""
         if not self.compact_window or self._is_shutting_down: return
 
-        h_mon = self._get_target_monitor_handle()
+        if self.compact_mode_last_x is not None and self.compact_mode_last_y is not None:
+            h_mon = self._get_monitor_from_logical(self.compact_mode_last_x, self.compact_mode_last_y)
+        else:
+            h_mon = self._get_target_monitor_handle()
+
         scale = self._get_scale_factor(h_mon)
         m_l, m_t, m_r, m_b = self._get_monitor_work_area_phys(h_mon)
 
@@ -348,9 +421,13 @@ class WindowManager:
         t_x_phys = max(m_l + m, min(t_x_phys, m_r - w_phys - m))
         t_y_phys = max(m_t + m, min(t_y_phys, m_b - h_phys - m))
 
+        # Sync clamped physical coordinates back to logical state to prevent UI drag jumps
+        self.compact_mode_last_x = t_x_phys / scale
+        self.compact_mode_last_y = t_y_phys / scale
+
         # Runtime resize requires Physical units | move requires Logical units
         self.compact_window.resize(w_phys, h_phys)
-        self.compact_window.move(int(t_x_phys / scale), int(t_y_phys / scale))
+        self.compact_window.move(int(self.compact_mode_last_x), int(self.compact_mode_last_y))
         self.compact_window.show()
         self.compact_window.restore()
 
