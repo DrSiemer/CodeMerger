@@ -7,6 +7,7 @@ import sys
 from src.core.utils import parse_gitignore, get_token_count_for_text, is_ignored, get_file_hash
 from src.core.file_tree_builder import build_file_tree_data
 from src.core.merger import generate_output_string
+from src import constants as c
 
 log = logging.getLogger("CodeMerger")
 
@@ -134,7 +135,11 @@ class FileApi:
 
         base_dir = project_config.base_dir
         current_selection_paths = {f['path'] for f in project_config.selected_files}
-        files_to_add = [path for path in new_files if path not in current_selection_paths]
+        files_to_add = [
+            path for path in new_files
+            if path not in current_selection_paths
+            and os.path.basename(path) not in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS
+        ]
 
         added_count = 0
         for path in files_to_add:

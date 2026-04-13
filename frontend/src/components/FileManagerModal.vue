@@ -13,6 +13,9 @@ const {
   copyOrderRequest, clearUnknownFiles, statusMessage, config
 } = useAppState()
 
+// List of boilerplate filenames to exclude during bulk selection actions
+const IGNORED_FOR_COMPLETENESS = ['__init__.py']
+
 // Reorderable list setup
 const [mergeListRef, listItems] = useDragAndDrop(
   JSON.parse(JSON.stringify(activeProject.selectedFiles)),
@@ -158,7 +161,11 @@ const toggleDirectorySelect = (node) => {
   highlightedPath.value = null
   const subtreeFiles = []
   const traverse = (n) => {
-    if (n.type === 'file') subtreeFiles.push(n.path)
+    if (n.type === 'file') {
+      if (!IGNORED_FOR_COMPLETENESS.includes(n.name)) {
+        subtreeFiles.push(n.path)
+      }
+    }
     if (n.children) n.children.forEach(traverse)
   }
   traverse(node)
@@ -210,7 +217,11 @@ const addAll = () => {
   const allFiles = []
   const traverse = (nodes) => {
     for (const node of nodes) {
-      if (node.type === 'file') allFiles.push(node.path)
+      if (node.type === 'file') {
+        if (!IGNORED_FOR_COMPLETENESS.includes(node.name)) {
+          allFiles.push(node.path)
+        }
+      }
       if (node.children) traverse(node.children)
     }
   }

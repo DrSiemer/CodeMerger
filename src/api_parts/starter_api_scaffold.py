@@ -187,8 +187,10 @@ class StarterApiScaffold:
         for f in files_created:
              norm = f.replace('\\', '/')
              filename = os.path.basename(norm)
-             # Skip if exact match or if it starts with the temp prefix
-             if filename not in merge_order_exclusion_list and not filename.startswith(c.ALLCODE_TEMP_PREFIX):
+             # Skip if exact match, if it is a boilerplate file to ignore, or if it starts with the temp prefix
+             if filename not in merge_order_exclusion_list and \
+                filename not in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS and \
+                not filename.startswith(c.ALLCODE_TEMP_PREFIX):
                  normalized_files.append({'path': norm})
 
         self.project_manager.create_project_with_defaults(
