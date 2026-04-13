@@ -152,14 +152,20 @@ const acceptChange = async (path, type) => {
       planOriginalContents.value[path] = await getFileContent(path)
     }
     const success = await deleteFile(path)
-    if (success) planFileStates.value[path] = 'deleted'
+    if (success) {
+      planFileStates.value[path] = 'deleted'
+      visibleDiffs.value.delete(path)
+    }
   } else {
     const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
     if (type === 'modify' && planOriginalContents.value[path] === undefined) {
       planOriginalContents.value[path] = await getFileContent(path)
     }
     const success = await applyFileChange(path, content)
-    if (success) planFileStates.value[path] = 'applied'
+    if (success) {
+      planFileStates.value[path] = 'applied'
+      visibleDiffs.value.delete(path)
+    }
   }
 }
 
@@ -198,6 +204,8 @@ const applyAllPending = async () => {
 
     await acceptChange(path, type)
   }
+
+  visibleDiffs.value.clear()
 
   // Activating the Verification tab automatically after batch apply
   if (tabs.value.find(t => t.id === 'verification')) {
