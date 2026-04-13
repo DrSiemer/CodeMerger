@@ -51,10 +51,10 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776080951.1428177,
-          "hash": "7a545b37c4bf6b395950b846a55ad4a8052f2eac",
-          "tokens": 4718,
-          "lines": 478
+          "mtime": 1776083084.6442702,
+          "hash": "339fccd829d27aca66dc2ba65a27f863ba103670",
+          "tokens": 455,
+          "lines": 63
         },
         {
           "path": "src/app_state.py",
@@ -730,9 +730,44 @@
           "lines": 48,
           "mtime": 1776082524.5628424,
           "hash": "7b6e04bf60b422fca1efbf7c04d925913af6bb6b"
+        },
+        {
+          "path": "src/core/window_geometry.py",
+          "tokens": 948,
+          "lines": 99,
+          "mtime": 1776082870.384491,
+          "hash": "977e2054700066405f26630e0d2c38985c5e6362"
+        },
+        {
+          "path": "src/core/window_splash.py",
+          "tokens": 796,
+          "lines": 52,
+          "mtime": 1776082870.4186113,
+          "hash": "521fe3abf603ae526420566b116090d32f77cc61"
+        },
+        {
+          "path": "src/core/window_main.py",
+          "tokens": 343,
+          "lines": 33,
+          "mtime": 1776082870.451777,
+          "hash": "6a721c0a4e6ca51e52c04db0196e5542dfd70a65"
+        },
+        {
+          "path": "src/core/window_compact.py",
+          "tokens": 598,
+          "lines": 53,
+          "mtime": 1776082870.483873,
+          "hash": "27f3869bfcdfcb4b6469ea76595513cdcbb57d80"
+        },
+        {
+          "path": "src/core/window_manager.py",
+          "tokens": 1994,
+          "lines": 229,
+          "mtime": 1776082870.51775,
+          "hash": "d4c0e790500bef2016601b4531262daaaecfe26f"
         }
       ],
-      "total_tokens": 127656,
+      "total_tokens": 132242,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -795,10 +830,10 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776080951.1428177,
-          "hash": "7a545b37c4bf6b395950b846a55ad4a8052f2eac",
-          "tokens": 4718,
-          "lines": 478
+          "mtime": 1776083084.6442702,
+          "hash": "339fccd829d27aca66dc2ba65a27f863ba103670",
+          "tokens": 455,
+          "lines": 63
         },
         {
           "path": "src/app_state.py",
@@ -1434,7 +1469,7 @@
           "hash": "8959834c6727f79e14993168fdc01bd2658accc5"
         }
       ],
-      "total_tokens": 311565,
+      "total_tokens": 307302,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1571,6 +1606,11 @@
     "src/core/secret_scanner.py",
     "src/core/updater.py",
     "src/core/utils.py",
+    "src/core/window_compact.py",
+    "src/core/window_geometry.py",
+    "src/core/window_main.py",
+    "src/core/window_manager.py",
+    "src/core/window_splash.py",
     "tkinter_reference.md",
     "updater_gui.py",
     "version.txt"
