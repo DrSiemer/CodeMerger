@@ -1,10 +1,17 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, markRaw } from 'vue'
 import {
   X, Settings, FolderClosed, Bot, Play,
-  Terminal, FileCode2, Trash2, Plus, CheckSquare, Square
+  Terminal, FileCode2
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+
+import SettingsAppTab from './settings/SettingsAppTab.vue'
+import SettingsFileManagerTab from './settings/SettingsFileManagerTab.vue'
+import SettingsFiletypesTab from './settings/SettingsFiletypesTab.vue'
+import SettingsPromptsTab from './settings/SettingsPromptsTab.vue'
+import SettingsStarterTab from './settings/SettingsStarterTab.vue'
+import SettingsEditorTab from './settings/SettingsEditorTab.vue'
 
 const props = defineProps({
   initialTab: {
@@ -14,16 +21,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close'])
-const { config, saveConfig, getFiletypes, saveFiletypes, resizeWindow, selectEditorExecutable } = useAppState()
+const { config, saveConfig, getFiletypes, saveFiletypes, resizeWindow } = useAppState()
 
 const localConfig = ref({})
 const activeTab = ref(props.initialTab)
 
 // Filetypes State
 const localFiletypes = ref([])
-const newExt = ref('')
-const newDesc = ref('')
-const searchQuery = ref('')
 
 const handleKeyDown = (e) => {
   if (e.key === 'Escape') emit('close')
@@ -59,65 +63,17 @@ const handleSave = async () => {
 }
 
 const tabs = [
-  { id: 'application', name: 'Application', icon: Settings, info: 'set_app' },
-  { id: 'filemanager', name: 'File Manager', icon: FolderClosed, info: 'set_fm' },
-  { id: 'filetypes', name: 'Filetypes', icon: FileCode2, info: 'filetypes' },
-  { id: 'prompts', name: 'Prompts', icon: Bot, info: 'set_prompts' },
-  { id: 'starter', name: 'Starter', icon: Play, info: 'set_starter' },
-  { id: 'editor', name: 'Editor', icon: Terminal, info: 'set_editor' }
+  { id: 'application', name: 'Application', icon: markRaw(Settings), info: 'set_app', component: markRaw(SettingsAppTab) },
+  { id: 'filemanager', name: 'File Manager', icon: markRaw(FolderClosed), info: 'set_fm', component: markRaw(SettingsFileManagerTab) },
+  { id: 'filetypes', name: 'Filetypes', icon: markRaw(FileCode2), info: 'filetypes', component: markRaw(SettingsFiletypesTab) },
+  { id: 'prompts', name: 'Prompts', icon: markRaw(Bot), info: 'set_prompts', component: markRaw(SettingsPromptsTab) },
+  { id: 'starter', name: 'Starter', icon: markRaw(Play), info: 'set_starter', component: markRaw(SettingsStarterTab) },
+  { id: 'editor', name: 'Editor', icon: markRaw(Terminal), info: 'set_editor', component: markRaw(SettingsEditorTab) }
 ]
 
 const activeTabInfoKey = computed(() => {
   return tabs.find(t => t.id === activeTab.value)?.info || ''
 })
-
-// --- Filetypes Logic ---
-const filteredTypes = computed(() => {
-  let list = localFiletypes.value
-  if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase()
-    list = list.filter(ft => ft.ext.toLowerCase().includes(q) || ft.description.toLowerCase().includes(q))
-  }
-  // Sort alphabetically
-  return list.sort((a, b) => a.ext.localeCompare(b.ext))
-})
-
-const toggleActive = (ft) => {
-  ft.active = !ft.active
-}
-
-const deleteFiletype = (ext) => {
-  localFiletypes.value = localFiletypes.value.filter(ft => ft.ext !== ext)
-}
-
-const addFiletype = () => {
-  let ext = newExt.value.trim().toLowerCase()
-  if (!ext) return
-  if (!ext.startsWith('.')) ext = `.${ext}` // Auto-prepend dot if missing for common extensions
-
-  // Check duplicate
-  if (localFiletypes.value.some(ft => ft.ext === ext)) {
-    alert(`The extension '${ext}' already exists.`)
-    return
-  }
-
-  localFiletypes.value.push({
-    ext: ext,
-    description: newDesc.value.trim(),
-    active: true,
-    default: false
-  })
-
-  newExt.value = ''
-  newDesc.value = ''
-}
-
-const handleBrowseEditor = async () => {
-  const path = await selectEditorExecutable()
-  if (path) {
-    localConfig.value.default_editor = path
-  }
-}
 </script>
 
 <template>
@@ -158,262 +114,11 @@ const handleBrowseEditor = async () => {
         <!-- Scrollable Settings Body -->
         <div class="flex-grow overflow-y-auto p-6 custom-scrollbar flex flex-col">
 
-          <!-- APPLICATION -->
-          <template v-if="activeTab === 'application'">
-            <div class="space-y-4">
-              <div v-info="'set_app_new_file'" class="flex flex-col space-y-4">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="checkbox" v-model="localConfig.enable_new_file_check" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-                  <span class="text-gray-200">Periodically check for new project files</span>
-                </label>
-
-                <div class="pl-7 flex items-center space-x-3" :class="{'opacity-50 pointer-events-none': !localConfig.enable_new_file_check}">
-                  <span class="text-gray-300 text-sm" v-info="'set_app_interval'">Check every:</span>
-                  <select v-model="localConfig.new_file_check_interval" v-info="'set_app_interval'" class="bg-cm-input-bg border border-gray-600 text-white rounded px-2 py-1 text-sm outline-none focus:border-cm-blue">
-                    <option value="2">2</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
-                    <option value="30">30</option>
-                    <option value="60">60</option>
-                  </select>
-                  <span class="text-gray-300 text-sm" v-info="'set_app_interval'">seconds</span>
-                </div>
-              </div>
-
-              <div v-info="'set_app_secrets'" class="pt-2">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="checkbox" v-model="localConfig.scan_for_secrets" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-                  <span class="text-gray-200">Scan for secrets (on each copy)</span>
-                </label>
-              </div>
-
-              <div v-info="'set_app_feedback'" class="pt-2">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="checkbox" v-model="localConfig.show_feedback_on_paste" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-                  <span class="text-gray-200">Show LLM feedback window automatically on paste</span>
-                </label>
-              </div>
-
-              <div v-info="'set_app_compact'" class="pt-2">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="checkbox" v-model="localConfig.enable_compact_mode_on_minimize" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-                  <span class="text-gray-200">Activate compact mode when main window is minimized</span>
-                </label>
-              </div>
-
-              <div v-info="'set_app_updates'" class="pt-2">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="checkbox" v-model="localConfig.check_for_updates" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-                  <span class="text-gray-200">Automatically check for updates daily</span>
-                </label>
-                <!-- Manual Check Button inside the updates documentation scope -->
-                <div class="pl-7 pt-2">
-                   <button
-                    id="btn-check-updates-now"
-                    @click="window.pywebview.api.check_for_updates_manual()"
-                    v-info="'set_app_check_now'"
-                    class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold py-1.5 px-4 rounded transition-colors"
-                    title="Bypass daily timer and check GitHub now"
-                  >
-                    Check for Updates Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- FILE MANAGER -->
-          <template v-if="activeTab === 'filemanager'">
-            <div class="space-y-6">
-              <div v-info="'set_fm_tokens'">
-                <label class="flex items-center space-x-3 cursor-pointer">
-                  <input type="checkbox" v-model="localConfig.token_count_enabled" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-                  <span class="text-gray-200">Enable token counting</span>
-                </label>
-              </div>
-
-              <div class="flex items-center space-x-3" v-info="'set_fm_limit'">
-                <span class="text-gray-200 w-64">Max token limit (empty for none):</span>
-                <input type="number" v-model="localConfig.token_limit" class="bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-1.5 w-24 outline-none focus:border-cm-blue">
-              </div>
-
-              <div class="flex items-center space-x-3" v-info="'set_fm_threshold'">
-                <span class="text-gray-200 w-64">Warn when 'Add all' exceeds:</span>
-                <input type="number" v-model="localConfig.add_all_warning_threshold" class="bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-1.5 w-24 outline-none focus:border-cm-blue">
-                <span class="text-gray-400 text-sm">files</span>
-              </div>
-
-              <div class="flex items-center space-x-3" v-info="'set_fm_alert_threshold'">
-                <span class="text-gray-200 w-64">New file alert threshold:</span>
-                <input type="number" v-model="localConfig.new_file_alert_threshold" class="bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-1.5 w-24 outline-none focus:border-cm-blue">
-                <span class="text-gray-400 text-sm">files</span>
-              </div>
-            </div>
-          </template>
-
-          <!-- FILETYPES -->
-          <template v-if="activeTab === 'filetypes'">
-            <div class="space-y-6">
-              <p class="text-gray-300 shrink-0">
-                Only files matching these extensions are scanned. Click the checkbox to enable or disable them.
-              </p>
-
-              <!-- Search / Filter -->
-              <div class="flex items-center space-x-3 shrink-0">
-                <input
-                  id="filetypes-search-input"
-                  v-model="searchQuery"
-                  type="text"
-                  class="flex-grow bg-cm-input-bg text-white px-3 py-2 rounded border border-gray-600 focus:border-cm-blue focus:outline-none text-sm"
-                  placeholder="Search extensions..."
-                >
-              </div>
-
-              <!-- List -->
-              <div id="filetypes-list-container" class="border border-gray-600 rounded bg-cm-input-bg overflow-hidden shrink-0" v-info="'ft_list'">
-                <table class="w-full text-sm text-left">
-                  <thead class="text-gray-400 bg-gray-800">
-                    <tr>
-                      <th class="px-4 py-2 font-medium w-16 text-center">Active</th>
-                      <th class="px-4 py-2 font-medium w-32">Extension</th>
-                      <th class="px-4 py-2 font-medium">Description</th>
-                      <th class="px-4 py-2 font-medium w-16 text-center">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-700">
-                    <tr
-                      v-for="ft in filteredTypes"
-                      :key="ft.ext"
-                      class="hover:bg-gray-700 transition-colors"
-                      :class="{'opacity-60': !ft.active}"
-                    >
-                      <td class="px-4 py-2 text-center cursor-pointer" @click="toggleActive(ft)" v-info="'ft_action'">
-                        <CheckSquare v-if="ft.active" class="w-5 h-5 inline-block text-cm-blue" />
-                        <Square v-else class="w-5 h-5 inline-block text-gray-500" />
-                      </td>
-                      <td class="px-4 py-2 font-mono text-gray-200">{{ ft.ext }}</td>
-                      <td class="px-4 py-2 text-gray-400 truncate max-w-xs" :title="ft.description">{{ ft.description }}</td>
-                      <td class="px-4 py-2 text-center">
-                        <button
-                          v-if="!ft.default"
-                          @click="deleteFiletype(ft.ext)"
-                          class="text-gray-500 hover:text-red-400 transition-colors"
-                          title="Delete custom filetype"
-                        >
-                          <Trash2 class="w-4 h-4 inline-block" />
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="filteredTypes.length === 0">
-                      <td colspan="4" class="px-4 py-8 text-center text-gray-500">No filetypes found.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <!-- Add New Section -->
-              <div id="filetypes-add-form" class="bg-gray-800 p-4 rounded border border-gray-700 shrink-0" v-info="'ft_add'">
-                <h3 class="text-sm font-bold text-gray-300 mb-3 uppercase tracking-wider">Add New Filetype</h3>
-                <div class="flex space-x-3">
-                  <input
-                    v-model="newExt"
-                    type="text"
-                    placeholder=".ext"
-                    class="w-24 bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-2 outline-none focus:border-cm-blue text-sm font-mono"
-                  >
-                  <input
-                    v-model="newDesc"
-                    type="text"
-                    placeholder="Description..."
-                    class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-2 outline-none focus:border-cm-blue text-sm"
-                    @keyup.enter="addFiletype"
-                  >
-                  <button
-                    @click="addFiletype"
-                    :disabled="!newExt.trim()"
-                    class="bg-gray-600 hover:bg-gray-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded transition-colors flex items-center"
-                    title="Add new extension to indexed types list"
-                  >
-                    <Plus class="w-4 h-4 mr-1" /> Add
-                  </button>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- PROMPTS -->
-          <template v-if="activeTab === 'prompts'">
-            <div class="space-y-6">
-              <div class="space-y-2" v-info="'set_prompt_merged'">
-                <label class="text-gray-200 font-medium">"Copy Code Only" Prompt</label>
-                <textarea
-                  v-model="localConfig.copy_merged_prompt"
-                  rows="3"
-                  class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 text-sm outline-none focus:border-cm-blue custom-scrollbar"
-                ></textarea>
-              </div>
-
-              <div class="space-y-2" v-info="'set_prompt_intro'">
-                <label class="text-gray-200 font-medium">Default Intro Instructions</label>
-                <textarea
-                  v-model="localConfig.default_intro_prompt"
-                  rows="4"
-                  class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 text-sm outline-none focus:border-cm-blue custom-scrollbar"
-                ></textarea>
-              </div>
-
-              <div class="space-y-2" v-info="'set_prompt_outro'">
-                <label class="text-gray-200 font-medium">Default Outro Instructions</label>
-                <textarea
-                  v-model="localConfig.default_outro_prompt"
-                  rows="4"
-                  class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 text-sm outline-none focus:border-cm-blue custom-scrollbar"
-                ></textarea>
-              </div>
-            </div>
-          </template>
-
-          <!-- STARTER -->
-          <template v-if="activeTab === 'starter'">
-            <div class="space-y-2" v-info="'set_starter_folder'">
-              <label class="text-gray-200 font-medium">Default parent folder for new projects</label>
-              <input
-                type="text"
-                v-model="localConfig.default_parent_folder"
-                placeholder="C:\Projects"
-                class="w-full bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-2 outline-none focus:border-cm-blue"
-              >
-            </div>
-          </template>
-
-          <!-- EDITOR -->
-          <template v-if="activeTab === 'editor'">
-            <div class="space-y-2" v-info="'set_editor_path'">
-              <label class="text-gray-200 font-medium">Default Editor Executable</label>
-              <div class="flex space-x-3">
-                <input
-                  type="text"
-                  v-model="localConfig.default_editor"
-                  placeholder="Leave blank to use system defaults"
-                  class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-2 outline-none focus:border-cm-blue"
-                >
-                <button
-                  @click="handleBrowseEditor"
-                  class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-4 py-2 rounded text-sm transition-colors shrink-0"
-                >
-                  Browse
-                </button>
-                <button
-                  v-if="localConfig.default_editor"
-                  @click="localConfig.default_editor = ''"
-                  class="bg-gray-800 hover:bg-red-900/40 text-gray-500 hover:text-red-400 font-bold px-4 py-2 rounded text-sm transition-colors shrink-0"
-                >
-                  Clear
-                </button>
-              </div>
-              <p class="text-sm text-gray-500 mt-1">Provide the full path to your code editor (e.g., sublime_text.exe).</p>
-            </div>
-          </template>
+          <component
+            :is="tabs.find(t => t.id === activeTab)?.component"
+            :localConfig="localConfig"
+            :localFiletypes="localFiletypes"
+          />
 
         </div>
 

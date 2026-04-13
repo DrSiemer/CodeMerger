@@ -404,10 +404,10 @@
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
-          "mtime": 1776076252.2998512,
-          "hash": "2f5c94adcffae52447278e672bada7aa595f9e6e",
-          "tokens": 4668,
-          "lines": 444
+          "mtime": 1776089632.0810387,
+          "hash": "9ab707b35af68346520aa78fff29605f0764d1ce",
+          "tokens": 1438,
+          "lines": 149
         },
         {
           "path": "frontend/src/components/NewProfileModal.vue",
@@ -778,9 +778,51 @@
           "hash": "46533fb7ab8721962f918b471392f04f066acb96",
           "tokens": 645,
           "lines": 87
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsAppTab.vue",
+          "tokens": 902,
+          "lines": 71,
+          "mtime": 1776089632.226904,
+          "hash": "a11a7dbbf718879a5fa09e44b32de5f41a831518"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
+          "tokens": 471,
+          "lines": 36,
+          "mtime": 1776089632.2704837,
+          "hash": "3cdb1c2c351a986ad685e0f1fec13ce56f296112"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsFiletypesTab.vue",
+          "tokens": 1334,
+          "lines": 147,
+          "mtime": 1776089632.3206358,
+          "hash": "d45f22eb31d5ac4afb4391d684e6c1150b0dbdd9"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsPromptsTab.vue",
+          "tokens": 344,
+          "lines": 39,
+          "mtime": 1776089632.3697653,
+          "hash": "2dce4f53a1add4309fd1a07dc967d780a37b44cf"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsStarterTab.vue",
+          "tokens": 263,
+          "lines": 39,
+          "mtime": 1776089686.1170437,
+          "hash": "d0265c230ccd4bd2f2d7b3552e50100a23177493"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsEditorTab.vue",
+          "tokens": 372,
+          "lines": 47,
+          "mtime": 1776089632.463963,
+          "hash": "3c60964216ce7a549ddadf41d7c62499b4d535d5"
         }
       ],
-      "total_tokens": 137943,
+      "total_tokens": 138399,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1199,10 +1241,10 @@
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
-          "mtime": 1776066422.211551,
-          "hash": "fa65295a77eda87e27c573d68dd54536e2c38be5",
-          "tokens": 4486,
-          "lines": 422
+          "mtime": 1776089632.0810387,
+          "hash": "9ab707b35af68346520aa78fff29605f0764d1ce",
+          "tokens": 1438,
+          "lines": 149
         },
         {
           "path": "frontend/src/components/NewProfileModal.vue",
@@ -1575,7 +1617,7 @@
           "hash": "6cbd5b7cb558dd93dd9e5238814334b2df85e17c"
         }
       ],
-      "total_tokens": 322910,
+      "total_tokens": 319862,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1643,6 +1685,12 @@
     "frontend/src/components/dashboard/DashboardHeader.vue",
     "frontend/src/components/dashboard/DashboardNav.vue",
     "frontend/src/components/review-tabs/ReviewChangesTab.vue",
+    "frontend/src/components/settings/SettingsAppTab.vue",
+    "frontend/src/components/settings/SettingsEditorTab.vue",
+    "frontend/src/components/settings/SettingsFileManagerTab.vue",
+    "frontend/src/components/settings/SettingsFiletypesTab.vue",
+    "frontend/src/components/settings/SettingsPromptsTab.vue",
+    "frontend/src/components/settings/SettingsStarterTab.vue",
     "frontend/src/components/starter-steps/NotesModal.vue",
     "frontend/src/components/starter-steps/ReviewerQuestions.vue",
     "frontend/src/components/starter-steps/RewriteModal.vue",
