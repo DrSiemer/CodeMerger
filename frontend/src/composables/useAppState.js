@@ -22,6 +22,9 @@ const statusMessage = ref('')
 const statusVisible = ref(false)
 const lastAiResponse = ref(null)
 
+// Version Migration State
+const newlyAddedFiletypes = ref([])
+
 // Global Shared Assets
 const logoMask = ref('')
 const logoMaskSmall = ref('')
@@ -204,6 +207,9 @@ export function useAppState() {
     if (window.pywebview) {
       config.value = await window.pywebview.api.get_app_config()
       infoModeActive.value = config.value.info_mode_active ?? true
+
+      // Load migration metadata
+      newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
 
       // Load all shared assets into global store once the bridge is available
       logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
@@ -425,6 +431,10 @@ export function useAppState() {
     }
   }
 
+  const clearNewlyAddedFiletypes = () => {
+    newlyAddedFiletypes.value = []
+  }
+
   // --- AI Feedback & Change Applier ---
 
   const hasPendingChanges = computed(() => {
@@ -580,6 +590,7 @@ export function useAppState() {
     statusMessage,
     statusVisible,
     lastAiResponse,
+    newlyAddedFiletypes,
     showReviewModal,
     reviewMode,
     revertToCompactOnClose,
@@ -638,6 +649,7 @@ export function useAppState() {
     restoreMainWindow,
     minimizeWindow,
     closeApp,
+    clearNewlyAddedFiletypes,
     getStarterSession: async () => window.pywebview ? await window.pywebview.api.get_starter_session() : {},
     saveStarterSession: async (data) => window.pywebview ? await window.pywebview.api.save_starter_session(data) : true,
     clearStarterSession,

@@ -3,11 +3,14 @@ import threading
 class BaseApi:
     """Provides base state and shared helper methods for the API mixins."""
 
-    def __init__(self, app_state, project_manager):
+    def __init__(self, app_state, project_manager, newly_added_filetypes=None):
         # Prefixing with an underscore prevents PyWebView from inspecting this attribute
         # during JS API generation, which avoids a premature DOM evaluation crash.
         self._window_manager = None
         self._color_picker_active = False
+
+        # Migration metadata for notification dialogs
+        self._newly_added_filetypes = newly_added_filetypes or []
 
         # Stored plan for cross-window handoffs (Compact -> Main)
         self._last_parsed_plan = None

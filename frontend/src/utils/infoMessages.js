@@ -118,6 +118,9 @@ export const INFO_MESSAGES = {
   "ft_action": "Active Toggle: Delete custom extensions or toggle the active status of bundled default extensions.",
   "ft_add": "Add Filetype: Type a new extension (e.g. .py or .js) and a short description to add it to the indexing list.",
 
+  // New Filetypes Notification
+  "ft_new_ok": "OK: Acknowledge the update and close the notification.",
+
   // Project Starter
   "starter_nav_prev": "Previous Step: Go back to review or change settings in earlier steps.",
   "starter_nav_next": "Next Step: Proceed to the next phase. Validates current input before moving.",

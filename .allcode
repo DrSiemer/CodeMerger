@@ -51,10 +51,10 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776014564.4637427,
-          "hash": "414428a56e036a58d17cf4634be1a848f5623696",
-          "tokens": 3917,
-          "lines": 396
+          "mtime": 1776075218.260097,
+          "hash": "0b4b9d7102b7db80909a1698758ddb5cdd7fef96",
+          "tokens": 4654,
+          "lines": 474
         },
         {
           "path": "src/app_state.py",
@@ -165,9 +165,9 @@
         },
         {
           "path": "src/api.py",
-          "mtime": 1776003109.2303967,
-          "hash": "4607b53f5fb862b2c2c9dfad6a1cee949027d56f",
-          "tokens": 202,
+          "mtime": 1776075218.3005183,
+          "hash": "3ea4bbf5d715e278f8d5896f59fc666feaff6392",
+          "tokens": 213,
           "lines": 26
         },
         {
@@ -179,10 +179,10 @@
         },
         {
           "path": "src/api_parts/base_api.py",
-          "mtime": 1776003109.242395,
-          "hash": "3e3ad484e24935043d93b8dcf6e38cc231d518b0",
-          "tokens": 355,
-          "lines": 40
+          "mtime": 1776075218.3361652,
+          "hash": "4dd8a7ad3f28bf96fec0c4e1bc085e728834d8d0",
+          "tokens": 411,
+          "lines": 48
         },
         {
           "path": "src/api_parts/window_api.py",
@@ -193,10 +193,10 @@
         },
         {
           "path": "src/api_parts/config_api.py",
-          "mtime": 1776003109.2433977,
-          "hash": "baaf51f8083cc9673de9b969047ed689716b9c1a",
-          "tokens": 533,
-          "lines": 73
+          "mtime": 1776075218.3724418,
+          "hash": "1c5d9f3607beca7290fe2f2b6542f3e183d923ba",
+          "tokens": 569,
+          "lines": 77
         },
         {
           "path": "src/api_parts/project_api.py",
@@ -284,17 +284,17 @@
         },
         {
           "path": "frontend/src/utils/infoMessages.js",
-          "mtime": 1776003109.168396,
-          "hash": "f3e2f78cd89cf43ac25dac54bcdf4c875680e2e8",
-          "tokens": 4153,
-          "lines": 167
+          "mtime": 1776075218.4074287,
+          "hash": "ff70cc713a2934283d912cefea5b267f2614d3af",
+          "tokens": 4179,
+          "lines": 170
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "mtime": 1776003109.1473966,
-          "hash": "d471b0cea4787f59bb75580d94b78e253990dc3b",
-          "tokens": 5165,
-          "lines": 634
+          "mtime": 1776075232.354352,
+          "hash": "a47ce2ade36eba85273b323f4b9aea20e87734dc",
+          "tokens": 5470,
+          "lines": 682
         },
         {
           "path": "frontend/src/directives/vInfo.js",
@@ -305,10 +305,10 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1776016290.1623697,
-          "hash": "064acf79025ed0e71ac12854aee76beb190d421d",
-          "tokens": 1149,
-          "lines": 148
+          "mtime": 1776075247.8174968,
+          "hash": "78b4fccfecf08375713ca6e34127c8b7474b07ae",
+          "tokens": 1456,
+          "lines": 183
         },
         {
           "path": "frontend/src/views/MainView.vue",
@@ -648,7 +648,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 130599,
+      "total_tokens": 132077,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -711,10 +711,10 @@
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776063480.838918,
-          "hash": "dfde9a87672300b14e33aaee6bd41695b23e78bc",
-          "tokens": 3917,
-          "lines": 396
+          "mtime": 1776075218.260097,
+          "hash": "0b4b9d7102b7db80909a1698758ddb5cdd7fef96",
+          "tokens": 4654,
+          "lines": 474
         },
         {
           "path": "src/app_state.py",
@@ -825,9 +825,9 @@
         },
         {
           "path": "src/api.py",
-          "mtime": 1775637370.8373837,
-          "hash": "4607b53f5fb862b2c2c9dfad6a1cee949027d56f",
-          "tokens": 202,
+          "mtime": 1776075218.3005183,
+          "hash": "3ea4bbf5d715e278f8d5896f59fc666feaff6392",
+          "tokens": 213,
           "lines": 26
         },
         {
@@ -839,10 +839,10 @@
         },
         {
           "path": "src/api_parts/base_api.py",
-          "mtime": 1776066570.2971368,
-          "hash": "50fb6b4487848334aae49e1a5c5fba9e2df2e389",
-          "tokens": 382,
-          "lines": 45
+          "mtime": 1776075218.3361652,
+          "hash": "4dd8a7ad3f28bf96fec0c4e1bc085e728834d8d0",
+          "tokens": 411,
+          "lines": 48
         },
         {
           "path": "src/api_parts/window_api.py",
@@ -853,10 +853,10 @@
         },
         {
           "path": "src/api_parts/config_api.py",
-          "mtime": 1775740014.8111012,
-          "hash": "baaf51f8083cc9673de9b969047ed689716b9c1a",
-          "tokens": 533,
-          "lines": 73
+          "mtime": 1776075218.3724418,
+          "hash": "1c5d9f3607beca7290fe2f2b6542f3e183d923ba",
+          "tokens": 569,
+          "lines": 77
         },
         {
           "path": "src/api_parts/project_api.py",
@@ -944,17 +944,17 @@
         },
         {
           "path": "frontend/src/utils/infoMessages.js",
-          "mtime": 1776063480.7612135,
-          "hash": "f3e2f78cd89cf43ac25dac54bcdf4c875680e2e8",
-          "tokens": 4153,
-          "lines": 167
+          "mtime": 1776075218.4074287,
+          "hash": "ff70cc713a2934283d912cefea5b267f2614d3af",
+          "tokens": 4179,
+          "lines": 170
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "mtime": 1776070650.3296566,
-          "hash": "92cacbc22cc2a45f36f120b7068b6991e9d53331",
-          "tokens": 5394,
-          "lines": 670
+          "mtime": 1776075232.354352,
+          "hash": "a47ce2ade36eba85273b323f4b9aea20e87734dc",
+          "tokens": 5470,
+          "lines": 682
         },
         {
           "path": "frontend/src/directives/vInfo.js",
@@ -965,10 +965,10 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1776069754.8000433,
-          "hash": "7516a4ebd943762118ac3091d50d5df4cbd932d4",
-          "tokens": 1411,
-          "lines": 178
+          "mtime": 1776075247.8174968,
+          "hash": "78b4fccfecf08375713ca6e34127c8b7474b07ae",
+          "tokens": 1456,
+          "lines": 183
         },
         {
           "path": "frontend/src/views/MainView.vue",
@@ -1315,9 +1315,16 @@
           "lines": 18943,
           "ignore_tokens": true,
           "ignoreTokens": true
+        },
+        {
+          "path": "frontend/src/components/NewFiletypesModal.vue",
+          "tokens": 543,
+          "lines": 56,
+          "mtime": 1776075511.562435,
+          "hash": "28b3ae578342eaa497de2a59bfd674f44821c504"
         }
       ],
-      "total_tokens": 132714,
+      "total_tokens": 316713,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1363,6 +1370,7 @@
     "frontend/src/components/InfoPanel.vue",
     "frontend/src/components/InstructionsModal.vue",
     "frontend/src/components/MarkdownRenderer.vue",
+    "frontend/src/components/NewFiletypesModal.vue",
     "frontend/src/components/NewProfileModal.vue",
     "frontend/src/components/ProjectSelectorModal.vue",
     "frontend/src/components/ProjectStarterModal.vue",

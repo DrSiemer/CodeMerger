@@ -35,7 +35,7 @@ from src import constants as c
 # Import core backend logic
 from src.app_state import AppState
 from src.core.project_manager import ProjectManager
-from src.core.utils import load_active_file_extensions, save_config
+from src.core.utils import load_active_file_extensions, save_config, update_and_get_new_filetypes
 
 log = logging.getLogger("CodeMerger")
 
@@ -455,9 +455,10 @@ def main():
     setup_logging()
     monitor = None
     try:
+        newly_added_filetypes = update_and_get_new_filetypes()
         app_state = AppState()
         project_manager = ProjectManager(load_active_file_extensions)
-        api = Api(app_state, project_manager)
+        api = Api(app_state, project_manager, newly_added_filetypes)
         monitor = FileMonitorThread(None, app_state, project_manager)
         manager = WindowManager(api, monitor, dev_mode=("--dev" in sys.argv))
         manager.start()

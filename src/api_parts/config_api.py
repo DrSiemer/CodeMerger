@@ -31,6 +31,10 @@ class ConfigApi:
             log.error(f"Error saving config: {e}")
             return False
 
+    def get_newly_added_filetypes(self):
+        """Returns the list of filetypes added during the version migration on boot."""
+        return self._newly_added_filetypes
+
     def check_for_updates_manual(self):
         """Triggers a manual update check via the central Updater logic."""
         if self._window_manager and hasattr(self._window_manager, 'updater'):

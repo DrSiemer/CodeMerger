@@ -21,6 +21,6 @@ class Api(
     The Python API bridge exposed to the Vue 3 frontend via PyWebView.
     Methods defined here can be called directly from JavaScript using `window.pywebview.api.method_name()`.
     """
-    def __init__(self, app_state, project_manager):
+    def __init__(self, app_state, project_manager, newly_added_filetypes=None):
         # Explicitly initialize the base class which holds the window manager reference
-        BaseApi.__init__(self, app_state, project_manager)
+        BaseApi.__init__(self, app_state, project_manager, newly_added_filetypes)

@@ -3,6 +3,7 @@ import { onMounted, computed, watch, nextTick, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppState } from './composables/useAppState'
 import InfoPanel from './components/InfoPanel.vue'
+import NewFiletypesModal from './components/NewFiletypesModal.vue'
 import { Info, Loader2 } from 'lucide-vue-next'
 
 const {
@@ -14,6 +15,7 @@ const {
   getClipboardText,
   copyCode,
   activeProject,
+  newlyAddedFiletypes,
   resetEditorFontSize,
   isProjectLoading,
   cancelLoadProject
@@ -139,6 +141,9 @@ onMounted(() => {
         </transition>
       </router-view>
     </div>
+
+    <!-- Modal Layers -->
+    <NewFiletypesModal v-if="newlyAddedFiletypes.length > 0" />
 
     <!-- Global Layout Footer (Hidden in Compact Mode) -->
     <!-- z-50 ensures the footer area is ABOVE any backgrounds but distinct from modal absolute content -->
