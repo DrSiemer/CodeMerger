@@ -35,7 +35,7 @@ defineExpose({ scrollToPath })
 </script>
 
 <template>
-  <div id="fm-available-files" class="w-1/2 flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg">
+  <div id="fm-available-files" class="flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg transition-all duration-300">
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-semibold text-gray-200">Available Files</h3>
       <div class="flex items-center space-x-2">

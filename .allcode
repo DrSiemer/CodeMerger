@@ -472,22 +472,22 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "mtime": 1776086665.2707994,
-          "hash": "35060d67a0da0c7c85df4d93b1a57ce65e4a074b",
-          "tokens": 3039,
+          "mtime": 1776090040.7836921,
+          "hash": "9f6e2cffab5b36546d5733cc0e7f4f65cb10aaea",
+          "tokens": 3051,
           "lines": 358
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
-          "mtime": 1776074907.9060147,
-          "hash": "4fa8badbdffb3d09ead9f670f670eae682a34378",
+          "mtime": 1776090040.8519802,
+          "hash": "646e1303d8afe052fba6b5370ee61d9cc46f5cf9",
           "tokens": 935,
           "lines": 105
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "mtime": 1776089916.5690136,
-          "hash": "2ec9bde75c849b1d30a068941a16cd9a62ec418c",
+          "mtime": 1776090040.911156,
+          "hash": "75a2c567fd586da8e33136f452005f0ce6059996",
           "tokens": 3478,
           "lines": 332
         },
@@ -822,7 +822,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 138418,
+      "total_tokens": 138430,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1269,22 +1269,22 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "mtime": 1776086665.2707994,
-          "hash": "35060d67a0da0c7c85df4d93b1a57ce65e4a074b",
-          "tokens": 3039,
+          "mtime": 1776090040.7836921,
+          "hash": "9f6e2cffab5b36546d5733cc0e7f4f65cb10aaea",
+          "tokens": 3051,
           "lines": 358
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
-          "mtime": 1776063480.5038738,
-          "hash": "acec38c6b56b403ed369b977e67b6ab76dc93442",
-          "tokens": 915,
-          "lines": 103
+          "mtime": 1776090040.8519802,
+          "hash": "646e1303d8afe052fba6b5370ee61d9cc46f5cf9",
+          "tokens": 935,
+          "lines": 105
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "mtime": 1776089916.5690136,
-          "hash": "2ec9bde75c849b1d30a068941a16cd9a62ec418c",
+          "mtime": 1776090040.911156,
+          "hash": "75a2c567fd586da8e33136f452005f0ce6059996",
           "tokens": 3478,
           "lines": 332
         },
@@ -1617,7 +1617,7 @@
           "hash": "6cbd5b7cb558dd93dd9e5238814334b2df85e17c"
         }
       ],
-      "total_tokens": 319881,
+      "total_tokens": 319913,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

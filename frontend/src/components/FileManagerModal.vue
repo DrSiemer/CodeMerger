@@ -286,6 +286,7 @@ const handleSave = async () => {
         <FileManagerLeftPanel
           id="fm-left-panel"
           ref="leftPanelRef"
+          :class="showFullPaths ? 'w-2/5' : 'w-1/2'"
           :fileTree="fileTree"
           v-model:filterText="filterText"
           v-model:isExtFilter="isExtFilter"
@@ -303,6 +304,7 @@ const handleSave = async () => {
         <FileManagerRightPanel
           id="fm-right-panel"
           ref="rightPanelRef"
+          :class="showFullPaths ? 'w-3/5' : 'w-1/2'"
           :listItems="listItems"
           :mergeListRef="mergeListRef"
           :totalTokens="totalTokens"

@@ -247,7 +247,7 @@ defineExpose({
 </script>
 
 <template>
-  <div id="fm-merge-order" class="w-1/2 flex flex-col p-5 bg-cm-dark-bg">
+  <div id="fm-merge-order" class="flex flex-col p-5 bg-cm-dark-bg transition-all duration-300">
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center space-x-3 min-w-0">
         <h3 class="font-semibold text-gray-200 shrink-0">Merge Order</h3>
