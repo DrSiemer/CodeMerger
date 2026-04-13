@@ -273,6 +273,7 @@ class WindowManager:
         def failsafe():
             if self._stop_failsafe.wait(7): return
             if not self._handshake_received:
+                log.warning("Frontend handshake timeout. Triggering failsafe show.")
                 self.show_main_and_close_splash()
 
         threading.Thread(target=failsafe, daemon=True).start()

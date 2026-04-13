@@ -14,7 +14,7 @@ class WindowApi:
         """
         Requests the main window to expand to specified dimensions.
         Calculates all logic in Physical Pixels but implements Hybrid-Domain execution
-        (move is logical, resize is physical) to overcome high-DPI behavior quirks
+        (move is logical, resize is physical) to overcome high-DPI behavior quirks.
         """
         if not self._window_manager or not self._window_manager.main_window:
             return
@@ -22,24 +22,28 @@ class WindowApi:
         mgr = self._window_manager
         win = mgr.main_window
 
-        # 1. Capture Scaling and Physical Environment
+        # CRITICAL: Do not perform geometry updates on hidden windows
+        if win.hidden:
+            return
+
+        # Capture Scaling and Physical Environment
         h_mon = mgr._get_target_monitor_handle()
         m_l_phys, m_t_phys, m_r_phys, m_b_phys = mgr._get_monitor_work_area_phys(h_mon)
         scale = mgr._get_scale_factor(h_mon)
 
         m_w_phys, m_h_phys = m_r_phys - m_l_phys, m_b_phys - m_t_phys
 
-        # 2. Capture Current State (Physical Pixels)
+        # Capture Current State (Physical Pixels)
         curr_w_phys = win.width
         curr_h_phys = win.height
         curr_x_phys = win.x
         curr_y_phys = win.y
 
-        # 3. Define Physical Targets
+        # Define Physical Targets
         target_w_phys = int(width * scale)
         target_h_phys = int(height * scale)
 
-        # 4. Strict Safety Clamp (Physical)
+        # Strict Safety Clamp (Physical)
         # If target exceeds monitor physical resolution, shrink just enough to fit
         margin_phys = int(40 * scale)
         max_allowed_w = m_w_phys - (margin_phys * 2)
@@ -54,12 +58,11 @@ class WindowApi:
         applied_w_phys = max(curr_w_phys, target_w_phys)
         applied_h_phys = max(curr_h_phys, target_h_phys)
 
-        # FIX: If the window is already large enough, do absolutely nothing.
-        # This prevents accidental "restoration" of maximized windows.
+        # If the window is already large enough, do nothing
         if applied_w_phys <= curr_w_phys and applied_h_phys <= curr_h_phys:
             return
 
-        # 5. Position Logic (Physical)
+        # Position Logic (Physical)
         # Calculate new position by expanding outward from current physical center
         center_x_phys = curr_x_phys + (curr_w_phys // 2)
         center_y_phys = curr_y_phys + (curr_h_phys // 2)
@@ -67,7 +70,7 @@ class WindowApi:
         new_x_phys = center_x_phys - (applied_w_phys // 2)
         new_y_phys = center_y_phys - (applied_h_phys // 2)
 
-        # 6. Physical Boundary "Shove" (Keep on screen)
+        # Physical Boundary "Shove" (Keep on screen)
         if new_x_phys + applied_w_phys > m_r_phys - margin_phys:
             new_x_phys = (m_r_phys - margin_phys) - applied_w_phys
 
@@ -80,7 +83,7 @@ class WindowApi:
         if new_y_phys < m_t_phys + margin_phys:
             new_y_phys = m_t_phys + margin_phys
 
-        # 7. HYBRID DOMAIN EXECUTION
+        # HYBRID DOMAIN EXECUTION
         # resize() consumes PHYSICAL | move() consumes LOGICAL
         exec_w_phys = int(applied_w_phys)
         exec_h_phys = int(applied_h_phys)
@@ -101,10 +104,6 @@ class WindowApi:
         mgr.main_last_x, mgr.main_last_y = new_x_phys, new_y_phys
 
     def signal_ui_ready(self):
-        """
-        Called by the frontend (Vue) once the app is mounted and rendered
-        Triggers the transition from Splash to Main Window with guaranteed visibility
-        """
         if self._window_manager:
             self._window_manager.show_main_and_close_splash()
 
