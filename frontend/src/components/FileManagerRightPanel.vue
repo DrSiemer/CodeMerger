@@ -34,7 +34,10 @@ const getTokenColor = (file) => {
   const count = file.tokens
   if (count === undefined || count === null || count < 0) return 'text-gray-500'
 
-  const tokenValues = props.listItems.map(f => f?.tokens || 0)
+  const tokenValues = props.listItems
+    .filter(f => f && !f.ignoreTokens)
+    .map(f => f.tokens || 0)
+
   const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, TOKEN_COLOR_RANGE_MAX) : TOKEN_COLOR_RANGE_MAX
   const p = count / maxInList
   if (p < 0.2) return 'text-gray-500'
