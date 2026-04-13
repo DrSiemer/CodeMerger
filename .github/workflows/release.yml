@@ -74,10 +74,8 @@ jobs:
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: CodeMerger-windows-build
-          path: |
-            dist/CodeMerger/CodeMerger.exe
-            dist-installer/CodeMerger_Setup.exe
+          name: CodeMerger-Installer
+          path: dist-installer/CodeMerger_Setup.exe
 
   # Create the GitHub Release
   create-release:
@@ -87,10 +85,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download all build artifacts
+      - name: Download installer artifact
         uses: actions/download-artifact@v4
         with:
-          name: CodeMerger-windows-build
+          name: CodeMerger-Installer
           path: artifacts
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -99,4 +97,4 @@ jobs:
           draft: true
           prerelease: false
           files: |
-            artifacts/**/*.exe
+            artifacts/CodeMerger_Setup.exe
