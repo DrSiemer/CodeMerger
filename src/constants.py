@@ -6,14 +6,16 @@ ADD_ALL_WARNING_THRESHOLD_DEFAULT = 100
 NEW_FILE_ALERT_THRESHOLD_DEFAULT = 5
 STATUS_FADE_SECONDS = 5
 
-# API Endpoints
-GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"
-
 # File System
 # Explicit directories to ignore for performance during recursive scans
 SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode'}
 # Files treated as selected to prevent folders from appearing unselected if they are the only unselected items
 FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
+# Prefix for transient files created during atomic writes
+ALLCODE_TEMP_PREFIX = '.allcode_tmp_'
+
+# API Endpoints
+GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"
 
 # Logging
 LOG_FILENAME = "codemerger.log"
@@ -88,8 +90,8 @@ COMPACT_MODE_BORDER_WIDTH = 1
 DEFAULT_LIST_ITEM_HEIGHT = 25
 
 # Compact Window Dimensions (Logical Units)
-COMPACT_WINDOW_WIDTH_LOGICAL = 120
-COMPACT_WINDOW_HEIGHT_LOGICAL = 110
+COMPACT_WINDOW_WIDTH_LOGICAL = 126
+COMPACT_WINDOW_HEIGHT_LOGICAL = 113
 
 # UI Default Dimensions
 DEFAULT_WINDOW_GEOMETRY = "660x360"

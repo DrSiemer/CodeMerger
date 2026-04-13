@@ -44,17 +44,17 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776063480.9122913,
-          "hash": "28692f5b7879e7f4f62456142356ece23cc71746",
-          "tokens": 1851,
-          "lines": 220
+          "mtime": 1776080667.7662795,
+          "hash": "51d83b214c308d0e9039c0507e83bf9b0c29fa3a",
+          "tokens": 1872,
+          "lines": 222
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776078969.8896165,
-          "hash": "7b8b266510bcf49ce78be9514437684006d354ed",
-          "tokens": 4709,
-          "lines": 477
+          "mtime": 1776080951.1428177,
+          "hash": "7a545b37c4bf6b395950b846a55ad4a8052f2eac",
+          "tokens": 4718,
+          "lines": 478
         },
         {
           "path": "src/app_state.py",
@@ -94,10 +94,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1776071255.2569616,
-          "hash": "bf57e8c41e98c413a1542844991869c9f81d70cd",
-          "tokens": 3484,
-          "lines": 408,
+          "mtime": 1776080667.921141,
+          "hash": "2566280b94766b57a91c13a02724871cebdb16e2",
+          "tokens": 3528,
+          "lines": 412,
           "ignore_tokens": false
         },
         {
@@ -109,17 +109,17 @@
         },
         {
           "path": "src/core/file_scanner.py",
-          "mtime": 1776070608.6298244,
-          "hash": "5132899693d6e75c034c82dfff5b47e17812a6c9",
-          "tokens": 543,
-          "lines": 71
+          "mtime": 1776080667.9594777,
+          "hash": "93cb65d65a208b19d793c7a6529bb8e0a96d639e",
+          "tokens": 576,
+          "lines": 73
         },
         {
           "path": "src/core/file_tree_builder.py",
-          "mtime": 1776063480.9290798,
-          "hash": "e617d8fc476a5180bb57b22834619ae186f74eb0",
-          "tokens": 1037,
-          "lines": 107
+          "mtime": 1776080667.9982305,
+          "hash": "4491ea5c0a2dc4a1f34a5e07d052d32cc53b91d2",
+          "tokens": 1082,
+          "lines": 110
         },
         {
           "path": "src/core/merger.py",
@@ -305,9 +305,9 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1776076900.8491044,
-          "hash": "fe674aac746e76eb1feb5b7a9cc53e8b3c306a79",
-          "tokens": 1510,
+          "mtime": 1776080951.291679,
+          "hash": "847166302059e162839f91b30e1905115fb788f1",
+          "tokens": 1525,
           "lines": 187
         },
         {
@@ -438,10 +438,10 @@
         },
         {
           "path": "src/api_parts/starter_api_scaffold.py",
-          "mtime": 1776063480.8820846,
-          "hash": "474589d76eafee33559a0c25e2d102ff2cc53138",
-          "tokens": 2157,
-          "lines": 207
+          "mtime": 1776080668.030205,
+          "hash": "ac899e70aeece4c15d4316f4005eca4116c2d450",
+          "tokens": 2205,
+          "lines": 210
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
@@ -655,7 +655,7 @@
           "lines": 166
         }
       ],
-      "total_tokens": 130976,
+      "total_tokens": 131191,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -711,17 +711,17 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776063480.9122913,
-          "hash": "28692f5b7879e7f4f62456142356ece23cc71746",
-          "tokens": 1851,
-          "lines": 220
+          "mtime": 1776080667.7662795,
+          "hash": "51d83b214c308d0e9039c0507e83bf9b0c29fa3a",
+          "tokens": 1872,
+          "lines": 222
         },
         {
           "path": "run_webview.py",
-          "mtime": 1776075758.3332157,
-          "hash": "41a36bf6479952ea130b76ae2836094b6fa73da0",
-          "tokens": 4669,
-          "lines": 475
+          "mtime": 1776080951.1428177,
+          "hash": "7a545b37c4bf6b395950b846a55ad4a8052f2eac",
+          "tokens": 4718,
+          "lines": 478
         },
         {
           "path": "src/app_state.py",
@@ -761,10 +761,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1776063480.935104,
-          "hash": "3ded33ac7e92938abae49508913aaa678555ef30",
-          "tokens": 3423,
-          "lines": 399,
+          "mtime": 1776080667.921141,
+          "hash": "2566280b94766b57a91c13a02724871cebdb16e2",
+          "tokens": 3528,
+          "lines": 412,
           "ignore_tokens": false
         },
         {
@@ -776,17 +776,17 @@
         },
         {
           "path": "src/core/file_scanner.py",
-          "mtime": 1776070608.6298244,
-          "hash": "5132899693d6e75c034c82dfff5b47e17812a6c9",
-          "tokens": 543,
-          "lines": 71
+          "mtime": 1776080667.9594777,
+          "hash": "93cb65d65a208b19d793c7a6529bb8e0a96d639e",
+          "tokens": 576,
+          "lines": 73
         },
         {
           "path": "src/core/file_tree_builder.py",
-          "mtime": 1776063480.9290798,
-          "hash": "e617d8fc476a5180bb57b22834619ae186f74eb0",
-          "tokens": 1037,
-          "lines": 107
+          "mtime": 1776080667.9982305,
+          "hash": "4491ea5c0a2dc4a1f34a5e07d052d32cc53b91d2",
+          "tokens": 1082,
+          "lines": 110
         },
         {
           "path": "src/core/merger.py",
@@ -972,10 +972,10 @@
         },
         {
           "path": "frontend/src/App.vue",
-          "mtime": 1776075247.8174968,
-          "hash": "78b4fccfecf08375713ca6e34127c8b7474b07ae",
-          "tokens": 1456,
-          "lines": 183
+          "mtime": 1776080951.291679,
+          "hash": "847166302059e162839f91b30e1905115fb788f1",
+          "tokens": 1525,
+          "lines": 187
         },
         {
           "path": "frontend/src/views/MainView.vue",
@@ -1105,10 +1105,10 @@
         },
         {
           "path": "src/api_parts/starter_api_scaffold.py",
-          "mtime": 1776063480.8820846,
-          "hash": "474589d76eafee33559a0c25e2d102ff2cc53138",
-          "tokens": 2157,
-          "lines": 207
+          "mtime": 1776080668.030205,
+          "hash": "ac899e70aeece4c15d4316f4005eca4116c2d450",
+          "tokens": 2205,
+          "lines": 210
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
@@ -1357,7 +1357,7 @@
           "hash": "8959834c6727f79e14993168fdc01bd2658accc5"
         }
       ],
-      "total_tokens": 315272,
+      "total_tokens": 320165,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

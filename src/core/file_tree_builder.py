@@ -51,7 +51,8 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
             try:
                 for entry in os.scandir(path):
                     e_rel = os.path.relpath(entry.path, base_dir).replace('\\', '/')
-                    if should_be_ignored(entry.path, e_rel) or entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE:
+                    name_low = entry.name.lower()
+                    if should_be_ignored(entry.path, e_rel) or name_low in c.SPECIAL_FILES_TO_IGNORE or name_low.startswith(c.ALLCODE_TEMP_PREFIX):
                         continue
                     if entry.is_dir():
                         if _has_relevant_files(entry.path, e_rel): return True
@@ -68,7 +69,8 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
 
             for entry in entries:
                 e_rel = os.path.relpath(entry.path, base_dir).replace('\\', '/')
-                if should_be_ignored(entry.path, e_rel) or entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE: continue
+                name_low = entry.name.lower()
+                if should_be_ignored(entry.path, e_rel) or name_low in c.SPECIAL_FILES_TO_IGNORE or name_low.startswith(c.ALLCODE_TEMP_PREFIX): continue
 
                 if entry.is_dir():
                     if _has_relevant_files(entry.path, e_rel):
@@ -88,7 +90,8 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
         has_match_in_subtree = False
         for entry in entries:
             e_rel = os.path.relpath(entry.path, base_dir).replace('\\', '/')
-            if should_be_ignored(entry.path, e_rel) or entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE: continue
+            name_low = entry.name.lower()
+            if should_be_ignored(entry.path, e_rel) or name_low in c.SPECIAL_FILES_TO_IGNORE or name_low.startswith(c.ALLCODE_TEMP_PREFIX): continue
 
             name_matches_filter = filter_text_lower in entry.name.lower()
 

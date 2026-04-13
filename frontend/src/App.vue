@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, computed, watch, nextTick, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAppState } from './composables/useAppState'
 import InfoPanel from './components/InfoPanel.vue'
 import NewFiletypesModal from './components/NewFiletypesModal.vue'
@@ -21,8 +21,12 @@ const {
   cancelLoadProject
 } = useAppState()
 const route = useRoute()
+const router = useRouter()
 
-const isCompact = computed(() => route.path === '/compact')
+const isCompact = computed(() => {
+  // Use router state if available, but fallback to raw location hash for initial production render
+  return route.path === '/compact' || window.location.hash.toLowerCase().includes('compact')
+})
 
 onMounted(() => {
   const signalReady = async () => {
@@ -30,6 +34,14 @@ onMounted(() => {
       // PyWebView injection can be slow on localhost, so we check specifically for the api object
       if (window.pywebview && window.pywebview.api) {
         try {
+          // Ensure Router is fully synchronized with the window URL before signaling ready
+          await router.isReady()
+
+          // Ensure initial hash navigation is picked up in production WebView
+          if (window.location.hash.toLowerCase().includes('compact') && route.path !== '/compact') {
+            await router.push('/compact')
+          }
+
           await window.pywebview.api.signal_ui_ready()
           init()
         } catch (err) {
@@ -113,7 +125,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div id="app-wrapper" class="h-screen w-screen bg-cm-dark-bg text-gray-100 flex flex-col font-sans selection:bg-cm-blue selection:text-white overflow-hidden">
+  <div id="app-wrapper" class="h-full w-full bg-cm-dark-bg text-gray-100 flex flex-col font-sans selection:bg-cm-blue selection:text-white overflow-hidden">
 
     <!-- Global Loading Overlay -->
     <transition name="fade">
@@ -139,18 +151,13 @@ onMounted(() => {
 
     <!-- Content Area (Relative for absolute modals) -->
     <div id="content-area" class="flex-grow relative overflow-hidden flex flex-col">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+      <router-view />
     </div>
 
     <!-- Modal Layers -->
     <NewFiletypesModal v-if="newlyAddedFiletypes.length > 0" />
 
     <!-- Global Layout Footer (Hidden in Compact Mode) -->
-    <!-- z-50 ensures the footer area is ABOVE any backgrounds but distinct from modal absolute content -->
     <template v-if="!isCompact">
       <div id="global-footer" class="relative z-50 flex flex-col">
         <!-- Shared Info Panel Component -->

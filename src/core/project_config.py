@@ -10,7 +10,7 @@ import sys
 import logging
 import threading
 from pathlib import Path
-from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD
+from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD, ALLCODE_TEMP_PREFIX
 from .utils import get_token_count_for_text
 
 log = logging.getLogger("CodeMerger")
@@ -315,7 +315,7 @@ class ProjectConfig:
                 "known_files": sorted(list(set(self.known_files)))
             }
 
-            fd, temp_path = tempfile.mkstemp(dir=self.base_dir, prefix='.allcode_tmp_')
+            fd, temp_path = tempfile.mkstemp(dir=self.base_dir, prefix=ALLCODE_TEMP_PREFIX)
             try:
                 with os.fdopen(fd, 'w', encoding='utf-8') as f:
                     json.dump(final_data, f, indent=2)
@@ -338,6 +338,7 @@ class ProjectConfig:
                                 ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs & ~FILE_ATTRIBUTE_HIDDEN)
 
                         os.replace(temp_path, self.allcode_path)
+                        temp_path = None # Mark as successfully moved for the finally block
 
                         # Restore hidden attribute if it was previously set
                         if is_windows and was_hidden:
@@ -350,10 +351,13 @@ class ProjectConfig:
                         if attempt == max_retries - 1:
                             raise
                         time.sleep(0.1)
-            except Exception:
-                if os.path.exists(temp_path):
-                    os.remove(temp_path)
-                raise
+            finally:
+                # Guarantee cleanup of temporary files if replacement failed or errored out
+                if temp_path and os.path.exists(temp_path):
+                    try:
+                        os.remove(temp_path)
+                    except Exception:
+                        pass
 
             if os.path.isfile(self.allcode_path):
                 self._last_mtime = os.path.getmtime(self.allcode_path)

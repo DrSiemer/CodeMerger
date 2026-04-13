@@ -182,10 +182,13 @@ class StarterApiScaffold:
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []
-        merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt']
+        # Exclude temporary files and specific artifacts from the initial merge selection
+        merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt', c.ALLCODE_TEMP_PREFIX]
         for f in files_created:
              norm = f.replace('\\', '/')
-             if os.path.basename(norm) not in merge_order_exclusion_list:
+             filename = os.path.basename(norm)
+             # Skip if exact match or if it starts with the temp prefix
+             if filename not in merge_order_exclusion_list and not filename.startswith(c.ALLCODE_TEMP_PREFIX):
                  normalized_files.append({'path': norm})
 
         self.project_manager.create_project_with_defaults(

@@ -29,7 +29,9 @@ def get_all_matching_files(base_dir, file_extensions, gitignore_patterns, always
                 if cancel_event and cancel_event.is_set():
                     return
 
-                if entry.name.lower() in c.SPECIAL_FILES_TO_IGNORE:
+                name_lower = entry.name.lower()
+                # Skip ignored system files and temporary CodeMerger config files to prevent recursion loops
+                if name_lower in c.SPECIAL_FILES_TO_IGNORE or name_lower.startswith(c.ALLCODE_TEMP_PREFIX):
                     continue
 
                 if is_ignored(entry.path, base_dir, gitignore_patterns):
