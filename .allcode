@@ -3,7 +3,7 @@
   "project_name": "CodeMerger",
   "project_color": "#808080",
   "project_font_color": "light",
-  "active_profile": "tkinter",
+  "active_profile": "Default",
   "profiles": {
     "Default": {
       "selected_files": [
@@ -73,10 +73,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1776080667.921141,
-          "hash": "2566280b94766b57a91c13a02724871cebdb16e2",
-          "tokens": 3528,
-          "lines": 412,
+          "mtime": 1776088999.4946523,
+          "hash": "44edcff412a53255e88fb1468b1db7bd1fb692cd",
+          "tokens": 3740,
+          "lines": 434,
           "ignore_tokens": false
         },
         {
@@ -123,10 +123,10 @@
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "mtime": 1775724741.4771452,
-          "hash": "6aded26718d2b7af212dd118f1ebe348ad98df03",
-          "tokens": 1111,
-          "lines": 140
+          "mtime": 1776088999.6399531,
+          "hash": "62d296309aa33714f80521885fc082e666891fa8",
+          "tokens": 1140,
+          "lines": 142
         },
         {
           "path": "src/core/prompts.py",
@@ -780,7 +780,7 @@
           "lines": 87
         }
       ],
-      "total_tokens": 137701,
+      "total_tokens": 137942,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -876,10 +876,10 @@
         },
         {
           "path": "src/core/project_config.py",
-          "mtime": 1776080667.921141,
-          "hash": "2566280b94766b57a91c13a02724871cebdb16e2",
-          "tokens": 3528,
-          "lines": 412,
+          "mtime": 1776088999.4946523,
+          "hash": "44edcff412a53255e88fb1468b1db7bd1fb692cd",
+          "tokens": 3740,
+          "lines": 434,
           "ignore_tokens": false
         },
         {
@@ -926,10 +926,10 @@
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "mtime": 1775724741.4771452,
-          "hash": "6aded26718d2b7af212dd118f1ebe348ad98df03",
-          "tokens": 1111,
-          "lines": 140
+          "mtime": 1776088999.6399531,
+          "hash": "62d296309aa33714f80521885fc082e666891fa8",
+          "tokens": 1140,
+          "lines": 142
         },
         {
           "path": "src/core/prompts.py",
@@ -1575,7 +1575,7 @@
           "hash": "6cbd5b7cb558dd93dd9e5238814334b2df85e17c"
         }
       ],
-      "total_tokens": 322668,
+      "total_tokens": 322909,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

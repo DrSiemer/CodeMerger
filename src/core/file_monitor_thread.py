@@ -70,9 +70,10 @@ class FileMonitorThread(threading.Thread):
         try:
             # Check for external config changes
             if project_config.has_external_changes():
-                log.info("External changes detected in .allcode. Triggering UI reload.")
-                project_config.load()
-                self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                log.info("Modified .allcode detected. Synchronizing internal state...")
+                if project_config.load():
+                    log.info("Project configuration updated externally. Triggering UI refresh.")
+                    self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
             # Scan for new files
             from .utils import load_active_file_extensions

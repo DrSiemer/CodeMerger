@@ -57,6 +57,7 @@ class ProjectConfig:
         self.profiles = {}
         self.active_profile_name = "Default"
         self._last_mtime = 0
+        self._last_content_hash = None
 
         # Safety latch: prevent saving if an existing file failed to load correctly
         self._load_successful = False
@@ -251,10 +252,28 @@ class ProjectConfig:
             # Mark load as successful only after full data validation
             self._load_successful = True
 
+            # Content hash check to prevent redundant UI reloads
+            new_hash = self._calculate_hash()
+            content_changed = (self._last_content_hash is not None and new_hash != self._last_content_hash)
+            if files_were_cleaned_globally:
+                content_changed = True
+            self._last_content_hash = new_hash
+
             if config_was_updated or files_were_cleaned_globally:
                 self.save()
 
-            return files_were_cleaned_globally
+            return content_changed
+
+    def _calculate_hash(self):
+        """Generates a stable signature of project state that affects UI rendering"""
+        state = {
+            "name": self.project_name,
+            "color": self.project_color,
+            "profiles": self.profiles,
+            "active": self.active_profile_name,
+            "known": self.known_files
+        }
+        return hashlib.md5(json.dumps(state, sort_keys=True).encode()).hexdigest()
 
     def _clean_profile_files(self, profile_data):
         profile_was_updated = False
@@ -361,6 +380,7 @@ class ProjectConfig:
 
             if os.path.isfile(self.allcode_path):
                 self._last_mtime = os.path.getmtime(self.allcode_path)
+                self._last_content_hash = self._calculate_hash()
 
     def has_external_changes(self):
         """Identifies file modifications on disk since the last internal access"""
@@ -369,7 +389,8 @@ class ProjectConfig:
         try:
             if os.path.getsize(self.allcode_path) == 0:
                 return False
-            return os.path.getmtime(self.allcode_path) != self._last_mtime
+            # Threshold of 0.1s ignores precision drift common during OS monitor scaling transitions
+            return abs(os.getmtime(self.allcode_path) - self._last_mtime) > 0.1
         except OSError:
             return False
 
