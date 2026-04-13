@@ -145,9 +145,9 @@ export function useProject() {
     }
   }
 
-  const getFileTree = async (filterText, isExtFilter, isGitFilter) => {
+  const getFileTree = async (filterText, isExtFilter, isGitFilter, currentSelectedPaths) => {
     if (window.pywebview) {
-      return await window.pywebview.api.get_file_tree(filterText, isExtFilter, isGitFilter)
+      return await window.pywebview.api.get_file_tree(filterText, isExtFilter, isGitFilter, currentSelectedPaths)
     }
     return []
   }

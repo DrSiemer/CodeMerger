@@ -13,7 +13,7 @@ log = logging.getLogger("CodeMerger")
 class FileApi:
     """API methods concerning the file tree, file parsing, and the merge list."""
 
-    def get_file_tree(self, filter_text="", is_ext_filter=True, is_git_filter=True):
+    def get_file_tree(self, filter_text="", is_ext_filter=True, is_git_filter=True, current_selected_paths=None):
         """Returns the project file tree data structure, enhanced with metadata."""
         project_config = self.project_manager.get_current_project()
         if not project_config:
@@ -23,7 +23,13 @@ class FileApi:
         from src.core.utils import load_active_file_extensions
         file_extensions = load_active_file_extensions()
         gitignore_patterns = parse_gitignore(base_dir)
-        selected_paths = {f['path'] for f in project_config.selected_files}
+
+        # Priority: Use current UI state if provided, otherwise fallback to disk state
+        if current_selected_paths is not None:
+            selected_paths = set(current_selected_paths)
+        else:
+            selected_paths = {f['path'] for f in project_config.selected_files}
+
         unknown_files = set(project_config.unknown_files)
 
         raw_tree = build_file_tree_data(
@@ -52,7 +58,14 @@ class FileApi:
                     exact_filenames_set = {ext for ext in file_extensions if not ext.startswith('.')}
                     is_valid_ext = file_ext in extensions_set or file_name_lower in exact_filenames_set
 
-                    node['is_filtered'] = is_git_ignored or (not is_valid_ext)
+                    if is_git_ignored:
+                        node['is_filtered'] = True
+                        node['filter_reason'] = 'Normally hidden by .gitignore'
+                    elif not is_valid_ext:
+                        node['is_filtered'] = True
+                        node['filter_reason'] = 'Normally hidden by filetype settings'
+                    else:
+                        node['is_filtered'] = False
                 else:
                     node['is_filtered'] = False
 

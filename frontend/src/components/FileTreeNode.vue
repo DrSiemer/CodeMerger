@@ -90,6 +90,20 @@ const textClass = computed(() => {
   }
 })
 
+const nodeTooltip = computed(() => {
+  // Base instruction based on node type
+  let tooltip = props.node.type === 'file'
+    ? `${props.node.name} (Ctrl+Click to open)`
+    : `${props.node.name} (Ctrl+Click to toggle folder selection)`;
+
+  // Append filtering reason if this item is currently bypass-filtered (Purple state)
+  if (props.node.is_filtered && props.node.filter_reason) {
+    tooltip += `\n(${props.node.filter_reason})`;
+  }
+
+  return tooltip;
+})
+
 const handleClick = (event) => {
   if (props.node.type === 'dir') {
     // Special bulk toggle behavior: prevents expansion
@@ -180,7 +194,7 @@ const onChildToggleExpand = (data) => {
       <span
         class="text-sm truncate"
         :class="textClass"
-        :title="node.is_filtered ? 'Normally hidden by filters' : (node.type === 'file' ? `${node.name} (Ctrl+Click to open)` : `${node.name} (Ctrl+Click to toggle folder selection)`)"
+        :title="nodeTooltip"
       >
         {{ node.name }}
       </span>

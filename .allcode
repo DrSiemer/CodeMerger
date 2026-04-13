@@ -172,10 +172,10 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "mtime": 1776063480.8658385,
-          "hash": "33b46455547969e5d4c9cf52837cd18e19c49320",
-          "tokens": 2043,
-          "lines": 249
+          "mtime": 1776093965.1271458,
+          "hash": "ecadf3462f60f0d52c95730b268c19e3739ad65f",
+          "tokens": 2141,
+          "lines": 262
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -319,10 +319,10 @@
         },
         {
           "path": "frontend/src/composables/useProject.js",
-          "tokens": 1522,
+          "tokens": 1530,
           "lines": 219,
-          "mtime": 1776082139.243713,
-          "hash": "0bfb47fdfefa4ec1bd73b02d0e41a3e630db3669"
+          "mtime": 1776093965.1644278,
+          "hash": "6cb02ef863589397f0aa775936c3481322e9eaa9"
         },
         {
           "path": "frontend/src/composables/useReview.js",
@@ -475,10 +475,10 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "mtime": 1776090040.7836921,
-          "hash": "9f6e2cffab5b36546d5733cc0e7f4f65cb10aaea",
-          "tokens": 3051,
-          "lines": 358
+          "mtime": 1776094057.3459134,
+          "hash": "2397c3b36ecd9cfd7897d0568ebd36bac765f56e",
+          "tokens": 3068,
+          "lines": 359
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
@@ -496,10 +496,10 @@
         },
         {
           "path": "frontend/src/components/FileTreeNode.vue",
-          "mtime": 1776074907.907019,
-          "hash": "07b7ff40945c5c73c6aed47f818d846d5fd90776",
-          "tokens": 1617,
-          "lines": 206
+          "mtime": 1776094134.7077482,
+          "hash": "0fc244ea2a7272e9860724e4ba349d2c2e7119a8",
+          "tokens": 1684,
+          "lines": 220
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
@@ -830,9 +830,14 @@
           "lines": 3,
           "mtime": 1776092343.4031677,
           "hash": "d2532a5fba345a00023fa9aa5e064df4b75ba4bf"
+        },
+        {
+          "path": "frontend/src/components/OrderErrorModal.vue",
+          "tokens": 760,
+          "ignoreTokens": false
         }
       ],
-      "total_tokens": 139656,
+      "total_tokens": 140606,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -846,6 +851,7 @@
         "frontend/src/components",
         "frontend/src/components/dashboard",
         "frontend/src/components/review-tabs",
+        "frontend/src/components/settings",
         "frontend/src/components/starter-steps",
         "frontend/src/components/starter-steps/widgets",
         "frontend/src/composables",
@@ -863,6 +869,7 @@
   },
   "known_files": [
     ".github/workflows/release.yml",
+    "LICENSE",
     "README.md",
     "assets/boilerplate/README.md",
     "assets/boilerplate/go_docker.bat",

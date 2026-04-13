@@ -60,7 +60,8 @@ onUnmounted(() => {
 })
 
 const refreshTree = async () => {
-  fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value)
+  const currentPaths = listItems.value.map(f => f.path)
+  fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
 }
 
 const autoHandleNewFiles = async () => {
