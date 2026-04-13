@@ -4,7 +4,7 @@ import {
   Milestone, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
   ArrowDownUp
 } from 'lucide-vue-next'
-import { useAppState } from '../composables/useAppState'
+import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
 
 const props = defineProps({
   listItems: Array,
@@ -102,7 +102,7 @@ const handlePasteOrder = async () => {
     const startIdx = pastedText.indexOf('[')
     const endIdx = pastedText.lastIndexOf(']')
     if (startIdx === -1 || endIdx === -1) {
-      throw new Error("Could not find a JSON array.")
+      throw new Error("Could not find a JSON array in the response.")
     }
 
     const jsonStr = pastedText.substring(startIdx, endIdx + 1)
@@ -120,10 +120,16 @@ const handlePasteOrder = async () => {
     const unknownFiles = [...newPathsSet].filter(p => !currentPathsSet.has(p))
 
     if (missingFiles.length || unknownFiles.length) {
-      let errorMsg = "The provided file list is invalid.\n"
-      if (missingFiles.length) errorMsg += `\nMissing files:\n- ` + missingFiles.sort().join('\n- ')
-      if (unknownFiles.length) errorMsg += `\nUnknown files:\n- ` + unknownFiles.sort().join('\n- ')
-      alert(errorMsg)
+      let errorParts = []
+      if (missingFiles.length) {
+        errorParts.push(`Missing Files:\n${JSON.stringify(missingFiles.sort(), null, 2)}`)
+      }
+      if (unknownFiles.length) {
+        errorParts.push(`Unknown Files:\n${JSON.stringify(unknownFiles.sort(), null, 2)}`)
+      }
+
+      orderErrorMessage.value = errorParts.join('\n\n')
+      showOrderErrorModal.value = true
       return
     }
 
@@ -136,7 +142,8 @@ const handlePasteOrder = async () => {
     statusMessage.value = "File merge order updated from clipboard."
 
   } catch (err) {
-    alert(`Could not parse the new file order.\n\nError: ${err.message}`)
+    orderErrorMessage.value = `Could not parse the new file order.\n\nError: ${err.message}`
+    showOrderErrorModal.value = true
   }
 }
 

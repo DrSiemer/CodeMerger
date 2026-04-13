@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { X, RotateCcw, Save } from 'lucide-vue-next'
-import { useAppState } from '../composables/useAppState'
+import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
 import FileManagerRightPanel from './FileManagerRightPanel.vue'
+import OrderErrorModal from './OrderErrorModal.vue'
 
 const emit = defineEmits(['close'])
 const {
@@ -34,7 +35,13 @@ const isOrderPulseActive = ref(false)
 const highlightedPath = ref(null)
 
 const handleKeyDown = (e) => {
-  if (e.key === 'Escape') handleCancel()
+  if (e.key === 'Escape') {
+    if (showOrderErrorModal.value) {
+      showOrderErrorModal.value = false
+      return
+    }
+    handleCancel()
+  }
 }
 
 onMounted(async () => {
@@ -49,6 +56,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown)
+  showOrderErrorModal.value = false
 })
 
 const refreshTree = async () => {
@@ -257,7 +265,10 @@ const handleSave = async () => {
 
 <template>
   <div id="file-manager-modal" class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
-    <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[90vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
+    <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[90vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden relative">
+
+      <!-- Error Layer -->
+      <OrderErrorModal v-if="showOrderErrorModal" :message="orderErrorMessage" @close="showOrderErrorModal = false" />
 
       <!-- Header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar">

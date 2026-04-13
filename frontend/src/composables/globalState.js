@@ -46,3 +46,7 @@ export const isProjectLoading = ref(false)
 // Persistence for AI Review Window
 export const planFileStates = ref({}) // path -> 'pending' | 'applied' | 'rejected' | 'deleted' | 'skipped'
 export const planOriginalContents = ref({}) // path -> string content (for undo)
+
+// Order Request Error Modal State
+export const showOrderErrorModal = ref(false)
+export const orderErrorMessage = ref('')

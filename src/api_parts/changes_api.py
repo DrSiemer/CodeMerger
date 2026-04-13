@@ -1,5 +1,6 @@
 import os
 import logging
+import pyperclip
 from src.core.utils import get_token_count_for_text, get_file_hash
 from src.core import change_applier
 
@@ -219,8 +220,8 @@ class ChangesApi:
 
         return success, msg
 
-    def get_admonishment_prompt(self):
-        """Generates a specialized prompt for corrected AI output format."""
+    def copy_admonishment(self):
+        """Generates and copies a specialized prompt for corrected AI output format."""
         LT, RT, PRE = "<", ">", "--- "
         IN_T = "IN" + "TRO"
         ANS_W = "ANS" + "WERS" + " TO DIR" + "ECT USER QUE" + "STIONS"
@@ -238,4 +239,22 @@ class ChangesApi:
             "- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.\n"
             "Please re-output the response correctly."
         )
-        return msg
+        try:
+            pyperclip.copy(msg)
+            return "Copied format correction prompt."
+        except Exception:
+            return "Failed to copy prompt."
+
+    def copy_order_admonishment(self, error_msg):
+        """Generates and copies a specialized prompt to correct a failed file order request."""
+        msg = (
+            "The file list you provided for the merge order is invalid. "
+            "Please provide only the JSON array of strings in the exact same format as requested. "
+            "Ensure you do not omit any files from the current selection and do not add files that were not requested.\n\n"
+            f"Validation Errors:\n{error_msg}"
+        )
+        try:
+            pyperclip.copy(msg)
+            return "Copied order correction prompt."
+        except Exception:
+            return "Failed to copy prompt."

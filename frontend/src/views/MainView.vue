@@ -65,6 +65,12 @@ const onRemotePasteRequest = async (event) => {
   const plan = await claimLastPlan()
   if (!plan) return
 
+  // Handle parsing errors claimed from compact mode via standard alert (dashboard flow)
+  if (plan.status === 'ERROR') {
+    alert(plan.message)
+    return
+  }
+
   lastAiResponse.value = plan
   revertToCompactOnClose.value = revertOnClose
   reviewMode.value = 'new'

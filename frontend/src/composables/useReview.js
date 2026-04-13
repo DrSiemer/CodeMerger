@@ -107,9 +107,8 @@ export function useReview() {
 
   const copyAdmonishment = async () => {
     if (window.pywebview) {
-      const prompt = await window.pywebview.api.get_admonishment_prompt()
-      await navigator.clipboard.writeText(prompt)
-      statusMessage.value = "Copied format correction prompt."
+      const msg = await window.pywebview.api.copy_admonishment()
+      statusMessage.value = msg
     }
   }
 
