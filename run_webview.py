@@ -59,7 +59,7 @@ class WindowManager:
         self.main_window = None
         self.compact_window = None
         self.splash_window = None
-        self._is_shut_down = False
+        self._is_shutting_down = False
         self._transitioning = False
         self._handshake_received = False
         self._stop_failsafe = threading.Event()

@@ -22,8 +22,21 @@ class WindowApi:
         mgr = self._window_manager
         win = mgr.main_window
 
-        # CRITICAL: Do not perform geometry updates on hidden windows
-        if win.hidden:
+        try:
+            # Capture Current State (Physical Pixels)
+            curr_w_phys = win.width
+            curr_h_phys = win.height
+            curr_x_phys = win.x
+            curr_y_phys = win.y
+        except Exception:
+            return
+
+        if curr_w_phys is None or curr_h_phys is None or curr_x_phys is None or curr_y_phys is None:
+            return
+
+        # CRITICAL: Do not perform geometry updates on minimized windows.
+        # Minimized windows on Windows have extreme negative coordinates (e.g., -32000).
+        if curr_x_phys < -10000 or curr_y_phys < -10000:
             return
 
         # Capture Scaling and Physical Environment
@@ -32,12 +45,6 @@ class WindowApi:
         scale = mgr._get_scale_factor(h_mon)
 
         m_w_phys, m_h_phys = m_r_phys - m_l_phys, m_b_phys - m_t_phys
-
-        # Capture Current State (Physical Pixels)
-        curr_w_phys = win.width
-        curr_h_phys = win.height
-        curr_x_phys = win.x
-        curr_y_phys = win.y
 
         # Define Physical Targets
         target_w_phys = int(width * scale)
@@ -95,11 +102,14 @@ class WindowApi:
 
         def apply_resize_sequenced():
             if win:
-                win.resize(exec_w_phys, exec_h_phys)
+                try:
+                    win.resize(exec_w_phys, exec_h_phys)
+                except Exception:
+                    pass
 
         threading.Timer(0.02, apply_resize_sequenced).start()
 
-        # Update manager memory (Logical for persistence)
+        # Update manager memory (Physical for persistence)
         mgr.main_last_w, mgr.main_last_h = applied_w_phys, applied_h_phys
         mgr.main_last_x, mgr.main_last_y = new_x_phys, new_y_phys
 

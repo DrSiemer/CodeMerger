@@ -3,7 +3,7 @@
   "project_name": "CodeMerger",
   "project_color": "#808080",
   "project_font_color": "light",
-  "active_profile": "tkinter",
+  "active_profile": "Default",
   "profiles": {
     "Default": {
       "selected_files": [
