@@ -141,6 +141,44 @@ const toggleFileSelect = (path) => {
   }
 }
 
+/**
+ * Executes bulk toggle for folder contents.
+ * If all files in subtree are present, remove them. Otherwise, add missing ones.
+ */
+const toggleDirectorySelect = (node) => {
+  highlightedPath.value = null
+  const subtreeFiles = []
+  const traverse = (n) => {
+    if (n.type === 'file') subtreeFiles.push(n.path)
+    if (n.children) n.children.forEach(traverse)
+  }
+  traverse(node)
+
+  if (subtreeFiles.length === 0) return
+
+  const currentPaths = new Set(listItems.value.map(f => f.path))
+  const isFullySelected = subtreeFiles.every(p => currentPaths.has(p))
+
+  if (isFullySelected) {
+    const pathsToRemove = new Set(subtreeFiles)
+    for (let i = listItems.value.length - 1; i >= 0; i--) {
+      if (pathsToRemove.has(listItems.value[i].path)) {
+        listItems.value.splice(i, 1)
+      }
+    }
+    rightPanelRef.value?.clearSelection()
+  } else {
+    const toAdd = subtreeFiles.filter(p => !currentPaths.has(p))
+    toAdd.forEach(path => {
+      window.pywebview.api.get_token_count(path).then(tokens => {
+        if (listItems.value.findIndex(f => f.path === path) === -1) {
+          listItems.value.push({ path, tokens, ignoreTokens: false })
+        }
+      })
+    })
+  }
+}
+
 // --- Synchronized Scrolling ---
 const onLeftFileClick = (path) => {
   highlightedPath.value = null
@@ -245,6 +283,7 @@ const handleSave = async () => {
           :expandedDirs="currentExpandedDirs"
           :highlightedPath="highlightedPath"
           @toggle-select="toggleFileSelect"
+          @toggle-directory="toggleDirectorySelect"
           @file-click="onLeftFileClick"
           @toggle-expand="toggleFolderExpand"
           @add-all="addAll"

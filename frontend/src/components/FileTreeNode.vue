@@ -26,7 +26,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['toggle-select', 'toggle-expand', 'file-click'])
+const emit = defineEmits(['toggle-select', 'toggle-directory', 'toggle-expand', 'file-click'])
 const { openFile } = useAppState()
 
 const isExpanded = ref(props.initialExpandedPaths.includes(props.node.path))
@@ -92,6 +92,11 @@ const textClass = computed(() => {
 
 const handleClick = (event) => {
   if (props.node.type === 'dir') {
+    // Special bulk toggle behavior: prevents expansion
+    if (event.ctrlKey) {
+      emit('toggle-directory', props.node)
+      return
+    }
     isExpanded.value = !isExpanded.value
     emit('toggle-expand', { path: props.node.path, expanded: isExpanded.value })
   } else {
@@ -109,6 +114,7 @@ const handleIconClick = (event) => {
   if (props.node.type === 'file') {
     emit('toggle-select', props.node.path)
   } else {
+    // Forward the event to handleClick to respect modifier keys
     handleClick(event)
   }
 }
@@ -121,6 +127,10 @@ const handleDoubleClick = () => {
 
 const onChildToggleSelect = (path) => {
   emit('toggle-select', path)
+}
+
+const onChildToggleDirectory = (node) => {
+  emit('toggle-directory', node)
 }
 
 const onChildFileClick = (path) => {
@@ -170,7 +180,7 @@ const onChildToggleExpand = (data) => {
       <span
         class="text-sm truncate"
         :class="textClass"
-        :title="node.is_filtered ? 'Normally hidden by filters' : (node.type === 'file' ? `${node.name} (Ctrl+Click to open)` : node.name)"
+        :title="node.is_filtered ? 'Normally hidden by filters' : (node.type === 'file' ? `${node.name} (Ctrl+Click to open)` : `${node.name} (Ctrl+Click to toggle folder selection)`)"
       >
         {{ node.name }}
       </span>
@@ -187,6 +197,7 @@ const onChildToggleExpand = (data) => {
         :highlightedPath="highlightedPath"
         :level="level + 1"
         @toggle-select="onChildToggleSelect"
+        @toggle-directory="onChildToggleDirectory"
         @file-click="onChildFileClick"
         @toggle-expand="onChildToggleExpand"
       />

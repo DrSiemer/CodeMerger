@@ -17,6 +17,7 @@ const emit = defineEmits([
   'update:isExtFilter',
   'update:isGitFilter',
   'toggle-select',
+  'toggle-directory',
   'file-click',
   'toggle-expand',
   'add-all'
@@ -83,6 +84,7 @@ defineExpose({ scrollToPath })
         :initial-expanded-paths="Array.from(expandedDirs)"
         :highlightedPath="highlightedPath"
         @toggle-select="(p) => emit('toggle-select', p)"
+        @toggle-directory="(node) => emit('toggle-directory', node)"
         @file-click="(p) => emit('file-click', p)"
         @toggle-expand="(data) => emit('toggle-expand', data)"
       />
