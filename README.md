@@ -103,6 +103,7 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
 ### Commands
 
 - `go`: Starts the app using the **Production Bundle**. This uses the pre-compiled files in `/frontend/dist`. Use this to verify the app before building.
+- `go i`: Installs the node modules for the frontend (shorthand for `npm install` in `/frontend`).
 - `go dev`: Starts the app in **Development Mode**. It uses `concurrently` to launch the Vite development server and the Python backend at once. This enables Hot Module Replacement (instant UI updates as you save code).
 - `go fe`: Manually start the Vite development server only.
 - `go api`: Manually start the Python backend in dev-link mode (expects Vite at localhost:5173).

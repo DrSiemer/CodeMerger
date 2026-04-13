@@ -28,6 +28,7 @@ if "%VIRTUAL_ENV%"=="" (
 
 REM Main Command Router
 if /I "%FLAG%"=="" goto :DefaultAction
+if /I "%FLAG%"=="i" goto :InstallFrontend
 if /I "%FLAG%"=="br" goto :BuildAndRun
 if /I "%FLAG%"=="dev" goto :DevAction
 if /I "%FLAG%"=="api" goto :ApiAction
@@ -57,6 +58,13 @@ goto :eof
 
     REM Using the venv python explicitly for consistency with go dev
     "%VENV_DIR%\Scripts\python.exe" %START_SCRIPT%
+    goto :eof
+
+:InstallFrontend
+    echo Installing node modules...
+    cd frontend
+    call npm install
+    cd ..
     goto :eof
 
 :BuildAndRun
