@@ -139,6 +139,11 @@ const handlePasteOrder = async () => {
 
     // Clear and refill listItems array
     props.listItems.splice(0, props.listItems.length, ...newOrderedItems)
+
+    // Deselect any selected files in the Merge Order after processing a new order
+    selectedIndices.value.clear()
+    lastSelectedIndex.value = null
+
     statusMessage.value = "File merge order updated from clipboard."
 
   } catch (err) {

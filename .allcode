@@ -50,13 +50,6 @@
           "lines": 69
         },
         {
-          "path": "src/app_state.py",
-          "mtime": 1774272843.131165,
-          "hash": "99f8e7b1aeaaf70c7b01403157e8cc2a14639cc9",
-          "tokens": 1071,
-          "lines": 122
-        },
-        {
           "path": "src/core/utils.py",
           "mtime": 1775637370.9201803,
           "hash": "daca45b19cc814a64dc6b2e720d116b3de0fd244",
@@ -85,6 +78,13 @@
           "hash": "6ffe44c0c0024e685d27abfbba28e6184034683e",
           "tokens": 941,
           "lines": 127
+        },
+        {
+          "path": "src/app_state.py",
+          "mtime": 1774272843.131165,
+          "hash": "99f8e7b1aeaaf70c7b01403157e8cc2a14639cc9",
+          "tokens": 1071,
+          "lines": 122
         },
         {
           "path": "src/core/file_scanner.py",
@@ -122,13 +122,6 @@
           "lines": 68
         },
         {
-          "path": "src/core/file_monitor_thread.py",
-          "mtime": 1776089111.780208,
-          "hash": "62d296309aa33714f80521885fc082e666891fa8",
-          "tokens": 1140,
-          "lines": 142
-        },
-        {
           "path": "src/core/prompts.py",
           "mtime": 1775724852.9927154,
           "hash": "c54711268e2af02c5df9dab4cf55e66ef13daecd",
@@ -141,6 +134,13 @@
           "hash": "27e3d5da14f9b80bd4408008f2e383b8e7e6fa12",
           "tokens": 1935,
           "lines": 233
+        },
+        {
+          "path": "src/core/file_monitor_thread.py",
+          "mtime": 1776089111.780208,
+          "hash": "62d296309aa33714f80521885fc082e666891fa8",
+          "tokens": 1140,
+          "lines": 142
         },
         {
           "path": "src/api_parts/base_api.py",
@@ -410,6 +410,48 @@
           "lines": 149
         },
         {
+          "path": "frontend/src/components/settings/SettingsAppTab.vue",
+          "tokens": 902,
+          "lines": 71,
+          "mtime": 1776089632.226904,
+          "hash": "a11a7dbbf718879a5fa09e44b32de5f41a831518"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
+          "tokens": 471,
+          "lines": 36,
+          "mtime": 1776089632.2704837,
+          "hash": "3cdb1c2c351a986ad685e0f1fec13ce56f296112"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsFiletypesTab.vue",
+          "tokens": 1334,
+          "lines": 147,
+          "mtime": 1776089632.3206358,
+          "hash": "d45f22eb31d5ac4afb4391d684e6c1150b0dbdd9"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsPromptsTab.vue",
+          "tokens": 344,
+          "lines": 39,
+          "mtime": 1776089632.3697653,
+          "hash": "2dce4f53a1add4309fd1a07dc967d780a37b44cf"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsStarterTab.vue",
+          "tokens": 263,
+          "lines": 39,
+          "mtime": 1776089686.1170437,
+          "hash": "d0265c230ccd4bd2f2d7b3552e50100a23177493"
+        },
+        {
+          "path": "frontend/src/components/settings/SettingsEditorTab.vue",
+          "tokens": 372,
+          "lines": 47,
+          "mtime": 1776089632.463963,
+          "hash": "3c60964216ce7a549ddadf41d7c62499b4d535d5"
+        },
+        {
           "path": "frontend/src/components/NewProfileModal.vue",
           "mtime": 1776066422.21206,
           "hash": "8e5a9369144d491bfb5b4c498f6b0969795d4d58",
@@ -444,10 +486,10 @@
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "mtime": 1776087063.972123,
-          "hash": "4d0170a73d94bb1ceb3cd641918db77b9b9d629a",
-          "tokens": 3459,
-          "lines": 327
+          "mtime": 1776089916.5690136,
+          "hash": "2ec9bde75c849b1d30a068941a16cd9a62ec418c",
+          "tokens": 3478,
+          "lines": 332
         },
         {
           "path": "frontend/src/components/FileTreeNode.vue",
@@ -778,51 +820,9 @@
           "hash": "46533fb7ab8721962f918b471392f04f066acb96",
           "tokens": 645,
           "lines": 87
-        },
-        {
-          "path": "frontend/src/components/settings/SettingsAppTab.vue",
-          "tokens": 902,
-          "lines": 71,
-          "mtime": 1776089632.226904,
-          "hash": "a11a7dbbf718879a5fa09e44b32de5f41a831518"
-        },
-        {
-          "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
-          "tokens": 471,
-          "lines": 36,
-          "mtime": 1776089632.2704837,
-          "hash": "3cdb1c2c351a986ad685e0f1fec13ce56f296112"
-        },
-        {
-          "path": "frontend/src/components/settings/SettingsFiletypesTab.vue",
-          "tokens": 1334,
-          "lines": 147,
-          "mtime": 1776089632.3206358,
-          "hash": "d45f22eb31d5ac4afb4391d684e6c1150b0dbdd9"
-        },
-        {
-          "path": "frontend/src/components/settings/SettingsPromptsTab.vue",
-          "tokens": 344,
-          "lines": 39,
-          "mtime": 1776089632.3697653,
-          "hash": "2dce4f53a1add4309fd1a07dc967d780a37b44cf"
-        },
-        {
-          "path": "frontend/src/components/settings/SettingsStarterTab.vue",
-          "tokens": 263,
-          "lines": 39,
-          "mtime": 1776089686.1170437,
-          "hash": "d0265c230ccd4bd2f2d7b3552e50100a23177493"
-        },
-        {
-          "path": "frontend/src/components/settings/SettingsEditorTab.vue",
-          "tokens": 372,
-          "lines": 47,
-          "mtime": 1776089632.463963,
-          "hash": "3c60964216ce7a549ddadf41d7c62499b4d535d5"
         }
       ],
-      "total_tokens": 138399,
+      "total_tokens": 138418,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1283,10 +1283,10 @@
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "mtime": 1776087063.972123,
-          "hash": "4d0170a73d94bb1ceb3cd641918db77b9b9d629a",
-          "tokens": 3459,
-          "lines": 327
+          "mtime": 1776089916.5690136,
+          "hash": "2ec9bde75c849b1d30a068941a16cd9a62ec418c",
+          "tokens": 3478,
+          "lines": 332
         },
         {
           "path": "frontend/src/components/FileTreeNode.vue",
@@ -1617,7 +1617,7 @@
           "hash": "6cbd5b7cb558dd93dd9e5238814334b2df85e17c"
         }
       ],
-      "total_tokens": 319862,
+      "total_tokens": 319881,
       "intro_text": "We are working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
