@@ -20,7 +20,6 @@ export function useProject() {
         statusMessage.value = projData.status_msg
       }
     } else {
-      // Logic for cancelled, deactivated, or invalid loads
       activeProject.path = null
       activeProject.name = null
       activeProject.color = null

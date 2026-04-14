@@ -7,14 +7,14 @@ html, body, #app {
   height: 100%;
 }
 
-/* Base CodeMerger styles to override default browser resets */
+/* Override default browser resets */
 body {
   background-color: #2E2E2E;
   color: #FFFFFF;
   margin: 0;
-  /* Standard system font stack providing standard thin weights */
+  /* Provide standard thin weights */
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  user-select: none; /* Prevent accidental text highlighting mimicking native feel */
+  user-select: none;
 
   /* Force Antialiasing for better rendering of thin weights in WebView */
   -webkit-font-smoothing: antialiased;
@@ -43,12 +43,12 @@ textarea {
     box-shadow: 0 0 0 0 var(--click-color);
   }
   20% {
-    transform: scale(0.92); /* Tactile "press" feel */
+    transform: scale(0.92);
     box-shadow: 0 0 0 4px var(--click-color);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 0 12px transparent; /* Expanding ring */
+    box-shadow: 0 0 0 12px transparent;
   }
 }
 

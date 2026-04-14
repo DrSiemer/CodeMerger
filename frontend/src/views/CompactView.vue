@@ -53,9 +53,7 @@ const updatePendingStatus = async () => {
   }
 }
 
-/**
- * Handles global shortcuts dispatched from App.vue while in Compact mode
- */
+// Handle global shortcuts dispatched from App.vue while in Compact mode
 const onShortcutPaste = (e) => {
   handlePaste({ ctrlKey: e.detail.isAuto })
 }
@@ -68,14 +66,12 @@ onMounted(async () => {
   // Ensure app state is loaded if compact mode is entry point
   await init()
 
-  // Initial check for existing plan
   await updatePendingStatus()
 
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
   window.addEventListener('blur', onBlur)
 
-  // Listen for redirected shortcuts
   window.addEventListener('cm-compact-paste', onShortcutPaste)
   window.addEventListener('cm-compact-copy', onShortcutCopy)
 
@@ -99,11 +95,10 @@ const startDrag = async (e) => {
     return
   }
 
-  // Mouse coordinates (pure logical)
+  // Store pure logical mouse coordinates
   startMouseX = e.screenX
   startMouseY = e.screenY
 
-  // Get current logical window coordinates from bridge
   const pos = await window.pywebview.api.get_compact_window_pos()
   startWinX = pos.x
   startWinY = pos.y
@@ -114,7 +109,7 @@ const startDrag = async (e) => {
 const onMouseMove = (e) => {
   if (!isDragging) return
 
-  // Calculate deltas in pure logical pixels and map 1:1 to the backend
+  // Calculate deltas in pure logical pixels and maps 1:1 to the backend
   const deltaXLogical = e.screenX - startMouseX
   const deltaYLogical = e.screenY - startMouseY
 
@@ -139,7 +134,6 @@ const handlePaste = async (event) => {
   if (window.pywebview) {
     const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey)
 
-    // Immediate synchronization of local state if paste succeeded
     if (result === true || typeof result === 'string') {
       lastAiResponse.value = await claimLastPlan()
     }
@@ -153,7 +147,6 @@ const handlePaste = async (event) => {
 
 const handleOpenReview = async () => {
   if (window.pywebview) {
-    // Coordinate with Main window to open the modal and ensure we revert back on close
     await window.pywebview.api.request_remote_review(true)
     await updatePendingStatus()
   }
@@ -239,7 +232,6 @@ const pasteTooltipText = computed(() => {
       </div>
 
       <div class="flex items-center space-x-1.5 shrink-0">
-        <!-- New Files Alert (Blinks green) -->
         <AlertTriangle
           v-if="activeProject.newFileCount > 0"
           class="w-3.5 h-3.5 text-cm-green animate-pulse"
@@ -311,6 +303,6 @@ const pasteTooltipText = computed(() => {
 </template>
 
 <style scoped>
-/* Standard PyWebView override to allow button interaction inside draggable areas */
+/* Allow button interaction inside draggable areas */
 button { -webkit-app-region: no-drag; }
 </style>

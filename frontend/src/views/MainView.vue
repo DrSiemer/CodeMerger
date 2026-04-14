@@ -58,28 +58,20 @@ const closeReviewModal = () => {
   }
 }
 
-/**
- * Ensures the window is large enough to display the custom color wheel
- * and its associated UI elements without clipping.
- */
+// Ensures window is large enough to display custom color wheel without clipping
 watch(showColorPicker, async (val) => {
   if (val) {
-    // Grow window to a comfortable size for the picker UI
     await resizeWindow(800, 540)
   }
 })
 
-/**
- * Handles paste handoff requests originating from the Compact window context.
- */
+// Handles paste handoff requests originating from the Compact window context
 const onRemotePasteRequest = async (event) => {
   const { revertOnClose } = event.detail
 
-  // Claim the pre-parsed plan from the Python session state
   const plan = await claimLastPlan()
   if (!plan) return
 
-  // Handle parsing errors claimed from compact mode via standard alert (dashboard flow)
   if (plan.status === 'ERROR') {
     alert(plan.message)
     return
@@ -89,16 +81,15 @@ const onRemotePasteRequest = async (event) => {
   revertToCompactOnClose.value = revertOnClose
   reviewMode.value = 'new'
 
-  // Reset Review State for new plan
   planFileStates.value = {}
   planOriginalContents.value = {}
 
   const updates = plan.updates || {}
   const creations = plan.creations || {}
   const deletions = plan.deletions_proposed || []
-  const skipped = plan.skipped_files || []
+  const skipped = plan.skipped_files ||[]
 
-  // Initialize handled states, accounting for byte-for-byte identical files
+  // Initializes handled states while accounting for byte-for-byte identical files
   Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
   Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
   deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
@@ -106,13 +97,10 @@ const onRemotePasteRequest = async (event) => {
   showReviewModal.value = true
 }
 
-/**
- * Handles review-resume requests originating from the Compact window context.
- */
+// Handles review-resume requests originating from the Compact window context
 const onRemoteReviewRequest = async (event) => {
   const { revertOnClose } = event.detail
 
-  // Claim the pre-parsed plan from the Python session state to ensure current window has it
   const plan = await claimLastPlan()
   if (!plan) return
 
@@ -120,20 +108,18 @@ const onRemoteReviewRequest = async (event) => {
   revertToCompactOnClose.value = revertOnClose
   reviewMode.value = 'resume'
 
-  // Inherit existing file states if they were stored in the backend (from the other window)
+  // Inherits existing file states if they were stored in the backend
   if (plan.file_states) {
     planFileStates.value = plan.file_states
   }
 
-  // Clear original contents cache to ensure diffs re-fetch against disk for accuracy
+  // Clears original contents cache to ensure diffs re-fetch against disk for accuracy
   planOriginalContents.value = {}
 
   showReviewModal.value = true
 }
 
-/**
- * Handles global keyboard shortcuts dispatched from App.vue
- */
+// Handles global keyboard shortcuts dispatched from App.vue
 const handleShortcutPaste = async (event) => {
   if (!activeProject.path) return
 
@@ -142,14 +128,13 @@ const handleShortcutPaste = async (event) => {
 
   if (success) {
     const autoShow = config.value.show_feedback_on_paste ?? true
-    // toggleReview (Shift+Ctrl+V) does the opposite of current settings
+    // Toggles review behavior based on current settings when using Shift+Ctrl+V
     const shouldShow = toggleReview ? !autoShow : autoShow
 
     if (shouldShow) {
       reviewMode.value = 'new'
       showReviewModal.value = true
     } else {
-      // Instant Apply
       const res = await applyFullPlan(lastAiResponse.value)
       if (res && res[0]) {
         statusMessage.value = res[1]

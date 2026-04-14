@@ -1,10 +1,6 @@
 import { useAppState } from '../composables/useAppState'
 
-/**
- * v-info directive
- * Usage: v-info="'key_name'"
- * Manages the global hover stack for Info Mode documentation.
- */
+// Global hover stack for Info Mode documentation
 export default {
   mounted(el, binding) {
     const { setHoverInfo, clearHoverInfo } = useAppState()
@@ -34,9 +30,8 @@ export default {
     const newKey = binding.value
     const oldKey = el._currentInfoKey
 
-    // If the bound documentation key changes (e.g. Close -> Cancel)
+    // Swap keys in the global stack if the bound documentation key changes while hovering
     if (newKey !== oldKey) {
-      // If the user is currently hovering, we must swap the keys in the global stack
       if (el._isHovered) {
         if (oldKey) {
           clearHoverInfo(oldKey)
@@ -45,7 +40,6 @@ export default {
           setHoverInfo(newKey)
         }
       }
-      // Synchronize internal reference
       el._currentInfoKey = newKey
     }
   },

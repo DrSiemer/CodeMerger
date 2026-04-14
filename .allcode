@@ -329,37 +329,43 @@
         },
         {
           "path": "frontend/src/style.css",
-          "tokens": 618,
+          "tokens": 585,
           "ignoreTokens": false,
           "lines": 88,
-          "mtime": 1776166138.949761,
-          "hash": "cc0c8e5dabc695e66d8b41b34b67a52dc6adb499"
+          "mtime": 1776190302.0092547,
+          "hash": "8b31917208d13e3fba9d6fb2d0d6fc6fbe246c4d"
         },
         {
           "path": "frontend/src/main.js",
-          "tokens": 70,
-          "ignoreTokens": false
+          "tokens": 61,
+          "ignoreTokens": false,
+          "lines": 13,
+          "mtime": 1776189332.0533676,
+          "hash": "fc69c089f98128097161f71d0d24e12a553a8754"
         },
         {
           "path": "frontend/src/App.vue",
           "tokens": 1361,
           "ignoreTokens": false,
           "lines": 179,
-          "mtime": 1776182541.621477,
-          "hash": "570b843827144e44c2df7af05ca4e7b58cda21d0"
+          "mtime": 1776189343.034713,
+          "hash": "0a060558a5d08a2bb620570c81264e1abe55258f"
         },
         {
           "path": "frontend/src/router/index.js",
           "tokens": 119,
-          "ignoreTokens": false
+          "ignoreTokens": false,
+          "lines": 24,
+          "mtime": 1776189389.6545157,
+          "hash": "ccfc393dafc5a502469659ee83739b9c7457c22c"
         },
         {
           "path": "frontend/src/composables/globalState.js",
-          "tokens": 349,
+          "tokens": 339,
           "ignoreTokens": false,
-          "lines": 51,
-          "mtime": 1776177306.9494112,
-          "hash": "148e2e2442a5a97b4fed1d7709952b56b105a46c"
+          "lines": 53,
+          "mtime": 1776189419.3283832,
+          "hash": "039c8c2fce35237b29858f1bdfd91a66ecadcb6b"
         },
         {
           "path": "frontend/src/composables/infoMode.js",
@@ -368,11 +374,11 @@
         },
         {
           "path": "frontend/src/composables/useSystem.js",
-          "tokens": 844,
+          "tokens": 838,
           "ignoreTokens": false,
           "lines": 131,
-          "mtime": 1776170047.9000351,
-          "hash": "a283e5c7953fba876e3b2d2a4803addfb658806a"
+          "mtime": 1776189449.314432,
+          "hash": "44636c3bd82b9849c751d47a2f928f179af1c427"
         },
         {
           "path": "frontend/src/composables/useProject.js",
@@ -384,11 +390,11 @@
         },
         {
           "path": "frontend/src/composables/useReview.js",
-          "tokens": 1196,
+          "tokens": 1152,
           "ignoreTokens": false,
-          "lines": 160,
-          "mtime": 1776174078.8214257,
-          "hash": "b6c48e90b917729dc32d81d24f9f49138dba82f0"
+          "lines": 156,
+          "mtime": 1776189732.9083128,
+          "hash": "e643f53e577c68d74acaf0accc77f4a80e03bfd8"
         },
         {
           "path": "frontend/src/composables/useStarter.js",
@@ -397,21 +403,27 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "tokens": 617,
+          "tokens": 623,
           "ignoreTokens": false,
           "lines": 88,
-          "mtime": 1776182541.9700446,
-          "hash": "9276b0a37f14d702c5901a66de3a27296d5af01a"
+          "mtime": 1776189749.2280889,
+          "hash": "84100738f009aa25816bb8ed931cb0d694a104de"
         },
         {
           "path": "frontend/src/directives/vInfo.js",
-          "tokens": 424,
-          "ignoreTokens": false
+          "tokens": 382,
+          "ignoreTokens": false,
+          "lines": 58,
+          "mtime": 1776190024.157303,
+          "hash": "e026e392a3c7ca30b008edc4bfa5c86cb23df1cd"
         },
         {
           "path": "frontend/src/utils/infoMessages.js",
-          "tokens": 125,
-          "ignoreTokens": false
+          "tokens": 114,
+          "ignoreTokens": false,
+          "lines": 14,
+          "mtime": 1776190190.2935638,
+          "hash": "4b1cea62f2a20eb8e426e805c50bfa5a5feb6565"
         },
         {
           "path": "frontend/src/utils/info/mainInfo.js",
@@ -446,19 +458,19 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "tokens": 1664,
+          "tokens": 1565,
           "ignoreTokens": false,
-          "lines": 213,
-          "mtime": 1776177970.9195373,
-          "hash": "8c84f3e507ddc49dba6ef64522592052db9f854f"
+          "lines": 198,
+          "mtime": 1776190210.351353,
+          "hash": "77582ba018ab3cb299a97235ee1d8482f7a1a2a9"
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 2563,
+          "tokens": 2425,
           "ignoreTokens": false,
-          "lines": 320,
-          "mtime": 1776174668.3858812,
-          "hash": "99b538e31491b1d0c4865251a4e0c11643361798"
+          "lines": 308,
+          "mtime": 1776190249.3583899,
+          "hash": "6193a1c6aa7b9e84e2db901dff795a4bf7c701ed"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
@@ -805,7 +817,7 @@
           "hash": "1055395f3bf01e2f014b549cb312e118d9386803"
         }
       ],
-      "total_tokens": 145818,
+      "total_tokens": 145432,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

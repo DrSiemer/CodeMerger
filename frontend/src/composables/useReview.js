@@ -22,7 +22,7 @@ export function useReview() {
   const processPaste = async () => {
     if (!window.pywebview) return false
 
-    // OVERWRITE CHECK (Main Dashboard flow)
+    // OVERWRITE CHECK
     if (hasPendingChanges.value) {
       if (!confirm("An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?")) {
         return false
@@ -30,7 +30,7 @@ export function useReview() {
     }
 
     try {
-      // Use Python backend to access system clipboard bypassing browser prompts
+      // Use Python backend to access system clipboard to bypass browser prompts
       const text = await getClipboardText()
 
       if (!text || !text.trim()) {
@@ -45,8 +45,6 @@ export function useReview() {
       }
 
       lastAiResponse.value = plan
-
-      // Reset Review State for new plan
       planFileStates.value = {}
       planOriginalContents.value = {}
 
@@ -55,7 +53,7 @@ export function useReview() {
       const deletions = plan.deletions_proposed || []
       const skipped = plan.skipped_files || []
 
-      // CRITICAL: Initialize states including the new 'skipped' status for NO-OP files
+      // Initialize states including the new 'skipped' status for NO-OP files
       Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
       Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
       deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
@@ -89,7 +87,6 @@ export function useReview() {
       const [success, error] = await window.pywebview.api.apply_single_file_change(relPath, content)
       if (success) {
         statusMessage.value = `Applied changes to ${relPath}`
-        // Trigger a reload of current project to update token counts and selection list
         const proj = await window.pywebview.api.get_current_project()
         project.applyProjectData(proj)
       } else {

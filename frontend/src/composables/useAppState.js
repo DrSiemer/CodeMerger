@@ -6,7 +6,7 @@ import { useProject } from './useProject'
 import { useReview } from './useReview'
 import { useStarter } from './useStarter'
 
-// Maintenance of backwards compatibility for module scope imports
+// Maintain backwards compatibility for module scope imports
 export * from './globalState'
 export * from './infoMode'
 
@@ -38,7 +38,7 @@ export function useAppState() {
       }
     })
 
-    // Critical for Compact Mode orange indicator and Overwrite warnings
+    // Synchronizes file states to backend for Compact Mode orange indicator and Overwrite warnings
     watch(globalState.planFileStates, (newStates) => {
       if (window.pywebview && Object.keys(newStates).length > 0) {
         window.pywebview.api.sync_plan_states(JSON.parse(JSON.stringify(newStates)))

@@ -6,10 +6,8 @@ import vInfo from './directives/vInfo'
 
 const app = createApp(App)
 
-// Setup Router
 app.use(router)
 
-// Register custom directives
 app.directive('info', vInfo)
 
 app.mount('#app')

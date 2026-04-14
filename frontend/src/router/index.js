@@ -16,7 +16,7 @@ const routes = [
 ]
 
 const router = createRouter({
-  // Using Hash history for compatibility with local filesystem loading (file://)
+  // Use Hash history for compatibility with local filesystem loading (file://)
   history: createWebHashHistory(),
   routes
 })

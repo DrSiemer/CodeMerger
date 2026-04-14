@@ -31,7 +31,7 @@ export function useSystem() {
       const newConfig = { ...config.value, info_mode_active: infoModeActive.value }
       await window.pywebview.api.save_app_config(newConfig)
 
-      // When enabling info mode, we must grow the window immediately so it doesn't overlap the dashboard content
+      // Grow window immediately to prevent dashboard content overlap when enabling info mode
       if (infoModeActive.value) {
         await resizeWindow(window.innerWidth, window.innerHeight - 36)
       }
