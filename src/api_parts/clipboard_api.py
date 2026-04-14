@@ -54,7 +54,8 @@ class ClipboardApi:
             return False
 
         # OVERWRITE CHECK: Ask user if they want to discard unapplied changes in memory
-        if self.check_for_pending_changes():
+        status = self.check_for_pending_changes()
+        if status.get('has_pending'):
             msg = "An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?"
             # Use compact window as it currently has focus during this request
             proceed = self._window_manager.compact_window.create_confirmation_dialog("Confirm Overwrite", msg)
@@ -120,6 +121,30 @@ class ClipboardApi:
             return True
         except Exception as e:
             log.error(f"Failed to trigger remote paste signal: {e}")
+            return False
+
+    def request_remote_review(self, revert_on_close):
+        """
+        Special cross-window method called by Compact mode to show the review
+        modal in the main window for the response currently in memory.
+        """
+        if not self._window_manager or not self._window_manager.main_window:
+            return False
+
+        if not self._last_parsed_plan:
+            return "No response in memory to review."
+
+        self._window_manager.restore_main()
+
+        # Brief delay to allow OS focus transition
+        time.sleep(0.1)
+
+        js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-review-request', {{ detail: {{ revertOnClose: {'true' if revert_on_close else 'false'} }} }}))"
+        try:
+            self._window_manager.main_window.evaluate_js(js_cmd)
+            return True
+        except Exception as e:
+            log.error(f"Failed to trigger remote review signal: {e}")
             return False
 
     def get_clipboard_text(self):

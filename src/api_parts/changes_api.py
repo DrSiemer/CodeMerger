@@ -132,27 +132,38 @@ class ChangesApi:
 
     def check_for_pending_changes(self):
         """
-        Returns True if the current response in memory has unapplied changes.
-        Used to display notification colors in the Paste buttons.
+        Returns a status dictionary indicating if a response is in memory
+        and if it contains unapplied changes.
         """
         if not self._last_parsed_plan:
-            return False
+            return {"exists": False, "has_pending": False}
 
         states = self._last_parsed_plan.get('file_states', {})
         skipped = set(self._last_parsed_plan.get('skipped_files', []))
 
-        # Check updates/creations
+        has_pending = False
+
+        # Check updates
         for p in self._last_parsed_plan.get('updates', {}):
             if p not in skipped and states.get(p, 'pending') == 'pending':
-                return True
-        for p in self._last_parsed_plan.get('creations', {}):
-            if states.get(p, 'pending') == 'pending':
-                return True
-        for p in self._last_parsed_plan.get('deletions_proposed', []):
-            if p not in skipped and states.get(p, 'pending') == 'pending':
-                return True
+                has_pending = True
+                break
 
-        return False
+        if not has_pending:
+            # Check creations
+            for p in self._last_parsed_plan.get('creations', {}):
+                if states.get(p, 'pending') == 'pending':
+                    has_pending = True
+                    break
+
+        if not has_pending:
+            # Check deletions
+            for p in self._last_parsed_plan.get('deletions_proposed', []):
+                if p not in skipped and states.get(p, 'pending') == 'pending':
+                    has_pending = True
+                    break
+
+        return {"exists": True, "has_pending": has_pending}
 
     def apply_full_plan(self, plan):
         """Executes a bulk update plan and synchronizes metadata for all processed files."""

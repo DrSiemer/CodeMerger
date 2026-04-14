@@ -93,6 +93,31 @@ const onRemotePasteRequest = async (event) => {
 }
 
 /**
+ * Handles review-resume requests originating from the Compact window context.
+ */
+const onRemoteReviewRequest = async (event) => {
+  const { revertOnClose } = event.detail
+
+  // Claim the pre-parsed plan from the Python session state to ensure current window has it
+  const plan = await claimLastPlan()
+  if (!plan) return
+
+  lastAiResponse.value = plan
+  revertToCompactOnClose.value = revertOnClose
+  reviewMode.value = 'resume'
+
+  // Inherit existing file states if they were stored in the backend (from the other window)
+  if (plan.file_states) {
+    planFileStates.value = plan.file_states
+  }
+
+  // Clear original contents cache to ensure diffs re-fetch against disk for accuracy
+  planOriginalContents.value = {}
+
+  showReviewModal.value = true
+}
+
+/**
  * Handles global keyboard shortcuts dispatched from App.vue
  */
 const handleShortcutPaste = async (event) => {
@@ -121,11 +146,13 @@ const handleShortcutPaste = async (event) => {
 
 onMounted(() => {
   window.addEventListener('cm-remote-paste-request', onRemotePasteRequest)
+  window.addEventListener('cm-remote-review-request', onRemoteReviewRequest)
   window.addEventListener('cm-shortcut-paste', handleShortcutPaste)
 })
 
 onUnmounted(() => {
   window.removeEventListener('cm-remote-paste-request', onRemotePasteRequest)
+  window.removeEventListener('cm-remote-review-request', onRemoteReviewRequest)
   window.removeEventListener('cm-shortcut-paste', handleShortcutPaste)
 })
 </script>

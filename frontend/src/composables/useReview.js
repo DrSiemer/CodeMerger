@@ -130,7 +130,14 @@ export function useReview() {
   }
 
   const claimLastPlan = async () => window.pywebview ? await window.pywebview.api.claim_last_plan() : null
-  const checkPendingChanges = async () => window.pywebview ? await window.pywebview.api.check_for_pending_changes() : false
+
+  const checkPendingChanges = async () => {
+    if (window.pywebview) {
+      return await window.pywebview.api.check_for_pending_changes()
+    }
+    return { exists: false, has_pending: false }
+  }
+
   const syncPlanStates = async (states) => window.pywebview ? await window.pywebview.api.sync_plan_states(states) : false
   const applyFullPlan = async (plan) => window.pywebview ? await window.pywebview.api.apply_full_plan(plan) : [false, ""]
 

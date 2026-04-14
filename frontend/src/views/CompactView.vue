@@ -18,7 +18,8 @@ const {
   clearPasteData,
   statusMessage,
   init,
-  config
+  config,
+  claimLastPlan
 } = useAppState()
 
 const isCopying = ref(false)
@@ -39,7 +40,17 @@ const onBlur = () => {
 }
 
 const updatePendingStatus = async () => {
-  hasPendingChangesInternal.value = await checkPendingChanges()
+  if (!window.pywebview) return
+
+  const status = await checkPendingChanges()
+  hasPendingChangesInternal.value = status.has_pending
+
+  // Cross-Window Synchronization
+  if (status.exists && !lastAiResponse.value) {
+    lastAiResponse.value = await claimLastPlan()
+  } else if (!status.exists && lastAiResponse.value) {
+    lastAiResponse.value = null
+  }
 }
 
 /**
@@ -57,6 +68,9 @@ onMounted(async () => {
   // Ensure app state is loaded if compact mode is entry point
   await init()
 
+  // Initial check for existing plan
+  await updatePendingStatus()
+
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
   window.addEventListener('blur', onBlur)
@@ -65,7 +79,6 @@ onMounted(async () => {
   window.addEventListener('cm-compact-paste', onShortcutPaste)
   window.addEventListener('cm-compact-copy', onShortcutCopy)
 
-  await updatePendingStatus()
   statusCheckInterval = setInterval(updatePendingStatus, 2000)
 })
 
@@ -125,10 +138,24 @@ const handleCopy = async (event) => {
 const handlePaste = async (event) => {
   if (window.pywebview) {
     const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey)
+
+    // Immediate synchronization of local state if paste succeeded
+    if (result === true || typeof result === 'string') {
+      lastAiResponse.value = await claimLastPlan()
+    }
+
     await updatePendingStatus()
     if (typeof result === 'string') {
       statusMessage.value = result
     }
+  }
+}
+
+const handleOpenReview = async () => {
+  if (window.pywebview) {
+    // Coordinate with Main window to open the modal and ensure we revert back on close
+    await window.pywebview.api.request_remote_review(true)
+    await updatePendingStatus()
   }
 }
 
@@ -271,8 +298,8 @@ const pasteTooltipText = computed(() => {
         <button
           id="btn-compact-review"
           v-if="lastAiResponse"
-          @click="restoreMainWindow"
-          class="bg-gray-800 hover:bg-gray-700 text-white w-8 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
+          @click="handleOpenReview"
+          class="bg-gray-800 hover:bg-gray-700 text-white w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
           title="View response review"
         >
           <!-- Eye icon color mirrors the pending changes state -->
