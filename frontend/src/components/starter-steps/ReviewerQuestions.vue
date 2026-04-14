@@ -18,7 +18,6 @@ const isCopied = ref(false)
 const isCustom = ref(false)
 const customText = ref('')
 
-// Reset index when question list changes (e.g. switching segments)
 watch(() => props.questions, () => {
   currentIndex.value = 0
 }, { deep: true })

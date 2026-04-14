@@ -19,7 +19,6 @@ const {
 
 const cleanupPulse = ref(false)
 
-// Loading states for copy buttons
 const isCopyingInstructions = ref(false)
 const isCopyingOnly = ref(false)
 
@@ -32,10 +31,8 @@ const handleCleanup = async () => {
 }
 
 const handleCopy = async (useWrapper, event) => {
-  // If Ctrl is held during click, override the logical intent to 'Copy Code Only'
   const finalUseWrapper = useWrapper && !event.ctrlKey
 
-  // Visual feedback: set spinner based on the specific button that was physically clicked
   if (useWrapper) {
     isCopyingInstructions.value = true
   } else {
@@ -185,7 +182,6 @@ const pasteTooltipText = computed(() => {
               title="Review latest AI response"
               v-info="'response_review'"
             >
-              <!-- Icon turns orange to signal unapplied work -->
               <Eye class="w-4 h-4" :class="hasPendingChanges ? 'text-[#DE6808]' : 'text-white'" />
               <span>AI Response Review</span>
             </button>

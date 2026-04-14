@@ -13,16 +13,13 @@ const {
   copyOrderRequest, clearUnknownFiles, statusMessage, config
 } = useAppState()
 
-// List of boilerplate filenames to exclude during bulk selection actions
 const IGNORED_FOR_COMPLETENESS = ['__init__.py']
 
-// Reorderable list setup
 const [mergeListRef, listItems] = useDragAndDrop(
   JSON.parse(JSON.stringify(activeProject.selectedFiles)),
   { handle: '.drag-handle' }
 )
 
-// State
 const leftPanelRef = ref(null)
 const rightPanelRef = ref(null)
 const fileTree = ref([])
@@ -34,7 +31,6 @@ const currentExpandedDirs = ref(new Set(activeProject.expandedDirs))
 const isLoaded = ref(false)
 const isOrderPulseActive = ref(false)
 
-// Subtle highlight state for tree synchronization
 const highlightedPath = ref(null)
 
 const handleKeyDown = (e) => {
@@ -136,15 +132,13 @@ const toggleFileSelect = (path) => {
     listItems.value.splice(existingIdx, 1)
     rightPanelRef.value?.clearSelection()
   } else {
-    // Start async token calculation
     window.pywebview.api.get_token_count(path).then(tokens => {
       // CRITICAL: Re-check existence inside the callback to prevent double-adding
-      // if the user clicked multiple times during the async delay.
+      // if the user clicked multiple times during the async delay
       const doubleCheckIdx = listItems.value.findIndex(f => f.path === path)
       if (doubleCheckIdx === -1) {
         listItems.value.push({ path, tokens, ignoreTokens: false })
 
-        // When added, scroll right panel to see it
         nextTick(() => {
           rightPanelRef.value?.scrollToPath(path)
         })
@@ -153,10 +147,8 @@ const toggleFileSelect = (path) => {
   }
 }
 
-/**
- * Executes bulk toggle for folder contents.
- * If all files in subtree are present, remove them. Otherwise, add missing ones.
- */
+// Executes bulk toggle for folder contents
+// If all files in subtree are present, remove them. Otherwise, add missing ones
 const toggleDirectorySelect = (node) => {
   highlightedPath.value = null
   const subtreeFiles = []
@@ -232,7 +224,6 @@ const addAll = () => {
   if (toAdd.length > threshold && !confirm(`Add ${toAdd.length} files to list?`)) return
   toAdd.forEach(path => {
     window.pywebview.api.get_token_count(path).then(tokens => {
-      // Same idempotency check for bulk operations
       if (listItems.value.findIndex(f => f.path === path) === -1) {
         listItems.value.push({ path, tokens, ignoreTokens: false })
       }

@@ -26,7 +26,6 @@ const { config, saveConfig, getFiletypes, saveFiletypes, resizeWindow } = useApp
 const localConfig = ref({})
 const activeTab = ref(props.initialTab)
 
-// Filetypes State
 const localFiletypes = ref([])
 
 const handleKeyDown = (e) => {
@@ -35,10 +34,8 @@ const handleKeyDown = (e) => {
 
 onMounted(async () => {
   // Smart Growth: Ensure the main window is large enough for the settings layout
-  // 1000x700 is the recommended comfortable footprint for settings.
   await resizeWindow(1000, 700)
 
-  // Deep clone to prevent mutating global state before saving
   localConfig.value = JSON.parse(JSON.stringify(config.value))
   localFiletypes.value = await getFiletypes()
 
@@ -50,13 +47,11 @@ onUnmounted(() => {
 })
 
 const handleSave = async () => {
-  // Sanitize numerical inputs
   localConfig.value.new_file_check_interval = parseInt(localConfig.value.new_file_check_interval) || 5
   localConfig.value.token_limit = parseInt(localConfig.value.token_limit) || 0
   localConfig.value.add_all_warning_threshold = parseInt(localConfig.value.add_all_warning_threshold) || 50
   localConfig.value.new_file_alert_threshold = parseInt(localConfig.value.new_file_alert_threshold) || 5
 
-  // Save settings and filetypes sequentially
   await saveConfig(localConfig.value)
   await saveFiletypes(localFiletypes.value)
   emit('close')

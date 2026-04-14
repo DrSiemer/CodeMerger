@@ -17,12 +17,10 @@ const props = defineProps({
 const emit = defineEmits(['close', 'apply'])
 const { getStarterRewritePrompt } = useAppState()
 
-// UI Refs
 const modalRef = ref(null)
 const instruction = ref('')
 const response = ref('')
 
-// Dragging State
 const posX = ref(0)
 const posY = ref(0)
 let isDragging = false
@@ -33,7 +31,6 @@ let startPosY = 0
 
 const isCopyDisabled = computed(() => !instruction.value.trim())
 
-// Initial Centering and Event Listeners
 onMounted(async () => {
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
@@ -63,7 +60,6 @@ onUnmounted(() => {
 
 // Dragging Logic
 const startDrag = (e) => {
-  // Only drag if clicking the header itself or the title, not buttons
   if (e.target.closest('button')) return
 
   isDragging = true
@@ -72,7 +68,6 @@ const startDrag = (e) => {
   startPosX = posX.value
   startPosY = posY.value
 
-  // Prevent text selection while dragging
   e.preventDefault()
 }
 
@@ -99,14 +94,12 @@ const clampToWindow = () => {
   const parent = document.getElementById('project-starter-modal')
   if (!parent) return
 
-  // X Boundaries (relative to full starter window)
   if (posX.value < 0) {
     posX.value = 0
   } else if (posX.value + rect.width > parent.clientWidth) {
     posX.value = parent.clientWidth - rect.width
   }
 
-  // Y Boundaries (relative to full starter window)
   if (posY.value < 0) {
     posY.value = 0
   } else if (posY.value + rect.height > parent.clientHeight) {
@@ -162,11 +155,9 @@ const applyChanges = () => {
   const raw = response.value.trim()
   if (!raw) return
 
-  // Extract Notes
   const notesMatch = raw.match(/<NOTES>([\s\S]*?)<\/NOTES>/i)
   const notes = notesMatch ? notesMatch[1].trim() : ""
 
-  // Extract remaining clean content
   const cleanContent = raw.replace(/<NOTES>[\s\S]*?<\/NOTES>/i, "").trim()
 
   emit('apply', { cleanContent, notes })

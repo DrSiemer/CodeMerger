@@ -19,7 +19,6 @@ const filteredTypes = computed(() => {
     const q = searchQuery.value.toLowerCase()
     list = list.filter(ft => ft.ext.toLowerCase().includes(q) || ft.description.toLowerCase().includes(q))
   }
-  // Sort alphabetically
   return [...list].sort((a, b) => a.ext.localeCompare(b.ext))
 })
 
@@ -37,9 +36,8 @@ const deleteFiletype = (ext) => {
 const addFiletype = () => {
   let ext = newExt.value.trim().toLowerCase()
   if (!ext) return
-  if (!ext.startsWith('.')) ext = `.${ext}` // Auto-prepend dot if missing for common extensions
+  if (!ext.startsWith('.')) ext = `.${ext}`
 
-  // Check duplicate
   if (props.localFiletypes.some(ft => ft.ext === ext)) {
     alert(`The extension '${ext}' already exists.`)
     return

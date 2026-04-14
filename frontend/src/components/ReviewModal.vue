@@ -9,10 +9,11 @@ import { useAppState } from '../composables/useAppState'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import ReviewChangesTab from './review-tabs/ReviewChangesTab.vue'
 
+// default is 'new' (pasted) or 'resume' (orange button)
 const props = defineProps({
   mode: {
     type: String,
-    default: 'new' // 'new' (pasted) or 'resume' (orange button)
+    default: 'new'
   }
 })
 
@@ -33,8 +34,7 @@ const {
   statusMessage
 } = useAppState()
 
-// State management
-const visibleDiffs = ref(new Set()) // paths currently showing diff
+const visibleDiffs = ref(new Set())
 const activeTab = ref('')
 const tabContentContainer = ref(null)
 
@@ -173,8 +173,6 @@ const toggleAllDiffs = async () => {
   } else {
     const paths = expandablePaths.value
     if (paths.length === 0) return
-
-    // Concurrent fetch for missing original contents
     const missingPaths = paths.filter(p => planOriginalContents.value[p] === undefined)
     if (missingPaths.length > 0) {
       statusMessage.value = `Loading ${missingPaths.length} file(s)...`
@@ -252,7 +250,7 @@ const applyAllPending = async () => {
 
   visibleDiffs.value.clear()
 
-  // Activating the Verification tab automatically after batch apply
+  // Activate the Verification tab automatically after batch apply
   if (tabs.value.find(t => t.id === 'verification')) {
     activeTab.value = 'verification'
   }

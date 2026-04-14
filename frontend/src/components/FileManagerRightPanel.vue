@@ -8,7 +8,7 @@ import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composab
 
 const props = defineProps({
   listItems: Array,
-  mergeListRef: Object, // From useDragAndDrop
+  mergeListRef: Object,
   totalTokens: Number,
   tokenColorClass: String,
   showFullPaths: Boolean,
@@ -92,7 +92,7 @@ const handlePasteOrder = async () => {
   }
 
   try {
-    // CRITICAL: Using backend-bridged getClipboardText() to bypass browser permission dialogs.
+    // CRITICAL: Using backend-bridged getClipboardText() to bypass browser permission dialogs
     const pastedText = await getClipboardText()
     if (!pastedText || !pastedText.trim()) {
       statusMessage.value = "Clipboard is empty."
@@ -112,7 +112,6 @@ const handlePasteOrder = async () => {
       throw new Error("Parsed JSON is not a list.")
     }
 
-    // Validation logic
     const currentPathsSet = new Set(props.listItems.map(f => f.path))
     const newPathsSet = new Set(newOrderList)
 
@@ -133,14 +132,11 @@ const handlePasteOrder = async () => {
       return
     }
 
-    // Reorder listItems in place
     const pathMap = new Map(props.listItems.map(f => [f.path, f]))
     const newOrderedItems = newOrderList.map(p => pathMap.get(p))
 
-    // Clear and refill listItems array
     props.listItems.splice(0, props.listItems.length, ...newOrderedItems)
 
-    // Deselect any selected files in the Merge Order after processing a new order
     selectedIndices.value.clear()
     lastSelectedIndex.value = null
 

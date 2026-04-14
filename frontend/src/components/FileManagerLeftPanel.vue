@@ -8,7 +8,7 @@ const props = defineProps({
   isExtFilter: Boolean,
   isGitFilter: Boolean,
   selectedPaths: Array,
-  expandedDirs: Object, // Set
+  expandedDirs: Object,
   highlightedPath: String
 })
 

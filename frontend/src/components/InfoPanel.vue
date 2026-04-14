@@ -2,10 +2,7 @@
 import { useAppState, currentInfoText, infoModeActive } from '../composables/useAppState'
 import { INFO_MESSAGES } from '../utils/infoMessages'
 
-/**
- * Singleton Refs imported directly from useAppState.js module scope.
- * This hard-links reactivity between the modals and footer.
- */
+// Import singleton Refs directly from module scope & hard-link reactivity between the modals and footer
 </script>
 
 <template>

@@ -31,7 +31,6 @@ const { openFile } = useAppState()
 
 const isExpanded = ref(props.initialExpandedPaths.includes(props.node.path))
 
-// Handle external changes to expanded state (e.g. on mount)
 watch(() => props.initialExpandedPaths, (newPaths) => {
   if (props.node.type === 'dir') {
     isExpanded.value = newPaths.includes(props.node.path)
@@ -42,7 +41,6 @@ const isFileSelected = computed(() => props.selectedPaths.includes(props.node.pa
 const isHighlighted = computed(() => props.highlightedPath === props.node.path)
 
 // --- Visual Completeness Logic (Mirrors Python UI) ---
-// Folders turn grey if all "relevant" (non-init) files inside are selected
 const IGNORED_FOR_COMPLETENESS = ['__init__.py']
 
 const isFolderComplete = computed(() => {
@@ -63,7 +61,9 @@ const isFolderComplete = computed(() => {
   }
 
   const relevantFiles = getRelevantFiles(props.node)
-  if (relevantFiles.length === 0) return true // Empty or only __init__.py
+
+  // Empty or only __init__.py
+  if (relevantFiles.length === 0) return true
 
   return relevantFiles.every(path => props.selectedPaths.includes(path))
 })
@@ -91,12 +91,10 @@ const textClass = computed(() => {
 })
 
 const nodeTooltip = computed(() => {
-  // Base instruction based on node type
   let tooltip = props.node.type === 'file'
     ? `${props.node.name} (Ctrl+Click to open)`
     : `${props.node.name} (Ctrl+Click to toggle folder selection)`;
 
-  // Append filtering reason if this item is currently bypass-filtered (Purple state)
   if (props.node.is_filtered && props.node.filter_reason) {
     tooltip += `\n(${props.node.filter_reason})`;
   }
@@ -114,7 +112,6 @@ const handleClick = (event) => {
     isExpanded.value = !isExpanded.value
     emit('toggle-expand', { path: props.node.path, expanded: isExpanded.value })
   } else {
-    // File Click
     if (event.ctrlKey) {
       openFile(props.node.path)
     } else {
@@ -128,7 +125,6 @@ const handleIconClick = (event) => {
   if (props.node.type === 'file') {
     emit('toggle-select', props.node.path)
   } else {
-    // Forward the event to handleClick to respect modifier keys
     handleClick(event)
   }
 }
@@ -165,7 +161,6 @@ const onChildToggleExpand = (data) => {
       @click="handleClick"
       @dblclick="handleDoubleClick"
     >
-      <!-- Expand Icon -->
       <div class="w-5 flex shrink-0 justify-center">
         <template v-if="node.type === 'dir'">
           <ChevronDown v-if="isExpanded" class="w-4 h-4 text-gray-500" />
@@ -173,7 +168,6 @@ const onChildToggleExpand = (data) => {
         </template>
       </div>
 
-      <!-- Type Icon (Instant toggle click area) -->
       <div class="w-5 flex shrink-0 justify-center mr-2" @click="handleIconClick" v-info="'fm_tree_action'">
         <Folder
           v-if="node.type === 'dir'"
@@ -190,7 +184,6 @@ const onChildToggleExpand = (data) => {
         </template>
       </div>
 
-      <!-- Label -->
       <span
         class="text-sm truncate"
         :class="textClass"
@@ -200,7 +193,6 @@ const onChildToggleExpand = (data) => {
       </span>
     </div>
 
-    <!-- Recursive Children -->
     <div v-if="node.type === 'dir' && isExpanded" class="overflow-hidden">
       <FileTreeNode
         v-for="child in node.children"

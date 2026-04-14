@@ -16,7 +16,7 @@ const props = defineProps({
 defineEmits(['dblclick'])
 
 const md = markdownit({
-  html: true, // Enabled to allow styled checkbox spans
+  html: true,
   linkify: true,
   typographer: true,
   breaks: true
@@ -46,14 +46,12 @@ const renderedHtml = computed(() => {
 </template>
 
 <style>
-/* Allow selection inside the renderer */
 .selectable {
   user-select: text;
 }
 
-/* Custom Checkbox Styles */
 .cm-todo-unfilled {
-  color: #6B7280; /* Gray-500 */
+  color: #6B7280;
   font-family: "Segoe UI Symbol", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   font-weight: bold;
   margin-right: 4px;
@@ -62,7 +60,7 @@ const renderedHtml = computed(() => {
 }
 
 .cm-todo-filled {
-  color: #0078D4; /* CM Blue */
+  color: #0078D4;
   font-family: "Segoe UI Symbol", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   font-weight: bold;
   margin-right: 4px;
@@ -70,7 +68,6 @@ const renderedHtml = computed(() => {
   vertical-align: -1px;
 }
 
-/* Remove top margin from the first element in the prose container */
 .prose > :first-child {
   margin-top: 0;
 }
@@ -97,7 +94,7 @@ const renderedHtml = computed(() => {
 .prose li:has(> .cm-todo-unfilled),
 .prose li:has(> .cm-todo-filled) {
   list-style-type: none;
-  margin-left: -0.2em; /* Adjust for removed bullet */
+  margin-left: -0.2em;
 }
 
 .prose h1, .prose h2, .prose h3 {

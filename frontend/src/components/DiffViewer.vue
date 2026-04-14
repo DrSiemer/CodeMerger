@@ -30,17 +30,14 @@ const diffLines = computed(() => {
   const newStr = props.newText || ''
 
   // --- FULL TEXT MODE (Used in Project Starter) ---
-  // This mode shows every single line of the text without Git metadata headers.
   if (props.fullContext) {
     const changes = Diff.diffLines(oldStr, newStr)
     const rows = []
 
     changes.forEach(part => {
-      // Split the value into lines while preserving empty lines
       const lines = part.value.split('\n')
 
-      // If the part ends with a newline, the last element of split is an empty string
-      // created by the trailing newline. We remove it to avoid double-spacing blocks.
+      // If the part ends with a newline, the last element of split is an empty string, created by the trailing newline. We remove it to avoid double-spacing blocks.
       if (lines[lines.length - 1] === '') {
         lines.pop()
       }
@@ -69,7 +66,6 @@ const diffLines = computed(() => {
   }
 
   // --- TRUNCATED DIFF MODE (Used in Dashboard / AI Response Review) ---
-  // Standard patch logic with headers and hunk markers.
   const patch = Diff.structuredPatch(
     props.filename,
     props.filename,
@@ -86,13 +82,10 @@ const diffLines = computed(() => {
 
   const rows = []
 
-  // Add traditional File Headers
   rows.push({ prefix: '---', text: props.filename, type: 'header' })
   rows.push({ prefix: '+++', text: props.filename, type: 'header' })
 
-  // Process hunks
   patch.hunks.forEach(hunk => {
-    // Add Hunk Header (@@ -start,len +start,len @@)
     rows.push({
       prefix: '@@',
       text: `-${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`,
@@ -140,11 +133,9 @@ const diffLines = computed(() => {
           'text-gray-400': line.type === 'context'
         }"
       >
-        <!-- Line prefix (Gutter) -->
         <div class="w-10 shrink-0 text-center select-none opacity-50 border-r border-gray-800 mr-2 py-0.5">
           {{ line.prefix }}
         </div>
-        <!-- Text content -->
         <div class="whitespace-pre-wrap break-words px-2 py-0.5 flex-grow min-w-0">
           {{ line.text || ' ' }}
         </div>

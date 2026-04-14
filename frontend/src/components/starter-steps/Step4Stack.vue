@@ -21,9 +21,7 @@ const { config, saveConfig, generateStackPrompt, editorFontSize, handleZoom } = 
 // Sub-states: 'input' | 'pasting' | 'review'
 const viewState = ref(props.pData.stack ? 'review' : (props.pData.stack_llm_response ? 'pasting' : 'input'))
 
-/**
- * Robust copy helper that handles async text generation and UI feedback.
- */
+// Handles async text generation and UI feedback
 const copyToClipboard = async (text, el) => {
   if (!el) return
   await navigator.clipboard.writeText(text)
@@ -55,7 +53,6 @@ const saveDefaultExperience = async () => {
     return
   }
 
-  // Update global config via API
   const newConfig = { ...config.value, user_experience: currentExp }
   await saveConfig(newConfig)
 }
@@ -63,7 +60,7 @@ const saveDefaultExperience = async () => {
 // --- Navigation & Processing ---
 
 const goToPasting = async (e) => {
-  const btn = e.currentTarget // Capture immediately
+  const btn = e.currentTarget
   const prompt = await generateStackPrompt(props.pData)
   await copyToClipboard(prompt, btn)
   viewState.value = 'pasting'

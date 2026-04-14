@@ -24,7 +24,6 @@ const {
   getTodoQuestions
 } = useAppState()
 
-// State
 const currentStep = ref(1)
 const maxAccessibleStep = ref(1)
 const isLoading = ref(true)
@@ -87,8 +86,6 @@ onMounted(async () => {
   if (saved && Object.keys(saved).length > 0) {
     Object.assign(pData, saved)
     recalcProgress()
-
-    // Always navigate to the farthest reachable phase when opening the starter.
     currentStep.value = maxAccessibleStep.value
   } else {
     pData.parent_folder = config.value?.default_parent_folder || ''
@@ -159,18 +156,13 @@ const importConfig = async () => {
   if (loadedData) {
     Object.assign(pData, loadedData)
     recalcProgress()
-
-    // Always navigate to the farthest reachable phase when loading a config.
     currentStep.value = maxAccessibleStep.value
-
     saveState()
     showToastNotification("Config loaded successfully.")
   }
 }
 
-/**
- * Resets all reactive data and deletes the session file from disk.
- */
+// Resets all reactive data and deletes the session file from disk
 const performReset = async () => {
   isResetting.value = true
 
@@ -213,7 +205,6 @@ const clearAll = async () => {
 }
 
 const onProjectCreated = async (res) => {
-  // Clearing the project starter state immediately upon successful generation
   await performReset()
   successScreenData.value = res
 }

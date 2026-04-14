@@ -36,8 +36,6 @@ const {
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.concept_llm_response)
-
-// Rewrite Modals State
 const showRewriteModal = ref(false)
 const rewriteContext = ref(null)
 const rewriteIsMergedMode = ref(false)

@@ -4,25 +4,19 @@ import { useAppState } from '../composables/useAppState'
 
 const { showColorPicker, originalProjectColor, activeProject, saveProjectColor } = useAppState()
 
-// High-definition internal resolution for the buffer
 const INTERNAL_RES = 512
 const RADIUS = INTERNAL_RES / 2
 const INNER_RADIUS = 100
 const OUTER_RADIUS = 250
 const RING_WIDTH = OUTER_RADIUS - INNER_RADIUS
 
-// Refs
 const canvasRef = ref(null)
 const overlayRef = ref(null)
 const hexInput = ref(activeProject.color)
 let ctx = null
 let wheelCache = null
 
-/**
- * Generates a high-fidelity HSL wheel pixel-by-pixel.
- * This is the only method guaranteed to provide zero-gap rendering and
- * perfect black/white zones across all WebView versions.
- */
+// Generates a high-fidelity HSL wheel pixel-by-pixel. Guarantees zero-gap rendering and perfect black/white zones across all WebView versions.
 const createStaticWheel = () => {
     const c = document.createElement('canvas')
     c.width = INTERNAL_RES
@@ -38,7 +32,6 @@ const createStaticWheel = () => {
             const dist = Math.sqrt(dx * dx + dy * dy)
             const index = (y * INTERNAL_RES + x) * 4
 
-            // Alpha masking for the ring shape with antialiasing
             let alpha = 0
             if (dist >= INNER_RADIUS - 1 && dist <= OUTER_RADIUS + 1) {
                 if (dist < INNER_RADIUS) alpha = dist - (INNER_RADIUS - 1)
@@ -51,15 +44,12 @@ const createStaticWheel = () => {
                 continue
             }
 
-            // Calculate HSL components
             let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90
             if (angle < 0) angle += 360
 
             let pos = (dist - INNER_RADIUS) / RING_WIDTH
             let l = 0.5
-            // Inner half: White to Pure color
             if (pos < 0.5) l = 1.0 - pos
-            // Outer half: Pure color to Black
             else l = 0.5 - (pos - 0.5)
 
             const [r, g, b] = hslToRgb(angle / 360, 1.0, l)
@@ -79,10 +69,8 @@ const render = () => {
     if (!ctx || !wheelCache) return
     ctx.clearRect(0, 0, INTERNAL_RES, INTERNAL_RES)
 
-    // Draw the high-fidelity buffer
     ctx.drawImage(wheelCache, 0, 0)
 
-    // Center Preview Circle
     ctx.save()
     ctx.beginPath()
     ctx.arc(RADIUS, RADIUS, INNER_RADIUS + 2, 0, Math.PI * 2)
@@ -174,8 +162,6 @@ onUnmounted(() => {
     window.removeEventListener('keydown', onKeyDown)
 })
 
-// --- Math Helpers ---
-
 function hslToRgb(h, s, l) {
     let r, g, b
     if (s === 0) {
@@ -230,7 +216,6 @@ function rgbToHex(r, g, b) {
 
             <!-- CENTER: The Responsive Wheel -->
             <div class="relative group shrink-0 mx-4">
-                <!-- Outer Shadow/Glow -->
                 <div
                     class="absolute inset-0 rounded-full blur-3xl opacity-20 transition-colors duration-500"
                     :style="{ backgroundColor: activeProject.color }"
@@ -245,7 +230,6 @@ function rgbToHex(r, g, b) {
                     @click="handleConfirm"
                 ></canvas>
 
-                <!-- Central Contrast Text -->
                 <div
                     class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none transition-colors duration-200"
                     :class="activeProject.fontColor === 'dark' ? 'text-black' : 'text-white'"

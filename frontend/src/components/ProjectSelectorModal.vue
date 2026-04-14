@@ -15,13 +15,8 @@ const handleEscape = (e) => {
   if (e.key === 'Escape') emit('close')
 }
 
-// Register lifecycle hooks at the top level
 onMounted(async () => {
-  // Dynamic Growth: Calculate required window height based on footer presence.
-  // Footer = 36px (Status Bar) + 80px (Info Panel if active).
   const footerHeight = infoModeActive.value ? 116 : 36
-  // Force window to grow if it's too small to comfortably show the project list.
-  // This ensures the Content Area provides at least 500px for the modal.
   await resizeWindow(800, 500 + footerHeight)
 
   document.addEventListener('keydown', handleEscape)
@@ -68,8 +63,8 @@ const handleBrowse = async () => {
   const path = await selectProject()
   if (path) {
     emit('close')
-    // Trigger loadProject ONLY after we have a valid path string from the OS picker.
-    // This ensures the overlay appears exactly when the scan starts.
+    // Trigger loadProject ONLY after we have a valid path string from the OS picker
+    // This ensures the overlay appears exactly when the scan starts
     await loadProject(path)
   }
 }

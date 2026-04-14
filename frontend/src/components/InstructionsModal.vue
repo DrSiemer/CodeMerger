@@ -14,7 +14,6 @@ const handleKeyDown = (e) => {
 }
 
 onMounted(async () => {
-  // Grow window to provide a comfortable text area footprint
   await resizeWindow(800, 650)
 
   localIntro.value = activeProject.introText || ''

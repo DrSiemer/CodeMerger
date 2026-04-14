@@ -5,7 +5,6 @@ import { useAppState } from '../composables/useAppState'
 const { newlyAddedFiletypes, clearNewlyAddedFiletypes, resizeWindow } = useAppState()
 
 onMounted(async () => {
-  // Ensure window is large enough to show the list comfortably
   await resizeWindow(500, 500)
 })
 </script>

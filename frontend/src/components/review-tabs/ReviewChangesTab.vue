@@ -33,7 +33,6 @@ const { lastAiResponse, planFileStates, planOriginalContents, editorFontSize } =
 
 const showCommentary = ref(false)
 
-// Re-define computed properties for clarity and localized reactivity
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
 const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed || []).length > 0)
@@ -289,7 +288,6 @@ const collapseCommentary = () => {
           </div>
         </div>
         <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
-          <!-- For deletions, DiffViewer shows current content as 'removed' -->
           <DiffViewer :old-text="planOriginalContents[path]" new-text="" :fontSize="editorFontSize" :filename="path" />
           <div class="flex justify-end items-center space-x-2 mt-3">
             <button @click="collapseAndScroll(path)" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-1.5 rounded transition-colors flex items-center">

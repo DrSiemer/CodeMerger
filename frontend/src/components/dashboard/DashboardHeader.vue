@@ -36,12 +36,10 @@ const handleTitleInteraction = () => {
   }
 
   if (clickTimer) {
-    // Second click detected within 250ms -> Double Click (Rename)
     clearTimeout(clickTimer)
     clickTimer = null
     startEditing()
   } else {
-    // First click -> Start timer for Single Click (Select Project)
     clickTimer = setTimeout(() => {
       clickTimer = null
       emit('open-project-modal')
@@ -49,7 +47,6 @@ const handleTitleInteraction = () => {
   }
 }
 
-// Title Editing State
 const isEditingName = ref(false)
 const tempName = ref('')
 const nameInput = ref(null)
@@ -100,7 +97,6 @@ const swatchStyle = computed(() => {
   }
 })
 
-// Context-aware UI metadata for the Minimize Toggle
 const minimizeInfoKey = computed(() => {
   return config.value.enable_compact_mode_on_minimize ? 'minimize_to_taskbar' : 'minimize_to_compact'
 })
