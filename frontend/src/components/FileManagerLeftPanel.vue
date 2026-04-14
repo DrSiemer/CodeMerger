@@ -1,5 +1,5 @@
 <script setup>
-import { Search, Filter, GitBranch, CheckSquare } from 'lucide-vue-next'
+import { Search, Filter, GitBranch, CheckSquare, Loader2 } from 'lucide-vue-next'
 import FileTreeNode from './FileTreeNode.vue'
 
 const props = defineProps({
@@ -9,7 +9,8 @@ const props = defineProps({
   isGitFilter: Boolean,
   selectedPaths: Array,
   expandedDirs: Object,
-  highlightedPath: String
+  highlightedPath: String,
+  isLoading: Boolean
 })
 
 const emit = defineEmits([
@@ -74,27 +75,35 @@ defineExpose({ scrollToPath })
       >
     </div>
 
-    <!-- File Tree -->
-    <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2" v-info="'fm_tree'">
-      <FileTreeNode
-        v-for="node in fileTree"
-        :key="node.path"
-        :node="node"
-        :selected-paths="selectedPaths"
-        :initial-expanded-paths="Array.from(expandedDirs)"
-        :highlightedPath="highlightedPath"
-        @toggle-select="(p) => emit('toggle-select', p)"
-        @toggle-directory="(node) => emit('toggle-directory', node)"
-        @file-click="(p) => emit('file-click', p)"
-        @toggle-expand="(data) => emit('toggle-expand', data)"
-      />
+    <!-- Tree / Loading Area -->
+    <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2 relative" v-info="'fm_tree'">
+      <div v-if="isLoading" class="absolute inset-0 flex flex-col items-center justify-center space-y-4 bg-cm-dark-bg/80 z-10">
+        <Loader2 class="w-10 h-10 text-cm-blue animate-spin" />
+        <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">Scanning Files...</span>
+      </div>
+
+      <div v-else>
+        <FileTreeNode
+          v-for="node in fileTree"
+          :key="node.path"
+          :node="node"
+          :selected-paths="selectedPaths"
+          :initial-expanded-paths="Array.from(expandedDirs)"
+          :highlightedPath="highlightedPath"
+          @toggle-select="(p) => emit('toggle-select', p)"
+          @toggle-directory="(node) => emit('toggle-directory', node)"
+          @file-click="(p) => emit('file-click', p)"
+          @toggle-expand="(data) => emit('toggle-expand', data)"
+        />
+      </div>
     </div>
 
     <div class="flex justify-end pt-2">
       <button
         id="btn-fm-add-all"
         @click="emit('add-all')"
-        class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-1.5 px-4 rounded text-sm transition-colors flex items-center"
+        :disabled="isLoading"
+        class="bg-gray-700 hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed text-white font-medium py-1.5 px-4 rounded text-sm transition-colors flex items-center"
         v-info="'fm_add_all'"
       >
         <CheckSquare class="w-4 h-4 mr-2" />

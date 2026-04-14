@@ -29,6 +29,7 @@ const isGitFilter = ref(true)
 const showFullPaths = ref(false)
 const currentExpandedDirs = ref(new Set(activeProject.expandedDirs))
 const isLoaded = ref(false)
+const isTreeLoading = ref(false)
 const isOrderPulseActive = ref(false)
 
 const highlightedPath = ref(null)
@@ -59,8 +60,13 @@ onUnmounted(() => {
 })
 
 const refreshTree = async () => {
-  const currentPaths = listItems.value.map(f => f.path)
-  fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
+  isTreeLoading.value = true
+  try {
+    const currentPaths = listItems.value.map(f => f.path)
+    fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
+  } finally {
+    isTreeLoading.value = false
+  }
 }
 
 const autoHandleNewFiles = async () => {
@@ -297,6 +303,7 @@ const handleSave = async () => {
           :selectedPaths="listItems.map(f => f.path)"
           :expandedDirs="currentExpandedDirs"
           :highlightedPath="highlightedPath"
+          :isLoading="isTreeLoading"
           @toggle-select="toggleFileSelect"
           @toggle-directory="toggleDirectorySelect"
           @file-click="onLeftFileClick"
