@@ -5,7 +5,7 @@ import os
 import sys
 from .utils import parse_gitignore
 from .file_scanner import get_project_inventory
-from . import constants as c
+from .. import constants as c
 
 log = logging.getLogger("CodeMerger")
 
@@ -126,6 +126,7 @@ class FileMonitorThread(threading.Thread):
             all_files = inventory['files']
             gitignores = inventory['gitignores']
 
+            # Filter inventory down to what is allowed by active settings to identify "true" new files
             profile_all_files = []
             for rel_path in all_files:
                 abs_path = os.path.join(base_dir, rel_path)

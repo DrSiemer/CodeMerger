@@ -9,7 +9,7 @@ from src.core.utils import parse_gitignore, get_token_count_for_text, is_ignored
 from src.core.file_tree_builder import build_file_tree_data
 from src.core.merger import generate_output_string
 from src.core.file_scanner import get_project_inventory
-from src import constants as c
+from .. import constants as c
 
 log = logging.getLogger("CodeMerger")
 
@@ -37,22 +37,17 @@ class FileApi:
         inventory, _ = self.project_manager.get_inventory()
 
         # PROACTIVE REFRESH LOGIC
-        # If cache is missing, we check if the project is "Small" enough to scan instantly.
         if not inventory:
-            # Quick check of root entries to guess project scale
             try:
                 root_count = len(os.listdir(base_dir))
             except Exception:
                 root_count = 0
 
-            # If it's a small project (likely < 1000 total files if root is small),
-            # we just do the scan blocking to avoid the "Inventory cache missing" UI delay.
             if root_count < 50:
                 log.debug("Small project detected. Performing synchronous inventory.")
                 inventory = get_project_inventory(base_dir)
                 self.project_manager.set_inventory(inventory)
             else:
-                # For larger projects, we use the lock and wait for background thread
                 log.info("Inventory cache missing for potentially large project. Waiting for scan lock...")
                 with self.project_manager._scan_lock:
                     inventory, _ = self.project_manager.get_inventory()
