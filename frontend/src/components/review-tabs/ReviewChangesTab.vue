@@ -136,7 +136,7 @@ const collapseCommentary = () => {
       <button
         @click="$emit('toggle-all-diffs')"
         class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
-        :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs in this tab'"
+        :title="isAllExpanded ? 'Close all open diffs' : 'Open all pending file diffs'"
       >
         <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-4 h-4" />
         <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>
@@ -315,7 +315,7 @@ const collapseCommentary = () => {
       <button
         @click="$emit('toggle-all-diffs')"
         class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
-        :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs in this tab'"
+        :title="isAllExpanded ? 'Close all open diffs' : 'Open all pending file diffs'"
       >
         <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-4 h-4" />
         <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>

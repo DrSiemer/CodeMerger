@@ -157,9 +157,13 @@ const allReviewPaths = computed(() => {
   ]
 })
 
+const expandablePaths = computed(() => {
+  return allReviewPaths.value.filter(p => planFileStates.value[p] === 'pending')
+})
+
 const isAllExpanded = computed(() => {
-  const paths = allReviewPaths.value
-  if (paths.length === 0) return false
+  const paths = expandablePaths.value
+  if (paths.length === 0) return visibleDiffs.value.size > 0
   return paths.every(p => visibleDiffs.value.has(p))
 })
 
@@ -167,7 +171,9 @@ const toggleAllDiffs = async () => {
   if (isAllExpanded.value) {
     visibleDiffs.value.clear()
   } else {
-    const paths = allReviewPaths.value
+    const paths = expandablePaths.value
+    if (paths.length === 0) return
+
     // Concurrent fetch for missing original contents
     const missingPaths = paths.filter(p => planOriginalContents.value[p] === undefined)
     if (missingPaths.length > 0) {
