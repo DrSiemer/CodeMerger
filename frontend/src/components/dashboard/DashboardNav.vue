@@ -77,6 +77,7 @@ const deleteProfileHandler = async () => {
       >
         <Sprout
           class="w-7 h-7 text-gray-400 group-hover:text-cm-green transition-colors"
+          :stroke-width="1.5"
         />
       </button>
 
