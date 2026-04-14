@@ -74,10 +74,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1776196412.2175772,
-          "hash": "fbcc1e9b9ec7f6e643f3bdcca397be34f9f1570b",
-          "tokens": 2907,
-          "lines": 402,
+          "mtime": 1776197413.058741,
+          "hash": "4612279d8a95459c90303d1b52ba0f7ea9a30802",
+          "tokens": 2959,
+          "lines": 407,
           "ignore_tokens": false
         },
         {
@@ -111,18 +111,18 @@
         },
         {
           "path": "src/core/file_scanner.py",
-          "mtime": 1776187888.003873,
-          "hash": "9a90363dc64dca9e069ee2b29d8509fc6ffad924",
-          "tokens": 565,
-          "lines": 73
+          "mtime": 1776197413.1254747,
+          "hash": "8641ff90c678bfd06ba529255c44949eda9a256c",
+          "tokens": 647,
+          "lines": 78
         },
         {
           "path": "src/core/file_tree_builder.py",
-          "tokens": 849,
+          "tokens": 1023,
           "ignoreTokens": false,
-          "lines": 113,
-          "mtime": 1776196421.1595502,
-          "hash": "0a2e21153f59e00dff372ca901657d68b409aa31"
+          "lines": 117,
+          "mtime": 1776197413.0943398,
+          "hash": "d29d6460d17e37da21b90968471e8e77a4e7ad61"
         },
         {
           "path": "src/core/merger.py",
@@ -147,18 +147,18 @@
         },
         {
           "path": "src/core/project_manager.py",
-          "mtime": 1776188096.4297516,
-          "hash": "d9e6872beb84321705330a619690de71fb44d8e5",
-          "tokens": 920,
+          "mtime": 1776197413.1858618,
+          "hash": "1b1d81bcf7ee3396998508d4e03582401887a244",
+          "tokens": 913,
           "lines": 125
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "tokens": 992,
+          "tokens": 994,
           "ignoreTokens": false,
           "lines": 130,
-          "mtime": 1776188100.4508078,
-          "hash": "60e11c2a8bc936d55861bc6441057af2f88b54ad"
+          "mtime": 1776197413.2133014,
+          "hash": "973a00b89f0a3a0f8210fed0e29db0ff0775ca0c"
         },
         {
           "path": "src/core/window_geometry.py",
@@ -246,11 +246,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 1806,
+          "tokens": 1791,
           "ignoreTokens": false,
-          "lines": 226,
-          "mtime": 1776196421.1925106,
-          "hash": "7639e64c5d31bc3aeb22dd296a577756978d7bdd"
+          "lines": 225,
+          "mtime": 1776197413.1554205,
+          "hash": "0f1a215a8ed5da2d2b288746dc9d7199ac51adce"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -854,7 +854,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 145397,
+      "total_tokens": 145685,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

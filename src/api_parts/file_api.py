@@ -23,7 +23,6 @@ class FileApi:
         base_dir = project_config.base_dir
         from src.core.utils import load_active_file_extensions
         file_extensions = load_active_file_extensions()
-        gitignore_patterns = parse_gitignore(base_dir)
 
         if current_selected_paths is not None:
             selected_paths = set(current_selected_paths)
@@ -32,11 +31,11 @@ class FileApi:
 
         unknown_files = set(project_config.unknown_files)
 
-        # Single-pass construction: metadata injection is now handled inside build_file_tree_data
+        # Integrated single-pass scan handles gitignore discovery internally to eliminate traversal overhead
         return build_file_tree_data(
             base_dir=base_dir,
             file_extensions=file_extensions,
-            gitignore_patterns=gitignore_patterns,
+            gitignore_patterns=None,
             filter_text=filter_text,
             is_extension_filter_active=is_ext_filter,
             selected_file_paths=selected_paths,

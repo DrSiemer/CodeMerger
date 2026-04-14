@@ -74,12 +74,12 @@ class FileMonitorThread(threading.Thread):
 
             from .utils import load_active_file_extensions
             file_extensions = load_active_file_extensions()
-            gitignore_patterns = parse_gitignore(base_dir)
 
+            # Integrated scanner discovers gitignores during traversal to keep monitor high-performance
             all_files = get_all_matching_files(
                 base_dir=base_dir,
                 file_extensions=file_extensions,
-                gitignore_patterns=gitignore_patterns
+                gitignore_patterns=None
             )
 
             known_set = set(project_config.known_files)

@@ -292,10 +292,15 @@ def load_active_file_extensions():
 
 def parse_gitignore(base_dir):
     """
-    Parses all .gitignore files starting from the project root
+    Parses all .gitignore files starting from the project root.
+    Optimized to return string-based paths and patterns to speed up subsequent matching.
     """
     gitignore_data = []
+    base_dir_norm = os.path.abspath(base_dir).replace('\\', '/')
+
     for root, dirs, files in os.walk(base_dir, topdown=True):
+        root_norm = os.path.abspath(root).replace('\\', '/')
+
         if '.git' in dirs:
             dirs.remove('.git')
 
@@ -308,37 +313,44 @@ def parse_gitignore(base_dir):
                         if line.strip() and not line.strip().startswith('#')
                     ]
                     if patterns:
-                        gitignore_data.append((Path(root), patterns))
+                        # Store root as string for faster prefix matching in is_ignored
+                        gitignore_data.append((root_norm, patterns))
             except (IOError, OSError):
                 pass
 
         # Prunes ignored directories in-place to prevent os.walk from entering them
-        # Modifying the dirs list in-place prevents os.walk from entering ignored directories, drastically improving full-project scan times
         if gitignore_data:
-            dirs[:] = [d for d in dirs if not is_ignored(os.path.join(root, d), base_dir, gitignore_data)]
+            dirs[:] = [d for d in dirs if not is_ignored(os.path.join(root, d), base_dir_norm, gitignore_data)]
 
     return gitignore_data
 
 def is_ignored(path, base_dir, gitignore_data):
     """
     Determines if a path should be ignored based on parsed .gitignore rules.
-    Optimized to minimize string allocations and Path object creations.
+    Optimized for performance by using string prefixing instead of Path object creation.
     """
-    if '.git' in path:
+    if not gitignore_data:
+        return False
+
+    path_norm = path.replace('\\', '/')
+    if '.git/' in path_norm or path_norm.endswith('/.git'):
         return True
 
-    target_path = Path(path)
     is_ignored_flag = False
 
-    for gitignore_dir, patterns in gitignore_data:
-        try:
-            # We only check patterns if the current path is within or equal to the gitignore's directory
-            relative_path = target_path.relative_to(gitignore_dir)
-        except ValueError:
+    # Process gitignores in order (top-down)
+    for gitignore_dir_str, patterns in gitignore_data:
+        # Optimization: Only check patterns if the path is within the gitignore's directory
+        if not path_norm.startswith(gitignore_dir_str):
             continue
 
-        relative_path_str = relative_path.as_posix()
-        parts = relative_path.parts
+        # Get the path relative to the .gitignore location
+        rel_path_str = path_norm[len(gitignore_dir_str):].lstrip('/')
+        if not rel_path_str:
+            continue
+
+        parts = rel_path_str.split('/')
+        is_dir = os.path.isdir(path)
 
         for p_orig in patterns:
             p = p_orig.strip()
@@ -348,9 +360,7 @@ def is_ignored(path, base_dir, gitignore_data):
             if is_negated:
                 p = p[1:]
 
-            # Matching strategy depends on whether the pattern contains a slash
             contains_slash = '/' in p
-
             is_dir_only = p.endswith('/')
             if is_dir_only:
                 p = p.rstrip('/')
@@ -363,20 +373,15 @@ def is_ignored(path, base_dir, gitignore_data):
             else:
                 # If slash exists, pattern is relative to the directory of the .gitignore file
                 p_to_match = p.lstrip('/')
-                if fnmatch.fnmatch(relative_path_str, p_to_match) or \
-                   relative_path_str.startswith(p_to_match + '/'):
+                if fnmatch.fnmatch(rel_path_str, p_to_match) or \
+                   rel_path_str.startswith(p_to_match + '/'):
                     match = True
 
-            if match and is_dir_only:
-                # If the pattern is directory-only, it must not match a file
-                if relative_path_str == p and not target_path.is_dir():
-                    match = False
+            if match and is_dir_only and not is_dir:
+                match = False
 
             if match:
-                if is_negated:
-                    is_ignored_flag = False
-                else:
-                    is_ignored_flag = True
+                is_ignored_flag = not is_negated
 
     return is_ignored_flag
 

@@ -19,7 +19,7 @@ class ProjectManager:
         all_project_files = get_all_matching_files(
             base_dir=project_config.base_dir,
             file_extensions=self.get_active_file_extensions(),
-            gitignore_patterns=parse_gitignore(project_config.base_dir),
+            gitignore_patterns=None,
             cancel_event=cancel_event
         )
 
