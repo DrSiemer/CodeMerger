@@ -307,6 +307,7 @@ def parse_gitignore(base_dir):
                 pass
 
         # Prunes ignored directories in-place to prevent os.walk from entering them
+        # Modifying the dirs list in-place prevents os.walk from entering ignored directories, drastically improving full-project scan times
         if gitignore_data:
             dirs[:] = [d for d in dirs if not is_ignored(os.path.join(root, d), base_dir, gitignore_data)]
 

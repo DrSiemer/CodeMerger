@@ -62,7 +62,8 @@ def main():
             pass
 
     # MIME Type Registration
-    # Force-registers correct MIME types to bypass ES module failures caused by incorrect registry settings
+    # Force-register correct MIME types to bypass ES module failures caused by incorrect registry settings
+    # This bypasses a common Windows registry bug where .js files are served as text/plain, which breaks Vite ES modules in Chromium
     mimetypes.init()
     mimetypes.add_type('application/javascript', '.js')
     mimetypes.add_type('application/javascript', '.mjs')

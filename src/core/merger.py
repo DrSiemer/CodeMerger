@@ -23,6 +23,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
     skipped_files = []
 
     # Use fragments to build markers to avoid triggering regex when CodeMerger bundles itself
+    # We fragment the marker strings here so that if an LLM is analyzing CodeMerger's own code, it doesn't accidentally trigger the parser's sentinel limits
     PREFIX = "--- "
     FILE_LABEL = "File: "
     EOF_LABEL = "End of file"

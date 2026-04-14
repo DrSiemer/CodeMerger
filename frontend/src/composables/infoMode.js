@@ -17,6 +17,7 @@ const _resolveInfoText = () => {
 
 export const setHoverInfo = (key) => {
   if (!activeInfoStack.value.includes(key)) {
+    // We use the spread operator to create a new array reference, forcing Vue 3 to trigger reactivity across view boundaries that mutation would miss
     activeInfoStack.value = [...activeInfoStack.value, key];
     _resolveInfoText();
   }

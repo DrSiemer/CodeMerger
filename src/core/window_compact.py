@@ -51,6 +51,7 @@ def show_compact_window(manager):
     exec_y_log = int(manager.compact_mode_last_y)
 
     # Runtime resize consumes physical units while move consumes logical units
+    # Due to a PyWebView High-DPI quirk on Windows, we must use physical pixels for resizing but logical pixels for moving
     manager.compact_window.resize(w_phys, h_phys)
     manager.compact_window.move(exec_x_log, exec_y_log)
     manager.compact_window.show()

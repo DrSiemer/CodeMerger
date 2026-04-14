@@ -39,7 +39,7 @@ def delete_single_file(base_dir, rel_path):
 
 def _sanitize_content(path, content):
     """
-    Normalizes content for writing and comparison.
+    Normalizes content for writing and comparison. Aggressively stripping trailing whitespace ensures we don't get phantom diffs where invisible space differences from LLM outputs trigger false file changes.
     """
     if not content:
         return ""

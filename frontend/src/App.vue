@@ -60,6 +60,7 @@ onMounted(() => {
     })
   }
 
+  // Globally intercepting and preventing the browser paste event bypasses security popups and routes clipboard access exclusively through our Python pyperclip bridge
   window.addEventListener('paste', (e) => {
     e.preventDefault()
   }, true)
