@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import DashboardHeader from '../components/dashboard/DashboardHeader.vue'
 import DashboardNav from '../components/dashboard/DashboardNav.vue'
@@ -11,6 +11,7 @@ import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
+import ColorPickerOverlay from '../components/ColorPickerOverlay.vue'
 
 const {
   activeProject,
@@ -23,7 +24,9 @@ const {
   processPaste,
   applyFullPlan,
   config,
-  statusMessage
+  statusMessage,
+  showColorPicker,
+  resizeWindow
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -54,6 +57,17 @@ const closeReviewModal = () => {
     minimizeWindow()
   }
 }
+
+/**
+ * Ensures the window is large enough to display the custom color wheel
+ * and its associated UI elements without clipping.
+ */
+watch(showColorPicker, async (val) => {
+  if (val) {
+    // Grow window to a comfortable size for the picker UI
+    await resizeWindow(800, 540)
+  }
+})
 
 /**
  * Handles paste handoff requests originating from the Compact window context.
@@ -159,29 +173,35 @@ onUnmounted(() => {
 
 <template>
   <div id="dashboard-view" class="flex-grow flex flex-col overflow-hidden text-gray-100 bg-cm-dark-bg font-sans relative">
-    <!-- Top Bar -->
+    <!-- Top Bar (Uncovered by Color Picker) -->
     <DashboardHeader
       :is-file-manager-open="showFileManagerModal"
       @open-project-modal="showProjectModal = true"
       @open-file-manager="showFileManagerModal = true"
     />
 
-    <!-- Navigation Buttons Row -->
-    <DashboardNav
-      @open-file-manager="showFileManagerModal = true"
-      @open-new-profile-modal="showNewProfileModal = true"
-      @open-starter-modal="showStarterModal = true"
-      @open-project-modal="showProjectModal = true"
-    />
+    <!-- Main Content Area Wrapper (Anchors the Color Picker) -->
+    <div class="flex-grow relative flex flex-col min-h-0">
+        <!-- Navigation Buttons Row -->
+        <DashboardNav
+          @open-file-manager="showFileManagerModal = true"
+          @open-new-profile-modal="showNewProfileModal = true"
+          @open-starter-modal="showStarterModal = true"
+          @open-project-modal="showProjectModal = true"
+        />
 
-    <!-- Main Dashboard Content -->
-    <DashboardActions
-      @open-settings="openSettings"
-      @open-instructions-modal="showInstructionsModal = true"
-      @open-review-modal="openReviewModal"
-    />
+        <!-- Main Dashboard Content -->
+        <DashboardActions
+          @open-settings="openSettings"
+          @open-instructions-modal="showInstructionsModal = true"
+          @open-review-modal="openReviewModal"
+        />
 
-    <!-- Modal Layers -->
+        <!-- Fancy Color Picker (Absolute to this container) -->
+        <ColorPickerOverlay v-if="showColorPicker" />
+    </div>
+
+    <!-- Modal Layers (Global view coverage) -->
     <ProjectSelectorModal v-if="showProjectModal" @close="showProjectModal = false" />
     <SettingsModal v-if="showSettingsModal" :initial-tab="settingsTab" @close="showSettingsModal = false" />
     <FileManagerModal v-if="showFileManagerModal" @close="showFileManagerModal = false" />

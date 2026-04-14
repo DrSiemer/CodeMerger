@@ -1,4 +1,4 @@
-import { activeProject, statusMessage, isProjectLoading } from './globalState'
+import { activeProject, statusMessage, isProjectLoading, showColorPicker, originalProjectColor } from './globalState'
 
 export function useProject() {
   const applyProjectData = (projData) => {
@@ -52,9 +52,15 @@ export function useProject() {
     return null
   }
 
-  const selectColor = async () => {
+  const selectColor = () => {
+    if (!activeProject.path) return
+    originalProjectColor.value = activeProject.color
+    showColorPicker.value = true
+  }
+
+  const saveProjectColor = async (hex) => {
     if (window.pywebview) {
-      const proj = await window.pywebview.api.select_color()
+      const proj = await window.pywebview.api.save_project_color(hex)
       if (proj) applyProjectData(proj)
     }
   }
@@ -199,6 +205,7 @@ export function useProject() {
     applyProjectData,
     selectProject,
     selectColor,
+    saveProjectColor,
     loadProject,
     cancelLoadProject,
     renameProject,

@@ -31,6 +31,10 @@ export const showReviewModal = ref(false)
 export const reviewMode = ref('new') // 'new' or 'resume'
 export const revertToCompactOnClose = ref(false)
 
+// Color Picker State
+export const showColorPicker = ref(false)
+export const originalProjectColor = ref(null)
+
 // Editor Scaling State
 export const DEFAULT_FONT_SIZE = 15
 export const editorFontSize = ref(DEFAULT_FONT_SIZE)

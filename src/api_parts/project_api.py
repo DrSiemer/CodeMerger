@@ -145,6 +145,19 @@ class ProjectApi:
 
         return None
 
+    def save_project_color(self, new_hex):
+        """Directly saves a hex color string to the project configuration."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return None
+
+        project_config.project_color = new_hex
+        from src.core.project_config import _calculate_font_color
+        project_config.project_font_color = _calculate_font_color(new_hex)
+        project_config.save()
+
+        return self._format_project_response(project_config, "Project color saved.")
+
     def select_directory(self):
         """Opens native OS directory selection dialog specifically for general directory selection."""
         if not self._window_manager or not self._window_manager.main_window:
