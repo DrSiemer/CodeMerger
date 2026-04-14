@@ -323,7 +323,7 @@ const nextStep = () => {
           <h2 class="text-xl font-bold text-white">Project Starter <span v-if="pData.name" class="text-gray-500 font-medium">/ {{ pData.name }}</span></h2>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2">
           <span
             class="text-cm-green text-sm font-bold transition-opacity duration-500 mr-2"
             :class="showToast ? 'opacity-100' : 'opacity-0 pointer-events-none'"
@@ -331,21 +331,24 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
-          <button id="btn-starter-save-config" @click="exportConfig" v-info="'starter_header_save'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Export configuration to JSON file">
-            <Save class="w-4 h-4"/>
+          <button id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
+            <Save class="w-4 h-4 mr-0 lg:mr-2"/>
+            <span class="hidden lg:inline text-xs">Export</span>
           </button>
-          <button id="btn-starter-load-config" @click="importConfig" v-info="'starter_header_load'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Restore project configuration from JSON">
-            <Upload class="w-4 h-4"/>
+          <button id="btn-starter-import" @click="importConfig" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Restore project configuration from JSON">
+            <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
+            <span class="hidden lg:inline text-xs">Import</span>
           </button>
-          <button id="btn-starter-clear-all" @click="clearAll" v-info="'starter_header_clear'" class="p-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800" title="Wipe all progress and start fresh">
-            <Trash2 class="w-4 h-4"/>
+          <button id="btn-starter-reset" @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Wipe all progress and start fresh">
+            <Trash2 class="w-4 h-4 mr-0 lg:mr-2"/>
+            <span class="hidden lg:inline text-xs">Reset</span>
           </button>
 
-          <div class="w-px h-6 bg-gray-600 mx-2"></div>
+          <div class="w-px h-6 bg-gray-600 mx-1"></div>
 
-          <button id="btn-starter-exit" @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
-            <LogOut class="w-4 h-4" />
-            <span class="text-sm font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
+          <button id="btn-starter-exit" @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
+            <LogOut class="w-4 h-4 mr-2" />
+            <span class="text-xs font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
           </button>
         </div>
       </div>
