@@ -72,31 +72,31 @@ const renderedHtml = computed(() => {
 
 /* Remove top margin from the first element in the prose container */
 .prose > :first-child {
-  margin-top: 0 !important;
+  margin-top: 0;
 }
 
 /* Restoring bullet visibility and list formatting hidden by Tailwind reset */
 .prose ul {
-  list-style-type: disc !important;
-  margin-left: 1.5em !important;
-  margin-bottom: 1rem !important;
+  list-style-type: disc;
+  margin-left: 1.5em;
+  margin-bottom: 1rem;
 }
 
 .prose ol {
-  list-style-type: decimal !important;
-  margin-left: 1.5em !important;
-  margin-bottom: 1rem !important;
+  list-style-type: decimal;
+  margin-left: 1.5em;
+  margin-bottom: 1rem;
 }
 
 .prose li {
-  display: list-item !important;
-  margin-bottom: 0.25em !important;
+  display: list-item;
+  margin-bottom: 0.25em;
 }
 
 /* Ensure our custom checkboxes don't double up with bullets */
 .prose li:has(> .cm-todo-unfilled),
 .prose li:has(> .cm-todo-filled) {
-  list-style-type: none !important;
+  list-style-type: none;
   margin-left: -0.2em; /* Adjust for removed bullet */
 }
 
