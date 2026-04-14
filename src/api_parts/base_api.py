@@ -1,35 +1,28 @@
 import threading
 
 class BaseApi:
-    """Provides base state and shared helper methods for the API mixins."""
+    """Provides base state and shared helper methods for the API mixins"""
 
     def __init__(self, app_state, project_manager, newly_added_filetypes=None):
         # Prefixing with an underscore prevents PyWebView from inspecting this attribute
-        # during JS API generation, which avoids a premature DOM evaluation crash.
+        # during JS API generation, which avoids a premature DOM evaluation crash
         self._window_manager = None
         self._color_picker_active = False
 
-        # Migration metadata for notification dialogs
         self._newly_added_filetypes = newly_added_filetypes or []
-
-        # Stored plan for cross-window handoffs (Compact -> Main)
         self._last_parsed_plan = None
-
-        # Cancellation event for long-running filesystem operations (Project Loading)
         self._load_cancel_event = threading.Event()
-
-        # Concurrency guard to prevent multiple dialogs from spawning simultaneously
         self._dialog_lock = threading.Lock()
 
         self.app_state = app_state
         self.project_manager = project_manager
 
     def set_window_manager(self, mgr):
-        """Links the Api to the central window orchestration logic."""
+        """Links the Api to the central window orchestration logic"""
         self._window_manager = mgr
 
     def _format_project_response(self, project_config, status_msg):
-        """Helper to format ProjectConfig into a dictionary suitable for JSON serialization."""
+        """Formats ProjectConfig into a dictionary suitable for JSON serialization"""
         if not project_config:
             return None
         return {
@@ -52,27 +45,23 @@ class BaseApi:
 
     def _show_managed_confirmation(self, title, message):
         """
-        Displays a native confirmation dialog centered on the monitor.
-        Uses a topmost hidden parent to ensure it appears in front of the Compact Mode window.
+        Displays a native confirmation dialog centered on the monitor
+        Uses a topmost hidden parent to ensure it appears in front of the Compact Mode window
         """
         import tkinter as tk
         from tkinter import messagebox
         from src.core.window_geometry import WindowGeometry
 
-        # Drop request if a dialog is already visible
         if not self._dialog_lock.acquire(blocking=False):
             return False
 
         try:
             root = tk.Tk()
             root.withdraw()
-
-            # This attribute ensures the dialog sits ABOVE the on-top Compact window
             root.attributes("-topmost", True)
 
             mgr = self._window_manager
             if mgr:
-                # Identify which monitor is currently 'active' for the user
                 is_compact = mgr.compact_window and not mgr.compact_window.hidden
                 if is_compact and mgr.compact_mode_last_x is not None:
                     h_mon = mgr._get_monitor_from_logical(mgr.compact_mode_last_x, mgr.compact_mode_last_y)
@@ -82,7 +71,6 @@ class BaseApi:
                 m_l, m_t, m_r, m_b = mgr._get_monitor_work_area_phys(h_mon)
                 scale = mgr._get_scale_factor(h_mon)
 
-                # Center on Monitor (Logical units for Tkinter)
                 center_x = (m_l + (m_r - m_l) / 2) / scale
                 center_y = (m_t + (m_b - m_t) / 2) / scale
 

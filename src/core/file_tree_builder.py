@@ -4,9 +4,8 @@ from .. import constants as c
 
 def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_text="", is_extension_filter_active=True, selected_file_paths=None, is_gitignore_filter_active=True):
     """
-    Scans the file system respecting .gitignore and returns a data structure
-    representing the relevant files and directories for the tree view.
-    Ensures that files in 'selected_file_paths' always bypass filters to remain visible.
+    Scans the file system respecting .gitignore and returns a tree data structure
+    Ensures that files in 'selected_file_paths' always bypass filters to remain visible
     """
     extensions = {ext for ext in file_extensions if ext.startswith('.')}
     exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
@@ -16,24 +15,24 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
         selected_file_paths = set()
 
     def is_path_or_child_selected(rel_path):
-        """Checks if this path or any path deeper than it is in the Merge Order."""
+        """Checks if this path or any path deeper than it is in the Merge Order"""
         if rel_path in selected_file_paths:
             return True
         prefix = rel_path + "/"
         return any(p.startswith(prefix) for p in selected_file_paths)
 
     def should_be_ignored(path, rel_path):
-        """Determines if a directory should be entered or ignored by gitignore."""
+        """Determines if a directory should be entered or ignored by gitignore"""
         if not is_gitignore_filter_active:
             return False
-        # If the directory itself, or any file within it, is selected, we MUST NOT ignore it.
+        # If the directory itself, or any file within it, is selected, we MUST NOT ignore it
         if is_path_or_child_selected(rel_path):
             return False
         return is_ignored(path, base_dir, gitignore_patterns)
 
     def is_file_visible(rel_path, file_name):
-        """Helper to determine if a file should be visible based on the filter state."""
-        # Files in the Merge Order are ALWAYS visible regardless of filters.
+        """Determines if a file should be visible based on the filter state"""
+        # Files in the Merge Order are ALWAYS visible regardless of filters
         if rel_path in selected_file_paths:
             return True
 
@@ -46,7 +45,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
         return True
 
     if not filter_text_lower:
-        # Original, unfiltered logic for performance when not searching
+        # Original unfiltered logic for performance when not searching
         def _has_relevant_files(path, rel_path):
             try:
                 for entry in os.scandir(path):
@@ -81,7 +80,6 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns, filter_t
             return nodes
         return _build_nodes_unfiltered(base_dir)
 
-    # New filtered logic
     def _build_nodes_filtered(current_path):
         nodes = []
         try: entries = sorted(os.scandir(current_path), key=lambda e: (e.is_file(), e.name.lower()))

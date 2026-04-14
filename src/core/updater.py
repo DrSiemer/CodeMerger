@@ -15,8 +15,8 @@ log = logging.getLogger("CodeMerger")
 
 class Updater:
     """
-    Handles checking for application updates from a GitHub repository.
-    Works for both Tkinter and PyWebView frontend environments.
+    Handles checking for application updates from a GitHub repository
+    Works for both Tkinter and PyWebView environments
     """
     def __init__(self, parent, app_state, current_version):
         self.parent = parent
@@ -26,27 +26,21 @@ class Updater:
 
     def _get_dialog_parent(self):
         """
-        Creates a hidden temporary Tk root if no parent is available.
-        Ensures popups don't crash when called from the Webview backend.
-        Forces the hidden root to the top so messageboxes appear over Webview.
+        Creates a hidden temporary Tk root if no parent is available
+        Forces the hidden root to the top so messageboxes appear over Webview
         """
         if self.parent and hasattr(self.parent, 'winfo_exists') and self.parent.winfo_exists():
             return self.parent
 
-        # Fallback for Webview mode
         root = tk.Tk()
         root.withdraw()
-        # CRITICAL: Force the hidden master window to the top of the OS z-order
-        # so that subsequent messagebox children inherit this elevation.
+        # Ensure the dialog sits ABOVE the on-top windows
         root.attributes("-topmost", True)
         root.lift()
         return root
 
     def _should_check_for_updates(self):
-        """
-        Determines if an update check should be performed based on user settings
-        and the last check date. An update check is performed if it's a new day.
-        """
+        """Determines if an update check is required today"""
         if not self.state.check_for_updates:
             log.info("Update check skipped: disabled by user setting.")
             return False
@@ -68,10 +62,7 @@ class Updater:
             return True
 
     def check_for_updates(self):
-        """
-        Performs the update check if conditions are met and handles the result.
-        This is designed to fail silently on network errors.
-        """
+        """Performs update check and notifies user of new releases"""
         if not self._should_check_for_updates():
             return
 
@@ -98,9 +89,7 @@ class Updater:
             self.state.update_last_check_date()
 
     def check_for_updates_manual(self):
-        """
-        Performs a user-initiated update check and provides direct feedback.
-        """
+        """Performs a user-initiated update check and provides direct feedback"""
         log.info("Performing manual update check.")
         dialog_root = self._get_dialog_parent()
         try:
@@ -145,10 +134,7 @@ class Updater:
                 dialog_root.destroy()
 
     def _is_newer(self, latest_str, current_str):
-        """
-        Compares two version strings (e.g., '1.2.3') and returns True if
-        the latest is newer than the current.
-        """
+        """Compares version tuples to identify newer releases"""
         try:
             latest_parts = tuple(map(int, latest_str.split('.')))
             current_parts = tuple(map(int, current_str.split('.')))
@@ -160,9 +146,7 @@ class Updater:
             return False
 
     def _notify_user(self, release_data):
-        """
-        Displays a dialog to the user about the available update.
-        """
+        """Prompts the user to install available updates"""
         latest_version = release_data.get('tag_name', 'N/A')
         release_notes = release_data.get('body', 'No release notes available.')
         log.info(f"New version available: {latest_version}. Prompting user to update.")
@@ -183,9 +167,7 @@ class Updater:
             log.info("User declined the update.")
 
     def start_update_process(self, release_data):
-        """
-        Launches the external GUI updater executable and exits the main application.
-        """
+        """Launches external GUI updater and terminates main application immediately"""
         assets = release_data.get('assets', [])
         download_url = next((asset.get('browser_download_url') for asset in assets if asset.get('name', '').endswith('_Setup.exe')), None)
 
@@ -200,10 +182,7 @@ class Updater:
             base_path = os.path.dirname(sys.executable)
             updater_exe_path = os.path.join(base_path, "updater_gui.exe")
         else:
-            # Development Mode Search
-            # Path 1: Project Root
             root_path = os.path.join(BUNDLE_DIR, "updater_gui.exe")
-            # Path 2: Build Output folder (Common dev scenario)
             build_path = os.path.join(BUNDLE_DIR, "dist", "CodeMerger", "updater_gui.exe")
 
             if os.path.exists(root_path):
@@ -211,7 +190,7 @@ class Updater:
             elif os.path.exists(build_path):
                 updater_exe_path = build_path
             else:
-                updater_exe_path = root_path # Fallback to trigger the 'not found' error below
+                updater_exe_path = root_path
 
         if not os.path.exists(updater_exe_path):
             log.critical(f"Updater executable 'updater_gui.exe' not found at expected path: {updater_exe_path}")
@@ -235,10 +214,7 @@ class Updater:
 
             log.info("Updater launched. Force-terminating main application for update cycle.")
 
-            # CRITICAL: We must use os._exit(0) to ensure the process vanishes from the
-            # OS process table immediately. Standard sys.exit() or window.destroy()
-            # might linger due to Chromium/COM cleanup, causing the updater_gui to
-            # hang while waiting for the PID to close.
+            # Immediate termination prevents COM teardown hangs that block the external updater
             os._exit(0)
 
         except Exception as e:

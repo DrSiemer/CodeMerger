@@ -9,15 +9,13 @@ from src.core import change_applier
 log = logging.getLogger("CodeMerger")
 
 class ClipboardApi:
-    """API methods for accessing the clipboard and copying finalized prompts."""
+    """API methods for accessing the clipboard and copying finalized prompts"""
 
     def copy_code(self, use_wrapper):
-        """
-        Merges the selected files and copies the result to the clipboard.
-        """
+        """Merges selected files and copies the result to the clipboard"""
         project_config = self.project_manager.get_current_project()
         if not project_config or not project_config.selected_files:
-            return "No files selected to copy."
+            return "No files selected to copy"
 
         base_dir = self.app_state.active_directory
         files_to_copy = [f['path'] for f in project_config.selected_files]
@@ -26,7 +24,6 @@ class ClipboardApi:
             report = scan_for_secrets(base_dir, files_to_copy)
             if report:
                 warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
-                # Coordination: Use managed confirmation to ensure visibility regardless of mode
                 proceed = self._show_managed_confirmation("Secrets Detected", warning_message)
                 if not proceed:
                     return "Copy cancelled due to potential secrets."
@@ -46,22 +43,20 @@ class ClipboardApi:
 
     def request_remote_paste(self, revert_on_close, auto_apply):
         """
-        Special cross-window method called by Compact mode.
-        Reads clipboard, parses plan, and either applies it or notifies the Main window to show review.
+        Cross-window method called by Compact mode
+        Reads clipboard and either auto-applies or signals Main window for review
         """
         if not self._window_manager or not self._window_manager.main_window:
             return False
 
-        # OVERWRITE CHECK: Ask user if they want to discard unapplied changes in memory
         status = self.check_for_pending_changes()
         if status.get('has_pending'):
             msg = "An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?"
-            # Use managed confirmation to prevent dialog appearing directly behind the compact widget
             proceed = self._show_managed_confirmation("Confirm Overwrite", msg)
             if not proceed:
                 return False
 
-        # Access system clipboard using Python to bypass browser permission restrictions
+        # Access system clipboard via Python to bypass browser permission restrictions
         text = pyperclip.paste()
         if not text or not text.strip():
             return "Clipboard is empty."
@@ -74,17 +69,14 @@ class ClipboardApi:
         if plan.get('status') == 'ERROR':
             return False
 
-        # Store for persistence across window handoffs
         self._last_parsed_plan = plan
 
-        # AUTO-APPLY LOGIC (Ctrl-click behavior)
         if auto_apply and plan.get('status') != 'UNFORMATTED':
             creations = plan.get('creations', {})
             updates = plan.get('updates', {})
             deletions = plan.get('deletions_proposed', [])
             skipped = set(plan.get('skipped_files', []))
 
-            # Filter out no-ops to see if there is actually work to do
             actual_updates = {p: c for p, c in updates.items() if p not in skipped}
             actual_deletions = [p for p in deletions if p not in skipped]
 
@@ -107,11 +99,8 @@ class ClipboardApi:
                     self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
                     return msg
 
-        # FALLBACK: Send signal to Main Window for review
-        # Restore main window FIRST to ensure the Vue instance is active and ready to receive events.
+        # Fallback to Main Window review
         self._window_manager.restore_main()
-
-        # Give the OS and Browser a moment to render/focus before sending the event
         time.sleep(0.1)
 
         js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-paste-request', {{ detail: {{ revertOnClose: {'true' if revert_on_close else 'false'} }} }}))"
@@ -123,10 +112,7 @@ class ClipboardApi:
             return False
 
     def request_remote_review(self, revert_on_close):
-        """
-        Special cross-window method called by Compact mode to show the review
-        modal in the main window for the response currently in memory.
-        """
+        """Opens the review modal in the main window for the plan in memory"""
         if not self._window_manager or not self._window_manager.main_window:
             return False
 
@@ -134,8 +120,6 @@ class ClipboardApi:
             return "No response in memory to review."
 
         self._window_manager.restore_main()
-
-        # Brief delay to allow OS focus transition
         time.sleep(0.1)
 
         js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-review-request', {{ detail: {{ revertOnClose: {'true' if revert_on_close else 'false'} }} }}))"
@@ -147,10 +131,7 @@ class ClipboardApi:
             return False
 
     def get_clipboard_text(self):
-        """
-        Reads text from the system clipboard using the Python pyperclip library.
-        Bypasses browser permission gated navigator.clipboard.readText() API.
-        """
+        """Accesses system clipboard via Python to bypass browser permission prompts"""
         try:
             return pyperclip.paste()
         except Exception as e:

@@ -9,8 +9,8 @@ log = logging.getLogger("CodeMerger")
 
 class FileMonitorThread(threading.Thread):
     """
-    A background daemon thread that periodically scans the active project for new files.
-    When changes are detected, it notifies the Vue frontend via PyWebView's evaluate_js.
+    Background daemon thread that periodically scans the active project for new files
+    Notifies the Vue frontend via PyWebView's evaluate_js when changes are found
     """
     def __init__(self, window, app_state, project_manager):
         super().__init__()
@@ -24,7 +24,7 @@ class FileMonitorThread(threading.Thread):
         self._stop_event.set()
 
     def update_window(self, window):
-        """Updates the window reference used for JS evaluation."""
+        """Updates the window reference used for JS evaluation"""
         self.window = window
 
     def run(self):
@@ -34,7 +34,6 @@ class FileMonitorThread(threading.Thread):
             if config.get('enable_new_file_check', True):
                 self._perform_check()
 
-            # Wait for the interval defined in settings (default 5s)
             interval = config.get('new_file_check_interval', 5)
 
             # Sleep in short bursts to remain responsive to stop event
@@ -45,9 +44,8 @@ class FileMonitorThread(threading.Thread):
 
     def _safe_eval(self, js_code):
         """
-        Executes JavaScript in the current window context.
-        Catching System.ObjectDisposedException (as a generic Exception) to
-        prevent crashes when a window is closed while a scan finishes.
+        Executes JavaScript in the current window context
+        Prevents crashes when a window is closed while a scan finishes
         """
         if not self.window:
             return
@@ -68,14 +66,12 @@ class FileMonitorThread(threading.Thread):
             return
 
         try:
-            # Check for external config changes
             if project_config.has_external_changes():
                 log.info("Modified .allcode detected. Synchronizing internal state...")
                 if project_config.load():
                     log.info("Project configuration updated externally. Triggering UI refresh.")
                     self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
-            # Scan for new files
             from .utils import load_active_file_extensions
             file_extensions = load_active_file_extensions()
             gitignore_patterns = parse_gitignore(base_dir)
@@ -113,10 +109,8 @@ class FileMonitorThread(threading.Thread):
                         p_data['total_tokens'] = sum(f.get('tokens', 0) for f in p_data['selected_files'])
                 config_changed = True
 
-                # Force refresh in UI to reflect removal
                 self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
-            # Detect brand new files
             brand_new = current_set - set(project_config.known_files)
             if brand_new:
                 log.info(f"Detected {len(brand_new)} brand new files.")
@@ -126,7 +120,6 @@ class FileMonitorThread(threading.Thread):
                 project_config.update_known_files(brand_new)
                 config_changed = True
 
-                # Notify Vue frontend of new files for the alert counter
                 count = len(project_config.unknown_files)
                 self._safe_eval(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')
 

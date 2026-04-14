@@ -16,8 +16,8 @@ log = logging.getLogger("CodeMerger")
 
 class WindowManager:
     """
-    Coordinates the visibility and lifecycle of the main application window
-    and the minimalist compact widget using a persistent window strategy.
+    Coordinates the visibility and lifecycle of application windows
+    Uses a persistent window strategy for the minimalist compact widget
 
     UNIT COORDINATION STRATEGY (PyWebView 5.3+ / Windows DPI Awareness V2):
     - CONSTRUCTOR (create_window): Position (x,y) = PHYSICAL | Size (w,h) = LOGICAL
@@ -43,11 +43,10 @@ class WindowManager:
         # Latch to override minimize behavior for a single event
         self._override_compact_behavior = None
 
-        # Timing for minimum splash visibility
         self.start_time = time.time()
         self.MIN_SPLASH_DURATION = 0.4
 
-        # Load persisted geometry (Stored in PHYSICAL units)
+        # Stored in PHYSICAL units
         geom = self.api.app_state.config.get('main_window_geom', {})
 
         self.main_last_x = geom.get('x')
@@ -55,8 +54,7 @@ class WindowManager:
         self.main_last_w = geom.get('w', 1200)
         self.main_last_h = geom.get('h', 750)
 
-        # Compact Mode Position is strictly transient and NEVER persisted.
-        # It resets to None every session to ensure it centers on activation.
+        # Compact Mode Position is strictly transient and resets every session
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
 
@@ -68,10 +66,8 @@ class WindowManager:
             self.base_url = os.path.abspath(os.path.normpath(index_path))
 
         app_version = load_app_version()
-        # Initialize updater with self as parent to allow access to exit_all()
         self.updater = Updater(self, self.api.app_state, app_version)
 
-    # --- Geometry Delegation ---
     def _get_scale_factor(self, h_monitor=None):
         return WindowGeometry.get_scale_factor(h_monitor, self.main_window, self.main_last_x, self.main_last_y)
 
@@ -84,8 +80,8 @@ class WindowManager:
     def _get_monitor_work_area_phys(self, h_monitor):
         return WindowGeometry.get_monitor_work_area_phys(h_monitor)
 
-    # --- Boot Sequence ---
     def start(self):
+        """Initializes windows and starts the PyWebView UI loop"""
         h_mon = self._get_target_monitor_handle()
         m_left, m_top, m_right, m_bottom = self._get_monitor_work_area_phys(h_mon)
         scale = self._get_scale_factor(h_mon)
@@ -105,8 +101,7 @@ class WindowManager:
         threading.Thread(target=show_splash_warm, daemon=True).start()
 
         def failsafe():
-            # Proactively check every second for engine responsiveness to ensure
-            # we start as soon as possible, even if the signal was somehow 'missed'.
+            # Check for engine responsiveness to start UI regardless of handshake signals
             for _ in range(20):
                 if self._stop_failsafe.wait(1.0):
                     return
@@ -116,7 +111,6 @@ class WindowManager:
 
                 if self.main_window:
                     try:
-                        # Attempt to probe if the bridge is ready
                         if self.main_window.evaluate_js('window.pywebview && window.pywebview.api ? true : false'):
                             self.show_main_and_close_splash(source="Proactive Check")
                             return
@@ -132,6 +126,7 @@ class WindowManager:
         webview.start(gui='edgechromium', debug=self.debug_mode)
 
     def show_main_and_close_splash(self, source="Failsafe"):
+        """Transitions visibility from splash screen to main dashboard"""
         with self._handshake_lock:
             if self._handshake_received or self._is_shutting_down:
                 return
@@ -143,7 +138,6 @@ class WindowManager:
             log.info("Proactive check detected active engine. Transitioning from splash.")
         else:
             log.warning(f"Frontend handshake alert ({source}). Triggering show.")
-            # Force reload the URL in case the browser engine stalled on initial resolve
             if self.main_window:
                 try:
                     self.main_window.load_url(self.base_url)
@@ -178,11 +172,9 @@ class WindowManager:
 
         create_compact_window(self)
 
-        # Trigger automatic update check on boot
         if self.updater:
             threading.Thread(target=self.updater.check_for_updates, daemon=True).start()
 
-    # --- Window Events ---
     def _on_main_moved(self, x, y):
         if self.main_window and not self._is_shutting_down:
             try:
@@ -228,10 +220,9 @@ class WindowManager:
 
         should_compact = self.api.app_state.config.get('enable_compact_mode_on_minimize', True)
 
-        # Apply behavior override if set via custom minimize button
         if self._override_compact_behavior is not None:
             should_compact = self._override_compact_behavior
-            self._override_compact_behavior = None # Reset for next event
+            self._override_compact_behavior = None
 
         if should_compact:
             self._transitioning = True
@@ -248,7 +239,7 @@ class WindowManager:
 
         try:
             if self.main_last_x is not None and self.main_last_y is not None:
-                # Save only main window geometry. Compact coordinates are transient.
+                # Save only main window geometry. Compact coordinates are transient
                 self.api.app_state.config['main_window_geom'] = {
                     'x': int(self.main_last_x), 'y': int(self.main_last_y),
                     'w': int(self.main_last_w), 'h': int(self.main_last_h)
@@ -266,7 +257,6 @@ class WindowManager:
         self.restore_main()
         return False
 
-    # --- Mode Switching ---
     def show_compact(self):
         show_compact_window(self)
 
@@ -282,11 +272,10 @@ class WindowManager:
         finally: self._transitioning = False
 
     def minimize_main(self, toggle_compact=False):
-        """Triggers main window minimization with optional logic override."""
+        """Triggers main window minimization with optional logic override"""
         if not self.main_window: return
 
         if toggle_compact:
-            # Set latch to the inverse of global configuration
             current_setting = self.api.app_state.config.get('enable_compact_mode_on_minimize', True)
             self._override_compact_behavior = not current_setting
 

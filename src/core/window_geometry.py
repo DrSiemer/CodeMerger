@@ -1,11 +1,11 @@
 import sys
 
 class WindowGeometry:
-    """Provides stateless utility functions for Windows High-DPI physical math."""
+    """Provides stateless utility functions for Windows High-DPI physical math"""
 
     @staticmethod
     def get_target_monitor_handle(main_window, main_last_x, main_last_y):
-        """Identifies the monitor handle using Physical probing for accuracy."""
+        """Identifies the monitor handle using Physical probing for accuracy"""
         if sys.platform == "win32":
             try:
                 import ctypes
@@ -34,7 +34,7 @@ class WindowGeometry:
 
     @staticmethod
     def get_scale_factor(h_monitor=None, main_window=None, main_last_x=None, main_last_y=None):
-        """Retrieves the DPI scaling multiplier (e.g. 1.5) for the active monitor."""
+        """Retrieves the DPI scaling multiplier (e.g. 1.5) for the active monitor"""
         if sys.platform == "win32":
             try:
                 import ctypes
@@ -50,7 +50,7 @@ class WindowGeometry:
 
     @staticmethod
     def get_monitor_from_logical(x_log, y_log, main_window=None, main_last_x=None, main_last_y=None):
-        """Identifies the monitor handle containing a specific logical coordinate."""
+        """Identifies the monitor handle containing a specific logical coordinate"""
         if sys.platform == "win32":
             try:
                 import ctypes
@@ -79,7 +79,7 @@ class WindowGeometry:
 
     @staticmethod
     def get_monitor_work_area_phys(h_monitor):
-        """Fetches raw physical desktop bounds for a specific monitor handle."""
+        """Fetches raw physical desktop bounds for a specific monitor handle"""
         if sys.platform == "win32" and h_monitor:
             try:
                 import ctypes

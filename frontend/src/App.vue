@@ -24,20 +24,17 @@ const route = useRoute()
 const router = useRouter()
 
 const isCompact = computed(() => {
-  // Use router state if available, but fallback to raw location hash for initial production render
+  // Use location hash fallback for initial production render
   return route.path === '/compact' || window.location.hash.toLowerCase().includes('compact')
 })
 
 onMounted(() => {
   const signalReady = async () => {
     const waitForBridgeAndSignal = async (attempts = 0) => {
-      // PyWebView injection can be slow on localhost, so we check specifically for the api object
       if (window.pywebview && window.pywebview.api) {
         try {
-          // Ensure Router is fully synchronized with the window URL before signaling ready
           await router.isReady()
 
-          // Ensure initial hash navigation is picked up in production WebView
           if (window.location.hash.toLowerCase().includes('compact') && route.path !== '/compact') {
             await router.push('/compact')
           }
@@ -47,7 +44,7 @@ onMounted(() => {
         } catch (err) {
           console.error("Ready signal error:", err)
         }
-      } else if (attempts < 1000) { // Support slow engine startup (approx 20s total polling)
+      } else if (attempts < 1000) {
         setTimeout(() => waitForBridgeAndSignal(attempts + 1), 20)
       }
     }
@@ -75,7 +72,6 @@ onMounted(() => {
     if (isCtrl && key === 'v') {
       e.preventDefault()
 
-      // Text Input Routing (Project Starter / Modals)
       const activeEl = document.activeElement
       const isInput = activeEl && (activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type === 'text'))
 
@@ -92,25 +88,20 @@ onMounted(() => {
         return
       }
 
-      // Feature Routing
       if (isCompact.value) {
-        // Notify Compact view to trigger its specific cross-window paste request
         window.dispatchEvent(new CustomEvent('cm-compact-paste', { detail: { isAuto: isShift } }))
       } else if (activeProject.path) {
-        // Notify Dashboard to trigger response review or auto-apply
         window.dispatchEvent(new CustomEvent('cm-shortcut-paste', { detail: { toggleReview: isShift } }))
       }
     }
 
     if (isCtrl && key === 'c') {
-      // Feature routing for Prompts (if no text is currently selected in UI)
       const selection = window.getSelection().toString()
       if (!selection && activeProject.path) {
         e.preventDefault()
         if (isCompact.value) {
           window.dispatchEvent(new CustomEvent('cm-compact-copy', { detail: { codeOnly: isShift } }))
         } else {
-          // Dashboard copy: Ctrl+C = with instructions, Ctrl+Shift+C = code only
           await copyCode(!isShift)
         }
       }
@@ -138,7 +129,6 @@ onMounted(() => {
           <Loader2 class="w-16 h-16 text-cm-blue animate-spin" />
           <div class="text-xl font-bold tracking-widest text-white uppercase">Scanning Project</div>
 
-          <!-- Subtle Cancel Button -->
           <button
             @click="cancelLoadProject"
             class="text-gray-500 hover:text-gray-300 text-xs font-bold uppercase tracking-tighter transition-colors border-b border-transparent hover:border-gray-500 pt-2"
@@ -149,21 +139,16 @@ onMounted(() => {
       </div>
     </transition>
 
-    <!-- Content Area (Relative for absolute modals) -->
     <div id="content-area" class="flex-grow relative overflow-hidden flex flex-col">
       <router-view />
     </div>
 
-    <!-- Modal Layers -->
     <NewFiletypesModal v-if="newlyAddedFiletypes.length > 0" />
 
-    <!-- Global Layout Footer (Hidden in Compact Mode) -->
     <template v-if="!isCompact">
       <div id="global-footer" class="relative z-50 flex flex-col">
-        <!-- Shared Info Panel Component -->
         <InfoPanel />
 
-        <!-- Global Status Bar -->
         <footer id="status-bar" class="bg-cm-status-bg text-gray-300 px-6 py-2 flex items-center justify-between text-sm font-medium shrink-0 h-[36px]">
           <div
             class="tracking-wide truncate pr-4"

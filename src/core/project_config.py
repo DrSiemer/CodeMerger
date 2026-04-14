@@ -419,7 +419,7 @@ class ProjectConfig:
             return True
 
     def delete_profile(self, profile_name_to_delete):
-        """Removes a profile and resets the active pointer if necessary."""
+        """Removes a profile and resets the active pointer if necessary"""
         with self._lock:
             if profile_name_to_delete == "Default" or profile_name_to_delete not in self.profiles:
                 return False

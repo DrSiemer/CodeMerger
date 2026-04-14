@@ -4,9 +4,8 @@ import ctypes
 from ctypes import wintypes
 import mimetypes
 
-# --- DPI AWARENESS BOOTSTRAP ---
-# Must be called before any UI elements or windows are initialized to ensure
-# Windows calculates coordinates and scaling correctly on High DPI displays.
+# DPI AWARENESS BOOTSTRAP
+# Must be called before UI initialization to ensure correct coordinate scaling on High DPI displays
 if sys.platform == "win32":
     try:
         # DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (-4)
@@ -34,7 +33,6 @@ from src.core.updater import Updater
 from src.core.utils import load_app_version
 from src import constants as c
 
-# Import core backend logic
 from src.app_state import AppState
 from src.core.project_manager import ProjectManager
 from src.core.utils import load_active_file_extensions, save_config, update_and_get_new_filetypes
@@ -43,10 +41,6 @@ from src.core.window_manager import WindowManager
 log = logging.getLogger("CodeMerger")
 
 def main():
-    # --- Flag Handling ---
-    # --dev = Connect to localhost:5173 (Vite)
-    # --debug or --inspect = Load Production Bundle + Enable DevTools
-    # --console = Spawn a Windows console for GUI executable
     dev_mode = "--dev" in sys.argv
     debug_mode = "--debug" in sys.argv or "--inspect" in sys.argv or dev_mode
     show_console = "--console" in sys.argv
@@ -55,25 +49,21 @@ def main():
         try:
             ctypes.windll.kernel32.AllocConsole()
 
-            # Enable ANSI support (Virtual Terminal Processing) for the new console
+            # Enable ANSI support for formatted logs in the spawned console
             kernel32 = ctypes.windll.kernel32
-            # STD_OUTPUT_HANDLE = -11
             h_out = kernel32.GetStdHandle(-11)
             if h_out != -1:
                 mode = wintypes.DWORD()
                 if kernel32.GetConsoleMode(h_out, ctypes.byref(mode)):
-                    # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
                     kernel32.SetConsoleMode(h_out, mode.value | 0x0004)
 
-            # Redirect standard streams to the new console
             sys.stdout = open('CONOUT$', 'w', encoding='utf-8')
             sys.stderr = open('CONOUT$', 'w', encoding='utf-8')
         except Exception:
             pass
 
-    # --- MIME Type Registration ---
-    # Force-register correct MIME types to bypass incorrect Windows Registry settings
-    # which frequently cause ES module loading failures (text/plain mismatch).
+    # MIME Type Registration
+    # Force-registers correct MIME types to bypass ES module failures caused by incorrect registry settings
     mimetypes.init()
     mimetypes.add_type('application/javascript', '.js')
     mimetypes.add_type('application/javascript', '.mjs')
@@ -83,8 +73,7 @@ def main():
 
     setup_logging()
 
-    # --- WebView Engine Global Settings ---
-    # Explicitly allow file access for local bundle assets
+    # WebView Engine Global Settings
     webview.settings['ALLOW_FILE_URLS'] = True
     os.environ['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = '--allow-file-access-from-files'
 
