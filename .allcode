@@ -254,11 +254,11 @@
         },
         {
           "path": "src/api_parts/clipboard_api.py",
-          "tokens": 1175,
+          "tokens": 1289,
           "ignoreTokens": false,
-          "lines": 137,
-          "mtime": 1776188788.0805624,
-          "hash": "96a633961ce068f0f5237a22434e9d7942285096"
+          "lines": 146,
+          "mtime": 1776191650.0013287,
+          "hash": "c4bca081e520f4745b2b4c158f62c3ea62e82e02"
         },
         {
           "path": "src/api_parts/changes_api.py",
@@ -361,11 +361,11 @@
         },
         {
           "path": "frontend/src/composables/globalState.js",
-          "tokens": 339,
+          "tokens": 363,
           "ignoreTokens": false,
-          "lines": 53,
-          "mtime": 1776189419.3283832,
-          "hash": "039c8c2fce35237b29858f1bdfd91a66ecadcb6b"
+          "lines": 57,
+          "mtime": 1776191649.836012,
+          "hash": "ef9a4e0e99c346e4c01b72c18ae6796552dc44c7"
         },
         {
           "path": "frontend/src/composables/infoMode.js",
@@ -390,11 +390,11 @@
         },
         {
           "path": "frontend/src/composables/useReview.js",
-          "tokens": 1152,
+          "tokens": 1172,
           "ignoreTokens": false,
-          "lines": 156,
-          "mtime": 1776189732.9083128,
-          "hash": "e643f53e577c68d74acaf0accc77f4a80e03bfd8"
+          "lines": 157,
+          "mtime": 1776191649.957099,
+          "hash": "0a3b435c9a089662fa239451904520639b503b19"
         },
         {
           "path": "frontend/src/composables/useStarter.js",
@@ -458,11 +458,11 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "tokens": 1565,
+          "tokens": 1761,
           "ignoreTokens": false,
-          "lines": 198,
-          "mtime": 1776190210.351353,
-          "hash": "77582ba018ab3cb299a97235ee1d8482f7a1a2a9"
+          "lines": 220,
+          "mtime": 1776191650.0359156,
+          "hash": "341fe5f7a6602a240b0d693e91069778a3ebc4f3"
         },
         {
           "path": "frontend/src/views/CompactView.vue",
@@ -482,11 +482,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardNav.vue",
-          "tokens": 1117,
+          "tokens": 1126,
           "ignoreTokens": false,
-          "lines": 95,
-          "mtime": 1776170955.31535,
-          "hash": "c32cdacae6c48bb498c9c0899f0a2a6dcdd9cd6c"
+          "lines": 96,
+          "mtime": 1776190461.7590191,
+          "hash": "e031875102aa0a2494728383fda3eacaf120d496"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardActions.vue",
@@ -815,9 +815,16 @@
           "lines": 277,
           "mtime": 1776180460.7026894,
           "hash": "1055395f3bf01e2f014b549cb312e118d9386803"
+        },
+        {
+          "path": "frontend/src/components/FormatErrorModal.vue",
+          "tokens": 735,
+          "lines": 82,
+          "mtime": 1776191650.074532,
+          "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 145432,
+      "total_tokens": 145795,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -878,6 +885,7 @@
     "frontend/src/components/FileManagerModal.vue",
     "frontend/src/components/FileManagerRightPanel.vue",
     "frontend/src/components/FileTreeNode.vue",
+    "frontend/src/components/FormatErrorModal.vue",
     "frontend/src/components/InfoPanel.vue",
     "frontend/src/components/InstructionsModal.vue",
     "frontend/src/components/MarkdownRenderer.vue",

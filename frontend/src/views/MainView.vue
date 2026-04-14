@@ -12,6 +12,7 @@ import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
 import ColorPickerOverlay from '../components/ColorPickerOverlay.vue'
+import FormatErrorModal from '../components/FormatErrorModal.vue'
 
 const {
   activeProject,
@@ -26,7 +27,9 @@ const {
   config,
   statusMessage,
   showColorPicker,
-  resizeWindow
+  resizeWindow,
+  showFormatErrorModal,
+  formatErrorMessage
 } = useAppState()
 
 const showProjectModal = ref(false)
@@ -52,6 +55,14 @@ const openReviewModal = (mode) => {
 
 const closeReviewModal = () => {
   showReviewModal.value = false
+  if (revertToCompactOnClose.value) {
+    revertToCompactOnClose.value = false
+    minimizeWindow()
+  }
+}
+
+const closeFormatErrorModal = () => {
+  showFormatErrorModal.value = false
   if (revertToCompactOnClose.value) {
     revertToCompactOnClose.value = false
     minimizeWindow()
@@ -87,7 +98,7 @@ const onRemotePasteRequest = async (event) => {
   const updates = plan.updates || {}
   const creations = plan.creations || {}
   const deletions = plan.deletions_proposed || []
-  const skipped = plan.skipped_files ||[]
+  const skipped = plan.skipped_files || []
 
   // Initializes handled states while accounting for byte-for-byte identical files
   Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
@@ -119,6 +130,14 @@ const onRemoteReviewRequest = async (event) => {
   showReviewModal.value = true
 }
 
+// Handles remote paste error requests originating from the Compact window context
+const onRemotePasteError = (event) => {
+  const { message, revertOnClose } = event.detail
+  formatErrorMessage.value = message
+  revertToCompactOnClose.value = revertOnClose
+  showFormatErrorModal.value = true
+}
+
 // Handles global keyboard shortcuts dispatched from App.vue
 const handleShortcutPaste = async (event) => {
   if (!activeProject.path) return
@@ -146,12 +165,14 @@ const handleShortcutPaste = async (event) => {
 onMounted(() => {
   window.addEventListener('cm-remote-paste-request', onRemotePasteRequest)
   window.addEventListener('cm-remote-review-request', onRemoteReviewRequest)
+  window.addEventListener('cm-remote-paste-error', onRemotePasteError)
   window.addEventListener('cm-shortcut-paste', handleShortcutPaste)
 })
 
 onUnmounted(() => {
   window.removeEventListener('cm-remote-paste-request', onRemotePasteRequest)
   window.removeEventListener('cm-remote-review-request', onRemoteReviewRequest)
+  window.removeEventListener('cm-remote-paste-error', onRemotePasteError)
   window.removeEventListener('cm-shortcut-paste', handleShortcutPaste)
 })
 </script>
@@ -187,6 +208,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Modal Layers (Global view coverage) -->
+    <FormatErrorModal v-if="showFormatErrorModal" :message="formatErrorMessage" @close="closeFormatErrorModal" />
     <ProjectSelectorModal v-if="showProjectModal" @close="showProjectModal = false" />
     <SettingsModal v-if="showSettingsModal" :initial-tab="settingsTab" @close="showSettingsModal = false" />
     <FileManagerModal v-if="showFileManagerModal" @close="showFileManagerModal = false" />

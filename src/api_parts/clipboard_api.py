@@ -66,6 +66,15 @@ class ClipboardApi:
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
         if plan.get('status') == 'ERROR':
+            self._window_manager.restore_main()
+            time.sleep(0.1)
+
+            msg_json = json.dumps(plan.get('message', 'Format Error'))
+            js_cmd = f"window.dispatchEvent(new CustomEvent('cm-remote-paste-error', {{ detail: {{ message: {msg_json}, revertOnClose: {'true' if revert_on_close else 'false'} }} }}))"
+            try:
+                self._window_manager.main_window.evaluate_js(js_cmd)
+            except Exception as e:
+                log.error(f"Failed to trigger remote paste error signal: {e}")
             return False
 
         self._last_parsed_plan = plan

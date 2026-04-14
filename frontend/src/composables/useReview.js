@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { lastAiResponse, planFileStates, planOriginalContents, activeProject, statusMessage } from './globalState'
+import { lastAiResponse, planFileStates, planOriginalContents, activeProject, statusMessage, showFormatErrorModal, formatErrorMessage } from './globalState'
 import { useProject } from './useProject'
 
 export function useReview() {
@@ -40,7 +40,8 @@ export function useReview() {
 
       const plan = await window.pywebview.api.parse_markdown_response(text)
       if (plan.status === 'ERROR') {
-        alert(plan.message)
+        formatErrorMessage.value = plan.message
+        showFormatErrorModal.value = true
         return false
       }
 

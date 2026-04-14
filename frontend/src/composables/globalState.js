@@ -51,3 +51,7 @@ export const planOriginalContents = ref({})
 // Order Request Error Modal State
 export const showOrderErrorModal = ref(false)
 export const orderErrorMessage = ref('')
+
+// Format Error Modal State
+export const showFormatErrorModal = ref(false)
+export const formatErrorMessage = ref('')
