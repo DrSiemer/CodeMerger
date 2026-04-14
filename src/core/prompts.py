@@ -33,7 +33,7 @@ COMMENT_CLEANUP_PROMPT = """Let's clean up the comments in this project.
 
 **CRITICAL CONSTRAINTS:**
 - **Do not output files where nothing is changed.**
-- **ONLY change COMMENTS; do NOT modify code, indentation, or logic in ANY way!**
+- **CODE MUST REMAIN BYTE-FOR-BYTE IDENTICAL.** Do NOT modify code, indentation, spacing, or logic in ANY way! When you delete or move an inline comment, you must preserve the exact whitespace of the remaining code.
 - **Sparingly add new comments**, only in places where the code lacks necessary context for a new developer.
 - Preserve linter/compiler directives (e.g., eslint-disable, @ts-ignore).
 
@@ -58,7 +58,8 @@ Only keep a comment if an experienced developer would be surprised by the code.
 2. **Placement:** Move comments from the end of a line to the line *above* the code.
 3. **Formatting:** Do not use numbering. Prefer single-line comments for single sentences.
 4. **Punctuation:** Remove dots from the end of single-line comments.
-5. **Tense:** All rationale must be in the present tense (e.g., "Prevents crash" instead of "Fixed crash").
+5. **Tense:** Remove historical/past-tense commentary (e.g., change "Fixed crash" to "Prevents crash"). Do not alter the grammar of existing present-tense or imperative comments.
+6. **Spaces:** Do not delete spaces inside the code itself (e.g., do not turn `a = []` into `a =[]`).
 
 Note: If your cleanup removes almost ALL comments in a file, re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
 
