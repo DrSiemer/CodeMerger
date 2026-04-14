@@ -62,6 +62,7 @@ export function useAppState() {
       globalState.newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
 
       // Load all shared assets into global store once the bridge is available
+      globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')
       globalState.logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
       globalState.logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
       globalState.folderIcon.value = await window.pywebview.api.get_image_base64('folder.png')

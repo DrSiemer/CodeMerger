@@ -8,6 +8,7 @@ import {
 const {
   activeProject,
   lastAiResponse,
+  appIcon,
   getImage,
   copyCode,
   restoreMainWindow,
@@ -20,7 +21,6 @@ const {
 } = useAppState()
 
 const isCopying = ref(false)
-const appIcon = ref('')
 const hasPendingChangesInternal = ref(false)
 
 // Manual Window Dragging State
@@ -56,7 +56,6 @@ onMounted(async () => {
   // Ensure app state is loaded if compact mode is entry point
   await init()
 
-  appIcon.value = await getImage('icon.ico')
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('mouseup', onMouseUp)
   window.addEventListener('blur', onBlur)

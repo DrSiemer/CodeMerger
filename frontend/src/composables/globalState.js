@@ -22,6 +22,7 @@ export const lastAiResponse = ref(null)
 export const newlyAddedFiletypes = ref([])
 
 // Global Shared Assets
+export const appIcon = ref('')
 export const logoMask = ref('')
 export const logoMaskSmall = ref('')
 export const folderIcon = ref('')

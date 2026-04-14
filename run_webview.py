@@ -79,6 +79,7 @@ def main():
     mimetypes.add_type('application/javascript', '.mjs')
     mimetypes.add_type('text/css', '.css')
     mimetypes.add_type('image/svg+xml', '.svg')
+    mimetypes.add_type('image/x-icon', '.ico')
 
     setup_logging()
 
