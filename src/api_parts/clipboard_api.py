@@ -26,9 +26,8 @@ class ClipboardApi:
             report = scan_for_secrets(base_dir, files_to_copy)
             if report:
                 warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
-                # Coordination: Confirmation needs to happen on whatever window is active
-                active_win = self._window_manager.compact_window if (self._window_manager.compact_window and self._window_manager.compact_window.visible) else self._window_manager.main_window
-                proceed = active_win.create_confirmation_dialog("Secrets Detected", warning_message)
+                # Coordination: Use managed confirmation to ensure visibility regardless of mode
+                proceed = self._show_managed_confirmation("Secrets Detected", warning_message)
                 if not proceed:
                     return "Copy cancelled due to potential secrets."
 
@@ -57,8 +56,8 @@ class ClipboardApi:
         status = self.check_for_pending_changes()
         if status.get('has_pending'):
             msg = "An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?"
-            # Use compact window as it currently has focus during this request
-            proceed = self._window_manager.compact_window.create_confirmation_dialog("Confirm Overwrite", msg)
+            # Use managed confirmation to prevent dialog appearing directly behind the compact widget
+            proceed = self._show_managed_confirmation("Confirm Overwrite", msg)
             if not proceed:
                 return False
 
@@ -100,7 +99,7 @@ class ClipboardApi:
             proceed = True
             if dangerous_actions:
                 msg = "This operation will perform the following actions:\n\n- " + "\n- ".join(dangerous_actions) + "\n\nDo you want to proceed?"
-                proceed = self._window_manager.compact_window.create_confirmation_dialog("Confirm File Actions", msg)
+                proceed = self._show_managed_confirmation("Confirm File Actions", msg)
 
             if proceed:
                 success, msg = self.apply_full_plan(plan)
