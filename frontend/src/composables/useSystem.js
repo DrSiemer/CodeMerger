@@ -78,9 +78,9 @@ export function useSystem() {
     }
   }
 
-  const minimizeWindow = async () => {
+  const minimizeWindow = async (toggle = false) => {
     if (window.pywebview) {
-      await window.pywebview.api.minimize_window()
+      await window.pywebview.api.minimize_window(toggle)
     }
   }
 

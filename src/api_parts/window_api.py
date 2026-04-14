@@ -156,10 +156,10 @@ class WindowApi:
             return True
         return False
 
-    def minimize_window(self):
-        """Programmatically minimizes the active window"""
-        if self._window_manager and self._window_manager.main_window:
-            self._window_manager.main_window.minimize()
+    def minimize_window(self, toggle=False):
+        """Programmatically minimizes the active window, optionally toggling behavior logic."""
+        if self._window_manager:
+            self._window_manager.minimize_main(toggle_compact=toggle)
 
     def move_compact_window(self, x, y):
         """

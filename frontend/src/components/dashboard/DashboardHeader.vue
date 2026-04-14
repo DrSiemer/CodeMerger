@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { PenLine, AlertTriangle } from 'lucide-vue-next'
+import { PenLine, AlertTriangle, Minimize2 } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -21,7 +21,9 @@ const {
   renameProject,
   openProjectFolder,
   addAllNewFiles,
-  selectColor
+  selectColor,
+  minimizeWindow,
+  config
 } = useAppState()
 
 const isFolderHovered = ref(false)
@@ -101,6 +103,15 @@ const swatchStyle = computed(() => {
     'mask-position': 'center'
   }
 })
+
+// Context-aware UI metadata for the Minimize Toggle
+const minimizeInfoKey = computed(() => {
+  return config.value.enable_compact_mode_on_minimize ? 'minimize_to_taskbar' : 'minimize_to_compact'
+})
+
+const minimizeTitle = computed(() => {
+  return config.value.enable_compact_mode_on_minimize ? 'Minimize without showing Compact Mode' : 'Minimize to Compact Mode'
+})
 </script>
 
 <template>
@@ -174,6 +185,17 @@ const swatchStyle = computed(() => {
       >
         <AlertTriangle class="w-6 h-6" />
       </div>
+
+      <!-- Inverse Minimize Toggle -->
+      <button
+        v-if="activeProject.path"
+        @click="minimizeWindow(true)"
+        class="text-gray-400 hover:text-white transition-colors p-1"
+        :title="minimizeTitle"
+        v-info="minimizeInfoKey"
+      >
+        <Minimize2 class="w-5 h-5" />
+      </button>
 
       <!-- Folder Icon -->
       <img

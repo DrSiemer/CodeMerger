@@ -3,6 +3,8 @@ export const mainInfo = {
   "select_project": "Select a Project: Click to browse for a folder. CodeMerger will create a hidden .allcode file in that directory, that will store your file selections and project-specific instructions.",
   "project_name": "Project Name: This is the active project. Hover here to reveal the pen icon or double-click to set a custom title. Single-click to switch to another project (same as Select Project button).",
   "color_swatch": "Project Color: Pick a unique accent color for this project. This color is used in Compact Mode, to help you visually distinguish between multiple CodeMerger instances.",
+  "minimize_to_taskbar": "Minimize without showing Compact Mode: Click to minimize the application to the taskbar. This action ignores your global 'Compact Mode' setting for this click.",
+  "minimize_to_compact": "Minimize to Compact Mode: Click to minimize the application and show the Compact Mode panel. This action ignores your global 'Compact Mode' setting for this click.",
   "folder_icon": "Folder Actions: Click to open the project in your File Explorer. Ctrl-click to copy the full path. Alt-click to open a Command Prompt (CMD) window directly in this directory.",
   "manage_files": "Edit Merge List: Open the dual-panel management window. This is where you decide exactly which files are relevant to your current task and in what order the AI should read them.",
   "instructions": "Define Instructions: Set a project-specific Intro and Outro. This text will be wrapped around your code whenever you use 'Copy with Instructions'.",

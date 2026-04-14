@@ -164,11 +164,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2178,
+          "tokens": 2520,
           "ignoreTokens": false,
-          "lines": 247,
-          "mtime": 1776111754.3410578,
-          "hash": "c3e4ecca84e58e0d6b9d7361c84ef7b657d288f7"
+          "lines": 299,
+          "mtime": 1776170047.8322737,
+          "hash": "bae60d9143447df612c74d8f54f80dd9e24ce244"
         },
         {
           "path": "src/core/window_main.py",
@@ -213,8 +213,11 @@
         },
         {
           "path": "src/api_parts/window_api.py",
-          "tokens": 1479,
-          "ignoreTokens": false
+          "tokens": 1490,
+          "ignoreTokens": false,
+          "lines": 176,
+          "mtime": 1776170047.8686872,
+          "hash": "df7bba17a62c6e62c453fa04fc1c40d9ad867cde"
         },
         {
           "path": "src/api_parts/config_api.py",
@@ -335,8 +338,11 @@
         },
         {
           "path": "frontend/src/composables/useSystem.js",
-          "tokens": 838,
-          "ignoreTokens": false
+          "tokens": 844,
+          "ignoreTokens": false,
+          "lines": 131,
+          "mtime": 1776170047.9000351,
+          "hash": "a283e5c7953fba876e3b2d2a4803addfb658806a"
         },
         {
           "path": "frontend/src/composables/useProject.js",
@@ -373,8 +379,11 @@
         },
         {
           "path": "frontend/src/utils/info/mainInfo.js",
-          "tokens": 1041,
-          "ignoreTokens": false
+          "tokens": 1122,
+          "ignoreTokens": false,
+          "lines": 41,
+          "mtime": 1776170178.163164,
+          "hash": "d739ae87df74956b3f231a88de28decfabfd40de"
         },
         {
           "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -414,8 +423,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
-          "tokens": 1514,
-          "ignoreTokens": false
+          "tokens": 1694,
+          "ignoreTokens": false,
+          "lines": 213,
+          "mtime": 1776170178.2034156,
+          "hash": "650a078ce45dc1d407f31c3948d2718da0ba3439"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardNav.vue",
@@ -732,7 +744,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 140653,
+      "total_tokens": 141273,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

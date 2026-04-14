@@ -40,6 +40,9 @@ class WindowManager:
         self._stop_failsafe = threading.Event()
         self._current_main_monitor = None
 
+        # Latch to override minimize behavior for a single event
+        self._override_compact_behavior = None
+
         # Timing for minimum splash visibility
         self.start_time = time.time()
         self.MIN_SPLASH_DURATION = 0.4
@@ -222,7 +225,15 @@ class WindowManager:
 
     def _on_main_minimized(self):
         if self._transitioning or self._is_shutting_down: return
-        if self.api.app_state.config.get('enable_compact_mode_on_minimize', True):
+
+        should_compact = self.api.app_state.config.get('enable_compact_mode_on_minimize', True)
+
+        # Apply behavior override if set via custom minimize button
+        if self._override_compact_behavior is not None:
+            should_compact = self._override_compact_behavior
+            self._override_compact_behavior = None # Reset for next event
+
+        if should_compact:
             self._transitioning = True
             try:
                 self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-close-review"))')
@@ -269,6 +280,17 @@ class WindowManager:
                 self.main_window.restore()
                 if self.monitor: self.monitor.update_window(self.main_window)
         finally: self._transitioning = False
+
+    def minimize_main(self, toggle_compact=False):
+        """Triggers main window minimization with optional logic override."""
+        if not self.main_window: return
+
+        if toggle_compact:
+            # Set latch to the inverse of global configuration
+            current_setting = self.api.app_state.config.get('enable_compact_mode_on_minimize', True)
+            self._override_compact_behavior = not current_setting
+
+        self.main_window.minimize()
 
     def exit_all(self):
         self._is_shutting_down = True
