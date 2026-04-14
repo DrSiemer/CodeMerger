@@ -51,7 +51,9 @@ Only keep a comment if an experienced developer would be surprised by the code.
 9. No History: Delete comments describing changes, fixes, or renames. If a comment refers to the code's past state, delete it
 10. Present Tense: All rationale must be in the present tense
 
-Do not change code, only comments."""
+Do not change code, only comments.
+
+Note: If your cleanup removes almost ALL comments in a file, you are likely being too aggressive. Re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
 
 # Project Starter Prompt Templates
 
