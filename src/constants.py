@@ -8,7 +8,10 @@ STATUS_FADE_SECONDS = 5
 
 # File System
 # Explicit directories to ignore for performance during recursive scans
-SPECIAL_FILES_TO_IGNORE = {'.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode'}
+SPECIAL_FILES_TO_IGNORE = {
+    '.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git',
+    '.venv', '__pycache__', '.idea', '.vscode', '.vs', 'bin', 'obj', 'dist', 'build'
+}
 # Files treated as selected to prevent folders from appearing unselected if they are the only unselected items
 FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
 # Prefix for transient files created during atomic writes

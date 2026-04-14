@@ -20,6 +20,9 @@ from ..constants import (
 # Reference holds the lock for the application lifetime
 _instance_lock = None
 
+# Global Tiktoken instance to prevent re-initialization during batch operations
+_tiktoken_encoding = None
+
 def is_another_instance_running():
     """
     Identifies active instances via Named Mutex on Windows or file lock on POSIX
@@ -85,11 +88,14 @@ def strip_markdown_wrapper(text):
 
 def get_token_count_for_text(text):
     """Calculates the token count for a string"""
+    global _tiktoken_encoding
     try:
-        # Uses cl100k_base encoding for compatibility with gpt-4
-        encoding = tiktoken.get_encoding("cl100k_base")
+        if _tiktoken_encoding is None:
+            # Uses cl100k_base encoding for compatibility with gpt-4
+            _tiktoken_encoding = tiktoken.get_encoding("cl100k_base")
+
         # Counts all tokens including special sequences
-        return len(encoding.encode(text, disallowed_special=()))
+        return len(_tiktoken_encoding.encode(text, disallowed_special=()))
     except Exception:
         return -1
 
@@ -315,20 +321,24 @@ def parse_gitignore(base_dir):
 
 def is_ignored(path, base_dir, gitignore_data):
     """
-    Determines if a path should be ignored based on parsed .gitignore rules
+    Determines if a path should be ignored based on parsed .gitignore rules.
+    Optimized to minimize string allocations and Path object creations.
     """
-    target_path = Path(path)
-    if '.git' in target_path.parts:
+    if '.git' in path:
         return True
 
+    target_path = Path(path)
     is_ignored_flag = False
+
     for gitignore_dir, patterns in gitignore_data:
         try:
+            # We only check patterns if the current path is within or equal to the gitignore's directory
             relative_path = target_path.relative_to(gitignore_dir)
         except ValueError:
             continue
 
         relative_path_str = relative_path.as_posix()
+        parts = relative_path.parts
 
         for p_orig in patterns:
             p = p_orig.strip()
@@ -347,15 +357,18 @@ def is_ignored(path, base_dir, gitignore_data):
 
             match = False
             if not contains_slash:
-                if any(fnmatch.fnmatch(part, p) for part in relative_path.parts):
+                # If no slash, pattern matches against any component of the path
+                if any(fnmatch.fnmatch(part, p) for part in parts):
                     match = True
             else:
+                # If slash exists, pattern is relative to the directory of the .gitignore file
                 p_to_match = p.lstrip('/')
                 if fnmatch.fnmatch(relative_path_str, p_to_match) or \
                    relative_path_str.startswith(p_to_match + '/'):
                     match = True
 
             if match and is_dir_only:
+                # If the pattern is directory-only, it must not match a file
                 if relative_path_str == p and not target_path.is_dir():
                     match = False
 
@@ -364,6 +377,7 @@ def is_ignored(path, base_dir, gitignore_data):
                     is_ignored_flag = False
                 else:
                     is_ignored_flag = True
+
     return is_ignored_flag
 
 def load_app_version():

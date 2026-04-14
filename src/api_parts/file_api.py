@@ -32,46 +32,17 @@ class FileApi:
 
         unknown_files = set(project_config.unknown_files)
 
-        raw_tree = build_file_tree_data(
+        # Single-pass construction: metadata injection is now handled inside build_file_tree_data
+        return build_file_tree_data(
             base_dir=base_dir,
             file_extensions=file_extensions,
             gitignore_patterns=gitignore_patterns,
             filter_text=filter_text,
             is_extension_filter_active=is_ext_filter,
             selected_file_paths=selected_paths,
-            is_gitignore_filter_active=is_git_filter
+            is_gitignore_filter_active=is_git_filter,
+            unknown_files=unknown_files
         )
-
-        def inject_metadata(nodes):
-            for node in nodes:
-                rel_path = node['path']
-                node['is_new'] = rel_path in unknown_files
-
-                if rel_path in selected_paths:
-                    is_git_ignored = is_ignored(os.path.join(base_dir, rel_path), base_dir, gitignore_patterns)
-
-                    file_name_lower = node['name'].lower()
-                    file_ext = os.path.splitext(file_name_lower)[1]
-                    extensions_set = {ext for ext in file_extensions if ext.startswith('.')}
-                    exact_filenames_set = {ext for ext in file_extensions if not ext.startswith('.')}
-                    is_valid_ext = file_ext in extensions_set or file_name_lower in exact_filenames_set
-
-                    if is_git_ignored:
-                        node['is_filtered'] = True
-                        node['filter_reason'] = 'Normally hidden by .gitignore'
-                    elif not is_valid_ext:
-                        node['is_filtered'] = True
-                        node['filter_reason'] = 'Normally hidden by filetype settings'
-                    else:
-                        node['is_filtered'] = False
-                else:
-                    node['is_filtered'] = False
-
-                if 'children' in node:
-                    inject_metadata(node['children'])
-
-        inject_metadata(raw_tree)
-        return raw_tree
 
     def get_token_count(self, file_path):
         """Calculates token count for a specific file relative to project root."""
@@ -96,7 +67,7 @@ class FileApi:
         if not os.path.isfile(full_path):
             return 0
         try:
-            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                 content = f.read()
             return get_token_count_for_text(content)
         except Exception:

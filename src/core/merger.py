@@ -23,7 +23,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
     skipped_files = []
 
     # Use fragments to build markers to avoid triggering regex when CodeMerger bundles itself
-    # We fragment the marker strings here so that if an LLM is analyzing CodeMerger's own code, it doesn't accidentally trigger the parser's sentinel limits
     PREFIX = "--- "
     FILE_LABEL = "File: "
     EOF_LABEL = "End of file"
@@ -49,7 +48,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
     if use_wrapper:
         project_title = project_config.project_name
 
-        # Defensive coercion ensures fields corrupted by trailing commas are handled correctly
         intro_text = project_config.intro_text
         if isinstance(intro_text, (list, tuple)):
             intro_text = "\n".join(intro_text)
@@ -150,20 +148,13 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 
         final_parts = [f"# {project_title}"]
 
-        # Add Intro (Custom)
         if intro_text:
             final_parts.append(intro_text)
 
-        # Add Critical Formatting Instructions
         final_parts.append(formatting_instruction)
-
-        # Add header for code blocks
         final_parts.append("## Project Files")
-
-        # Add the Code
         final_parts.append(merged_code)
 
-        # Add Outro (Custom + Automation Warning)
         footer_parts = []
         if outro_text:
             footer_parts.append(outro_text)
@@ -186,19 +177,26 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
     return final_content, status_message
 
 def recalculate_token_count(base_dir, selected_files_info):
-    """Summarizes total tokens for the current selection set"""
+    """
+    Summarizes total tokens for the current selection set.
+    Optimized to handle massive projects by processing files individually
+    to reduce memory overhead and re-using the global tokenizer instance.
+    """
     if not selected_files_info:
         return 0
 
-    all_content = []
+    total = 0
     for file_info in selected_files_info:
         rel_path = file_info['path']
         full_path = os.path.join(base_dir, rel_path)
         try:
             with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
-                all_content.append(f.read())
+                content = f.read()
+                # Individual token counts are faster and more memory efficient than joining strings
+                count = get_token_count_for_text(content)
+                if count > 0:
+                    total += count
         except FileNotFoundError:
             continue
 
-    full_text = "\n".join(all_content)
-    return get_token_count_for_text(full_text)
+    return total
