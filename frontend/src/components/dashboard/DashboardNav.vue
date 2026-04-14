@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { Sprout } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const emit = defineEmits(['open-file-manager', 'open-new-profile-modal', 'open-starter-modal', 'open-project-modal'])
@@ -7,13 +8,9 @@ const emit = defineEmits(['open-file-manager', 'open-new-profile-modal', 'open-s
 const {
   activeProject,
   isProjectLoading,
-  starterIcon,
-  starterActiveIcon,
   switchProfile,
   deleteProfile
 } = useAppState()
-
-const isStarterHovered = ref(false)
 
 // --- Profile Management ---
 const prevProfile = async () => {
@@ -72,19 +69,14 @@ const deleteProfileHandler = async () => {
       <!-- Project Starter Icon Button -->
       <button
         id="btn-starter"
-        class="hover:brightness-110 transition-all p-1 flex items-center justify-center"
+        class="transition-all p-1 flex items-center justify-center group"
         title="Open Project Starter wizard"
-        @mouseenter="isStarterHovered = true"
-        @mouseleave="isStarterHovered = false"
         @click="emit('open-starter-modal')"
         v-info="'starter'"
         :disabled="isProjectLoading"
       >
-        <img
-          v-if="starterIcon"
-          :src="isStarterHovered ? (starterActiveIcon || starterIcon) : starterIcon"
-          class="w-7 h-7"
-          alt="Project Starter"
+        <Sprout
+          class="w-7 h-7 text-gray-400 group-hover:text-cm-green transition-colors"
         />
       </button>
 

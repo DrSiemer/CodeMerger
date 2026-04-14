@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
-import { HelpCircle, Check, X as XIcon, CheckCheck } from 'lucide-vue-next'
+import {
+  HelpCircle, Check, X as XIcon, CheckCheck,
+  LockKeyhole, LockKeyholeOpen, PencilLine
+} from 'lucide-vue-next'
 import MarkdownRenderer from '../../MarkdownRenderer.vue'
 import ReviewerQuestions from '../ReviewerQuestions.vue'
 import DiffViewer from '../../DiffViewer.vue'
@@ -18,7 +21,7 @@ const props = defineProps({
 
 const emit = defineEmits(['reset', 'rewrite', 'merge'])
 
-const { editorFontSize, handleZoom, lockedIcon, unlockedIcon } = useAppState()
+const { editorFontSize, handleZoom } = useAppState()
 
 const activeSegmentKey = ref(null)
 const reviewerEditMode = ref(false)
@@ -210,8 +213,8 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
           <span class="truncate pr-2">{{ renderSegmentTitle(key) }}</span>
         </div>
         <button @click.stop="toggleSignoff(key)" v-info="'starter_seg_indicator'" class="shrink-0 opacity-70 hover:opacity-100 transition-opacity" :title="signoffs[key] ? 'Unlock' : 'Lock'">
-          <img v-if="signoffs[key] && lockedIcon" :src="lockedIcon" class="h-4 w-auto object-contain" />
-          <img v-else-if="!signoffs[key] && unlockedIcon" :src="unlockedIcon" class="h-4 w-auto object-contain" />
+          <LockKeyhole v-if="signoffs[key]" class="w-4 h-4 text-cm-green" :stroke-width="2.5" />
+          <LockKeyholeOpen v-else class="w-4 h-4 text-gray-500" :stroke-width="2.5" />
         </button>
       </div>
     </div>
@@ -237,7 +240,10 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
                >
                  <HelpCircle class="w-3 h-3" /><span>Questions</span>
                </button>
-              <button @click="$emit('rewrite')" v-info="'starter_seg_rewrite'" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors">Rewrite</button>
+              <button @click="$emit('rewrite')" v-info="'starter_seg_rewrite'" class="bg-cm-blue text-white px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center">
+                <PencilLine class="w-3 h-3 mr-1" />
+                <span>Rewrite</span>
+              </button>
               <button @click="toggleReviewerEditMode(null, false)" v-info="'starter_view_toggle'" class="bg-gray-700 text-white px-3 py-1 rounded text-xs shadow transition-colors">{{ reviewerEditMode ? 'Render' : 'Edit' }}</button>
             </template>
           </div>
@@ -257,8 +263,14 @@ const toggleReviewerEditMode = async (event = null, isContextual = false) => {
           </div>
       </div>
       <div class="shrink-0 pt-4 flex justify-end space-x-4">
-          <button v-if="signoffs[activeSegmentKey]" @click="toggleSignoff(activeSegmentKey)" v-info="'starter_seg_unlock'" class="bg-cm-green hover:bg-green-600 text-white px-8 py-2 rounded font-bold shadow transition-colors">Unlock</button>
-          <button v-else @click="handleSignoffAndNext" v-info="'starter_seg_signoff'" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Lock & Next</button>
+          <button v-if="signoffs[activeSegmentKey]" @click="toggleSignoff(activeSegmentKey)" v-info="'starter_seg_unlock'" class="bg-cm-green hover:bg-green-600 text-white px-8 py-2 rounded font-bold shadow transition-colors flex items-center">
+            <LockKeyholeOpen class="w-4 h-4 mr-2" :stroke-width="2.5" />
+            <span>Unlock</span>
+          </button>
+          <button v-else @click="handleSignoffAndNext" v-info="'starter_seg_signoff'" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors flex items-center">
+            <LockKeyhole class="w-4 h-4 mr-2" :stroke-width="2.5" />
+            <span>Lock & Next</span>
+          </button>
           <button v-if="allSigned" @click="$emit('merge')" v-info="'starter_seg_merge'" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Merge & Finalize</button>
       </div>
     </div>

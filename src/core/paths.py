@@ -54,43 +54,6 @@ SPLASH_1_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_1.png')
 SPLASH_2_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_2.png')
 SPLASH_3_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_3.png')
 
-NEW_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles.png')
-NEW_FILES_MANY_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'newfiles_many.png')
-
-TRASH_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'trash.png')
-
-EDIT_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'edit.png')
-
 VERSION_FILE_PATH = os.path.join(BUNDLE_DIR, 'version.txt')
-
-COMPACT_MODE_CLOSE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'compactmode_close.png')
-
-DEFAULTS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'defaults.png')
-
-EXTRA_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files.png')
-EXTRA_FILES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'extra_files_active.png')
-
-GIT_FILES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'git_files.png')
-GIT_FILES_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'git_files_active.png')
-
-PATHS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths.png')
-PATHS_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'paths_active.png')
-
-ORDER_REQUEST_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'order_request.png')
-
-SETTINGS_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'settings.png')
-FILETYPES_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes.png')
-SETTINGS_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'settings_active.png')
-FILETYPES_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'filetypes_active.png')
-
-# Project Starter Icons
-PROJECT_STARTER_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter.png')
-PROJECT_STARTER_ACTIVE_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'project_starter_active.png')
-LOCKED_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'locked.png')
-UNLOCKED_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'unlocked.png')
-
-# Info Mode Icons
-INFO_ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info.png')
-INFO_ICON_ACTIVE_PATH = os.path.join(BUNDLE_DIR, 'assets', 'info_active.png')
 
 REGISTRY_KEY_PATH = r"Software\CodeMerger"

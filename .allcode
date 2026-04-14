@@ -60,10 +60,10 @@
         },
         {
           "path": "src/core/paths.py",
-          "mtime": 1776170589.8252153,
-          "hash": "8132ddde48d0603fb49d217a92e93cc2bd35d961",
-          "tokens": 1006,
-          "lines": 96
+          "mtime": 1776171175.7133417,
+          "hash": "20f8d2e0fe22d818a13bd90b57c9d3ba3b9fc480",
+          "tokens": 525,
+          "lines": 59
         },
         {
           "path": "src/core/logger.py",
@@ -328,11 +328,11 @@
         },
         {
           "path": "frontend/src/composables/globalState.js",
-          "tokens": 355,
+          "tokens": 326,
           "ignoreTokens": false,
-          "lines": 51,
-          "mtime": 1776170535.7993257,
-          "hash": "3ab0775cf0ee121913727970176917f058243dca"
+          "lines": 47,
+          "mtime": 1776171175.7449584,
+          "hash": "b014bed9757dc8a7294115e191a9a7b6155d707b"
         },
         {
           "path": "frontend/src/composables/infoMode.js",
@@ -367,11 +367,11 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "tokens": 840,
+          "tokens": 745,
           "ignoreTokens": false,
-          "lines": 101,
-          "mtime": 1776170535.8384757,
-          "hash": "49a04cf3a4b359136cb51b7966bf86bc2e0455a4"
+          "lines": 97,
+          "mtime": 1776171175.785828,
+          "hash": "375c399132f56f6682ffb503d033a56de75fc86d"
         },
         {
           "path": "frontend/src/directives/vInfo.js",
@@ -421,11 +421,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 2322,
+          "tokens": 2312,
           "ignoreTokens": false,
           "lines": 289,
-          "mtime": 1776169293.3754265,
-          "hash": "658705dbe75a8c027d6af4010a4634c0b8a92641"
+          "mtime": 1776171687.6711886,
+          "hash": "9671a620a74fc0c4f75190ded453c301f6f2c634"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
@@ -437,8 +437,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardNav.vue",
-          "tokens": 1171,
-          "ignoreTokens": false
+          "tokens": 1117,
+          "ignoreTokens": false,
+          "lines": 95,
+          "mtime": 1776170955.31535,
+          "hash": "c32cdacae6c48bb498c9c0899f0a2a6dcdd9cd6c"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardActions.vue",
@@ -610,8 +613,11 @@
         },
         {
           "path": "frontend/src/components/starter-steps/RewriteModal.vue",
-          "tokens": 1801,
-          "ignoreTokens": false
+          "tokens": 1811,
+          "ignoreTokens": false,
+          "lines": 229,
+          "mtime": 1776171947.296885,
+          "hash": "2a91f5337ce08d82fa8e478656846b3f61d7f2ce"
         },
         {
           "path": "frontend/src/components/starter-steps/NotesModal.vue",
@@ -628,13 +634,19 @@
         },
         {
           "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
-          "tokens": 1843,
-          "ignoreTokens": false
+          "tokens": 1876,
+          "ignoreTokens": false,
+          "lines": 178,
+          "mtime": 1776171687.7618785,
+          "hash": "1332f7d80f5f1c14e6ee95eca49551c4d2d4fdff"
         },
         {
           "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
-          "tokens": 3098,
-          "ignoreTokens": false
+          "tokens": 3209,
+          "ignoreTokens": false,
+          "lines": 278,
+          "mtime": 1776171687.7157085,
+          "hash": "7f44ca62692f8bf58d815883cfaec73c8db72e82"
         },
         {
           "path": "assets/reference/concept_questions.json",
@@ -750,7 +762,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 141216,
+      "total_tokens": 140701,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

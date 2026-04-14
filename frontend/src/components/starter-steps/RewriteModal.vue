@@ -176,11 +176,11 @@ const applyChanges = () => {
         @mousedown="startDrag"
         class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar shrink-0 cursor-move select-none"
       >
-        <div>
-          <h2 class="text-xl font-bold text-white pointer-events-none">{{ isMergedMode ? 'Rewrite Document' : 'Rewrite Unsigned Segments' }}</h2>
+        <div class="min-w-0">
+          <h2 class="text-xl font-bold text-white pointer-events-none truncate">{{ isMergedMode ? 'Rewrite Document' : 'Rewrite Unsigned Segments' }}</h2>
           <p class="text-gray-400 text-sm mt-1 pointer-events-none">Provide an instruction to modify the content.</p>
         </div>
-        <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors">
+        <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors shrink-0">
           <X class="w-6 h-6" />
         </button>
       </div>

@@ -25,10 +25,6 @@ export const newlyAddedFiletypes = ref([])
 export const appIcon = ref('')
 export const logoMask = ref('')
 export const logoMaskSmall = ref('')
-export const starterIcon = ref('')
-export const starterActiveIcon = ref('')
-export const lockedIcon = ref('')
-export const unlockedIcon = ref('')
 
 // AI Review State
 export const showReviewModal = ref(false)

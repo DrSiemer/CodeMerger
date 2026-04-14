@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import {
-  ClipboardPaste, Eye, Minimize2, AlertTriangle, Loader2, Trash2
+  ClipboardPaste, Eye, Expand, AlertTriangle, Loader2, Trash2
 } from 'lucide-vue-next'
 
 const {
@@ -224,7 +224,7 @@ const pasteTooltipText = computed(() => {
           class="text-gray-400 hover:text-white transition-colors"
           title="Restore dashboard (Ctrl-Click to exit application)"
         >
-          <Minimize2 class="w-4 h-4" />
+          <Expand class="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -252,7 +252,7 @@ const pasteTooltipText = computed(() => {
             id="btn-compact-paste"
             @click="handlePaste"
             class="w-full text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-full"
-            :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
+            :class="hasPendingChangesInternal ? 'bg-[#DE6808]' : 'bg-cm-green hover:bg-green-600'"
             :title="pasteTooltipText"
           >
             <span>Paste</span>

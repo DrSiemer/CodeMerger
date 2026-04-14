@@ -1,6 +1,6 @@
 <script setup>
 import { ref, nextTick, computed } from 'vue'
-import { HelpCircle, ChevronRight, Check, X as XIcon } from 'lucide-vue-next'
+import { HelpCircle, ChevronRight, Check, X as XIcon, PencilLine } from 'lucide-vue-next'
 import MarkdownRenderer from '../../MarkdownRenderer.vue'
 import ReviewerQuestions from '../ReviewerQuestions.vue'
 import DiffViewer from '../../DiffViewer.vue'
@@ -149,7 +149,10 @@ const acceptDiff = () => {
           >
             <HelpCircle class="w-4 h-4" /><span>Questions</span>
           </button>
-          <button @click="$emit('rewrite')" v-info="'starter_seg_rewrite'" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">Rewrite</button>
+          <button @click="$emit('rewrite')" v-info="'starter_seg_rewrite'" class="bg-cm-blue text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center">
+            <PencilLine class="w-4 h-4 mr-2" />
+            <span>Rewrite</span>
+          </button>
           <button @click="toggleReviewerEditMode(null, false)" v-info="'starter_view_toggle'" class="bg-gray-700 text-white px-4 py-1.5 rounded font-bold text-sm shadow transition-colors">{{ reviewerEditMode ? 'Finish Editing' : 'Edit Markdown' }}</button>
         </template>
       </div>
