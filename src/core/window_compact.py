@@ -41,7 +41,7 @@ def show_compact_window(manager):
 
     # 3. Calculate Target Physical Position
     if manager.compact_mode_last_x is not None and manager.compact_mode_last_y is not None:
-        log.info(f"  - Mode: Restoring Last Position (Logical {manager.compact_mode_last_x}, {manager.compact_mode_last_y})")
+        log.info(f"  - Mode: Restoring Transient Session Position (Logical {manager.compact_mode_last_x}, {manager.compact_mode_last_y})")
         t_x_phys = int(manager.compact_mode_last_x * scale)
         t_y_phys = int(manager.compact_mode_last_y * scale)
     else:

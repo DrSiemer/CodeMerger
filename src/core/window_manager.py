@@ -51,9 +51,10 @@ class WindowManager:
         self.main_last_w = geom.get('w', 1200)
         self.main_last_h = geom.get('h', 750)
 
-        # Compact Mode Position (Logical)
-        self.compact_mode_last_x = geom.get('compact_x')
-        self.compact_mode_last_y = geom.get('compact_y')
+        # Compact Mode Position is strictly transient and NEVER persisted.
+        # It resets to None every session to ensure it centers on activation.
+        self.compact_mode_last_x = None
+        self.compact_mode_last_y = None
 
         if dev_mode:
             self.base_url = "http://localhost:5173"
@@ -215,11 +216,10 @@ class WindowManager:
 
         try:
             if self.main_last_x is not None and self.main_last_y is not None:
+                # Save only main window geometry. Compact coordinates are transient.
                 self.api.app_state.config['main_window_geom'] = {
                     'x': int(self.main_last_x), 'y': int(self.main_last_y),
-                    'w': int(self.main_last_w), 'h': int(self.main_last_h),
-                    'compact_x': int(self.compact_mode_last_x) if self.compact_mode_last_x else None,
-                    'compact_y': int(self.compact_mode_last_y) if self.compact_mode_last_y else None
+                    'w': int(self.main_last_w), 'h': int(self.main_last_h)
                 }
                 save_config(self.api.app_state.config)
         except Exception: pass
