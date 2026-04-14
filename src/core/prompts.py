@@ -29,31 +29,37 @@ Do NOT:
 
 Use the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them."""
 
-COMMENT_CLEANUP_PROMPT = """Let's clean up the comments. Remove all LLM tags (e.g., [MODIFIED], [FIX]), transient feedback, and changelogs. Git handles history; the code shouldn't.
+COMMENT_CLEANUP_PROMPT = """Let's clean up the comments in this project.
 
-Directive: Optimize the code for a programmer that has never seen this code before. Assume they understand standard syntax.
+**CRITICAL CONSTRAINTS:**
+- **Do not output files where nothing is changed.**
+- **ONLY change COMMENTS; do NOT modify code, indentation, or logic in ANY way!**
+- **Preserve linter/compiler directives (e.g., eslint-disable, @ts-ignore).**
 
-The "Surprise Factor" Test:
+**Directive:** Optimize for a programmer who has never seen the code. Remove all LLM tags, transient feedback, and changelogs. Git handles history; the code shouldn't.
+
+**The "Surprise Factor" Test:**
 Only keep a comment if an experienced developer would be surprised by the code.
-- Keep comments for workarounds (fixing library bugs/race conditions).
-- Keep comments for atypical choices (why library X was used instead of Y).
-- Keep comments for complex business logic.
-- DELETE everything else.
+- **KEEP** comments for workarounds (fixing library bugs, race conditions, or OS quirks).
+- **KEEP** comments for atypical choices (why library X was used instead of Y).
+- **KEEP** comments for complex business logic (the "why," not the "how").
+- **KEEP** structural headers (e.g., "Navigation", "API Logic") that aid file scanning.
+- **DELETE everything else.**
 
-1. Remove Redundancy: Delete comments that explain the obvious or simply restate the code in English
-2. Keep Structure: Retain section headers (e.g., "Navigation", "API Logic") that help file navigation
-3. Keep Context: Retain comments that explain the "why" behind complex logic, but clean up the wording
-4. Clean Tags: Remove the [TAG] prefix. If the comment remains useful without the tag, keep it; otherwise, delete it
-5. Avoid comments directly behind code
-6. Do not use numbering in comments
-7. Remove dots from the end of single line comments
-8. Single line comments for single sentences are preferred, even if that makes them long
-9. No History: Delete comments describing changes, fixes, or renames. If a comment refers to the code's past state, delete it
-10. Present Tense: All rationale must be in the present tense
+**Intelligent Tag Handling (e.g., [FIX], [MODIFIED], [TAG]):**
+1. **Strip the Tag:** Mentally remove the [TAG] prefix.
+2. **Evaluate the Residue:**
+   - If the remaining text describes a **change/history** (e.g., "Renamed function", "Fixed bug in loop"), **DELETE the entire comment**.
+   - If the remaining text explains **permanent logic or a "why"** (e.g., "Safari fails to parse this date format without the Z offset"), **KEEP the text but REMOVE the [TAG]**.
 
-Do not change code, only comments.
+**Stylistic Rules:**
+1. **Remove Redundancy:** Delete comments that explain the obvious or restate code in English.
+2. **Placement:** Move comments from the end of a line to the line *above* the code.
+3. **Formatting:** Do not use numbering. Prefer single-line comments for single sentences.
+4. **Punctuation:** Remove dots from the end of single-line comments.
+5. **Tense:** All rationale must be in the present tense (e.g., "Prevents crash" instead of "Fixed crash").
 
-Note: If your cleanup removes almost ALL comments in a file, you are likely being too aggressive. Re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
+Note: If your cleanup removes almost ALL comments in a file, re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
 
 # Project Starter Prompt Templates
 
