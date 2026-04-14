@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import {
   Eye, Undo2, BookOpen, ChevronDown, ChevronRight,
-  ChevronDownSquare, ChevronUpSquare
+  ChevronDownSquare, ChevronUpSquare, ChevronUp
 } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import DiffViewer from '../DiffViewer.vue'
@@ -44,6 +44,28 @@ const totalFileCount = computed(() => {
   const d = (lastAiResponse.value?.deletions_proposed || []).length
   return u + c + d
 })
+
+const getHeaderId = (path) => `file-header-${path.replace(/[\\/.]/g, '-')}`
+
+const collapseAndScroll = (path) => {
+  emit('toggle-diff', path)
+  setTimeout(() => {
+    const el = document.getElementById(getHeaderId(path))
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, 50)
+}
+
+const collapseCommentary = () => {
+  showCommentary.value = false
+  setTimeout(() => {
+    const el = document.getElementById('commentary-header')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, 50)
+}
 </script>
 
 <template>
@@ -52,6 +74,7 @@ const totalFileCount = computed(() => {
     <!-- AI Commentary Expandable -->
     <div v-if="commentary" class="border border-gray-700 rounded bg-[#1A1A1A] overflow-hidden">
       <button
+        id="commentary-header"
         @click="showCommentary = !showCommentary"
         v-info="'review_commentary'"
         class="w-full flex items-center justify-between px-4 py-3 hover:bg-white/5 transition-colors"
@@ -69,6 +92,12 @@ const totalFileCount = computed(() => {
       </button>
       <div v-if="showCommentary" class="p-4 border-t border-gray-700 bg-cm-dark-bg">
         <MarkdownRenderer :content="commentary" :fontSize="editorFontSize" />
+        <div class="flex justify-end mt-3">
+          <button @click="collapseCommentary" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-1.5 rounded transition-colors flex items-center">
+            <ChevronUp class="w-3.5 h-3.5 mr-1" />
+            Collapse
+          </button>
+        </div>
       </div>
     </div>
 
@@ -92,7 +121,7 @@ const totalFileCount = computed(() => {
       </div>
       <div class="space-y-3">
         <div v-for="(content, path) in lastAiResponse.updates" :key="path" class="border border-gray-700 rounded bg-cm-input-bg/30">
-          <div class="flex items-center justify-between p-3">
+          <div class="flex items-center justify-between p-3" :id="getHeaderId(path)">
             <div class="flex items-center space-x-3 min-w-0">
               <span
                 class="font-mono text-sm truncate"
@@ -109,8 +138,8 @@ const totalFileCount = computed(() => {
                   <Eye class="w-3.5 h-3.5 mr-1.5" />
                   Diff
                 </button>
-                <button @click="$emit('accept', path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors" title="Apply change to this file">Accept</button>
                 <button @click="$emit('discard', path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors" title="Skip this file for now">Discard</button>
+                <button @click="$emit('accept', path, 'modify')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors" title="Apply change to this file">Accept</button>
               </template>
               <div v-else class="flex items-center space-x-2">
                 <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="Inspect text changes for this applied file">
@@ -126,6 +155,21 @@ const totalFileCount = computed(() => {
           </div>
           <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
             <DiffViewer :old-text="planOriginalContents[path]" :new-text="content" :fontSize="editorFontSize" :filename="path" />
+            <div class="flex justify-end items-center space-x-2 mt-3">
+              <button @click="collapseAndScroll(path)" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-1.5 rounded transition-colors flex items-center">
+                <ChevronUp class="w-3.5 h-3.5 mr-1" />
+                Collapse
+              </button>
+              <template v-if="planFileStates[path] === 'pending'">
+                <button @click="$emit('discard', path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Discard</button>
+                <button @click="$emit('accept', path, 'modify')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-4 py-1.5 rounded transition-colors">Accept</button>
+              </template>
+              <template v-else-if="planFileStates[path] !== 'skipped'">
+                 <button @click="$emit('undo', path, 'modify')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
+                   <Undo2 class="w-3.5 h-3.5 mr-1.5" /> Undo
+                 </button>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -139,13 +183,13 @@ const totalFileCount = computed(() => {
       </div>
       <div class="space-y-3">
         <div v-for="(content, path) in lastAiResponse.creations" :key="path" class="border border-gray-700 rounded bg-cm-input-bg/30">
-          <div class="flex items-center justify-between p-3">
+          <div class="flex items-center justify-between p-3" :id="getHeaderId(path)">
             <span class="font-mono text-sm text-gray-200" :class="{'text-gray-500 line-through': planFileStates[path] === 'applied'}">{{ path }}</span>
             <div class="flex items-center space-x-2">
               <template v-if="planFileStates[path] === 'pending'">
                 <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors" title="View file content">View</button>
-                <button @click="$emit('accept', path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors" title="Create this new file">Accept</button>
                 <button @click="$emit('discard', path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors" title="Do not create this file">Discard</button>
+                <button @click="$emit('accept', path, 'create')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-3 py-1 rounded transition-colors" title="Create this new file">Accept</button>
               </template>
               <div v-else class="flex items-center space-x-2">
                 <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="View file content for this newly created file">
@@ -161,6 +205,21 @@ const totalFileCount = computed(() => {
           </div>
           <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
             <DiffViewer :new-text="content" :fontSize="editorFontSize" :filename="path" />
+            <div class="flex justify-end items-center space-x-2 mt-3">
+              <button @click="collapseAndScroll(path)" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-1.5 rounded transition-colors flex items-center">
+                <ChevronUp class="w-3.5 h-3.5 mr-1" />
+                Collapse
+              </button>
+              <template v-if="planFileStates[path] === 'pending'">
+                <button @click="$emit('discard', path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Discard</button>
+                <button @click="$emit('accept', path, 'create')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-4 py-1.5 rounded transition-colors">Accept</button>
+              </template>
+              <template v-else-if="planFileStates[path] !== 'skipped'">
+                 <button @click="$emit('undo', path, 'create')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
+                   <Undo2 class="w-3.5 h-3.5 mr-1.5" /> Undo
+                 </button>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -173,7 +232,7 @@ const totalFileCount = computed(() => {
         <div class="h-px bg-cm-warn/30 flex-grow"></div>
       </div>
       <div v-for="path in lastAiResponse.deletions_proposed" :key="path" class="border border-gray-700 rounded bg-cm-input-bg/30 mb-3">
-        <div class="p-3 flex items-center justify-between">
+        <div class="p-3 flex items-center justify-between" :id="getHeaderId(path)">
           <span
             class="font-mono text-sm truncate"
             :class="['pending', 'skipped'].includes(planFileStates[path]) ? (planFileStates[path] === 'skipped' ? 'text-[#888888]' : 'text-gray-200') : 'text-gray-500 line-through'"
@@ -184,8 +243,8 @@ const totalFileCount = computed(() => {
             </template>
             <template v-else-if="planFileStates[path] === 'pending'">
               <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-cm-blue hover:bg-blue-500 text-white px-3 py-1 rounded transition-colors" title="View file content before deletion">View</button>
-              <button @click="$emit('accept', path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-3 py-1 rounded transition-colors" title="Delete this file from disk">Accept Delete</button>
               <button @click="$emit('discard', path)" v-info="'review_file_action'" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded transition-colors" title="Keep this file">Keep</button>
+              <button @click="$emit('accept', path, 'delete')" v-info="'review_file_action'" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-3 py-1 rounded transition-colors" title="Delete this file from disk">Accept Delete</button>
             </template>
             <div v-else class="flex items-center space-x-2">
               <button @click="$emit('toggle-diff', path)" v-info="'review_diff'" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1 rounded transition-colors flex items-center" title="View file content that was deleted">
@@ -202,6 +261,21 @@ const totalFileCount = computed(() => {
         <div v-if="visibleDiffs.has(path)" class="p-3 pt-0">
           <!-- For deletions, DiffViewer shows current content as 'removed' -->
           <DiffViewer :old-text="planOriginalContents[path]" new-text="" :fontSize="editorFontSize" :filename="path" />
+          <div class="flex justify-end items-center space-x-2 mt-3">
+            <button @click="collapseAndScroll(path)" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-1.5 rounded transition-colors flex items-center">
+              <ChevronUp class="w-3.5 h-3.5 mr-1" />
+              Collapse
+            </button>
+            <template v-if="planFileStates[path] === 'pending'">
+              <button @click="$emit('discard', path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Keep</button>
+              <button @click="$emit('accept', path, 'delete')" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-4 py-1.5 rounded transition-colors">Accept Delete</button>
+            </template>
+            <template v-else-if="planFileStates[path] !== 'skipped'">
+               <button @click="$emit('undo', path, 'delete')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
+                 <Undo2 class="w-3.5 h-3.5 mr-1.5" /> Undo
+               </button>
+            </template>
+          </div>
         </div>
       </div>
     </div>

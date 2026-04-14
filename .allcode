@@ -529,19 +529,19 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "tokens": 3705,
+          "tokens": 3713,
           "ignoreTokens": false,
-          "lines": 408,
-          "mtime": 1776111284.7451613,
-          "hash": "b12e76806db05ea615e5928e64f511f4903df46c"
+          "lines": 409,
+          "mtime": 1776183157.2225072,
+          "hash": "7074cae28fd33ed356704f9df15dda288aa413e5"
         },
         {
           "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-          "tokens": 3300,
+          "tokens": 4526,
           "ignoreTokens": false,
-          "lines": 222,
-          "mtime": 1776111284.801186,
-          "hash": "e85fa246e179a93343cbfd9f1bc70b8af4e695f5"
+          "lines": 296,
+          "mtime": 1776183651.121863,
+          "hash": "a9f462d45492bf8f3e2c3caaf933ef197cbbbaf1"
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
@@ -799,7 +799,7 @@
           "hash": "1055395f3bf01e2f014b549cb312e118d9386803"
         }
       ],
-      "total_tokens": 144367,
+      "total_tokens": 145601,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

@@ -209,6 +209,7 @@ const acceptChange = async (path, type) => {
 
 const discardChange = (path) => {
   planFileStates.value[path] = 'rejected'
+  visibleDiffs.value.delete(path)
 }
 
 const undoChange = async (path, type) => {
