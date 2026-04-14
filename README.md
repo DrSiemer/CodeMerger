@@ -78,6 +78,14 @@ The download is a portable executable for Windows. Ignore the Windows Defender S
     - Double-click the move bar or click the close button to exit compact mode and restore the main window. **Ctrl-clicking** the close button will exit the application immediately.
 
 
+### Command Line Arguments (Advanced)
+
+If you are running the built executable (`CodeMerger.exe`), you can use the following flags via a terminal (CMD/PowerShell):
+
+- `--console`: (Windows only) Spawns a native command prompt window alongside the app. This allows you to view real-time logs and DPI debug information without opening the log file in AppData.
+- `--inspect`: Enables "Inspect Element" and Developer Tools (Ctrl+Shift+I) in the production bundle. Useful for debugging CSS or frontend logic issues.
+
+
 ![Settings](./dev/screenshot_04a.jpg "Project Starter")
 
 

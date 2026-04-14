@@ -1,6 +1,8 @@
 import sys
 import os
 import ctypes
+from ctypes import wintypes
+import mimetypes
 
 # --- DPI AWARENESS BOOTSTRAP ---
 # Must be called before any UI elements or windows are initialized to ensure
@@ -41,22 +43,65 @@ from src.core.window_manager import WindowManager
 log = logging.getLogger("CodeMerger")
 
 def main():
+    # --- Flag Handling ---
+    # --dev = Connect to localhost:5173 (Vite)
+    # --debug or --inspect = Load Production Bundle + Enable DevTools
+    # --console = Spawn a Windows console for GUI executable
+    dev_mode = "--dev" in sys.argv
+    debug_mode = "--debug" in sys.argv or "--inspect" in sys.argv or dev_mode
+    show_console = "--console" in sys.argv
+
+    if show_console and sys.platform == "win32":
+        try:
+            ctypes.windll.kernel32.AllocConsole()
+
+            # Enable ANSI support (Virtual Terminal Processing) for the new console
+            kernel32 = ctypes.windll.kernel32
+            # STD_OUTPUT_HANDLE = -11
+            h_out = kernel32.GetStdHandle(-11)
+            if h_out != -1:
+                mode = wintypes.DWORD()
+                if kernel32.GetConsoleMode(h_out, ctypes.byref(mode)):
+                    # ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+                    kernel32.SetConsoleMode(h_out, mode.value | 0x0004)
+
+            # Redirect standard streams to the new console
+            sys.stdout = open('CONOUT$', 'w', encoding='utf-8')
+            sys.stderr = open('CONOUT$', 'w', encoding='utf-8')
+        except Exception:
+            pass
+
+    # --- MIME Type Registration ---
+    # Force-register correct MIME types to bypass incorrect Windows Registry settings
+    # which frequently cause ES module loading failures (text/plain mismatch).
+    mimetypes.init()
+    mimetypes.add_type('application/javascript', '.js')
+    mimetypes.add_type('application/javascript', '.mjs')
+    mimetypes.add_type('text/css', '.css')
+    mimetypes.add_type('image/svg+xml', '.svg')
+
     setup_logging()
+
+    # --- WebView Engine Global Settings ---
+    # Explicitly allow file access for local bundle assets
+    webview.settings['ALLOW_FILE_URLS'] = True
+    os.environ['WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS'] = '--allow-file-access-from-files'
+
     monitor = None
     try:
+        log.info("--- CodeMerger Startup ---")
+        bundle_dir = get_bundle_dir()
+        log.info(f"Bundle Directory: {bundle_dir}")
+
         newly_added_filetypes = update_and_get_new_filetypes()
         app_state = AppState()
         project_manager = ProjectManager(load_active_file_extensions)
         api = Api(app_state, project_manager, newly_added_filetypes)
         monitor = FileMonitorThread(None, app_state, project_manager)
 
-        # Mode detection:
-        # --dev = Connect to localhost:5173 (Vite)
-        # --debug = Load Production Bundle + Enable DevTools
-        dev_mode = "--dev" in sys.argv
-        debug_mode = "--debug" in sys.argv or dev_mode
-
         manager = WindowManager(api, monitor, dev_mode=dev_mode, debug_mode=debug_mode)
+        log.info(f"Base URL Resolved: {manager.base_url}")
+
         manager.start()
     except Exception as e:
         log.error(f"Fatal error during startup:\n{traceback.format_exc()}")

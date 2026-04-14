@@ -37,12 +37,16 @@ def setup_logging():
 
     # Rich Handler for console output
     if not log.handlers:
-        # Only uses Rich if a functional TTY exists
-        if sys.stdout and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty():
+        # Detect if we should use the Rich handler (standard TTY or forced via --console)
+        is_console_forced = "--console" in sys.argv
+        is_tty = sys.stdout and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
+
+        if is_console_forced or is_tty:
             try:
                 console_handler = RichHandler(
                     rich_tracebacks=True,
-                    tracebacks_show_locals=True
+                    tracebacks_show_locals=True,
+                    markup=True
                 )
                 console_handler.setFormatter(logging.Formatter("%(message)s"))
                 log.addHandler(console_handler)

@@ -59,7 +59,8 @@ class WindowManager:
             self.base_url = "http://localhost:5173"
         else:
             bundle_dir = get_bundle_dir()
-            self.base_url = os.path.abspath(os.path.join(bundle_dir, 'frontend', 'dist', 'index.html'))
+            index_path = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
+            self.base_url = os.path.abspath(os.path.normpath(index_path))
 
         app_version = load_app_version()
         # Initialize updater with self as parent to allow access to exit_all()
@@ -99,7 +100,9 @@ class WindowManager:
         threading.Thread(target=show_splash_warm, daemon=True).start()
 
         def failsafe():
-            if self._stop_failsafe.wait(10.0): return
+            # Extended window (20s) to allow slow engines to finish without interruption.
+            # Fast systems will exit this wait early via _handshake_received.
+            if self._stop_failsafe.wait(20.0): return
             if not self._handshake_received:
                 self.show_main_and_close_splash(source="Failsafe")
 

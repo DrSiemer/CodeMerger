@@ -1,7 +1,10 @@
 import os
 import base64
 import webview
+import logging
 from src.core.paths import SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_3_PATH
+
+log = logging.getLogger("CodeMerger")
 
 def get_splash_html():
     """Generates the animated HTML for the CodeMerger splash screen."""
@@ -43,6 +46,11 @@ def create_splash_window(m_left, m_top, m_w_phys, m_h_phys, scale):
     s_w_log, s_h_log = 400, 280
     s_x_phys = int(m_left + (m_w_phys - (s_w_log * scale)) / 2)
     s_y_phys = int(m_top + (m_h_phys - (s_h_log * scale)) / 2)
+
+    log.info("[DPI Debug] Splash Screen Initial Placement:")
+    log.info(f"  - Monitor Phys: L={m_left}, T={m_top}, W={m_w_phys}, H={m_h_phys}")
+    log.info(f"  - Scale: {scale}")
+    log.info(f"  - Result Phys: X={s_x_phys}, Y={s_y_phys}")
 
     return webview.create_window(
         "CM-Splash", html=get_splash_html(), width=s_w_log, height=s_h_log,
