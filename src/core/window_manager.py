@@ -36,6 +36,7 @@ class WindowManager:
         self._is_shutting_down = False
         self._transitioning = False
         self._handshake_received = False
+        self._handshake_lock = threading.Lock()
         self._stop_failsafe = threading.Event()
         self._current_main_monitor = None
 
@@ -101,11 +102,26 @@ class WindowManager:
         threading.Thread(target=show_splash_warm, daemon=True).start()
 
         def failsafe():
-            # Extended window (20s) to allow slow engines to finish without interruption.
-            # Fast systems will exit this wait early via _handshake_received.
-            if self._stop_failsafe.wait(20.0): return
+            # Proactively check every second for engine responsiveness to ensure
+            # we start as soon as possible, even if the signal was somehow 'missed'.
+            for _ in range(20):
+                if self._stop_failsafe.wait(1.0):
+                    return
+
+                if self._is_shutting_down or self._handshake_received:
+                    return
+
+                if self.main_window:
+                    try:
+                        # Attempt to probe if the bridge is ready
+                        if self.main_window.evaluate_js('window.pywebview && window.pywebview.api ? true : false'):
+                            self.show_main_and_close_splash(source="Proactive Check")
+                            return
+                    except Exception:
+                        pass
+
             if not self._handshake_received:
-                self.show_main_and_close_splash(source="Failsafe")
+                self.show_main_and_close_splash(source="Failsafe Timeout")
 
         threading.Thread(target=failsafe, daemon=True).start()
 
@@ -113,12 +129,17 @@ class WindowManager:
         webview.start(gui='edgechromium', debug=self.debug_mode)
 
     def show_main_and_close_splash(self, source="Failsafe"):
-        if self._handshake_received or self._is_shutting_down: return
+        with self._handshake_lock:
+            if self._handshake_received or self._is_shutting_down:
+                return
+            self._handshake_received = True
 
         if source == "Handshake":
             log.info("Frontend handshake received. Transitioning from splash.")
+        elif source == "Proactive Check":
+            log.info("Proactive check detected active engine. Transitioning from splash.")
         else:
-            log.warning("Frontend handshake timeout. Triggering failsafe show.")
+            log.warning(f"Frontend handshake alert ({source}). Triggering show.")
             # Force reload the URL in case the browser engine stalled on initial resolve
             if self.main_window:
                 try:
@@ -126,7 +147,6 @@ class WindowManager:
                 except Exception as e:
                     log.error(f"Failsafe URL reload failed: {e}")
 
-        self._handshake_received = True
         self._stop_failsafe.set()
 
         elapsed = time.time() - self.start_time
@@ -150,7 +170,8 @@ class WindowManager:
 
         if self.monitor:
             self.monitor.update_window(self.main_window)
-            if not self.monitor.is_alive(): self.monitor.start()
+            if not self.monitor.is_alive():
+                self.monitor.start()
 
         create_compact_window(self)
 
