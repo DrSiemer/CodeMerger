@@ -47,7 +47,7 @@ onMounted(() => {
         } catch (err) {
           console.error("Ready signal error:", err)
         }
-      } else if (attempts < 200) { // Support slow dev startup (approx 4s total polling)
+      } else if (attempts < 1000) { // Support slow engine startup (approx 20s total polling)
         setTimeout(() => waitForBridgeAndSignal(attempts + 1), 20)
       }
     }

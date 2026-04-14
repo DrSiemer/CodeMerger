@@ -115,7 +115,7 @@ class WindowApi:
 
     def signal_ui_ready(self):
         if self._window_manager:
-            self._window_manager.show_main_and_close_splash()
+            self._window_manager.show_main_and_close_splash(source="Handshake")
 
     def get_image_base64(self, filename):
         """

@@ -101,16 +101,27 @@ class WindowManager:
         def failsafe():
             if self._stop_failsafe.wait(10.0): return
             if not self._handshake_received:
-                log.warning("Frontend handshake timeout. Triggering failsafe show.")
-                self.show_main_and_close_splash()
+                self.show_main_and_close_splash(source="Failsafe")
 
         threading.Thread(target=failsafe, daemon=True).start()
 
         webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
         webview.start(gui='edgechromium', debug=self.debug_mode)
 
-    def show_main_and_close_splash(self):
+    def show_main_and_close_splash(self, source="Failsafe"):
         if self._handshake_received or self._is_shutting_down: return
+
+        if source == "Handshake":
+            log.info("Frontend handshake received. Transitioning from splash.")
+        else:
+            log.warning("Frontend handshake timeout. Triggering failsafe show.")
+            # Force reload the URL in case the browser engine stalled on initial resolve
+            if self.main_window:
+                try:
+                    self.main_window.load_url(self.base_url)
+                except Exception as e:
+                    log.error(f"Failsafe URL reload failed: {e}")
+
         self._handshake_received = True
         self._stop_failsafe.set()
 
