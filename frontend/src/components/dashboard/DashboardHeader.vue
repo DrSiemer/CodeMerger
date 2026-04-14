@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { PenLine, AlertTriangle, Minimize2 } from 'lucide-vue-next'
+import { PenLine, AlertTriangle, Minimize2, FolderOpen } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -16,8 +16,6 @@ const {
   activeProject,
   isProjectLoading,
   logoMask,
-  folderIcon,
-  folderActiveIcon,
   renameProject,
   openProjectFolder,
   addAllNewFiles,
@@ -25,8 +23,6 @@ const {
   minimizeWindow,
   config
 } = useAppState()
-
-const isFolderHovered = ref(false)
 
 // Interaction state to distinguish between single and double clicks on the project title
 let clickTimer = null
@@ -197,17 +193,16 @@ const minimizeTitle = computed(() => {
         <Minimize2 class="w-5 h-5" />
       </button>
 
-      <!-- Folder Icon -->
-      <img
-        v-if="activeProject.path && folderIcon"
-        :src="isFolderHovered ? (folderActiveIcon || folderIcon) : folderIcon"
-        class="w-7 h-auto cursor-pointer transition-opacity"
-        title="Open project folder (Ctrl-Click: Copy Path, Alt-Click: Open Command Prompt)"
+      <!-- Folder Icon (Lucide SVG replacement) -->
+      <button
+        v-if="activeProject.path"
         @click="openProjectFolder($event)"
-        @mouseenter="isFolderHovered = true"
-        @mouseleave="isFolderHovered = false"
+        class="text-gray-400 hover:text-white transition-colors p-1"
+        title="Open project folder (Ctrl-Click: Copy Path, Alt-Click: Open Command Prompt)"
         v-info="'folder_icon'"
-      />
+      >
+        <FolderOpen class="w-6 h-6" />
+      </button>
     </div>
   </header>
 </template>

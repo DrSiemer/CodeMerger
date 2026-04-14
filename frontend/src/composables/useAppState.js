@@ -65,8 +65,6 @@ export function useAppState() {
       globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')
       globalState.logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
       globalState.logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
-      globalState.folderIcon.value = await window.pywebview.api.get_image_base64('folder.png')
-      globalState.folderActiveIcon.value = await window.pywebview.api.get_image_base64('folder_active.png')
       globalState.starterIcon.value = await window.pywebview.api.get_image_base64('project_starter.png')
       globalState.starterActiveIcon.value = await window.pywebview.api.get_image_base64('project_starter_active.png')
       globalState.lockedIcon.value = await window.pywebview.api.get_image_base64('locked.png')

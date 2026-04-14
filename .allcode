@@ -60,10 +60,10 @@
         },
         {
           "path": "src/core/paths.py",
-          "mtime": 1774299923.29056,
-          "hash": "4e3c232340095006cf442315fc13a11d2c005721",
-          "tokens": 999,
-          "lines": 98
+          "mtime": 1776170589.8252153,
+          "hash": "8132ddde48d0603fb49d217a92e93cc2bd35d961",
+          "tokens": 1006,
+          "lines": 96
         },
         {
           "path": "src/core/logger.py",
@@ -328,8 +328,11 @@
         },
         {
           "path": "frontend/src/composables/globalState.js",
-          "tokens": 363,
-          "ignoreTokens": false
+          "tokens": 355,
+          "ignoreTokens": false,
+          "lines": 51,
+          "mtime": 1776170535.7993257,
+          "hash": "3ab0775cf0ee121913727970176917f058243dca"
         },
         {
           "path": "frontend/src/composables/infoMode.js",
@@ -364,8 +367,11 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "tokens": 863,
-          "ignoreTokens": false
+          "tokens": 840,
+          "ignoreTokens": false,
+          "lines": 101,
+          "mtime": 1776170535.8384757,
+          "hash": "49a04cf3a4b359136cb51b7966bf86bc2e0455a4"
         },
         {
           "path": "frontend/src/directives/vInfo.js",
@@ -423,11 +429,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
-          "tokens": 1694,
+          "tokens": 1661,
           "ignoreTokens": false,
-          "lines": 213,
-          "mtime": 1776170178.2034156,
-          "hash": "650a078ce45dc1d407f31c3948d2718da0ba3439"
+          "lines": 208,
+          "mtime": 1776170535.8869364,
+          "hash": "c99e01ced31554b94f624e816af1d3ab2ef2dde3"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardNav.vue",
@@ -744,7 +750,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 141273,
+      "total_tokens": 141216,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
