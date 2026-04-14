@@ -47,11 +47,6 @@ def create_splash_window(m_left, m_top, m_w_phys, m_h_phys, scale):
     s_x_phys = int(m_left + (m_w_phys - (s_w_log * scale)) / 2)
     s_y_phys = int(m_top + (m_h_phys - (s_h_log * scale)) / 2)
 
-    log.info("[DPI Debug] Splash Screen Initial Placement:")
-    log.info(f"  - Monitor Phys: L={m_left}, T={m_top}, W={m_w_phys}, H={m_h_phys}")
-    log.info(f"  - Scale: {scale}")
-    log.info(f"  - Result Phys: X={s_x_phys}, Y={s_y_phys}")
-
     return webview.create_window(
         "CM-Splash", html=get_splash_html(), width=s_w_log, height=s_h_log,
         x=s_x_phys, y=s_y_phys,

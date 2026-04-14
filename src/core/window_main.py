@@ -11,12 +11,6 @@ def create_main_window(manager, m_left, m_top, m_w_phys, m_h_phys, scale):
     m_x_phys = int(m_left + (m_w_phys - (m_w_log * scale)) / 2)
     m_y_phys = int(m_top + (m_h_phys - (m_h_log * scale)) / 2)
 
-    log.info("[DPI Debug] Main Window Initial Placement:")
-    log.info(f"  - Monitor Phys: L={m_left}, T={m_top}, W={m_w_phys}, H={m_h_phys}")
-    log.info(f"  - Scale: {scale}")
-    log.info(f"  - Logical Target: {m_w_log}x{m_h_log}")
-    log.info(f"  - Result Phys: X={m_x_phys}, Y={m_y_phys}")
-
     # Passing the base_url directly triggers PyWebView's internal HTTP server
     # which bypasses file:// CORS restrictions for Vue 3 ES modules.
     win = webview.create_window(
