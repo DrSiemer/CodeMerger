@@ -33,7 +33,7 @@ input, textarea, .selectable {
 
 /* Enforce fixed dimensions for all text areas */
 textarea {
-  resize: none !important;
+  resize: none;
 }
 
 /* Reusable tactile bloom effect */

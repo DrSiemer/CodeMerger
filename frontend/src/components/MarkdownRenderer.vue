@@ -48,7 +48,7 @@ const renderedHtml = computed(() => {
 <style>
 /* Allow selection inside the renderer */
 .selectable {
-  user-select: text !important;
+  user-select: text;
 }
 
 /* Custom Checkbox Styles */

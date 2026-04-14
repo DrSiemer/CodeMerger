@@ -155,6 +155,6 @@ const diffLines = computed(() => {
 
 <style scoped>
 .selectable {
-  user-select: text !important;
+  user-select: text;
 }
 </style>
