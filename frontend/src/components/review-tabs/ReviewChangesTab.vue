@@ -57,6 +57,36 @@ const collapseAndScroll = (path) => {
   }, 50)
 }
 
+const acceptAndScroll = (path, type) => {
+  emit('accept', path, type)
+  setTimeout(() => {
+    const el = document.getElementById(getHeaderId(path))
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, 50)
+}
+
+const discardAndScroll = (path) => {
+  emit('discard', path)
+  setTimeout(() => {
+    const el = document.getElementById(getHeaderId(path))
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, 50)
+}
+
+const undoAndScroll = (path, type) => {
+  emit('undo', path, type)
+  setTimeout(() => {
+    const el = document.getElementById(getHeaderId(path))
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, 50)
+}
+
 const collapseCommentary = () => {
   showCommentary.value = false
   setTimeout(() => {
@@ -161,11 +191,11 @@ const collapseCommentary = () => {
                 Collapse
               </button>
               <template v-if="planFileStates[path] === 'pending'">
-                <button @click="$emit('discard', path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Discard</button>
-                <button @click="$emit('accept', path, 'modify')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-4 py-1.5 rounded transition-colors">Accept</button>
+                <button @click="discardAndScroll(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Discard</button>
+                <button @click="acceptAndScroll(path, 'modify')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-4 py-1.5 rounded transition-colors">Accept</button>
               </template>
               <template v-else-if="planFileStates[path] !== 'skipped'">
-                 <button @click="$emit('undo', path, 'modify')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
+                 <button @click="undoAndScroll(path, 'modify')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
                    <Undo2 class="w-3.5 h-3.5 mr-1.5" /> Undo
                  </button>
               </template>
@@ -211,11 +241,11 @@ const collapseCommentary = () => {
                 Collapse
               </button>
               <template v-if="planFileStates[path] === 'pending'">
-                <button @click="$emit('discard', path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Discard</button>
-                <button @click="$emit('accept', path, 'create')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-4 py-1.5 rounded transition-colors">Accept</button>
+                <button @click="discardAndScroll(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Discard</button>
+                <button @click="acceptAndScroll(path, 'create')" class="text-xs font-bold bg-cm-green hover:bg-green-600 text-white px-4 py-1.5 rounded transition-colors">Accept</button>
               </template>
               <template v-else-if="planFileStates[path] !== 'skipped'">
-                 <button @click="$emit('undo', path, 'create')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
+                 <button @click="undoAndScroll(path, 'create')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
                    <Undo2 class="w-3.5 h-3.5 mr-1.5" /> Undo
                  </button>
               </template>
@@ -267,11 +297,11 @@ const collapseCommentary = () => {
               Collapse
             </button>
             <template v-if="planFileStates[path] === 'pending'">
-              <button @click="$emit('discard', path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Keep</button>
-              <button @click="$emit('accept', path, 'delete')" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-4 py-1.5 rounded transition-colors">Accept Delete</button>
+              <button @click="discardAndScroll(path)" class="text-xs font-bold bg-gray-700 hover:bg-gray-600 text-gray-300 px-4 py-1.5 rounded transition-colors">Keep</button>
+              <button @click="acceptAndScroll(path, 'delete')" class="text-xs font-bold bg-cm-warn hover:bg-red-500 text-white px-4 py-1.5 rounded transition-colors">Accept Delete</button>
             </template>
             <template v-else-if="planFileStates[path] !== 'skipped'">
-               <button @click="$emit('undo', path, 'delete')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
+               <button @click="undoAndScroll(path, 'delete')" class="text-xs font-bold bg-gray-800 hover:bg-gray-700 text-gray-400 px-4 py-1.5 rounded transition-colors flex items-center">
                  <Undo2 class="w-3.5 h-3.5 mr-1.5" /> Undo
                </button>
             </template>
