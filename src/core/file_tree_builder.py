@@ -2,11 +2,10 @@ import os
 from .utils import is_ignored
 from .. import constants as c
 
-def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, filter_text="", is_extension_filter_active=True, selected_file_paths=None, is_gitignore_filter_active=True, unknown_files=None):
+def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, filter_text="", is_extension_filter_active=True, selected_file_paths=None, is_gitignore_filter_active=True, unknown_files=None, inventory=None):
     """
     Scans the file system respecting .gitignore and returns a tree data structure.
-    Optimized for massive projects by integrating .gitignore detection and Accumulated Pattern matching
-    into a single-pass recursion stack to achieve O(N) complexity.
+    Optimized for massive projects by supporting an in-memory 'inventory' cache.
     """
     extensions = {ext for ext in file_extensions if ext.startswith('.')}
     exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
@@ -18,8 +17,104 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
     if unknown_files is None:
         unknown_files = set()
 
+    # --- MODE A: BUILD FROM MEMORY INVENTORY (INSTANT) ---
+    if inventory:
+        all_paths = inventory['files']
+        gitignores = inventory['gitignores']
+
+        # 1. First Pass: Identify visible files
+        visible_paths = []
+        for rel_path in all_paths:
+            # Rule: Text Filter is the absolute primary. If it exists, everything must match it.
+            if filter_text_lower and filter_text_lower not in rel_path.lower():
+                continue
+
+            is_selected = rel_path in selected_file_paths
+
+            # Rule: If not selected, it must pass secondary settings filters
+            if not is_selected:
+                name = rel_path.split('/')[-1].lower()
+
+                # Extension Filter
+                if is_extension_filter_active:
+                    file_ext = os.path.splitext(name)[1]
+                    if not (file_ext in extensions or name in exact_filenames):
+                        continue
+
+                # Gitignore Filter
+                if is_gitignore_filter_active:
+                    abs_path = os.path.join(base_dir, rel_path)
+                    if is_ignored(abs_path, base_dir_norm, gitignores):
+                        continue
+
+            visible_paths.append(rel_path)
+
+        # 2. Second Pass: Construct Trie structure
+        root_nodes = []
+        path_to_node = {}
+
+        # Inventory 'files' is pre-sorted in FileMonitorThread (alphabetical)
+        for rel_path in visible_paths:
+            parts = rel_path.split('/')
+            current_level_nodes = root_nodes
+            parent_path = ""
+
+            for i, part in enumerate(parts):
+                is_last = (i == len(parts) - 1)
+                part_path = f"{parent_path}/{part}" if parent_path else part
+
+                if part_path not in path_to_node:
+                    node_type = 'file' if is_last else 'dir'
+
+                    is_filtered = False
+                    filter_reason = ''
+
+                    # Logic for "Purple" Metadata (Selected but hidden by settings)
+                    if node_type == 'file' and rel_path in selected_file_paths:
+                        abs_path = os.path.join(base_dir, rel_path)
+                        file_git_ignored = is_ignored(abs_path, base_dir_norm, gitignores)
+                        file_ext = os.path.splitext(part.lower())[1]
+                        is_valid_ext = file_ext in extensions or part.lower() in exact_filenames
+
+                        if file_git_ignored:
+                            is_filtered = True
+                            filter_reason = 'Normally hidden by .gitignore'
+                        elif not is_valid_ext:
+                            is_filtered = True
+                            filter_reason = 'Normally hidden by filetype settings'
+
+                    new_node = {
+                        'name': part,
+                        'path': part_path,
+                        'type': node_type
+                    }
+                    if node_type == 'dir':
+                        new_node['children'] = []
+                    else:
+                        new_node['is_new'] = part_path in unknown_files
+                        new_node['is_filtered'] = is_filtered
+                        new_node['filter_reason'] = filter_reason
+
+                    path_to_node[part_path] = new_node
+                    current_level_nodes.append(new_node)
+
+                if not is_last:
+                    current_level_nodes = path_to_node[part_path]['children']
+                    parent_path = part_path
+
+        # 3. Final Pass: Restore "Folders First" sorting
+        def sort_tree(nodes):
+            # Sort by type (dirs before files) and then name (alphabetical)
+            nodes.sort(key=lambda n: (n['type'] != 'dir', n['name'].lower()))
+            for n in nodes:
+                if 'children' in n:
+                    sort_tree(n['children'])
+
+        sort_tree(root_nodes)
+        return root_nodes
+
+    # --- MODE B: BUILD FROM DISK (FALLBACK) ---
     def load_local_gitignore(path):
-        """Checks for and parses a .gitignore in the current directory."""
         gitignore_path = os.path.join(path, '.gitignore')
         if os.path.isfile(gitignore_path):
             try:
@@ -31,12 +126,9 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
 
     def _build_nodes(current_path, current_rel_path, active_patterns):
         nodes = []
-
-        # 1. Discover and append local patterns for this subtree
         local_patterns = load_local_gitignore(current_path)
         new_active_patterns = active_patterns
         if local_patterns:
-            # We clone the stack only when a new .gitignore is found to save memory
             new_active_patterns = active_patterns + [(current_path.replace('\\', '/'), local_patterns)]
 
         try:
@@ -49,69 +141,51 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
             if name_low in c.SPECIAL_FILES_TO_IGNORE or name_low.startswith(c.ALLCODE_TEMP_PREFIX):
                 continue
 
-            # Optimized relative path generation via string concatenation
             rel_path = f"{current_rel_path}/{entry.name}" if current_rel_path else entry.name
             entry_path_norm = entry.path.replace('\\', '/')
 
+            # Standard visibility logic for Disk Mode
             if entry.is_dir():
-                # Directory Ignoring Check
+                # Text Filter (applies to path)
+                matches_filter = not filter_text_lower or filter_text_lower in rel_path.lower()
+
                 if is_gitignore_filter_active and rel_path not in selected_file_paths:
-                    # Check if any selected file is deeper than this path to ensure path remains reachable
                     prefix = rel_path + "/"
                     is_reachable = any(p.startswith(prefix) for p in selected_file_paths)
-
                     if not is_reachable and is_ignored(entry_path_norm, base_dir_norm, new_active_patterns):
                         continue
 
                 children = _build_nodes(entry.path, rel_path, new_active_patterns)
-                matches_filter = filter_text_lower and filter_text_lower in entry.name.lower()
-
                 if children or matches_filter:
-                    nodes.append({
-                        'name': entry.name,
-                        'path': rel_path,
-                        'type': 'dir',
-                        'children': children
-                    })
+                    nodes.append({'name': entry.name, 'path': rel_path, 'type': 'dir', 'children': children})
             else:
-                # File Visibility Check
                 visible = False
-                if rel_path in selected_file_paths:
-                    visible = True
-                else:
-                    matches_text = not filter_text_lower or filter_text_lower in name_low
-                    matches_ext = not is_extension_filter_active or (os.path.splitext(name_low)[1] in extensions or name_low in exact_filenames)
-
-                    if matches_text and matches_ext:
-                        if not is_gitignore_filter_active or not is_ignored(entry_path_norm, base_dir_norm, new_active_patterns):
-                            visible = True
+                # Primary filter: Search
+                if not filter_text_lower or filter_text_lower in rel_path.lower():
+                    if rel_path in selected_file_paths:
+                        visible = True
+                    else:
+                        file_ext = os.path.splitext(name_low)[1]
+                        matches_ext = not is_extension_filter_active or (file_ext in extensions or name_low in exact_filenames)
+                        if matches_ext:
+                            if not is_gitignore_filter_active or not is_ignored(entry_path_norm, base_dir_norm, new_active_patterns):
+                                visible = True
 
                 if visible:
                     is_filtered = False
                     filter_reason = ''
-
                     if rel_path in selected_file_paths:
                         file_git_ignored = is_ignored(entry_path_norm, base_dir_norm, new_active_patterns)
                         file_ext = os.path.splitext(name_low)[1]
                         is_valid_ext = file_ext in extensions or name_low in exact_filenames
-
-                        if file_git_ignored:
-                            is_filtered = True
-                            filter_reason = 'Normally hidden by .gitignore'
-                        elif not is_valid_ext:
-                            is_filtered = True
-                            filter_reason = 'Normally hidden by filetype settings'
+                        if file_git_ignored: is_filtered, filter_reason = True, 'Normally hidden by .gitignore'
+                        elif not is_valid_ext: is_filtered, filter_reason = True, 'Normally hidden by filetype settings'
 
                     nodes.append({
-                        'name': entry.name,
-                        'path': rel_path,
-                        'type': 'file',
-                        'is_new': rel_path in unknown_files,
-                        'is_filtered': is_filtered,
-                        'filter_reason': filter_reason
+                        'name': entry.name, 'path': rel_path, 'type': 'file',
+                        'is_new': rel_path in unknown_files, 'is_filtered': is_filtered, 'filter_reason': filter_reason
                     })
         return nodes
 
-    # Start recursion with an empty patterns stack (or provided initial patterns)
     initial_patterns = gitignore_patterns if gitignore_patterns is not None else []
     return _build_nodes(base_dir, "", initial_patterns)

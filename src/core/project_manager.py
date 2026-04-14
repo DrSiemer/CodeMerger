@@ -1,8 +1,12 @@
 import os
 import threading
+import logging
+import time
 from .project_config import ProjectConfig, _calculate_font_color
 from .utils import parse_gitignore
 from .file_scanner import get_all_matching_files
+
+log = logging.getLogger("CodeMerger")
 
 class ProjectManager:
     """Handles loading, initializing, and managing the active project's configuration."""
@@ -11,6 +15,25 @@ class ProjectManager:
         self.get_active_file_extensions = get_active_file_extensions_func
         # Lock to ensure thread-safe access to the project_config reference and management ops
         self._lock = threading.Lock()
+
+        # Memory Cache: Stores a snapshot of the disk (file list + gitignores)
+        self._disk_inventory = None
+        self._inventory_timestamp = 0
+        self._inventory_lock = threading.Lock()
+
+        # Concurrency Lock: Prevents multiple threads from performing a disk walk at the same time
+        self._scan_lock = threading.Lock()
+
+    def get_inventory(self):
+        """Returns the cached disk inventory and its age."""
+        with self._inventory_lock:
+            return self._disk_inventory, self._inventory_timestamp
+
+    def set_inventory(self, inventory):
+        """Updates the cached disk inventory and refreshes the age."""
+        with self._inventory_lock:
+            self._disk_inventory = inventory
+            self._inventory_timestamp = time.time()
 
     def _populate_new_project_files(self, project_config, cancel_event=None):
         """
@@ -38,11 +61,14 @@ class ProjectManager:
         Returns a tuple: (ProjectConfig object or None, status message string)
         """
         with self._lock:
+            # Invalidate cache on project change
+            self.set_inventory(None)
+            self._inventory_timestamp = 0
+
             if path is None:
                 self.project_config = None
                 return None, "No project active."
 
-            # Ensure path is a string before passing to os.path APIs
             if not isinstance(path, str):
                 log.error(f"ProjectManager received non-string path: {type(path)}")
                 self.project_config = None

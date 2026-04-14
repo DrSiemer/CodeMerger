@@ -111,18 +111,18 @@
         },
         {
           "path": "src/core/file_scanner.py",
-          "mtime": 1776197413.1254747,
-          "hash": "8641ff90c678bfd06ba529255c44949eda9a256c",
-          "tokens": 647,
-          "lines": 78
+          "mtime": 1776198744.024785,
+          "hash": "725bb9c11cf75cf6b238a121d44686e9f0c831bc",
+          "tokens": 1050,
+          "lines": 133
         },
         {
           "path": "src/core/file_tree_builder.py",
-          "tokens": 1023,
+          "tokens": 1679,
           "ignoreTokens": false,
-          "lines": 117,
-          "mtime": 1776197413.0943398,
-          "hash": "d29d6460d17e37da21b90968471e8e77a4e7ad61"
+          "lines": 191,
+          "mtime": 1776199233.643582,
+          "hash": "613aa8b98f3a831b7783dccfeb3edf6f7becdebd"
         },
         {
           "path": "src/core/merger.py",
@@ -147,18 +147,18 @@
         },
         {
           "path": "src/core/project_manager.py",
-          "mtime": 1776197413.1858618,
-          "hash": "1b1d81bcf7ee3396998508d4e03582401887a244",
-          "tokens": 913,
-          "lines": 125
+          "mtime": 1776198743.990075,
+          "hash": "6967485dc9c31f33a76f22547580a3cdca89c62d",
+          "tokens": 1092,
+          "lines": 151
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "tokens": 994,
+          "tokens": 1450,
           "ignoreTokens": false,
-          "lines": 130,
-          "mtime": 1776197413.2133014,
-          "hash": "973a00b89f0a3a0f8210fed0e29db0ff0775ca0c"
+          "lines": 174,
+          "mtime": 1776199161.3075297,
+          "hash": "cfe321776f570689834cbbf7ef31564ede227989"
         },
         {
           "path": "src/core/window_geometry.py",
@@ -246,11 +246,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 1791,
+          "tokens": 1932,
           "ignoreTokens": false,
-          "lines": 225,
-          "mtime": 1776197413.1554205,
-          "hash": "0f1a215a8ed5da2d2b288746dc9d7199ac51adce"
+          "lines": 241,
+          "mtime": 1776199010.712431,
+          "hash": "5d1deaa85a62785d78a5ff166100c021ad20e76b"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -538,11 +538,11 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "tokens": 3117,
+          "tokens": 3228,
           "ignoreTokens": false,
-          "lines": 368,
-          "mtime": 1776197635.3966968,
-          "hash": "d0698cf9adc5dd962cfa8d656fd3ef50edac5ce1"
+          "lines": 394,
+          "mtime": 1776199161.2152474,
+          "hash": "2c2af6d939507385a56ea843dd07bf7e95f24404"
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
@@ -854,7 +854,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 145850,
+      "total_tokens": 147796,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

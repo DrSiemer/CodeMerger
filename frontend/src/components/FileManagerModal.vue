@@ -32,6 +32,9 @@ const isLoaded = ref(false)
 const isTreeLoading = ref(false)
 const isOrderPulseActive = ref(false)
 
+// Sequence tracker to prevent async race conditions where old search results overwrite newer ones
+const lastRequestId = ref(0)
+
 const highlightedPath = ref(null)
 
 const handleKeyDown = (e) => {
@@ -41,6 +44,14 @@ const handleKeyDown = (e) => {
       return
     }
     handleCancel()
+  }
+}
+
+const debounce = (fn, delay) => {
+  let timeout
+  return (...args) => {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => fn(...args), delay)
   }
 }
 
@@ -60,14 +71,29 @@ onUnmounted(() => {
 })
 
 const refreshTree = async () => {
-  isTreeLoading.value = true
+  // Increment request ID for this specific call
+  const requestId = ++lastRequestId.value
+
+  if (!fileTree.value.length) isTreeLoading.value = true
+
   try {
     const currentPaths = listItems.value.map(f => f.path)
-    fileTree.value = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
+    const result = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
+
+    // DISCARD: If a newer request has already been sent, ignore this stale result
+    if (requestId !== lastRequestId.value) {
+      return
+    }
+
+    fileTree.value = result
   } finally {
-    isTreeLoading.value = false
+    if (requestId === lastRequestId.value) {
+      isTreeLoading.value = false
+    }
   }
 }
+
+const debouncedRefresh = debounce(refreshTree, 200)
 
 const autoHandleNewFiles = async () => {
   const newFiles = []
@@ -97,7 +123,12 @@ const autoHandleNewFiles = async () => {
   }
 }
 
-watch([filterText, isExtFilter, isGitFilter], () => {
+watch(filterText, () => {
+  highlightedPath.value = null
+  debouncedRefresh()
+})
+
+watch([isExtFilter, isGitFilter], () => {
   highlightedPath.value = null
   refreshTree()
 })
@@ -139,8 +170,6 @@ const toggleFileSelect = (path) => {
     rightPanelRef.value?.clearSelection()
   } else {
     window.pywebview.api.get_token_count(path).then(tokens => {
-      // CRITICAL: Re-check existence inside the callback to prevent double-adding
-      // if the user clicked multiple times during the async delay
       const doubleCheckIdx = listItems.value.findIndex(f => f.path === path)
       if (doubleCheckIdx === -1) {
         listItems.value.push({ path, tokens, ignoreTokens: false })
@@ -153,8 +182,6 @@ const toggleFileSelect = (path) => {
   }
 }
 
-// Executes bulk toggle for folder contents
-// If all files in subtree are present, remove them. Otherwise, add missing ones
 const toggleDirectorySelect = (node) => {
   highlightedPath.value = null
   const subtreeFiles = []
@@ -193,7 +220,6 @@ const toggleDirectorySelect = (node) => {
   }
 }
 
-// --- Synchronized Scrolling ---
 const onLeftFileClick = (path) => {
   highlightedPath.value = null
   rightPanelRef.value?.scrollToPath(path)

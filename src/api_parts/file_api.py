@@ -4,9 +4,11 @@ import pyperclip
 import logging
 import subprocess
 import sys
+import time
 from src.core.utils import parse_gitignore, get_token_count_for_text, is_ignored, get_file_hash
 from src.core.file_tree_builder import build_file_tree_data
 from src.core.merger import generate_output_string
+from src.core.file_scanner import get_project_inventory
 from src import constants as c
 
 log = logging.getLogger("CodeMerger")
@@ -31,7 +33,16 @@ class FileApi:
 
         unknown_files = set(project_config.unknown_files)
 
-        # Integrated single-pass scan handles gitignore discovery internally to eliminate traversal overhead
+        inventory, _ = self.project_manager.get_inventory()
+
+        # ONLY refresh if inventory is missing.
+        if not inventory:
+            log.info("Inventory cache missing. Performing initial scan...")
+            with self.project_manager._scan_lock:
+                inventory = get_project_inventory(base_dir)
+                self.project_manager.set_inventory(inventory)
+
+        # Build tree (uses the in-memory strings for instant results)
         return build_file_tree_data(
             base_dir=base_dir,
             file_extensions=file_extensions,
@@ -40,7 +51,8 @@ class FileApi:
             is_extension_filter_active=is_ext_filter,
             selected_file_paths=selected_paths,
             is_gitignore_filter_active=is_git_filter,
-            unknown_files=unknown_files
+            unknown_files=unknown_files,
+            inventory=inventory
         )
 
     def get_token_count(self, file_path):
@@ -61,7 +73,7 @@ class FileApi:
             return 0
 
     def get_token_count_for_path(self, base_dir, rel_path):
-        """Used by Step 2 File Manager to calculate tokens for base project files."""
+        """Used by File Manager to calculate tokens for base project files."""
         full_path = os.path.join(base_dir, rel_path)
         if not os.path.isfile(full_path):
             return 0
