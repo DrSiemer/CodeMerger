@@ -55,7 +55,7 @@ class StarterApiScaffold:
 
     def create_starter_project(self, llm_output, include_base_reference, project_pitch, _unused_data=None):
         """Initial check for directory existence before scaffolding project."""
-        # Load project data directly from the session file to bypass bridge limits and serialization issues
+        # Loads project data directly from the session file to bypass bridge limits and serialization issues
         project_data = self.get_starter_session()
         if not project_data or not isinstance(project_data, dict):
             return {"status": "ERROR", "message": "Failed to load project data from session. Please ensure your project has a name."}
@@ -141,8 +141,7 @@ class StarterApiScaffold:
         if not found_any:
             return {"status": "ERROR", "message": "No valid file blocks found."}
 
-        # Write project-starter.json (Configuration State)
-        # ATOMIC WRITE: Dump to string first to ensure serialization succeeds before truncating file
+        # Dumps to string first to ensure serialization succeeds before truncating file
         try:
             target_json = project_path / "project-starter.json"
             json_str = json.dumps(project_data, indent=2)
@@ -152,7 +151,6 @@ class StarterApiScaffold:
         except Exception as e:
             log.error(f"Failed to write project-starter.json: {e}")
 
-        # Write documentation files
         try:
             concept_segs = project_data.get("concept_segments")
             concept_content = self.assemble_starter_document(concept_segs, c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if concept_segs else project_data.get("concept_md", "")
@@ -182,12 +180,11 @@ class StarterApiScaffold:
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []
-        # Exclude temporary files and specific artifacts from the initial merge selection
+        # Excludes temporary files and specific artifacts from the initial merge selection
         merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt', c.ALLCODE_TEMP_PREFIX]
         for f in files_created:
              norm = f.replace('\\', '/')
              filename = os.path.basename(norm)
-             # Skip if exact match, if it is a boilerplate file to ignore, or if it starts with the temp prefix
              if filename not in merge_order_exclusion_list and \
                 filename not in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS and \
                 not filename.startswith(c.ALLCODE_TEMP_PREFIX):

@@ -20,7 +20,6 @@ class AppState:
         self.last_update_check = self.config.get('last_update_check', None)
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', True)
 
-        # Info Mode visibility state
         self.info_mode_active = self.config.get('info_mode_active', True)
 
         # List of callbacks to synchronize info mode visibility across windows
@@ -73,7 +72,6 @@ class AppState:
         self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', True)
         self.info_mode_active = self.config.get('info_mode_active', True)
-        # Reload from registry as well
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)
 

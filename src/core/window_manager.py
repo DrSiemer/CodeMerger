@@ -239,7 +239,7 @@ class WindowManager:
 
         try:
             if self.main_last_x is not None and self.main_last_y is not None:
-                # Save only main window geometry. Compact coordinates are transient
+                # Save only main window geometry since Compact coordinates are transient
                 self.api.app_state.config['main_window_geom'] = {
                     'x': int(self.main_last_x), 'y': int(self.main_last_y),
                     'w': int(self.main_last_w), 'h': int(self.main_last_h)

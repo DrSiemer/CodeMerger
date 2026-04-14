@@ -17,7 +17,6 @@ class ChangesApi:
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
 
-        # Store for internal tracking of unapplied changes across windows
         self._last_parsed_plan = plan
         return plan
 
@@ -46,7 +45,7 @@ class ChangesApi:
         if raw_content is None:
             return None
 
-        # Sanitization Pipeline: Standardize for the frontend diff tool to prevent phantom diff artifacts
+        # Standardizes content for the frontend diff tool to prevent phantom diff artifacts
         return change_applier._sanitize_content(rel_path, raw_content)
 
     def apply_single_file_change(self, rel_path, content):
@@ -60,7 +59,6 @@ class ChangesApi:
 
         success, err = change_applier.apply_single_file(project_config.base_dir, rel_path, content)
         if success:
-            # Synchronize configuration metadata
             sanitized = change_applier._sanitize_content(rel_path, content)
             full_path = os.path.join(project_config.base_dir, rel_path)
             tokens = get_token_count_for_text(sanitized)
@@ -87,7 +85,6 @@ class ChangesApi:
                 })
                 project_config.update_known_files([rel_path], project_config.active_profile_name)
 
-            # Update backend tracking state for unapplied changes notification
             if self._last_parsed_plan:
                 if 'file_states' not in self._last_parsed_plan:
                     self._last_parsed_plan['file_states'] = {}
@@ -112,7 +109,6 @@ class ChangesApi:
                 p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f != rel_path]
                 p_data['total_tokens'] = sum(f.get('tokens', 0) for f in p_data['selected_files'])
 
-            # Update backend tracking state for unapplied changes notification
             if self._last_parsed_plan:
                 if 'file_states' not in self._last_parsed_plan:
                     self._last_parsed_plan['file_states'] = {}
@@ -143,21 +139,18 @@ class ChangesApi:
 
         has_pending = False
 
-        # Check updates
         for p in self._last_parsed_plan.get('updates', {}):
             if p not in skipped and states.get(p, 'pending') == 'pending':
                 has_pending = True
                 break
 
         if not has_pending:
-            # Check creations
             for p in self._last_parsed_plan.get('creations', {}):
                 if states.get(p, 'pending') == 'pending':
                     has_pending = True
                     break
 
         if not has_pending:
-            # Check deletions
             for p in self._last_parsed_plan.get('deletions_proposed', []):
                 if p not in skipped and states.get(p, 'pending') == 'pending':
                     has_pending = True
@@ -209,7 +202,6 @@ class ChangesApi:
                 if not found_in_active:
                     project_config.selected_files.append({'path': rel_path, 'tokens': tokens, 'lines': lines, 'mtime': mtime, 'hash': f_hash})
 
-            # Single-point registration for new file alerts across other profiles
             project_config.update_known_files(list(all_changed_paths), project_config.active_profile_name)
 
             if actual_deletions:
@@ -221,7 +213,6 @@ class ChangesApi:
 
             project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
 
-            # Mark all as applied in tracking plan for UI consistency
             if self._last_parsed_plan:
                 states = self._last_parsed_plan.setdefault('file_states', {})
                 for p in all_changed_paths: states[p] = 'applied'

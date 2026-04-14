@@ -87,7 +87,7 @@ class FileMonitorThread(threading.Thread):
 
             config_changed = False
 
-            # Detect and Prune physically deleted files
+            # Detect and prune physically deleted files
             missing_from_scan = known_set - current_set
             truly_deleted = set()
             if missing_from_scan:

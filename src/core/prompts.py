@@ -34,7 +34,8 @@ COMMENT_CLEANUP_PROMPT = """Let's clean up the comments in this project.
 **CRITICAL CONSTRAINTS:**
 - **Do not output files where nothing is changed.**
 - **ONLY change COMMENTS; do NOT modify code, indentation, or logic in ANY way!**
-- **Preserve linter/compiler directives (e.g., eslint-disable, @ts-ignore).**
+- **Sparingly add new comments**, only in places where the code lacks necessary context for a new developer.
+- Preserve linter/compiler directives (e.g., eslint-disable, @ts-ignore).
 
 **Directive:** Optimize for a programmer who has never seen the code. Remove all LLM tags, transient feedback, and changelogs. Git handles history; the code shouldn't.
 

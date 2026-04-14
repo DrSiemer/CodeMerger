@@ -42,7 +42,6 @@ def is_another_instance_running():
             if not _instance_lock:
                 return False
 
-            # ERROR_ALREADY_EXISTS = 183
             last_error = kernel32.GetLastError()
             if last_error == 183:
                 return True
@@ -62,7 +61,6 @@ def is_another_instance_running():
             _instance_lock = open(lock_file_path, 'w')
 
             try:
-                # Attempt non-blocking exclusive lock
                 fcntl.lockf(_instance_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 return False
             except (IOError, BlockingIOError):
@@ -250,7 +248,6 @@ def update_and_get_new_filetypes():
     newly_added = []
     config_changed = False
 
-    # Update local metadata formats
     for ext, local_ft in local_map.items():
         if 'description' not in local_ft or 'default' not in local_ft:
             config_changed = True
@@ -262,7 +259,6 @@ def update_and_get_new_filetypes():
                 local_ft.setdefault('description', '')
                 local_ft['default'] = False
 
-    # Incorporate new default filetypes
     for ext, default_ft in default_map.items():
         if ext not in local_map:
             config_changed = True

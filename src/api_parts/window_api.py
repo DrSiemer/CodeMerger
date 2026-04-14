@@ -32,7 +32,6 @@ class WindowApi:
         if curr_w_phys is None or curr_h_phys is None or curr_x_phys is None or curr_y_phys is None:
             return
 
-        # Do not perform geometry updates on minimized windows (coordinates are -32000)
         if curr_x_phys < -10000 or curr_y_phys < -10000:
             return
 
@@ -61,7 +60,6 @@ class WindowApi:
         if applied_w_phys <= curr_w_phys and applied_h_phys <= curr_h_phys:
             return
 
-        # Position expansion outward from physical center
         center_x_phys = curr_x_phys + (curr_w_phys // 2)
         center_y_phys = curr_y_phys + (curr_h_phys // 2)
 
@@ -84,7 +82,6 @@ class WindowApi:
         exec_x_log = int(new_x_phys / scale)
         exec_y_log = int(new_y_phys / scale)
 
-        # Sequenced Execution to prevent OS geometry drops
         win.move(exec_x_log, exec_y_log)
 
         def apply_resize_sequenced():

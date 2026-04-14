@@ -56,7 +56,6 @@ class ClipboardApi:
             if not proceed:
                 return False
 
-        # Access system clipboard via Python to bypass browser permission restrictions
         text = pyperclip.paste()
         if not text or not text.strip():
             return "Clipboard is empty."
@@ -99,7 +98,6 @@ class ClipboardApi:
                     self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
                     return msg
 
-        # Fallback to Main Window review
         self._window_manager.restore_main()
         time.sleep(0.1)
 

@@ -34,7 +34,6 @@ class Updater:
 
         root = tk.Tk()
         root.withdraw()
-        # Ensure the dialog sits ABOVE the on-top windows
         root.attributes("-topmost", True)
         root.lift()
         return root

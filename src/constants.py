@@ -19,7 +19,7 @@ GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/late
 
 # Logging
 LOG_FILENAME = "codemerger.log"
-LOG_MAX_BYTES = 5 * 1024 * 1024  # 5 MB
+LOG_MAX_BYTES = 5 * 1024 * 1024
 LOG_BACKUP_COUNT = 3
 
 # Behavioral Magic Numbers

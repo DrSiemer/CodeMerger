@@ -12,7 +12,7 @@ class StarterApiPrompts:
     """API methods handling construction of prompts for the Project Starter."""
 
     def _get_base_project_content(self, project_data):
-        # Defensive check to prevent 'NoneType' object has no attribute 'get'
+        # Prevents crashes if project_data is None
         if project_data is None:
             project_data = {}
 
@@ -29,7 +29,6 @@ class StarterApiPrompts:
                 with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as f:
                     content = f.read()
 
-                # Use the imported function from merger core
                 language = get_language_from_path(rel_path)
                 content_blocks.append(f"--- File: `{rel_path}` ---\n```{language}\n{content}\n```\n")
             except Exception:
@@ -129,8 +128,7 @@ class StarterApiPrompts:
                 path = os.path.join(BOILERPLATE_DIR, filename)
                 try:
                     with open(path, 'r', encoding='utf-8') as f:
-                        # Include the '--- End of file ---' marker for consistency
-                        # This teaches the LLM the correct response format by example.
+                        # Includes the '--- End of file ---' marker for consistency to teach the LLM the correct response format
                         prompt_content += f"--- File: `boilerplate/{filename}` ---\n```\n{f.read()}\n```\n--- End of file ---\n\n"
                 except Exception:
                     pass

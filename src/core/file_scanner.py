@@ -46,16 +46,16 @@ def get_all_matching_files(base_dir, file_extensions, gitignore_patterns, always
                         rel_path = os.path.relpath(entry.path, base_dir).replace('\\', '/')
                         matching_files.append(rel_path)
         except OSError:
-            pass # Ignore permission errors etc
+            pass
 
     _scan_dir(base_dir)
 
-    # If the process was cancelled, we skip post-processing as the result will be discarded.
+    # If the process was cancelled, we skip post-processing as the result will be discarded
     if cancel_event and cancel_event.is_set():
         return matching_files
 
-    # Post-scan: Explicitly check and include specific paths (e.g., selected files)
-    # that might have been filtered out by gitignore or extension filters.
+    # Post-scan: Explicitly check and include specific paths
+    # that might have been filtered out by gitignore or extension filters
     if always_include_paths:
         # Convert list to set for O(1) lookups if it's not already
         found_set = set(matching_files)

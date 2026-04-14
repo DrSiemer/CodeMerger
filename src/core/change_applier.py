@@ -40,18 +40,14 @@ def delete_single_file(base_dir, rel_path):
 def _sanitize_content(path, content):
     """
     Normalizes content for writing and comparison.
-    1. Converts CRLF to LF to prevent phantom diffs in WebView.
-    2. Strips trailing whitespace from every line.
-    3. Collapses consecutive empty lines (non-Markdown only).
     """
     if not content:
         return ""
 
-    # Step 1: Normalize line endings to LF (PyWebView/JS Standard)
+    # Normalizes line endings to LF to adhere to PyWebView and JS standards
     content = content.replace('\r\n', '\n').replace('\r', '\n')
 
     lines = content.split('\n')
-    # Step 2: Strip trailing whitespace
     lines = [line.rstrip() for line in lines]
 
     _, extension = os.path.splitext(path)
@@ -59,7 +55,6 @@ def _sanitize_content(path, content):
     if extension.lower() == '.md':
         return '\n'.join(lines).strip()
 
-    # Step 3: Collapse multiple empty lines for code files
     collapsed_lines = []
     last_line_was_empty = False
     for line in lines:
@@ -74,15 +69,12 @@ def _sanitize_content(path, content):
 def execute_plan(base_dir, updates, creations, deletions=None):
     """Writes the planned changes to the filesystem and deletes files marked for removal"""
     try:
-        # Create new files
         for rel_path, content in creations.items():
             apply_single_file(base_dir, rel_path, content)
 
-        # Update existing files
         for rel_path, content in updates.items():
             apply_single_file(base_dir, rel_path, content)
 
-        # Handle Deletions
         if deletions:
             for rel_path in deletions:
                 delete_single_file(base_dir, rel_path)
@@ -112,7 +104,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
     EOF_LABEL = "End of file"
     EOF_MARKER = PREFIX + EOF_LABEL + " ---"
 
-    # Verify marker symmetry via anchored line-start counts
     start_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(FILE_LABEL), markdown_text, re.MULTILINE))
     end_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(EOF_LABEL), markdown_text, re.MULTILINE))
 
@@ -123,10 +114,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'hint': "Please ask the AI to correct its output format."
         }
 
-    # Identify all blocks chronologically
     all_blocks = []
 
-    # Identify tagged sections
     tags = ["ANSWERS TO DIRECT USER QUESTIONS", "INTRO", "CHANGES", "DELETED FILES", "VERIFICATION", "UNCHANGED"]
     for tag in tags:
         # Accept truncated closing tag as well
@@ -157,7 +146,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'content': content
             })
 
-    # Extract proposed deletions from the tag content
     deletions_proposed = []
     delete_section_content = ""
     for b in all_blocks:
@@ -170,26 +158,23 @@ def parse_and_plan_changes(base_dir, markdown_text):
         del_matches = re.findall(r'DELETE FILE:\s*(.+)', delete_section_content, re.IGNORECASE)
         deletions_proposed = [m.strip().replace('\\', '/') for m in del_matches if m.strip()]
 
-    # Identify file blocks
-    # Updated: Replaced \n with \s*\n+ after header to handle optional empty lines/trailing space
     file_block_regex = re.compile(
-        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s*\n+' # Header
-        r'```[^\n]*\n'                # Opening Backticks
-        r'(?P<content>.*?)'           # Content
-        r'\n```\s*\n'                 # Closing Backticks
-        r'^' + re.escape(EOF_MARKER), # Footer
+        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s*\n+'
+        r'```[^\n]*\n'
+        r'(?P<content>.*?)'
+        r'\n```\s*\n'
+        r'^' + re.escape(EOF_MARKER),
         re.DOTALL | re.MULTILINE
     )
 
-    # State tracking for planned changes
     files_to_update = {}
     files_to_create = {}
-    skipped_files = [] # Tracks paths that are already identical or missing for deletion
+    skipped_files = []
 
     for match in file_block_regex.finditer(markdown_text):
         rel_path = match.group('path').strip().replace('\\', '/')
 
-        # CRITICAL: Sanitize content IMMEDIATELY to prevent phantom diffs from trailing whitespace
+        # Sanitizes content IMMEDIATELY to prevent phantom diffs from trailing whitespace
         sanitized_new = _sanitize_content(rel_path, match.group('content'))
 
         all_blocks.append({
@@ -199,7 +184,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'content': sanitized_new
         })
 
-        # Check for NO-OP against existing disk content
         if os.path.isfile(os.path.join(base_dir, rel_path)):
             old_raw = get_current_file_content(base_dir, rel_path)
             if old_raw is not None:
@@ -216,12 +200,10 @@ def parse_and_plan_changes(base_dir, markdown_text):
     # Sort blocks by starting position to identify chronological order for UI tabs
     all_blocks.sort(key=lambda x: x['span'][0])
 
-    # Map orphans (unformatted gaps between valid blocks)
     ordered_segments = []
     last_end = 0
 
     for block in all_blocks:
-        # Check for gap before this block
         gap_text = markdown_text[last_end:block['span'][0]].strip()
         if gap_text:
             ordered_segments.append({
@@ -229,7 +211,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'content': gap_text
             })
 
-        # Add metadata for the block itself
         if block['type'] == 'tag':
             ordered_segments.append({
                 'type': 'tag',
@@ -241,7 +222,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
         last_end = block['span'][1]
 
-    # Check for trailing orphan commentary
     final_gap = markdown_text[last_end:].strip()
     if final_gap:
         ordered_segments.append({
@@ -249,7 +229,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'content': final_gap
         })
 
-    # Validate Paths (Critical Security Step)
+    # Path validation for security
     invalid_chars_pattern = r'[<>:"|?*]'
     base_dir_abs = os.path.abspath(base_dir)
 
@@ -267,7 +247,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
         except (ValueError, Exception):
             return {'status': 'ERROR', 'message': f"Error: Deletion path '{rel_path}' attempts to access a location outside the project directory."}
 
-    # Helper to extract flat tag content for compatibility
     def get_tag_content(tag_name):
         for s in ordered_segments:
             if s.get('tag') == tag_name:
@@ -278,7 +257,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         'updates': files_to_update,
         'creations': files_to_create,
         'deletions_proposed': deletions_proposed,
-        'skipped_files': skipped_files, # Returned to frontend for "No changes" labeling
+        'skipped_files': skipped_files,
         'answers': get_tag_content("ANSWERS TO DIRECT USER QUESTIONS"),
         'intro': get_tag_content("INTRO"),
         'changes': get_tag_content("CHANGES"),

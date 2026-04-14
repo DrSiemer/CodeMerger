@@ -159,13 +159,13 @@ class ProjectConfig:
             files_were_cleaned_globally = False
 
             if not os.path.isfile(self.allcode_path):
-                self._load_successful = True # Valid state for new projects
+                self._load_successful = True
                 return False
 
             try:
                 self._last_mtime = os.path.getmtime(self.allcode_path)
 
-                # Defensive: Don't load if the file is currently 0 bytes (mid-write lock)
+                # Prevents loading if the file is currently 0 bytes during a mid-write lock
                 if os.path.getsize(self.allcode_path) == 0:
                     raise RuntimeError("Config file is empty or locked.")
 
@@ -249,7 +249,6 @@ class ProjectConfig:
                 if profile_updated:
                     config_was_updated = True
 
-            # Mark load as successful only after full data validation
             self._load_successful = True
 
             # Content hash check to prevent redundant UI reloads
@@ -320,7 +319,6 @@ class ProjectConfig:
     def save(self):
         """Saves configuration using an atomic replacement to prevent data wipes during collisions"""
         with self._lock:
-            # Block saving if a previous load of an existing file failed
             if os.path.isfile(self.allcode_path) and not self._load_successful:
                 return
 
@@ -339,15 +337,14 @@ class ProjectConfig:
                 with os.fdopen(fd, 'w', encoding='utf-8') as f:
                     json.dump(final_data, f, indent=2)
 
-                # Windows specific: PermissionError/Access Denied on os.replace is common
-                # if the file is being read by the monitor thread or has a Hidden attribute.
+                # Windows specific: PermissionError or Access Denied on os.replace is common
+                # if the file is being read by the monitor thread or has a Hidden attribute
                 max_retries = 5
                 is_windows = sys.platform == "win32"
                 was_hidden = False
 
                 for attempt in range(max_retries):
                     try:
-                        # Attempt to clear hidden attribute if on Windows to prevent Access Denied
                         if is_windows and os.path.exists(self.allcode_path):
                             import ctypes
                             FILE_ATTRIBUTE_HIDDEN = 0x02
@@ -357,9 +354,8 @@ class ProjectConfig:
                                 ctypes.windll.kernel32.SetFileAttributesW(self.allcode_path, attrs & ~FILE_ATTRIBUTE_HIDDEN)
 
                         os.replace(temp_path, self.allcode_path)
-                        temp_path = None # Mark as successfully moved for the finally block
+                        temp_path = None
 
-                        # Restore hidden attribute if it was previously set
                         if is_windows and was_hidden:
                             attrs = ctypes.windll.kernel32.GetFileAttributesW(self.allcode_path)
                             if attrs != -1:
@@ -371,7 +367,6 @@ class ProjectConfig:
                             raise
                         time.sleep(0.1)
             finally:
-                # Guarantee cleanup of temporary files if replacement failed or errored out
                 if temp_path and os.path.exists(temp_path):
                     try:
                         os.remove(temp_path)
@@ -426,7 +421,6 @@ class ProjectConfig:
 
             del self.profiles[profile_name_to_delete]
 
-            # Revert to Default if the active profile was just removed
             if self.active_profile_name == profile_name_to_delete:
                 self.active_profile_name = "Default"
 

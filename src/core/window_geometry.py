@@ -71,7 +71,6 @@ class WindowGeometry:
                     if (m_l / scale) <= x_log <= (m_r / scale) and (m_t / scale) <= y_log <= (m_b / scale):
                         return h_mon
 
-                # Fallback physical guess
                 point = wintypes.POINT(int(x_log), int(y_log))
                 return ctypes.windll.user32.MonitorFromPoint(point, 2)
             except Exception: pass

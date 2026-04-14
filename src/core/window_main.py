@@ -12,13 +12,14 @@ def create_main_window(manager, m_left, m_top, m_w_phys, m_h_phys, scale):
     m_y_phys = int(m_top + (m_h_phys - (m_h_log * scale)) / 2)
 
     # Passing the base_url directly triggers PyWebView's internal HTTP server
-    # which bypasses file:// CORS restrictions for Vue 3 ES modules.
+    # which bypasses file:// CORS restrictions for Vue 3 ES modules
+    # Width and height use logical units, x and y use physical position
     win = webview.create_window(
         "CodeMerger", url=manager.base_url, js_api=manager.api,
-        width=m_w_log, height=m_h_log, # Logical Size
+        width=m_w_log, height=m_h_log,
         min_size=(800, m_h_log),
         background_color='#2E2E2E',
-        hidden=True, x=m_x_phys, y=m_y_phys # Physical Position
+        hidden=True, x=m_x_phys, y=m_y_phys
     )
 
     win.events.minimized += manager._on_main_minimized

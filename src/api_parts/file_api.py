@@ -25,7 +25,6 @@ class FileApi:
         file_extensions = load_active_file_extensions()
         gitignore_patterns = parse_gitignore(base_dir)
 
-        # Priority: Use current UI state if provided, otherwise fallback to disk state
         if current_selected_paths is not None:
             selected_paths = set(current_selected_paths)
         else:
@@ -43,13 +42,11 @@ class FileApi:
             is_gitignore_filter_active=is_git_filter
         )
 
-        # Inject is_new and is_filtered flags recursively
         def inject_metadata(nodes):
             for node in nodes:
                 rel_path = node['path']
                 node['is_new'] = rel_path in unknown_files
 
-                # Check if file is in selection but normally filtered
                 if rel_path in selected_paths:
                     is_git_ignored = is_ignored(os.path.join(base_dir, rel_path), base_dir, gitignore_patterns)
 
@@ -114,7 +111,6 @@ class FileApi:
         if project_config:
             project_config.unknown_files = []
             project_config.save()
-            # Notify UI
             if self._window_manager and self._window_manager.main_window:
                 self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
             return True
@@ -161,19 +157,15 @@ class FileApi:
             except Exception as e:
                 log.error(f"Failed to process new file {path}: {e}")
 
-        # Recalculate total tokens
         project_config.total_tokens = sum(f.get('tokens', 0) for f in project_config.selected_files)
 
-        # Clear unknown files for the active profile
         project_config.unknown_files = []
 
-        # Ensure these files are marked as known globally and propagated to other profiles
         current_paths = [f['path'] for f in project_config.selected_files]
         project_config.update_known_files(current_paths, project_config.active_profile_name)
 
         project_config.save()
 
-        # Manually trigger the event to clear the counter in UI immediately
         if self._window_manager and self._window_manager.main_window:
             self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
 
@@ -191,10 +183,8 @@ class FileApi:
         if expanded_dirs is not None:
             project_config.expanded_dirs = set(expanded_dirs)
 
-        # Clear unknown files for the active profile once user has interacted with the manager
         project_config.unknown_files = []
 
-        # Centralized update of known files to propagate alerts to other profiles
         current_paths = [f['path'] for f in selected_files]
         project_config.update_known_files(current_paths, project_config.active_profile_name)
 
@@ -207,7 +197,6 @@ class FileApi:
         if not project_config or not selected_files:
             return "Failed to generate request: No files selected."
 
-        # Temporarily apply provided selection to logic
         orig_selection = project_config.selected_files
         project_config.selected_files = selected_files
 
@@ -235,7 +224,6 @@ class FileApi:
             log.error(f"Error generating order request: {e}")
             return f"Error: {str(e)}"
         finally:
-            # Restore original selection
             project_config.selected_files = orig_selection
 
     def open_file(self, rel_path):
@@ -248,7 +236,6 @@ class FileApi:
         if not os.path.isfile(full_path):
             return False
 
-        # Check for configured editor
         app_config = self.app_state.config
         editor = app_config.get('default_editor', '')
 

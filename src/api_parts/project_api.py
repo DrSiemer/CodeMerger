@@ -31,8 +31,6 @@ class ProjectApi:
         """Removes a project from the recents list and returns the updated list."""
         self.app_state.remove_recent_project(path)
 
-        # If the project being removed is no longer in AppState's active directory,
-        # ensure the project manager unloads it.
         if not self.app_state.active_directory:
             self.project_manager.load_project(None)
 
@@ -40,19 +38,16 @@ class ProjectApi:
 
     def load_project(self, path):
         """Activates and loads a specific project path."""
-        # Unload request
         if path is None:
             self.project_manager.load_project(None)
             return {"status_msg": "Project deactivated."}
 
-        # Defensive: Ensure path is a string before passing to filesystem APIs
         if not isinstance(path, str):
             log.error(f"API received non-string path for load_project: {type(path)}")
             return {"status_msg": "Error: Invalid path type."}
 
         if path and os.path.isdir(path):
             if self.app_state.update_active_dir(path):
-                # Reset cancellation event before starting a new load
                 self._load_cancel_event.clear()
 
                 project_config, status_msg = self.project_manager.load_project(path, cancel_event=self._load_cancel_event)
@@ -103,22 +98,19 @@ class ProjectApi:
 
         self._color_picker_active = True
         try:
-            # Create a temporary hidden Tk root to host the dialog
             root = Tk()
             root.withdraw()
 
-            # Coordination: Anchor the hidden root to the main window's position.
-            # This ensures the native color picker opens on the correct monitor.
+            # Anchor the hidden root to the main window's position to ensure it opens on the correct monitor
+            # PyWebView properties are physical while Tkinter expects logical units
             if self._window_manager and self._window_manager.main_window:
                 try:
                     win = self._window_manager.main_window
                     if win.x is not None and win.y is not None:
                         mgr = self._window_manager
-                        # PyWebView properties are Physical. Tkinter expects Logical.
                         h_mon = mgr._get_target_monitor_handle()
                         scale = mgr._get_scale_factor(h_mon)
 
-                        # Target top-left of application window (Logical units)
                         root.geometry(f"+{int(win.x / scale)}+{int(win.y / scale)}")
                 except Exception:
                     pass
@@ -197,7 +189,7 @@ class ProjectApi:
         if is_alt:
             try:
                 if sys.platform == "win32":
-                    # Environment Scrubbing logic to ensure a clean shell
+                    # Environment scrubbing logic to ensure a clean shell
                     new_env = os.environ.copy()
                     venv_root = new_env.pop('VIRTUAL_ENV', None)
                     new_env.pop('PYTHONHOME', None)
@@ -236,7 +228,6 @@ class ProjectApi:
             pyperclip.copy(project_path.replace('/', '\\'))
             return "Project path copied to clipboard."
 
-        # Default: Open in native file manager
         try:
             if sys.platform == "win32":
                 os.startfile(project_path)

@@ -38,12 +38,11 @@ class ProjectManager:
         Returns a tuple: (ProjectConfig object or None, status message string)
         """
         with self._lock:
-            # Handle deactivation
             if path is None:
                 self.project_config = None
                 return None, "No project active."
 
-            # Defensive: Ensure path is a string before passing to os.path APIs
+            # Ensure path is a string before passing to os.path APIs
             if not isinstance(path, str):
                 log.error(f"ProjectManager received non-string path: {type(path)}")
                 self.project_config = None
@@ -67,7 +66,6 @@ class ProjectManager:
             project_display_name = self.project_config.project_name
 
             if is_new_project:
-                # Initialize a new project by scanning for all valid files
                 success = self._populate_new_project_files(self.project_config, cancel_event=cancel_event)
 
                 if cancel_event and cancel_event.is_set():

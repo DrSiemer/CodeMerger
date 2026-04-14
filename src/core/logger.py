@@ -16,15 +16,12 @@ class DummyStream:
         pass
 
 def handle_exception(exc_type, exc_value, exc_traceback):
-    """Global exception hook to log unhandled exceptions"""
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
     log.critical("Unhandled exception:", exc_info=(exc_type, exc_value, exc_traceback))
 
 def setup_logging():
-    """Configures application-wide logging"""
-
     # In windowed mode sys.stdout/stderr are None; DummyStream prevents attribute errors
     if sys.stdout is None:
         sys.stdout = DummyStream()
@@ -35,7 +32,6 @@ def setup_logging():
 
     log.propagate = False
 
-    # Rich Handler for console output
     if not log.handlers:
         # Detect if we should use the Rich handler (standard TTY or forced via --console)
         is_console_forced = "--console" in sys.argv
@@ -53,7 +49,6 @@ def setup_logging():
             except Exception:
                 pass
 
-        # File Handler for persistent logging
         try:
             log_path = os.path.join(PERSISTENT_DATA_DIR, c.LOG_FILENAME)
             file_handler = RotatingFileHandler(

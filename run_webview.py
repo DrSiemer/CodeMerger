@@ -8,7 +8,6 @@ import mimetypes
 # Must be called before UI initialization to ensure correct coordinate scaling on High DPI displays
 if sys.platform == "win32":
     try:
-        # DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (-4)
         ctypes.windll.user32.SetProcessDpiAwarenessContext(ctypes.c_void_p(-4))
     except Exception:
         try:
