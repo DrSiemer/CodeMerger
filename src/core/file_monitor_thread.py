@@ -5,6 +5,7 @@ import os
 import sys
 from .utils import parse_gitignore
 from .file_scanner import get_project_inventory
+from . import constants as c
 
 log = logging.getLogger("CodeMerger")
 
@@ -12,7 +13,7 @@ class FileMonitorThread(threading.Thread):
     """
     Background daemon thread that periodically scans the active project for new files.
     Features:
-    - Adaptive Throttling: Automatically scales wait time to ensure scan work < 25% duty cycle.
+    - Adaptive Throttling: Automatically scales wait time for LARGE projects.
     - Result Caching: Maintains a raw inventory of file paths and gitignore patterns.
     - Forced Interrupt: Can be triggered manually by the API to refresh cache.
     """
@@ -63,14 +64,19 @@ class FileMonitorThread(threading.Thread):
             end_time = time.perf_counter()
             duration = end_time - start_time
 
+            # --- SMART ADAPTIVE THROTTLING ---
             user_interval = config.get('new_file_check_interval', 5)
-            adaptive_interval = max(user_interval, int(duration * 4))
 
-            if duration > 1.0:
-                log.debug(f"Large scan detected ({duration:.2f}s). Throttling next background check to {adaptive_interval}s.")
+            # If the project is small (fast scan), we strictly honor the user setting.
+            # If it's large (slow scan), we enforce a cooldown to protect system resources.
+            if duration > c.FAST_SCAN_THRESHOLD_SECONDS:
+                adaptive_interval = max(user_interval, int(duration * 4))
+                log.debug(f"Large project throttling: Scan took {duration:.2f}s, cooldown set to {adaptive_interval}s.")
+            else:
+                adaptive_interval = user_interval
 
             self._force_check_event.clear()
-            for _ in range(adaptive_interval * 2):
+            for _ in range(int(adaptive_interval * 2)):
                 if self._stop_event.is_set() or self._force_check_event.is_set():
                     break
                 time.sleep(0.5)
@@ -104,7 +110,10 @@ class FileMonitorThread(threading.Thread):
             with self.project_manager._scan_lock:
                 inventory = get_project_inventory(base_dir, cancel_event=self._stop_event)
                 if self._stop_event.is_set(): return
+
+                # Optimization: Sort inventory paths once here in background
                 inventory['files'].sort(key=str.lower)
+
                 self.project_manager.set_inventory(inventory)
 
             # Match inventory against project profile requirements for "New File" alerts
@@ -117,11 +126,9 @@ class FileMonitorThread(threading.Thread):
             all_files = inventory['files']
             gitignores = inventory['gitignores']
 
-            # Filter inventory down to what is allowed by active settings to identify "true" new files
             profile_all_files = []
             for rel_path in all_files:
                 abs_path = os.path.join(base_dir, rel_path)
-                # Note: For background alerts, we DO respect gitignore rules
                 if is_ignored(abs_path, base_dir_norm, gitignores):
                     continue
 

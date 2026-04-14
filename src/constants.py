@@ -6,6 +6,12 @@ ADD_ALL_WARNING_THRESHOLD_DEFAULT = 100
 NEW_FILE_ALERT_THRESHOLD_DEFAULT = 5
 STATUS_FADE_SECONDS = 5
 
+# Performance Thresholds
+# Projects larger than this will trigger CPU protection/throttling
+LARGE_PROJECT_THRESHOLD = 1000
+# Scans faster than this will ignore adaptive throttling multipliers
+FAST_SCAN_THRESHOLD_SECONDS = 0.5
+
 # File System
 # Explicit directories to ignore for performance during recursive scans
 SPECIAL_FILES_TO_IGNORE = {

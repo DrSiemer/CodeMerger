@@ -33,16 +33,34 @@ class FileApi:
 
         unknown_files = set(project_config.unknown_files)
 
+        # Inventory Retrieval
         inventory, _ = self.project_manager.get_inventory()
 
-        # ONLY refresh if inventory is missing.
+        # PROACTIVE REFRESH LOGIC
+        # If cache is missing, we check if the project is "Small" enough to scan instantly.
         if not inventory:
-            log.info("Inventory cache missing. Performing initial scan...")
-            with self.project_manager._scan_lock:
+            # Quick check of root entries to guess project scale
+            try:
+                root_count = len(os.listdir(base_dir))
+            except Exception:
+                root_count = 0
+
+            # If it's a small project (likely < 1000 total files if root is small),
+            # we just do the scan blocking to avoid the "Inventory cache missing" UI delay.
+            if root_count < 50:
+                log.debug("Small project detected. Performing synchronous inventory.")
                 inventory = get_project_inventory(base_dir)
                 self.project_manager.set_inventory(inventory)
+            else:
+                # For larger projects, we use the lock and wait for background thread
+                log.info("Inventory cache missing for potentially large project. Waiting for scan lock...")
+                with self.project_manager._scan_lock:
+                    inventory, _ = self.project_manager.get_inventory()
+                    if not inventory:
+                        inventory = get_project_inventory(base_dir)
+                        self.project_manager.set_inventory(inventory)
 
-        # Build tree (uses the in-memory strings for instant results)
+        # Build tree - uses the in-memory strings for instant results
         return build_file_tree_data(
             base_dir=base_dir,
             file_extensions=file_extensions,
@@ -73,7 +91,7 @@ class FileApi:
             return 0
 
     def get_token_count_for_path(self, base_dir, rel_path):
-        """Used by File Manager to calculate tokens for base project files."""
+        """Used by Step 2 File Manager to calculate tokens for base project files."""
         full_path = os.path.join(base_dir, rel_path)
         if not os.path.isfile(full_path):
             return 0

@@ -18,7 +18,7 @@ def get_project_inventory(base_dir, cancel_event=None):
         if cancel_event and cancel_event.is_set():
             return
 
-        # 1. Discover local gitignore
+        # Discover local gitignore
         gitignore_path = os.path.join(current_path, '.gitignore')
         if os.path.isfile(gitignore_path):
             try:

@@ -46,10 +46,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776196412.0836496,
-          "hash": "73e50005c5b13494332cce18d7249b24b0a99ee8",
-          "tokens": 1885,
-          "lines": 225
+          "mtime": 1776200361.0688426,
+          "hash": "38add8b2761b1572222ba0098bb4d9e9a811c2be",
+          "tokens": 1936,
+          "lines": 231
         },
         {
           "path": "default_filetypes.json",
@@ -154,11 +154,11 @@
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "tokens": 1450,
+          "tokens": 1458,
           "ignoreTokens": false,
-          "lines": 174,
-          "mtime": 1776199161.3075297,
-          "hash": "cfe321776f570689834cbbf7ef31564ede227989"
+          "lines": 177,
+          "mtime": 1776200361.10313,
+          "hash": "e14a37006e7b93f93246b90a7d80b8f8578f2165"
         },
         {
           "path": "src/core/window_geometry.py",
@@ -246,11 +246,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 1932,
+          "tokens": 2062,
           "ignoreTokens": false,
-          "lines": 241,
-          "mtime": 1776199010.712431,
-          "hash": "5d1deaa85a62785d78a5ff166100c021ad20e76b"
+          "lines": 255,
+          "mtime": 1776200361.1335256,
+          "hash": "9d8aff34a1ef599d388031f04262b41e19807a98"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -854,7 +854,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 147932,
+      "total_tokens": 148121,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

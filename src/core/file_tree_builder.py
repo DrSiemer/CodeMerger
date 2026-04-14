@@ -22,7 +22,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
         all_paths = inventory['files']
         gitignores = inventory['gitignores']
 
-        # 1. First Pass: Identify visible files
+        # First Pass: Identify visible files
         visible_paths = []
         for rel_path in all_paths:
             # Rule: Text Filter is the absolute primary. If it exists, everything must match it.
@@ -49,7 +49,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
 
             visible_paths.append(rel_path)
 
-        # 2. Second Pass: Construct Trie structure
+        # Second Pass: Construct Trie structure
         root_nodes = []
         path_to_node = {}
 
@@ -102,7 +102,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
                     current_level_nodes = path_to_node[part_path]['children']
                     parent_path = part_path
 
-        # 3. Final Pass: Restore "Folders First" sorting
+        # Final Pass: Restore "Folders First" sorting
         def sort_tree(nodes):
             # Sort by type (dirs before files) and then name (alphabetical)
             nodes.sort(key=lambda n: (n['type'] != 'dir', n['name'].lower()))
