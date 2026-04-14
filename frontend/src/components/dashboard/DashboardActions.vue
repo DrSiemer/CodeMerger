@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2 } from 'lucide-vue-next'
+import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const emit = defineEmits(['open-settings', 'open-instructions-modal', 'open-review-modal'])
@@ -13,6 +13,7 @@ const {
   copyCleanupPrompt,
   copyCode,
   processPaste,
+  clearPasteData,
   config
 } = useAppState()
 
@@ -151,18 +152,29 @@ const pasteTooltipText = computed(() => {
 
           <div class="flex flex-col space-y-4">
             <!-- Orange Attention styling when changes are pending in memory (Requirement) -->
-            <button
-              id="btn-paste-changes"
-              @click="handlePasteChanges"
-              :disabled="isProjectLoading"
-              class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px] disabled:opacity-50"
-              :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
-              :title="pasteTooltipText"
-              v-info="'paste_changes'"
-            >
-              <ClipboardPaste class="w-4 h-4" />
-              <span>Paste Changes</span>
-            </button>
+            <div class="relative w-full">
+              <button
+                id="btn-paste-changes"
+                @click="handlePasteChanges"
+                :disabled="isProjectLoading"
+                class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px] disabled:opacity-50"
+                :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
+                :title="pasteTooltipText"
+                v-info="'paste_changes'"
+              >
+                <ClipboardPaste class="w-4 h-4" />
+                <span>Paste Changes</span>
+              </button>
+              <!-- Clear Recycle Bin -->
+              <button
+                v-if="hasPendingChanges"
+                @click.stop="clearPasteData"
+                class="absolute top-1 right-1 p-1 text-white/50 hover:text-white transition-colors"
+                title="Clear unapplied response from memory"
+              >
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
 
             <button
               id="btn-response-review"

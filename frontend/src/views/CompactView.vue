@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import {
-  ClipboardPaste, Eye, Minimize2, AlertTriangle, Loader2
+  ClipboardPaste, Eye, Minimize2, AlertTriangle, Loader2, Trash2
 } from 'lucide-vue-next'
 
 const {
@@ -15,6 +15,7 @@ const {
   closeApp,
   openProjectFolder,
   checkPendingChanges,
+  clearPasteData,
   statusMessage,
   init,
   config
@@ -131,6 +132,11 @@ const handlePaste = async (event) => {
   }
 }
 
+const handleClear = async () => {
+  await clearPasteData()
+  await updatePendingStatus()
+}
+
 const handleClose = (event) => {
   if (event.ctrlKey) closeApp()
   else restoreMainWindow()
@@ -241,15 +247,26 @@ const pasteTooltipText = computed(() => {
       <!-- Paste & Review Logic Row -->
       <div class="w-full flex items-center space-x-1.5">
         <!-- Orange styling when changes are pending in memory -->
-        <button
-          id="btn-compact-paste"
-          @click="handlePaste"
-          class="relative flex-grow text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-8"
-          :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
-          :title="pasteTooltipText"
-        >
-          <span>Paste</span>
-        </button>
+        <div class="relative flex-grow flex h-8">
+          <button
+            id="btn-compact-paste"
+            @click="handlePaste"
+            class="w-full text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-full"
+            :class="hasPendingChangesInternal ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"
+            :title="pasteTooltipText"
+          >
+            <span>Paste</span>
+          </button>
+          <!-- Clear Recycle Bin -->
+          <button
+            v-if="hasPendingChangesInternal"
+            @click.stop="handleClear"
+            class="absolute top-0.5 right-0.5 p-0.5 text-white/50 hover:text-white transition-colors"
+            title="Clear unapplied response"
+          >
+            <Trash2 class="w-3 h-3" />
+          </button>
+        </div>
 
         <button
           id="btn-compact-review"

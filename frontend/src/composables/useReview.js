@@ -67,6 +67,16 @@ export function useReview() {
     }
   }
 
+  const clearPasteData = async () => {
+    if (window.pywebview) {
+      await window.pywebview.api.clear_parsed_plan()
+    }
+    lastAiResponse.value = null
+    planFileStates.value = {}
+    planOriginalContents.value = {}
+    statusMessage.value = "AI response cleared from memory."
+  }
+
   const getFileContent = async (relPath) => {
     if (window.pywebview) {
       return await window.pywebview.api.get_file_content(relPath)
@@ -128,6 +138,7 @@ export function useReview() {
     hasPendingChanges,
     getClipboardText,
     processPaste,
+    clearPasteData,
     getFileContent,
     applyFileChange,
     deleteFile,

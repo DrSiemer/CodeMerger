@@ -241,11 +241,11 @@
         },
         {
           "path": "src/api_parts/changes_api.py",
-          "tokens": 2544,
+          "tokens": 2562,
           "ignoreTokens": false,
-          "lines": 257,
-          "mtime": 1776113001.09644,
-          "hash": "200556d66455e138fb9f762ac26c942215406896"
+          "lines": 261,
+          "mtime": 1776169293.2631648,
+          "hash": "53ccf7e937a5eb003d3292960eeb0bdfe481b2dd"
         },
         {
           "path": "src/api_parts/starter_api_session.py",
@@ -345,8 +345,11 @@
         },
         {
           "path": "frontend/src/composables/useReview.js",
-          "tokens": 1090,
-          "ignoreTokens": false
+          "tokens": 1163,
+          "ignoreTokens": false,
+          "lines": 152,
+          "mtime": 1776169293.2991915,
+          "hash": "1c83052f3ee3d44293f8a9eb4e856d7d72ceae73"
         },
         {
           "path": "frontend/src/composables/useStarter.js",
@@ -403,8 +406,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 2204,
-          "ignoreTokens": false
+          "tokens": 2322,
+          "ignoreTokens": false,
+          "lines": 289,
+          "mtime": 1776169293.3754265,
+          "hash": "658705dbe75a8c027d6af4010a4634c0b8a92641"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
@@ -418,8 +424,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardActions.vue",
-          "tokens": 1859,
-          "ignoreTokens": false
+          "tokens": 1963,
+          "ignoreTokens": false,
+          "lines": 201,
+          "mtime": 1776169293.3341088,
+          "hash": "0989db6fe862e1ff09042b9063ad6896c528ad25"
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -723,7 +732,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 140340,
+      "total_tokens": 140653,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1.\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

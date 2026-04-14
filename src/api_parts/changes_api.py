@@ -125,6 +125,11 @@ class ChangesApi:
         """Used by the main window to retrieve a plan prepared by the compact window Browser context."""
         return self._last_parsed_plan
 
+    def clear_parsed_plan(self):
+        """Removes the stored plan from session memory."""
+        self._last_parsed_plan = None
+        return True
+
     def check_for_pending_changes(self):
         """
         Returns True if the current response in memory has unapplied changes.
