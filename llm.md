@@ -22,16 +22,6 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 
 ---
 
-### Meta-Log: Notes on My Behavior
-
-*(Use this section to log corrections to my own behavior, so I don't repeat mistakes. This is separate from code logic.)*
-
-- **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
-- **Info Mode Key-Sync Requirement (CRITICAL):** When porting Info Mode features from Python to Web UI, a 1:1 mapping between `info_messages.py` (Python) and `infoMessages.js` (JavaScript) is MANDATORY. If a key is used in `v-info` but is missing from `infoMessages.js`, the system silently falls back to the default message. Since the text doesn't change, Vue's reactivity system will not trigger an update, resulting in the footer appearing "broken" or "frozen" even if events are firing. ALWAYS verify the frontend key dictionary exists before implementing hovers.
-- **Dots in batch files:** NEVER use triple dots (`...`) in Batch scripts (`.bat`), as they cannot handle it and you will break the scripts by doing that.
-
----
-
 ### Quick Examples
 
 **Good Note (A Workaround):**
@@ -39,6 +29,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src/ui/assets.py`: Uses a two-stage load (PIL then `PhotoImage`) to avoid a Tkinter race condition with the root window. This is intentional.
 
 **Good Note (An Atypical Choice):**
+
 - `src/core/secret_scanner.py`: Explicitly defines all plugins via `transient_settings` instead of relying on filesystem discovery, which is unreliable in a PyInstaller bundle.
 
 **Bad Note (A Routine Bug Fix):**
@@ -48,6 +39,16 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 **Bad Note (An Obvious Summary):**
 
 - `src/ui/app_window.py`: This file contains the main `App` class which initializes the UI...
+ 
+---
+
+### Meta-Log: Notes on My Behavior
+
+*(Use this section to log corrections to my own behavior, so I don't repeat mistakes. This is separate from code logic.)*
+
+- **Logging Threshold:** Do not log standard bug fixes or common implementation patterns. The bar for a "quirk" is high: it must be a workaround, a non-standard choice, or an otherwise surprising piece of code.
+- **Info Mode Key-Sync Requirement (CRITICAL):** When porting Info Mode features from Python to Web UI, a 1:1 mapping between `info_messages.py` (Python) and `infoMessages.js` (JavaScript) is MANDATORY. If a key is used in `v-info` but is missing from `infoMessages.js`, the system silently falls back to the default message. Since the text doesn't change, Vue's reactivity system will not trigger an update, resulting in the footer appearing "broken" or "frozen" even if events are firing. ALWAYS verify the frontend key dictionary exists before implementing hovers.
+- **Dots in batch files:** NEVER use triple dots (`...`) in Batch scripts (`.bat`), as they cannot handle it and you will break the scripts by doing that.
 
 ---
 
@@ -66,6 +67,8 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **Cross-Window Clipboard Access**: The application explicitly bypasses the `navigator.clipboard` API in favor of the Python `pyperclip` bridge. This avoids browser permission popups and "User Activation" requirements that would otherwise block programmatic clipboard access, especially when triggering paste operations from the Compact window into the Main window's review logic.
 - **Windows MIME Type Strictness**: On some Windows machines, the registry incorrectly maps `.js` files to `text/plain`. Since Vite-generated bundles use ES modules (`type="module"`), Chromium (WebView2) strictly enforces MIME types and will refuse to execute scripts served as anything other than `application/javascript`. To prevent blank screens and handshake timeouts, CodeMerger explicitly force-registers correct MIME types for `.js`, `.mjs`, and `.css` in the Python `mimetypes` module at startup.
 - **Compact Mode Transient Position (CRITICAL)**: The coordinates (`x`, `y`) for the Compact Mode window MUST NEVER be persisted to configuration files, `AppState`, or the registry. The position is strictly transient and must reset to `None` at every application startup or whenever the main window moves between monitors. Upon activation, if the remembered position is `None`, the compact window must be centered exactly in the middle of the main application window's current bounds using Physical Pixel arithmetic.
+- **Inventory-First Performance Stack**: To support 12,000+ files with sub-100ms UI responsiveness, CodeMerger avoids recursive Disk IO in the UI thread. The `FileMonitorThread` maintains a flat memory inventory (paths + gitignores). The `FileApi` reconstructs the nested UI Tree on-demand using a non-recursive Trie builder. This architecture avoids Disk IO during filtering, searching, and sorting.
+- **Visibility Bypass (Purple Logic)**: Selected files (those in the Merge Order) are immune to Extension and Gitignore filters. They are forced into the Tree regardless of settings. If a file is visible *only* because of this bypass, it is flagged as `is_filtered`, which triggers a purple visual style in the UI to alert the user that the file would normally be hidden.
 
 ### Core Logic (`src/core`)
 
@@ -75,13 +78,15 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - `src.core/updater.py`: The automatic update check compares only the date part of the `last_update_check` timestamp to ensure it runs only once per day, not every time the app is started.
 - `src/core/change_applier.py`: A persistent generative flaw was identified where the model repeatedly produced `lines.strip()` instead of the correct `lines[1].strip()`, causing an `AttributeError`. This is a form of pattern-matching failure where a high-probability (but incorrect) code pattern overrides the specific analytical correction. The fix is to embed explicit, high-priority comments (e.g., `// DO NOT REMOVE [index]`) directly in the code to act as a hard constraint during generation.
 - `src/core/logger.py`: Centralizes application logging using the `rich` library for formatted console output and a `RotatingFileHandler` for persistent log files. It also sets a global exception hook to ensure all unhandled exceptions are logged.
-- `src/core/utils.py`: `parse_gitignore` modifies the `dirs` list of `os.walk` in-place using `is_ignored`. This prevents the walker from traversing into ignored directories (like `node_modules`), drastically improving load times.
+- `src/core/utils.py`: `parse_gitignore` and `is_ignored` use a high-performance string-prefix matching algorithm. By avoiding `Path` object instantiation and using pre-sorted inventory strings, it achieves $O(N \times Depth)$ matching rather than $O(N \times TotalGitignores)$.
 - `src/core/utils.py`: Replaced `psutil` process iteration with a Named Mutex (Windows) and `fcntl` lock file (POSIX) for single-instance detection. This avoids the high startup cost of scanning the system process table.
 - `src/core/project_config.py`: Implements atomic saving using `tempfile.mkstemp` and `os.replace` to prevent configuration wipes when multiple instances (e.g., dev and build) access the same project simultaneously. The `load` method includes defensive checks to ignore transiently empty or partial files created during write collisions, preventing the initialization of empty default profiles.
 - `src/core/change_applier.py`: Expanded the placeholder-bypass in `get_section` to catch verbose LLM hallucinations (e.g., "No conceptual questions were asked") to ensure segments remain cleanly empty when no valid content is generated.
 - `src/core/change_applier.py`: The parser for tagged sections (specifically ANSWERS) is permissive with closing tags, accepting either the full closing tag or a truncated version to handle frequent LLM output cutoff issues.
 - **Development Updater Search (Quirk)**: When running in non-frozen (source) mode, the `Updater` checks `dist/CodeMerger/updater_gui.exe` as a secondary path. This allows testing the update system without a full installation, provided the developer has run `go ba` to generate the build artifacts first.
 - **Forceful Update Shutdown (Quirk)**: The main application uses `os._exit(0)` to terminate immediately after launching the update GUI. This bypasses the standard PyWebView/Chromium graceful shutdown, which can be slow or hang due to COM object teardown. Immediate exit is required so the `updater_gui.exe` can see the PID has vanished and begin the download/install cycle without a timeout.
+- **Adaptive Background Throttling**: To prevent the background monitor from consuming excessive system resources on massive projects, `FileMonitorThread` uses a $T \times 4$ adaptive multiplier. If a scan takes 3 seconds, the thread is forced to sleep for at least 12 seconds, regardless of user settings. On Windows, the thread also calls `THREAD_MODE_BACKGROUND_BEGIN` to lower IO/CPU priority.
+- **Concurrency Scan Locking**: The `ProjectManager` uses a `_scan_lock` to coordinate between the background monitor and foreground UI requests. If a background scan is already in progress when the user opens the File Manager, the UI thread will wait for the existing result instead of triggering a competing disk walk.
 
 ### PyWebView & Web UI
 
@@ -94,6 +99,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **High-DPI Hybrid Growth Strategy**: To solve "cropped growth" on High-DPI displays (e.g., 150% scaling), CodeMerger uses an **Absolute Physical Arithmetic** pipeline. Centering and boundary checks are performed in raw physical pixels against the monitor's work area. **Hybrid-Domain Execution** is then applied: `win.resize()` is called with raw physical pixels (for standard windows), while `win.move()` is called with logical pixels (physical / scale). This overcomes PyWebView's inconsistent unit handling. Calls are **sequenced** (move then resize) with a 20ms delay to prevent OS-level geometry drops.
 - **Overlay-Isolated Global Layout**: To ensure the Info footer remains visible and accessible even when modals are open, the app uses a split-level layout in `App.vue`. The main content area is a `relative` container, while the footer is a sibling to that container. Modals use `absolute inset-0` positioning to anchor strictly to the content area. This ensures that the transparent black backdrop used by modals physically cannot cover the Info Panel or Status Bar.
 - **Reference-Replacement Reactivity**: Vue 3 reactivity for module-level `ref` arrays (like the `activeInfoStack` used for hovers) can fail to notify components across view boundaries if updated via mutation methods like `.push()`. Global state updates for Info Mode must use the spread operator (`activeInfoStack.value = [...activeInfoStack.value, key]`) to replace the array reference, forcing a reliable DOM update.
+- **Async Search Sequencing**: To prevent race conditions in the File Manager during rapid typing, the frontend uses a `lastRequestId` tracker. Responses from the Python backend are discarded if they belong to a request ID older than the current one, ensuring the UI never "reverts" to old results if a simpler search query finishes after a more complex one.
 
 ### Build, Installation, & CI/CD
 
