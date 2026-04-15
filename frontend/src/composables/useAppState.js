@@ -13,6 +13,7 @@ export * from './infoMode'
 let statusTimeout = null
 let statusFadeTimeout = null
 let isInitialized = false
+let isAppSetup = false
 
 export function useAppState() {
   const system = useSystem()
@@ -48,31 +49,44 @@ export function useAppState() {
     isInitialized = true
   }
 
-  const init = async () => {
-    if (window.pywebview) {
-      globalState.config.value = await window.pywebview.api.get_app_config()
-      infoMode.infoModeActive.value = globalState.config.value.info_mode_active ?? true
-
-      globalState.newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
-
-      globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')
-      globalState.logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
-      globalState.logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
-
+  const refreshProject = async (data = null) => {
+    if (data) {
+      project.applyProjectData(data)
+    } else if (window.pywebview) {
       const proj = await window.pywebview.api.get_current_project()
       project.applyProjectData(proj)
+    }
+  }
 
-      window.addEventListener('cm-new-files', (e) => {
-        globalState.activeProject.newFileCount = e.detail.count
-      })
-      window.addEventListener('cm-project-reloaded', () => {
-        init()
-      })
+  const init = async () => {
+    if (window.pywebview) {
+      if (!isAppSetup) {
+        globalState.config.value = await window.pywebview.api.get_app_config()
+        infoMode.infoModeActive.value = globalState.config.value.info_mode_active ?? true
 
-      window.addEventListener('cm-close-review', () => {
-        globalState.showReviewModal.value = false
-        globalState.revertToCompactOnClose.value = false
-      })
+        globalState.newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
+
+        globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')
+        globalState.logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
+        globalState.logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
+
+        window.addEventListener('cm-new-files', (e) => {
+          globalState.activeProject.newFileCount = e.detail.count
+        })
+
+        window.addEventListener('cm-project-reloaded', (e) => {
+          refreshProject(e.detail)
+        })
+
+        window.addEventListener('cm-close-review', () => {
+          globalState.showReviewModal.value = false
+          globalState.revertToCompactOnClose.value = false
+        })
+
+        isAppSetup = true
+      }
+
+      await refreshProject()
     }
   }
 
@@ -83,6 +97,7 @@ export function useAppState() {
     ...project,
     ...review,
     ...starter,
-    init
+    init,
+    refreshProject
   }
 }

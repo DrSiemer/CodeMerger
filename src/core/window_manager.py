@@ -3,6 +3,7 @@ import webview
 import logging
 import time
 import threading
+import json
 from src.core.paths import get_bundle_dir
 from src.core.updater import Updater
 from src.core.utils import load_app_version, save_config
@@ -79,6 +80,27 @@ class WindowManager:
 
     def _get_monitor_work_area_phys(self, h_monitor):
         return WindowGeometry.get_monitor_work_area_phys(h_monitor)
+
+    def _dispatch_project_reload(self, win):
+        """Broadcasts current project state to a window, bypassing async round-trips"""
+        if not win or not self.api: return
+        project_config = self.api.project_manager.get_current_project()
+        data = self.api._format_project_response(project_config, "") if project_config else None
+        data_json = json.dumps(data)
+        win.evaluate_js(f'window.dispatchEvent(new CustomEvent("cm-project-reloaded", {{ detail: {data_json} }}))')
+
+    def broadcast_project_reload(self):
+        """Pushes current state to all windows to ensure hidden windows stay synchronized"""
+        if not self.api: return
+        project_config = self.api.project_manager.get_current_project()
+        data = self.api._format_project_response(project_config, "") if project_config else None
+        data_json = json.dumps(data)
+        js = f'window.dispatchEvent(new CustomEvent("cm-project-reloaded", {{ detail: {data_json} }}))'
+
+        if self.main_window:
+            self.main_window.evaluate_js(js)
+        if self.compact_window:
+            self.compact_window.evaluate_js(js)
 
     def start(self):
         """Initializes windows and starts the PyWebView UI loop"""
@@ -213,7 +235,7 @@ class WindowManager:
         try:
             if self.compact_window: self.compact_window.hide()
             if self.main_window:
-                self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                self.broadcast_project_reload()
             if self.monitor: self.monitor.update_window(self.main_window)
         finally: self._transitioning = False
 
@@ -271,7 +293,7 @@ class WindowManager:
             if self.main_window:
                 self.main_window.show()
                 self.main_window.restore()
-                self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                self.broadcast_project_reload()
                 if self.monitor: self.monitor.update_window(self.main_window)
         finally: self._transitioning = False
 

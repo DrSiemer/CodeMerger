@@ -105,6 +105,7 @@ class ClipboardApi:
                 success, msg = self.apply_full_plan(plan)
                 if success:
                     self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
+                    self._broadcast_reload()
                     return msg
 
         self._window_manager.restore_main()

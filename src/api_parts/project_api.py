@@ -33,6 +33,7 @@ class ProjectApi:
 
         if not self.app_state.active_directory:
             self.project_manager.load_project(None)
+            self._broadcast_reload()
 
         return self.get_recent_projects()
 
@@ -40,6 +41,7 @@ class ProjectApi:
         """Activates and loads a specific project path."""
         if path is None:
             self.project_manager.load_project(None)
+            self._broadcast_reload()
             return {"status_msg": "Project deactivated."}
 
         if not isinstance(path, str):
@@ -55,6 +57,7 @@ class ProjectApi:
                 if self._load_cancel_event.is_set():
                     return {"status_msg": "Load cancelled."}
 
+                self._broadcast_reload()
                 return self._format_project_response(project_config, status_msg)
         return None
 
@@ -84,6 +87,7 @@ class ProjectApi:
 
         project_config.project_name = new_name.strip()
         project_config.save()
+        self._broadcast_reload()
         return self._format_project_response(project_config, f"Project renamed to '{new_name.strip()}'")
 
     def select_color(self):
@@ -131,6 +135,7 @@ class ProjectApi:
                 from src.core.project_config import _calculate_font_color
                 project_config.project_font_color = _calculate_font_color(new_hex)
                 project_config.save()
+                self._broadcast_reload()
                 return self._format_project_response(project_config, "Project color updated.")
         finally:
             self._color_picker_active = False
@@ -148,6 +153,7 @@ class ProjectApi:
         project_config.project_font_color = _calculate_font_color(new_hex)
         project_config.save()
 
+        self._broadcast_reload()
         return self._format_project_response(project_config, "Project color saved.")
 
     def select_directory(self):
@@ -249,6 +255,7 @@ class ProjectApi:
         if profile_name in project_config.profiles and profile_name != project_config.active_profile_name:
             project_config.active_profile_name = profile_name
             project_config.save()
+            self._broadcast_reload()
             return self._format_project_response(project_config, f"Switched to profile: {profile_name}")
         return None
 
@@ -261,6 +268,7 @@ class ProjectApi:
         if project_config.create_new_profile(name, copy_files, copy_instructions):
             project_config.active_profile_name = name
             project_config.save()
+            self._broadcast_reload()
             return self._format_project_response(project_config, f"Created and switched to profile: {name}")
         return self._format_project_response(project_config, f"Error: Profile '{name}' already exists.")
 
@@ -275,6 +283,7 @@ class ProjectApi:
 
         if project_config.delete_profile(name):
             project_config.save()
+            self._broadcast_reload()
             if self._window_manager and self._window_manager.main_window:
                 count = len(project_config.unknown_files)
                 self._window_manager.main_window.evaluate_js(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')

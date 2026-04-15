@@ -50,12 +50,14 @@ def show_compact_window(manager):
     exec_x_log = int(manager.compact_mode_last_x)
     exec_y_log = int(manager.compact_mode_last_y)
 
+    # Ensure Vue has rendered the state in the background buffer
+    manager._dispatch_project_reload(manager.compact_window)
+
     # Runtime resize consumes physical units while move consumes logical units
     # Due to a PyWebView High-DPI quirk on Windows, we must use physical pixels for resizing but logical pixels for moving
     manager.compact_window.resize(w_phys, h_phys)
     manager.compact_window.move(exec_x_log, exec_y_log)
     manager.compact_window.show()
     manager.compact_window.restore()
-    manager.compact_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
     if manager.monitor: manager.monitor.update_window(manager.compact_window)

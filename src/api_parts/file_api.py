@@ -106,6 +106,7 @@ class FileApi:
         if project_config:
             project_config.unknown_files = []
             project_config.save()
+            self._broadcast_reload()
             if self._window_manager and self._window_manager.main_window:
                 self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
             return True
@@ -160,6 +161,7 @@ class FileApi:
         project_config.update_known_files(current_paths, project_config.active_profile_name)
 
         project_config.save()
+        self._broadcast_reload()
 
         if self._window_manager and self._window_manager.main_window:
             self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-new-files", { detail: { count: 0 } }))')
@@ -184,6 +186,7 @@ class FileApi:
         project_config.update_known_files(current_paths, project_config.active_profile_name)
 
         project_config.save()
+        self._broadcast_reload()
         return True
 
     def generate_order_request(self, selected_files):

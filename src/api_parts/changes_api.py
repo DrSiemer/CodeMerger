@@ -91,6 +91,7 @@ class ChangesApi:
                 self._last_parsed_plan['file_states'][rel_path] = 'applied'
 
             project_config.save()
+            self._broadcast_reload()
         return success, err
 
     def delete_file(self, rel_path):
@@ -115,6 +116,7 @@ class ChangesApi:
                 self._last_parsed_plan['file_states'][rel_path] = 'deleted'
 
             project_config.save()
+            self._broadcast_reload()
         return success, err
 
     def claim_last_plan(self):
@@ -219,6 +221,7 @@ class ChangesApi:
                 for p in actual_deletions: states[p] = 'deleted'
 
             project_config.save()
+            self._broadcast_reload()
             if skipped: msg = f"Updated {len(all_changed_paths)} file(s). {len(skipped)} file(s) already up to date."
 
         return success, msg

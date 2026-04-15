@@ -21,6 +21,11 @@ class BaseApi:
         """Links the Api to the central window orchestration logic"""
         self._window_manager = mgr
 
+    def _broadcast_reload(self):
+        """Triggers a global synchronization of project state across all windows"""
+        if self._window_manager:
+            self._window_manager.broadcast_project_reload()
+
     def _format_project_response(self, project_config, status_msg):
         """Formats ProjectConfig into a dictionary suitable for JSON serialization"""
         if not project_config:
