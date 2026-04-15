@@ -170,11 +170,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2394,
+          "tokens": 2470,
           "ignoreTokens": false,
-          "lines": 288,
-          "mtime": 1776188720.0564902,
-          "hash": "08280ac72733a8e7d14380424296d26ba0c62913"
+          "lines": 294,
+          "mtime": 1776288242.9505355,
+          "hash": "e72a4fcbc43c89a1c4bc1a06624f21920ce4c569"
         },
         {
           "path": "src/core/window_main.py",
@@ -186,11 +186,11 @@
         },
         {
           "path": "src/core/window_compact.py",
-          "tokens": 628,
+          "tokens": 695,
           "ignoreTokens": false,
-          "lines": 59,
-          "mtime": 1776188742.5270412,
-          "hash": "676fda32aa9c3e72badb3f45cc3e9060a06cf51f"
+          "lines": 63,
+          "mtime": 1776288243.136536,
+          "hash": "2ad583385850f9b4f827a5a9d9b58d100f35c3b6"
         },
         {
           "path": "src/core/window_splash.py",
@@ -854,7 +854,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 148052,
+      "total_tokens": 148195,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

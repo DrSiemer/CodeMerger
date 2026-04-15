@@ -56,5 +56,6 @@ def show_compact_window(manager):
     manager.compact_window.move(exec_x_log, exec_y_log)
     manager.compact_window.show()
     manager.compact_window.restore()
+    manager.compact_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 
     if manager.monitor: manager.monitor.update_window(manager.compact_window)

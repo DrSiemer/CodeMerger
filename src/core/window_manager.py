@@ -212,6 +212,8 @@ class WindowManager:
         self._transitioning = True
         try:
             if self.compact_window: self.compact_window.hide()
+            if self.main_window:
+                self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
             if self.monitor: self.monitor.update_window(self.main_window)
         finally: self._transitioning = False
 
@@ -230,7 +232,8 @@ class WindowManager:
                 self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-close-review"))')
                 self.main_window.hide()
                 self.show_compact()
-            finally: self._transitioning = False
+            finally:
+                self._transitioning = False
 
     def _on_main_closing(self):
         if self._is_shutting_down: return
@@ -268,6 +271,7 @@ class WindowManager:
             if self.main_window:
                 self.main_window.show()
                 self.main_window.restore()
+                self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
                 if self.monitor: self.monitor.update_window(self.main_window)
         finally: self._transitioning = False
 
