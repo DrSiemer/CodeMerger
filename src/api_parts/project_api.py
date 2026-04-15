@@ -33,6 +33,7 @@ class ProjectApi:
 
         if not self.app_state.active_directory:
             self.project_manager.load_project(None)
+            self.clear_parsed_plan()
             self._broadcast_reload()
 
         return self.get_recent_projects()
@@ -41,6 +42,7 @@ class ProjectApi:
         """Activates and loads a specific project path."""
         if path is None:
             self.project_manager.load_project(None)
+            self.clear_parsed_plan()
             self._broadcast_reload()
             return {"status_msg": "Project deactivated."}
 
@@ -51,6 +53,7 @@ class ProjectApi:
         if path and os.path.isdir(path):
             if self.app_state.update_active_dir(path):
                 self._load_cancel_event.clear()
+                self.clear_parsed_plan()
 
                 project_config, status_msg = self.project_manager.load_project(path, cancel_event=self._load_cancel_event)
 

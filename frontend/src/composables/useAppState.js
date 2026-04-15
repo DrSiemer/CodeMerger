@@ -56,6 +56,18 @@ export function useAppState() {
       const proj = await window.pywebview.api.get_current_project()
       project.applyProjectData(proj)
     }
+
+    // Ensure AI response state is consistent with the backend on reload
+    if (window.pywebview) {
+      const status = await review.checkPendingChanges()
+      if (!status.exists && globalState.lastAiResponse.value) {
+        globalState.lastAiResponse.value = null
+        globalState.planFileStates.value = {}
+        globalState.planOriginalContents.value = {}
+        globalState.showReviewModal.value = false
+        globalState.revertToCompactOnClose.value = false
+      }
+    }
   }
 
   const init = async () => {
@@ -79,6 +91,14 @@ export function useAppState() {
         })
 
         window.addEventListener('cm-close-review', () => {
+          globalState.showReviewModal.value = false
+          globalState.revertToCompactOnClose.value = false
+        })
+
+        window.addEventListener('cm-plan-cleared', () => {
+          globalState.lastAiResponse.value = null
+          globalState.planFileStates.value = {}
+          globalState.planOriginalContents.value = {}
           globalState.showReviewModal.value = false
           globalState.revertToCompactOnClose.value = false
         })

@@ -126,6 +126,17 @@ class ChangesApi:
     def clear_parsed_plan(self):
         """Removes the stored plan from session memory."""
         self._last_parsed_plan = None
+
+        # Synchronize UI state across windows by broadcasting a clear event
+        if self._window_manager:
+            js = 'window.dispatchEvent(new CustomEvent("cm-plan-cleared"))'
+            for win in [self._window_manager.main_window, self._window_manager.compact_window]:
+                if win:
+                    try:
+                        win.evaluate_js(js)
+                    except Exception:
+                        pass
+
         return True
 
     def check_for_pending_changes(self):
