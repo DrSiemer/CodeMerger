@@ -31,6 +31,7 @@ let startMouseX = 0
 let startMouseY = 0
 let startWinX = 0
 let startWinY = 0
+let lastClickTime = 0
 
 // Interval for updating the notification status locally
 let statusCheckInterval = null
@@ -89,6 +90,16 @@ onUnmounted(() => {
 
 const startDrag = async (e) => {
   if (e.target.closest('button')) return
+
+  const now = Date.now()
+  const isDblClick = (now - lastClickTime < 300)
+  lastClickTime = now
+
+  if (isDblClick) {
+    isDragging = false
+    restoreMainWindow()
+    return
+  }
 
   if (e.altKey) {
     openProjectFolder({ ctrlKey: false, altKey: true })
@@ -218,7 +229,6 @@ const pasteTooltipText = computed(() => {
       id="compact-move-bar"
       class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move"
       @mousedown="startDrag"
-      @dblclick="restoreMainWindow"
       title="Double-click to restore. Alt-Click to open Command Prompt."
     >
       <div class="flex items-center space-x-2 min-w-0 pointer-events-none">

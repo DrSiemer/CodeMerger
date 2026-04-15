@@ -256,7 +256,7 @@ class WindowManager:
                 except Exception: pass
 
     def _on_compact_closing(self):
-        if self._is_shutting_down: return
+        if self._is_shutting_down: return True
         self.restore_main()
         return False
 
@@ -286,7 +286,11 @@ class WindowManager:
         self.main_window.minimize()
 
     def exit_all(self):
-        self._is_shutting_down = True
         if self.main_window:
             try: self.main_window.destroy()
-            except Exception: pass
+            except Exception:
+                import os
+                os._exit(0)
+        else:
+            import os
+            os._exit(0)
