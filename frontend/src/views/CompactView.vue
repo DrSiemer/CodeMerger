@@ -234,7 +234,7 @@ const pasteTooltipText = computed(() => {
       <div class="flex items-center space-x-2 min-w-0 pointer-events-none h-full">
         <img v-if="appIcon" :src="appIcon" class="w-4 h-4 shrink-0" />
         <span
-          class="text-[9px] font-black tracking-widest px-1 rounded whitespace-nowrap overflow-hidden h-[18px] flex items-center shrink-0"
+          class="text-[11px] font-mono font-bold tracking-widest px-1 rounded whitespace-nowrap overflow-hidden h-[18px] flex items-center pt-[1px] antialiased shrink-0"
           :style="{ color: activeProject.fontColor === 'dark' ? '#000000' : '#FFFFFF', backgroundColor: activeProject.color || '#666666' }"
         >
           {{ titleAbbr }}
