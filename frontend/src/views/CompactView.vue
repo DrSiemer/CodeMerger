@@ -231,17 +231,17 @@ const pasteTooltipText = computed(() => {
       @mousedown="startDrag"
       title="Double-click to restore. Alt-Click to open Command Prompt."
     >
-      <div class="flex items-center space-x-2 min-w-0 pointer-events-none">
-        <img v-if="appIcon" :src="appIcon" class="w-4 h-4" />
+      <div class="flex items-center space-x-2 min-w-0 pointer-events-none h-full">
+        <img v-if="appIcon" :src="appIcon" class="w-4 h-4 shrink-0" />
         <span
-          class="text-[9px] font-black tracking-widest px-1 rounded whitespace-nowrap overflow-hidden h-4 flex items-center"
+          class="text-[9px] font-black tracking-widest px-1 rounded whitespace-nowrap overflow-hidden h-[18px] flex items-center shrink-0"
           :style="{ color: activeProject.fontColor === 'dark' ? '#000000' : '#FFFFFF', backgroundColor: activeProject.color || '#666666' }"
         >
           {{ titleAbbr }}
         </span>
       </div>
 
-      <div class="flex items-center space-x-1.5 shrink-0">
+      <div class="flex items-center space-x-1.5 shrink-0 h-full">
         <AlertTriangle
           v-if="activeProject.newFileCount > 0"
           class="w-3.5 h-3.5 text-cm-green animate-pulse"
@@ -250,7 +250,7 @@ const pasteTooltipText = computed(() => {
         <button
           @mousedown.stop
           @click="handleClose"
-          class="text-gray-400 hover:text-white transition-colors"
+          class="text-gray-400 hover:text-white transition-colors flex items-center justify-center"
           title="Restore dashboard (Ctrl-Click to exit application)"
         >
           <Expand class="w-4 h-4" />
