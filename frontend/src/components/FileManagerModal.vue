@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { X, RotateCcw, Save, Search } from 'lucide-vue-next'
 import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
 import FileManagerRightPanel from './FileManagerRightPanel.vue'
@@ -37,15 +38,13 @@ const lastRequestId = ref(0)
 
 const highlightedPath = ref(null)
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') {
-    if (showOrderErrorModal.value) {
-      showOrderErrorModal.value = false
-      return
-    }
-    handleCancel()
+useEscapeKey(() => {
+  if (showOrderErrorModal.value) {
+    showOrderErrorModal.value = false
+    return
   }
-}
+  handleCancel()
+})
 
 const debounce = (fn, delay) => {
   let timeout
@@ -61,13 +60,6 @@ onMounted(async () => {
   await autoHandleNewFiles()
   await clearUnknownFiles()
   isLoaded.value = true
-
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
-  showOrderErrorModal.value = false
 })
 
 const refreshTree = async () => {

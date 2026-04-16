@@ -1,33 +1,27 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { X, Search, FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 
 const emit = defineEmits(['close'])
-const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow, infoModeActive, openProjectFolder } = useAppState()
+const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow, infoModeActive } = useAppState()
 
 const recents = ref([])
 const searchQuery = ref('')
 const isLoaded = ref(false)
 const logoMaskSmall = ref('')
 
-const handleEscape = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   const footerHeight = infoModeActive.value ? 116 : 36
   await resizeWindow(800, 500 + footerHeight)
 
-  document.addEventListener('keydown', handleEscape)
   const initialRecents = await getRecentProjects()
   recents.value = Array.isArray(initialRecents) ? initialRecents : []
   logoMaskSmall.value = await getImage('logo_mask_small.png')
   isLoaded.value = true
-})
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscape)
 })
 
 const filteredRecents = computed(() => {

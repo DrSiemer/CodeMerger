@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted, markRaw } from 'vue'
+import { ref, computed, onMounted, markRaw } from 'vue'
 import {
   X, Settings, FolderClosed, Bot, Play,
   Terminal, FileCode2
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 
 import SettingsAppTab from './settings/SettingsAppTab.vue'
 import SettingsFileManagerTab from './settings/SettingsFileManagerTab.vue'
@@ -28,9 +29,7 @@ const activeTab = ref(props.initialTab)
 
 const localFiletypes = ref([])
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   // Smart Growth: Ensure the main window is large enough for the settings layout
@@ -38,12 +37,6 @@ onMounted(async () => {
 
   localConfig.value = JSON.parse(JSON.stringify(config.value))
   localFiletypes.value = await getFiletypes()
-
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const handleSave = async () => {

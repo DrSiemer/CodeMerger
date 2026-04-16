@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Leaf, Save, Upload, Trash2, LogOut } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 
 import Step1Details from './starter-steps/Step1Details.vue'
 import Step2BaseFiles from './starter-steps/Step2BaseFiles.vue'
@@ -72,9 +73,7 @@ const stepNames = {
   6: 'Generate'
 }
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   await resizeWindow(1100, 850)
@@ -93,16 +92,12 @@ onMounted(async () => {
   }
 
   isLoading.value = false
-
-  window.addEventListener('keydown', handleKeyDown)
 })
 
 onUnmounted(() => {
   // Automatic acceptance of all pending diffs on exit
   pData.concept_baselines = {}
   pData.todo_baselines = {}
-
-  window.removeEventListener('keydown', handleKeyDown)
 })
 
 watch(() => pData, () => {
