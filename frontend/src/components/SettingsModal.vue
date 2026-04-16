@@ -29,6 +29,9 @@ const activeTab = ref(props.initialTab)
 
 const localFiletypes = ref([])
 
+const initialConfigString = ref('')
+const initialFiletypesString = ref('')
+
 useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
@@ -36,7 +39,16 @@ onMounted(async () => {
   await resizeWindow(1000, 700)
 
   localConfig.value = JSON.parse(JSON.stringify(config.value))
+  initialConfigString.value = JSON.stringify(localConfig.value)
+
   localFiletypes.value = await getFiletypes()
+  initialFiletypesString.value = JSON.stringify(localFiletypes.value)
+})
+
+const hasChanges = computed(() => {
+  if (!initialConfigString.value || !initialFiletypesString.value) return false
+  return JSON.stringify(localConfig.value) !== initialConfigString.value ||
+         JSON.stringify(localFiletypes.value) !== initialFiletypesString.value
 })
 
 const handleSave = async () => {
@@ -112,23 +124,35 @@ const activeTabInfoKey = computed(() => {
 
         <!-- Footer -->
         <div class="p-4 border-t border-gray-700 shrink-0 bg-cm-top-bar flex justify-end">
-          <button
-            @click="emit('close')"
-            v-info="'settings_cancel'"
-            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-5 rounded mr-3 transition-colors"
-            title="Discard modifications and exit"
-          >
-            Cancel
-          </button>
-          <button
-            id="btn-settings-save"
-            @click="handleSave"
-            v-info="'settings_save'"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-medium py-2 px-5 rounded shadow-sm transition-colors"
-            title="Commit all settings to configuration"
-          >
-            Save Changes
-          </button>
+          <template v-if="hasChanges">
+            <button
+              @click="emit('close')"
+              v-info="'settings_cancel'"
+              class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-5 rounded mr-3 transition-colors"
+              title="Discard modifications and exit"
+            >
+              Cancel
+            </button>
+            <button
+              id="btn-settings-save"
+              @click="handleSave"
+              v-info="'settings_save'"
+              class="bg-cm-blue hover:bg-blue-500 text-white font-medium py-2 px-5 rounded shadow-sm transition-colors"
+              title="Commit all settings to configuration"
+            >
+              Save Changes
+            </button>
+          </template>
+          <template v-else>
+            <button
+              @click="emit('close')"
+              v-info="'settings_cancel'"
+              class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-5 rounded transition-colors"
+              title="Close settings window"
+            >
+              Close
+            </button>
+          </template>
         </div>
       </div>
 
