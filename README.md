@@ -18,7 +18,7 @@ Download the latest portable executable for Windows from the [Releases page](htt
 
 - **The "No-Chunking" Advantage**: By providing an LLM with full, unabridged source files, it eliminates hallucinations caused by missing context.
 - **Web-UI Optimized**: Specifically designed for a manual copy-paste workflow. This allows you to use the most powerful models for **FREE** through their standard web interfaces (like [Google AI Studio](https://aistudio.google.com/)) rather than paying for API credits or specialized IDE subscriptions.
-- **Closed-Loop AI Review**: Once the AI generates a response, paste it back into CodeMerger. The app automatically parses the output into navigable segments (Intro, Changes, Answers, Verification), allowing you to approve or reject file modifications line-by-line using an interactive diff viewer before any code is written to disk.
+- **Closed-Loop AI Review**: Once the AI generates a response, paste it back into CodeMerger. The app automatically parses the output into navigable segments (Intro, Changes, Answers, Verification), allowing you to approve or reject file modifications using an interactive diff viewer before any code is written to disk.
 - **Guided Project Starter**: A structured, guided workflow for building new applications. It helps you and your LLM generate a cohesive concept, tech stack, and step-by-step TODO plan before scaffolding the boilerplate.
 - **Compact Widget**: Minimize the main window to activate a tiny, always-on-top panel. It handles the "Copy Context / Paste Changes" loop so you never have to leave your editor.
 
@@ -44,12 +44,11 @@ When you minimize the main window, CodeMerger transforms into a compact, always-
 
 - Access your standard "Copy" and "Paste" actions without leaving your IDE.
 - Color-coded to match your active project.
-- Supports all global keyboard shortcuts (`Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+V`).
 - Double-click the title bar or click the expand icon to restore the full dashboard.
 
 ## Project Starter
 
-CodeMerger includes a built-in Project Starter to help you kick off new ideas. It provides a structured workflow, that guides you and your LLM through generating a solid project foundation.
+CodeMerger includes a built-in tool to help you kick off new projects. It provides a structured workflow, that guides you and your LLM through generating a solid project foundation.
 
 ![Project Starter](./dev/screenshot_04b.jpg "Project Starter")
 
