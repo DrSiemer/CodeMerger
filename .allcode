@@ -570,11 +570,11 @@
         },
         {
           "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-          "tokens": 4713,
+          "tokens": 1583,
           "ignoreTokens": false,
-          "lines": 326,
-          "mtime": 1776188575.5446973,
-          "hash": "2853d1a45b829e86e1a5cebe55d5f20380e3e784"
+          "lines": 184,
+          "mtime": 1776329467.165392,
+          "hash": "5ba746dbbbfa05cd7453e8b1fdc24edd0d3bd8ea"
         },
         {
           "path": "frontend/src/components/SettingsModal.vue",
@@ -852,9 +852,23 @@
           "lines": 82,
           "mtime": 1776191650.074532,
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
+        },
+        {
+          "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
+          "tokens": 558,
+          "lines": 57,
+          "mtime": 1776329467.2107506,
+          "hash": "0780f20705ed4ea2798ff33a178bd582b13c115d"
+        },
+        {
+          "path": "frontend/src/components/review-tabs/ReviewFileItem.vue",
+          "tokens": 1754,
+          "lines": 207,
+          "mtime": 1776329467.2515626,
+          "hash": "5665a49a10fbc51132c3177a8b47754ba2b381c7"
         }
       ],
-      "total_tokens": 149965,
+      "total_tokens": 146835,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -930,6 +944,8 @@
     "frontend/src/components/dashboard/DashboardHeader.vue",
     "frontend/src/components/dashboard/DashboardNav.vue",
     "frontend/src/components/review-tabs/ReviewChangesTab.vue",
+    "frontend/src/components/review-tabs/ReviewCommentary.vue",
+    "frontend/src/components/review-tabs/ReviewFileItem.vue",
     "frontend/src/components/settings/SettingsAppTab.vue",
     "frontend/src/components/settings/SettingsEditorTab.vue",
     "frontend/src/components/settings/SettingsFileManagerTab.vue",
