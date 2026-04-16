@@ -45,17 +45,21 @@ class FileApi:
 
             if root_count < 50:
                 log.debug("Small project detected. Performing synchronous inventory.")
-                inventory = get_project_inventory(base_dir)
+                raw_inv = get_project_inventory(base_dir)
+                from src.core.file_scanner import enrich_inventory
+                inventory = enrich_inventory(base_dir, raw_inv)
                 self.project_manager.set_inventory(inventory)
             else:
                 log.info("Inventory cache missing for potentially large project. Waiting for scan lock...")
                 with self.project_manager._scan_lock:
                     inventory, _ = self.project_manager.get_inventory()
                     if not inventory:
-                        inventory = get_project_inventory(base_dir)
+                        raw_inv = get_project_inventory(base_dir)
+                        from src.core.file_scanner import enrich_inventory
+                        inventory = enrich_inventory(base_dir, raw_inv)
                         self.project_manager.set_inventory(inventory)
 
-        # Build tree - uses the in-memory strings for instant results
+        # Build tree - uses the enriched metadata in inventory for instant results
         return build_file_tree_data(
             base_dir=base_dir,
             file_extensions=file_extensions,

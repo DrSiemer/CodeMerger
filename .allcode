@@ -111,18 +111,18 @@
         },
         {
           "path": "src/core/file_scanner.py",
-          "mtime": 1776198744.024785,
-          "hash": "725bb9c11cf75cf6b238a121d44686e9f0c831bc",
-          "tokens": 1050,
-          "lines": 133
+          "mtime": 1776329181.5764546,
+          "hash": "f1e6f0cc7469fab4720c2bd3a255245c0e01cd7c",
+          "tokens": 1289,
+          "lines": 161
         },
         {
           "path": "src/core/file_tree_builder.py",
-          "tokens": 1679,
+          "tokens": 1666,
           "ignoreTokens": false,
-          "lines": 191,
-          "mtime": 1776199233.643582,
-          "hash": "613aa8b98f3a831b7783dccfeb3edf6f7becdebd"
+          "lines": 193,
+          "mtime": 1776329181.6622577,
+          "hash": "287968b110ba074508eb31e12fd04d7cca62bcd5"
         },
         {
           "path": "src/core/merger.py",
@@ -154,11 +154,11 @@
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "tokens": 1478,
+          "tokens": 1443,
           "ignoreTokens": false,
-          "lines": 178,
-          "mtime": 1776200572.2068357,
-          "hash": "c85098ca19dc46766076f7eb344ebd12bfe1e82a"
+          "lines": 177,
+          "mtime": 1776329181.6206584,
+          "hash": "74912e6582cb4672d1a786507cfda50d99c093e2"
         },
         {
           "path": "src/core/window_geometry.py",
@@ -246,11 +246,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 1982,
+          "tokens": 2029,
           "ignoreTokens": false,
-          "lines": 253,
-          "mtime": 1776290446.9403148,
-          "hash": "8d4df156608c15425097a1f8a7812749da82b7ce"
+          "lines": 257,
+          "mtime": 1776329181.6950057,
+          "hash": "19136bafbff0434aff9470ebfa78e733f6e860ed"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -854,7 +854,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 149727,
+      "total_tokens": 149965,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

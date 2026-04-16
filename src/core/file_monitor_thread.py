@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 from .utils import parse_gitignore
-from .file_scanner import get_project_inventory
+from .file_scanner import get_project_inventory, enrich_inventory
 from .. import constants as c
 
 log = logging.getLogger("CodeMerger")
@@ -108,33 +108,32 @@ class FileMonitorThread(threading.Thread):
 
             # Update Project Inventory Cache (Discover ALL files and gitignores)
             with self.project_manager._scan_lock:
-                inventory = get_project_inventory(base_dir, cancel_event=self._stop_event)
+                raw_inventory = get_project_inventory(base_dir, cancel_event=self._stop_event)
                 if self._stop_event.is_set(): return
 
-                # Optimization: Sort inventory paths once here in background
-                inventory['files'].sort(key=str.lower)
+                # Perform background enrichment (heavy lift for ignore matching)
+                inventory = enrich_inventory(base_dir, raw_inventory)
 
                 self.project_manager.set_inventory(inventory)
 
             # Match inventory against project profile requirements for "New File" alerts
-            from .utils import load_active_file_extensions, is_ignored
+            from .utils import load_active_file_extensions
             file_extensions = load_active_file_extensions()
             extensions = {ext for ext in file_extensions if ext.startswith('.')}
             exact_filenames = {ext for ext in file_extensions if not ext.startswith('.')}
 
-            base_dir_norm = os.path.abspath(base_dir).replace('\\', '/')
-            all_files = inventory['files']
-            gitignores = inventory['gitignores']
+            all_files = inventory['files'] # List of enriched metadata objects
 
             # Filter inventory down to what is allowed by active settings to identify "true" new files
             profile_all_files = []
-            for rel_path in all_files:
-                abs_path = os.path.join(base_dir, rel_path)
-                if is_ignored(abs_path, base_dir_norm, gitignores):
+            for item in all_files:
+                # Use pre-calculated ignored flag to bypass recursive logic
+                if item['i']:
                     continue
 
-                name_low = os.path.basename(rel_path).lower()
-                ext = os.path.splitext(name_low)[1]
+                rel_path = item['p']
+                ext = item['e']
+                name_low = item['n']
                 if ext in extensions or name_low in exact_filenames:
                     profile_all_files.append(rel_path)
 

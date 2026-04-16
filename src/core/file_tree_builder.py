@@ -17,14 +17,16 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
     if unknown_files is None:
         unknown_files = set()
 
-    # --- MODE A: BUILD FROM MEMORY INVENTORY (INSTANT) ---
+    # --- MODE A: BUILD FROM ENRICHED MEMORY INVENTORY (INSTANT) ---
     if inventory:
-        all_paths = inventory['files']
+        all_items = inventory['files'] # Enriched list of {p, n, i, e}
         gitignores = inventory['gitignores']
 
         # First Pass: Identify visible files
-        visible_paths = []
-        for rel_path in all_paths:
+        visible_items = []
+        for item in all_items:
+            rel_path = item['p']
+
             # Rule: Text Filter is the absolute primary. If it exists, everything must match it.
             if filter_text_lower and filter_text_lower not in rel_path.lower():
                 continue
@@ -33,28 +35,28 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
 
             # Rule: If not selected, it must pass secondary settings filters
             if not is_selected:
-                name = rel_path.split('/')[-1].lower()
-
                 # Extension Filter
                 if is_extension_filter_active:
-                    file_ext = os.path.splitext(name)[1]
-                    if not (file_ext in extensions or name in exact_filenames):
+                    ext = item['e']
+                    name_low = item['n']
+                    if not (ext in extensions or name_low in exact_filenames):
                         continue
 
                 # Gitignore Filter
                 if is_gitignore_filter_active:
-                    abs_path = os.path.join(base_dir, rel_path)
-                    if is_ignored(abs_path, base_dir_norm, gitignores):
+                    # USE PRE-CALCULATED FLAG from background enrichment
+                    if item['i']:
                         continue
 
-            visible_paths.append(rel_path)
+            visible_items.append(item)
 
         # Second Pass: Construct Trie structure
         root_nodes = []
         path_to_node = {}
 
         # Inventory 'files' is pre-sorted in FileMonitorThread (alphabetical)
-        for rel_path in visible_paths:
+        for item in visible_items:
+            rel_path = item['p']
             parts = rel_path.split('/')
             current_level_nodes = root_nodes
             parent_path = ""
@@ -71,10 +73,10 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
 
                     # Logic for "Purple" Metadata (Selected but hidden by settings)
                     if node_type == 'file' and rel_path in selected_file_paths:
-                        abs_path = os.path.join(base_dir, rel_path)
-                        file_git_ignored = is_ignored(abs_path, base_dir_norm, gitignores)
-                        file_ext = os.path.splitext(part.lower())[1]
-                        is_valid_ext = file_ext in extensions or part.lower() in exact_filenames
+                        file_git_ignored = item['i']
+                        file_ext = item['e']
+                        name_low = item['n']
+                        is_valid_ext = file_ext in extensions or name_low in exact_filenames
 
                         if file_git_ignored:
                             is_filtered = True
