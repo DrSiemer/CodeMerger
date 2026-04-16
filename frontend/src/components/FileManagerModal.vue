@@ -440,6 +440,12 @@ const handleSave = async () => {
 
 <style scoped>
 .footer-col-left, .footer-col-right, .footer-search-col {
+  transition: all 0.4s ease-in-out 0.1s;
+}
+
+.has-changes .footer-col-left,
+.has-changes .footer-col-right,
+.has-changes .footer-search-col {
   transition: all 0.4s ease-in-out;
 }
 
