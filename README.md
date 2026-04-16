@@ -1,127 +1,99 @@
 # CodeMerger
 
-A simple app for developers that prefer to stay in control and want to avoid working in AI powered IDE's. It allows you to define which files should be merged into a single string, so you can easily paste all relevant code into an LLM. Settings for a folder are stored in a .allcode file that can be committed with your project.
+CodeMerger is a lightweight desktop application designed for developers who want to maintain absolute control over their code context when working with Large Language Models (LLMs). Instead of relying on AI-powered IDEs that silently scan your entire workspace, CodeMerger lets you explicitly hand-pick, order, and bundle specific files into a single, highly optimized text string that you can paste directly into your AI assistant of choice.
 
+By saving your file selections and instructions in a local `.allcode` file, you can easily resume your session or share the context configuration with your team.
 
 ![Main application window](./dev/screenshot_01b.jpg "Main Application Window")
 
-
-I recommend using this with [Gemini](https://aistudio.google.com/prompts/new_chat?model=gemini-3-flash-preview), because there you currently get a very large context length with high rate limits for free.
-
+*Tip: We recommend using CodeMerger with models like [Gemini Flash Latest](https://aistudio.google.com/prompts/new_chat?model=gemini-flash-latest), which has a generous free tier, with massive context windows capable of handling large code bundles.*
 
 ## Download
 
-Download the latest release [here](https://github.com/DrSiemer/codemerger/releases).
+Download the latest portable executable for Windows from the [Releases page](https://github.com/DrSiemer/codemerger/releases).
 
-The download is a portable executable for Windows. Ignore the Windows Defender SmartScreen block if you get it (click "More info" > "Run anyway"). The app is safe; all it does is bundle text with a convenient UI.
+*(Note: If you encounter a Windows Defender SmartScreen block, click "More info" > "Run anyway". CodeMerger is a safe, local-only utility.)*
 
+## Key Features
+
+- **The "No-Chunking" Advantage**: By providing an LLM with full, unabridged source files, it eliminates hallucinations caused by missing context.
+- **Web-UI Optimized**: Specifically designed for a manual copy-paste workflow. This allows you to use the most powerful models for **FREE** through their standard web interfaces (like [Google AI Studio](https://aistudio.google.com/)) rather than paying for API credits or specialized IDE subscriptions.
+- **Closed-Loop AI Review**: Once the AI generates a response, paste it back into CodeMerger. The app automatically parses the output into navigable segments (Intro, Changes, Answers, Verification), allowing you to approve or reject file modifications line-by-line using an interactive diff viewer before any code is written to disk.
+- **Guided Project Starter**: A structured, guided workflow for building new applications. It helps you and your LLM generate a cohesive concept, tech stack, and step-by-step TODO plan before scaffolding the boilerplate.
+- **Compact Widget**: Minimize the main window to activate a tiny, always-on-top panel. It handles the "Copy Context / Paste Changes" loop so you never have to leave your editor.
+
+![File management](./dev/screenshot_03b.jpg "Merge List")
+
+## Core Workflow
+
+1. **Select a Project**: Browse for a folder. CodeMerger will automatically create a `.allcode` profile to save your settings.
+2. **Edit Merge List**: Click "Edit Merge List" to open the file manager.
+   - Select the specific files you want to share with the AI.
+   - Drag and drop the selected files to dictate the order in which the AI reads them. Use the "Order Request" to let an LLM determine the optimal order.
+3. **Add Instructions**: Click "Define Instructions" to prepend goals or append code style rules to your project bundle.
+4. **Copy Code**:
+   - Click **"Copy with Instructions"** (`Ctrl+C`) to bundle the code and wrap it with your custom prompts. Ideal for starting a new chat.
+   - Click **"Copy Code Only"** (`Ctrl+Shift+C`) to quickly bundle the code with a simple update header. Ideal for asking questions or updating an existing conversation with the latest context if you made changes outside the conversation.
+5. **Paste Changes**: Once the AI gives you updated code, click **"Paste Changes"** (`Ctrl+V`) to import it. CodeMerger parses the AI's Markdown response and opens the **AI Response Review** window, allowing you to diff and approve file modifications line-by-line.
+
+## Compact Mode
+
+When you minimize the main window, CodeMerger transforms into a compact, always-on-top widget.
 
 ![Compact mode](./dev/screenshot_02b.jpg "Compact Mode")
 
+- Access your standard "Copy" and "Paste" actions without leaving your IDE.
+- Color-coded to match your active project.
+- Supports all global keyboard shortcuts (`Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+V`).
+- Double-click the title bar or click the expand icon to restore the full dashboard.
 
-## Features
+## Project Starter
 
-- **Project-Based Settings**: Saves all your file selections, merge order, and window state in a local `.allcode` file for each project
-- **`.gitignore` Aware**: The file browser automatically hides files and folders listed in your `.gitignore` file
-- **New File Detection**: Automatically scans your project for new files that match your filetype settings and alerts you with a visual indicator. New files are highlighted in the list editor for easy review
-- **Token Counting**: Calculates the total token count of your selected files to help you stay within an LLM's context limit
-- **Customizable Prompts**: Configure a default prompt that is automatically prepended to your code when using the "Copy Code Only" button. You can also set application-wide default intro and outro texts for the instructions feature
-- **Customizable Instructions**: Add project-specific text (like prompts or instructions) before and after the merged code block. You can easily load your predefined default prompts
-- **Drag & Drop Reordering**: Easily reorder the files in your merge list to control the final output structure
-- **Compact Mode**: A small, always-on-top, draggable window for quick access to core functions that appears when the main window is minimized. It includes an adaptive copy button (Copy with Instructions / Copy Code Only) and a paste button.
-- **Recent Projects**: Quickly switch between your recent project folders
-- **Project Colors**: Assign a unique color to each project for easy identification in compact mode
+CodeMerger includes a built-in Project Starter to help you kick off new ideas. It provides a structured workflow, that guides you and your LLM through generating a solid project foundation.
 
+![Project Starter](./dev/screenshot_04b.jpg "Project Starter")
 
-![File management](./dev/screenshot_03b.jpg "File Management")
-
-
-## Usage
-
-- **Select a project**
-    - Click "Select project" to browse for a folder or choose one from your recent projects list
-- **Edit Merge List**
-    - A warning icon will appear in the top bar if new files are detected in your project. Click this or the "Edit Merge List" button to open the list editor
-        - **Ctrl-clicking** the new files icon will immediately add all new files to the current merge list without opening the list editor.
-    - In the "Edit Merge List" window, a tree of available files is shown on the left
-        - Newly detected files are highlighted in green for easy identification
-        - Files listed in `.gitignore` are automatically hidden
-        - Double-click a file or select it and click the button to add/remove it from the merge list
-    - The "Merge Order" list on the right shows the files that will be copied
-        - Drag and drop files or use the buttons to reorder them
-        - The window title displays the number of selected files and the total token count
-    - Double-click a file in either list to open it in your default or configured editor
-    - Click "Update Project" to save your selection to `.allcode`
-- **Add Instructions**
-    - Click "Define Instructions" to add a project-specific introduction or conclusion that will be wrapped around the merged code block
-    - You can click the "Load Defaults" icon in this window to populate the fields with your predefined default prompts from the Settings
-- **Copy Prompt**
-    - Click "Copy Code Only" to merge the selected files and prepend your custom prompt (configured in Settings). This is useful for providing ongoing context to an LLM. The keyboard shortcut for this action is **`Ctrl+Shift+C`**.
-    - If you added instructions, a "Copy with Instructions" button will appear to include your project-specific intro/outro text. This is ideal for starting a new conversation. The keyboard shortcut for this action is **`Ctrl+C`**.
-- **Paste Changes**
-    - To apply changes from a language model, you can use the paste functionality.
-    - Click **"Paste Changes"** or press **`Ctrl+V`** to apply changes from your clipboard. Depending on your settings, this will either open the "AI Response Review" window or apply changes instantly.
-    - **Ctrl-clicking** the button (or **`Ctrl+Shift+V`**) will toggle the automatic review behavior (doing the opposite of your current settings).
-    - **Alt-clicking** the button will open the manual "Paste Changes" window for raw text input.
-- **Compact Mode**
-    - Minimize the main window to activate the compact mode panel. All keyboard shortcuts (`Ctrl+C`, `Ctrl+Shift+C`, `Ctrl+V`, and `Ctrl+Shift+V`) are also active in this mode.
-    - The panel contains two primary buttons:
-        - **Copy Prompt (Instructions/Only)**: A single adaptive button for copying code.
-            - It appears as "Copy with Instructions" if you have defined instructions for the project, and "Copy Code Only" if you have not.
-            - A normal click performs the action shown on the button.
-            - Holding **Ctrl** while clicking will always perform the "Copy Code Only" action.
-        - **Paste**: Applies changes from your clipboard. A normal click follows your "AI Response Review" settings. **Ctrl-click** toggles that behavior, and **Alt-click** opens the manual paste window.
-    - The panel is colored with your project's assigned color.
-    - A warning icon will appear in the move bar if new files are found.
-        - **Click** the icon to restore the main window and open the list editor.
-        - **Ctrl-click** the icon to immediately add all new files to the merge list.
-    - Double-click the move bar or click the close button to exit compact mode and restore the main window. **Ctrl-clicking** the close button will exit the application immediately.
-
+- **Concept Generation**: Define your goal and let the AI generate a structured problem statement, feature list, and user flows.
+- **Stack Selection**: Get intelligent technology recommendations based on your experience and the generated concept.
+- **TODO Plan**: Generate a detailed, phase-by-phase implementation plan.
+- **Interactive Refinement**: Lock approved segments, request targeted rewrites, and ask contextual questions before scaffolding the final codebase directly to disk.
 
 ### Command Line Arguments (Advanced)
 
-If you are running the built executable (`CodeMerger.exe`), you can use the following flags via a terminal (CMD/PowerShell):
-
-- `--console`: (Windows only) Spawns a native command prompt window alongside the app. This allows you to view real-time logs and DPI debug information without opening the log file in AppData.
-- `--inspect`: Enables "Inspect Element" and Developer Tools (Ctrl+Shift+I) in the production bundle. Useful for debugging CSS or frontend logic issues.
-
-
-![Settings](./dev/screenshot_04b.jpg "Project Starter")
-
-
-### Settings
-
-- **Application Updates**: Enable or disable the automatic daily check for new versions
-- **Window Behavior**: Disable the automatic compact mode when the main window is minimized
-- **File System Monitoring**: Configure the automatic check for new files (enable/disable and set the check interval)
-- **Secret Scanning**: Enable a check for potential secrets (API keys, etc) that runs before copying code to the clipboard
-- **Prompts**:
-    - **"Copy Code Only" Prompt**: Set the default text that is automatically prepended when you click "Copy Code Only"
-    - **Default Intro/Outro Prompts**: Define reusable, application-wide default texts for the instructions feature. These can be quickly loaded into any project's specific instructions
-- **Default Editor**: Select your preferred editor for opening files from the list editor (leaving it blank uses the system default)
-- To manage indexed filetypes, click "Manage Filetypes" from the main window
-
+- `--console`: Spawns a native command prompt alongside the app for real-time logs.
+- `--inspect`: Enables "Inspect Element" and Developer Tools (Ctrl+Shift+I) for debugging.
 
 ## Development
 
-- Make sure you have [Python](https://www.python.org/downloads/) installed (and added to your PATH)
-- Make sure you have [Inno Setup](https://jrsoftware.org/isdl.php) installed
-- Before starting development, run `npm install` in the `/frontend` directory.
+- Requires [Python 3.10+](https://www.python.org/downloads/) and [Node.js](https://nodejs.org/) installed.
+- Run `go i` before starting.
 
 ### Commands
+The project uses a `go.bat` script to orchestrate all development and build tasks.
 
-- `go`: Starts the app using the **Production Bundle**. This uses the pre-compiled files in `/frontend/dist`. Use this to verify the app before building.
-- `go i`: Installs the node modules for the frontend (shorthand for `npm install` in `/frontend`).
-- `go dev`: Starts the app in **Development Mode**. It uses `concurrently` to launch the Vite development server and the Python backend at once. This enables Hot Module Replacement (instant UI updates as you save code).
-- `go fe`: Manually start the Vite development server only.
-- `go api`: Manually start the Python backend in dev-link mode (expects Vite at localhost:5173).
-- `go b`: Build the full application (compile frontend + bundle executable + create installer).
-- `go ba`: Build the executable only.
-- `go r`: Push or update a release on Github using Actions.
-    - Update `/version.txt` if you want to create a new release
-    - You can add a comment to the release like this: `go r "Comment"`
-- When the app is installed, config can be found in `%APPDATA%\CodeMerger`
+**Running the App**
 
+- `go`: Starts the app (builds production frontend if missing).
+- `go dev`: Starts Vite HMR and the Python backend concurrently.
+- `go debug`: Starts the app in production mode with DevTools enabled.
+- `go api`: Starts only the Python backend in development mode (expects Vite at port 5173).
+- `go fe`: Starts only the Vite development server.
+
+**Building & Distribution**
+
+- `go b`: **Full Build**. Compiles frontend, bundles executable, and creates the installer.
+- `go ba`: Build App Only (frontend + executable).
+- `go bi`: Build Installer Only (requires existing `dist\CodeMerger` folder).
+- `go br`: Rebuilds the production frontend and then starts the app.
+
+**Environment & Utilities**
+
+- `go i`: Installs node modules for the frontend.
+- `go cmd`: Opens a new command prompt with the Python virtual environment pre-activated.
+- `go f`: Freezes current Python dependencies into `requirements.txt`.
+- `go r "Comment"`: Handles the release process (verifies branch, creates Git tag, and pushes).
+
+*Configuration is stored in `%APPDATA%\CodeMerger`.*
 
 ## License
 
