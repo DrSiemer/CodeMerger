@@ -170,11 +170,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2723,
+          "tokens": 2740,
           "ignoreTokens": false,
-          "lines": 324,
-          "mtime": 1776342300.5403218,
-          "hash": "129230232b9d7f67c7a44a70006b66f7be56ad28"
+          "lines": 326,
+          "mtime": 1776342765.0555816,
+          "hash": "1b60c6ded4df5fee38523576bdd521af2c4601f9"
         },
         {
           "path": "src/core/window_main.py",
@@ -225,11 +225,11 @@
         },
         {
           "path": "src/api_parts/window_api.py",
-          "tokens": 1331,
+          "tokens": 1382,
           "ignoreTokens": false,
-          "lines": 158,
-          "mtime": 1776342350.4242876,
-          "hash": "924e2433c77f3a6632b61f438380c6fc8e133651"
+          "lines": 165,
+          "mtime": 1776342765.154585,
+          "hash": "ec40fb36098acef69d439ce0f498084cd2518e0d"
         },
         {
           "path": "src/api_parts/config_api.py",
@@ -466,11 +466,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 2554,
+          "tokens": 2559,
           "ignoreTokens": false,
           "lines": 327,
-          "mtime": 1776342350.479694,
-          "hash": "66638aff35e691813850e074bd69969ee7d3f8ca"
+          "mtime": 1776342765.1019902,
+          "hash": "6a6e987fe847297bd022afee1eb25899dba3bf95"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
@@ -888,7 +888,7 @@
           "hash": "79ceb73efedf63005724d61d562c9cbc4f522be8"
         }
       ],
-      "total_tokens": 146403,
+      "total_tokens": 146476,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1053,6 +1053,6 @@
     "src/core/window_splash.py",
     "updater_gui.py",
     "version.txt",
-    "zzzz9.txt"
+    "zzzz11.txt"
   ]
 }

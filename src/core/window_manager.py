@@ -291,7 +291,7 @@ class WindowManager:
     def show_compact(self):
         show_compact_window(self)
 
-    def restore_main(self):
+    def restore_main(self, trigger_fm=False):
         if self._transitioning or self._is_shutting_down: return
         self._transitioning = True
         try:
@@ -300,6 +300,8 @@ class WindowManager:
                 self.main_window.show()
                 self.main_window.restore()
                 self.broadcast_project_reload()
+                if trigger_fm:
+                    self.trigger_file_manager_in_main()
                 if self.monitor: self.monitor.update_window(self.main_window)
         finally: self._transitioning = False
 

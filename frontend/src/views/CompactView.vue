@@ -5,6 +5,8 @@ import {
   ClipboardPaste, Eye, Expand, AlertTriangle, Loader2, Trash2
 } from 'lucide-vue-next'
 
+const app = useAppState()
+
 const {
   activeProject,
   lastAiResponse,
@@ -20,7 +22,7 @@ const {
   init,
   config,
   claimLastPlan
-} = useAppState()
+} = app
 
 const isCopying = ref(false)
 const hasPendingChangesInternal = ref(false)
@@ -174,12 +176,9 @@ const handleClose = (event) => {
 }
 
 const handleNewFilesClick = async () => {
-  restoreMainWindow()
-  setTimeout(async () => {
-    if (window.pywebview) {
-      await window.pywebview.api.trigger_file_manager_in_main()
-    }
-  }, 500)
+  if (window.pywebview) {
+    await window.pywebview.api.restore_main_window_and_trigger_fm()
+  }
 }
 
 const titleAbbr = computed(() => {

@@ -10,6 +10,13 @@ log = logging.getLogger("CodeMerger")
 class WindowApi:
     """API methods for managing PyWebView windows and assets"""
 
+    def restore_main_window_and_trigger_fm(self):
+        """Transitions from compact widget to main dashboard and triggers file manager."""
+        if self._window_manager:
+            self._window_manager.restore_main(trigger_fm=True)
+            return True
+        return False
+
     def trigger_file_manager_in_main(self):
         """Forces the main window to open the File Manager."""
         if self._window_manager:
