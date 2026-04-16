@@ -10,6 +10,11 @@ log = logging.getLogger("CodeMerger")
 class WindowApi:
     """API methods for managing PyWebView windows and assets"""
 
+    def trigger_file_manager_in_main(self):
+        """Forces the main window to open the File Manager."""
+        if self._window_manager:
+            self._window_manager.trigger_file_manager_in_main()
+
     def ensure_window_size(self, width, height):
         """
         Requests the main window to expand to specified dimensions

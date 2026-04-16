@@ -22,6 +22,9 @@ class AppState:
 
         self.info_mode_active = self.config.get('info_mode_active', True)
 
+        # Transient flag for cross-window signaling
+        self.open_fm_on_restore = False
+
         # List of callbacks to synchronize info mode visibility across windows
         self._info_observers = []
 

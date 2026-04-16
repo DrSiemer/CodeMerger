@@ -14,6 +14,8 @@ import NewProfileModal from '../components/NewProfileModal.vue'
 import ColorPickerOverlay from '../components/ColorPickerOverlay.vue'
 import FormatErrorModal from '../components/FormatErrorModal.vue'
 
+const app = useAppState()
+
 const {
   activeProject,
   lastAiResponse,
@@ -30,7 +32,7 @@ const {
   resizeWindow,
   showFormatErrorModal,
   formatErrorMessage
-} = useAppState()
+} = app
 
 const showProjectModal = ref(false)
 const showSettingsModal = ref(false)
@@ -100,7 +102,7 @@ const onRemotePasteRequest = async (event) => {
   const deletions = plan.deletions_proposed || []
   const skipped = plan.skipped_files || []
 
-  // Initializes handled states while accounting for byte-for-byte identical files
+  // Initialize handled states while accounting for byte-for-byte identical files
   Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
   Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
   deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
@@ -163,6 +165,9 @@ const handleShortcutPaste = async (event) => {
 }
 
 onMounted(() => {
+  window.openFileManager = () => {
+    showFileManagerModal.value = true
+  }
   window.addEventListener('cm-remote-paste-request', onRemotePasteRequest)
   window.addEventListener('cm-remote-review-request', onRemoteReviewRequest)
   window.addEventListener('cm-remote-paste-error', onRemotePasteError)
@@ -174,6 +179,7 @@ onUnmounted(() => {
   window.removeEventListener('cm-remote-review-request', onRemoteReviewRequest)
   window.removeEventListener('cm-remote-paste-error', onRemotePasteError)
   window.removeEventListener('cm-shortcut-paste', handleShortcutPaste)
+  delete window.openFileManager
 })
 </script>
 

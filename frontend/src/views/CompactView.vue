@@ -173,6 +173,15 @@ const handleClose = (event) => {
   else restoreMainWindow()
 }
 
+const handleNewFilesClick = async () => {
+  restoreMainWindow()
+  setTimeout(async () => {
+    if (window.pywebview) {
+      await window.pywebview.api.trigger_file_manager_in_main()
+    }
+  }, 500)
+}
+
 const titleAbbr = computed(() => {
   const name = activeProject.name || 'CodeMerger'
   const maxLen = 8
@@ -210,10 +219,6 @@ const titleAbbr = computed(() => {
   }
 })
 
-const copyButtonText = computed(() => {
-  return activeProject.hasInstructions ? 'Copy Prompt (i)' : 'Copy Prompt'
-})
-
 const pasteTooltipText = computed(() => {
   const showReview = config.value.show_feedback_on_paste ?? true
   const base = showReview ? "Paste and Review changes" : "Paste and Apply changes immediately"
@@ -242,11 +247,6 @@ const pasteTooltipText = computed(() => {
       </div>
 
       <div class="flex items-center space-x-1.5 shrink-0 h-full">
-        <AlertTriangle
-          v-if="activeProject.newFileCount > 0"
-          class="w-3.5 h-3.5 text-cm-green animate-pulse"
-          title="New files detected! (Click to manage, Ctrl-Click to add all to merge list)"
-        />
         <button
           @mousedown.stop
           @click="handleClose"
@@ -260,22 +260,34 @@ const pasteTooltipText = computed(() => {
 
     <!-- Actions Area -->
     <div id="compact-actions" class="flex flex-col p-1.5 space-y-1.5">
-      <!-- Adaptive Copy Button (Switches logic based on project instructions) -->
-      <button
-        id="btn-compact-copy"
-        @click="handleCopy"
-        :disabled="isCopying"
-        class="w-full text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
-        :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
-        title="Copy Prompt (Ctrl-Click for Code Only)"
-      >
-        <Loader2 v-if="isCopying" class="w-3.5 h-3.5 animate-spin" />
-        <span v-else class="truncate px-1">{{ copyButtonText }}</span>
-      </button>
+
+      <!-- Copy/New Files Button Group -->
+      <div class="flex items-center space-x-1.5 h-8">
+        <button
+          id="btn-compact-copy"
+          @click="handleCopy"
+          :disabled="isCopying"
+          class="flex-grow text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
+          :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
+          title="Copy Prompt (Ctrl-Click for Code Only)"
+        >
+          <Loader2 v-if="isCopying" class="w-3.5 h-3.5 animate-spin" />
+          <span v-else class="truncate px-1">Copy Prompt</span>
+        </button>
+
+        <!-- New Files Indicator -->
+        <button
+          v-if="activeProject.newFileCount > 0"
+          @click="handleNewFilesClick"
+          class="bg-gray-800 hover:bg-gray-700 text-cm-green w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
+          title="New files detected! Click to manage."
+        >
+          <AlertTriangle class="w-4 h-4 animate-pulse" />
+        </button>
+      </div>
 
       <!-- Paste & Review Logic Row -->
       <div class="w-full flex items-center space-x-1.5">
-        <!-- Orange styling when changes are pending in memory -->
         <div class="relative flex-grow flex h-8">
           <button
             id="btn-compact-paste"
@@ -286,7 +298,6 @@ const pasteTooltipText = computed(() => {
           >
             <span>Paste</span>
           </button>
-          <!-- Clear Recycle Bin -->
           <button
             v-if="hasPendingChangesInternal"
             @click.stop="handleClear"
@@ -304,7 +315,6 @@ const pasteTooltipText = computed(() => {
           class="bg-gray-800 hover:bg-gray-700 text-white w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
           title="View response review"
         >
-          <!-- Eye icon color mirrors the pending changes state -->
           <Eye class="w-3.5 h-3.5" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
         </button>
       </div>
@@ -313,6 +323,5 @@ const pasteTooltipText = computed(() => {
 </template>
 
 <style scoped>
-/* Allow button interaction inside draggable areas */
 button { -webkit-app-region: no-drag; }
 </style>

@@ -102,6 +102,12 @@ class WindowManager:
         if self.compact_window:
             self.compact_window.evaluate_js(js)
 
+    def trigger_file_manager_in_main(self):
+        """Forces the main window to open the File Manager."""
+        if self.main_window:
+            log.info("WindowManager: Triggering remote openFileManager JS call.")
+            self.main_window.evaluate_js("if (window.openFileManager) window.openFileManager();")
+
     def start(self):
         """Initializes windows and starts the PyWebView UI loop"""
         h_mon = self._get_target_monitor_handle()

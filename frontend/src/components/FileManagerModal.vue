@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { X, RotateCcw, Save, Search } from 'lucide-vue-next'
-import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
+import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
@@ -55,33 +55,27 @@ const debounce = (fn, delay) => {
 }
 
 onMounted(async () => {
+  console.log("[FileManager] Mounted. Current newFileCount:", activeProject.newFileCount);
   await resizeWindow(1100, 800)
   await refreshTree()
   await autoHandleNewFiles()
+  // Triggered on mount to clear UI alert immediately upon entry
+  console.log("[FileManager] Clearing unknown files...");
   await clearUnknownFiles()
   isLoaded.value = true
 })
 
 const refreshTree = async () => {
-  // Increment request ID for this specific call
   const requestId = ++lastRequestId.value
-
   if (!fileTree.value.length) isTreeLoading.value = true
 
   try {
     const currentPaths = listItems.value.map(f => f.path)
     const result = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
-
-    // DISCARD: If a newer request has already been sent, ignore this stale result
-    if (requestId !== lastRequestId.value) {
-      return
-    }
-
+    if (requestId !== lastRequestId.value) return
     fileTree.value = result
   } finally {
-    if (requestId === lastRequestId.value) {
-      isTreeLoading.value = false
-    }
+    if (requestId === lastRequestId.value) isTreeLoading.value = false
   }
 }
 
@@ -324,7 +318,7 @@ const handleSave = async () => {
       <!-- Main Content Split -->
       <div class="flex-grow flex min-0 overflow-hidden">
         <FileManagerLeftPanel
-          id="fm-left-panel"
+          id="fm-available-files"
           ref="leftPanelRef"
           :class="showFullPaths ? 'w-2/5' : 'w-1/2'"
           :fileTree="fileTree"
@@ -342,7 +336,7 @@ const handleSave = async () => {
         />
 
         <FileManagerRightPanel
-          id="fm-right-panel"
+          id="fm-merge-order"
           ref="rightPanelRef"
           :class="showFullPaths ? 'w-3/5' : 'w-1/2'"
           :listItems="listItems"
@@ -372,7 +366,6 @@ const handleSave = async () => {
             @click="listItems.splice(0, listItems.length)"
             class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm shrink-0"
             title="Clear the entire merge list for the current profile"
-            v-info="'fm_remove_all'"
           >
             <RotateCcw class="w-3.5 h-3.5 mr-2" />
             Clear List
@@ -389,7 +382,6 @@ const handleSave = async () => {
               type="text"
               placeholder="Filter both lists..."
               class="w-full bg-cm-input-bg text-white pl-10 pr-10 py-1.5 rounded border border-gray-600 focus:border-cm-blue outline-none text-sm transition-all"
-              v-info="'fm_filter_text'"
             >
             <button
               v-if="filterText"
@@ -408,7 +400,6 @@ const handleSave = async () => {
             @click="handleCancel"
             class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm shrink-0"
             :title="hasUnsavedChanges ? 'Discard modifications and exit' : 'Exit merge list editor'"
-            v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
           >
             {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
           </button>
@@ -418,7 +409,6 @@ const handleSave = async () => {
             @click="handleSave"
             class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm shrink-0"
             title="Commit changes and update the project merge list"
-            v-info="'fm_save'"
           >
             <Save class="w-4 h-4 mr-2" />
             Save Merge List

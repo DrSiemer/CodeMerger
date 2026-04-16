@@ -2,6 +2,7 @@ import { activeProject, statusMessage, isProjectLoading, showColorPicker, origin
 
 export function useProject() {
   const applyProjectData = (projData) => {
+    console.log("[useProject] applyProjectData called", projData);
     if (projData && projData.path) {
       activeProject.path = projData.path
       activeProject.name = projData.project_name
@@ -16,6 +17,7 @@ export function useProject() {
       activeProject.introText = projData.intro_text || ''
       activeProject.outroText = projData.outro_text || ''
       activeProject.newFileCount = projData.new_file_count || 0
+      console.log("[useProject] newFileCount updated to:", activeProject.newFileCount);
       if (projData.status_msg) {
         statusMessage.value = projData.status_msg
       }
@@ -135,6 +137,7 @@ export function useProject() {
 
   const clearUnknownFiles = async () => {
     if (window.pywebview) {
+      console.log("[useProject] Clearing unknown files...");
       await window.pywebview.api.clear_unknown_files()
       activeProject.newFileCount = 0
     }

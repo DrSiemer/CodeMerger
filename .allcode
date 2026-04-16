@@ -96,10 +96,10 @@
         },
         {
           "path": "src/app_state.py",
-          "mtime": 1776187868.3785203,
-          "hash": "fbfdb8f4b838927acd10bd7940d9eaa647dc76df",
-          "tokens": 1056,
-          "lines": 120
+          "mtime": 1776341218.4577694,
+          "hash": "fbf0905a1e0df06823e4cd465dfd04e2b1867b54",
+          "tokens": 1075,
+          "lines": 123
         },
         {
           "path": "src/core/project_config.py",
@@ -154,11 +154,11 @@
         },
         {
           "path": "src/core/file_monitor_thread.py",
-          "tokens": 1443,
+          "tokens": 1104,
           "ignoreTokens": false,
-          "lines": 177,
-          "mtime": 1776329181.6206584,
-          "hash": "74912e6582cb4672d1a786507cfda50d99c093e2"
+          "lines": 139,
+          "mtime": 1776342533.257139,
+          "hash": "520c7c4e78b093dfb62e654ee63862c6491fedd4"
         },
         {
           "path": "src/core/window_geometry.py",
@@ -170,11 +170,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2662,
+          "tokens": 2723,
           "ignoreTokens": false,
-          "lines": 318,
-          "mtime": 1776290446.7893138,
-          "hash": "32fbebcaf442c23d7860fa21c9febcf74f229657"
+          "lines": 324,
+          "mtime": 1776342300.5403218,
+          "hash": "129230232b9d7f67c7a44a70006b66f7be56ad28"
         },
         {
           "path": "src/core/window_main.py",
@@ -225,11 +225,11 @@
         },
         {
           "path": "src/api_parts/window_api.py",
-          "tokens": 1291,
+          "tokens": 1331,
           "ignoreTokens": false,
-          "lines": 153,
-          "mtime": 1776188764.2959535,
-          "hash": "e72fd325066caedd7af666c5e8117285bdfb53f2"
+          "lines": 158,
+          "mtime": 1776342350.4242876,
+          "hash": "924e2433c77f3a6632b61f438380c6fc8e133651"
         },
         {
           "path": "src/api_parts/config_api.py",
@@ -382,11 +382,11 @@
         },
         {
           "path": "frontend/src/composables/useProject.js",
-          "tokens": 1585,
+          "tokens": 1619,
           "ignoreTokens": false,
-          "lines": 226,
-          "mtime": 1776177306.9897244,
-          "hash": "b272d8d3dce716755bc0756c1847a698af457e11"
+          "lines": 228,
+          "mtime": 1776342533.3049407,
+          "hash": "1292088ac0b3b98bbaa736277f52becad035bdfa"
         },
         {
           "path": "frontend/src/composables/useReview.js",
@@ -458,19 +458,19 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "tokens": 1761,
+          "tokens": 1789,
           "ignoreTokens": false,
-          "lines": 220,
-          "mtime": 1776191650.0359156,
-          "hash": "341fe5f7a6602a240b0d693e91069778a3ebc4f3"
+          "lines": 226,
+          "mtime": 1776342300.6434362,
+          "hash": "61951538be3878719819453d242492282abe16da"
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 2505,
+          "tokens": 2554,
           "ignoreTokens": false,
-          "lines": 318,
-          "mtime": 1776289339.618094,
-          "hash": "0a510236ef799d1c6d73c2136dcf6b9a4c461e0a"
+          "lines": 327,
+          "mtime": 1776342350.479694,
+          "hash": "66638aff35e691813850e074bd69969ee7d3f8ca"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardHeader.vue",
@@ -538,11 +538,11 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "tokens": 3851,
+          "tokens": 3810,
           "ignoreTokens": false,
-          "lines": 478,
-          "mtime": 1776331669.4458897,
-          "hash": "4dfe3f7ab8d47f6e43685f90100054a3191f6994"
+          "lines": 468,
+          "mtime": 1776342533.3541026,
+          "hash": "90843f596696e32b37bfd6529e26968c0366429d"
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
@@ -888,7 +888,7 @@
           "hash": "79ceb73efedf63005724d61d562c9cbc4f522be8"
         }
       ],
-      "total_tokens": 146552,
+      "total_tokens": 146403,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1052,6 +1052,7 @@
     "src/core/window_manager.py",
     "src/core/window_splash.py",
     "updater_gui.py",
-    "version.txt"
+    "version.txt",
+    "zzzz9.txt"
   ]
 }
