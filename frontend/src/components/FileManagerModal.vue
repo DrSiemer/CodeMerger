@@ -182,7 +182,7 @@ const toggleFileSelect = (path) => {
   }
 }
 
-const toggleDirectorySelect = (node) => {
+const toggleDirectorySelect = async (node) => {
   highlightedPath.value = null
   const subtreeFiles = []
   const traverse = (n) => {
@@ -210,13 +210,19 @@ const toggleDirectorySelect = (node) => {
     rightPanelRef.value?.clearSelection()
   } else {
     const toAdd = subtreeFiles.filter(p => !currentPaths.has(p))
-    toAdd.forEach(path => {
-      window.pywebview.api.get_token_count(path).then(tokens => {
-        if (listItems.value.findIndex(f => f.path === path) === -1) {
-          listItems.value.push({ path, tokens, ignoreTokens: false })
-        }
+    for (const path of toAdd) {
+      const tokens = await window.pywebview.api.get_token_count(path)
+      if (listItems.value.findIndex(f => f.path === path) === -1) {
+        listItems.value.push({ path, tokens, ignoreTokens: false })
+      }
+    }
+
+    if (toAdd.length > 0) {
+      const lastPath = toAdd[toAdd.length - 1]
+      nextTick(() => {
+        rightPanelRef.value?.scrollToPath(lastPath)
       })
-    })
+    }
   }
 }
 
@@ -236,7 +242,7 @@ const toggleFolderExpand = ({ path, expanded }) => {
   else currentExpandedDirs.value.delete(path)
 }
 
-const addAll = () => {
+const addAll = async () => {
   highlightedPath.value = null
   const allFiles = []
   const traverse = (nodes) => {
@@ -254,13 +260,20 @@ const addAll = () => {
   const toAdd = allFiles.filter(p => !currentPaths.has(p))
   const threshold = config.value.add_all_warning_threshold || 50
   if (toAdd.length > threshold && !confirm(`Add ${toAdd.length} files to list?`)) return
-  toAdd.forEach(path => {
-    window.pywebview.api.get_token_count(path).then(tokens => {
-      if (listItems.value.findIndex(f => f.path === path) === -1) {
-        listItems.value.push({ path, tokens, ignoreTokens: false })
-      }
+
+  for (const path of toAdd) {
+    const tokens = await window.pywebview.api.get_token_count(path)
+    if (listItems.value.findIndex(f => f.path === path) === -1) {
+      listItems.value.push({ path, tokens, ignoreTokens: false })
+    }
+  }
+
+  if (toAdd.length > 0) {
+    const lastPath = toAdd[toAdd.length - 1]
+    nextTick(() => {
+      rightPanelRef.value?.scrollToPath(lastPath)
     })
-  })
+  }
 }
 
 const handleOrderRequest = async () => {
