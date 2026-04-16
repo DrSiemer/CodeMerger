@@ -126,9 +126,11 @@ onMounted(() => {
         id="loading-overlay"
         class="fixed inset-0 bg-black/60 z-[100] flex flex-col items-center justify-center pointer-events-auto"
       >
-        <div class="bg-cm-top-bar border border-gray-600 rounded-2xl p-10 shadow-2xl flex flex-col items-center space-y-5">
-          <Loader2 class="w-16 h-16 text-cm-blue animate-spin" />
-          <div class="text-xl font-bold tracking-widest text-white uppercase">Scanning Project</div>
+        <div class="bg-cm-top-bar border border-gray-600 rounded-2xl p-10 shadow-2xl flex flex-col items-center space-y-5 min-w-[320px]">
+          <div class="flex justify-center items-center w-full">
+            <Loader2 class="w-16 h-16 text-cm-blue animate-spin" />
+          </div>
+          <div class="text-xl font-bold tracking-widest text-white uppercase text-center w-full">Scanning Project</div>
 
           <button
             @click="cancelLoadProject"
