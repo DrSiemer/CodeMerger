@@ -317,20 +317,22 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
-          <button id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
-            <Save class="w-4 h-4 mr-0 lg:mr-2"/>
-            <span class="hidden lg:inline text-xs">Export</span>
-          </button>
-          <button id="btn-starter-import" @click="importConfig" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Restore project configuration from JSON">
-            <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
-            <span class="hidden lg:inline text-xs">Import</span>
-          </button>
-          <button id="btn-starter-reset" @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Wipe all progress and start fresh">
-            <Trash2 class="w-4 h-4 mr-0 lg:mr-2"/>
-            <span class="hidden lg:inline text-xs">Reset</span>
-          </button>
+          <template v-if="!isStarterEmpty">
+            <button id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
+              <Save class="w-4 h-4 mr-0 lg:mr-2"/>
+              <span class="hidden lg:inline text-xs">Export</span>
+            </button>
+            <button id="btn-starter-import" @click="importConfig" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Restore project configuration from JSON">
+              <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
+              <span class="hidden lg:inline text-xs">Import</span>
+            </button>
+            <button id="btn-starter-reset" @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Wipe all progress and start fresh">
+              <Trash2 class="w-4 h-4 mr-0 lg:mr-2"/>
+              <span class="hidden lg:inline text-xs">Reset</span>
+            </button>
 
-          <div class="w-px h-6 bg-gray-600 mx-1"></div>
+            <div class="w-px h-6 bg-gray-600 mx-1"></div>
+          </template>
 
           <button id="btn-starter-exit" @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
             <LogOut class="w-4 h-4 mr-2" />
