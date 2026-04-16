@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
-import { X, RotateCcw, Save } from 'lucide-vue-next'
+import { X, RotateCcw, Save, Search } from 'lucide-vue-next'
 import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
@@ -317,13 +317,12 @@ const handleSave = async () => {
       </div>
 
       <!-- Main Content Split -->
-      <div class="flex-grow flex min-h-0 overflow-hidden">
+      <div class="flex-grow flex min-0 overflow-hidden">
         <FileManagerLeftPanel
           id="fm-left-panel"
           ref="leftPanelRef"
           :class="showFullPaths ? 'w-2/5' : 'w-1/2'"
           :fileTree="fileTree"
-          v-model:filterText="filterText"
           v-model:isExtFilter="isExtFilter"
           v-model:isGitFilter="isGitFilter"
           :selectedPaths="listItems.map(f => f.path)"
@@ -342,6 +341,7 @@ const handleSave = async () => {
           ref="rightPanelRef"
           :class="showFullPaths ? 'w-3/5' : 'w-1/2'"
           :listItems="listItems"
+          :filterText="filterText"
           :mergeListRef="mergeListRef"
           :totalTokens="totalTokens"
           :tokenColorClass="tokenColorClass"
@@ -354,22 +354,54 @@ const handleSave = async () => {
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
-        <button
-          id="btn-fm-clear-list"
-          @click="listItems.splice(0, listItems.length)"
-          class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm"
-          title="Clear the entire merge list for the current profile"
-          v-info="'fm_remove_all'"
-        >
-          <RotateCcw class="w-3.5 h-3.5 mr-2" />
-          Clear List
-        </button>
+      <div
+        id="fm-footer"
+        class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex items-center justify-between shrink-0"
+        :class="{'has-changes': hasUnsavedChanges}"
+      >
 
-        <div class="flex items-center space-x-3">
+        <!-- Left Column: Clear List -->
+        <div class="footer-col-left flex justify-start">
+          <button
+            id="btn-fm-clear-list"
+            @click="listItems.splice(0, listItems.length)"
+            class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm shrink-0"
+            title="Clear the entire merge list for the current profile"
+            v-info="'fm_remove_all'"
+          >
+            <RotateCcw class="w-3.5 h-3.5 mr-2" />
+            Clear List
+          </button>
+        </div>
+
+        <!-- Center Column: Filter Search -->
+        <div class="footer-search-col mx-4">
+          <div class="relative w-full">
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              id="fm-filter-input"
+              v-model="filterText"
+              type="text"
+              placeholder="Filter both lists..."
+              class="w-full bg-cm-input-bg text-white pl-10 pr-10 py-1.5 rounded border border-gray-600 focus:border-cm-blue outline-none text-sm transition-all"
+              v-info="'fm_filter_text'"
+            >
+            <button
+              v-if="filterText"
+              @click="filterText = ''"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              title="Clear filter"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Navigation Actions -->
+        <div class="footer-col-right flex justify-end items-center space-x-3">
           <button
             @click="handleCancel"
-            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
+            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm shrink-0"
             :title="hasUnsavedChanges ? 'Discard modifications and exit' : 'Exit merge list editor'"
             v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
           >
@@ -379,7 +411,7 @@ const handleSave = async () => {
             id="btn-fm-save"
             v-if="hasUnsavedChanges"
             @click="handleSave"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
+            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm shrink-0"
             title="Commit changes and update the project merge list"
             v-info="'fm_save'"
           >
@@ -392,3 +424,44 @@ const handleSave = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.footer-col-left, .footer-col-right, .footer-search-col {
+  transition: all 0.4s ease-in-out;
+}
+
+.footer-col-left {
+  flex: 0 0 auto;
+  min-width: 130px;
+}
+
+.footer-col-right {
+  flex: 0 0 auto;
+  min-width: 90px;
+}
+
+.footer-search-col {
+  flex: 1 1 auto;
+  max-width: 448px;
+  min-width: 180px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 1000px) {
+  #fm-footer:not(.has-changes) > .footer-col-left,
+  #fm-footer:not(.has-changes) > .footer-col-right {
+    flex: 1 1 0px;
+  }
+}
+
+.has-changes .footer-col-right {
+  min-width: 240px;
+}
+
+.has-changes .footer-search-col {
+  flex-grow: 0;
+  flex-basis: 320px;
+  max-width: 320px;
+}
+</style>

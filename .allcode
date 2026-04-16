@@ -538,27 +538,27 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "tokens": 3228,
+          "tokens": 3689,
           "ignoreTokens": false,
-          "lines": 394,
-          "mtime": 1776199161.2152474,
-          "hash": "2c2af6d939507385a56ea843dd07bf7e95f24404"
+          "lines": 445,
+          "mtime": 1776327683.0941758,
+          "hash": "22c34c616d2d8ac67b66091732b04b3287d6c44c"
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
-          "tokens": 1056,
+          "tokens": 897,
           "ignoreTokens": false,
-          "lines": 114,
-          "mtime": 1776197635.4476235,
-          "hash": "6d01da12d00a3771d147ec02284953844a0c5b28"
+          "lines": 98,
+          "mtime": 1776327077.846254,
+          "hash": "7a30be31e8ed10fc07029919636a71b55ada904f"
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "tokens": 3431,
+          "tokens": 3477,
           "ignoreTokens": false,
-          "lines": 328,
-          "mtime": 1776192382.5927813,
-          "hash": "43e0ec5b01eef5fbe4d2371df11ffadbf14e688c"
+          "lines": 335,
+          "mtime": 1776326884.0734594,
+          "hash": "0683d8a5b93c4a1bc314d6afb65b2947ba925dfd"
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
@@ -854,7 +854,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 148984,
+      "total_tokens": 149332,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

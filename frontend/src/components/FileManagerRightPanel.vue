@@ -8,6 +8,7 @@ import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composab
 
 const props = defineProps({
   listItems: Array,
+  filterText: String,
   mergeListRef: Object,
   totalTokens: Number,
   tokenColorClass: String,
@@ -27,6 +28,11 @@ const selectedIndices = ref(new Set())
 const lastSelectedIndex = ref(null)
 
 const TOKEN_COLOR_RANGE_MAX = 2500
+
+const matchesFilter = (path) => {
+  if (!props.filterText) return true
+  return path.toLowerCase().includes(props.filterText.toLowerCase())
+}
 
 const getTokenColor = (file) => {
   if (!file) return 'text-gray-500'
@@ -282,6 +288,7 @@ defineExpose({
         <li
           v-for="(file, index) in listItems"
           :key="file.path"
+          v-show="matchesFilter(file.path)"
           v-info="'fm_list_item'"
           class="group flex items-center border rounded p-2 text-sm transition-colors"
           :class="selectedIndices.has(index) ? 'bg-cm-blue border-cm-blue' : 'bg-cm-input-bg border-gray-700 hover:border-gray-500'"
