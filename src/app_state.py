@@ -9,9 +9,14 @@ class AppState:
     """
     Manages the application's persistent state loaded from and saved to config.json
     """
-    def __init__(self):
+    def __init__(self, is_second_instance=False):
         self.config = load_config()
         self.active_directory = self.config.get('active_directory', '')
+
+        # Prevent secondary instances from automatically loading the last project
+        if is_second_instance:
+            self.active_directory = ''
+
         self.recent_projects = self.config.get('user_lists', {}).get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)

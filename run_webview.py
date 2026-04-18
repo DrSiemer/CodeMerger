@@ -34,7 +34,10 @@ from src import constants as c
 
 from src.app_state import AppState
 from src.core.project_manager import ProjectManager
-from src.core.utils import load_active_file_extensions, save_config, update_and_get_new_filetypes
+from src.core.utils import (
+    load_active_file_extensions, save_config, update_and_get_new_filetypes,
+    is_another_instance_running
+)
 from src.core.window_manager import WindowManager
 
 log = logging.getLogger("CodeMerger")
@@ -43,6 +46,9 @@ def main():
     dev_mode = "--dev" in sys.argv
     debug_mode = "--debug" in sys.argv or "--inspect" in sys.argv or dev_mode
     show_console = "--console" in sys.argv
+
+    # Detect if this instance is secondary to decide if we should boot with an active project
+    is_second_instance = is_another_instance_running()
 
     if show_console and sys.platform == "win32":
         try:
@@ -84,7 +90,7 @@ def main():
         log.info(f"Bundle Directory: {bundle_dir}")
 
         newly_added_filetypes = update_and_get_new_filetypes()
-        app_state = AppState()
+        app_state = AppState(is_second_instance=is_second_instance)
         project_manager = ProjectManager(load_active_file_extensions)
         api = Api(app_state, project_manager, newly_added_filetypes)
         monitor = FileMonitorThread(None, app_state, project_manager)
