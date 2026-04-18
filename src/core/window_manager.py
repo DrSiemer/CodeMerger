@@ -248,7 +248,7 @@ class WindowManager:
     def _on_main_minimized(self):
         if self._transitioning or self._is_shutting_down: return
 
-        should_compact = self.api.app_state.config.get('enable_compact_mode_on_minimize', True)
+        should_compact = self.api.app_state.config.get('enable_compact_mode_on_minimize', False)
 
         if self._override_compact_behavior is not None:
             should_compact = self._override_compact_behavior
@@ -310,7 +310,7 @@ class WindowManager:
         if not self.main_window: return
 
         if toggle_compact:
-            current_setting = self.api.app_state.config.get('enable_compact_mode_on_minimize', True)
+            current_setting = self.api.app_state.config.get('enable_compact_mode_on_minimize', False)
             self._override_compact_behavior = not current_setting
 
         self.main_window.minimize()

@@ -59,7 +59,8 @@ const closeReviewModal = () => {
   showReviewModal.value = false
   if (revertToCompactOnClose.value) {
     revertToCompactOnClose.value = false
-    minimizeWindow()
+    const isCompactDefault = config.value.enable_compact_mode_on_minimize ?? false
+    minimizeWindow(!isCompactDefault)
   }
 }
 
@@ -67,7 +68,8 @@ const closeFormatErrorModal = () => {
   showFormatErrorModal.value = false
   if (revertToCompactOnClose.value) {
     revertToCompactOnClose.value = false
-    minimizeWindow()
+    const isCompactDefault = config.value.enable_compact_mode_on_minimize ?? false
+    minimizeWindow(!isCompactDefault)
   }
 }
 
