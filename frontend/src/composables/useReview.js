@@ -32,9 +32,21 @@ export function useReview() {
 
     // Ignore identical verification in succession
     if (!lastEntry || lastEntry.content !== vContent) {
+      const now = new Date()
+
+      const displayTimestamp = now.toLocaleString([], {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+
       history.push({
         content: vContent,
-        timestamp: new Date().toLocaleString()
+        timestamp: displayTimestamp,
+        rawTime: now.getTime()
       })
     }
 
@@ -111,12 +123,12 @@ export function useReview() {
     return null
   }
 
-  const applyFileChange = async (relPath, content) => {
+  const applyFileChange = async (rel_path, content) => {
     if (window.pywebview) {
-      const [success, error] = await window.pywebview.api.apply_single_file_change(relPath, content)
+      const [success, error] = await window.pywebview.api.apply_single_file_change(rel_path, content)
       if (success) {
         hasAcceptedChanges.value = true
-        statusMessage.value = `Applied changes to ${relPath}`
+        statusMessage.value = `Applied changes to ${rel_path}`
         const proj = await window.pywebview.api.get_current_project()
         project.applyProjectData(proj)
       } else {
@@ -127,12 +139,12 @@ export function useReview() {
     return false
   }
 
-  const deleteFile = async (relPath) => {
+  const deleteFile = async (rel_path) => {
     if (window.pywebview) {
-      const [success, error] = await window.pywebview.api.delete_file(relPath)
+      const [success, error] = await window.pywebview.api.delete_file(rel_path)
       if (success) {
         hasAcceptedChanges.value = true
-        statusMessage.value = `Deleted ${relPath}`
+        statusMessage.value = `Deleted ${rel_path}`
         const proj = await window.pywebview.api.get_current_project()
         project.applyProjectData(proj)
       } else {
@@ -150,10 +162,10 @@ export function useReview() {
     }
   }
 
-  const copyCode = async (useWrapper) => {
+  const copyCode = async (use_wrapper) => {
     if (!activeProject.path) return
     statusMessage.value = 'Merging and copying...'
-    const msg = await window.pywebview.api.copy_code(useWrapper)
+    const msg = await window.pywebview.api.copy_code(use_wrapper)
     statusMessage.value = msg
   }
 
