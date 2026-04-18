@@ -122,7 +122,7 @@ const handleAcceptAllClick = () => {
   <div class="flex h-full min-h-0 text-gray-100" @wheel.ctrl.prevent="handleZoom">
     <div class="w-72 shrink-0 border-r border-gray-700 pr-4 overflow-y-auto space-y-2" v-info="'starter_seg_nav'">
       <div class="p-2 mb-4 border-b border-gray-700 flex flex-col items-center space-y-3 pb-3">
-        <button @click="$emit('reset')" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+        <button @click="$emit('reset')" v-info="'starter_nav_reset'" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
         <button
           v-if="hasPendingDiffs"
           @click="handleAcceptAllClick"
@@ -165,7 +165,7 @@ const handleAcceptAllClick = () => {
                  @click="showQuestions = !showQuestions"
                  v-info="'starter_seg_questions'"
                  class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
-                 :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+                 :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:text-white'"
                >
                  <HelpCircle class="w-3 h-3" /><span>Questions</span>
                </button>

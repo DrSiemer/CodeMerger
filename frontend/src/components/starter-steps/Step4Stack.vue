@@ -200,7 +200,7 @@ const handleReset = () => {
 
             <div v-if="hasVisibleWarning" class="bg-black/30 border border-gray-800 rounded-lg p-5">
                <span class="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Architectural Warning</span>
-               <p class="text-gray-300 leading-relaxed">{{ deleteTarget?.warning }}</p>
+               <p v-info="'starter_stack_delete_warning'" class="text-gray-300 leading-relaxed">{{ deleteTarget?.warning }}</p>
             </div>
           </div>
 
@@ -318,7 +318,7 @@ const handleReset = () => {
             <h3 class="text-2xl font-bold text-white">Selected Code Stack</h3>
             <p class="text-gray-400 mt-1">Review the chosen technologies. Click a subject to reveal its architectural rationale.</p>
           </div>
-          <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+          <button @click="handleReset" v-info="'starter_nav_reset'" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
         </div>
 
         <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-2" v-info="'starter_stack_edit'">
@@ -331,6 +331,7 @@ const handleReset = () => {
                 !item.rationale ? 'cursor-default' : 'cursor-pointer'
               ]"
               @click="toggleExpand(idx)"
+              v-info="'starter_stack_item'"
             >
               <div class="flex items-center space-x-4 min-w-0 flex-grow">
                  <component
@@ -348,6 +349,7 @@ const handleReset = () => {
                       @click.stop
                       @blur="stopEditingName"
                       @keyup.enter="stopEditingName"
+                      v-info="'starter_stack_edit_name'"
                       class="bg-black/30 border border-cm-blue text-white font-bold text-lg py-1 px-2 rounded w-full outline-none"
                       placeholder="Technology Name"
                     >
@@ -355,6 +357,7 @@ const handleReset = () => {
                       <span class="text-white font-bold text-lg truncate">{{ item.tech || '(unnamed)' }}</span>
                       <button
                         @click.stop="startEditingName(idx)"
+                        v-info="'starter_stack_edit_name'"
                         class="text-gray-500 hover:text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Edit name"
                       >
@@ -364,7 +367,7 @@ const handleReset = () => {
                  </div>
               </div>
 
-              <button @click.stop="requestDelete(idx)" class="ml-4 text-gray-600 hover:text-red-400 transition-colors p-2 shrink-0">
+              <button @click.stop="requestDelete(idx)" v-info="'starter_stack_delete'" class="ml-4 text-gray-600 hover:text-red-400 transition-colors p-2 shrink-0">
                 <Trash2 class="w-4 h-4" />
               </button>
             </div>
@@ -373,13 +376,13 @@ const handleReset = () => {
             <div v-if="expandedIndices.has(idx) && item.rationale" class="bg-black/20 p-6 border-t border-gray-700/50 animate-in slide-in-from-top-1 duration-200">
               <div class="space-y-3">
                 <span class="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Technical Rationale</span>
-                <p class="text-gray-200 text-[15px] leading-relaxed whitespace-pre-wrap">{{ item.rationale }}</p>
+                <p v-info="'starter_stack_rationale'" class="text-gray-200 text-[15px] leading-relaxed whitespace-pre-wrap">{{ item.rationale }}</p>
               </div>
             </div>
           </div>
 
           <!-- Add Button -->
-          <button @click="addManualSubject" class="w-full py-3 border border-dashed border-gray-700 rounded-lg text-gray-500 hover:text-gray-300 hover:border-gray-500 transition-all flex items-center justify-center space-x-2 bg-black/10">
+          <button @click="addManualSubject" v-info="'starter_stack_add'" class="w-full py-3 border border-dashed border-gray-700 rounded-lg text-gray-500 hover:text-gray-300 hover:border-gray-500 transition-all flex items-center justify-center space-x-2 bg-black/10">
             <Plus class="w-4 h-4" />
             <span class="font-bold text-sm">Add Subject</span>
           </button>

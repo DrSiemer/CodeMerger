@@ -50,7 +50,7 @@ const acceptDiff = () => {
     <div class="flex items-center justify-between mb-4 shrink-0">
       <h3 class="text-2xl font-bold text-white">{{ title }}</h3>
       <div class="flex space-x-3">
-        <button @click="$emit('reset')" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest mr-2">Start Over</button>
+        <button @click="$emit('reset')" v-info="'starter_nav_reset'" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest mr-2">Start Over</button>
 
         <div v-if="baselines && baselines['__merged__']" class="flex space-x-2">
           <button
@@ -72,7 +72,7 @@ const acceptDiff = () => {
             @click="showQuestions = !showQuestions"
             v-info="'starter_seg_questions'"
             class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
-            :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-700 text-gray-300 hover:text-white'"
+            :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:text-white'"
           >
             <HelpCircle class="w-4 h-4" /><span>Questions</span>
           </button>
