@@ -1,7 +1,7 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
-import { X, AlertTriangle, Copy } from 'lucide-vue-next'
+import { AlertTriangle, Copy, X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 
 const props = defineProps({
   message: {
@@ -13,9 +13,7 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 const { statusMessage } = useAppState()
 
-const handleEscape = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+useEscapeKey(() => emit('close'))
 
 const copyCorrectionPrompt = async () => {
   if (window.pywebview) {
@@ -24,14 +22,6 @@ const copyCorrectionPrompt = async () => {
     emit('close')
   }
 }
-
-onMounted(() => {
-  document.addEventListener('keydown', handleEscape)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('keydown', handleEscape)
-})
 </script>
 
 <template>

@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
-import { X, RotateCcw, Save } from 'lucide-vue-next'
-import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
+import { X, RotateCcw, Save, Search } from 'lucide-vue-next'
+import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
 import FileManagerRightPanel from './FileManagerRightPanel.vue'
@@ -37,15 +38,13 @@ const lastRequestId = ref(0)
 
 const highlightedPath = ref(null)
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') {
-    if (showOrderErrorModal.value) {
-      showOrderErrorModal.value = false
-      return
-    }
-    handleCancel()
+useEscapeKey(() => {
+  if (showOrderErrorModal.value) {
+    showOrderErrorModal.value = false
+    return
   }
-}
+  handleCancel()
+})
 
 const debounce = (fn, delay) => {
   let timeout
@@ -56,40 +55,27 @@ const debounce = (fn, delay) => {
 }
 
 onMounted(async () => {
+  console.log("[FileManager] Mounted. Current newFileCount:", activeProject.newFileCount);
   await resizeWindow(1100, 800)
   await refreshTree()
   await autoHandleNewFiles()
+  // Triggered on mount to clear UI alert immediately upon entry
+  console.log("[FileManager] Clearing unknown files...");
   await clearUnknownFiles()
   isLoaded.value = true
-
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
-  showOrderErrorModal.value = false
 })
 
 const refreshTree = async () => {
-  // Increment request ID for this specific call
   const requestId = ++lastRequestId.value
-
   if (!fileTree.value.length) isTreeLoading.value = true
 
   try {
     const currentPaths = listItems.value.map(f => f.path)
     const result = await getFileTree(filterText.value, isExtFilter.value, isGitFilter.value, currentPaths)
-
-    // DISCARD: If a newer request has already been sent, ignore this stale result
-    if (requestId !== lastRequestId.value) {
-      return
-    }
-
+    if (requestId !== lastRequestId.value) return
     fileTree.value = result
   } finally {
-    if (requestId === lastRequestId.value) {
-      isTreeLoading.value = false
-    }
+    if (requestId === lastRequestId.value) isTreeLoading.value = false
   }
 }
 
@@ -182,7 +168,7 @@ const toggleFileSelect = (path) => {
   }
 }
 
-const toggleDirectorySelect = (node) => {
+const toggleDirectorySelect = async (node) => {
   highlightedPath.value = null
   const subtreeFiles = []
   const traverse = (n) => {
@@ -210,13 +196,19 @@ const toggleDirectorySelect = (node) => {
     rightPanelRef.value?.clearSelection()
   } else {
     const toAdd = subtreeFiles.filter(p => !currentPaths.has(p))
-    toAdd.forEach(path => {
-      window.pywebview.api.get_token_count(path).then(tokens => {
-        if (listItems.value.findIndex(f => f.path === path) === -1) {
-          listItems.value.push({ path, tokens, ignoreTokens: false })
-        }
+    for (const path of toAdd) {
+      const tokens = await window.pywebview.api.get_token_count(path)
+      if (listItems.value.findIndex(f => f.path === path) === -1) {
+        listItems.value.push({ path, tokens, ignoreTokens: false })
+      }
+    }
+
+    if (toAdd.length > 0) {
+      const lastPath = toAdd[toAdd.length - 1]
+      nextTick(() => {
+        rightPanelRef.value?.scrollToPath(lastPath)
       })
-    })
+    }
   }
 }
 
@@ -236,7 +228,7 @@ const toggleFolderExpand = ({ path, expanded }) => {
   else currentExpandedDirs.value.delete(path)
 }
 
-const addAll = () => {
+const addAll = async () => {
   highlightedPath.value = null
   const allFiles = []
   const traverse = (nodes) => {
@@ -254,13 +246,20 @@ const addAll = () => {
   const toAdd = allFiles.filter(p => !currentPaths.has(p))
   const threshold = config.value.add_all_warning_threshold || 50
   if (toAdd.length > threshold && !confirm(`Add ${toAdd.length} files to list?`)) return
-  toAdd.forEach(path => {
-    window.pywebview.api.get_token_count(path).then(tokens => {
-      if (listItems.value.findIndex(f => f.path === path) === -1) {
-        listItems.value.push({ path, tokens, ignoreTokens: false })
-      }
+
+  for (const path of toAdd) {
+    const tokens = await window.pywebview.api.get_token_count(path)
+    if (listItems.value.findIndex(f => f.path === path) === -1) {
+      listItems.value.push({ path, tokens, ignoreTokens: false })
+    }
+  }
+
+  if (toAdd.length > 0) {
+    const lastPath = toAdd[toAdd.length - 1]
+    nextTick(() => {
+      rightPanelRef.value?.scrollToPath(lastPath)
     })
-  })
+  }
 }
 
 const handleOrderRequest = async () => {
@@ -317,13 +316,12 @@ const handleSave = async () => {
       </div>
 
       <!-- Main Content Split -->
-      <div class="flex-grow flex min-h-0 overflow-hidden">
+      <div class="flex-grow flex min-0 overflow-hidden">
         <FileManagerLeftPanel
-          id="fm-left-panel"
+          id="fm-available-files"
           ref="leftPanelRef"
           :class="showFullPaths ? 'w-2/5' : 'w-1/2'"
           :fileTree="fileTree"
-          v-model:filterText="filterText"
           v-model:isExtFilter="isExtFilter"
           v-model:isGitFilter="isGitFilter"
           :selectedPaths="listItems.map(f => f.path)"
@@ -338,10 +336,11 @@ const handleSave = async () => {
         />
 
         <FileManagerRightPanel
-          id="fm-right-panel"
+          id="fm-merge-order"
           ref="rightPanelRef"
           :class="showFullPaths ? 'w-3/5' : 'w-1/2'"
           :listItems="listItems"
+          :filterText="filterText"
           :mergeListRef="mergeListRef"
           :totalTokens="totalTokens"
           :tokenColorClass="tokenColorClass"
@@ -354,24 +353,53 @@ const handleSave = async () => {
       </div>
 
       <!-- Footer Actions -->
-      <div class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
-        <button
-          id="btn-fm-clear-list"
-          @click="listItems.splice(0, listItems.length)"
-          class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm"
-          title="Clear the entire merge list for the current profile"
-          v-info="'fm_remove_all'"
-        >
-          <RotateCcw class="w-3.5 h-3.5 mr-2" />
-          Clear List
-        </button>
+      <div
+        id="fm-footer"
+        class="px-6 py-3 border-t border-gray-700 bg-cm-top-bar flex items-center justify-between shrink-0"
+        :class="{'has-changes': hasUnsavedChanges}"
+      >
 
-        <div class="flex items-center space-x-3">
+        <!-- Left Column: Clear List -->
+        <div class="footer-col-left flex justify-start">
+          <button
+            id="btn-fm-clear-list"
+            @click="listItems.splice(0, listItems.length)"
+            class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm shrink-0"
+            title="Clear the entire merge list for the current profile"
+          >
+            <RotateCcw class="w-3.5 h-3.5 mr-2" />
+            Clear List
+          </button>
+        </div>
+
+        <!-- Center Column: Filter Search -->
+        <div class="footer-search-col mx-4">
+          <div class="relative w-full">
+            <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              id="fm-filter-input"
+              v-model="filterText"
+              type="text"
+              placeholder="Filter both lists..."
+              class="w-full bg-cm-input-bg text-white pl-10 pr-10 py-1.5 rounded border border-gray-600 focus:border-cm-blue outline-none text-sm transition-all"
+            >
+            <button
+              v-if="filterText"
+              @click="filterText = ''"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              title="Clear filter"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Column: Navigation Actions -->
+        <div class="footer-col-right flex justify-end items-center space-x-3">
           <button
             @click="handleCancel"
-            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm"
+            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm shrink-0"
             :title="hasUnsavedChanges ? 'Discard modifications and exit' : 'Exit merge list editor'"
-            v-info="hasUnsavedChanges ? 'fm_cancel' : 'fm_close'"
           >
             {{ hasUnsavedChanges ? 'Cancel' : 'Close' }}
           </button>
@@ -379,9 +407,8 @@ const handleSave = async () => {
             id="btn-fm-save"
             v-if="hasUnsavedChanges"
             @click="handleSave"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm"
+            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-1.5 px-10 rounded shadow-md transition-all flex items-center text-sm shrink-0"
             title="Commit changes and update the project merge list"
-            v-info="'fm_save'"
           >
             <Save class="w-4 h-4 mr-2" />
             Save Merge List
@@ -392,3 +419,50 @@ const handleSave = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.footer-col-left, .footer-col-right, .footer-search-col {
+  transition: all 0.4s ease-in-out 0.1s;
+}
+
+.has-changes .footer-col-left,
+.has-changes .footer-col-right,
+.has-changes .footer-search-col {
+  transition: all 0.4s ease-in-out;
+}
+
+.footer-col-left {
+  flex: 0 0 auto;
+  min-width: 130px;
+}
+
+.footer-col-right {
+  flex: 0 0 auto;
+  min-width: 90px;
+}
+
+.footer-search-col {
+  flex: 1 1 auto;
+  max-width: 448px;
+  min-width: 180px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 1000px) {
+  #fm-footer:not(.has-changes) > .footer-col-left,
+  #fm-footer:not(.has-changes) > .footer-col-right {
+    flex: 1 1 0px;
+  }
+}
+
+.has-changes .footer-col-right {
+  min-width: 240px;
+}
+
+.has-changes .footer-search-col {
+  flex-grow: 0;
+  flex-basis: 320px;
+  max-width: 320px;
+}
+</style>

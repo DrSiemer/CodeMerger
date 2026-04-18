@@ -892,7 +892,12 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": []
+      "unknown_files": [
+        "frontend/src/components/review-tabs/ReviewCommentary.vue",
+        "frontend/src/components/review-tabs/ReviewFileItem.vue",
+        "frontend/src/composables/useEscapeKey.js",
+        "frontend/src/composables/useReviewerEditMode.js"
+      ]
     }
   },
   "known_files": [
@@ -936,6 +941,8 @@
     "frontend/src/components/dashboard/DashboardHeader.vue",
     "frontend/src/components/dashboard/DashboardNav.vue",
     "frontend/src/components/review-tabs/ReviewChangesTab.vue",
+    "frontend/src/components/review-tabs/ReviewCommentary.vue",
+    "frontend/src/components/review-tabs/ReviewFileItem.vue",
     "frontend/src/components/settings/SettingsAppTab.vue",
     "frontend/src/components/settings/SettingsEditorTab.vue",
     "frontend/src/components/settings/SettingsFileManagerTab.vue",
@@ -957,8 +964,10 @@
     "frontend/src/composables/globalState.js",
     "frontend/src/composables/infoMode.js",
     "frontend/src/composables/useAppState.js",
+    "frontend/src/composables/useEscapeKey.js",
     "frontend/src/composables/useProject.js",
     "frontend/src/composables/useReview.js",
+    "frontend/src/composables/useReviewerEditMode.js",
     "frontend/src/composables/useStarter.js",
     "frontend/src/composables/useSystem.js",
     "frontend/src/directives/vInfo.js",

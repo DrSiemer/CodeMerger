@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted } from 'vue'
 import {
   Milestone, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
   ArrowDownUp
@@ -8,6 +8,7 @@ import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composab
 
 const props = defineProps({
   listItems: Array,
+  filterText: String,
   mergeListRef: Object,
   totalTokens: Number,
   tokenColorClass: String,
@@ -26,7 +27,24 @@ const { openFile, statusMessage, getClipboardText } = useAppState()
 const selectedIndices = ref(new Set())
 const lastSelectedIndex = ref(null)
 
+// Local template ref for reliable internal access to the UL element
+const listRoot = ref(null)
+const tempHighlightedPath = ref(null)
+let highlightTimeout = null
+
+onMounted(() => {
+  // Synchronize the local element with the parent's Drag and Drop ref
+  if (props.mergeListRef && listRoot.value) {
+    props.mergeListRef.value = listRoot.value
+  }
+})
+
 const TOKEN_COLOR_RANGE_MAX = 2500
+
+const matchesFilter = (path) => {
+  if (!props.filterText) return true
+  return path.toLowerCase().includes(props.filterText.toLowerCase())
+}
 
 const getTokenColor = (file) => {
   if (!file) return 'text-gray-500'
@@ -150,7 +168,7 @@ const handlePasteOrder = async () => {
 
 const scrollToSelection = (alignToTop = false) => {
   nextTick(() => {
-    const selectedEl = props.mergeListRef.value?.querySelector('.bg-cm-blue')
+    const selectedEl = listRoot.value?.querySelector('.bg-cm-blue')
     if (selectedEl) {
       selectedEl.scrollIntoView({ behavior: 'smooth', block: alignToTop ? 'start' : 'nearest' })
     }
@@ -161,13 +179,24 @@ const scrollToPath = (path) => {
   const index = props.listItems.findIndex(f => f.path === path)
   if (index === -1) return
 
-  nextTick(() => {
-    const listEl = props.mergeListRef.value
-    if (!listEl) return
-    const items = listEl.querySelectorAll('li')
-    if (items[index]) {
-      items[index].scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }
+  // Apply subtle highlight
+  tempHighlightedPath.value = path
+  if (highlightTimeout) clearTimeout(highlightTimeout)
+  highlightTimeout = setTimeout(() => {
+    tempHighlightedPath.value = null
+  }, 2000)
+
+  // Use double requestAnimationFrame for maximum snappiness while ensuring the item is in the DOM
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const listEl = listRoot.value
+      if (!listEl) return
+
+      const items = listEl.querySelectorAll('li')
+      if (items[index]) {
+        items[index].scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    })
   })
 }
 
@@ -278,13 +307,17 @@ defineExpose({
 
     <!-- Merge List -->
     <div class="flex-grow overflow-y-auto custom-scrollbar mb-2 pr-2" v-info="'fm_list'">
-      <ul ref="mergeListRef" class="space-y-1">
+      <ul ref="listRoot" class="space-y-1">
         <li
           v-for="(file, index) in listItems"
           :key="file.path"
+          v-show="matchesFilter(file.path)"
           v-info="'fm_list_item'"
-          class="group flex items-center border rounded p-2 text-sm transition-colors"
-          :class="selectedIndices.has(index) ? 'bg-cm-blue border-cm-blue' : 'bg-cm-input-bg border-gray-700 hover:border-gray-500'"
+          class="group flex items-center border rounded p-2 text-sm transition-all duration-300"
+          :class="[
+            selectedIndices.has(index) ? 'bg-cm-blue border-cm-blue' : 'bg-cm-input-bg border-gray-700 hover:border-gray-500',
+            tempHighlightedPath === file.path ? 'ring-1 ring-cm-blue/50 bg-cm-blue/20 border-cm-blue/50' : ''
+          ]"
           @click="handleFileClick(index, $event)"
           @dblclick="handleFileDoubleClick(index)"
           :title="`${file.path} (Double-click to open)`"

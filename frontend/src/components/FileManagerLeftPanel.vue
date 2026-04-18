@@ -1,10 +1,9 @@
 <script setup>
-import { Search, Filter, GitBranch, CheckSquare, Loader2 } from 'lucide-vue-next'
+import { Filter, GitBranch, CheckSquare, Loader2 } from 'lucide-vue-next'
 import FileTreeNode from './FileTreeNode.vue'
 
 const props = defineProps({
   fileTree: Array,
-  filterText: String,
   isExtFilter: Boolean,
   isGitFilter: Boolean,
   selectedPaths: Array,
@@ -14,7 +13,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'update:filterText',
   'update:isExtFilter',
   'update:isGitFilter',
   'toggle-select',
@@ -59,20 +57,6 @@ defineExpose({ scrollToPath })
           <Filter class="w-4 h-4" />
         </button>
       </div>
-    </div>
-
-    <!-- Filter Search -->
-    <div class="relative mb-4">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-      <input
-        id="fm-filter-input"
-        :value="filterText"
-        @input="emit('update:filterText', $event.target.value)"
-        type="text"
-        placeholder="Filter tree..."
-        class="w-full bg-cm-input-bg text-white pl-10 pr-4 py-2 rounded border border-gray-600 focus:border-cm-blue outline-none text-sm"
-        v-info="'fm_filter_text'"
-      >
     </div>
 
     <!-- Tree / Loading Area -->

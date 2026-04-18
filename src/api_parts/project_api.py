@@ -74,13 +74,7 @@ class ProjectApi:
         """
         Opens the native OS directory selection dialog and returns the selected path string.
         """
-        if not self._window_manager or not self._window_manager.main_window:
-            return None
-
-        result = self._window_manager.main_window.create_file_dialog(webview.FOLDER_DIALOG)
-        if result and len(result) > 0:
-            return result[0]
-        return None
+        return self.select_directory()
 
     def rename_project(self, new_name):
         """Updates the name of the currently active project."""

@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 
 const emit = defineEmits(['close'])
 const { activeProject, createProfile, resizeWindow } = useAppState()
@@ -11,9 +12,7 @@ const copyFiles = ref(false)
 const copyInstructions = ref(false)
 const nameInput = ref(null)
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   await resizeWindow(800, 550)
@@ -21,12 +20,6 @@ onMounted(async () => {
   nextTick(() => {
     nameInput.value?.focus()
   })
-
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const handleCreate = async () => {

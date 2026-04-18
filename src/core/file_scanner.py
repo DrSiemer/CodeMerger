@@ -2,6 +2,34 @@ import os
 from ..core.utils import is_ignored
 from .. import constants as c
 
+def enrich_inventory(base_dir, raw_inventory):
+    """
+    Enriches a raw disk walk inventory with metadata (ignore status, extension).
+    This moves expensive string/IO operations out of the UI build loop.
+    """
+    base_dir_norm = os.path.abspath(base_dir).replace('\\', '/')
+    gitignores = raw_inventory['gitignores']
+
+    enriched_files = []
+    for rel_path in raw_inventory['files']:
+        abs_path = os.path.join(base_dir, rel_path)
+
+        # Store metadata to make UI filtering O(1) per file
+        enriched_files.append({
+            'p': rel_path,                           # Path
+            'n': os.path.basename(rel_path).lower(), # Name (normalized)
+            'i': is_ignored(abs_path, base_dir_norm, gitignores), # Is Ignored
+            'e': os.path.splitext(rel_path.lower())[1] # Extension
+        })
+
+    # Sort enriched files by path (case-insensitive) for stable Trie construction
+    enriched_files.sort(key=lambda x: x['p'].lower())
+
+    return {
+        'files': enriched_files,
+        'gitignores': gitignores
+    }
+
 def get_project_inventory(base_dir, cancel_event=None):
     """
     Performs a raw disk walk and returns a complete inventory of the project.

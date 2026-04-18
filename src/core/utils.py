@@ -134,17 +134,20 @@ def _get_default_config_dict():
         }
     }
 
+def _load_default_filetypes(target_dict):
+    """Safely loads and populates the default filetypes array from disk"""
+    try:
+        with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
+            target_dict.setdefault('user_lists', {})['filetypes'] = json.load(f)
+    except Exception:
+        pass
+
 def _create_and_get_default_config():
     """
     Initializes configuration from the default template and saves to disk
     """
     config = _get_default_config_dict()
-    try:
-        with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
-            config['user_lists']['filetypes'] = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        pass
-
+    _load_default_filetypes(config)
     save_config(config)
     return config
 
@@ -154,12 +157,7 @@ def load_config():
     Merges user values with the default template and applies necessary migrations
     """
     defaults = _get_default_config_dict()
-
-    try:
-        with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
-            defaults['user_lists']['filetypes'] = json.load(f)
-    except Exception:
-        pass
+    _load_default_filetypes(defaults)
 
     if not os.path.exists(CONFIG_FILE_PATH):
         return _create_and_get_default_config()

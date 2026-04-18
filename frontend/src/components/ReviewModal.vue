@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
   HelpCircle, ShieldCheck, AlertTriangle,
   ClipboardPaste
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import ReviewChangesTab from './review-tabs/ReviewChangesTab.vue'
 
@@ -80,15 +81,13 @@ const tabs = computed(() => {
 const hasUnformatted = computed(() => tabs.value.some(t => t.id === 'unformatted'))
 const hasFormattingTags = computed(() => lastAiResponse.value?.has_any_tags)
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') {
-    if (getPendingCount.value > 0) {
-      if (confirm('You have pending changes in the review. Discard them?')) emit('close')
-    } else {
-      emit('close')
-    }
+useEscapeKey(() => {
+  if (getPendingCount.value > 0) {
+    if (confirm('You have pending changes in the review. Discard them?')) emit('close')
+  } else {
+    emit('close')
   }
-}
+})
 
 onMounted(async () => {
   await resizeWindow(1100, 850)
@@ -125,12 +124,6 @@ onMounted(async () => {
       }
     }
   }
-
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
 })
 
 // --- Logic Actions ---
@@ -332,7 +325,7 @@ const getSkippedMessage = (path) => {
           @click="activeTab = tab.id"
           v-info="`review_tab_${tab.id}`"
           class="px-5 py-3 text-sm font-medium transition-all border-b-2 flex items-center space-x-2"
-          :class="activeTab === tab.id ? 'border-cm-blue text-white bg-white/5' : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'"
+          :class="activeTab === tab.id ? 'border-cm-blue text-white bg-white/5' : 'border-transparent text-gray-500 hover:text-white hover:bg-white/5'"
           :title="tab.tooltip"
         >
           <component :is="tab.icon" class="w-4 h-4" :class="tab.color" />

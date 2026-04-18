@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { X, BookOpen, RotateCcw, Save } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { useEscapeKey } from '../composables/useEscapeKey'
 
 const emit = defineEmits(['close'])
 const { activeProject, config, saveInstructions, resizeWindow } = useAppState()
@@ -9,21 +10,13 @@ const { activeProject, config, saveInstructions, resizeWindow } = useAppState()
 const localIntro = ref('')
 const localOutro = ref('')
 
-const handleKeyDown = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   await resizeWindow(800, 650)
 
   localIntro.value = activeProject.introText || ''
   localOutro.value = activeProject.outroText || ''
-
-  window.addEventListener('keydown', handleKeyDown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown)
 })
 
 const loadDefaults = () => {
