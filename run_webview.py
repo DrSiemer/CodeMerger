@@ -48,7 +48,8 @@ def main():
     show_console = "--console" in sys.argv
 
     # Detect if this instance is secondary to decide if we should boot with an active project
-    is_second_instance = is_another_instance_running()
+    # Instance detection is disabled in dev mode to allow standard project loading during development
+    is_second_instance = is_another_instance_running() if not dev_mode else False
 
     if show_console and sys.platform == "win32":
         try:
