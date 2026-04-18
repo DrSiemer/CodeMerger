@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
   HelpCircle, ShieldCheck, AlertTriangle,
-  ClipboardPaste
+  ClipboardPaste, ChevronLeft, ChevronRight, ArrowUpRight
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
@@ -32,16 +32,56 @@ const {
   editorFontSize,
   hasPendingChanges,
   handleZoom,
-  statusMessage
+  statusMessage,
+  verificationHistory
 } = useAppState()
 
 const visibleDiffs = ref(new Set())
 const activeTab = ref('')
 const tabContentContainer = ref(null)
 
+// History state
+const selectedHistoryIndex = ref(0)
+
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
 const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed || []).length > 0)
+
+// Navigation: History Computed Helpers
+const currentPlanHasVerification = computed(() => {
+  const v = lastAiResponse.value?.verification
+  return !!(v && v !== '-' && v.trim().length > 0)
+})
+
+// Combine history and staged verification into one navigable sequence
+const allVerifications = computed(() => {
+  const combined = [...verificationHistory.value.map(h => ({ ...h, isArchive: true }))]
+  const currentV = lastAiResponse.value?.verification || ''
+
+  if (currentPlanHasVerification.value) {
+    combined.push({
+      content: currentV,
+      timestamp: 'Current',
+      isArchive: false
+    })
+  }
+  return combined
+})
+
+const currentVerificationView = computed(() => {
+  const list = allVerifications.value
+  if (list.length === 0) return null
+  // Clamp index in case a paste reduced the history count (unlikely but safe)
+  const idx = Math.min(selectedHistoryIndex.value, list.length - 1)
+  return list[idx]
+})
+
+const isHistorical = computed(() => {
+  const view = currentVerificationView.value
+  return view && view.isArchive
+})
+
+const isLatest = computed(() => selectedHistoryIndex.value === allVerifications.value.length - 1)
 
 // Categorize segments from the plan into dedicated tab objects
 const tabs = computed(() => {
@@ -75,6 +115,11 @@ const tabs = computed(() => {
     list.push({ id: 'changes', name: 'Changes', icon: FileCode, content: '', color: 'text-cm-blue', tooltip: 'Review and apply file modifications' })
   }
 
+  // Ensure 'Verification' is present if session history exists, even if not in current response
+  if (!list.find(t => t.id === 'verification') && verificationHistory.value.length > 0) {
+    list.push({ id: 'verification', name: 'Verification', icon: ShieldCheck, content: '', color: 'text-cm-green', tooltip: 'Review past and current verification steps' })
+  }
+
   return list
 })
 
@@ -89,8 +134,27 @@ useEscapeKey(() => {
   }
 })
 
+// Reset navigation index whenever a new AI response is pasted
+watch(lastAiResponse, () => {
+  if (allVerifications.value.length > 0) {
+    selectedHistoryIndex.value = allVerifications.value.length - 1
+  }
+})
+
+// Reset index when tab changes to Verification to ensure we start on the latest entry
+watch(activeTab, (newTab) => {
+  if (newTab === 'verification' && allVerifications.value.length > 0) {
+    selectedHistoryIndex.value = allVerifications.value.length - 1
+  }
+})
+
 onMounted(async () => {
   await resizeWindow(1100, 850)
+
+  // Initialize history index to the latest entry
+  if (allVerifications.value.length > 0) {
+    selectedHistoryIndex.value = allVerifications.value.length - 1
+  }
 
   // Initialization: Logic for state-aware initial tab selection
   if (tabs.value.length > 0) {
@@ -341,7 +405,64 @@ const getSkippedMessage = (path) => {
 
           <!-- Standard Content Tabs -->
           <template v-if="tab.id !== 'changes'">
-            <MarkdownRenderer :content="tab.content" :fontSize="editorFontSize" />
+            <div class="relative min-h-full">
+              <!-- Verification History Subtle Navigation (Floating) -->
+              <div
+                v-if="tab.id === 'verification' && allVerifications.length > 1"
+                v-info="'review_verification_history'"
+                class="relative z-20 float-right ml-6 mb-2 flex flex-col items-end space-y-2 select-none pointer-events-auto"
+                :class="isHistorical ? 'opacity-100' : 'opacity-40 hover:opacity-100 transition-opacity'"
+                title="Browse past verification steps from this session"
+              >
+                <div class="flex items-center space-x-1 bg-black/40 border border-gray-700 rounded-md p-1 shadow-sm">
+                  <button
+                    @click="selectedHistoryIndex--"
+                    :disabled="selectedHistoryIndex <= 0"
+                    class="p-1 text-gray-400 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    title="Previous verification"
+                  >
+                    <ChevronLeft class="w-4 h-4" />
+                  </button>
+                  <div class="px-2 text-[10px] font-mono text-gray-400 tracking-tighter">
+                    {{ selectedHistoryIndex + 1 }} / {{ allVerifications.length }}
+                  </div>
+                  <button
+                    @click="selectedHistoryIndex++"
+                    :disabled="selectedHistoryIndex >= allVerifications.length - 1"
+                    class="p-1 text-gray-400 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+                    title="Next verification"
+                  >
+                    <ChevronRight class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <button
+                  v-if="!isLatest"
+                  @click="selectedHistoryIndex = allVerifications.length - 1"
+                  v-info="'review_verification_current'"
+                  class="flex items-center space-x-1 px-2 py-1 text-[9px] font-black uppercase tracking-[0.15em] text-cm-blue hover:text-blue-300 transition-colors bg-blue-500/5 rounded border border-cm-blue/20"
+                  title="Jump to current verification"
+                >
+                  <ArrowUpRight class="w-3 h-3" />
+                  <span>Current</span>
+                </button>
+              </div>
+
+              <!-- Content Body -->
+              <div :class="{'opacity-80 grayscale-[0.3] border-l-4 border-yellow-700/40 pl-6 py-1': tab.id === 'verification' && isHistorical}">
+                <!-- Consolidated History Badge -->
+                <div v-if="tab.id === 'verification' && isHistorical" class="mb-4">
+                  <div class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-900/30 text-yellow-500 text-[10px] font-black uppercase tracking-[0.2em] border border-yellow-700/50">
+                    Verification from {{ currentVerificationView?.timestamp }}
+                  </div>
+                </div>
+
+                <MarkdownRenderer :content="tab.id === 'verification' ? currentVerificationView?.content : tab.content" :fontSize="editorFontSize" />
+              </div>
+
+              <!-- Ensures layout clears floats for tabs with little text -->
+              <div class="clear-both"></div>
+            </div>
           </template>
 
           <!-- Interactive Changes Tab -->

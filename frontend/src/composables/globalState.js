@@ -55,3 +55,7 @@ export const orderErrorMessage = ref('')
 // Format Error Modal State
 export const showFormatErrorModal = ref(false)
 export const formatErrorMessage = ref('')
+
+// Verification History (Session-only)
+export const verificationHistory = ref([])
+export const hasAcceptedChanges = ref(false)

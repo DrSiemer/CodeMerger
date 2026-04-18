@@ -356,11 +356,11 @@
         },
         {
           "path": "frontend/src/composables/globalState.js",
-          "tokens": 363,
+          "tokens": 387,
           "ignoreTokens": false,
-          "lines": 57,
-          "mtime": 1776191649.836012,
-          "hash": "ef9a4e0e99c346e4c01b72c18ae6796552dc44c7"
+          "lines": 61,
+          "mtime": 1776522376.4974258,
+          "hash": "9750b09c38f2411107a95927685ae13f23deccd2"
         },
         {
           "path": "frontend/src/composables/infoMode.js",
@@ -385,11 +385,11 @@
         },
         {
           "path": "frontend/src/composables/useReview.js",
-          "tokens": 1172,
+          "tokens": 1460,
           "ignoreTokens": false,
-          "lines": 157,
-          "mtime": 1776191649.957099,
-          "hash": "0a3b435c9a089662fa239451904520639b503b19"
+          "lines": 198,
+          "mtime": 1776522376.545366,
+          "hash": "9618866ff1461f1ac660d87807538171db443750"
         },
         {
           "path": "frontend/src/composables/useStarter.js",
@@ -437,8 +437,11 @@
         },
         {
           "path": "frontend/src/utils/info/reviewInfo.js",
-          "tokens": 461,
-          "ignoreTokens": false
+          "tokens": 523,
+          "ignoreTokens": false,
+          "lines": 21,
+          "mtime": 1776522887.598165,
+          "hash": "48e0b973ef230878cd28c260272f59064952d03d"
         },
         {
           "path": "frontend/src/utils/info/settingsInfo.js",
@@ -596,11 +599,11 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "tokens": 3792,
+          "tokens": 4975,
           "ignoreTokens": false,
-          "lines": 410,
-          "mtime": 1776501381.7856345,
-          "hash": "ac92edfa4ca3834d0e86bdac4762212a01bf672d"
+          "lines": 529,
+          "mtime": 1776522887.6453009,
+          "hash": "030a9fe20b614508954cbf810bcfbc4225373703"
         },
         {
           "path": "frontend/src/components/settings/SettingsAppTab.vue",
@@ -875,7 +878,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 150427,
+      "total_tokens": 151984,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

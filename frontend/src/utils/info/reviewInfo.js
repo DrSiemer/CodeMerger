@@ -15,5 +15,7 @@ export const reviewInfo = {
   "review_admonish": "Copy Correction Prompt: Copies a prompt telling the AI that it failed to follow the required output format.",
   "review_diff": "Diff Viewer: Toggle a line-by-line comparison between your local file and the AI version. Green highlights indicate additions, red indicates removals.",
   "review_file_action": "File Actions: Choose to Accept or Discard changes for individual files. Handled files are crossed out in the list. You can 'Undo' a choice before applying the full update.",
-  "review_commentary": "AI Commentary: Read the specific technical explanation provided by the AI for the proposed changes."
+  "review_commentary": "AI Commentary: Read the specific technical explanation provided by the AI for the proposed changes.",
+  "review_verification_history": "Verification History: Browse past verification steps from this session. A verification section is archived only when you accept at least one change from that response.",
+  "review_verification_current": "Return to Current: Instantly jump back to the verification steps belonging to the response currently being reviewed."
 };

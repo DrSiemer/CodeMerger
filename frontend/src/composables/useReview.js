@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { lastAiResponse, planFileStates, planOriginalContents, activeProject, statusMessage, showFormatErrorModal, formatErrorMessage } from './globalState'
+import { lastAiResponse, planFileStates, planOriginalContents, activeProject, statusMessage, showFormatErrorModal, formatErrorMessage, verificationHistory, hasAcceptedChanges } from './globalState'
 import { useProject } from './useProject'
 
 export function useReview() {
@@ -17,6 +17,29 @@ export function useReview() {
       return await window.pywebview.api.get_clipboard_text()
     }
     return ""
+  }
+
+  // Helper to archive the verification section of the interaction that just ended
+  const archivePreviousVerification = () => {
+    const prevPlan = lastAiResponse.value
+    if (!prevPlan || !hasAcceptedChanges.value) return
+
+    const vContent = prevPlan.verification || ''
+    if (!vContent || vContent === '-' || vContent.trim().length === 0) return
+
+    const history = verificationHistory.value
+    const lastEntry = history.length > 0 ? history[history.length - 1] : null
+
+    // Ignore identical verification in succession
+    if (!lastEntry || lastEntry.content !== vContent) {
+      history.push({
+        content: vContent,
+        timestamp: new Date().toLocaleString()
+      })
+    }
+
+    // Reset the modification flag for the next response
+    hasAcceptedChanges.value = false
   }
 
   const processPaste = async () => {
@@ -45,7 +68,11 @@ export function useReview() {
         return false
       }
 
+      archivePreviousVerification()
+
       lastAiResponse.value = plan
+      hasAcceptedChanges.value = false
+
       planFileStates.value = {}
       planOriginalContents.value = {}
 
@@ -73,6 +100,7 @@ export function useReview() {
     lastAiResponse.value = null
     planFileStates.value = {}
     planOriginalContents.value = {}
+    hasAcceptedChanges.value = false
     statusMessage.value = "AI response cleared from memory."
   }
 
@@ -87,6 +115,7 @@ export function useReview() {
     if (window.pywebview) {
       const [success, error] = await window.pywebview.api.apply_single_file_change(relPath, content)
       if (success) {
+        hasAcceptedChanges.value = true
         statusMessage.value = `Applied changes to ${relPath}`
         const proj = await window.pywebview.api.get_current_project()
         project.applyProjectData(proj)
@@ -102,6 +131,7 @@ export function useReview() {
     if (window.pywebview) {
       const [success, error] = await window.pywebview.api.delete_file(relPath)
       if (success) {
+        hasAcceptedChanges.value = true
         statusMessage.value = `Deleted ${relPath}`
         const proj = await window.pywebview.api.get_current_project()
         project.applyProjectData(proj)
@@ -137,7 +167,16 @@ export function useReview() {
   }
 
   const syncPlanStates = async (states) => window.pywebview ? await window.pywebview.api.sync_plan_states(states) : false
-  const applyFullPlan = async (plan) => window.pywebview ? await window.pywebview.api.apply_full_plan(plan) : [false, ""]
+  const applyFullPlan = async (plan) => {
+    if (window.pywebview) {
+      const res = await window.pywebview.api.apply_full_plan(plan)
+      if (res && res[0]) {
+        hasAcceptedChanges.value = true
+      }
+      return res
+    }
+    return [false, ""]
+  }
 
   return {
     hasPendingChanges,
