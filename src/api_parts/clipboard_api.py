@@ -11,8 +11,14 @@ log = logging.getLogger("CodeMerger")
 class ClipboardApi:
     """API methods for accessing the clipboard and copying finalized prompts"""
 
-    def copy_code(self, use_wrapper):
-        """Merges selected files and copies the result to the clipboard"""
+    def copy_code(self, use_wrapper, allow_secrets=None):
+        """
+        Merges selected files and copies the result to the clipboard.
+        allow_secrets:
+          None  -> Use default blocking dialog (Main window)
+          True  -> Copy anyway (Widget confirmation)
+          False -> Check and return error if found (Widget initial check)
+        """
         project_config = self.project_manager.get_current_project()
         if not project_config or not project_config.selected_files:
             return "No files selected to copy"
@@ -23,10 +29,20 @@ class ClipboardApi:
         if self.app_state.scan_for_secrets:
             report = scan_for_secrets(base_dir, files_to_copy)
             if report:
-                warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
-                proceed = self._show_managed_confirmation("Secrets Detected", warning_message)
-                if not proceed:
-                    return "Copy cancelled due to potential secrets."
+                # Flow A: Widget non-blocking check
+                if allow_secrets is False:
+                    return {"status": "SECRETS_DETECTED", "report": report}
+
+                # Flow B: Widget confirmed bypass
+                if allow_secrets is True:
+                    pass # Continue to copy
+
+                # Flow C: Standard Main Window blocking behavior
+                else:
+                    warning_message = f"Warning: Potential secrets were detected in your selection.\n\n{report}\n\nDo you still want to copy this content to your clipboard?"
+                    proceed = self._show_managed_confirmation("Secrets Detected", warning_message)
+                    if not proceed:
+                        return "Copy cancelled due to potential secrets."
 
         final_content, status_message = generate_output_string(
             base_dir,
@@ -41,7 +57,7 @@ class ClipboardApi:
 
         return status_message or "Error: Could not generate content."
 
-    def request_remote_paste(self, revert_on_close, auto_apply):
+    def request_remote_paste(self, revert_on_close, auto_apply, force_overwrite=False):
         """
         Cross-window method called by Compact mode
         Reads clipboard and either auto-applies or signals Main window for review
@@ -50,11 +66,14 @@ class ClipboardApi:
             return False
 
         status = self.check_for_pending_changes()
-        if status.get('has_pending'):
-            msg = "An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?"
-            proceed = self._show_managed_confirmation("Confirm Overwrite", msg)
-            if not proceed:
-                return False
+        if status.get('has_pending') and not force_overwrite:
+            # Main window still uses blocking confirmation
+            # Compact mode checks has_pending locally before calling this with force_overwrite=True
+            if not force_overwrite:
+                msg = "An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?"
+                proceed = self._show_managed_confirmation("Confirm Overwrite", msg)
+                if not proceed:
+                    return False
 
         text = pyperclip.paste()
         if not text or not text.strip():
