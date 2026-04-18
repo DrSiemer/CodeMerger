@@ -80,9 +80,13 @@ STARTER_STACK_PROMPT_INTRO = "Act as a Senior Software Architect. Your goal is t
 
 STARTER_STACK_PROMPT_INSTR = """
 ### Constraints
-1. **Strict Filtering:** Use the "Developer Experience" ONLY to choose between viable paths. If a technology in that list does not directly solve a requirement in the "Project Concept," EXCLUDE it.
-2. Return ONLY a raw JSON list of strings representing the final stack.
-   - Example: ["Python 3.10", "Flask"]
+1. **Requirement-First Selection:** Analyze the Project Concept first. Suggest technologies that are objectively the best fit for the problem, regardless of what's in the Developer Experience list.
+2. **Experience-Second Filtering:** Use the "Developer Experience" list ONLY to choose between technically equal paths. Do not default to Python or other listed languages if they are inappropriate for the project concept.
+3. **Deep Rationale:** For every choice, provide a technical rationale explaining why it is the optimal fit for this specific project.
+4. **The "Why Not Delete" Warning:** For every technology, generate a one-sentence "warning" explaining exactly what would be lost or what significant technical hurdle would be introduced if this item were removed from the stack.
+5. **Format:** Return ONLY a raw JSON array of objects.
+   - Format: [{"tech": "Name", "rationale": "Reasoning", "warning": "Consequence of removal"}]
+   - Example: [{"tech": "PostgreSQL", "rationale": "Relational handling for user data", "warning": "Switching to NoSQL would require a total rewrite of our complex analytical queries."}]
 """
 
 STARTER_TODO_PROMPT_INTRO = """You are a Technical Project Manager.

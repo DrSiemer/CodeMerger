@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { ChevronRight, Save, RotateCcw } from 'lucide-vue-next'
+import { ref, computed, nextTick } from 'vue'
+import { ChevronRight, Save, RotateCcw, Plus, Trash2, ChevronDown, ChevronUp, AlertCircle, PencilLine, Check } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -19,9 +19,73 @@ const emit = defineEmits(['next'])
 const { config, saveConfig, generateStackPrompt, editorFontSize, handleZoom } = useAppState()
 
 // Sub-states: 'input' | 'pasting' | 'review'
-const viewState = ref(props.pData.stack ? 'review' : (props.pData.stack_llm_response ? 'pasting' : 'input'))
+const viewState = ref((Array.isArray(props.pData.stack) && props.pData.stack.length > 0) ? 'review' : (props.pData.stack_llm_response ? 'pasting' : 'input'))
 
-// Handles async text generation and UI feedback
+const expandedIndices = ref(new Set())
+const editingNameIndex = ref(null)
+const nameInputRef = ref(null)
+
+const toggleExpand = (idx) => {
+  // Manual items or items without rationale are not expandable
+  if (!props.pData.stack[idx].rationale) return
+
+  if (expandedIndices.value.has(idx)) expandedIndices.value.delete(idx)
+  else expandedIndices.value.add(idx)
+}
+
+const startEditingName = (idx) => {
+  editingNameIndex.value = idx
+  nextTick(() => {
+    if (nameInputRef.value && nameInputRef.value[0]) {
+      nameInputRef.value[0].focus()
+      nameInputRef.value[0].select()
+    }
+  })
+}
+
+const stopEditingName = () => {
+  editingNameIndex.value = null
+}
+
+// Deletion Confirmation State
+const showConfirmDelete = ref(false)
+const deleteTargetIndex = ref(null)
+
+// --- Deletion Flow ---
+
+const requestDelete = (idx) => {
+  deleteTargetIndex.value = idx
+  showConfirmDelete.value = true
+}
+
+const abortDelete = () => {
+  deleteTargetIndex.value = null
+  showConfirmDelete.value = false
+}
+
+const confirmDelete = () => {
+  if (deleteTargetIndex.value !== null) {
+    props.pData.stack.splice(deleteTargetIndex.value, 1)
+    expandedIndices.value.delete(deleteTargetIndex.value)
+  }
+  abortDelete()
+}
+
+const deleteTarget = computed(() => {
+  if (deleteTargetIndex.value === null) return null
+  return props.pData.stack[deleteTargetIndex.value]
+})
+
+const hasVisibleWarning = computed(() => {
+  const t = deleteTarget.value
+  if (!t || t.isManual || !t.warning) return false
+  // Filter out common generic placeholders
+  const low = t.warning.toLowerCase()
+  return !(low.includes('manually added') || low.trim() === '');
+})
+
+// --- Logic & Processing ---
+
 const copyToClipboard = async (text, el) => {
   if (!el) return
   await navigator.clipboard.writeText(text)
@@ -29,8 +93,6 @@ const copyToClipboard = async (text, el) => {
   el.innerText = "Copied!"
   setTimeout(() => { if (el) el.innerText = originalText }, 2000)
 }
-
-// --- Default Experience Management ---
 
 const loadDefaultExperience = () => {
   const defaultExp = config.value.user_experience || ''
@@ -57,8 +119,6 @@ const saveDefaultExperience = async () => {
   await saveConfig(newConfig)
 }
 
-// --- Navigation & Processing ---
-
 const goToPasting = async (e) => {
   const btn = e.currentTarget
   const prompt = await generateStackPrompt(props.pData)
@@ -71,29 +131,86 @@ const processStack = () => {
   try {
     const startIdx = raw.indexOf('[')
     const endIdx = raw.lastIndexOf(']')
-    if (startIdx === -1 || endIdx === -1) throw new Error("No JSON")
-    const jsonStr = raw.substring(startIdx, endIdx + 1).replace(/'/g, '"')
+    if (startIdx === -1 || endIdx === -1) throw new Error("JSON array markers ([ ]) not found.")
+
+    const jsonStr = raw.substring(startIdx, endIdx + 1)
     const list = JSON.parse(jsonStr)
-    // PRESENTATION: Join with newlines for the editor instead of commas
-    props.pData.stack = list.join('\n')
+
+    if (!Array.isArray(list)) throw new Error("The content is not a list/array.")
+
+    props.pData.stack = list.map(item => {
+      if (typeof item === 'string') {
+        return {
+          tech: item,
+          rationale: 'Suggested by AI during initial scan.',
+          warning: '',
+          isManual: false
+        }
+      }
+      return {
+        tech: item.tech || 'Unnamed Subject',
+        rationale: item.rationale || '',
+        warning: item.warning || '',
+        isManual: false
+      }
+    })
+
     props.pData.stack_llm_response = ''
     viewState.value = 'review'
   } catch (err) {
-    alert("Could not parse JSON list. Please ensure the LLM returned a valid array format.")
+    alert(`Could not parse the technology stack.\n\nError: ${err.message}\n\nPlease ensure the LLM provided a valid JSON array of objects.`)
   }
+}
+
+const addManualSubject = () => {
+  const newIdx = props.pData.stack.length
+  props.pData.stack.push({
+    tech: '',
+    rationale: '',
+    warning: '',
+    isManual: true
+  })
+  startEditingName(newIdx)
 }
 
 const handleReset = () => {
   if (confirm("Reset tech stack selection and return to input?")) {
-    props.pData.stack = ''
+    props.pData.stack = []
     props.pData.stack_llm_response = ''
+    expandedIndices.value.clear()
     viewState.value = 'input'
   }
 }
 </script>
 
 <template>
-  <div class="h-full flex flex-col text-gray-100" @wheel.ctrl.prevent="handleZoom">
+  <div class="h-full flex flex-col text-gray-100 relative" @wheel.ctrl.prevent="handleZoom">
+
+    <!-- DELETION CONFIRM MODAL -->
+    <Teleport to="#project-starter-modal">
+      <div v-if="showConfirmDelete" class="absolute inset-0 bg-black/85 flex items-center justify-center z-[110] p-4">
+        <div class="bg-cm-dark-bg w-full max-w-lg rounded-xl shadow-2xl border border-gray-700 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div class="bg-cm-top-bar px-6 py-5 border-b border-gray-700 flex items-center space-x-3">
+             <Trash2 class="w-5 h-5 text-gray-400" />
+             <h3 class="text-xl font-bold text-white">Remove Subject?</h3>
+          </div>
+
+          <div class="p-8 space-y-6">
+            <p class="text-gray-200 text-lg leading-snug">Are you sure you want to remove <span class="font-black text-cm-blue">{{ deleteTarget?.tech || 'this item' }}</span> from the project stack?</p>
+
+            <div v-if="hasVisibleWarning" class="bg-black/30 border border-gray-800 rounded-lg p-5">
+               <span class="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] mb-2">Architectural Warning</span>
+               <p class="text-gray-300 leading-relaxed">{{ deleteTarget?.warning }}</p>
+            </div>
+          </div>
+
+          <div class="px-6 py-5 bg-cm-top-bar border-t border-gray-800 flex justify-end space-x-3">
+            <button @click="abortDelete" class="px-6 py-2 rounded font-bold text-gray-400 hover:text-white transition-colors">Cancel</button>
+            <button @click="confirmDelete" class="bg-cm-warn hover:bg-red-600 text-white font-bold px-10 py-2 rounded shadow-lg transition-all">Remove</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- PHASE 1: EXPERIENCE INPUT -->
     <template v-if="viewState === 'input'">
@@ -112,10 +229,10 @@ const handleReset = () => {
         ></textarea>
 
         <div class="shrink-0 flex items-center justify-between bg-gray-800/50 p-4 rounded border border-gray-700">
-          <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-3 text-sm">
             <button
               @click="loadDefaultExperience"
-              class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 text-sm font-bold"
+              class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 font-bold"
               title="Load saved experience from settings"
             >
               <RotateCcw class="w-4 h-4" />
@@ -123,7 +240,7 @@ const handleReset = () => {
             </button>
             <button
               @click="saveDefaultExperience"
-              class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 text-sm font-bold"
+              class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 font-bold"
               title="Save current text as your app-wide default"
             >
               <Save class="w-4 h-4" />
@@ -175,7 +292,7 @@ const handleReset = () => {
             v-info="'starter_gen_response'"
             class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar font-mono text-base selectable"
             :style="{ fontSize: editorFontSize + 'px' }"
-            placeholder='Example response: ["Python 3.10", "FastAPI", "SQLite"]'
+            placeholder='Example response: [{"tech": "Node.js", "rationale": "High concurrency...", "warning": "..."}]'
           ></textarea>
         </div>
 
@@ -198,19 +315,75 @@ const handleReset = () => {
       <div class="flex flex-col h-full space-y-4">
         <div class="shrink-0 flex items-center justify-between">
           <div>
-            <h3 class="text-2xl font-bold text-white">Final Code Stack</h3>
-            <p class="text-gray-400 mt-1">Review and manually adjust the technologies. Use one line per subject.</p>
+            <h3 class="text-2xl font-bold text-white">Selected Code Stack</h3>
+            <p class="text-gray-400 mt-1">Review the chosen technologies. Click a subject to reveal its architectural rationale.</p>
           </div>
           <button @click="handleReset" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
         </div>
 
-        <textarea
-          v-model="pData.stack"
-          v-info="'starter_stack_edit'"
-          class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue custom-scrollbar text-xl font-mono leading-relaxed selectable shrink-0"
-          :style="{ fontSize: editorFontSize + 'px' }"
-          placeholder="Python 3.10&#10;FastAPI&#10;Tailwind CSS"
-        ></textarea>
+        <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-2" v-info="'starter_stack_edit'">
+          <div v-for="(item, idx) in pData.stack" :key="idx" class="border border-gray-700 rounded-lg overflow-hidden transition-all duration-200">
+            <!-- Header Row -->
+            <div
+              class="flex items-center justify-between p-4 cursor-pointer transition-colors group"
+              :class="[
+                expandedIndices.has(idx) ? 'bg-cm-blue/10' : 'bg-gray-800/40 hover:bg-gray-800/60',
+                !item.rationale ? 'cursor-default' : 'cursor-pointer'
+              ]"
+              @click="toggleExpand(idx)"
+            >
+              <div class="flex items-center space-x-4 min-w-0 flex-grow">
+                 <component
+                   v-if="item.rationale"
+                   :is="expandedIndices.has(idx) ? ChevronUp : ChevronDown"
+                   class="w-5 h-5 text-gray-500 shrink-0"
+                 />
+                 <div v-else class="w-5 h-5 shrink-0"></div>
+
+                 <div class="flex-grow min-w-0 flex items-center">
+                    <input
+                      v-if="editingNameIndex === idx"
+                      ref="nameInputRef"
+                      v-model="item.tech"
+                      @click.stop
+                      @blur="stopEditingName"
+                      @keyup.enter="stopEditingName"
+                      class="bg-black/30 border border-cm-blue text-white font-bold text-lg py-1 px-2 rounded w-full outline-none"
+                      placeholder="Technology Name"
+                    >
+                    <div v-else class="flex items-center space-x-2 truncate">
+                      <span class="text-white font-bold text-lg truncate">{{ item.tech || '(unnamed)' }}</span>
+                      <button
+                        @click.stop="startEditingName(idx)"
+                        class="text-gray-500 hover:text-white p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Edit name"
+                      >
+                        <PencilLine class="w-4 h-4" />
+                      </button>
+                    </div>
+                 </div>
+              </div>
+
+              <button @click.stop="requestDelete(idx)" class="ml-4 text-gray-600 hover:text-red-400 transition-colors p-2 shrink-0">
+                <Trash2 class="w-4 h-4" />
+              </button>
+            </div>
+
+            <!-- Expanded Content -->
+            <div v-if="expandedIndices.has(idx) && item.rationale" class="bg-black/20 p-6 border-t border-gray-700/50 animate-in slide-in-from-top-1 duration-200">
+              <div class="space-y-3">
+                <span class="block text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Technical Rationale</span>
+                <p class="text-gray-200 text-[15px] leading-relaxed whitespace-pre-wrap">{{ item.rationale }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Button -->
+          <button @click="addManualSubject" class="w-full py-3 border border-dashed border-gray-700 rounded-lg text-gray-500 hover:text-gray-300 hover:border-gray-500 transition-all flex items-center justify-center space-x-2 bg-black/10">
+            <Plus class="w-4 h-4" />
+            <span class="font-bold text-sm">Add Subject</span>
+          </button>
+        </div>
 
         <div v-if="!isLookingBack" class="shrink-0 pt-6 flex justify-end">
           <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
@@ -223,3 +396,10 @@ const handleReset = () => {
 
   </div>
 </template>
+
+<style scoped>
+/* Standardize font scaling for plain text previews */
+p {
+  font-family: inherit;
+}
+</style>

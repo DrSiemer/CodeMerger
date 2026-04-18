@@ -37,7 +37,7 @@ let toastTimer = null
 const pData = reactive({
   name: '',
   parent_folder: '',
-  stack: '',
+  stack: [],
   stack_experience: '',
   goal: '',
   concept_md: '',
@@ -95,6 +95,13 @@ onMounted(async () => {
 
   const saved = await getStarterSession()
   if (saved && Object.keys(saved).length > 0) {
+    // Migration logic for stack string to array of objects
+    if (typeof saved.stack === 'string' && saved.stack.trim()) {
+      saved.stack = saved.stack.split('\n').filter(s => s.trim()).map(s => ({ tech: s, rationale: 'Imported from previous version' }))
+    } else if (!saved.stack) {
+      saved.stack = []
+    }
+
     Object.assign(pData, saved)
     recalcProgress()
     currentStep.value = maxAccessibleStep.value
@@ -121,19 +128,26 @@ watch(() => pData, () => {
 const recalcProgress = () => {
   const hasDetails = !!pData.name
   const hasConcept = (!Object.keys(pData.concept_segments).length) && !!pData.concept_md
+  const hasStack = pData.stack && pData.stack.length > 0
   const hasTodo = (!Object.keys(pData.todo_segments).length) && !!pData.todo_md
 
   let targetMax = 1
   if (hasDetails) {
-    targetMax = 3
+    targetMax = 3 // Move to Concept
     if (hasConcept) {
-      targetMax = 5
-      if (hasTodo) {
-        targetMax = 6
+      targetMax = 4 // Move to Stack
+      if (hasStack) {
+        targetMax = 5 // Move to TODO
+        if (hasTodo) {
+          targetMax = 6 // Move to Generate
+        }
       }
     }
   }
-  if (targetMax > maxAccessibleStep.value) maxAccessibleStep.value = targetMax
+
+  if (targetMax > maxAccessibleStep.value) {
+      maxAccessibleStep.value = targetMax
+  }
 }
 
 const saveState = async () => {
@@ -177,7 +191,7 @@ const performReset = async () => {
 
   pData.name = ''
   pData.parent_folder = config.value?.default_parent_folder || ''
-  pData.stack = ''
+  pData.stack = []
   pData.stack_experience = config.value?.user_experience || ''
   pData.goal = ''
   pData.concept_md = ''
@@ -413,7 +427,7 @@ const nextStep = () => {
                 class="bg-cm-blue hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white px-10 py-2 rounded font-bold shadow-lg transition-all flex items-center"
                 title="Proceed to the next phase"
              >
-                {{ currentStep === 4 && !pData.stack.trim() ? 'Skip Stack' : 'Next Step >' }}
+                {{ currentStep === 4 && (!Array.isArray(pData.stack) ? !pData.stack.trim() : !pData.stack.length) ? 'Skip Stack' : 'Next Step >' }}
              </button>
         </div>
     </div>

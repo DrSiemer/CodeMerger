@@ -11,6 +11,23 @@ log = logging.getLogger("CodeMerger")
 class StarterApiPrompts:
     """API methods handling construction of prompts for the Project Starter."""
 
+    def _format_stack_for_prompt(self, stack_data):
+        if not stack_data:
+            return "No specific stack defined."
+        if isinstance(stack_data, str):
+            return stack_data.strip()
+        if isinstance(stack_data, list):
+            lines = []
+            for item in stack_data:
+                tech = item.get('tech', 'Unknown')
+                rat = item.get('rationale', '').strip()
+                if rat:
+                    lines.append(f"- {tech}: {rat}")
+                else:
+                    lines.append(f"- {tech}")
+            return "\n".join(lines)
+        return str(stack_data)
+
     def _get_base_project_content(self, project_data):
         # Prevents crashes if project_data is None
         if project_data is None:
@@ -91,7 +108,9 @@ class StarterApiPrompts:
         if not concept_md and project_data.get("concept_segments"):
             concept_md = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
 
-        stack = project_data.get("stack", "")
+        stack_raw = project_data.get("stack", "")
+        stack = self._format_stack_for_prompt(stack_raw)
+
         example_code = self._get_base_project_content(project_data)
         todo_template = self.get_todo_template() or "(Template not found)"
         valid_headers = [v for k, v in c.TODO_PHASES.items()]
@@ -112,7 +131,8 @@ class StarterApiPrompts:
         if project_data is None: project_data = {}
 
         name = project_data.get("name", "")
-        stack = project_data.get("stack", "")
+        stack_raw = project_data.get("stack", "")
+        stack = self._format_stack_for_prompt(stack_raw)
 
         concept = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if project_data.get("concept_segments") else project_data.get("concept_md", "")
         todo = self.assemble_starter_document(project_data["todo_segments"], c.TODO_ORDER, c.TODO_PHASES) if project_data.get("todo_segments") else project_data.get("todo_md", "")

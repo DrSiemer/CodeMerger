@@ -280,11 +280,11 @@
         },
         {
           "path": "src/api_parts/starter_api_prompts.py",
-          "tokens": 2142,
+          "tokens": 2320,
           "ignoreTokens": false,
-          "lines": 214,
-          "mtime": 1776188808.9157631,
-          "hash": "409780ea1cb5bdfd4c951b3fd022272feeafa2af"
+          "lines": 236,
+          "mtime": 1776547443.7622824,
+          "hash": "93c0a25d79c1451a4cc90c922a77971cb6668263"
         },
         {
           "path": "src/api_parts/starter_api_scaffold.py",
@@ -746,8 +746,11 @@
         },
         {
           "path": "frontend/src/components/starter-steps/Step4Stack.vue",
-          "tokens": 2244,
-          "ignoreTokens": false
+          "tokens": 3923,
+          "ignoreTokens": false,
+          "lines": 405,
+          "mtime": 1776546731.4141183,
+          "hash": "b2dbafbc333344fe064032dd90f66aa889e7c58f"
         },
         {
           "path": "frontend/src/components/starter-steps/Step5Todo.vue",
@@ -772,11 +775,11 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "tokens": 3762,
+          "tokens": 3905,
           "ignoreTokens": false,
-          "lines": 427,
-          "mtime": 1776501930.9181993,
-          "hash": "f8448689468c9a8147c54d673c95a4f8233fd4e8"
+          "lines": 441,
+          "mtime": 1776547443.823289,
+          "hash": "67c358e7e09f4f0bcefae810069101b1cd98337c"
         },
         {
           "path": "assets/reference/concept_questions.json",
@@ -884,7 +887,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 153101,
+      "total_tokens": 155101,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
