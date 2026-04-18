@@ -11,7 +11,8 @@ import OrderErrorModal from './OrderErrorModal.vue'
 const emit = defineEmits(['close'])
 const {
   activeProject, getFileTree, resizeWindow, updateProjectFiles,
-  copyOrderRequest, clearUnknownFiles, statusMessage, config
+  copyOrderRequest, clearUnknownFiles, statusMessage, config,
+  showOrderErrorModal, orderErrorMessage
 } = useAppState()
 
 const IGNORED_FOR_COMPLETENESS = ['__init__.py']

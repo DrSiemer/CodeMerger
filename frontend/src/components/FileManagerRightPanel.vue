@@ -4,7 +4,7 @@ import {
   Milestone, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
   ArrowDownUp
 } from 'lucide-vue-next'
-import { useAppState, showOrderErrorModal, orderErrorMessage } from '../composables/useAppState'
+import { useAppState } from '../composables/useAppState'
 
 const props = defineProps({
   listItems: Array,
@@ -23,7 +23,10 @@ const emit = defineEmits([
   'order-request'
 ])
 
-const { openFile, statusMessage, getClipboardText } = useAppState()
+const {
+  openFile, statusMessage, getClipboardText,
+  showOrderErrorModal, orderErrorMessage
+} = useAppState()
 const selectedIndices = ref(new Set())
 const lastSelectedIndex = ref(null)
 
@@ -135,14 +138,18 @@ const handlePasteOrder = async () => {
 
     const missingFiles = [...currentPathsSet].filter(p => !newPathsSet.has(p))
     const unknownFiles = [...newPathsSet].filter(p => !currentPathsSet.has(p))
+    const duplicates = newOrderList.filter((item, index) => newOrderList.indexOf(item) !== index)
 
-    if (missingFiles.length || unknownFiles.length) {
+    if (missingFiles.length || unknownFiles.length || duplicates.length) {
       let errorParts = []
       if (missingFiles.length) {
         errorParts.push(`Missing Files:\n${JSON.stringify(missingFiles.sort(), null, 2)}`)
       }
       if (unknownFiles.length) {
         errorParts.push(`Unknown Files:\n${JSON.stringify(unknownFiles.sort(), null, 2)}`)
+      }
+      if (duplicates.length) {
+        errorParts.push(`Duplicate Entries Found:\n${JSON.stringify([...new Set(duplicates)].sort(), null, 2)}`)
       }
 
       orderErrorMessage.value = errorParts.join('\n\n')
