@@ -151,7 +151,9 @@ const allReviewPaths = computed(() => {
 })
 
 const expandablePaths = computed(() => {
-  return allReviewPaths.value.filter(p => planFileStates.value[p] === 'pending')
+  const allNonSkipped = allReviewPaths.value.filter(p => planFileStates.value[p] !== 'skipped')
+  const pending = allNonSkipped.filter(p => planFileStates.value[p] === 'pending')
+  return pending.length > 0 ? pending : allNonSkipped
 })
 
 const isAllExpanded = computed(() => {

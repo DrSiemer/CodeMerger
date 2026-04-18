@@ -84,7 +84,7 @@ const onUndo = (path, type) => {
       <button
         @click="$emit('toggle-all-diffs')"
         class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
-        :title="isAllExpanded ? 'Close all open diffs' : 'Open all pending file diffs'"
+        :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs'"
       >
         <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-4 h-4" />
         <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>
@@ -173,7 +173,7 @@ const onUndo = (path, type) => {
       <button
         @click="$emit('toggle-all-diffs')"
         class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
-        :title="isAllExpanded ? 'Close all open diffs' : 'Open all pending file diffs'"
+        :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs'"
       >
         <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-4 h-4" />
         <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>

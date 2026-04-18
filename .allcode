@@ -204,7 +204,7 @@
           "tokens": 2774,
           "ignoreTokens": false,
           "lines": 329,
-          "mtime": 1776500579.6700366,
+          "mtime": 1776501881.145462,
           "hash": "efceabfaee8c24d70f2fdc2a47d564348ebd3083"
         },
         {
@@ -220,7 +220,7 @@
           "tokens": 738,
           "ignoreTokens": false,
           "lines": 88,
-          "mtime": 1776290446.7403133,
+          "mtime": 1776501879.9244275,
           "hash": "fbac6b1cec3762eef0d9c3581545626a8beae654"
         },
         {
@@ -297,7 +297,10 @@
         {
           "path": "src/api_parts/starter_api.py",
           "tokens": 155,
-          "ignoreTokens": false
+          "ignoreTokens": false,
+          "lines": 20,
+          "mtime": 1776501879.5628455,
+          "hash": "4783e467713853069be6559825b8a9a63512ef2b"
         },
         {
           "path": "src/api.py",
@@ -585,19 +588,19 @@
         },
         {
           "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-          "tokens": 4713,
+          "tokens": 1581,
           "ignoreTokens": false,
-          "lines": 326,
-          "mtime": 1776188575.5446973,
-          "hash": "2853d1a45b829e86e1a5cebe55d5f20380e3e784"
+          "lines": 184,
+          "mtime": 1776501381.8349926,
+          "hash": "1e74ca57488f869e60238b271c2dfd2d29306acb"
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "tokens": 3760,
+          "tokens": 3792,
           "ignoreTokens": false,
-          "lines": 415,
-          "mtime": 1776188575.5009382,
-          "hash": "4a2c6e927bd01fe1324af61bc7aa15881529b8fe"
+          "lines": 410,
+          "mtime": 1776501381.7856345,
+          "hash": "ac92edfa4ca3834d0e86bdac4762212a01bf672d"
         },
         {
           "path": "frontend/src/components/settings/SettingsAppTab.vue",
@@ -760,11 +763,11 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "tokens": 3693,
+          "tokens": 3643,
           "ignoreTokens": false,
-          "lines": 423,
-          "mtime": 1776173416.0608356,
-          "hash": "2c657926b715cc39cf3a476c004489635988f2c3"
+          "lines": 411,
+          "mtime": 1776501879.0240648,
+          "hash": "eef4862c66c3579de2eafcc5e2ca1646fc10d3cf"
         },
         {
           "path": "assets/reference/concept_questions.json",
@@ -872,7 +875,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 154715,
+      "total_tokens": 151565,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
