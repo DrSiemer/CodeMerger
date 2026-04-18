@@ -127,8 +127,10 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
   }
 
   if (rewriteIsMergedMode.value) {
-    props.pData.concept_baselines['__merged__'] = props.pData.concept_md
-    props.pData.concept_md = cleanContent
+    if (props.pData.concept_md !== cleanContent) {
+      props.pData.concept_baselines['__merged__'] = props.pData.concept_md
+      props.pData.concept_md = cleanContent
+    }
   } else {
     const parsed = await parseStarterSegments(cleanContent)
     if (!parsed || !Object.keys(parsed).length) {
@@ -139,9 +141,14 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
     const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
 
     for (const key in mapped) {
-      if (props.pData.concept_segments[key] !== undefined && !props.pData.concept_signoffs[key]) {
-        props.pData.concept_baselines[key] = props.pData.concept_segments[key]
-        props.pData.concept_segments[key] = mapped[key]
+      const oldVal = props.pData.concept_segments[key]
+      const newVal = mapped[key]
+
+      if (oldVal !== undefined && !props.pData.concept_signoffs[key]) {
+        if (oldVal !== newVal) {
+          props.pData.concept_baselines[key] = oldVal
+          props.pData.concept_segments[key] = newVal
+        }
       }
     }
   }

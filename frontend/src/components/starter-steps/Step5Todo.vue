@@ -141,8 +141,10 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
   }
 
   if (rewriteIsMergedMode.value) {
-    props.pData.todo_baselines['__merged__'] = props.pData.todo_md
-    props.pData.todo_md = cleanContent
+    if (props.pData.todo_md !== cleanContent) {
+      props.pData.todo_baselines['__merged__'] = props.pData.todo_md
+      props.pData.todo_md = cleanContent
+    }
   } else {
     const parsed = await parseStarterSegments(cleanContent)
     if (!parsed || !Object.keys(parsed).length) {
@@ -153,9 +155,14 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
     const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
 
     for (const key in mapped) {
-      if (props.pData.todo_segments[key] !== undefined && !props.pData.todo_signoffs[key]) {
-        props.pData.todo_baselines[key] = props.pData.todo_segments[key]
-        props.pData.todo_segments[key] = mapped[key]
+      const oldVal = props.pData.todo_segments[key]
+      const newVal = mapped[key]
+
+      if (oldVal !== undefined && !props.pData.todo_signoffs[key]) {
+        if (oldVal !== newVal) {
+          props.pData.todo_baselines[key] = oldVal
+          props.pData.todo_segments[key] = newVal
+        }
       }
     }
   }
