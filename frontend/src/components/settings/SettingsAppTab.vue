@@ -54,7 +54,7 @@ const { checkForUpdatesManual } = useSystem()
 
         <label class="flex items-center space-x-3 cursor-pointer" v-info="'set_app_compact'">
           <input type="checkbox" v-model="localConfig.enable_compact_mode_on_minimize" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
-          <span class="text-gray-200">Activate Compact Mode when main window is minimized</span>
+          <span class="text-gray-200">Always activate Compact Mode when main window is minimized</span>
         </label>
       </div>
     </section>

@@ -92,7 +92,7 @@ If you are running the built executable (`CodeMerger.exe`), you can use the foll
 ### Settings
 
 - **Application Updates**: Enable or disable the automatic daily check for new versions
-- **Window Behavior**: Disable the automatic compact mode when the main window is minimized
+- **Window Behavior**: Make Compact Mode the default status when the main window is minimized
 - **File System Monitoring**: Configure the automatic check for new files (enable/disable and set the check interval)
 - **Secret Scanning**: Enable a check for potential secrets (API keys, etc) that runs before copying code to the clipboard
 - **Prompts**:

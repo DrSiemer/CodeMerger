@@ -9,10 +9,10 @@
       "selected_files": [
         {
           "path": "README.md",
-          "mtime": 1774640635.7241569,
-          "hash": "c138249ef816cc662d4fe5eae3472cdd71415ab0",
-          "tokens": 1865,
-          "lines": 115
+          "mtime": 1776494189.7796519,
+          "hash": "b60e5c9a0260a2bf2f977ab162d9950958816a6c",
+          "tokens": 2080,
+          "lines": 128
         },
         {
           "path": "llm.md",
@@ -74,8 +74,8 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1776197413.058741,
-          "hash": "4612279d8a95459c90303d1b52ba0f7ea9a30802",
+          "mtime": 1776493970.8291297,
+          "hash": "fcfce49f7830e46501c905f2442cfbfb7eaa83fa",
           "tokens": 2959,
           "lines": 407,
           "ignore_tokens": false
@@ -96,8 +96,8 @@
         },
         {
           "path": "src/app_state.py",
-          "mtime": 1776187868.3785203,
-          "hash": "fbfdb8f4b838927acd10bd7940d9eaa647dc76df",
+          "mtime": 1776493970.6260648,
+          "hash": "4b4c34162132ee8540c18eceaad31c0d3cb1a314",
           "tokens": 1056,
           "lines": 120
         },
@@ -445,8 +445,11 @@
         },
         {
           "path": "frontend/src/utils/info/settingsInfo.js",
-          "tokens": 890,
-          "ignoreTokens": false
+          "tokens": 898,
+          "ignoreTokens": false,
+          "lines": 39,
+          "mtime": 1776494189.8546507,
+          "hash": "4d20241d0d67d26548670a8674fb8ed3692a8cf9"
         },
         {
           "path": "frontend/src/utils/info/starterInfo.js",
@@ -586,8 +589,11 @@
         },
         {
           "path": "frontend/src/components/settings/SettingsAppTab.vue",
-          "tokens": 1024,
-          "ignoreTokens": false
+          "tokens": 1025,
+          "ignoreTokens": false,
+          "lines": 82,
+          "mtime": 1776494189.813653,
+          "hash": "a70bfac61b91487614d38a7a859184dbd67ea57e"
         },
         {
           "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
@@ -854,7 +860,7 @@
           "hash": "98dcaef63fcf2e6afbbd69750e1533c100a024a1"
         }
       ],
-      "total_tokens": 148927,
+      "total_tokens": 149151,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

@@ -18,7 +18,7 @@ class AppState:
         self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)
-        self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', True)
+        self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', False)
 
         self.info_mode_active = self.config.get('info_mode_active', True)
 
@@ -70,7 +70,7 @@ class AppState:
         self.default_editor = self.config.get('default_editor', '')
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
         self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
-        self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', True)
+        self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', False)
         self.info_mode_active = self.config.get('info_mode_active', True)
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)

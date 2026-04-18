@@ -5,7 +5,7 @@ export const settingsInfo = {
   "set_app_interval": "Check Interval: How frequently CodeMerger scans the disk for changes. Lower values are more responsive, but may impact performance on slow drives.",
   "set_app_secrets": "Secret Scanning: Uses 'detect-secrets' to look for API keys or private credentials before you copy. Enable this to prevent accidentally sharing sensitive data with the language model.",
   "set_app_feedback": "AI Response Review: Automatically open the response review window when wrapped sections can be found.",
-  "set_app_compact": "Compact Mode: Automatically switches to the compact window when you minimize the main window. Useful for keeping CodeMerger easily accessible while working in your IDE.",
+  "set_app_compact": "Compact Mode: Automatically switches to the compact window whenever you minimize the main window. When enabled, the minimize button in the dashboard header switches behavior to minimize the application normally to the taskbar.",
   "set_app_updates": "Automatic Updates: Checks GitHub for a new version once per day.",
   "set_app_check_now": "Check Now: Manually trigger an update check to see if a newer version of CodeMerger is available on GitHub, bypassing the automatic daily timer.",
 
