@@ -17,6 +17,9 @@ class BaseApi:
         self.app_state = app_state
         self.project_manager = project_manager
 
+        # Transient state for restoring project after Starter session
+        self._previous_project_path = None
+
     def set_window_manager(self, mgr):
         """Links the Api to the central window orchestration logic"""
         self._window_manager = mgr

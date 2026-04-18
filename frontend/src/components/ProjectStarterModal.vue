@@ -73,10 +73,22 @@ const stepNames = {
   6: 'Generate'
 }
 
-useEscapeKey(() => emit('close'))
+const handleClose = async (wasCreated = false) => {
+  if (window.pywebview) {
+    await window.pywebview.api.on_starter_close(wasCreated)
+  }
+  emit('close')
+}
+
+useEscapeKey(() => handleClose())
 
 onMounted(async () => {
   await resizeWindow(1100, 850)
+
+  // Requirement: Deactivate current model and disable compact mode
+  if (window.pywebview) {
+    await window.pywebview.api.on_starter_open()
+  }
 
   conceptQuestionsMap.value = await getConceptQuestions()
   todoQuestionsMap.value = await getTodoQuestions()
@@ -201,6 +213,10 @@ const clearAll = async () => {
 
 const onProjectCreated = async (res) => {
   await performReset()
+  // Call API to signify project was created (Requirement: don't restore previous)
+  if (window.pywebview) {
+    await window.pywebview.api.on_starter_close(true)
+  }
   successScreenData.value = res
 }
 
@@ -334,7 +350,7 @@ const nextStep = () => {
             <div class="w-px h-6 bg-gray-600 mx-1"></div>
           </template>
 
-          <button id="btn-starter-exit" @click="emit('close')" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
+          <button id="btn-starter-exit" @click="handleClose(false)" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
             <LogOut class="w-4 h-4 mr-2" />
             <span class="text-xs font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
           </button>

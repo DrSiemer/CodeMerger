@@ -44,6 +44,9 @@ class WindowManager:
         # Latch to override minimize behavior for a single event
         self._override_compact_behavior = None
 
+        # Rule: Project Starter should never minimize to Compact Mode
+        self.is_starter_active = False
+
         self.start_time = time.time()
         self.MIN_SPLASH_DURATION = 0.4
 
@@ -247,6 +250,10 @@ class WindowManager:
 
     def _on_main_minimized(self):
         if self._transitioning or self._is_shutting_down: return
+
+        # Requirement: Project Starter should never minimize to Compact Mode
+        if self.is_starter_active:
+            return
 
         should_compact = self.api.app_state.config.get('enable_compact_mode_on_minimize', False)
 

@@ -201,11 +201,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2774,
+          "tokens": 2820,
           "ignoreTokens": false,
-          "lines": 329,
-          "mtime": 1776501881.145462,
-          "hash": "efceabfaee8c24d70f2fdc2a47d564348ebd3083"
+          "lines": 336,
+          "mtime": 1776501930.8050487,
+          "hash": "3c843b69ce368c0e69b8874f9360f1a6e59f4ec3"
         },
         {
           "path": "run_webview.py",
@@ -217,11 +217,11 @@
         },
         {
           "path": "src/api_parts/base_api.py",
-          "tokens": 738,
+          "tokens": 759,
           "ignoreTokens": false,
-          "lines": 88,
-          "mtime": 1776501879.9244275,
-          "hash": "fbac6b1cec3762eef0d9c3581545626a8beae654"
+          "lines": 91,
+          "mtime": 1776501930.8531036,
+          "hash": "af4bf72cfe9cbe9f85be1915e2fa2b7dbc1716ef"
         },
         {
           "path": "src/api_parts/window_api.py",
@@ -296,11 +296,11 @@
         },
         {
           "path": "src/api_parts/starter_api.py",
-          "tokens": 155,
+          "tokens": 343,
           "ignoreTokens": false,
-          "lines": 20,
-          "mtime": 1776501879.5628455,
-          "hash": "4783e467713853069be6559825b8a9a63512ef2b"
+          "lines": 43,
+          "mtime": 1776501930.8874934,
+          "hash": "d9850ce787f8f98014845237476c5b93d7e0d385"
         },
         {
           "path": "src/api.py",
@@ -763,11 +763,11 @@
         },
         {
           "path": "frontend/src/components/ProjectStarterModal.vue",
-          "tokens": 3643,
+          "tokens": 3762,
           "ignoreTokens": false,
-          "lines": 411,
-          "mtime": 1776501879.0240648,
-          "hash": "eef4862c66c3579de2eafcc5e2ca1646fc10d3cf"
+          "lines": 427,
+          "mtime": 1776501930.9181993,
+          "hash": "f8448689468c9a8147c54d673c95a4f8233fd4e8"
         },
         {
           "path": "assets/reference/concept_questions.json",
@@ -875,7 +875,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 151565,
+      "total_tokens": 151939,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

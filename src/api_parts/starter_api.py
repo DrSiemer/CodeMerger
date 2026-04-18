@@ -14,6 +14,29 @@ class StarterApi(
 ):
     """API methods concerning the comprehensive Project Starter feature pipeline."""
 
+    def on_starter_open(self):
+        """Initializes starter session: deactivates current project and disables compact mode."""
+        self._previous_project_path = self.app_state.active_directory
+        if self._previous_project_path:
+            # Requirements: Project Starter should deactivate the current model
+            self.load_project(None)
+
+        if self._window_manager:
+            self._window_manager.is_starter_active = True
+        return True
+
+    def on_starter_close(self, project_created=False):
+        """Finalizes starter session: restores previous project if needed and re-enables compact mode."""
+        if self._window_manager:
+            self._window_manager.is_starter_active = False
+
+        # Requirements: reactivate the project on close unless activating a created project
+        if not project_created and self._previous_project_path:
+            self.load_project(self._previous_project_path)
+
+        self._previous_project_path = None
+        return True
+
     def test(self):
         """A simple test method to verify the Vue -> Python bridge is working."""
         log.info("API test method called from Vue frontend.")
