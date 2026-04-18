@@ -265,7 +265,6 @@ class WindowManager:
             self._transitioning = True
             try:
                 self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-close-review"))')
-                self.main_window.hide()
                 self.show_compact()
             finally:
                 self._transitioning = False

@@ -1,8 +1,35 @@
 import webview
 import logging
+import sys
 from src import constants as c
 
 log = logging.getLogger("CodeMerger")
+
+def _set_skip_taskbar(title):
+    """
+    Win32 implementation to strip the taskbar button from the compact widget.
+    This ensures the app's taskbar presence remains anchored to the minimized Main Window.
+    """
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            # Using the window title to find the HWND
+            hwnd = ctypes.windll.user32.FindWindowW(None, title)
+            if hwnd:
+                GWL_EXSTYLE = -20
+                WS_EX_TOOLWINDOW = 0x00000080
+                WS_EX_APPWINDOW = 0x00040000
+
+                # Get current extended style
+                style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+
+                # WS_EX_TOOLWINDOW hides from taskbar and Alt-Tab
+                # WS_EX_APPWINDOW forces a taskbar button even for hidden/tool windows
+                new_style = (style & ~WS_EX_APPWINDOW) | WS_EX_TOOLWINDOW
+
+                ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, new_style)
+        except Exception as e:
+            log.debug(f"Failed to set skip taskbar style: {e}")
 
 def create_compact_window(manager):
     """Initializes the frameless compact widget window"""
@@ -58,6 +85,10 @@ def show_compact_window(manager):
     manager.compact_window.resize(w_phys, h_phys)
     manager.compact_window.move(exec_x_log, exec_y_log)
     manager.compact_window.show()
+
+    # Rule: Prevent taskbar icon jumping by ensuring the widget has no taskbar presence
+    _set_skip_taskbar("CM-Compact")
+
     manager.compact_window.restore()
 
     if manager.monitor: manager.monitor.update_window(manager.compact_window)
