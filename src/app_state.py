@@ -16,6 +16,8 @@ class AppState:
         # Prevent secondary instances from automatically loading the last project
         if is_second_instance:
             self.active_directory = ''
+            # Update local config dict so accidental saves don't immediately wipe the primary instance project
+            self.config['active_directory'] = ''
 
         self.recent_projects = self.config.get('user_lists', {}).get('recent_projects', [])
         self.default_editor = self.config.get('default_editor', '')
@@ -69,8 +71,33 @@ class AppState:
             self._save()
 
     def _save(self):
-        """Saves the current state back to the config file"""
-        save_config(self.config)
+        """
+        Saves the current state back to the config file with multi-instance reconciliation.
+        Ensures that interactions in one window do not wipe history from another.
+        """
+        # Reload the latest state from disk to preserve history (Recent Projects) added by other windows
+        disk_config = load_config()
+
+        # Apply settings from our current memory state.
+        # This ensures "Last Changed Wins" for active project and global preferences.
+        disk_config['active_directory'] = self.active_directory
+        disk_config['default_editor'] = self.default_editor
+        disk_config['scan_for_secrets'] = self.scan_for_secrets
+        disk_config['copy_merged_prompt'] = self.copy_merged_prompt
+        disk_config['last_update_check'] = self.last_update_check
+        disk_config['enable_compact_mode_on_minimize'] = self.enable_compact_mode_on_minimize
+        disk_config['info_mode_active'] = self.info_mode_active
+
+        # Preserve geometry if it was updated in our local config dict (e.g., during window move/resize)
+        if 'main_window_geom' in self.config:
+            disk_config['main_window_geom'] = self.config['main_window_geom']
+
+        # Sync history lists
+        disk_config.setdefault('user_lists', {})['recent_projects'] = self.recent_projects
+
+        save_config(disk_config)
+        # Update local memory dict to stay in sync with reconciled file
+        self.config = disk_config
 
     def reload(self):
         """Reloads the configuration from disk, e.g., after settings change"""

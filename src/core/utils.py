@@ -5,6 +5,8 @@ import hashlib
 import tiktoken
 import sys
 import ctypes
+import tempfile
+import time
 from pathlib import Path
 from ..core.paths import (
     CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH, PERSISTENT_DATA_DIR
@@ -192,8 +194,8 @@ def load_config():
 
 def save_config(config):
     """
-    Saves application configuration to disk
-    Operates on a copy to avoid mutating the in-memory object
+    Saves application configuration to disk using an atomic replacement.
+    This prevents file corruption or data loss in multi-instance environments.
     """
     export_data = config.copy()
 
@@ -204,11 +206,30 @@ def save_config(config):
 
     export_data['user_lists'] = user_lists_data
 
+    # Use atomic write pattern to prevent corruption during concurrent access
+    fd, temp_path = tempfile.mkstemp(dir=PERSISTENT_DATA_DIR, prefix='config_tmp_')
     try:
-        with open(CONFIG_FILE_PATH, 'w', encoding='utf-8') as f:
+        with os.fdopen(fd, 'w', encoding='utf-8') as f:
             json.dump(export_data, f, indent=2)
+
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                os.replace(temp_path, CONFIG_FILE_PATH)
+                temp_path = None
+                break
+            except PermissionError:
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep(0.1)
     except IOError as e:
         print(f"Error saving configuration: {e}")
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
 
 def update_and_get_new_filetypes():
     """

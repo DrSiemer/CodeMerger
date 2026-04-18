@@ -74,10 +74,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1776496208.0046153,
-          "hash": "47ceba44e7019f540b99036d62c62af3bac71913",
-          "tokens": 2820,
-          "lines": 384,
+          "mtime": 1776500579.595567,
+          "hash": "27720205e961b3ccdb45b94da9b499ab274a05aa",
+          "tokens": 2961,
+          "lines": 405,
           "ignore_tokens": false
         },
         {
@@ -96,10 +96,10 @@
         },
         {
           "path": "src/app_state.py",
-          "mtime": 1776500257.378853,
-          "hash": "1a59b714f4a748206535d4ce9c9b968b1ff3d9d7",
-          "tokens": 1104,
-          "lines": 128
+          "mtime": 1776500579.6346056,
+          "hash": "1adf420bd83f17994f3cad46c54cfd65c9828e15",
+          "tokens": 1407,
+          "lines": 155
         },
         {
           "path": "src/core/project_config.py",
@@ -201,11 +201,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2740,
+          "tokens": 2774,
           "ignoreTokens": false,
-          "lines": 326,
-          "mtime": 1776499419.5470717,
-          "hash": "bf3be7b8614a56159d3e1e1426d67882649b7f15"
+          "lines": 329,
+          "mtime": 1776500579.6700366,
+          "hash": "efceabfaee8c24d70f2fdc2a47d564348ebd3083"
         },
         {
           "path": "run_webview.py",
@@ -872,7 +872,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 154237,
+      "total_tokens": 154715,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

@@ -264,18 +264,21 @@ class WindowManager:
                 self._transitioning = False
 
     def _on_main_closing(self):
+        """Perform a final reconciled save of application state and geometry on shutdown"""
         if self._is_shutting_down: return
         self._is_shutting_down = True
         self._stop_failsafe.set()
 
         try:
+            # Sync final window geometry to internal config dict before reconciled save
             if self.main_last_x is not None and self.main_last_y is not None:
-                # Save only main window geometry since Compact coordinates are transient
                 self.api.app_state.config['main_window_geom'] = {
                     'x': int(self.main_last_x), 'y': int(self.main_last_y),
                     'w': int(self.main_last_w), 'h': int(self.main_last_h)
                 }
-                save_config(self.api.app_state.config)
+
+            # Execute reconciled save to implement "Last Closed Wins" for Active Project
+            self.api.app_state._save()
         except Exception: pass
 
         for win in [self.compact_window, self.splash_window]:
