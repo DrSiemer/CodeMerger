@@ -4,6 +4,7 @@ import fnmatch
 import hashlib
 import tiktoken
 import sys
+import ctypes
 from pathlib import Path
 from ..core.paths import (
     CONFIG_FILE_PATH, DEFAULT_FILETYPES_CONFIG_PATH, VERSION_FILE_PATH, PERSISTENT_DATA_DIR
@@ -25,7 +26,7 @@ _tiktoken_encoding = None
 
 def is_another_instance_running():
     """
-    Identifies active instances via Named Mutex on Windows or file lock on POSIX
+    Identifies active instances via Named Mutex on Windows
     Returns False if CM_DEV_MODE environment variable is active
     """
     global _instance_lock
@@ -33,43 +34,21 @@ def is_another_instance_running():
     if os.environ.get('CM_DEV_MODE') == '1':
         return False
 
-    if sys.platform == "win32":
-        try:
-            import ctypes
-            kernel32 = ctypes.windll.kernel32
+    try:
+        kernel32 = ctypes.windll.kernel32
+        mutex_name = "Global\\CodeMerger_Instance_Mutex_C06CFB28"
+        _instance_lock = kernel32.CreateMutexW(None, False, mutex_name)
 
-            mutex_name = "Global\\CodeMerger_Instance_Mutex_C06CFB28"
-
-            _instance_lock = kernel32.CreateMutexW(None, False, mutex_name)
-
-            if not _instance_lock:
-                return False
-
-            last_error = kernel32.GetLastError()
-            if last_error == 183:
-                return True
-
+        if not _instance_lock:
             return False
-        except Exception:
-            return False
-    else:
-        try:
-            import fcntl
 
-            lock_file_path = os.path.join(PERSISTENT_DATA_DIR, 'app.lock')
+        last_error = kernel32.GetLastError()
+        if last_error == 183:
+            return True
 
-            if not os.path.exists(PERSISTENT_DATA_DIR):
-                os.makedirs(PERSISTENT_DATA_DIR, exist_ok=True)
-
-            _instance_lock = open(lock_file_path, 'w')
-
-            try:
-                fcntl.lockf(_instance_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                return False
-            except (IOError, BlockingIOError):
-                return True
-        except Exception:
-            return False
+        return False
+    except Exception:
+        return False
 
 def strip_markdown_wrapper(text):
     """

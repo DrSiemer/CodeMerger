@@ -14,19 +14,14 @@ def get_bundle_dir():
 def get_persistent_data_dir():
     """
     Gets the directory for storing persistent data
-    Uses OS-appropriate paths for user configuration
+    Uses Windows APPDATA path for user configuration
     """
     if getattr(sys, 'frozen', False):
-        if sys.platform == "win32":
-            app_data_path = os.getenv('APPDATA')
-            if app_data_path:
-                config_dir = os.path.join(app_data_path, 'CodeMerger')
-            else:
-                config_dir = os.path.dirname(sys.executable)
-        elif sys.platform == "darwin":
-            config_dir = os.path.join(str(Path.home()), 'Library', 'Application Support', 'CodeMerger')
+        app_data_path = os.getenv('APPDATA')
+        if app_data_path:
+            config_dir = os.path.join(app_data_path, 'CodeMerger')
         else:
-            config_dir = os.path.join(str(Path.home()), '.config', 'CodeMerger')
+            config_dir = os.path.dirname(sys.executable)
 
         os.makedirs(config_dir, exist_ok=True)
         return config_dir

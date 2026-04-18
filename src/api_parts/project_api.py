@@ -167,12 +167,7 @@ class ProjectApi:
         if not path or not os.path.isdir(path):
             return False
         try:
-            if sys.platform == "win32":
-                os.startfile(path)
-            elif sys.platform == "darwin":
-                subprocess.Popen(["open", path])
-            else:
-                subprocess.Popen(["xdg-open", path])
+            os.startfile(path)
             return True
         except Exception as e:
             log.error(f"Failed to open path {path}: {e}")
@@ -181,9 +176,9 @@ class ProjectApi:
     def open_project_folder(self, is_ctrl=False, is_alt=False):
         """
         Handles folder icon interactions:
-        - Default: Opens the project root in File Explorer/Finder.
+        - Default: Opens the project root in File Explorer.
         - Ctrl: Copies the full path to the clipboard.
-        - Alt: Opens a clean command prompt in the project directory (Windows only).
+        - Alt: Opens a clean command prompt in the project directory.
         """
         project_path = self.app_state.active_directory
         if not project_path or not os.path.isdir(project_path):
@@ -191,37 +186,32 @@ class ProjectApi:
 
         if is_alt:
             try:
-                if sys.platform == "win32":
-                    # Environment scrubbing logic to ensure a clean shell
-                    new_env = os.environ.copy()
-                    venv_root = new_env.pop('VIRTUAL_ENV', None)
-                    new_env.pop('PYTHONHOME', None)
-                    new_env.pop('PYTHONPATH', None)
-                    new_env.pop('PROMPT', None)
+                # Environment scrubbing logic to ensure a clean shell
+                new_env = os.environ.copy()
+                venv_root = new_env.pop('VIRTUAL_ENV', None)
+                new_env.pop('PYTHONHOME', None)
+                new_env.pop('PYTHONPATH', None)
+                new_env.pop('PROMPT', None)
 
-                    purge_targets = []
-                    if venv_root: purge_targets.append(venv_root.lower())
-                    bundle_dir = getattr(sys, '_MEIPASS', None)
-                    if bundle_dir: bundle_dir_lower = bundle_dir.lower()
-                    else: bundle_dir_lower = ""
-                    exec_dir = os.path.dirname(sys.executable).lower()
+                bundle_dir = getattr(sys, '_MEIPASS', None)
+                if bundle_dir: bundle_dir_lower = bundle_dir.lower()
+                else: bundle_dir_lower = ""
+                exec_dir = os.path.dirname(sys.executable).lower()
 
-                    path_entries = new_env.get('PATH', '').split(os.pathsep)
-                    cleaned_entries = []
-                    for e in path_entries:
-                        low = e.lower()
-                        if (venv_root and low.startswith(venv_root.lower())) or \
-                           (bundle_dir_lower and low.startswith(bundle_dir_lower)) or \
-                           (low.startswith(exec_dir)):
-                            continue
-                        cleaned_entries.append(e)
+                path_entries = new_env.get('PATH', '').split(os.pathsep)
+                cleaned_entries = []
+                for e in path_entries:
+                    low = e.lower()
+                    if (venv_root and low.startswith(venv_root.lower())) or \
+                       (bundle_dir_lower and low.startswith(bundle_dir_lower)) or \
+                       (low.startswith(exec_dir)):
+                        continue
+                    cleaned_entries.append(e)
 
-                    new_env['PATH'] = os.pathsep.join(cleaned_entries)
+                new_env['PATH'] = os.pathsep.join(cleaned_entries)
 
-                    subprocess.Popen('cmd.exe', cwd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
-                    return "Opened clean console in project folder."
-                else:
-                    return "Terminal feature only available on Windows."
+                subprocess.Popen('cmd.exe', cwd=project_path, creationflags=subprocess.CREATE_NEW_CONSOLE, env=new_env)
+                return "Opened clean console in project folder."
             except Exception as e:
                 log.error(f"Failed to open console: {e}")
                 return f"Error opening console: {e}"
@@ -232,12 +222,7 @@ class ProjectApi:
             return "Project path copied to clipboard."
 
         try:
-            if sys.platform == "win32":
-                os.startfile(project_path)
-            elif sys.platform == "darwin":
-                subprocess.Popen(["open", project_path])
-            else:
-                subprocess.Popen(["xdg-open", project_path])
+            os.startfile(project_path)
             return "Opened project folder."
         except Exception as e:
             log.error(f"Failed to open folder: {e}")

@@ -5,6 +5,7 @@ import sys
 import subprocess
 import logging
 import tkinter as tk
+import ctypes
 from datetime import datetime
 from urllib import request, error
 from tkinter import messagebox
@@ -13,10 +14,19 @@ from ..core.paths import BUNDLE_DIR
 
 log = logging.getLogger("CodeMerger")
 
+def is_pid_running_win32(pid):
+    """Windows-specific PID check using kernel32"""
+    PROCESS_QUERY_INFORMATION = 0x0400
+    handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_INFORMATION, 0, pid)
+    if handle == 0:
+        return False
+    ctypes.windll.kernel32.CloseHandle(handle)
+    return True
+
 class Updater:
     """
-    Handles checking for application updates from a GitHub repository
-    Works for both Tkinter and PyWebView environments
+    Handles checking for application updates from a GitHub repository.
+    Strictly Windows-only implementation.
     """
     def __init__(self, parent, app_state, current_version):
         self.parent = parent
@@ -26,8 +36,8 @@ class Updater:
 
     def _get_dialog_parent(self):
         """
-        Creates a hidden temporary Tk root if no parent is available
-        Forces the hidden root to the top so messageboxes appear over Webview
+        Creates a hidden temporary Tk root if no parent is available.
+        Forces the hidden root to the top so messageboxes appear over Webview.
         """
         if self.parent and hasattr(self.parent, 'winfo_exists') and self.parent.winfo_exists():
             return self.parent
@@ -201,13 +211,9 @@ class Updater:
             pid = os.getpid()
             log.info(f"Starting update process. Current PID: {pid}. Updater: {updater_exe_path}. URL: {download_url}")
 
-            creationflags = 0
-            if sys.platform == "win32":
-                creationflags = subprocess.DETACHED_PROCESS
-
             subprocess.Popen(
                 [updater_exe_path, str(pid), download_url],
-                creationflags=creationflags,
+                creationflags=subprocess.DETACHED_PROCESS,
                 close_fds=True
             )
 

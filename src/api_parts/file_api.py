@@ -245,12 +245,7 @@ class FileApi:
             if editor and os.path.isfile(editor):
                 subprocess.Popen([editor, full_path])
             else:
-                if sys.platform == "win32":
-                    os.startfile(full_path)
-                elif sys.platform == "darwin":
-                    subprocess.Popen(["open", full_path])
-                else:
-                    subprocess.Popen(["xdg-open", full_path])
+                os.startfile(full_path)
             return True
         except Exception as e:
             log.error(f"Failed to open file {rel_path}: {e}")

@@ -143,8 +143,8 @@ const startDrag = async (e) => {
 
   if (e.altKey) {
     const res = await openProjectFolder({ ctrlKey: false, altKey: true })
-    if (res && (res.includes('Error') || res.includes('only available'))) {
-      triggerTitleError(res.includes('Windows') ? 'WIN ONLY' : 'CMD FAIL')
+    if (res && res.includes('Error')) {
+      triggerTitleError('CMD FAIL')
     }
     return
   }
