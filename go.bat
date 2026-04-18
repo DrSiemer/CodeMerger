@@ -66,7 +66,6 @@ goto :eof
 :DebugAction
     echo Starting CodeMerger in Production Debug Mode (DevTools enabled)
 
-
     REM Ensure frontend is built first
     if not exist "frontend\dist\index.html" (
         call :BuildFrontend
@@ -94,8 +93,9 @@ goto :eof
 :DevAction
     echo Starting Frontend and API concurrently
 
-
-    call npm run dev
+    cd frontend
+    call npm run dev-all
+    cd ..
     goto :eof
 
 :ApiAction
