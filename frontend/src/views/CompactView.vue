@@ -61,6 +61,14 @@ let statusCheckInterval = null, feedbackTimer = null, titleTimer = null
 
 const updatePendingStatus = async () => {
   if (!window.pywebview || !window.pywebview.api) return
+
+  // Synchronize local coordinates with the backend to prevent drag offsets/jumps
+  const pos = await window.pywebview.api.get_compact_window_pos()
+  if (pos) {
+    localWinX.value = pos.x
+    localWinY.value = pos.y
+  }
+
   const status = await checkPendingChanges()
   hasPendingChangesInternal.value = status.has_pending
   if (status.exists && !lastAiResponse.value) lastAiResponse.value = await claimLastPlan()
@@ -117,6 +125,11 @@ const handleOpenReview = async () => {
   }
 }
 
+const handleRestore = (e) => {
+  if (e.ctrlKey) closeApp()
+  else restoreMainWindow()
+}
+
 const handleManage = async () => {
   if (window.pywebview && window.pywebview.api) await window.pywebview.api.restore_main_window_and_trigger_fm()
 }
@@ -139,6 +152,7 @@ onMounted(async () => {
   window.addEventListener('blur', onBlur)
   window.addEventListener('cm-compact-paste', (e) => handlePaste({ ctrlKey: e.detail.isAuto }))
   window.addEventListener('cm-compact-copy', (e) => handleCopy({ ctrlKey: e.detail.codeOnly }))
+  window.addEventListener('cm-project-reloaded', updatePendingStatus)
   statusCheckInterval = setInterval(updatePendingStatus, 2000)
 })
 
@@ -183,7 +197,7 @@ const pasteTooltipText = computed(() => {
         <span class="text-[11px] font-mono font-bold tracking-widest px-1 rounded whitespace-nowrap overflow-hidden h-[18px] flex items-center pt-[1px] antialiased shrink-0 transition-colors duration-300" :style="{ color: activeProject.fontColor === 'dark' || titleOverride ? '#000000' : '#FFFFFF', backgroundColor: titleOverride ? '#DF2622' : (activeProject.color || '#666666') }">{{ titleAbbr }}</span>
       </div>
       <div class="flex items-center space-x-1.5 shrink-0 h-full">
-        <button @mousedown.stop @click="restoreMainWindow" class="text-gray-400 hover:text-white transition-colors flex items-center justify-center" title="Restore dashboard (Ctrl-Click: Exit)"><Expand class="w-4 h-4" /></button>
+        <button @mousedown.stop @click="handleRestore" class="text-gray-400 hover:text-white transition-colors flex items-center justify-center" title="Restore dashboard (Ctrl-Click: Exit)"><Expand class="w-4 h-4" /></button>
       </div>
     </div>
 
@@ -195,7 +209,7 @@ const pasteTooltipText = computed(() => {
             <div class="flex-grow flex justify-center pointer-events-none">
               <span class="text-[11px] font-mono font-bold w-5 rounded h-[18px] flex items-center justify-center antialiased shrink-0 transition-colors duration-300" :style="{ color: activeProject.fontColor === 'dark' || titleOverride ? '#000000' : '#FFFFFF', backgroundColor: titleOverride ? '#DF2622' : (activeProject.color || '#666666') }">{{ titleAbbr }}</span>
             </div>
-            <button @mousedown.stop @click="restoreMainWindow" class="text-gray-500 hover:text-white transition-colors flex items-center justify-center h-5 w-5 shrink-0"><Expand class="w-3.5 h-3.5" /></button>
+            <button @mousedown.stop @click="handleRestore" class="text-gray-500 hover:text-white transition-colors flex items-center justify-center h-5 w-5 shrink-0"><Expand class="w-3.5 h-3.5" /></button>
           </div>
           <CompactActionsUltra
             :is-copying="isCopying" :new-file-count="activeProject.newFileCount" :has-pending="hasPendingChangesInternal" :has-last-response="!!lastAiResponse" :paste-tooltip="pasteTooltipText"

@@ -132,11 +132,23 @@ class WindowApi:
 
     def get_compact_window_pos(self):
         """Returns logical coordinates for initializing JS drag logic"""
-        if self._window_manager:
-            x = self._window_manager.compact_mode_last_x
-            y = self._window_manager.compact_mode_last_y
-            if x is not None and y is not None:
-                return {'x': x, 'y': y}
+        mgr = self._window_manager
+        if not mgr:
+            return {'x': 0, 'y': 0}
+
+        # Primary: use the logical tracking variables if they have been initialized
+        if mgr.compact_mode_last_x is not None and mgr.compact_mode_last_y is not None:
+            return {'x': mgr.compact_mode_last_x, 'y': mgr.compact_mode_last_y}
+
+        # Fallback: Query live physical coordinates and convert to logical
+        if mgr.compact_window:
+            try:
+                xp, yp = mgr.compact_window.x, mgr.compact_window.y
+                if xp > -10000:
+                    scale = mgr._get_scale_factor()
+                    return {'x': xp / scale, 'y': yp / scale}
+            except Exception:
+                pass
 
         return {'x': 0, 'y': 0}
 
