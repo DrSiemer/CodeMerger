@@ -56,6 +56,11 @@ const { checkForUpdatesManual } = useSystem()
           <input type="checkbox" v-model="localConfig.enable_compact_mode_on_minimize" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
           <span class="text-gray-200">Always activate Compact Mode when main window is minimized</span>
         </label>
+
+        <label class="flex items-center space-x-3 cursor-pointer">
+          <input type="checkbox" v-model="localConfig.enable_ultra_compact_mode" class="w-4 h-4 bg-cm-input-bg border-gray-600 rounded text-cm-blue focus:ring-cm-blue">
+          <span class="text-gray-200">Enable Ultra Compact Mode (Minimalist single row)</span>
+        </label>
       </div>
     </section>
 

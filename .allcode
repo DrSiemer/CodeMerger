@@ -46,10 +46,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776200361.0688426,
-          "hash": "38add8b2761b1572222ba0098bb4d9e9a811c2be",
-          "tokens": 1936,
-          "lines": 231
+          "mtime": 1776618858.4457946,
+          "hash": "877020815d788f180d7087a4b2f0272b5fe55805",
+          "tokens": 1960,
+          "lines": 233
         },
         {
           "path": "default_filetypes.json",
@@ -74,10 +74,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1776602514.3412175,
-          "hash": "eaa3c3ae40cacf000ca4e826b7423ed0a9dee743",
-          "tokens": 2969,
-          "lines": 406,
+          "mtime": 1776616804.9939244,
+          "hash": "90b749cc13b475b9b8a164d71d0f9b7b2bdf624a",
+          "tokens": 2980,
+          "lines": 407,
           "ignore_tokens": false
         },
         {
@@ -96,10 +96,10 @@
         },
         {
           "path": "src/app_state.py",
-          "mtime": 1776603092.320247,
-          "hash": "4ced2efaa5cfdb50d5c772802ade2bfd025d1cee",
-          "tokens": 1453,
-          "lines": 158
+          "mtime": 1776616805.0373132,
+          "hash": "2fa2f05831054144174ae5524e42729aad0b7081",
+          "tokens": 1517,
+          "lines": 161
         },
         {
           "path": "src/core/project_config.py",
@@ -193,11 +193,11 @@
         },
         {
           "path": "src/core/window_compact.py",
-          "tokens": 957,
+          "tokens": 1026,
           "ignoreTokens": false,
-          "lines": 94,
-          "mtime": 1776502156.4912665,
-          "hash": "7417639eaa32e3b7b8a181530b38c34aa1392de1"
+          "lines": 98,
+          "mtime": 1776617080.426736,
+          "hash": "b93d247639f194e15e42168c96ee7c2bee2c6e9b"
         },
         {
           "path": "src/core/window_manager.py",
@@ -488,11 +488,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 3916,
+          "tokens": 4965,
           "ignoreTokens": false,
-          "lines": 486,
-          "mtime": 1776496207.828598,
-          "hash": "c214aa28a60f6db54205d01fefa803c322de7fc6"
+          "lines": 587,
+          "mtime": 1776619062.252086,
+          "hash": "82a43e19026cd50a4298efe0a0e2115ca57da29e"
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -610,11 +610,11 @@
         },
         {
           "path": "frontend/src/components/settings/SettingsAppTab.vue",
-          "tokens": 1025,
+          "tokens": 1114,
           "ignoreTokens": false,
-          "lines": 82,
-          "mtime": 1776494189.813653,
-          "hash": "a70bfac61b91487614d38a7a859184dbd67ea57e"
+          "lines": 87,
+          "mtime": 1776617080.5781024,
+          "hash": "7520d8710d2cfb2296bfc431c42ab940619b4618"
         },
         {
           "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
@@ -904,7 +904,7 @@
           "hash": "c71269a7eace7b12851b6c782ff99fa40fe044f4"
         }
       ],
-      "total_tokens": 159672,
+      "total_tokens": 160978,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

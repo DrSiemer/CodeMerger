@@ -270,10 +270,17 @@ const handleNewFilesClick = async () => {
   }
 }
 
+const isUltra = computed(() => config.value.enable_ultra_compact_mode ?? false)
+
 const titleAbbr = computed(() => {
   if (titleOverride.value) return titleOverride.value
 
   const name = activeProject.name || 'CodeMerger'
+
+  if (isUltra.value) {
+    return name.charAt(0).toUpperCase()
+  }
+
   const maxLen = 8
   const chars = [...name]
 
@@ -321,6 +328,7 @@ const pasteTooltipText = computed(() => {
   <div id="compact-view" class="h-full flex flex-col bg-cm-dark-bg border border-gray-600 select-none overflow-hidden font-sans">
     <!-- Header Draggable Bar -->
     <div
+      v-if="!isUltra"
       id="compact-move-bar"
       class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move"
       @mousedown="startDrag"
@@ -344,7 +352,7 @@ const pasteTooltipText = computed(() => {
           @mousedown.stop
           @click="handleClose"
           class="text-gray-400 hover:text-white transition-colors flex items-center justify-center"
-          title="Restore dashboard (Ctrl-Click to exit application)"
+          title="Restore dashboard (Ctrl-Click: Exit application)"
         >
           <Expand class="w-4 h-4" />
         </button>
@@ -355,65 +363,158 @@ const pasteTooltipText = computed(() => {
     <div id="compact-content-root" class="relative flex-grow">
 
       <!-- Action Buttons Layer -->
-      <div id="compact-actions" class="flex flex-col p-1.5 space-y-1.5 transition-opacity duration-200" :class="{ 'opacity-0 pointer-events-none': feedback.active }">
+      <div id="compact-actions" class="flex flex-col transition-opacity duration-200" :class="{ 'opacity-0 pointer-events-none': feedback.active, 'p-1.5 space-y-1.5': !isUltra, 'p-1 pb-0 items-center space-y-1': isUltra }">
 
-        <!-- Copy/New Files Button Group -->
-        <div class="flex items-center space-x-1.5 h-8">
-          <button
-            id="btn-compact-copy"
-            @click="handleCopy($event)"
-            :disabled="isCopying"
-            class="flex-grow text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
-            :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
-            title="Copy Prompt (Ctrl-Click for Code Only)"
-          >
-            <Loader2 v-if="isCopying" class="w-3.5 h-3.5 animate-spin" />
-            <span v-else class="truncate px-1">Copy Prompt</span>
-          </button>
+        <!-- ULTRA COMPACT BLOCK -->
+        <div v-if="isUltra" class="flex flex-col w-full">
+          <!-- Draggable Header -->
+          <div class="h-6 flex items-center px-1 cursor-move mb-0.5" @mousedown="startDrag">
+            <img v-if="appIcon" :src="appIcon" class="w-4 h-4 shrink-0 pointer-events-none mr-1" />
 
-          <!-- New Files Indicator -->
-          <button
-            v-if="activeProject.newFileCount > 0"
-            @click="handleNewFilesClick"
-            class="bg-gray-800 hover:bg-gray-700 text-cm-green w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
-            title="New files detected! Click to manage."
-          >
-            <AlertTriangle class="w-4 h-4 animate-pulse" />
-          </button>
-        </div>
+            <div class="flex-grow flex justify-center pointer-events-none">
+              <span
+                class="text-[11px] font-mono font-bold w-5 rounded h-[18px] flex items-center justify-center antialiased shrink-0 transition-colors duration-300"
+                :style="{
+                  color: activeProject.fontColor === 'dark' || titleOverride ? '#000000' : '#FFFFFF',
+                  backgroundColor: titleOverride ? '#DF2622' : (activeProject.color || '#666666')
+                }"
+              >
+                {{ titleAbbr }}
+              </span>
+            </div>
 
-        <!-- Paste & Review Logic Row -->
-        <div class="w-full flex items-center space-x-1.5">
-          <div class="relative flex-grow flex h-8">
             <button
-              id="btn-compact-paste"
-              @click="handlePaste($event)"
-              class="w-full text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-full"
-              :class="hasPendingChangesInternal ? 'bg-[#DE6808]' : 'bg-cm-green hover:bg-green-600'"
-              :title="pasteTooltipText"
+              @mousedown.stop
+              @click="handleClose"
+              class="text-gray-500 hover:text-white transition-colors flex items-center justify-center h-5 w-5 shrink-0"
+              title="Restore dashboard"
             >
-              <span>Paste</span>
-            </button>
-            <button
-              v-if="hasPendingChangesInternal"
-              @click.stop="handleClear"
-              class="absolute top-0.5 right-0.5 p-0.5 text-white/50 hover:text-white transition-colors"
-              title="Clear unapplied response"
-            >
-              <Trash2 class="w-3 h-3" />
+              <Expand class="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <button
-            id="btn-compact-review"
-            v-if="lastAiResponse"
-            @click="handleOpenReview"
-            class="bg-gray-800 hover:bg-gray-700 text-white w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
-            title="View response review"
-          >
-            <Eye class="w-3.5 h-3.5" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
-          </button>
+          <!-- Action Rows -->
+          <div class="flex flex-col items-center space-y-1 w-full px-0.5">
+            <!-- Row C -->
+            <div class="flex items-center gap-1 w-full max-w-[64px]">
+              <div class="relative flex-grow">
+                <button
+                  @click="handleCopy($event)"
+                  @mousedown.stop
+                  :disabled="isCopying"
+                  class="w-full bg-cm-blue hover:bg-blue-500 text-white h-6 rounded flex items-center justify-center transition-all active:scale-95 disabled:opacity-50 text-[11px] font-black leading-none"
+                  title="Copy Prompt with Instructions (Ctrl-Click: Code Only)"
+                >
+                  <Loader2 v-if="isCopying" class="w-3 h-3 animate-spin" />
+                  <span v-else>C</span>
+                </button>
+              </div>
+              <button
+                v-if="activeProject.newFileCount > 0"
+                @click="handleNewFilesClick"
+                @mousedown.stop
+                class="bg-gray-800 hover:bg-gray-700 text-cm-green w-6 h-6 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0"
+                title="New files detected! Click to manage."
+              >
+                <AlertTriangle class="w-3.5 h-3.5 animate-pulse" />
+              </button>
+            </div>
+
+            <!-- Row P -->
+            <div class="flex items-center gap-1 w-full max-w-[64px]">
+              <div class="relative flex-grow">
+                <button
+                  @click="handlePaste($event)"
+                  @mousedown.stop
+                  class="w-full text-white h-6 rounded flex items-center justify-center transition-all active:scale-95 text-[11px] font-black leading-none"
+                  :class="hasPendingChangesInternal ? 'bg-[#DE6808]' : 'bg-cm-green hover:bg-green-600'"
+                  :title="pasteTooltipText"
+                >
+                  <span>P</span>
+                </button>
+                <button
+                  v-if="hasPendingChangesInternal"
+                  @click.stop="handleClear"
+                  @mousedown.stop
+                  class="absolute -top-1 -right-1 p-0.5 bg-gray-900 rounded-full text-white/70 hover:text-white shadow-sm border border-gray-700 transition-colors"
+                  title="Clear unapplied response"
+                >
+                  <Trash2 class="w-2 h-2" />
+                </button>
+              </div>
+              <button
+                v-if="lastAiResponse"
+                @click="handleOpenReview"
+                @mousedown.stop
+                class="w-6 h-6 rounded flex items-center justify-center transition-all active:scale-95 bg-gray-800 text-gray-400 hover:text-white shrink-0"
+                title="View response review"
+              >
+                <Eye class="w-3.5 h-3.5" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
+              </button>
+            </div>
+          </div>
         </div>
+
+        <!-- STANDARD COMPACT LAYOUT -->
+        <template v-else>
+          <!-- Copy/New Files Button Group -->
+          <div class="flex items-center space-x-1.5 h-8">
+            <button
+              id="btn-compact-copy"
+              @click="handleCopy($event)"
+              :disabled="isCopying"
+              class="flex-grow text-[11px] font-bold py-1.5 rounded shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-50 active:scale-95 leading-tight h-8"
+              :class="activeProject.hasInstructions ? 'bg-cm-blue hover:bg-blue-500 text-white' : 'bg-gray-300 hover:bg-gray-200 text-gray-900'"
+              title="Copy with Instructions (Ctrl-Click: Code Only)"
+            >
+              <Loader2 v-if="isCopying" class="w-3.5 h-3.5 animate-spin" />
+              <span v-else class="truncate px-1">Copy Prompt</span>
+            </button>
+
+            <!-- New Files Indicator -->
+            <button
+              v-if="activeProject.newFileCount > 0"
+              @click="handleNewFilesClick"
+              class="bg-gray-800 hover:bg-gray-700 text-cm-green w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
+              title="New files detected! Click to manage."
+            >
+              <AlertTriangle class="w-4 h-4 animate-pulse" />
+            </button>
+          </div>
+
+          <!-- Paste & Review Logic Row -->
+          <div class="w-full flex items-center space-x-1.5">
+            <div class="relative flex-grow flex h-8">
+              <button
+                id="btn-compact-paste"
+                @click="handlePaste($event)"
+                class="w-full text-white font-bold py-1.5 rounded text-[11px] transition-all active:scale-95 shadow h-full"
+                :class="hasPendingChangesInternal ? 'bg-[#DE6808]' : 'bg-cm-green hover:bg-green-600'"
+                :title="pasteTooltipText"
+              >
+                <span>Paste</span>
+              </button>
+              <button
+                v-if="hasPendingChangesInternal"
+                @click.stop="handleClear"
+                class="absolute top-0.5 right-0.5 p-0.5 text-white/50 hover:text-white transition-colors"
+                title="Clear unapplied response"
+              >
+                <Trash2 class="w-3 h-3" />
+              </button>
+            </div>
+
+            <button
+              id="btn-compact-review"
+              v-if="lastAiResponse"
+              @click="handleOpenReview"
+              class="bg-gray-800 hover:bg-gray-700 text-white w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
+              title="View response review"
+            >
+              <Eye class="w-3.5 h-3.5" :class="hasPendingChangesInternal ? 'text-[#DE6808]' : 'text-gray-400'" />
+            </button>
+          </div>
+        </template>
       </div>
 
       <!-- Transient Feedback Layer -->

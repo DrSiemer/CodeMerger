@@ -105,6 +105,7 @@ def _get_default_config_dict():
         'token_count_enabled': TOKEN_COUNT_ENABLED_DEFAULT,
         'token_limit': 0,
         'enable_compact_mode_on_minimize': False,
+        'enable_ultra_compact_mode': False,
         'add_all_warning_threshold': ADD_ALL_WARNING_THRESHOLD_DEFAULT,
         'new_file_alert_threshold': NEW_FILE_ALERT_THRESHOLD_DEFAULT,
         'show_feedback_on_paste': True,

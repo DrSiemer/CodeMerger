@@ -56,8 +56,12 @@ def show_compact_window(manager):
     scale = manager._get_scale_factor(h_mon)
     m_l, m_t, m_r, m_b = manager._get_monitor_work_area_phys(h_mon)
 
-    w_phys = int(c.COMPACT_WINDOW_WIDTH_LOGICAL * scale)
-    h_phys = int(c.COMPACT_WINDOW_HEIGHT_LOGICAL * scale)
+    is_ultra = manager.api.app_state.config.get('enable_ultra_compact_mode', False)
+    target_w_log = c.ULTRA_COMPACT_WINDOW_WIDTH_LOGICAL if is_ultra else c.COMPACT_WINDOW_WIDTH_LOGICAL
+    target_h_log = c.ULTRA_COMPACT_WINDOW_HEIGHT_LOGICAL if is_ultra else c.COMPACT_WINDOW_HEIGHT_LOGICAL
+
+    w_phys = int(target_w_log * scale)
+    h_phys = int(target_h_log * scale)
 
     if manager.compact_mode_last_x is not None and manager.compact_mode_last_y is not None:
         t_x_phys = int(manager.compact_mode_last_x * scale)

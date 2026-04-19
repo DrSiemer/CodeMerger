@@ -26,6 +26,7 @@ class AppState:
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', False)
+        self.enable_ultra_compact_mode = self.config.get('enable_ultra_compact_mode', False)
 
         self.info_mode_active = self.config.get('info_mode_active', True)
         self.enable_fast_apply = self.config.get('enable_fast_apply', True)
@@ -87,6 +88,7 @@ class AppState:
         disk_config['copy_merged_prompt'] = self.copy_merged_prompt
         disk_config['last_update_check'] = self.last_update_check
         disk_config['enable_compact_mode_on_minimize'] = self.enable_compact_mode_on_minimize
+        disk_config['enable_ultra_compact_mode'] = self.enable_ultra_compact_mode
         disk_config['info_mode_active'] = self.info_mode_active
         disk_config['enable_fast_apply'] = self.enable_fast_apply
 
@@ -108,6 +110,7 @@ class AppState:
         self.scan_for_secrets = self.config.get('scan_for_secrets', False)
         self.copy_merged_prompt = self.config.get('copy_merged_prompt', DEFAULT_COPY_MERGED_PROMPT)
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', False)
+        self.enable_ultra_compact_mode = self.config.get('enable_ultra_compact_mode', False)
         self.info_mode_active = self.config.get('info_mode_active', True)
         self.enable_fast_apply = self.config.get('enable_fast_apply', True)
         self.check_for_updates = get_setting('AutomaticUpdates', True)
