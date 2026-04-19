@@ -28,6 +28,10 @@ const {
 const isCopying = ref(false)
 const hasPendingChangesInternal = ref(false)
 
+// Synchronous position tracking to eliminate drag jitter
+const localWinX = ref(0)
+const localWinY = ref(0)
+
 // Feedback Banner State
 const feedback = reactive({
   active: false,
@@ -40,6 +44,7 @@ const titleOverride = ref(null)
 
 // Manual Window Dragging State
 let isDragging = false
+let ticking = false
 let startMouseX = 0
 let startMouseY = 0
 let startWinX = 0
@@ -105,6 +110,10 @@ onMounted(async () => {
   // Ensure app state is loaded if compact mode is entry point
   await init()
 
+  const pos = await window.pywebview.api.get_compact_window_pos()
+  localWinX.value = pos.x
+  localWinY.value = pos.y
+
   await updatePendingStatus()
 
   window.addEventListener('mousemove', onMouseMove)
@@ -128,7 +137,7 @@ onUnmounted(() => {
   if (titleTimer) clearTimeout(titleTimer)
 })
 
-const startDrag = async (e) => {
+const startDrag = (e) => {
   if (e.target.closest('button')) return
 
   const now = Date.now()
@@ -142,10 +151,9 @@ const startDrag = async (e) => {
   }
 
   if (e.altKey) {
-    const res = await openProjectFolder({ ctrlKey: false, altKey: true })
-    if (res && res.includes('Error')) {
-      triggerTitleError('CMD FAIL')
-    }
+    openProjectFolder({ ctrlKey: false, altKey: true }).then(res => {
+      if (res && res.includes('Error')) triggerTitleError('CMD FAIL')
+    })
     return
   }
 
@@ -153,21 +161,37 @@ const startDrag = async (e) => {
   startMouseX = e.screenX
   startMouseY = e.screenY
 
-  const pos = await window.pywebview.api.get_compact_window_pos()
-  startWinX = pos.x
-  startWinY = pos.y
+  // Use cached synchronous positions instead of an async bridge call to eliminate jitter
+  startWinX = localWinX.value
+  startWinY = localWinY.value
 
   isDragging = true
 }
 
 const onMouseMove = (e) => {
-  if (!isDragging) return
+  if (!isDragging || ticking) return
 
-  // Calculate deltas in pure logical pixels and maps 1:1 to the backend
-  const deltaXLogical = e.screenX - startMouseX
-  const deltaYLogical = e.screenY - startMouseY
+  ticking = true
+  requestAnimationFrame(() => {
+    if (!isDragging) {
+      ticking = false
+      return
+    }
 
-  window.pywebview.api.move_compact_window(startWinX + deltaXLogical, startWinY + deltaYLogical)
+    // Calculate deltas in pure logical pixels and maps 1:1 to the backend
+    const deltaXLogical = e.screenX - startMouseX
+    const deltaYLogical = e.screenY - startMouseY
+
+    const newX = startWinX + deltaXLogical
+    const newY = startWinY + deltaYLogical
+
+    // Update local cache immediately so the next frame is smooth
+    localWinX.value = newX
+    localWinY.value = newY
+
+    window.pywebview.api.move_compact_window(newX, newY)
+    ticking = false
+  })
 }
 
 const onMouseUp = () => {
