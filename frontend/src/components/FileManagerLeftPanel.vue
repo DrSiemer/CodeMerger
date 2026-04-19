@@ -162,27 +162,37 @@ const handleNodeClick = ({ node, event }) => {
 }
 
 const addSelected = async () => {
-  const paths = selectionAnalysis.value.toAdd
+  const analysis = selectionAnalysis.value
+  const paths = analysis.toAdd
   if (!paths || paths.length === 0) return
+
+  const isMixed = analysis.toRemove.length > 0
 
   for (const path of paths) {
     emit('toggle-select', path)
   }
 
-  multiSelectedPaths.value = new Set()
-  lastClickedPath.value = null
+  if (!isMixed) {
+    multiSelectedPaths.value = new Set()
+    lastClickedPath.value = null
+  }
 }
 
 const removeSelected = async () => {
-  const paths = selectionAnalysis.value.toRemove
+  const analysis = selectionAnalysis.value
+  const paths = analysis.toRemove
   if (!paths || paths.length === 0) return
+
+  const isMixed = analysis.toAdd.length > 0
 
   for (const path of paths) {
     emit('remove-select', path)
   }
 
-  multiSelectedPaths.value = new Set()
-  lastClickedPath.value = null
+  if (!isMixed) {
+    multiSelectedPaths.value = new Set()
+    lastClickedPath.value = null
+  }
 }
 
 defineExpose({ scrollToPath })
