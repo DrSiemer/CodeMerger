@@ -1,123 +1,59 @@
 <script setup>
-import { computed } from 'vue'
-import * as Diff from 'diff'
+import { ref, onMounted, watch } from 'vue'
 
 const props = defineProps({
-  oldText: {
-    type: String,
-    default: ''
-  },
-  newText: {
-    type: String,
-    default: ''
-  },
-  filename: {
-    type: String,
-    default: 'file'
-  },
-  fontSize: {
-    type: Number,
-    default: 13
-  },
-  fullContext: {
-    type: Boolean,
-    default: false
+  oldText: { type: String, default: '' },
+  newText: { type: String, default: '' },
+  filename: { type: String, default: 'file' },
+  fontSize: { type: Number, default: 13 },
+  fullContext: { type: Boolean, default: false }
+})
+
+const diffLines = ref([])
+const isLoading = ref(true)
+
+// Fetch the highlighted diff from the Python backend
+const loadDiff = async () => {
+  isLoading.value = true
+  if (window.pywebview) {
+    diffLines.value = await window.pywebview.api.get_syntax_diff(
+      props.oldText,
+      props.newText,
+      props.filename,
+      props.fullContext
+    )
+  }
+  isLoading.value = false
+}
+
+onMounted(() => {
+  loadDiff()
+
+  // Inject Pygments CSS globally if it hasn't been injected yet
+  if (window.pywebview && !document.getElementById('pygments-css')) {
+    window.pywebview.api.get_pygments_style().then(css => {
+      const style = document.createElement('style')
+      style.id = 'pygments-css'
+      style.innerHTML = css // Inject raw CSS
+      document.head.appendChild(style)
+    })
   }
 })
 
-const diffLines = computed(() => {
-  const oldStr = props.oldText || ''
-  const newStr = props.newText || ''
-
-  // --- FULL TEXT MODE (Used in Project Starter) ---
-  if (props.fullContext) {
-    const changes = Diff.diffLines(oldStr, newStr)
-    const rows = []
-
-    changes.forEach(part => {
-      const lines = part.value.split('\n')
-
-      // If the part ends with a newline, the last element of split is an empty string, created by the trailing newline. We remove it to avoid double-spacing blocks.
-      if (lines[lines.length - 1] === '') {
-        lines.pop()
-      }
-
-      lines.forEach(line => {
-        let type = 'context'
-        let prefix = ' '
-
-        if (part.added) {
-          type = 'add'
-          prefix = '+'
-        } else if (part.removed) {
-          type = 'remove'
-          prefix = '-'
-        }
-
-        rows.push({
-          prefix,
-          text: line,
-          type
-        })
-      })
-    })
-
-    return rows
-  }
-
-  // --- TRUNCATED DIFF MODE (Used in Dashboard / AI Response Review) ---
-  const patch = Diff.structuredPatch(
-    props.filename,
-    props.filename,
-    oldStr,
-    newStr,
-    '',
-    '',
-    { context: 3 }
-  )
-
-  if (!patch || patch.hunks.length === 0) {
-    return []
-  }
-
-  const rows = []
-
-  rows.push({ prefix: '---', text: props.filename, type: 'header' })
-  rows.push({ prefix: '+++', text: props.filename, type: 'header' })
-
-  patch.hunks.forEach(hunk => {
-    rows.push({
-      prefix: '@@',
-      text: `-${hunk.oldStart},${hunk.oldLines} +${hunk.newStart},${hunk.newLines} @@`,
-      type: 'header'
-    })
-
-    hunk.lines.forEach(line => {
-      const char = line[0]
-      const content = line.substring(1)
-      let type = 'context'
-
-      if (char === '+') type = 'add'
-      else if (char === '-') type = 'remove'
-
-      rows.push({
-        prefix: char,
-        text: content,
-        type: type
-      })
-    })
-  })
-
-  return rows
-})
+// Recalculate if the text changes (e.g., Undo/Redo)
+watch([() => props.oldText, () => props.newText], loadDiff)
 </script>
 
 <template>
   <div
-    class="bg-[#1A1A1A] border border-gray-700 rounded overflow-hidden font-mono leading-relaxed selectable h-fit"
+    class="bg-[#1A1A1A] border border-gray-700 rounded overflow-hidden font-mono leading-relaxed selectable h-fit highlight"
     :style="{ fontSize: fontSize + 'px' }"
   >
-    <div v-if="diffLines.length === 0" class="p-4 text-gray-500 italic">
+    <div v-if="isLoading" class="p-4 text-gray-500 italic">
+      Generating diff...
+    </div>
+
+    <div v-else-if="diffLines.length === 0" class="p-4 text-gray-500 italic">
       No changes detected in file content.
     </div>
 
@@ -127,18 +63,32 @@ const diffLines = computed(() => {
         :key="idx"
         class="flex min-w-0 border-b border-gray-800/30 last:border-0"
         :class="{
-          'bg-[#1e301e] text-[#a7f0a7]': line.type === 'add',
-          'bg-[#3a1e1e] text-[#f0a7a7]': line.type === 'remove',
-          'text-[#85b5d5] font-bold': line.type === 'header',
-          'text-gray-400': line.type === 'context'
+          'bg-[#1e301e]': line.type === 'add',       /* Dark Green Background */
+          'bg-[#3a1e1e]': line.type === 'remove',    /* Dark Red Background */
         }"
       >
-        <div class="w-10 shrink-0 text-center select-none opacity-50 border-r border-gray-800 mr-2 py-0.5">
+        <!-- The +/- Prefix -->
+        <div
+          class="w-10 shrink-0 text-center select-none border-r border-gray-800 mr-2 py-0.5"
+          :class="{
+            'text-[#a7f0a7]': line.type === 'add',
+            'text-[#f0a7a7]': line.type === 'remove',
+            'text-gray-600': line.type === 'context',
+            'text-[#85b5d5] font-bold': line.type === 'header'
+          }"
+        >
           {{ line.prefix }}
         </div>
-        <div class="whitespace-pre-wrap break-words px-2 py-0.5 flex-grow min-w-0">
-          {{ line.text || ' ' }}
-        </div>
+
+        <!-- The Rendered HTML from Pygments -->
+        <div
+          class="whitespace-pre-wrap break-words px-2 py-0.5 flex-grow min-w-0"
+          :class="{
+            'opacity-50': line.type === 'context',
+            'text-[#85b5d5] font-bold': line.type === 'header'
+          }"
+          v-html="line.html || ' '"
+        ></div>
       </div>
     </div>
   </div>

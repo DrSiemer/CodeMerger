@@ -30,11 +30,11 @@
         },
         {
           "path": "frontend/package.json",
-          "tokens": 294,
+          "tokens": 283,
           "ignoreTokens": false,
-          "lines": 29,
-          "mtime": 1776110899.6959877,
-          "hash": "e1e46a98df02767cf5093c48ba11ae918a646ad3"
+          "lines": 28,
+          "mtime": 1776599712.27271,
+          "hash": "2d56a2287bc34488a1cd158531cb84958dad508e"
         },
         {
           "path": "go.bat",
@@ -201,11 +201,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2868,
+          "tokens": 2951,
           "ignoreTokens": false,
-          "lines": 338,
-          "mtime": 1776502156.5363383,
-          "hash": "82c1711107015b6ee0e399fecbaf5af1bd1e7ec7"
+          "lines": 353,
+          "mtime": 1776600202.8165772,
+          "hash": "cae7da20ddaa27a625a08e870c8fe0825b46f101"
         },
         {
           "path": "run_webview.py",
@@ -262,11 +262,11 @@
         },
         {
           "path": "src/api_parts/changes_api.py",
-          "tokens": 2621,
+          "tokens": 2714,
           "ignoreTokens": false,
-          "lines": 277,
-          "mtime": 1776291131.145811,
-          "hash": "3aed8c93a69ab24650e9c623c87891bbba28478a"
+          "lines": 286,
+          "mtime": 1776599712.1889682,
+          "hash": "6a6db191384bb3be661976ef2c5705c047f0359c"
         },
         {
           "path": "src/api_parts/starter_api_session.py",
@@ -536,11 +536,11 @@
         },
         {
           "path": "frontend/src/components/DiffViewer.vue",
-          "tokens": 962,
+          "tokens": 797,
           "ignoreTokens": false,
-          "lines": 152,
-          "mtime": 1776192138.5885954,
-          "hash": "b7b66f1cd0cccde86f7fa88c1194c5389b488177"
+          "lines": 101,
+          "mtime": 1776600202.8980494,
+          "hash": "df70f9bd589e577b091f15a3e9d0296abba00062"
         },
         {
           "path": "frontend/src/components/FileTreeNode.vue",
@@ -888,9 +888,16 @@
           "hash": "1c527956cd20c258174e0faf87c76c5cb0ddf506",
           "tokens": 680,
           "lines": 100
+        },
+        {
+          "path": "src/core/highlighter.py",
+          "tokens": 818,
+          "lines": 80,
+          "mtime": 1776600202.859486,
+          "hash": "14c7c6d4a64dffa5cbe7765a66e9e32e84d666b7"
         }
       ],
-      "total_tokens": 154478,
+      "total_tokens": 155296,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -922,7 +929,9 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": []
+      "unknown_files": [
+        "src/core/highlighter.py"
+      ]
     }
   },
   "known_files": [
@@ -1037,6 +1046,7 @@
     "src/core/file_monitor_thread.py",
     "src/core/file_scanner.py",
     "src/core/file_tree_builder.py",
+    "src/core/highlighter.py",
     "src/core/logger.py",
     "src/core/merger.py",
     "src/core/paths.py",

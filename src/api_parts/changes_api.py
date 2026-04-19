@@ -3,6 +3,7 @@ import logging
 import pyperclip
 from src.core.utils import get_token_count_for_text, get_file_hash
 from src.core import change_applier
+from src.core.highlighter import get_highlighted_diff, get_pygments_css
 
 log = logging.getLogger("CodeMerger")
 
@@ -19,6 +20,14 @@ class ChangesApi:
 
         self._last_parsed_plan = plan
         return plan
+
+    def get_syntax_diff(self, old_text, new_text, filename, full_context=False):
+        """Called by Vue to fetch the syntax highlighted diff array."""
+        return get_highlighted_diff(old_text, new_text, filename, full_context)
+
+    def get_pygments_style(self):
+        """Called by Vue once on mount to inject the CSS."""
+        return get_pygments_css()
 
     def sync_plan_states(self, states):
         """
