@@ -71,9 +71,9 @@ INSTR_FULL_FILE = """NO CODE TRUNCATION (STRICT REQUIREMENT):
 
 INSTR_FAST_APPLY = """SURGICAL DIFFS (FAST APPLY):
    - Only output the specific changes using ORIGINAL/UPDATED blocks.
-   - **Baseline Awareness:** Always base your ORIGINAL blocks on the *evolved state* of the project. If a file was modified in previous turns of this conversation, use that modified version as your reference baseline.
-   - **Replace All Shortcut:** If you are replacing the ENTIRE content of a file (e.g., during a total rewrite or a file breakup), you may put `==ALL==` inside the ORIGINAL block instead of repeating the whole file verbatim.
-   - **Do not** use the initial source code from the start of the session as a reference if it has since been updated.
+   - **Baseline Awareness (STRICT REQUIREMENT):** Your reference for the ORIGINAL block MUST be the *current* state of the code as it exists *now*. If we have been editing a file throughout this session, the ORIGINAL block must reflect the code *after* your most recent modification.
+   - **EVOLUTIONARY CONTEXT:** Do NOT use the initial source code from the start of the conversation as a reference if it has since been modified. The evolved state is your new and only baseline.
+   - **Replace All Shortcut:** If you are replacing the ENTIRE content of a file, you may put `==ALL==` inside the ORIGINAL block instead of repeating the whole file verbatim.
    - The ORIGINAL section must match the current state of the code exactly (including indentation).
    - You can provide multiple blocks per file."""
 

@@ -75,16 +75,20 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
 3. **{mode_instruction}**
 
-4. **FUNCTIONAL PRESERVATION:**
+4. **EVOLVED BASELINE AWARENESS (SESSION CONTEXT):**
+   - You must acknowledge that the codebase evolves. If a file has been modified in previous turns of this conversation, that modified version is your only valid baseline for the ORIGINAL block.
+   - NEVER reference the initial code blocks from the start of the chat if they have been superceded by your own subsequent changes.
+
+5. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
    - NO SILENT REFACTORING: Do not "improve," "clean up," or "simplify" any code that is not directly related to the requested change. Leave unrelated logic and comments untouched.
 
-5. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
+6. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
    - ONLY output files that have actually been modified.
-   - If a file's final code is **byte-for-byte identical** to the original input provided in this prompt, **DO NOT** include it in your output.
+   - If a file's final code is **byte-for-byte identical** to the current state of the project, **DO NOT** include it in your output.
    - **UNCHANGED FILES (LAST RESORT ONLY):** If you feel a strict compulsion to acknowledge files you didn't modify, use the optional `<UNCHANGED>` block at the very end of your response. DO NOT output this block if you can simply stop yourself from outputting unchanged files. It is only here to prevent you from wasting tokens on unmodified code blocks.
 
-6. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
+7. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
 
 --- File: `path/to/file.ext` ---
@@ -95,7 +99,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
    - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
 
-7. **DELETE, VERIFICATION & UNCHANGED (POST-CODE):**
+8. **DELETE, VERIFICATION & UNCHANGED (POST-CODE):**
    Immediately following the final "--- End of file ---" marker, provide these sections:
 
    <DELETED FILES>
