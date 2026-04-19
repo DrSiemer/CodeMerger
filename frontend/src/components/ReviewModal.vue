@@ -256,6 +256,10 @@ const acceptChange = async (path, type) => {
     if (success) {
       planFileStates.value[path] = 'deleted'
       visibleDiffs.value.delete(path)
+
+      if (allReviewPaths.value.length === 1 && tabs.value.find(t => t.id === 'verification')) {
+        activeTab.value = 'verification'
+      }
     }
   } else {
     const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
@@ -266,6 +270,10 @@ const acceptChange = async (path, type) => {
     if (success) {
       planFileStates.value[path] = 'applied'
       visibleDiffs.value.delete(path)
+
+      if (allReviewPaths.value.length === 1 && tabs.value.find(t => t.id === 'verification')) {
+        activeTab.value = 'verification'
+      }
     }
   }
 }

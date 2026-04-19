@@ -80,6 +80,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **Async Search Request Sequencing**: `FileManagerModal.vue` uses a `lastRequestId` tracker. Responses from the Python backend are discarded if their ID is older than the current session query, preventing "reverting" UI results if a fast simple search finishes after a slow complex one.
 - **Windows MIME Type Overrides**: `run_webview.py` explicitly registers MIME types for `.js`, `.mjs`, and `.css` in the Python `mimetypes` module. This bypasses a common Windows registry bug where `.js` is mapped to `text/plain`, which would otherwise cause Chromium to refuse ES modules.
 - **Compact Mode Transient State**: Coordinates for the Compact Mode window are strictly transient. They must reset to `None` on every application startup. If `None`, the window centers on the main dashboard using Physical Pixel arithmetic.
+- **Single-Change Auto-Verification**: If an AI response proposes only a single file change (modification, creation, or deletion), accepting that change via the file list buttons will automatically switch the review window to the Verification tab. This reduces interaction friction for small updates.
 
 ### Build & Environment
 
