@@ -363,7 +363,7 @@ const pasteTooltipText = computed(() => {
     <div id="compact-content-root" class="relative flex-grow">
 
       <!-- Action Buttons Layer -->
-      <div id="compact-actions" class="flex flex-col transition-opacity duration-200" :class="{ 'opacity-0 pointer-events-none': feedback.active, 'p-1.5 space-y-1.5': !isUltra, 'p-1 pb-0 items-center space-y-1': isUltra }">
+      <div id="compact-actions" class="flex flex-col transition-opacity duration-200" :class="{ 'opacity-0 pointer-events-none': feedback.active, 'p-1.5 space-y-1.5': !isUltra, 'pt-0.5 px-1 pb-0 items-center space-y-1': isUltra }">
 
         <!-- ULTRA COMPACT BLOCK -->
         <div v-if="isUltra" class="flex flex-col w-full">

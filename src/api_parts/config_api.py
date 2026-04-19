@@ -28,6 +28,10 @@ class ConfigApi:
             self.app_state.config.update(new_config)
             save_config(self.app_state.config)
             self.app_state.reload()
+
+            if self._window_manager:
+                self._window_manager.on_config_changed(self.app_state.config)
+
             return True
         except Exception as e:
             log.error(f"Error saving config: {e}")

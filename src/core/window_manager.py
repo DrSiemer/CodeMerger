@@ -116,6 +116,26 @@ class WindowManager:
             except Exception as e:
                 log.debug(f"Failed to evaluate JS on compact window: {e}")
 
+    def on_config_changed(self, config_data):
+        """Called when global application settings are updated."""
+        self.broadcast_config_update(config_data)
+
+        # If compact window is active, re-trigger show logic to handle resize/positioning
+        if self.compact_window and not self.compact_window.hidden:
+            show_compact_window(self)
+
+    def broadcast_config_update(self, config_data):
+        """Pushes global config updates to all frontend contexts."""
+        if not self._handshake_received: return
+        js = f'window.dispatchEvent(new CustomEvent("cm-config-updated", {{ detail: {json.dumps(config_data)} }}))'
+
+        if self.main_window:
+            try: self.main_window.evaluate_js(js)
+            except Exception: pass
+        if self.compact_window:
+            try: self.compact_window.evaluate_js(js)
+            except Exception: pass
+
     def trigger_file_manager_in_main(self):
         """Forces the main window to open the File Manager."""
         if self.main_window:

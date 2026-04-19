@@ -201,11 +201,11 @@
         },
         {
           "path": "src/core/window_manager.py",
-          "tokens": 2951,
+          "tokens": 3126,
           "ignoreTokens": false,
-          "lines": 353,
-          "mtime": 1776600202.8165772,
-          "hash": "cae7da20ddaa27a625a08e870c8fe0825b46f101"
+          "lines": 373,
+          "mtime": 1776620222.7443328,
+          "hash": "87983dbad2a2f118946b46a6e3fe8ffee19460e8"
         },
         {
           "path": "run_webview.py",
@@ -233,8 +233,11 @@
         },
         {
           "path": "src/api_parts/config_api.py",
-          "tokens": 710,
-          "ignoreTokens": false
+          "tokens": 730,
+          "ignoreTokens": false,
+          "lines": 100,
+          "mtime": 1776620222.7028916,
+          "hash": "a5d273823926b1f0417132304720df7d45e50ffc"
         },
         {
           "path": "src/api_parts/project_api.py",
@@ -398,11 +401,11 @@
         },
         {
           "path": "frontend/src/composables/useAppState.js",
-          "tokens": 870,
+          "tokens": 893,
           "ignoreTokens": false,
-          "lines": 123,
-          "mtime": 1776291131.2258484,
-          "hash": "ed05318c10abfc5211cc91086fc4d5d4dd188c35"
+          "lines": 127,
+          "mtime": 1776620222.7877524,
+          "hash": "79b897c9f49d7ccf8adfc710f354ddd057148584"
         },
         {
           "path": "frontend/src/composables/useEscapeKey.js",
@@ -488,11 +491,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 4965,
+          "tokens": 4970,
           "ignoreTokens": false,
           "lines": 587,
-          "mtime": 1776619062.252086,
-          "hash": "82a43e19026cd50a4298efe0a0e2115ca57da29e"
+          "mtime": 1776620313.3382494,
+          "hash": "390da5a0e81adb4f5d5a4cc031bb27fdf3ba9959"
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -904,7 +907,7 @@
           "hash": "c71269a7eace7b12851b6c782ff99fa40fe044f4"
         }
       ],
-      "total_tokens": 161727,
+      "total_tokens": 161950,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

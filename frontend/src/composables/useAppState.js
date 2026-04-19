@@ -90,6 +90,10 @@ export function useAppState() {
           refreshProject(e.detail)
         })
 
+        window.addEventListener('cm-config-updated', (e) => {
+          globalState.config.value = e.detail
+        })
+
         window.addEventListener('cm-close-review', () => {
           globalState.showReviewModal.value = false
           globalState.revertToCompactOnClose.value = false
