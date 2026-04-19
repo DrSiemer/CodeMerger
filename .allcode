@@ -929,9 +929,7 @@
         "src/ui/settings",
         "src/ui/widgets"
       ],
-      "unknown_files": [
-        "src/core/highlighter.py"
-      ]
+      "unknown_files": []
     }
   },
   "known_files": [
