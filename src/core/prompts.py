@@ -72,6 +72,7 @@ INSTR_FULL_FILE = """NO CODE TRUNCATION (STRICT REQUIREMENT):
 INSTR_FAST_APPLY = """SURGICAL DIFFS (FAST APPLY):
    - Only output the specific changes using ORIGINAL/UPDATED blocks.
    - **Baseline Awareness:** Always base your ORIGINAL blocks on the *evolved state* of the project. If a file was modified in previous turns of this conversation, use that modified version as your reference baseline.
+   - **Replace All Shortcut:** If you are replacing the ENTIRE content of a file (e.g., during a total rewrite or a file breakup), you may put `==ALL==` inside the ORIGINAL block instead of repeating the whole file verbatim.
    - **Do not** use the initial source code from the start of the session as a reference if it has since been updated.
    - The ORIGINAL section must match the current state of the code exactly (including indentation).
    - You can provide multiple blocks per file."""
@@ -82,6 +83,14 @@ EXAMPLE_FAST_APPLY = """<<<<<<< ORIGINAL
 [existing code to replace]
 =======
 [new code]
+>>>>>>> UPDATED
+
+OR for total rewrites:
+
+<<<<<<< ORIGINAL
+==ALL==
+=======
+[entirely new file content]
 >>>>>>> UPDATED"""
 
 # Project Starter Prompt Templates
