@@ -100,15 +100,13 @@ def process_surgical_blocks(current_content, llm_content):
         re.DOTALL
     )
 
-    # Normalize internal line endings for processing
+    # Normalize BOTH inputs to LF immediately to prevent line-ending mismatches
     llm_content = llm_content.replace('\r\n', '\n').replace('\r', '\n')
+    working_content = current_content.replace('\r\n', '\n').replace('\r', '\n')
 
     matches = list(patch_regex.finditer(llm_content))
     if not matches:
         return llm_content # Fallback to Full-File if no blocks found
-
-    # Ensure the content we are patching is normalized to LF
-    working_content = current_content.replace('\r\n', '\n').replace('\r', '\n')
 
     for match in matches:
         old_code, new_code = match.groups()

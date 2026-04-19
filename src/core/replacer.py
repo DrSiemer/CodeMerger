@@ -20,8 +20,7 @@ def _clean_block(text):
     if not text:
         return ""
     text = text.replace('\r\n', '\n').replace('\r', '\n')
-    # Strip surrounding newlines but keep internal ones
-    return text.strip('\n')
+    return text.rstrip('\n').lstrip('\n')
 
 def _is_line_match(line_a, line_b, fuzzy=False):
     """Compares two lines, ignoring trailing whitespace and optionally indentation."""
@@ -54,7 +53,8 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
     content_lines = current_normalized.split('\n')
     old_lines = old_code.split('\n')
 
-    # Filter for lines that actually contain code
+    # Filter for lines that actually contain code.
+    # This allows us to jump over variable amounts of whitespace/blank lines between code blocks.
     significant_old_indices = [i for i, l in enumerate(old_lines) if l.strip()]
     if not significant_old_indices:
         raise ValueError("The 'ORIGINAL' block contains no code-bearing lines.")
@@ -65,12 +65,14 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
 
     # Scan the file for the sequence of significant lines
     for i in range(len(content_lines)):
+        # Check if the first non-empty line of the block matches the current line
         if _is_line_match(content_lines[i], old_lines[significant_old_indices[0]]):
             curr_idx = i
             matched_all = True
 
             for sig_idx in significant_old_indices[1:]:
                 found_next = False
+                # Search forward for the next significant line
                 for search_idx in range(curr_idx + 1, len(content_lines)):
                     if content_lines[search_idx].strip():
                         if _is_line_match(content_lines[search_idx], old_lines[sig_idx]):
@@ -78,6 +80,7 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
                             found_next = True
                             break
                         else:
+                            # We found code, but it's the wrong code. Match failed.
                             matched_all = False
                             break
 
