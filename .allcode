@@ -16,9 +16,9 @@
         },
         {
           "path": "llm.md",
-          "mtime": 1776593097.3459392,
-          "hash": "493d48c994004317cdee9233a56f09cf8633f7f3",
-          "tokens": 2249,
+          "mtime": 1776625987.3671112,
+          "hash": "5345901d73316044aaa2b4584ea08cc72db43c28",
+          "tokens": 2278,
           "lines": 89
         },
         {
@@ -605,11 +605,11 @@
         },
         {
           "path": "frontend/src/components/ReviewModal.vue",
-          "tokens": 5043,
+          "tokens": 5148,
           "ignoreTokens": false,
-          "lines": 537,
-          "mtime": 1776593097.4726784,
-          "hash": "7984a26a20dcdd6d7c152db7c24e77c3f9669b5e"
+          "lines": 544,
+          "mtime": 1776625854.3718617,
+          "hash": "56185ae4a4e7ad8b1bb1798560c7ec7ab262110a"
         },
         {
           "path": "frontend/src/components/settings/SettingsAppTab.vue",
@@ -935,7 +935,7 @@
           "hash": "c0e0fd41d1921c1b5864355cfff5fcb316a2b76b"
         }
       ],
-      "total_tokens": 162743,
+      "total_tokens": 162877,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

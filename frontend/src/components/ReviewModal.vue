@@ -151,39 +151,34 @@ watch(activeTab, (newTab) => {
 onMounted(async () => {
   await resizeWindow(1100, 850)
 
-  // Initialize history index to the latest entry
   if (allVerifications.value.length > 0) {
     selectedHistoryIndex.value = allVerifications.value.length - 1
   }
 
-  // Initialization: Logic for state-aware initial tab selection
   if (tabs.value.length > 0) {
     const tabIds = tabs.value.map(t => t.id)
 
-    if (props.mode === 'resume') {
-      // Priority 1: Unaccepted changes exist -> Changes Tab
+    // Priority 1: If work is complete and verification exists, go there (prevents Intro reset on re-mount)
+    if (tabIds.includes('verification') && !hasPendingChanges.value) {
+      activeTab.value = 'verification'
+    }
+    // Priority 2: Standard resume logic
+    else if (props.mode === 'resume') {
       if (hasPendingChanges.value && tabIds.includes('changes')) {
         activeTab.value = 'changes'
-      }
-      // Priority 2: Re-opened after acceptance -> Verification Tab
-      else if (tabIds.includes('verification')) {
+      } else if (tabIds.includes('verification')) {
         activeTab.value = 'verification'
-      }
-      // Fallback
-      else {
+      } else {
         activeTab.value = tabIds[0]
       }
-    } else {
-      // Priority 1: Default for new responses -> Intro Tab
+    }
+    // Priority 3: Default for new responses
+    else {
       if (tabIds.includes('intro')) {
         activeTab.value = 'intro'
-      }
-      // Priority 2: If no Intro but unformatted exists -> Unformatted
-      else if (hasUnformatted.value && !hasFormattingTags.value) {
+      } else if (hasUnformatted.value && !hasFormattingTags.value) {
         activeTab.value = 'unformatted'
-      }
-      // Fallback
-      else {
+      } else {
         activeTab.value = tabIds[0]
       }
     }
@@ -257,6 +252,7 @@ const acceptChange = async (path, type) => {
       planFileStates.value[path] = 'deleted'
       visibleDiffs.value.delete(path)
 
+      // Only auto-switch if this was the only file in the response (BY DESIGN)
       if (allReviewPaths.value.length === 1 && tabs.value.find(t => t.id === 'verification')) {
         activeTab.value = 'verification'
       }
@@ -271,6 +267,7 @@ const acceptChange = async (path, type) => {
       planFileStates.value[path] = 'applied'
       visibleDiffs.value.delete(path)
 
+      // Only auto-switch if this was the only file in the response (BY DESIGN)
       if (allReviewPaths.value.length === 1 && tabs.value.find(t => t.id === 'verification')) {
         activeTab.value = 'verification'
       }
@@ -307,7 +304,17 @@ const undoChange = async (path, type) => {
 
 const applyAllPending = async () => {
   const pending = Object.entries(planFileStates.value).filter(([p, s]) => s === 'pending')
-  for (const [path, state] of pending) {
+
+  const sortedPending = pending.sort(([pathA], [pathB]) => {
+    const getTypePriority = (path) => {
+      if (lastAiResponse.value.creations[path]) return 0
+      if (lastAiResponse.value.deletions_proposed.includes(path)) return 2
+      return 1
+    }
+    return getTypePriority(pathA) - getTypePriority(pathB)
+  })
+
+  for (const [path, state] of sortedPending) {
     let type = 'modify'
     if (lastAiResponse.value.creations[path]) type = 'create'
     else if (lastAiResponse.value.deletions_proposed.includes(path)) type = 'delete'
@@ -317,7 +324,7 @@ const applyAllPending = async () => {
 
   visibleDiffs.value.clear()
 
-  // Activate the Verification tab automatically after batch apply
+  // Always attempt to switch to verification after a bulk apply (BY DESIGN)
   if (tabs.value.find(t => t.id === 'verification')) {
     activeTab.value = 'verification'
   }
