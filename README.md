@@ -1,12 +1,14 @@
 # CodeMerger
 
-CodeMerger is a lightweight desktop application designed for developers who want to maintain absolute control over their code context when working with Large Language Models (LLMs). Instead of relying on AI-powered IDEs that silently scan your entire workspace, CodeMerger lets you explicitly hand-pick, order, and bundle specific files into a single, highly optimized text string that you can paste directly into your AI assistant of choice.
+**CodeMerger is a low-level, clipboard-based bridge designed to give developers absolute custody over their AI context.**
 
-By saving your file selections and instructions in a local `.allcode` file, you can easily resume your session or share the context configuration with your team.
+While modern AI-powered IDEs act as a "black box", silently scanning your workspace and sending hidden sequences of prompts to proprietary APIs, CodeMerger operates with total transparency. It is a zero-magic utility, that puts the raw power of context management literally in your hands.
+
+By using the clipboard as your bridge, you decouple your workflow from specific editors and expensive API credits, allowing you to leverage the world’s most powerful LLMs for free via their native web interfaces.
 
 ![Main application window](./dev/screenshot_01b.jpg "Main Application Window")
 
-*Tip: We recommend using CodeMerger with models like [Gemini Flash Latest](https://aistudio.google.com/prompts/new_chat?model=gemini-flash-latest), which has a generous free tier, with massive context windows capable of handling large code bundles.*
+*Tip: We recommend using CodeMerger with models like [Gemini Flash Latest](https://aistudio.google.com/prompts/new_chat?model=gemini-flash-latest), which has a generous free tier and a massive context window capable of handling large code bundles.*
 
 ## Download
 
@@ -16,11 +18,12 @@ Download the latest portable executable for Windows from the [Releases page](htt
 
 ## Key Features
 
-- **The "No-Chunking" Advantage**: By providing an LLM with full, unabridged source files, it eliminates hallucinations caused by missing context.
-- **Web-UI Optimized**: Specifically designed for a manual copy-paste workflow. This allows you to use the most powerful models for **FREE** through their standard web interfaces (like [Google AI Studio](https://aistudio.google.com/)) rather than paying for API credits or specialized IDE subscriptions.
-- **Closed-Loop AI Review**: Once the AI generates a response, paste it back into CodeMerger. The app automatically parses the output into navigable segments (Intro, Changes, Answers, Verification), allowing you to approve or reject file modifications using an interactive diff viewer before any code is written to disk.
-- **Guided Project Starter**: A structured, guided workflow for building new applications. It helps you and your LLM generate a cohesive concept, tech stack, and step-by-step TODO plan before scaffolding the boilerplate.
-- **Compact Widget**: Minimize the main window to activate a tiny, always-on-top panel. It handles the "Copy Context / Paste Changes" loop so you never have to leave your editor.
+- **Prompt Custody**: Nothing is hidden. You hand-pick the files, dictate their order, and wrap them in your own instructions. The final prompt is a transparent text string that you own and control.
+- **Unabridged Context**: No "chunking," no "vector embeddings," and no RAG hallucinations. You provide full source files to the LLM, ensuring it sees your code exactly as it exists on disk.
+- **Decoupled Workflow**: Specifically designed for a manual copy-paste loop. This allows you to use the most powerful models for **FREE** through their standard web interfaces (like [Google AI Studio](https://aistudio.google.com/)) rather than paying for API credits or specialized IDE subscriptions.
+- **Closed-Loop Transparency**: Once the AI responds, paste it back into CodeMerger. The app automatically parses the output into navigable segments, allowing you to review line-by-line diffs and approve changes before any code is written to disk.
+- **Guided Project Starter**: A structured workflow for building new applications. It guides you and your LLM through generating a cohesive concept, tech stack, and step-by-step TODO plan before scaffolding the boilerplate.
+- **Compact Widget**: Minimize the main window to activate an always-on-top panel. It handles the "Copy Context / Paste Changes" loop so you never have to leave your editor.
 
 ![File management](./dev/screenshot_03b.jpg "Merge List")
 
