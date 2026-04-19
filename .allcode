@@ -494,8 +494,8 @@
           "tokens": 2864,
           "ignoreTokens": false,
           "lines": 219,
-          "mtime": 1776625227.032112,
-          "hash": "73c076b9e1096764a74f66cf13976b4a60fcccdc"
+          "mtime": 1776626298.1566656,
+          "hash": "721780ef350e14dda307c466c76c333a25fe82f8"
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -931,7 +931,7 @@
           "path": "frontend/src/components/compact/CompactActionsUltra.vue",
           "tokens": 728,
           "lines": 73,
-          "mtime": 1776624999.9124992,
+          "mtime": 1776626355.6409497,
           "hash": "c0e0fd41d1921c1b5864355cfff5fcb316a2b76b"
         }
       ],

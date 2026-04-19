@@ -189,8 +189,8 @@ const pasteTooltipText = computed(() => {
 
     <div id="compact-content-root" class="relative flex-grow">
       <div id="compact-actions" class="flex flex-col transition-opacity duration-200" :class="{ 'opacity-0 pointer-events-none': feedback.active }">
-        <div v-if="isUltra" class="flex flex-col w-full">
-          <div class="h-6 flex items-center px-1 cursor-move mb-0.5" @mousedown="startDrag">
+        <div v-if="isUltra" class="flex flex-col w-full pt-0.5">
+          <div class="h-6 flex items-center px-1 cursor-move" @mousedown="startDrag">
             <img v-if="appIcon" :src="appIcon" class="w-4 h-4 shrink-0 pointer-events-none mr-1" />
             <div class="flex-grow flex justify-center pointer-events-none">
               <span class="text-[11px] font-mono font-bold w-5 rounded h-[18px] flex items-center justify-center antialiased shrink-0 transition-colors duration-300" :style="{ color: activeProject.fontColor === 'dark' || titleOverride ? '#000000' : '#FFFFFF', backgroundColor: titleOverride ? '#DF2622' : (activeProject.color || '#666666') }">{{ titleAbbr }}</span>
