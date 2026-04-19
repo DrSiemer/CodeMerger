@@ -491,11 +491,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 5348,
+          "tokens": 2864,
           "ignoreTokens": false,
-          "lines": 633,
-          "mtime": 1776620480.0010767,
-          "hash": "8045876476eace8b1a78beeca9004e13b54cdb94"
+          "lines": 219,
+          "mtime": 1776625227.032112,
+          "hash": "73c076b9e1096764a74f66cf13976b4a60fcccdc"
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -905,9 +905,37 @@
           "lines": 147,
           "mtime": 1776605217.4013128,
           "hash": "c71269a7eace7b12851b6c782ff99fa40fe044f4"
+        },
+        {
+          "path": "frontend/src/components/compact/CompactFeedbackOverlay.vue",
+          "tokens": 790,
+          "lines": 53,
+          "mtime": 1776625226.8859265,
+          "hash": "81a445546ef04bfe52f49bd5cbf7bef05c697caf"
+        },
+        {
+          "path": "frontend/src/composables/useCompactHandlers.js",
+          "tokens": 1221,
+          "lines": 157,
+          "mtime": 1776624543.5022354,
+          "hash": "ea60e0fa366e429798b5820f50324041db0cef88"
+        },
+        {
+          "path": "frontend/src/components/compact/CompactActionsStandard.vue",
+          "tokens": 733,
+          "lines": 70,
+          "mtime": 1776624999.8682308,
+          "hash": "d168c26e7d707ab00d16f5ad99b5e053ac2f7015"
+        },
+        {
+          "path": "frontend/src/components/compact/CompactActionsUltra.vue",
+          "tokens": 728,
+          "lines": 73,
+          "mtime": 1776624999.9124992,
+          "hash": "c0e0fd41d1921c1b5864355cfff5fcb316a2b76b"
         }
       ],
-      "total_tokens": 161755,
+      "total_tokens": 162743,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -979,6 +1007,9 @@
     "frontend/src/components/ProjectStarterModal.vue",
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
+    "frontend/src/components/compact/CompactActionsStandard.vue",
+    "frontend/src/components/compact/CompactActionsUltra.vue",
+    "frontend/src/components/compact/CompactFeedbackOverlay.vue",
     "frontend/src/components/dashboard/DashboardActions.vue",
     "frontend/src/components/dashboard/DashboardHeader.vue",
     "frontend/src/components/dashboard/DashboardNav.vue",
@@ -1006,6 +1037,7 @@
     "frontend/src/composables/globalState.js",
     "frontend/src/composables/infoMode.js",
     "frontend/src/composables/useAppState.js",
+    "frontend/src/composables/useCompactHandlers.js",
     "frontend/src/composables/useEscapeKey.js",
     "frontend/src/composables/useProject.js",
     "frontend/src/composables/useReview.js",
