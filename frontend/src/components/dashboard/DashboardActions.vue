@@ -81,17 +81,6 @@ const pasteTooltipText = computed(() => {
           <h2 class="text-[17px] font-medium text-white">Actions</h2>
 
           <div class="flex items-center space-x-3">
-            <!-- Mini Fast Apply Toggle -->
-            <button
-              @click="toggleFastApply"
-              v-info="'fast_apply_toggle'"
-              class="transition-all duration-300 p-1 rounded hover:bg-white/5"
-              :class="(config.enable_fast_apply ?? true) ? 'text-cm-blue' : 'text-gray-600'"
-              title="Toggle Fast Apply (Surgical Diffs)"
-            >
-              <Zap class="w-4 h-4" :fill="(config.enable_fast_apply ?? true) ? 'currentColor' : 'none'" />
-            </button>
-
             <button
               id="btn-comment-cleanup"
               @click="handleCleanup"
@@ -102,6 +91,17 @@ const pasteTooltipText = computed(() => {
               v-info="'cleanup'"
             >
               //
+            </button>
+
+            <!-- Mini Fast Apply Toggle -->
+            <button
+              @click="toggleFastApply"
+              v-info="'fast_apply_toggle'"
+              class="transition-all duration-300 p-1 rounded hover:bg-white/5"
+              :class="(config.enable_fast_apply ?? true) ? 'text-cm-blue' : 'text-gray-600'"
+              title="Toggle Fast Apply (Surgical Diffs)"
+            >
+              <Zap class="w-4 h-4" :fill="(config.enable_fast_apply ?? true) ? 'currentColor' : 'none'" />
             </button>
           </div>
         </div>
