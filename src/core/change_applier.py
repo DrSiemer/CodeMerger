@@ -40,7 +40,9 @@ def delete_single_file(base_dir, rel_path):
 
 def _sanitize_content(path, content):
     """
-    Normalizes content for writing and comparison. Aggressively stripping trailing whitespace ensures we don't get phantom diffs where invisible space differences from LLM outputs trigger false file changes.
+    Normalizes content for writing and comparison.
+    Aggressively stripping trailing whitespace ensures we don't get phantom diffs
+    where invisible space differences from LLM outputs trigger false file changes.
     """
     if not content:
         return ""
@@ -92,7 +94,7 @@ def execute_plan(base_dir, updates, creations, deletions=None):
     return True, msg + "."
 
 def process_surgical_blocks(current_content, llm_content):
-    """Parses MODO-style blocks and applies them via the Fuzzy Engine."""
+    """Parses ORIGINAL/UPDATED blocks and applies them via the Fuzzy Engine."""
     patch_regex = re.compile(
         r'<<<<<<< ORIGINAL[ \t]*\n(.*?)\n=======[ \t]*\n?(.*?)\n?>>>>>>> UPDATED',
         re.DOTALL
@@ -103,18 +105,15 @@ def process_surgical_blocks(current_content, llm_content):
 
     matches = list(patch_regex.finditer(llm_content))
     if not matches:
-        return llm_content # Fallback to Full-File
+        return llm_content # Fallback to Full-File if no blocks found
 
     # Ensure the content we are patching is normalized to LF
     working_content = current_content.replace('\r\n', '\n').replace('\r', '\n')
 
     for match in matches:
         old_code, new_code = match.groups()
-        try:
-            working_content, _ = apply_fuzzy_patch(working_content, old_code, new_code)
-        except ValueError as e:
-            # Inject a visible error into the file so the Pygments Diff Viewer shows it
-            working_content += f"\n/* FAST-APPLY ERROR: {str(e)} */\n"
+        # ValueError raised here will bubble up to parse_and_plan_changes
+        working_content, _ = apply_fuzzy_patch(working_content, old_code, new_code)
 
     return working_content
 
@@ -199,16 +198,23 @@ def parse_and_plan_changes(base_dir, markdown_text):
     files_to_create = {}
     skipped_files = []
 
+    failed_paths = []
     for match in file_block_regex.finditer(markdown_text):
         rel_path = match.group('path').strip().replace('\\', '/')
         llm_raw_content = match.group('content')
 
         current_disk_content = get_current_file_content(base_dir, rel_path)
-        if current_disk_content and "<<<<<<< ORIGINAL" in llm_raw_content:
-            final_assembled_content = process_surgical_blocks(current_disk_content, llm_raw_content)
-            sanitized_new = _sanitize_content(rel_path, final_assembled_content)
-        else:
-            sanitized_new = _sanitize_content(rel_path, llm_raw_content)
+
+        try:
+            if current_disk_content and "<<<<<<< ORIGINAL" in llm_raw_content:
+                # If patching fails, process_surgical_blocks raises ValueError
+                final_assembled_content = process_surgical_blocks(current_disk_content, llm_raw_content)
+                sanitized_new = _sanitize_content(rel_path, final_assembled_content)
+            else:
+                sanitized_new = _sanitize_content(rel_path, llm_raw_content)
+        except ValueError as e:
+            failed_paths.append((rel_path, str(e)))
+            continue
 
         all_blocks.append({
             'type': 'file',
@@ -299,6 +305,17 @@ def parse_and_plan_changes(base_dir, markdown_text):
         'ordered_segments': ordered_segments,
         'has_any_tags': any(b['type'] == 'tag' for b in all_blocks)
     }
+
+    if failed_paths:
+        # Construct detailed error for the UI
+        err_msg = "\n".join([f"- {p}: {e}" for p, e in failed_paths])
+        return {
+            'status': 'ERROR',
+            'error_type': 'FAST_APPLY',
+            'failed_paths': [p for p, e in failed_paths],
+            'message': f"Fast-Apply Error in {len(failed_paths)} file(s):\n{err_msg}",
+            'hint': "The AI is hallucinating old code. Click 'Copy Correction Prompt' to send the up-to-date source back to the AI."
+        }
 
     if not all_blocks:
         result['status'] = 'UNFORMATTED'

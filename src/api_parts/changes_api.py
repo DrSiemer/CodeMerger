@@ -247,13 +247,47 @@ class ChangesApi:
         return success, msg
 
     def copy_admonishment(self):
-        """Generates and copies a specialized prompt for corrected AI output format."""
+        """
+        Generates and copies a specialized prompt for corrected AI output.
+        If the last plan failed due to a Fast-Apply mismatch, it includes
+        the full source code of the affected files.
+        """
+        plan = self._last_parsed_plan
+
+        # Check if we have a specific Fast-Apply failure
+        if plan and plan.get('error_type') == 'FAST_APPLY' and plan.get('failed_paths'):
+            failed_paths = plan['failed_paths']
+            project_config = self.project_manager.get_current_project()
+
+            blocks = []
+            for rel_path in failed_paths:
+                content = self.get_file_content(rel_path)
+                if content is not None:
+                    from .file_api import FileApi
+                    from src.core.merger import get_language_from_path
+                    lang = get_language_from_path(rel_path)
+                    blocks.append(f"--- File: `{rel_path}` ---\n```{lang}\n{content}\n```\n--- End of file ---")
+
+            paths_str = ", ".join([f"`{p}`" for p in failed_paths])
+            msg = (
+                "The ORIGINAL code blocks you provided for surgical patching in the following files did not match my local source code exactly:\n"
+                f"{paths_str}\n\n"
+                "This usually happens because you are hallucinating old code or assuming context that has changed. "
+                "To ensure accuracy, please provide the FULL file content for the modified files.\n\n"
+                "Here is the current, up-to-date source code for the affected files:\n\n"
+                + "\n\n".join(blocks) + "\n\n"
+                "Please use this code to generate your update."
+            )
+            try:
+                pyperclip.copy(msg)
+                return f"Copied surgical correction prompt for {len(failed_paths)} file(s)."
+            except Exception:
+                return "Failed to copy prompt."
+
+        # Standard Format Admonishment
         LT, RT, PRE = "<", ">", "--- "
-        IN_T = "IN" + "TRO"
-        ANS_W = "ANS" + "WERS" + " TO DIR" + "ECT USER QUE" + "STIONS"
-        CHA_N = "CHA" + "NGES"
-        VER_I = "VER" + "IFI" + "CATION"
-        UNC_H = "UNC" + "HANGED"
+        IN_T, ANS_W = "INTRO", "ANSWERS TO DIRECT USER QUESTIONS"
+        CHA_N, VER_I, UNC_H = "CHANGES", "VERIFICATION", "UNCHANGED"
 
         msg = (
             "Please follow the output format strictly as described in your instructions. "
