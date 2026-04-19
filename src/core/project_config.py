@@ -239,6 +239,12 @@ class ProjectConfig:
                     p_data['unknown_files'] = []
                     config_was_updated = True
 
+                for f_info in p_data.get('selected_files', []):
+                    if isinstance(f_info, dict) and 'path' in f_info:
+                        all_found_known.add(f_info['path'])
+                    elif isinstance(f_info, str):
+                        all_found_known.add(f_info)
+
             self.known_files = sorted(list(all_found_known))
 
             for profile_name, profile_data in self.profiles.items():
@@ -451,8 +457,16 @@ class ProjectConfig:
                 if name == originating_profile_name:
                     continue
 
-                p_unknown = set(p_data.get('unknown_files', []))
-                p_unknown.update(actually_new)
-                p_data['unknown_files'] = sorted(list(p_unknown))
+                current_selected_paths = {f['path'] for f in p_data.get('selected_files', [])}
+
+                actually_unknown_for_profile = [
+                    p for p in actually_new
+                    if p not in current_selected_paths
+                ]
+
+                if actually_unknown_for_profile:
+                    p_unknown = set(p_data.get('unknown_files', []))
+                    p_unknown.update(actually_unknown_for_profile)
+                    p_data['unknown_files'] = sorted(list(p_unknown))
 
         return changed
