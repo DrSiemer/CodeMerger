@@ -41,6 +41,8 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
         return new_code, "Replace All"
 
     if not old_code.strip():
+        if not current_normalized.strip():
+            return new_code, "Creation"
         raise ValueError("The 'ORIGINAL' block provided by the AI is empty.")
 
     # Strategy 0: Already Applied

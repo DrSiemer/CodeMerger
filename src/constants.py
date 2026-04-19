@@ -45,6 +45,11 @@ STATUS_FADE_DURATION_SECONDS = 0.5
 # Visual Defaults
 TOKEN_THRESHOLD_WARNING_TEXT = "You are close to the current maximum tokens\nfor currently available language models"
 
+# Self-hosting safe markers built with fragments to avoid triggering regex during bundling
+MARKER_PREFIX = "--- "
+MARKER_FILE = "File" + ": "
+MARKER_EOF = "End of " + "file"
+
 # Project Starter Logic
 DELIMITER_TEMPLATE = '<SECTION name="{name}">'
 

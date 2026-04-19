@@ -106,18 +106,15 @@ class StarterApiScaffold:
         try: project_path.mkdir(parents=True, exist_ok=True)
         except Exception as e: return {"status": "ERROR", "message": f"Failed to create directory: {e}"}
 
-        PREFIX = "--- "
-        FILE_LABEL = "File: "
-        EOF_LABEL = "End of file"
-        EOF_MARKER = PREFIX + EOF_LABEL + " ---"
+        EOF_MARKER = c.MARKER_PREFIX + c.MARKER_EOF + " ---"
 
-        start_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(FILE_LABEL), llm_output, re.MULTILINE))
-        end_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(EOF_LABEL), llm_output, re.MULTILINE))
+        start_count = len(re.findall(r'^' + re.escape(c.MARKER_PREFIX) + re.escape(c.MARKER_FILE), llm_output, re.MULTILINE))
+        end_count = len(re.findall(r'^' + re.escape(c.MARKER_PREFIX) + re.escape(c.MARKER_EOF), llm_output, re.MULTILINE))
         if start_count != end_count:
             return {"status": "ERROR", "message": f"Marker mismatch ({start_count} starts, {end_count} ends)."}
 
         file_pattern = re.compile(
-            re.escape(PREFIX) + r'File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n?```\s*[\r\n]+' + re.escape(EOF_MARKER),
+            re.escape(c.MARKER_PREFIX) + r'File: `([^\n`]+)` ---\s*[\r\n]+```[^\n]*[\r\n]+(.*?)\n?```\s*[\r\n]+' + re.escape(EOF_MARKER),
             re.DOTALL
         )
         matches = file_pattern.finditer(llm_output)

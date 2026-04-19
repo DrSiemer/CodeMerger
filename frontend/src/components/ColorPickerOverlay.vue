@@ -82,15 +82,10 @@ const render = () => {
     ctx.restore()
 }
 
+import { getLuminanceMode } from '../utils/colorUtils'
+
 const updateLuminance = (hex) => {
-    try {
-        const h = hex.replace('#', '')
-        const r = parseInt(h.substring(0, 2), 16)
-        const g = parseInt(h.substring(2, 4), 16)
-        const b = parseInt(h.substring(4, 6), 16)
-        const luminance = (0.299 * r + 0.587 * g + 0.114 * b)
-        activeProject.fontColor = luminance > 150 ? 'dark' : 'light'
-    } catch (e) {}
+    activeProject.fontColor = getLuminanceMode(hex)
 }
 
 const handleMove = (e) => {

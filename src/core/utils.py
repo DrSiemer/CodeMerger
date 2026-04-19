@@ -17,7 +17,8 @@ from ..core.prompts import (
 from ..constants import (
     TOKEN_COUNT_ENABLED_DEFAULT,
     ADD_ALL_WARNING_THRESHOLD_DEFAULT,
-    NEW_FILE_ALERT_THRESHOLD_DEFAULT
+    NEW_FILE_ALERT_THRESHOLD_DEFAULT,
+    FONT_LUMINANCE_THRESHOLD
 )
 
 # Reference holds the lock for the application lifetime
@@ -405,3 +406,17 @@ def load_app_version():
 
     except (FileNotFoundError, IndexError):
         return "v?.?.?"
+
+def calculate_font_color(hex_color):
+    """
+    Selects 'light' or 'dark' text identifier based on background luminance.
+    Used for contrasting text against project-specific accent colors.
+    """
+    try:
+        hex_color = hex_color.lstrip('#')
+        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        # Relative luminance formula (W3C standard)
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b)
+        return 'dark' if luminance > FONT_LUMINANCE_THRESHOLD else 'light'
+    except (ValueError, IndexError):
+        return 'light'

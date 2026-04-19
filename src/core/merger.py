@@ -22,11 +22,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
     output_blocks = []
     skipped_files = []
 
-    # Use fragments to build markers to avoid triggering regex when CodeMerger bundles itself
-    PREFIX = "--- "
-    FILE_LABEL = "File: "
-    EOF_LABEL = "End of file"
-
     for path in final_ordered_list:
         full_path = os.path.join(base_dir, path)
         if not os.path.isfile(full_path):
@@ -37,9 +32,9 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
         language = get_language_from_path(path)
 
-        # Build block using concatenation
-        block_header = f"{PREFIX}{FILE_LABEL}`{path}` ---"
-        block_footer = f"{PREFIX}{EOF_LABEL} ---"
+        # Build block using central markers
+        block_header = f"{c.MARKER_PREFIX}{c.MARKER_FILE}`{path}` ---"
+        block_footer = f"{c.MARKER_PREFIX}{c.MARKER_EOF} ---"
 
         output_blocks.append(f"{block_header}\n```{language}\n{content}\n```\n{block_footer}")
 
@@ -91,13 +86,13 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 7. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
    - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
 
---- File: `path/to/file.ext` ---
+{c.MARKER_PREFIX}{c.MARKER_FILE}`path/to/file.ext` ---
 ```[language_id]
 {example_content}
 ```
---- End of file ---
+{c.MARKER_PREFIX}{c.MARKER_EOF} ---
 
-   - **CRITICAL:** The `--- End of file ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
+   - **CRITICAL:** The `{c.MARKER_PREFIX}{c.MARKER_EOF} ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
 
 8. **DELETE, VERIFICATION & UNCHANGED (POST-CODE):**
    Immediately following the final "--- End of file ---" marker, provide these sections:
@@ -133,11 +128,11 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (List of changes)
 </CHANGES>
 
---- File: `path/to/file.ext` ---
+{c.MARKER_PREFIX}{c.MARKER_FILE}`path/to/file.ext` ---
 ```language
 (Full unabridged file code or surgical blocks as instructed)
 ```
---- End of file ---
+{c.MARKER_PREFIX}{c.MARKER_EOF} ---
 
 <DELETED FILES>
 (Files to delete, or `-`)
@@ -147,7 +142,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (Testing steps)
 </VERIFICATION>"""
 
-        automation_warning = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
+        automation_warning = f"CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and {c.MARKER_PREFIX}{c.MARKER_FILE} wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
 
         final_parts = [f"# {project_title}"]
 

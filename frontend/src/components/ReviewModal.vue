@@ -1,14 +1,15 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
   HelpCircle, ShieldCheck, AlertTriangle,
-  ClipboardPaste, ChevronLeft, ChevronRight, ArrowUpRight
+  ClipboardPaste
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import ReviewChangesTab from './review-tabs/ReviewChangesTab.vue'
+import ReviewVerificationTab from './review-tabs/ReviewVerificationTab.vue'
 
 // default is 'new' (pasted) or 'resume' (orange button)
 const props = defineProps({
@@ -22,8 +23,6 @@ const emit = defineEmits(['close'])
 const {
   lastAiResponse,
   planFileStates,
-  planOriginalContents,
-  getFileContent,
   applyFileChange,
   deleteFile,
   copyAdmonishment,
@@ -32,56 +31,15 @@ const {
   editorFontSize,
   hasPendingChanges,
   handleZoom,
-  statusMessage,
   verificationHistory
 } = useAppState()
 
-const visibleDiffs = ref(new Set())
 const activeTab = ref('')
 const tabContentContainer = ref(null)
-
-// History state
-const selectedHistoryIndex = ref(0)
 
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
 const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed || []).length > 0)
-
-// Navigation: History Computed Helpers
-const currentPlanHasVerification = computed(() => {
-  const v = lastAiResponse.value?.verification
-  return !!(v && v !== '-' && v.trim().length > 0)
-})
-
-// Combine history and staged verification into one navigable sequence
-const allVerifications = computed(() => {
-  const combined = [...verificationHistory.value.map(h => ({ ...h, isArchive: true }))]
-  const currentV = lastAiResponse.value?.verification || ''
-
-  if (currentPlanHasVerification.value) {
-    combined.push({
-      content: currentV,
-      timestamp: 'Current',
-      isArchive: false
-    })
-  }
-  return combined
-})
-
-const currentVerificationView = computed(() => {
-  const list = allVerifications.value
-  if (list.length === 0) return null
-  // Clamp index in case a paste reduced the history count (unlikely but safe)
-  const idx = Math.min(selectedHistoryIndex.value, list.length - 1)
-  return list[idx]
-})
-
-const isHistorical = computed(() => {
-  const view = currentVerificationView.value
-  return view && view.isArchive
-})
-
-const isLatest = computed(() => selectedHistoryIndex.value === allVerifications.value.length - 1)
 
 // Categorize segments from the plan into dedicated tab objects
 const tabs = computed(() => {
@@ -134,31 +92,13 @@ useEscapeKey(() => {
   }
 })
 
-// Reset navigation index whenever a new AI response is pasted
-watch(lastAiResponse, () => {
-  if (allVerifications.value.length > 0) {
-    selectedHistoryIndex.value = allVerifications.value.length - 1
-  }
-})
-
-// Reset index when tab changes to Verification to ensure we start on the latest entry
-watch(activeTab, (newTab) => {
-  if (newTab === 'verification' && allVerifications.value.length > 0) {
-    selectedHistoryIndex.value = allVerifications.value.length - 1
-  }
-})
-
 onMounted(async () => {
   await resizeWindow(1100, 850)
-
-  if (allVerifications.value.length > 0) {
-    selectedHistoryIndex.value = allVerifications.value.length - 1
-  }
 
   if (tabs.value.length > 0) {
     const tabIds = tabs.value.map(t => t.id)
 
-    // Priority 1: If work is complete and verification exists, go there (prevents Intro reset on re-mount)
+    // Priority 1: If work is complete and verification exists, go there
     if (tabIds.includes('verification') && !hasPendingChanges.value) {
       activeTab.value = 'verification'
     }
@@ -187,121 +127,6 @@ onMounted(async () => {
 
 // --- Logic Actions ---
 
-const toggleDiff = async (path) => {
-  if (visibleDiffs.value.has(path)) {
-    visibleDiffs.value.delete(path)
-  } else {
-    // Lazy load original content for diffing
-    if (planOriginalContents.value[path] === undefined) {
-      planOriginalContents.value[path] = await getFileContent(path)
-    }
-    visibleDiffs.value.add(path)
-  }
-}
-
-const allReviewPaths = computed(() => {
-  const response = lastAiResponse.value
-  if (!response) return []
-  return [
-    ...Object.keys(response.updates || {}),
-    ...Object.keys(response.creations || {}),
-    ...(response.deletions_proposed || [])
-  ]
-})
-
-const expandablePaths = computed(() => {
-  const allNonSkipped = allReviewPaths.value.filter(p => planFileStates.value[p] !== 'skipped')
-  const pending = allNonSkipped.filter(p => planFileStates.value[p] === 'pending')
-  return pending.length > 0 ? pending : allNonSkipped
-})
-
-const isAllExpanded = computed(() => {
-  const paths = expandablePaths.value
-  if (paths.length === 0) return visibleDiffs.value.size > 0
-  return paths.every(p => visibleDiffs.value.has(p))
-})
-
-const toggleAllDiffs = async () => {
-  if (isAllExpanded.value) {
-    visibleDiffs.value.clear()
-  } else {
-    const paths = expandablePaths.value
-    if (paths.length === 0) return
-    const missingPaths = paths.filter(p => planOriginalContents.value[p] === undefined)
-    if (missingPaths.length > 0) {
-      statusMessage.value = `Loading ${missingPaths.length} file(s)...`
-      try {
-        await Promise.all(missingPaths.map(async (path) => {
-          planOriginalContents.value[path] = await getFileContent(path)
-        }))
-      } finally {
-        statusMessage.value = ''
-      }
-    }
-    paths.forEach(p => visibleDiffs.value.add(p))
-  }
-}
-
-const acceptChange = async (path, type) => {
-  if (type === 'delete') {
-    if (planOriginalContents.value[path] === undefined) {
-      planOriginalContents.value[path] = await getFileContent(path)
-    }
-    const success = await deleteFile(path)
-    if (success) {
-      planFileStates.value[path] = 'deleted'
-      visibleDiffs.value.delete(path)
-
-      // Only auto-switch if this was the only file in the response (BY DESIGN)
-      if (allReviewPaths.value.length === 1 && tabs.value.find(t => t.id === 'verification')) {
-        activeTab.value = 'verification'
-      }
-    }
-  } else {
-    const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
-    if (type === 'modify' && planOriginalContents.value[path] === undefined) {
-      planOriginalContents.value[path] = await getFileContent(path)
-    }
-    const success = await applyFileChange(path, content)
-    if (success) {
-      planFileStates.value[path] = 'applied'
-      visibleDiffs.value.delete(path)
-
-      // Only auto-switch if this was the only file in the response (BY DESIGN)
-      if (allReviewPaths.value.length === 1 && tabs.value.find(t => t.id === 'verification')) {
-        activeTab.value = 'verification'
-      }
-    }
-  }
-}
-
-const discardChange = (path) => {
-  planFileStates.value[path] = 'rejected'
-  visibleDiffs.value.delete(path)
-}
-
-const undoChange = async (path, type) => {
-  if (planFileStates.value[path] === 'rejected') {
-    planFileStates.value[path] = 'pending'
-    return
-  }
-
-  const originalText = planOriginalContents.value[path]
-
-  if (type === 'create') {
-    const success = await deleteFile(path)
-    if (success) planFileStates.value[path] = 'pending'
-  } else if (type === 'modify') {
-    if (originalText === undefined) return
-    const success = await applyFileChange(path, originalText)
-    if (success) planFileStates.value[path] = 'pending'
-  } else if (type === 'delete') {
-    if (originalText === undefined) return
-    const success = await applyFileChange(path, originalText)
-    if (success) planFileStates.value[path] = 'pending'
-  }
-}
-
 const applyAllPending = async () => {
   const pending = Object.entries(planFileStates.value).filter(([p, s]) => s === 'pending')
 
@@ -319,10 +144,13 @@ const applyAllPending = async () => {
     if (lastAiResponse.value.creations[path]) type = 'create'
     else if (lastAiResponse.value.deletions_proposed.includes(path)) type = 'delete'
 
-    await acceptChange(path, type)
-  }
+    const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
+    const success = (type === 'delete') ? await deleteFile(path) : await applyFileChange(path, content)
 
-  visibleDiffs.value.clear()
+    if (success) {
+      planFileStates.value[path] = (type === 'delete') ? 'deleted' : 'applied'
+    }
+  }
 
   // Always attempt to switch to verification after a bulk apply (BY DESIGN)
   if (tabs.value.find(t => t.id === 'verification')) {
@@ -333,8 +161,6 @@ const applyAllPending = async () => {
 const handlePasteNext = async () => {
   const success = await processPaste()
   if (success) {
-    visibleDiffs.value.clear()
-
     // Reset tab to Intro if available, matching fresh behavior
     if (tabs.value.length > 0) {
       const hasIntro = tabs.value.find(t => t.id === 'intro')
@@ -362,11 +188,6 @@ const applyAllLabel = computed(() => {
   const hasInteracted = states.some(s => ['applied', 'rejected', 'deleted'].includes(s))
   return hasInteracted ? 'Apply All Remaining' : 'Apply All'
 })
-
-const getSkippedMessage = (path) => {
-  const isDeletion = lastAiResponse.value?.deletions_proposed?.includes(path)
-  return isDeletion ? 'Already deleted' : 'No changes'
-}
 </script>
 
 <template>
@@ -418,81 +239,24 @@ const getSkippedMessage = (path) => {
       <div id="review-content-viewport" ref="tabContentContainer" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg" @wheel.ctrl.prevent="handleZoom">
         <div v-for="tab in tabs" :key="tab.id" v-show="activeTab === tab.id" class="p-8">
 
-          <!-- Standard Content Tabs -->
-          <template v-if="tab.id !== 'changes'">
+          <!-- Specialized Verification Tab -->
+          <ReviewVerificationTab
+            v-if="tab.id === 'verification'"
+          />
+
+          <!-- Specialized Interactive Changes Tab -->
+          <ReviewChangesTab
+            v-else-if="tab.id === 'changes'"
+            :commentary="tab.content"
+            @request-tab-switch="activeTab = $event"
+          />
+
+          <!-- Standard Markdown Content Tabs (Intro, Answers, Unformatted) -->
+          <template v-else>
             <div class="relative min-h-full">
-              <!-- Verification History Subtle Navigation (Floating) -->
-              <div
-                v-if="tab.id === 'verification' && allVerifications.length > 1"
-                v-info="'review_verification_history'"
-                class="relative z-20 float-right ml-6 mb-2 flex flex-col items-end space-y-2 select-none pointer-events-auto"
-                :class="isHistorical ? 'opacity-100' : 'opacity-40 hover:opacity-100 transition-opacity'"
-                title="Browse past verification steps from this session"
-              >
-                <div class="flex items-center space-x-1 bg-black/40 border border-gray-700 rounded-md p-1 shadow-sm">
-                  <button
-                    @click="selectedHistoryIndex--"
-                    :disabled="selectedHistoryIndex <= 0"
-                    class="p-1 text-gray-400 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                    title="Previous verification"
-                  >
-                    <ChevronLeft class="w-4 h-4" />
-                  </button>
-                  <div class="px-2 text-[10px] font-mono text-gray-400 tracking-tighter">
-                    {{ selectedHistoryIndex + 1 }} / {{ allVerifications.length }}
-                  </div>
-                  <button
-                    @click="selectedHistoryIndex++"
-                    :disabled="selectedHistoryIndex >= allVerifications.length - 1"
-                    class="p-1 text-gray-400 hover:text-white disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
-                    title="Next verification"
-                  >
-                    <ChevronRight class="w-4 h-4" />
-                  </button>
-                </div>
-
-                <button
-                  v-if="!isLatest"
-                  @click="selectedHistoryIndex = allVerifications.length - 1"
-                  v-info="'review_verification_current'"
-                  class="flex items-center space-x-1 px-2 py-1 text-[9px] font-black uppercase tracking-[0.15em] text-cm-blue hover:text-blue-300 transition-colors bg-blue-500/5 rounded border border-cm-blue/20"
-                  title="Jump to current verification"
-                >
-                  <ArrowUpRight class="w-3 h-3" />
-                  <span>Current</span>
-                </button>
-              </div>
-
-              <!-- Content Body -->
-              <div :class="{'opacity-80 grayscale-[0.3] border-l-4 border-yellow-700/40 pl-6 py-1': tab.id === 'verification' && isHistorical}">
-                <!-- Consolidated History Badge -->
-                <div v-if="tab.id === 'verification' && isHistorical" class="mb-4">
-                  <div class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-900/30 text-yellow-500 text-[10px] font-black uppercase tracking-[0.2em] border border-yellow-700/50">
-                    Verification from {{ currentVerificationView?.timestamp }}
-                  </div>
-                </div>
-
-                <MarkdownRenderer :content="tab.id === 'verification' ? currentVerificationView?.content : tab.content" :fontSize="editorFontSize" />
-              </div>
-
-              <!-- Ensures layout clears floats for tabs with little text -->
-              <div class="clear-both"></div>
+              <MarkdownRenderer :content="tab.content" :fontSize="editorFontSize" />
             </div>
           </template>
-
-          <!-- Interactive Changes Tab -->
-          <ReviewChangesTab
-            v-else
-            :commentary="tab.content"
-            :visible-diffs="visibleDiffs"
-            :is-all-expanded="isAllExpanded"
-            :get-skipped-message="getSkippedMessage"
-            @toggle-diff="toggleDiff"
-            @toggle-all-diffs="toggleAllDiffs"
-            @accept="acceptChange"
-            @discard="discardChange"
-            @undo="undoChange"
-          />
 
         </div>
       </div>

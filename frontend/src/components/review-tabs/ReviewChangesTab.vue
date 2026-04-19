@@ -9,34 +9,49 @@ const props = defineProps({
   commentary: {
     type: String,
     default: ''
-  },
-  visibleDiffs: {
-    type: Set,
-    required: true
-  },
-  isAllExpanded: {
-    type: Boolean,
-    default: false
-  },
-  getSkippedMessage: {
-    type: Function,
-    required: true
   }
 })
 
-const emit = defineEmits(['toggle-diff', 'toggle-all-diffs', 'accept', 'discard', 'undo'])
+const emit = defineEmits(['request-tab-switch'])
 
-const { lastAiResponse, planFileStates, planOriginalContents } = useAppState()
+const {
+  lastAiResponse,
+  planFileStates,
+  planOriginalContents,
+  getFileContent,
+  applyFileChange,
+  deleteFile,
+  statusMessage
+} = useAppState()
+
+const visibleDiffs = ref(new Set())
 
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
 const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed || []).length > 0)
 
-const totalFileCount = computed(() => {
-  const u = Object.keys(lastAiResponse.value?.updates || {}).length
-  const c = Object.keys(lastAiResponse.value?.creations || {}).length
-  const d = (lastAiResponse.value?.deletions_proposed || []).length
-  return u + c + d
+const allReviewPaths = computed(() => {
+  const response = lastAiResponse.value
+  if (!response) return []
+  return [
+    ...Object.keys(response.updates || {}),
+    ...Object.keys(response.creations || {}),
+    ...(response.deletions_proposed || [])
+  ]
+})
+
+const totalFileCount = computed(() => allReviewPaths.value.length)
+
+const expandablePaths = computed(() => {
+  const allNonSkipped = allReviewPaths.value.filter(p => planFileStates.value[p] !== 'skipped')
+  const pending = allNonSkipped.filter(p => planFileStates.value[p] === 'pending')
+  return pending.length > 0 ? pending : allNonSkipped
+})
+
+const isAllExpanded = computed(() => {
+  const paths = expandablePaths.value
+  if (paths.length === 0) return visibleDiffs.value.size > 0
+  return paths.every(p => visibleDiffs.value.has(p))
 })
 
 const getHeaderId = (path) => `file-header-${path.replace(/[\\/.]/g, '-')}`
@@ -50,26 +65,91 @@ const scrollAfterAction = (path) => {
   }, 50)
 }
 
-const onToggleDiff = (path) => {
-  emit('toggle-diff', path)
-  if (!props.visibleDiffs.has(path)) {
+const toggleDiff = async (path) => {
+  if (visibleDiffs.value.has(path)) {
+    visibleDiffs.value.delete(path)
+  } else {
+    if (planOriginalContents.value[path] === undefined) {
+      planOriginalContents.value[path] = await getFileContent(path)
+    }
+    visibleDiffs.value.add(path)
     scrollAfterAction(path)
   }
 }
 
-const onAccept = (path, type) => {
-  emit('accept', path, type)
+const toggleAllDiffs = async () => {
+  if (isAllExpanded.value) {
+    visibleDiffs.value.clear()
+  } else {
+    const paths = expandablePaths.value
+    if (paths.length === 0) return
+    const missingPaths = paths.filter(p => planOriginalContents.value[p] === undefined)
+    if (missingPaths.length > 0) {
+      statusMessage.value = `Loading ${missingPaths.length} file(s)...`
+      try {
+        await Promise.all(missingPaths.map(async (path) => {
+          planOriginalContents.value[path] = await getFileContent(path)
+        }))
+      } finally {
+        statusMessage.value = ''
+      }
+    }
+    paths.forEach(p => visibleDiffs.value.add(p))
+  }
+}
+
+const acceptChange = async (path, type) => {
+  if (type === 'delete') {
+    if (planOriginalContents.value[path] === undefined) {
+      planOriginalContents.value[path] = await getFileContent(path)
+    }
+    const success = await deleteFile(path)
+    if (success) {
+      planFileStates.value[path] = 'deleted'
+      visibleDiffs.value.delete(path)
+      if (allReviewPaths.value.length === 1) emit('request-tab-switch', 'verification')
+    }
+  } else {
+    const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
+    if (type === 'modify' && planOriginalContents.value[path] === undefined) {
+      planOriginalContents.value[path] = await getFileContent(path)
+    }
+    const success = await applyFileChange(path, content)
+    if (success) {
+      planFileStates.value[path] = 'applied'
+      visibleDiffs.value.delete(path)
+      if (allReviewPaths.value.length === 1) emit('request-tab-switch', 'verification')
+    }
+  }
   scrollAfterAction(path)
 }
 
-const onDiscard = (path) => {
-  emit('discard', path)
+const discardChange = (path) => {
+  planFileStates.value[path] = 'rejected'
+  visibleDiffs.value.delete(path)
   scrollAfterAction(path)
 }
 
-const onUndo = (path, type) => {
-  emit('undo', path, type)
+const undoChange = async (path, type) => {
+  if (planFileStates.value[path] === 'rejected') {
+    planFileStates.value[path] = 'pending'
+  } else {
+    const originalText = planOriginalContents.value[path]
+    if (type === 'create') {
+      const success = await deleteFile(path)
+      if (success) planFileStates.value[path] = 'pending'
+    } else {
+      if (originalText === undefined) return
+      const success = await applyFileChange(path, originalText)
+      if (success) planFileStates.value[path] = 'pending'
+    }
+  }
   scrollAfterAction(path)
+}
+
+const getSkippedMessage = (path) => {
+  const isDeletion = lastAiResponse.value?.deletions_proposed?.includes(path)
+  return isDeletion ? 'Already deleted' : 'No changes'
 }
 </script>
 
@@ -82,7 +162,7 @@ const onUndo = (path, type) => {
     <!-- Bulk Toggle Toolbar (Top) -->
     <div v-if="totalFileCount > 1" class="flex justify-end items-center">
       <button
-        @click="$emit('toggle-all-diffs')"
+        @click="toggleAllDiffs"
         class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
         :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs'"
       >
@@ -109,10 +189,10 @@ const onUndo = (path, type) => {
           :is-expanded="visibleDiffs.has(path)"
           :header-id="getHeaderId(path)"
           :get-skipped-message="getSkippedMessage"
-          @toggle-diff="onToggleDiff"
-          @accept="onAccept"
-          @discard="onDiscard"
-          @undo="onUndo"
+          @toggle-diff="toggleDiff"
+          @accept="acceptChange"
+          @discard="discardChange"
+          @undo="undoChange"
         />
       </div>
     </div>
@@ -134,10 +214,10 @@ const onUndo = (path, type) => {
           :is-expanded="visibleDiffs.has(path)"
           :header-id="getHeaderId(path)"
           :get-skipped-message="getSkippedMessage"
-          @toggle-diff="onToggleDiff"
-          @accept="onAccept"
-          @discard="onDiscard"
-          @undo="onUndo"
+          @toggle-diff="toggleDiff"
+          @accept="acceptChange"
+          @discard="discardChange"
+          @undo="undoChange"
         />
       </div>
     </div>
@@ -160,10 +240,10 @@ const onUndo = (path, type) => {
           :is-expanded="visibleDiffs.has(path)"
           :header-id="getHeaderId(path)"
           :get-skipped-message="getSkippedMessage"
-          @toggle-diff="onToggleDiff"
-          @accept="onAccept"
-          @discard="onDiscard"
-          @undo="onUndo"
+          @toggle-diff="toggleDiff"
+          @accept="acceptChange"
+          @discard="discardChange"
+          @undo="undoChange"
         />
       </div>
     </div>
@@ -171,7 +251,7 @@ const onUndo = (path, type) => {
     <!-- Bulk Toggle Toolbar (Bottom) -->
     <div v-if="totalFileCount > 2" class="flex justify-end items-center pt-4">
       <button
-        @click="$emit('toggle-all-diffs')"
+        @click="toggleAllDiffs"
         class="text-xs font-bold text-gray-400 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-tight"
         :title="isAllExpanded ? 'Close all open diffs' : 'Open all file diffs'"
       >

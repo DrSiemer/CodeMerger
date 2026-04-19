@@ -10,8 +10,8 @@ import sys
 import logging
 import threading
 from pathlib import Path
-from ..constants import COMPACT_MODE_BG_COLOR, FONT_LUMINANCE_THRESHOLD, ALLCODE_TEMP_PREFIX
-from .utils import get_token_count_for_text
+from ..constants import COMPACT_MODE_BG_COLOR, ALLCODE_TEMP_PREFIX
+from .utils import get_token_count_for_text, calculate_font_color
 
 log = logging.getLogger("CodeMerger")
 
@@ -30,16 +30,6 @@ def _generate_random_color():
     r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
     r_int, g_int, b_int = int(r * 255), int(g * 255), int(b * 255)
     return f"#{r_int:02x}{g_int:02x}{b_int:02x}"
-
-def _calculate_font_color(hex_color):
-    """Selects light or dark text based on background luminance"""
-    try:
-        hex_color = hex_color.lstrip('#')
-        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
-        luminance = (0.299 * r + 0.587 * g + 0.114 * b)
-        return 'dark' if luminance > FONT_LUMINANCE_THRESHOLD else 'light'
-    except (ValueError, IndexError):
-        return 'light'
 
 class ProjectConfig:
     """
@@ -202,7 +192,7 @@ class ProjectConfig:
                 self.project_color = color_value
 
             if not font_color_value or font_color_value not in ['light', 'dark']:
-                self.project_font_color = _calculate_font_color(self.project_color)
+                self.project_font_color = calculate_font_color(self.project_color)
                 config_was_updated = True
             else:
                 self.project_font_color = font_color_value

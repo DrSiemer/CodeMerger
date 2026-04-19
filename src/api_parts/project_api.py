@@ -129,8 +129,8 @@ class ProjectApi:
             if result and result[1]:
                 new_hex = result[1]
                 project_config.project_color = new_hex
-                from src.core.project_config import _calculate_font_color
-                project_config.project_font_color = _calculate_font_color(new_hex)
+                from src.core.utils import calculate_font_color
+                project_config.project_font_color = calculate_font_color(new_hex)
                 project_config.save()
                 self._broadcast_reload()
                 return self._format_project_response(project_config, "Project color updated.")
@@ -146,8 +146,8 @@ class ProjectApi:
             return None
 
         project_config.project_color = new_hex
-        from src.core.project_config import _calculate_font_color
-        project_config.project_font_color = _calculate_font_color(new_hex)
+        from src.core.utils import calculate_font_color
+        project_config.project_font_color = calculate_font_color(new_hex)
         project_config.save()
 
         self._broadcast_reload()

@@ -1,6 +1,7 @@
 import os
 import re
 from .replacer import apply_fuzzy_patch
+from .. import constants as c
 
 def get_current_file_content(base_dir, rel_path):
     """Reads current file content from disk for backup/undo purposes."""
@@ -95,8 +96,9 @@ def execute_plan(base_dir, updates, creations, deletions=None):
 
 def process_surgical_blocks(current_content, llm_content):
     """Parses ORIGINAL/UPDATED blocks and applies them via the Fuzzy Engine."""
+    # Updated regex to handle empty ORIGINAL sections correctly (optional newline before separator)
     patch_regex = re.compile(
-        r'<<<<<<< ORIGINAL[ \t]*\n(.*?)\n=======[ \t]*\n?(.*?)\n?>>>>>>> UPDATED',
+        r'<<<<<<< ORIGINAL[ \t]*\n(.*?)\n?=======[ \t]*\n?(.*?)\n?>>>>>>> UPDATED',
         re.DOTALL
     )
 
@@ -123,14 +125,10 @@ def parse_and_plan_changes(base_dir, markdown_text):
     # Normalize input line endings immediately to simplify regex matching
     markdown_text = markdown_text.replace('\r\n', '\n').replace('\r', '\n')
 
-    # Define markers using concatenation to prevent self-detection
-    PREFIX = "--- "
-    FILE_LABEL = "File: "
-    EOF_LABEL = "End of file"
-    EOF_MARKER = PREFIX + EOF_LABEL + " ---"
+    EOF_MARKER = c.MARKER_PREFIX + c.MARKER_EOF + " ---"
 
-    start_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(FILE_LABEL), markdown_text, re.MULTILINE))
-    end_count = len(re.findall(r'^' + re.escape(PREFIX) + re.escape(EOF_LABEL), markdown_text, re.MULTILINE))
+    start_count = len(re.findall(r'^' + re.escape(c.MARKER_PREFIX) + re.escape(c.MARKER_FILE), markdown_text, re.MULTILINE))
+    end_count = len(re.findall(r'^' + re.escape(c.MARKER_PREFIX) + re.escape(c.MARKER_EOF), markdown_text, re.MULTILINE))
 
     if start_count != end_count:
         return {
@@ -184,7 +182,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         deletions_proposed = [m.strip().replace('\\', '/') for m in del_matches if m.strip()]
 
     file_block_regex = re.compile(
-        r'^' + re.escape(PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s*\n+'
+        r'^' + re.escape(c.MARKER_PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s*\n+'
         r'```[^\n]*\n'
         r'(?P<content>.*?)'
         r'\n```\s*\n'
@@ -204,9 +202,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
         current_disk_content = get_current_file_content(base_dir, rel_path)
 
         try:
-            if current_disk_content and "<<<<<<< ORIGINAL" in llm_raw_content:
-                # If patching fails, process_surgical_blocks raises ValueError
-                final_assembled_content = process_surgical_blocks(current_disk_content, llm_raw_content)
+            if "<<<<<<< ORIGINAL" in llm_raw_content:
+                final_assembled_content = process_surgical_blocks(current_disk_content or "", llm_raw_content)
                 sanitized_new = _sanitize_content(rel_path, final_assembled_content)
             else:
                 sanitized_new = _sanitize_content(rel_path, llm_raw_content)

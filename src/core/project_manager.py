@@ -2,8 +2,8 @@ import os
 import threading
 import logging
 import time
-from .project_config import ProjectConfig, _calculate_font_color
-from .utils import parse_gitignore
+from .project_config import ProjectConfig
+from .utils import parse_gitignore, calculate_font_color
 from .file_scanner import get_all_matching_files
 
 log = logging.getLogger("CodeMerger")
@@ -121,7 +121,7 @@ class ProjectManager:
 
             if project_color:
                 config.project_color = project_color
-                config.project_font_color = _calculate_font_color(project_color)
+                config.project_font_color = calculate_font_color(project_color)
 
             self._populate_new_project_files(config)
 

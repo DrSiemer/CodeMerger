@@ -58,7 +58,7 @@ Only keep a comment if an experienced developer would be surprised by the code.
 2. **Placement:** Move comments from the end of a line to the line *above* the code.
 3. **Formatting:** Do not use numbering. Prefer single-line comments for single sentences.
 4. **Punctuation:** Remove dots from the end of single-line comments.
-5. **Tense:** Remove historical/past-tense commentary (e.g., change "Fixed crash" to "Prevents crash"). Do not alter the grammar of existing present-tense or imperative comments.
+5. **Tense:** Remove historical/past-tense commentary (e.g., change "Fixed crash" to "Prevents crash"). Do not alter the grammar of existing present-tense or CLI-standard comments.
 6. **Spaces:** Do not delete spaces inside the code itself (e.g., do not turn `a = []` into `a =[]`).
 
 Note: If your cleanup removes almost ALL comments in a file, re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
@@ -75,7 +75,8 @@ INSTR_FAST_APPLY = """SURGICAL DIFFS (FAST APPLY):
    - **EVOLUTIONARY CONTEXT:** Do NOT use the initial source code from the start of the conversation as a reference if it has since been modified. The evolved state is your new and only baseline.
    - **Replace All Shortcut:** If you are replacing the ENTIRE content of a file, you may put `==ALL==` inside the ORIGINAL block instead of repeating the whole file verbatim.
    - The ORIGINAL section must match the current state of the code exactly (including indentation).
-   - You can provide multiple blocks per file."""
+   - You can provide multiple blocks per file.
+   - **NEW FILES:** If you are creating a file that does not yet exist in the project, do NOT use ORIGINAL/UPDATED blocks. Simply provide the full content of the file."""
 
 EXAMPLE_FULL_FILE = "[full unabridged code here]"
 
@@ -85,7 +86,7 @@ EXAMPLE_FAST_APPLY = """<<<<<<< ORIGINAL
 [new code]
 >>>>>>> UPDATED
 
-OR for total rewrites:
+OR for total rewrites / NEW files:
 
 <<<<<<< ORIGINAL
 ==ALL==
