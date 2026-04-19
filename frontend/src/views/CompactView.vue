@@ -567,22 +567,44 @@ const pasteTooltipText = computed(() => {
             v-else
             class="w-full h-full rounded shadow-lg bg-[#DE6808] flex flex-col overflow-hidden"
           >
-            <div class="flex-grow flex items-center justify-center px-2 py-1">
-               <HelpCircle class="w-3.5 h-3.5 text-white mr-1.5 shrink-0" />
-               <span class="text-[10px] font-bold text-white uppercase tracking-tighter leading-tight text-center whitespace-normal">
-                  {{ feedback.msg }}
-               </span>
-            </div>
-            <div class="flex h-8 border-t border-white/20">
-              <button
-                @click="handleConfirmChoice"
-                class="flex-1 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest transition-colors"
-              >Confirm</button>
-              <button
-                @click="feedback.active = false"
-                class="flex-1 bg-black/10 hover:bg-black/20 text-white/80 text-[9px] font-black uppercase tracking-widest transition-colors border-l border-white/20"
-              >Abort</button>
-            </div>
+            <!-- ULTRA MINIMAL CONFIRMATION -->
+            <template v-if="isUltra">
+              <div class="flex-grow flex items-center justify-center pt-1" title="Overwrite pending changes in memory?">
+                 <span class="text-[10px] font-black text-white uppercase">OWR?</span>
+              </div>
+              <div class="flex h-7 border-t border-white/20">
+                <button
+                  @click="handleConfirmChoice"
+                  class="flex-1 bg-white/10 hover:bg-white/20 text-white text-[11px] font-black transition-colors"
+                  title="Yes: Confirm and replace"
+                >Y</button>
+                <button
+                  @click="feedback.active = false"
+                  class="flex-1 bg-black/10 hover:bg-black/20 text-white/80 text-[11px] font-black transition-colors border-l border-white/20"
+                  title="No: Keep existing response"
+                >N</button>
+              </div>
+            </template>
+
+            <!-- STANDARD CONFIRMATION -->
+            <template v-else>
+              <div class="flex-grow flex items-center justify-center px-2 py-1">
+                 <HelpCircle class="w-3.5 h-3.5 text-white mr-1.5 shrink-0" />
+                 <span class="text-[10px] font-bold text-white uppercase tracking-tighter leading-tight text-center whitespace-normal">
+                    {{ feedback.msg }}
+                 </span>
+              </div>
+              <div class="flex h-8 border-t border-white/20">
+                <button
+                  @click="handleConfirmChoice"
+                  class="flex-1 bg-white/10 hover:bg-white/20 text-white text-[9px] font-black uppercase tracking-widest transition-colors"
+                >Confirm</button>
+                <button
+                  @click="feedback.active = false"
+                  class="flex-1 bg-black/10 hover:bg-black/20 text-white/80 text-[9px] font-black uppercase tracking-widest transition-colors border-l border-white/20"
+                >Abort</button>
+              </div>
+            </template>
           </div>
         </div>
       </transition>
