@@ -37,10 +37,10 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776629197.4541225,
-          "hash": "75adbd0f42447d9f233cfc6376ac1505642fefc8",
-          "tokens": 2005,
-          "lines": 238
+          "mtime": 1776630614.6010084,
+          "hash": "aaf71306870740311addcf14de1f200a95d1bb60",
+          "tokens": 2017,
+          "lines": 239
         },
         {
           "path": "src/core/paths.py",
@@ -73,10 +73,10 @@
         },
         {
           "path": "src/core/prompts.py",
-          "mtime": 1776627731.1501307,
-          "hash": "55db41fb66c0aa62facd7693f442e5d9ab068804",
-          "tokens": 8,
-          "lines": 1
+          "mtime": 1776630718.496843,
+          "hash": "bd1aa9871eb0a739e71b871cb76e9a5cadd644c6",
+          "tokens": 3606,
+          "lines": 297
         },
         {
           "path": "src/app_state.py",
@@ -110,10 +110,10 @@
         },
         {
           "path": "src/core/merger.py",
-          "mtime": 1776627731.1943796,
-          "hash": "e5b3dd084aa6432e2d70f65a4894b766f0bcc4fb",
-          "tokens": 1083,
-          "lines": 96
+          "mtime": 1776630614.6874301,
+          "hash": "dd5c821c6945ec8ad15e11478d76e7299d881689",
+          "tokens": 2154,
+          "lines": 225
         },
         {
           "path": "src/core/secret_scanner.py",
@@ -247,11 +247,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 1989,
+          "tokens": 2253,
           "ignoreTokens": false,
-          "lines": 252,
-          "mtime": 1776496207.919618,
-          "hash": "bcde89dc95b81343bb15e7098913135c61289d9a"
+          "lines": 286,
+          "mtime": 1776631141.5321722,
+          "hash": "f5e48ff67e04c50e2c9b82bdd43f8e09f5ed3ec6"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -386,11 +386,11 @@
         },
         {
           "path": "frontend/src/composables/useProject.js",
-          "tokens": 1585,
+          "tokens": 1695,
           "ignoreTokens": false,
-          "lines": 226,
-          "mtime": 1776177306.9897244,
-          "hash": "b272d8d3dce716755bc0756c1847a698af457e11"
+          "lines": 233,
+          "mtime": 1776630658.053576,
+          "hash": "6eabdb77469bb39ca891790fd285d3044077167b"
         },
         {
           "path": "frontend/src/composables/useReview.js",
@@ -448,11 +448,11 @@
         },
         {
           "path": "frontend/src/utils/info/mainInfo.js",
-          "tokens": 1175,
+          "tokens": 1223,
           "ignoreTokens": false,
-          "lines": 42,
-          "mtime": 1776606379.9810853,
-          "hash": "85b3af4f4a71dce9cae1fe57b1d05b7f253ed46e"
+          "lines": 43,
+          "mtime": 1776630614.7668314,
+          "hash": "9ef047eaeae8e2928f9d1a586858d367966a5412"
         },
         {
           "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -496,11 +496,11 @@
         },
         {
           "path": "frontend/src/views/MainView.vue",
-          "tokens": 1867,
+          "tokens": 1893,
           "ignoreTokens": false,
-          "lines": 230,
-          "mtime": 1776499419.421173,
-          "hash": "b7b68d323217be5a2038380914ce8728ce42b7df"
+          "lines": 232,
+          "mtime": 1776630662.6874783,
+          "hash": "fe560eb0cc584c02895a66a54715b94ce77caf0d"
         },
         {
           "path": "frontend/src/views/CompactView.vue",
@@ -528,11 +528,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardNav.vue",
-          "tokens": 1126,
+          "tokens": 1261,
           "ignoreTokens": false,
-          "lines": 96,
-          "mtime": 1776190461.7590191,
-          "hash": "e031875102aa0a2494728383fda3eacaf120d496"
+          "lines": 115,
+          "mtime": 1776630960.9698813,
+          "hash": "d80593e35a71bd59e4a52a22c385e76ee3859c72"
         },
         {
           "path": "frontend/src/components/dashboard/DashboardActions.vue",
@@ -947,9 +947,23 @@
           "lines": 35,
           "mtime": 1776629359.8055696,
           "hash": "e80bb7c40a16b23cb45e60119801bcae341ff6e4"
+        },
+        {
+          "path": "frontend/src/components/VisualizerModal.vue",
+          "tokens": 2370,
+          "lines": 237,
+          "mtime": 1776631407.4415517,
+          "hash": "434e79fe92781b76fc4d88ce322574e922f1341a"
+        },
+        {
+          "path": "frontend/src/components/VisualizerTreeNode.vue",
+          "tokens": 607,
+          "lines": 72,
+          "mtime": 1776631333.6163518,
+          "hash": "c3c589cf6e1b467785a61d95d7a4713a4b0ac5ae"
         }
       ],
-      "total_tokens": 159844,
+      "total_tokens": 168085,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1024,6 +1038,8 @@
     "frontend/src/components/ProjectStarterModal.vue",
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
+    "frontend/src/components/VisualizerModal.vue",
+    "frontend/src/components/VisualizerTreeNode.vue",
     "frontend/src/components/compact/CompactActionsStandard.vue",
     "frontend/src/components/compact/CompactActionsUltra.vue",
     "frontend/src/components/compact/CompactFeedbackOverlay.vue",

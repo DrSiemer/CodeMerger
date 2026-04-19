@@ -228,6 +228,40 @@ class FileApi:
         finally:
             project_config.selected_files = orig_selection
 
+    def get_visualizer_prompt(self):
+        """Generates the prompt for the LLM to build the visualizer tree, including full source code."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return ""
+
+        from src.core.merger import generate_output_string
+        merged_code, _ = generate_output_string(
+            base_dir=project_config.base_dir,
+            project_config=project_config,
+            use_wrapper=False,
+            copy_merged_prompt=""
+        )
+
+        if not merged_code:
+            return "Error: Merge list is empty."
+
+        from src.core import prompts as p
+        return p.VISUALIZER_GENERATION_PROMPT.format(merged_content=merged_code)
+
+    def copy_visualizer_node_code(self, file_paths):
+        """Copies code for a specific subset of files defined in a visualizer node."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return "No active project."
+
+        from src.core.merger import generate_subset_output
+        code = generate_subset_output(project_config.base_dir, file_paths)
+        if code:
+            pyperclip.copy(code)
+            return f"Copied code for {len(file_paths)} file(s) under this node."
+
+        return "No files found to copy."
+
     def open_file(self, rel_path):
         """Opens a specific project file in the OS default or configured editor."""
         project_config = self.project_manager.get_current_project()

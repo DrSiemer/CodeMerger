@@ -199,3 +199,27 @@ STARTER_QUESTION_PROMPT_TEMPLATE = """### {context_label}
 {question}
 
 Instruction: {instruction_suffix}"""
+
+# Project Visualizer Prompt
+VISUALIZER_GENERATION_PROMPT = """Analyze the following project code from my Merge List. 
+Create a hierarchical tree structure to help me visualize the project's architecture based on the actual logic, dependencies, and roles of these files.
+
+**Constraints:**
+1. Group files logically (e.g., by feature, layer, or technology).
+2. You can create empty parent nodes (folders) to group other nodes.
+3. Every file in the Merge List MUST be assigned to exactly one leaf node.
+4. Each node (parent or leaf) MUST have a short, insightful description explaining its role in the architecture.
+
+**Output Format:**
+Return ONLY a raw JSON array of objects with the following structure:
+[
+  {{
+    "name": "Node Name",
+    "description": "Role of this part of the system.",
+    "children": [ ... recursively ],
+    "files": ["path/to/file1.ext", "path/to/file2.ext"]
+  }}
+]
+
+**Project Code Content:**
+{merged_content}"""

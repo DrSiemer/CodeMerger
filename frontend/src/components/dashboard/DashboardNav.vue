@@ -1,9 +1,9 @@
 <script setup>
 import { ref } from 'vue'
-import { Sprout } from 'lucide-vue-next'
+import { Sprout, Network } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
-const emit = defineEmits(['open-file-manager', 'open-new-profile-modal', 'open-starter-modal', 'open-project-modal'])
+const emit = defineEmits(['open-file-manager', 'open-new-profile-modal', 'open-starter-modal', 'open-project-modal', 'open-visualizer'])
 
 const {
   activeProject,
@@ -66,6 +66,21 @@ const deleteProfileHandler = async () => {
     </div>
 
     <div class="flex items-center space-x-3">
+      <!-- Visualizer Icon Button -->
+      <button
+        id="btn-visualizer"
+        class="transition-all p-1 flex items-center justify-center group"
+        title="Open Project Node Visualizer"
+        @click="emit('open-visualizer')"
+        v-info="'visualizer'"
+        :disabled="!activeProject.path || isProjectLoading"
+      >
+        <Network
+          class="w-6 h-6 text-gray-400 group-hover:text-cm-blue transition-colors"
+          :stroke-width="1.5"
+        />
+      </button>
+
       <!-- Project Starter Icon Button -->
       <button
         id="btn-starter"

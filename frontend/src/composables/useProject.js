@@ -203,6 +203,9 @@ export function useProject() {
 
   const getRecentProjects = async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : []
 
+  const getVisualizerPrompt = async () => window.pywebview ? await window.pywebview.api.get_visualizer_prompt() : ""
+  const copyVisualizerNodeCode = async (paths) => window.pywebview ? await window.pywebview.api.copy_visualizer_node_code(paths) : "Error"
+
   return {
     applyProjectData,
     selectProject,
@@ -223,6 +226,8 @@ export function useProject() {
     copyOrderRequest,
     openFile,
     saveInstructions,
-    getRecentProjects
+    getRecentProjects,
+    getVisualizerPrompt,
+    copyVisualizerNodeCode
   }
 }

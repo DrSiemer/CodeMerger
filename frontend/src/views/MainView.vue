@@ -10,6 +10,7 @@ import FileManagerModal from '../components/FileManagerModal.vue'
 import ReviewModal from '../components/ReviewModal.vue'
 import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
+import VisualizerModal from '../components/VisualizerModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
 import ColorPickerOverlay from '../components/ColorPickerOverlay.vue'
 import FormatErrorModal from '../components/FormatErrorModal.vue'
@@ -39,6 +40,7 @@ const showSettingsModal = ref(false)
 const showFileManagerModal = ref(false)
 const showInstructionsModal = ref(false)
 const showStarterModal = ref(false)
+const showVisualizerModal = ref(false)
 const showNewProfileModal = ref(false)
 const settingsTab = ref('application')
 
@@ -202,6 +204,7 @@ onUnmounted(() => {
           @open-new-profile-modal="showNewProfileModal = true"
           @open-starter-modal="showStarterModal = true"
           @open-project-modal="showProjectModal = true"
+          @open-visualizer="showVisualizerModal = true"
         />
 
         <!-- Main Dashboard Content -->
@@ -223,6 +226,7 @@ onUnmounted(() => {
     <ReviewModal v-if="showReviewModal" :mode="reviewMode" @close="closeReviewModal" />
     <InstructionsModal v-if="showInstructionsModal" @close="showInstructionsModal = false" />
     <ProjectStarterModal v-if="showStarterModal" @close="showStarterModal = false" />
+    <VisualizerModal v-if="showVisualizerModal" @close="showVisualizerModal = false" />
     <NewProfileModal v-if="showNewProfileModal" @close="showNewProfileModal = false" />
   </div>
 </template>

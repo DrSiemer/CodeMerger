@@ -174,6 +174,31 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 
     return final_content, status_message
 
+def generate_subset_output(base_dir, paths):
+    """
+    Bundles a specific list of file paths into standard CodeMerger Markdown blocks.
+    Used by the Visualizer to copy code for specific nodes/subtrees.
+    """
+    output_blocks = []
+    for path in paths:
+        full_path = os.path.join(base_dir, path)
+        if not os.path.isfile(full_path):
+            continue
+        try:
+            with open(full_path, 'r', encoding='utf-8-sig', errors='ignore') as code_file:
+                content = code_file.read()
+        except OSError:
+            continue
+
+        language = get_language_from_path(path)
+
+        block_header = f"{c.MARKER_PREFIX}{c.MARKER_FILE}`{path}` ---"
+        block_footer = f"{c.MARKER_PREFIX}{c.MARKER_EOF} ---"
+
+        output_blocks.append(f"{block_header}\n```{language}\n{content}\n```\n{block_footer}")
+
+    return '\n\n'.join(output_blocks)
+
 def recalculate_token_count(base_dir, selected_files_info):
     """
     Summarizes total tokens for the current selection set.

@@ -16,6 +16,7 @@ export const mainInfo = {
   "fast_apply_toggle": "Fast Apply: Toggles Surgical Diff mode. When ON, the AI is instructed to output only specific ORIGINAL/UPDATED blocks rather than full files, saving tokens and speed. Turn OFF if using weaker models that struggle with patching.",
   "settings": "Application Settings: Configure application behavior.",
   "starter": "Project Starter: Launch a guided workflow for starting new projects. Assists you in creating a concept, tech stack, and step-by-step implementation plan using AI.",
+  "visualizer": "Project Visualizer: Opens an interactive architectural overview of your project. Requires an LLM prompt to organize your Merge List into a descriptive hierarchy. Useful for understanding complex structures and copying code for specific features or layers.",
   "info_toggle": "Info Mode: Toggles help panels on all application windows. Useful for learning how to work with CodeMerger.",
   "profile_nav": "Profile Switcher: Swap between different configurations for the same project. Each profile has its own file selection and instruction set.",
   "profile_add": "Add Profile: Create a new named configuration. Useful for separating different tasks like 'Backend' or 'Feature Development' within the same project.",
