@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { X, RotateCcw, Save, Search } from 'lucide-vue-next'
+import { X, Save, Search } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
@@ -360,18 +360,8 @@ const handleSave = async () => {
         :class="{'has-changes': hasUnsavedChanges}"
       >
 
-        <!-- Left Column: Clear List -->
-        <div class="footer-col-left flex justify-start">
-          <button
-            id="btn-fm-clear-list"
-            @click="listItems.splice(0, listItems.length)"
-            class="bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium py-1.5 px-6 rounded transition-colors flex items-center text-sm shrink-0"
-            title="Clear the entire merge list for the current profile"
-          >
-            <RotateCcw class="w-3.5 h-3.5 mr-2" />
-            Clear List
-          </button>
-        </div>
+        <!-- Left Column: Spacer (Symmetry) -->
+        <div class="footer-col-side flex justify-start"></div>
 
         <!-- Center Column: Filter Search -->
         <div class="footer-search-col mx-4">
@@ -396,7 +386,7 @@ const handleSave = async () => {
         </div>
 
         <!-- Right Column: Navigation Actions -->
-        <div class="footer-col-right flex justify-end items-center space-x-3">
+        <div class="footer-col-side flex justify-end items-center space-x-3">
           <button
             @click="handleCancel"
             class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-6 rounded transition-colors text-sm shrink-0"
@@ -422,23 +412,17 @@ const handleSave = async () => {
 </template>
 
 <style scoped>
-.footer-col-left, .footer-col-right, .footer-search-col {
+.footer-col-side, .footer-search-col {
   transition: all 0.4s ease-in-out 0.1s;
 }
 
-.has-changes .footer-col-left,
-.has-changes .footer-col-right,
+.has-changes .footer-col-side,
 .has-changes .footer-search-col {
   transition: all 0.4s ease-in-out;
 }
 
-.footer-col-left {
-  flex: 0 0 auto;
-  min-width: 130px;
-}
-
-.footer-col-right {
-  flex: 0 0 auto;
+.footer-col-side {
+  flex: 1 1 0px;
   min-width: 90px;
 }
 
@@ -450,15 +434,9 @@ const handleSave = async () => {
   justify-content: center;
 }
 
-@media (min-width: 1000px) {
-  #fm-footer:not(.has-changes) > .footer-col-left,
-  #fm-footer:not(.has-changes) > .footer-col-right {
-    flex: 1 1 0px;
-  }
-}
-
-.has-changes .footer-col-right {
+.has-changes .footer-col-side:last-child {
   min-width: 240px;
+  flex: 0 0 auto;
 }
 
 .has-changes .footer-search-col {
