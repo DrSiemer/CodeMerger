@@ -263,7 +263,6 @@ class ChangesApi:
             for rel_path in failed_paths:
                 content = self.get_file_content(rel_path)
                 if content is not None:
-                    from .file_api import FileApi
                     from src.core.merger import get_language_from_path
                     lang = get_language_from_path(rel_path)
                     blocks.append(f"--- File: `{rel_path}` ---\n```{lang}\n{content}\n```\n--- End of file ---")

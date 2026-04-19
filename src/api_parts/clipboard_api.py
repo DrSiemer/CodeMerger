@@ -85,6 +85,8 @@ class ClipboardApi:
             return "No active project."
 
         plan = change_applier.parse_and_plan_changes(project_config.base_dir, text)
+        self._last_parsed_plan = plan
+
         if plan.get('status') == 'ERROR':
             self._window_manager.restore_main()
             time.sleep(0.1)
@@ -96,8 +98,6 @@ class ClipboardApi:
             except Exception as e:
                 log.error(f"Failed to trigger remote paste error signal: {e}")
             return False
-
-        self._last_parsed_plan = plan
 
         if auto_apply and plan.get('status') != 'UNFORMATTED':
             creations = plan.get('creations', {})
