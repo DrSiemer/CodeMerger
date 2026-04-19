@@ -432,11 +432,11 @@
         },
         {
           "path": "frontend/src/utils/info/fileManagerInfo.js",
-          "tokens": 662,
+          "tokens": 689,
           "ignoreTokens": false,
-          "lines": 25,
-          "mtime": 1776592093.6023953,
-          "hash": "c1fdf0b3ef135c473a52c71c3e16b08d420de619"
+          "lines": 26,
+          "mtime": 1776592574.3431165,
+          "hash": "cdac335a2fbafd47c69a4b1f5e6a7397f37714df"
         },
         {
           "path": "frontend/src/utils/info/reviewInfo.js",
@@ -568,11 +568,11 @@
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "tokens": 3737,
+          "tokens": 3831,
           "ignoreTokens": false,
-          "lines": 368,
-          "mtime": 1776533599.5958576,
-          "hash": "2931a6e664c527b4e77a59bfb811dc1564a4682a"
+          "lines": 382,
+          "mtime": 1776592574.3942766,
+          "hash": "12ea6323692657ede4328ab6c21af0e48cc47217"
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
@@ -890,7 +890,7 @@
           "lines": 100
         }
       ],
-      "total_tokens": 154475,
+      "total_tokens": 154596,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

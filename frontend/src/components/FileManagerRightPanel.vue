@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, onMounted } from 'vue'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import {
   Milestone, ArrowUpToLine, ArrowUp, ArrowDown, ArrowDownToLine,
   ArrowDownUp
@@ -35,11 +35,25 @@ const listRoot = ref(null)
 const tempHighlightedPath = ref(null)
 let highlightTimeout = null
 
+const onKeyDown = (e) => {
+  if (e.key === 'Delete' && selectedIndices.value.size > 0) {
+    const target = e.target
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return
+    e.preventDefault()
+    removeSelected()
+  }
+}
+
 onMounted(() => {
   // Synchronize the local element with the parent's Drag and Drop ref
   if (props.mergeListRef && listRoot.value) {
     props.mergeListRef.value = listRoot.value
   }
+  window.addEventListener('keydown', onKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown)
 })
 
 const TOKEN_COLOR_RANGE_MAX = 2500
@@ -360,7 +374,7 @@ defineExpose({
     <div id="fm-reorder-toolbar" class="flex items-center justify-center space-x-2 pt-2">
       <button @click="moveSelectionToTop" v-info="'fm_sort_top'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Top"><ArrowUpToLine class="w-4 h-4" /></button>
       <button @click="moveSelectionUp" v-info="'fm_sort_up'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Up"><ArrowUp class="w-4 h-4" /></button>
-      <button @click="removeSelected" v-info="'fm_sort_remove'" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-red-900/50 enabled:hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Remove Selected">Remove</button>
+      <button @click="removeSelected" v-info="'fm_sort_remove'" class="px-5 py-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-red-900/50 enabled:hover:text-red-400 text-gray-400 disabled:opacity-30 text-sm font-medium transition-colors" :disabled="selectedIndices.size === 0" title="Delete Selected (Delete Key)">Delete</button>
       <button @click="moveSelectionDown" v-info="'fm_sort_down'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected Down"><ArrowDown class="w-4 h-4" /></button>
       <button @click="moveSelectionToBottom" v-info="'fm_sort_bottom'" class="p-2 bg-gray-800 border border-gray-700 rounded enabled:hover:bg-gray-700 text-gray-400 disabled:opacity-30" :disabled="selectedIndices.size === 0" title="Move Selected to Bottom"><ArrowDownToLine class="w-4 h-4" /></button>
     </div>
