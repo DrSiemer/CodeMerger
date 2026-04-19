@@ -74,10 +74,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1776500579.595567,
-          "hash": "27720205e961b3ccdb45b94da9b499ab274a05aa",
-          "tokens": 2961,
-          "lines": 405,
+          "mtime": 1776602514.3412175,
+          "hash": "eaa3c3ae40cacf000ca4e826b7423ed0a9dee743",
+          "tokens": 2969,
+          "lines": 406,
           "ignore_tokens": false
         },
         {
@@ -96,10 +96,10 @@
         },
         {
           "path": "src/app_state.py",
-          "mtime": 1776500579.6346056,
-          "hash": "1adf420bd83f17994f3cad46c54cfd65c9828e15",
-          "tokens": 1407,
-          "lines": 155
+          "mtime": 1776603092.320247,
+          "hash": "4ced2efaa5cfdb50d5c772802ade2bfd025d1cee",
+          "tokens": 1453,
+          "lines": 158
         },
         {
           "path": "src/core/project_config.py",
@@ -140,10 +140,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1776524668.4016898,
-          "hash": "bc3c39e76bf1784d38983e183c4242628d8b92c0",
-          "tokens": 2318,
-          "lines": 278
+          "mtime": 1776605217.4458387,
+          "hash": "b89cc74de1bfaccac51c86ba1aa18e0435f3e360",
+          "tokens": 2704,
+          "lines": 318
         },
         {
           "path": "src/core/project_manager.py",
@@ -254,11 +254,11 @@
         },
         {
           "path": "src/api_parts/clipboard_api.py",
-          "tokens": 1462,
+          "tokens": 1473,
           "ignoreTokens": false,
-          "lines": 166,
-          "mtime": 1776495637.585901,
-          "hash": "058a66578db7326fd6031efe26823b199c0903cf"
+          "lines": 167,
+          "mtime": 1776603092.360874,
+          "hash": "3d85d17c6da65629d8e5c49a86615563ef897fe7"
         },
         {
           "path": "src/api_parts/changes_api.py",
@@ -369,11 +369,11 @@
         },
         {
           "path": "frontend/src/composables/useSystem.js",
-          "tokens": 838,
+          "tokens": 901,
           "ignoreTokens": false,
-          "lines": 131,
-          "mtime": 1776189449.314432,
-          "hash": "44636c3bd82b9849c751d47a2f928f179af1c427"
+          "lines": 140,
+          "mtime": 1776602514.45013,
+          "hash": "eae632ebc19d2d51134870c5c4bb8c8deea5ec9a"
         },
         {
           "path": "frontend/src/composables/useProject.js",
@@ -424,11 +424,11 @@
         },
         {
           "path": "frontend/src/utils/info/mainInfo.js",
-          "tokens": 1122,
+          "tokens": 1175,
           "ignoreTokens": false,
-          "lines": 41,
-          "mtime": 1776170178.163164,
-          "hash": "d739ae87df74956b3f231a88de28decfabfd40de"
+          "lines": 42,
+          "mtime": 1776606379.9810853,
+          "hash": "85b3af4f4a71dce9cae1fe57b1d05b7f253ed46e"
         },
         {
           "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -520,11 +520,11 @@
         },
         {
           "path": "frontend/src/components/dashboard/DashboardActions.vue",
-          "tokens": 1908,
+          "tokens": 2052,
           "ignoreTokens": false,
-          "lines": 197,
-          "mtime": 1776192953.7055497,
-          "hash": "a8e89ce4e90b9186254954337a46f18a1583e4a1"
+          "lines": 212,
+          "mtime": 1776606378.052204,
+          "hash": "21bf952f741b55c4f8f9ad6ffbfe15a06f353eb7"
         },
         {
           "path": "frontend/src/components/MarkdownRenderer.vue",
@@ -895,9 +895,16 @@
           "lines": 80,
           "mtime": 1776600202.859486,
           "hash": "14c7c6d4a64dffa5cbe7765a66e9e32e84d666b7"
+        },
+        {
+          "path": "src/core/replacer.py",
+          "tokens": 1266,
+          "lines": 147,
+          "mtime": 1776605217.4013128,
+          "hash": "c71269a7eace7b12851b6c782ff99fa40fe044f4"
         }
       ],
-      "total_tokens": 155296,
+      "total_tokens": 157273,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1052,6 +1059,7 @@
     "src/core/project_manager.py",
     "src/core/prompts.py",
     "src/core/registry.py",
+    "src/core/replacer.py",
     "src/core/secret_scanner.py",
     "src/core/updater.py",
     "src/core/utils.py",

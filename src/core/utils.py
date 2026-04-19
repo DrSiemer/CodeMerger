@@ -109,6 +109,7 @@ def _get_default_config_dict():
         'new_file_alert_threshold': NEW_FILE_ALERT_THRESHOLD_DEFAULT,
         'show_feedback_on_paste': True,
         'info_mode_active': True,
+        'enable_fast_apply': True,
         'user_lists': {
             'recent_projects': [],
             'filetypes': []

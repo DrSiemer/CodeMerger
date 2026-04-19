@@ -63,6 +63,25 @@ Only keep a comment if an experienced developer would be surprised by the code.
 
 Note: If your cleanup removes almost ALL comments in a file, re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
 
+# Surgical Diff Instruction Fragments
+INSTR_FULL_FILE = """NO CODE TRUNCATION (STRICT REQUIREMENT):
+   - You MUST provide the FULL, COMPLETE content for EVERY file you modify.
+   - DO NOT use comments like `// ... rest of code`.
+   - ZERO OMISSION POLICY: Every single line must be mirrored exactly."""
+
+INSTR_FAST_APPLY = """SURGICAL DIFFS (FAST APPLY):
+   - Only output the specific changes using ORIGINAL/UPDATED blocks.
+   - The ORIGINAL section must match the existing code exactly (including indentation).
+   - You can provide multiple blocks per file."""
+
+EXAMPLE_FULL_FILE = "[full unabridged code here]"
+
+EXAMPLE_FAST_APPLY = """<<<<<<< ORIGINAL
+[existing code to replace]
+=======
+[new code]
+>>>>>>> UPDATED"""
+
 # Project Starter Prompt Templates
 
 STARTER_CONCEPT_DEFAULT_GOAL = "The plan is to build a..."

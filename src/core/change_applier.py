@@ -1,5 +1,6 @@
 import os
 import re
+from .replacer import apply_fuzzy_patch
 
 def get_current_file_content(base_dir, rel_path):
     """Reads current file content from disk for backup/undo purposes."""
@@ -90,6 +91,33 @@ def execute_plan(base_dir, updates, creations, deletions=None):
 
     return True, msg + "."
 
+def process_surgical_blocks(current_content, llm_content):
+    """Parses MODO-style blocks and applies them via the Fuzzy Engine."""
+    patch_regex = re.compile(
+        r'<<<<<<< ORIGINAL[ \t]*\n(.*?)\n=======[ \t]*\n?(.*?)\n?>>>>>>> UPDATED',
+        re.DOTALL
+    )
+
+    # Normalize internal line endings for processing
+    llm_content = llm_content.replace('\r\n', '\n').replace('\r', '\n')
+
+    matches = list(patch_regex.finditer(llm_content))
+    if not matches:
+        return llm_content # Fallback to Full-File
+
+    # Ensure the content we are patching is normalized to LF
+    working_content = current_content.replace('\r\n', '\n').replace('\r', '\n')
+
+    for match in matches:
+        old_code, new_code = match.groups()
+        try:
+            working_content, _ = apply_fuzzy_patch(working_content, old_code, new_code)
+        except ValueError as e:
+            # Inject a visible error into the file so the Pygments Diff Viewer shows it
+            working_content += f"\n/* FAST-APPLY ERROR: {str(e)} */\n"
+
+    return working_content
+
 def parse_and_plan_changes(base_dir, markdown_text):
     """
     Parses markdown using custom file wrappers, plans changes, and returns
@@ -173,9 +201,14 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
     for match in file_block_regex.finditer(markdown_text):
         rel_path = match.group('path').strip().replace('\\', '/')
+        llm_raw_content = match.group('content')
 
-        # Sanitizes content IMMEDIATELY to prevent phantom diffs from trailing whitespace
-        sanitized_new = _sanitize_content(rel_path, match.group('content'))
+        current_disk_content = get_current_file_content(base_dir, rel_path)
+        if current_disk_content and "<<<<<<< ORIGINAL" in llm_raw_content:
+            final_assembled_content = process_surgical_blocks(current_disk_content, llm_raw_content)
+            sanitized_new = _sanitize_content(rel_path, final_assembled_content)
+        else:
+            sanitized_new = _sanitize_content(rel_path, llm_raw_content)
 
         all_blocks.append({
             'type': 'file',
@@ -185,7 +218,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         })
 
         if os.path.isfile(os.path.join(base_dir, rel_path)):
-            old_raw = get_current_file_content(base_dir, rel_path)
+            old_raw = current_disk_content
             if old_raw is not None:
                 # Sanitize the local file EXACTLY the same way as the LLM input
                 sanitized_old = _sanitize_content(rel_path, old_raw)

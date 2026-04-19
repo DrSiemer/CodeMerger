@@ -38,6 +38,14 @@ export function useSystem() {
     }
   }
 
+  const toggleFastApply = async () => {
+    if (window.pywebview) {
+      const newVal = !(config.value.enable_fast_apply ?? true)
+      const newConfig = { ...config.value, enable_fast_apply: newVal }
+      await saveConfig(newConfig)
+    }
+  }
+
   const saveConfig = async (newConfig) => {
     if (window.pywebview) {
       const success = await window.pywebview.api.save_app_config(newConfig)
@@ -117,6 +125,7 @@ export function useSystem() {
     getImage,
     resizeWindow,
     toggleInfoMode,
+    toggleFastApply,
     saveConfig,
     getFiletypes,
     saveFiletypes,

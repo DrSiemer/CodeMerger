@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2 } from 'lucide-vue-next'
+import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2, Zap } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const emit = defineEmits(['open-settings', 'open-instructions-modal', 'open-review-modal'])
@@ -14,7 +14,8 @@ const {
   copyCode,
   processPaste,
   clearPasteData,
-  config
+  config,
+  toggleFastApply
 } = useAppState()
 
 const cleanupPulse = ref(false)
@@ -78,17 +79,31 @@ const pasteTooltipText = computed(() => {
       <div v-if="activeProject.path" id="dashboard-action-card" class="w-full max-w-[620px] border border-gray-600 rounded bg-cm-dark-bg p-6 flex flex-col shadow-sm">
         <div class="flex justify-between items-center mb-5">
           <h2 class="text-[17px] font-medium text-white">Actions</h2>
-          <button
-            id="btn-comment-cleanup"
-            @click="handleCleanup"
-            class="text-gray-500 hover:text-gray-300 text-sm font-mono font-bold transition-colors relative"
-            :class="{ 'click-pulse': cleanupPulse }"
-            :style="cleanupPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
-            title="Copy comment cleanup prompt"
-            v-info="'cleanup'"
-          >
-            //
-          </button>
+
+          <div class="flex items-center space-x-3">
+            <!-- Mini Fast Apply Toggle -->
+            <button
+              @click="toggleFastApply"
+              v-info="'fast_apply_toggle'"
+              class="transition-all duration-300 p-1 rounded hover:bg-white/5"
+              :class="(config.enable_fast_apply ?? true) ? 'text-cm-blue' : 'text-gray-600'"
+              title="Toggle Fast Apply (Surgical Diffs)"
+            >
+              <Zap class="w-4 h-4" :fill="(config.enable_fast_apply ?? true) ? 'currentColor' : 'none'" />
+            </button>
+
+            <button
+              id="btn-comment-cleanup"
+              @click="handleCleanup"
+              class="text-gray-500 hover:text-gray-300 text-sm font-mono font-bold transition-colors relative"
+              :class="{ 'click-pulse': cleanupPulse }"
+              :style="cleanupPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
+              title="Copy comment cleanup prompt"
+              v-info="'cleanup'"
+            >
+              //
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4">

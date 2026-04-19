@@ -1,7 +1,7 @@
 import os
 import json
 from .. import constants as c
-from .prompts import DEFAULT_COPY_MERGED_PROMPT
+from .prompts import INSTR_FULL_FILE, INSTR_FAST_APPLY, EXAMPLE_FULL_FILE, EXAMPLE_FAST_APPLY
 from .utils import get_token_count_for_text
 
 def get_language_from_path(path):
@@ -9,7 +9,7 @@ def get_language_from_path(path):
     _, ext = os.path.splitext(path)
     return c.LANGUAGE_MAP.get(ext.lower(), '')
 
-def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
+def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt, enable_fast_apply=False):
     """
     Concatenates selected files into a single machine-parseable string
     Returns the final string and a status message
@@ -56,7 +56,11 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         if isinstance(outro_text, (list, tuple)):
             outro_text = "\n".join(outro_text)
 
-        formatting_instruction = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
+        # Build dynamic mode-based instructions
+        mode_instruction = INSTR_FAST_APPLY if enable_fast_apply else INSTR_FULL_FILE
+        example_content = EXAMPLE_FAST_APPLY if enable_fast_apply else EXAMPLE_FULL_FILE
+
+        formatting_instruction = f"""**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
 
 1. **MANDATORY TAGGING & CLOSING POLICY:**
    Every section of your response (Answers, Intro, Changes, Delete, Verification) MUST be explicitly wrapped in tags.
@@ -69,12 +73,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
    - **<ANSWERS TO DIRECT USER QUESTIONS>**: If the user asked a specific question (usually ending with a '?'), answer it here. If there is no question mark in the prompt, there is no question. In that case, this block MUST remain empty (use a single dash `-`). Do NOT fill it with filler text like "None" or "No questions".
    - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
 
-3. **NO CODE TRUNCATION (STRICT REQUIREMENT):**
-   - You MUST provide the **FULL, COMPLETE content** for EVERY file you modify.
-   - **DO NOT** use comments like `// ... rest of code`, `/* unchanged */`, or `[previous logic here]`.
-   - ZERO OMISSION POLICY: Every single line, comment, and whitespace character not explicitly targeted for change MUST be mirrored exactly from the source. I am using a diff-tool to verify; any missing existing code is a failure. Byte-for-byte mirroring of unchanged lines is MANDATORY.
-   - Before outputting a modified file, perform a diff in your head: Are there any methods, imports, or logic blocks present in the original that are missing in the new version? If they were not explicitly marked for deletion, they MUST be restored.
-   - EXACT WHITESPACE PRESERVATION: You are strictly forbidden from modifying whitespace around assignment operators. Mirror the exact spacing of the original file (keep `= [` and do NOT replace it with `=[`).
+3. **{mode_instruction}**
 
 4. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
@@ -90,7 +89,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
 --- File: `path/to/file.ext` ---
 ```[language_id]
-[full unabridged code here]
+{example_content}
 ```
 --- End of file ---
 
@@ -132,7 +131,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 
 --- File: `path/to/file.ext` ---
 ```language
-(Full unabridged file code)
+(Full unabridged file code or surgical blocks as instructed)
 ```
 --- End of file ---
 
@@ -144,7 +143,7 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 (Testing steps)
 </VERIFICATION>"""
 
-        automation_warning = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file, even unchanged ones."
+        automation_warning = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and --- File: --- wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
 
         final_parts = [f"# {project_title}"]
 
