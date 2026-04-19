@@ -15,13 +15,13 @@ const props = defineProps({
   getQuestionPrompt: Function,
   isLookingBack: Boolean,
   reviewInfoKey: String,
-  nextButtonText: String
+  nextButtonText: String,
+  showQuestions: Boolean
 })
 
-const emit = defineEmits(['update:content', 'reset', 'rewrite', 'next'])
+const emit = defineEmits(['update:content', 'reset', 'rewrite', 'next', 'update:showQuestions'])
 
 const { editorFontSize, handleZoom } = useAppState()
-const showQuestions = ref(false)
 const scrollRef = ref(null)
 
 const { reviewerEditMode, toggleReviewerEditMode } = useReviewerEditMode(scrollRef)
@@ -69,7 +69,7 @@ const acceptDiff = () => {
 
         <template v-if="!(baselines && baselines['__merged__'])">
           <button
-            @click="showQuestions = !showQuestions"
+            @click="$emit('update:showQuestions', !showQuestions)"
             v-info="'starter_seg_questions'"
             class="px-4 py-1.5 rounded font-bold text-sm shadow transition-colors flex items-center space-x-2"
             :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:text-white'"

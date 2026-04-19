@@ -44,6 +44,7 @@ const {
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.todo_llm_response)
+const showQuestions = ref(false)
 const showRewriteModal = ref(false)
 const rewriteContext = ref(null)
 const rewriteIsMergedMode = ref(false)
@@ -134,6 +135,7 @@ const openRewriteModal = (isMergedMode) => {
 
 const handleRewriteApply = async ({ cleanContent, notes }) => {
   showRewriteModal.value = false
+  showQuestions.value = false
 
   if (notes) {
     notesContent.value = notes
@@ -197,6 +199,7 @@ const handleReset = () => {
     props.pData.todo_md = ""
     props.pData.todo_llm_response = ""
     showPasteArea.value = false
+    showQuestions.value = false
   }
 }
 </script>
@@ -208,6 +211,7 @@ const handleReset = () => {
         title="Review TODO Plan"
         :content="pData.todo_md"
         @update:content="val => pData.todo_md = val"
+        v-model:showQuestions="showQuestions"
         :baselines="pData.todo_baselines"
         :questions="['Does this plan accurately reflect the project concept?', 'Are the steps actionable and well-sequenced?', 'Is anything critical missing from the environment setup?']"
         :getQuestionPrompt="getMergedQuestionPrompt"
@@ -225,6 +229,7 @@ const handleReset = () => {
         :segments="pData.todo_segments"
         :signoffs="pData.todo_signoffs"
         :baselines="pData.todo_baselines"
+        v-model:showQuestions="showQuestions"
         :orderedKeys="orderedTodoKeys"
         :friendlyNames="getFriendlyNames()"
         :questionsMap="todoQuestionsMap"

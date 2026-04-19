@@ -17,15 +17,15 @@ const props = defineProps({
   orderedKeys: Array,
   friendlyNames: Object,
   questionsMap: Object,
-  getQuestionPrompt: Function
+  getQuestionPrompt: Function,
+  showQuestions: Boolean
 })
 
-const emit = defineEmits(['reset', 'rewrite', 'merge'])
+const emit = defineEmits(['reset', 'rewrite', 'merge', 'update:showQuestions'])
 
 const { editorFontSize, handleZoom } = useAppState()
 
 const activeSegmentKey = ref(null)
-const showQuestions = ref(false)
 const scrollRef = ref(null)
 
 const { reviewerEditMode, toggleReviewerEditMode } = useReviewerEditMode(scrollRef)
@@ -162,7 +162,7 @@ const handleAcceptAllClick = () => {
 
             <template v-if="!signoffs[activeSegmentKey] && !baselines[activeSegmentKey]">
               <button
-                 @click="showQuestions = !showQuestions"
+                 @click="$emit('update:showQuestions', !showQuestions)"
                  v-info="'starter_seg_questions'"
                  class="px-3 py-1 rounded text-xs font-bold shadow transition-colors flex items-center space-x-1"
                  :class="showQuestions ? 'bg-cm-blue text-white' : 'bg-gray-800 border-gray-600 text-gray-300 hover:text-white'"

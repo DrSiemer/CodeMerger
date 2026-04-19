@@ -36,6 +36,7 @@ const {
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.concept_llm_response)
+const showQuestions = ref(false)
 const showRewriteModal = ref(false)
 const rewriteContext = ref(null)
 const rewriteIsMergedMode = ref(false)
@@ -120,6 +121,7 @@ const openRewriteModal = (isMergedMode) => {
 
 const handleRewriteApply = async ({ cleanContent, notes }) => {
   showRewriteModal.value = false
+  showQuestions.value = false
 
   if (notes) {
     notesContent.value = notes
@@ -183,6 +185,7 @@ const handleReset = () => {
     props.pData.concept_md = ""
     props.pData.concept_llm_response = ""
     showPasteArea.value = false
+    showQuestions.value = false
   }
 }
 </script>
@@ -194,6 +197,7 @@ const handleReset = () => {
         title="Review Concept"
         :content="pData.concept_md"
         @update:content="val => pData.concept_md = val"
+        v-model:showQuestions="showQuestions"
         :baselines="pData.concept_baselines"
         :questions="['Is this concept clearly explained?', 'Does the target audience match the goal?', 'Are there any major omissions in the feature list?']"
         :getQuestionPrompt="getMergedQuestionPrompt"
@@ -211,6 +215,7 @@ const handleReset = () => {
         :segments="pData.concept_segments"
         :signoffs="pData.concept_signoffs"
         :baselines="pData.concept_baselines"
+        v-model:showQuestions="showQuestions"
         :orderedKeys="Object.keys(pData.concept_segments)"
         :friendlyNames="getFriendlyNames()"
         :questionsMap="conceptQuestionsMap"
