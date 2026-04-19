@@ -134,9 +134,14 @@ const handleManage = async () => {
   if (window.pywebview && window.pywebview.api) await window.pywebview.api.restore_main_window_and_trigger_fm()
 }
 
+const handleCancelFeedback = () => {
+  if (feedbackTimer) clearTimeout(feedbackTimer)
+  feedback.active = false
+}
+
 const handleConfirmChoice = async () => {
   const type = feedback.type
-  feedback.active = false
+  handleCancelFeedback()
   if (type === 'secrets') await handleCopy({ ctrlKey: false }, true)
   else if (type === 'overwrite') await handlePaste({ ctrlKey: false }, true)
 }
@@ -223,7 +228,7 @@ const pasteTooltipText = computed(() => {
         />
       </div>
 
-      <CompactFeedbackOverlay :feedback="feedback" :is-ultra="isUltra" @confirm="handleConfirmChoice" @cancel="feedback.active = false" />
+      <CompactFeedbackOverlay :feedback="feedback" :is-ultra="isUltra" @confirm="handleConfirmChoice" @cancel="handleCancelFeedback" />
     </div>
   </div>
 </template>
