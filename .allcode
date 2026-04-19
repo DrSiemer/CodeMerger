@@ -89,10 +89,10 @@
         },
         {
           "path": "src/core/prompts.py",
-          "mtime": 1774299923.2915604,
-          "hash": "4a4b6c4d91ec0d903b6cff3862e76603c6c3971a",
-          "tokens": 1959,
-          "lines": 150
+          "mtime": 1776619706.188066,
+          "hash": "c93d4561f3ee0c10fb3dd1172d270cb03821a339",
+          "tokens": 2661,
+          "lines": 191
         },
         {
           "path": "src/app_state.py",
@@ -262,11 +262,11 @@
         },
         {
           "path": "src/api_parts/changes_api.py",
-          "tokens": 3061,
+          "tokens": 3108,
           "ignoreTokens": false,
-          "lines": 320,
-          "mtime": 1776612851.7204275,
-          "hash": "82c9e9d4f337e89eb2dcc08b60c3d5060f7540d2"
+          "lines": 321,
+          "mtime": 1776619705.3742952,
+          "hash": "43648ac170722ed4efd83b763dc32252a139e2c5"
         },
         {
           "path": "src/api_parts/starter_api_session.py",
@@ -904,7 +904,7 @@
           "hash": "c71269a7eace7b12851b6c782ff99fa40fe044f4"
         }
       ],
-      "total_tokens": 160978,
+      "total_tokens": 161727,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

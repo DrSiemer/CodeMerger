@@ -270,13 +270,14 @@ class ChangesApi:
 
             paths_str = ", ".join([f"`{p}`" for p in failed_paths])
             msg = (
-                "The ORIGINAL code blocks you provided for surgical patching in the following files did not match my local source code exactly:\n"
+                "Surgical Patch Mismatch: The ORIGINAL code blocks provided for the following files do not match my current local source:\n"
                 f"{paths_str}\n\n"
-                "This usually happens because you are hallucinating old code or assuming context that has changed. "
-                "To ensure accuracy, please provide the FULL file content for the modified files.\n\n"
-                "Here is the current, up-to-date source code for the affected files:\n\n"
+                "This error occurred because your baseline reference is out of sync with the current evolved state of the project. "
+                "To resolve this, I am providing the *actual* up-to-date source code for the affected files below. "
+                "Please use this code as your new baseline and return a CORRECTED surgical diff using ORIGINAL/UPDATED blocks.\n\n"
+                "CRITICAL: Do NOT return the full file content. Only provide the corrected surgical blocks.\n\n"
                 + "\n\n".join(blocks) + "\n\n"
-                "Please use this code to generate your update."
+                "Please ensure your new ORIGINAL blocks are a byte-for-byte match to the code provided above."
             )
             try:
                 pyperclip.copy(msg)

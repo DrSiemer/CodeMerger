@@ -71,7 +71,9 @@ INSTR_FULL_FILE = """NO CODE TRUNCATION (STRICT REQUIREMENT):
 
 INSTR_FAST_APPLY = """SURGICAL DIFFS (FAST APPLY):
    - Only output the specific changes using ORIGINAL/UPDATED blocks.
-   - The ORIGINAL section must match the existing code exactly (including indentation).
+   - **Baseline Awareness:** Always base your ORIGINAL blocks on the *evolved state* of the project. If a file was modified in previous turns of this conversation, use that modified version as your reference baseline.
+   - **Do not** use the initial source code from the start of the session as a reference if it has since been updated.
+   - The ORIGINAL section must match the current state of the code exactly (including indentation).
    - You can provide multiple blocks per file."""
 
 EXAMPLE_FULL_FILE = "[full unabridged code here]"
