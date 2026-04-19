@@ -140,10 +140,10 @@
         },
         {
           "path": "src/core/change_applier.py",
-          "mtime": 1776605217.4458387,
-          "hash": "b89cc74de1bfaccac51c86ba1aa18e0435f3e360",
-          "tokens": 2704,
-          "lines": 318
+          "mtime": 1776612851.5730805,
+          "hash": "eaac0c8345622fddf6ec924de9d07e4698f33ec2",
+          "tokens": 2792,
+          "lines": 328
         },
         {
           "path": "src/core/project_manager.py",
@@ -262,11 +262,11 @@
         },
         {
           "path": "src/api_parts/changes_api.py",
-          "tokens": 2714,
+          "tokens": 3061,
           "ignoreTokens": false,
-          "lines": 286,
-          "mtime": 1776599712.1889682,
-          "hash": "6a6db191384bb3be661976ef2c5705c047f0359c"
+          "lines": 320,
+          "mtime": 1776612851.7204275,
+          "hash": "82c9e9d4f337e89eb2dcc08b60c3d5060f7540d2"
         },
         {
           "path": "src/api_parts/starter_api_session.py",
@@ -544,11 +544,11 @@
         },
         {
           "path": "frontend/src/components/FileTreeNode.vue",
-          "tokens": 1503,
+          "tokens": 1771,
           "ignoreTokens": false,
-          "lines": 205,
-          "mtime": 1776192214.5374303,
-          "hash": "b6f7741895cea077c2d98bbbf202eacc513782a7"
+          "lines": 237,
+          "mtime": 1776611237.948174,
+          "hash": "4044abcb65435ac52c60dc25097213b01de49df6"
         },
         {
           "path": "frontend/src/components/ProjectSelectorModal.vue",
@@ -560,11 +560,11 @@
         },
         {
           "path": "frontend/src/components/FileManagerLeftPanel.vue",
-          "tokens": 1268,
+          "tokens": 2586,
           "ignoreTokens": false,
-          "lines": 136,
-          "mtime": 1776592348.1642144,
-          "hash": "3f74712c722903e445a47cb315cbdafab0252265"
+          "lines": 297,
+          "mtime": 1776612926.7341568,
+          "hash": "b7a0213ca952ef424c9c7967f492d20f592b03a7"
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
@@ -576,11 +576,11 @@
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
-          "tokens": 3626,
+          "tokens": 3693,
           "ignoreTokens": false,
-          "lines": 447,
-          "mtime": 1776592741.5659063,
-          "hash": "a0f5a12effe6b5dabbe23c1591ec77f7e65dab3e"
+          "lines": 456,
+          "mtime": 1776613245.479847,
+          "hash": "292b5952db24027c36e951509ca4afd84fa461e4"
         },
         {
           "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
@@ -904,7 +904,7 @@
           "hash": "c71269a7eace7b12851b6c782ff99fa40fe044f4"
         }
       ],
-      "total_tokens": 157452,
+      "total_tokens": 159540,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

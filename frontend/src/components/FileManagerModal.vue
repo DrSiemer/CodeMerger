@@ -213,6 +213,14 @@ const toggleDirectorySelect = async (node) => {
   }
 }
 
+const removeFileFromList = (path) => {
+  const idx = listItems.value.findIndex(f => f.path === path)
+  if (idx !== -1) {
+    listItems.value.splice(idx, 1)
+    rightPanelRef.value?.clearSelection()
+  }
+}
+
 const onLeftFileClick = (path) => {
   highlightedPath.value = null
   rightPanelRef.value?.scrollToPath(path)
@@ -331,6 +339,7 @@ const handleSave = async () => {
           :isLoading="isTreeLoading"
           @toggle-select="toggleFileSelect"
           @toggle-directory="toggleDirectorySelect"
+          @remove-select="removeFileFromList"
           @file-click="onLeftFileClick"
           @toggle-expand="toggleFolderExpand"
           @add-all="addAll"

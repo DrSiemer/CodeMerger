@@ -4,11 +4,11 @@ import { Filter, GitBranch, CheckSquare, Loader2, Eye, X } from 'lucide-vue-next
 import FileTreeNode from './FileTreeNode.vue'
 
 const props = defineProps({
-  fileTree: Array,
+  fileTree: { type: Array, default: () => [] },
   isExtFilter: Boolean,
   isGitFilter: Boolean,
-  selectedPaths: Array,
-  expandedDirs: Object,
+  selectedPaths: { type: Array, default: () => [] },
+  expandedDirs: { type: Object, default: () => new Set() },
   highlightedPath: String,
   isLoading: Boolean
 })
@@ -18,12 +18,15 @@ const emit = defineEmits([
   'update:isGitFilter',
   'toggle-select',
   'toggle-directory',
+  'remove-select',
   'file-click',
   'toggle-expand',
   'add-all'
 ])
 
 const showVisibilityOptions = ref(false)
+const multiSelectedPaths = ref(new Set())
+const lastClickedPath = ref(null)
 const windowWidth = ref(window.innerWidth)
 
 const updateWidth = () => {
@@ -40,12 +43,146 @@ onUnmounted(() => {
 
 const isNarrow = computed(() => windowWidth.value < 1000)
 
+// Smart Button Logic: Analyze highlighted items vs merge list
+const selectionAnalysis = computed(() => {
+  const result = { toAdd: [], toRemove: [] }
+  try {
+    if (!multiSelectedPaths.value || multiSelectedPaths.value.size === 0) return result
+
+    const highlighted = Array.from(multiSelectedPaths.value)
+    const merged = new Set(props.selectedPaths || [])
+    const toAddSet = new Set()
+    const toRemoveSet = new Set()
+
+    const pathToNode = {}
+    const traverseBuildMap = (nodes) => {
+      if (!nodes || !Array.isArray(nodes)) return
+      for (const n of nodes) {
+        if (!n) continue
+        pathToNode[n.path] = n
+        if (n.children) traverseBuildMap(n.children)
+      }
+    }
+    traverseBuildMap(props.fileTree)
+
+    const IGNORED_FOR_COMPLETENESS = ['__init__.py']
+
+    for (const path of highlighted) {
+      const node = pathToNode[path]
+      if (!node) continue
+
+      const processFileNode = (fNode) => {
+        if (!fNode || IGNORED_FOR_COMPLETENESS.includes(fNode.name)) return
+        if (merged.has(fNode.path)) toRemoveSet.add(fNode.path)
+        else toAddSet.add(fNode.path)
+      }
+
+      if (node.type === 'file') {
+        processFileNode(node)
+      } else {
+        const traverseSubtree = (n) => {
+          if (!n) return
+          if (n.type === 'file') {
+            processFileNode(n)
+          } else if (n.children && Array.isArray(n.children)) {
+            for (const child of n.children) traverseSubtree(child)
+          }
+        }
+        traverseSubtree(node)
+      }
+    }
+
+    result.toAdd = Array.from(toAddSet)
+    result.toRemove = Array.from(toRemoveSet)
+  } catch (err) {
+    console.error("[FileManagerLeftPanel] Selection analysis crash:", err)
+  }
+  return result
+})
+
 const scrollToPath = (path) => {
   const id = `node-${path.replace(/[\\/.]/g, '-')}`
   const el = document.getElementById(id)
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }
+}
+
+// Logic for Multi-selection and Range selection
+const handleNodeClick = ({ node, event }) => {
+  if (!node || !node.path) return
+  const path = node.path
+  const isShift = event.shiftKey
+  const isCtrl = event.ctrlKey || event.metaKey
+
+  if (isShift && lastClickedPath.value) {
+    // Range Selection logic
+    const flattened = []
+    const traverse = (nodes) => {
+      if (!nodes || !Array.isArray(nodes)) return
+      for (const n of nodes) {
+        if (!n) continue
+        flattened.push(n.path)
+        if (n.type === 'dir' && props.expandedDirs?.has?.(n.path)) {
+          traverse(n.children || [])
+        }
+      }
+    }
+    traverse(props.fileTree)
+
+    const idxA = flattened.indexOf(lastClickedPath.value)
+    const idxB = flattened.indexOf(path)
+
+    if (idxA !== -1 && idxB !== -1) {
+      const start = Math.min(idxA, idxB)
+      const end = Math.max(idxA, idxB)
+
+      const newSelection = isCtrl ? new Set(multiSelectedPaths.value) : new Set()
+
+      for (let i = start; i <= end; i++) {
+        newSelection.add(flattened[i])
+      }
+      multiSelectedPaths.value = newSelection
+    }
+  } else if (isCtrl) {
+    // Toggle individual highlight
+    const newSelection = new Set(multiSelectedPaths.value)
+    if (newSelection.has(path)) {
+      newSelection.delete(path)
+    } else {
+      newSelection.add(path)
+    }
+    multiSelectedPaths.value = newSelection
+    lastClickedPath.value = path
+  } else {
+    // Single selection (reset)
+    multiSelectedPaths.value = new Set([path])
+    lastClickedPath.value = path
+  }
+}
+
+const addSelected = async () => {
+  const paths = selectionAnalysis.value.toAdd
+  if (!paths || paths.length === 0) return
+
+  for (const path of paths) {
+    emit('toggle-select', path)
+  }
+
+  multiSelectedPaths.value = new Set()
+  lastClickedPath.value = null
+}
+
+const removeSelected = async () => {
+  const paths = selectionAnalysis.value.toRemove
+  if (!paths || paths.length === 0) return
+
+  for (const path of paths) {
+    emit('remove-select', path)
+  }
+
+  multiSelectedPaths.value = new Set()
+  lastClickedPath.value = null
 }
 
 defineExpose({ scrollToPath })
@@ -110,18 +247,42 @@ defineExpose({ scrollToPath })
           :key="node.path"
           :node="node"
           :selected-paths="selectedPaths"
+          :multi-selected-paths="multiSelectedPaths"
           :initial-expanded-paths="Array.from(expandedDirs)"
           :highlightedPath="highlightedPath"
           @toggle-select="(p) => emit('toggle-select', p)"
           @toggle-directory="(node) => emit('toggle-directory', node)"
           @file-click="(p) => emit('file-click', p)"
+          @node-click="handleNodeClick"
           @toggle-expand="(data) => emit('toggle-expand', data)"
         />
       </div>
     </div>
 
-    <div class="flex justify-end pt-2">
+    <div class="flex justify-end items-center space-x-3 pt-2">
+      <!-- Smart Batch Actions -->
+      <template v-if="multiSelectedPaths && multiSelectedPaths.size > 0">
+        <button
+          id="btn-fm-remove-selected"
+          @click="removeSelected"
+          :disabled="!selectionAnalysis.toRemove || selectionAnalysis.toRemove.length === 0"
+          class="bg-gray-700 hover:bg-red-900/50 hover:text-red-400 disabled:opacity-30 disabled:hover:bg-gray-700 disabled:hover:text-gray-400 text-gray-300 font-bold py-1.5 px-4 rounded text-sm transition-all flex items-center"
+        >
+          {{ isNarrow ? 'Remove' : 'Remove Selected' }} ({{ selectionAnalysis.toRemove ? selectionAnalysis.toRemove.length : 0 }})
+        </button>
+
+        <button
+          id="btn-fm-add-selected"
+          @click="addSelected"
+          :disabled="!selectionAnalysis.toAdd || selectionAnalysis.toAdd.length === 0"
+          class="bg-cm-blue hover:bg-blue-500 disabled:opacity-30 text-white font-bold py-1.5 px-6 rounded text-sm shadow-md transition-all flex items-center"
+        >
+          {{ isNarrow ? 'Add' : 'Add Selected' }} ({{ selectionAnalysis.toAdd ? selectionAnalysis.toAdd.length : 0 }})
+        </button>
+      </template>
+
       <button
+        v-else
         id="btn-fm-add-all"
         @click="emit('add-all')"
         :disabled="isLoading"

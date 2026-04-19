@@ -12,6 +12,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  multiSelectedPaths: {
+    type: Object, // Set
+    default: () => new Set()
+  },
   initialExpandedPaths: {
     type: Array,
     default: () => []
@@ -26,7 +30,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['toggle-select', 'toggle-directory', 'toggle-expand', 'file-click'])
+const emit = defineEmits(['toggle-select', 'toggle-directory', 'toggle-expand', 'file-click', 'node-click'])
 const { openFile } = useAppState()
 
 const isExpanded = ref(props.initialExpandedPaths.includes(props.node.path))
@@ -92,8 +96,8 @@ const textClass = computed(() => {
 
 const nodeTooltip = computed(() => {
   let tooltip = props.node.type === 'file'
-    ? `${props.node.name} (Ctrl+Click to open)`
-    : `${props.node.name} (Ctrl+Click to toggle folder selection)`;
+    ? `${props.node.name} (Alt+Click to open)`
+    : `${props.node.name} (Ctrl+Click to toggle selection)`;
 
   if (props.node.is_filtered && props.node.filter_reason) {
     tooltip += `\n(${props.node.filter_reason})`;
@@ -103,18 +107,27 @@ const nodeTooltip = computed(() => {
 })
 
 const handleClick = (event) => {
+  if (event.altKey) {
+    if (props.node.type === 'file') {
+      openFile(props.node.path)
+    }
+    return
+  }
+
+  // Range selection and Multi-selection take priority in the Left Panel logic
+  emit('node-click', { node: props.node, event })
+
   if (props.node.type === 'dir') {
-    // Special bulk toggle behavior: prevents expansion
     if (event.ctrlKey) {
       emit('toggle-directory', props.node)
       return
     }
-    isExpanded.value = !isExpanded.value
-    emit('toggle-expand', { path: props.node.path, expanded: isExpanded.value })
+    if (!event.shiftKey) {
+      isExpanded.value = !isExpanded.value
+      emit('toggle-expand', { path: props.node.path, expanded: isExpanded.value })
+    }
   } else {
-    if (event.ctrlKey) {
-      openFile(props.node.path)
-    } else {
+    if (!event.ctrlKey && !event.shiftKey) {
       emit('file-click', props.node.path)
     }
   }
@@ -147,6 +160,10 @@ const onChildFileClick = (path) => {
   emit('file-click', path)
 }
 
+const onChildNodeClick = (data) => {
+  emit('node-click', data)
+}
+
 const onChildToggleExpand = (data) => {
   emit('toggle-expand', data)
 }
@@ -156,7 +173,10 @@ const onChildToggleExpand = (data) => {
   <div :id="`node-${node.path.replace(/[\\/.]/g, '-')}`" class="select-none">
     <div
       class="flex items-center py-1 hover:bg-cm-blue/10 cursor-pointer rounded transition-colors group"
-      :class="{ 'bg-cm-blue/20': isHighlighted }"
+      :class="{
+        'bg-cm-blue/20': isHighlighted,
+        'bg-gray-700/50': multiSelectedPaths.has(node.path) && !isHighlighted
+      }"
       :style="{ paddingLeft: `${level * 20}px` }"
       @click="handleClick"
       @dblclick="handleDoubleClick"
@@ -201,10 +221,12 @@ const onChildToggleExpand = (data) => {
         :selected-paths="selectedPaths"
         :initial-expanded-paths="initialExpandedPaths"
         :highlightedPath="highlightedPath"
+        :multi-selected-paths="multiSelectedPaths"
         :level="level + 1"
         @toggle-select="onChildToggleSelect"
         @toggle-directory="onChildToggleDirectory"
         @file-click="onChildFileClick"
+        @node-click="onChildNodeClick"
         @toggle-expand="onChildToggleExpand"
       />
     </div>
