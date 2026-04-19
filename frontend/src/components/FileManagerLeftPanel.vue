@@ -1,5 +1,6 @@
 <script setup>
-import { Filter, GitBranch, CheckSquare, Loader2 } from 'lucide-vue-next'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { Filter, GitBranch, CheckSquare, Loader2, Eye, X } from 'lucide-vue-next'
 import FileTreeNode from './FileTreeNode.vue'
 
 const props = defineProps({
@@ -22,6 +23,23 @@ const emit = defineEmits([
   'add-all'
 ])
 
+const showVisibilityOptions = ref(false)
+const windowWidth = ref(window.innerWidth)
+
+const updateWidth = () => {
+  windowWidth.value = window.innerWidth
+}
+
+onMounted(() => {
+  window.addEventListener('resize', updateWidth)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateWidth)
+})
+
+const isNarrow = computed(() => windowWidth.value < 1000)
+
 const scrollToPath = (path) => {
   const id = `node-${path.replace(/[\\/.]/g, '-')}`
   const el = document.getElementById(id)
@@ -39,23 +57,43 @@ defineExpose({ scrollToPath })
       <h3 class="font-semibold text-gray-200">Available Files</h3>
       <div class="flex items-center space-x-2">
         <button
-          @click="emit('update:isGitFilter', !isGitFilter)"
-          class="p-1.5 rounded border transition-colors"
-          :class="isGitFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
-          title="Toggle Gitignore Filter"
-          v-info="'fm_filter_git'"
+          v-if="!showVisibilityOptions"
+          @click="showVisibilityOptions = true"
+          class="flex items-center px-3 py-1.5 rounded border border-gray-600 bg-gray-800 text-gray-400 hover:text-white transition-colors text-xs font-bold uppercase tracking-wider"
+          v-info="'fm_visibility_toggle'"
         >
-          <GitBranch class="w-4 h-4" />
+          <Eye class="w-4 h-4 mr-2" />
+          <span>File visibility</span>
         </button>
-        <button
-          @click="emit('update:isExtFilter', !isExtFilter)"
-          class="p-1.5 rounded border transition-colors"
-          :class="isExtFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-500'"
-          title="Toggle Extension Filter"
-          v-info="'fm_filter_ext'"
-        >
-          <Filter class="w-4 h-4" />
-        </button>
+
+        <template v-else>
+          <button
+            @click="emit('update:isGitFilter', !isGitFilter)"
+            class="flex items-center px-3 py-1.5 rounded border transition-colors text-xs font-bold uppercase tracking-wider"
+            :class="isGitFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-400'"
+            v-info="'fm_filter_git'"
+            :title="isNarrow ? 'Toggle Gitignore Filter' : ''"
+          >
+            <GitBranch class="w-4 h-4" :class="{'mr-2': !isNarrow}" />
+            <span v-if="!isNarrow">Git ignored</span>
+          </button>
+          <button
+            @click="emit('update:isExtFilter', !isExtFilter)"
+            class="flex items-center px-3 py-1.5 rounded border transition-colors text-xs font-bold uppercase tracking-wider"
+            :class="isExtFilter ? 'bg-cm-blue/20 border-cm-blue text-cm-blue' : 'bg-gray-800 border-gray-600 text-gray-400'"
+            v-info="'fm_filter_ext'"
+            :title="isNarrow ? 'Toggle Extension Filter' : ''"
+          >
+            <Filter class="w-4 h-4" :class="{'mr-2': !isNarrow}" />
+            <span v-if="!isNarrow">Extensions</span>
+          </button>
+          <button
+            @click="showVisibilityOptions = false"
+            class="p-1.5 text-gray-500 hover:text-white transition-colors"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </template>
       </div>
     </div>
 

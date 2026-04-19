@@ -4,6 +4,7 @@ export const fileManagerInfo = {
   "fm_tree_action": "Merge Toggle: Adds or removes the currently selected files from the list.",
   "fm_list": "Merge Order: This list determines in what order the code will be presented to the AI. Files are merged from top to bottom. Click a file to select it for sorting or removal.",
   "fm_list_tools": "List Visibility: Toggle the display of full file paths or relative filenames in the merge list.",
+  "fm_visibility_toggle": "File Visibility: Click to manage filters for hidden files (Git ignored) and allowed file extensions.",
   "fm_filter_git": "Git Filter: Toggle visibility of files listed in your .gitignore. When ON, ignored files are hidden.",
   "fm_filter_ext": "Filetype Filter: Toggle visibility of files not in your allowed extensions list. When ON, extra files are hidden.",
   "fm_filter_text": "Text Filter: Type to filter the tree and the merge list by filename.",
