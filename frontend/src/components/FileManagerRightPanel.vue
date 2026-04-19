@@ -356,7 +356,7 @@ defineExpose({
           <div
             class="flex items-center space-x-3 shrink-0 cursor-help"
             @click="emit('token-interaction', index, $event)"
-            title="Alt+Click: Toggle Ignore tokens | Ctrl+Click: Copy refactor request"
+            title="Ctrl+Click: Copy refactor request | Alt+Click: Toggle Ignore tokens"
             v-info="'fm_tokens_item'"
           >
             <span class="text-xs font-mono" :class="selectedIndices.has(index) ? 'text-blue-100 font-bold' : getTokenColor(file)">
