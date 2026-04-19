@@ -29,6 +29,11 @@ const multiSelectedPaths = ref(new Set())
 const lastClickedPath = ref(null)
 const windowWidth = ref(window.innerWidth)
 
+const clearSelection = () => {
+  multiSelectedPaths.value = new Set()
+  lastClickedPath.value = null
+}
+
 const updateWidth = () => {
   windowWidth.value = window.innerWidth
 }
@@ -195,13 +200,17 @@ const removeSelected = async () => {
   }
 }
 
-defineExpose({ scrollToPath })
+defineExpose({ scrollToPath, clearSelection })
 </script>
 
 <template>
-  <div id="fm-available-files" class="flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg transition-all duration-300">
-    <div class="flex items-center justify-between mb-4">
-      <h3 class="font-semibold text-gray-200">Available Files</h3>
+  <div
+    id="fm-available-files"
+    class="flex flex-col border-r border-gray-700 p-5 bg-cm-dark-bg transition-all duration-300"
+    @click.self="clearSelection"
+  >
+    <div class="flex items-center justify-between mb-4" @click.self="clearSelection">
+      <h3 class="font-semibold text-gray-200 cursor-default" @click="clearSelection">Available Files</h3>
       <div class="flex items-center space-x-2">
         <button
           v-if="!showVisibilityOptions"
@@ -245,7 +254,11 @@ defineExpose({ scrollToPath })
     </div>
 
     <!-- Tree / Loading Area -->
-    <div class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2 relative" v-info="'fm_tree'">
+    <div
+      class="flex-grow overflow-y-auto custom-scrollbar pr-2 mb-2 relative"
+      v-info="'fm_tree'"
+      @click.self="clearSelection"
+    >
       <div v-if="isLoading" class="absolute inset-0 flex flex-col items-center justify-center space-y-4 bg-cm-dark-bg/80 z-10">
         <Loader2 class="w-10 h-10 text-cm-blue animate-spin" />
         <span class="text-sm font-bold text-gray-400 uppercase tracking-widest">Scanning Files...</span>
@@ -292,7 +305,7 @@ defineExpose({ scrollToPath })
       </template>
 
       <button
-        v-else
+        v-else-if="selectedPaths.length === 0"
         id="btn-fm-add-all"
         @click="emit('add-all')"
         :disabled="isLoading"
