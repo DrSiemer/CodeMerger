@@ -159,8 +159,7 @@ class ProjectConfig:
             self.project_font_color = data.get('project_font_color', calculate_font_color(self.project_color))
             self.active_profile_name = data.get('active_profile', 'Default')
 
-            # Global aggregation of known files to prevent false "New File" flags on boot
-            all_found_known = set(data.get('known_files', []))
+            all_found_known = {p.replace('\\', '/') for p in data.get('known_files', [])}
 
             self.profiles = {}
             if os.path.isdir(self.profiles_dir):
@@ -173,7 +172,8 @@ class ProjectConfig:
                             with open(full_path, 'r', encoding='utf-8-sig') as f:
                                 p_data = json.load(f)
                                 if 'known_files' in p_data:
-                                    all_found_known.update(p_data.pop('known_files', []))
+                                    for p in p_data.pop('known_files', []):
+                                        all_found_known.add(p.replace('\\', '/'))
                                 self.profiles[profile_name] = p_data
                             config_was_updated = True
                         except Exception: pass
@@ -211,7 +211,8 @@ class ProjectConfig:
                             fd = profile_data.pop('files_data')
                             profile_data['unknown_files'] = fd.get('unknown_files', [])
                             profile_data['total_tokens'] = fd.get('total_tokens', profile_data.get('total_tokens', 0))
-                            all_found_known.update(fd.get('known_files', []))
+                            for p in fd.get('known_files', []):
+                                all_found_known.add(p.replace('\\', '/'))
 
                         load_segment('ui.json', 'ui_data', None)
                         if profile_data.get('ui_data'):
@@ -229,10 +230,10 @@ class ProjectConfig:
                 config_was_updated = True
 
             for profile_name, profile_data in self.profiles.items():
-                profile_data['unknown_files'] = sorted(list(set(profile_data.get('unknown_files', []))))
+                profile_data['unknown_files'] = sorted(list({p.replace('\\', '/') for p in profile_data.get('unknown_files', [])}))
                 for f_info in profile_data.get('selected_files', []):
                     path = f_info['path'] if isinstance(f_info, dict) else f_info
-                    all_found_known.add(path)
+                    all_found_known.add(path.replace('\\', '/'))
 
                 files_cleaned, profile_updated = self._clean_profile_files(profile_data)
                 if files_cleaned: files_were_cleaned_globally = True
@@ -251,51 +252,6 @@ class ProjectConfig:
 
             return content_changed
 
-    def _migrate_legacy_project(self):
-        """Loads legacy .allcode format and triggers structured migration."""
-        try:
-            with open(self.legacy_allcode_path, 'r', encoding='utf-8-sig') as f:
-                data = json.load(f)
-        except Exception as e:
-            raise RuntimeError(f"Failed to read legacy project config: {e}")
-
-        self.project_name = data.get('project_name', os.path.basename(self.base_dir))
-        self.project_color = data.get('project_color', _generate_random_color())
-        self.project_font_color = data.get('project_font_color', calculate_font_color(self.project_color))
-
-        if 'profiles' in data:
-            self.profiles = data.get('profiles', {})
-            self.active_profile_name = data.get('active_profile', 'Default')
-        elif 'selected_files' in data:
-            default_profile = self._create_empty_profile()
-            default_profile['intro_text'] = data.get('intro_text', '')
-            default_profile['outro_text'] = data.get('outro_text', '')
-            default_profile['expanded_dirs'] = data.get('expanded_dirs', [])
-            default_profile['selected_files'] = data.get('selected_files', [])
-            default_profile['total_tokens'] = data.get('total_tokens', 0)
-            self.profiles = {'Default': default_profile}
-            self.active_profile_name = 'Default'
-
-        all_found_known = set(data.get('known_files', []))
-        for p_data in self.profiles.values():
-            if 'known_files' in p_data: all_found_known.update(p_data.pop('known_files', []))
-            for f_info in p_data.get('selected_files', []):
-                path = f_info['path'] if isinstance(f_info, dict) else f_info
-                all_found_known.add(path)
-
-        self.known_files = sorted(list(all_found_known))
-        self._load_successful = True
-        self.save()
-
-        try:
-            backup_path = self.legacy_allcode_path + '.bak'
-            if os.path.exists(backup_path): os.remove(backup_path)
-            os.rename(self.legacy_allcode_path, backup_path)
-        except OSError: pass
-
-        self._last_content_hash = self._calculate_hash()
-        return True
-
     def _calculate_hash(self):
         state = {"name": self.project_name, "color": self.project_color, "profiles": self.profiles, "active": self.active_profile_name, "known": self.known_files}
         return hashlib.md5(json.dumps(state, sort_keys=True).encode()).hexdigest()
@@ -309,7 +265,8 @@ class ProjectConfig:
         if not is_new_format:
             if original_selection: profile_was_updated = True
             for f_path in original_selection:
-                full_path = os.path.join(self.base_dir, f_path)
+                norm_path = f_path.replace('\\', '/')
+                full_path = os.path.join(self.base_dir, norm_path)
                 if os.path.isfile(full_path):
                     try:
                         with open(full_path, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
@@ -317,11 +274,12 @@ class ProjectConfig:
                         file_hash = get_file_hash(full_path)
                         tokens = get_token_count_for_text(content)
                         lines = content.count('\n') + 1
-                        cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
+                        cleaned_selection.append({'path': norm_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
                     except OSError: continue
         else:
             for f_info in original_selection:
                 if os.path.isfile(os.path.join(self.base_dir, f_info['path'])):
+                    f_info['path'] = f_info['path'].replace('\\', '/')
                     if 'tokens' not in f_info: profile_was_updated = True
                     cleaned_selection.append(f_info)
 

@@ -329,58 +329,71 @@ def parse_gitignore(base_dir):
 def is_ignored(path, base_dir, gitignore_data):
     """
     Determines if a path should be ignored based on parsed .gitignore rules.
-    Optimized for performance by using string prefixing instead of Path object creation.
+    Follows standard Git rules: anchored vs match-anywhere, negated patterns, and dir-only.
     """
     if not gitignore_data:
         return False
 
     path_norm = path.replace('\\', '/')
-    if '.git/' in path_norm or path_norm.endswith('/.git'):
+    if '/.git/' in path_norm or path_norm.endswith('/.git'):
         return True
 
     is_ignored_flag = False
+    is_dir = None # Lazy-load directory status only if needed
 
     # Process gitignores in order (top-down)
     for gitignore_dir_str, patterns in gitignore_data:
-        # Optimization: Only check patterns if the path is within the gitignore's directory
         if not path_norm.startswith(gitignore_dir_str):
             continue
 
-        # Get the path relative to the .gitignore location
+        # Get path relative to this .gitignore's location
         rel_path_str = path_norm[len(gitignore_dir_str):].lstrip('/')
         if not rel_path_str:
             continue
 
         parts = rel_path_str.split('/')
-        is_dir = os.path.isdir(path)
 
         for p_orig in patterns:
             p = p_orig.strip()
-            if not p: continue
+            if not p or p.startswith('#'):
+                continue
 
             is_negated = p.startswith('!')
             if is_negated:
                 p = p[1:]
 
-            contains_slash = '/' in p
+            # A pattern is anchored if it has a slash (other than a trailing one)
             is_dir_only = p.endswith('/')
-            if is_dir_only:
-                p = p.rstrip('/')
+            p_clean = p.rstrip('/')
+
+            # If pattern starts with /, it's anchored to the gitignore root.
+            # If it has a slash anywhere else (middle), it's also relative to the gitignore root.
+            is_anchored = '/' in p_clean or p_orig.startswith('/')
+            p_final = p_clean.lstrip('/')
 
             match = False
-            if not contains_slash:
-                # If no slash, pattern matches against any component of the path
-                if any(fnmatch.fnmatch(part, p) for part in parts):
+            if not is_anchored:
+                # MATCH ANYWHERE: Pattern matches against any component of the path
+                # e.g., 'vendor/' matches 'a/vendor/b'
+                if any(fnmatch.fnmatch(part, p_final) for part in parts[:-1]):
                     match = True
+                elif fnmatch.fnmatch(parts[-1], p_final):
+                    if not is_dir_only:
+                        match = True
+                    else:
+                        if is_dir is None: is_dir = os.path.isdir(path)
+                        if is_dir: match = True
             else:
-                # If slash exists, pattern is relative to the directory of the .gitignore file
-                p_to_match = p.lstrip('/')
-                if fnmatch.fnmatch(rel_path_str, p_to_match) or \
-                   rel_path_str.startswith(p_to_match + '/'):
+                # ANCHORED: Pattern is relative to the directory of the .gitignore
+                # e.g., '/httpdocs/vendor/' matches 'httpdocs/vendor/a' but not 'other/httpdocs/vendor'
+                if rel_path_str.startswith(p_final + '/'):
                     match = True
-
-            if match and is_dir_only and not is_dir:
-                match = False
+                elif fnmatch.fnmatch(rel_path_str, p_final):
+                    if not is_dir_only:
+                        match = True
+                    else:
+                        if is_dir is None: is_dir = os.path.isdir(path)
+                        if is_dir: match = True
 
             if match:
                 is_ignored_flag = not is_negated

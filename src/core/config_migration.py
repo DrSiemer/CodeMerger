@@ -28,12 +28,15 @@ def migrate_legacy_project(config_instance):
         config_instance.profiles = {'Default': default_profile}
         config_instance.active_profile_name = 'Default'
 
-    all_found_known = set(data.get('known_files', []))
+    all_found_known = {p.replace('\\', '/') for p in data.get('known_files', [])}
     for p_data in config_instance.profiles.values():
-        if 'known_files' in p_data: all_found_known.update(p_data.pop('known_files', []))
+        if 'known_files' in p_data:
+            for p in p_data.pop('known_files', []):
+                all_found_known.add(p.replace('\\', '/'))
+
         for f_info in p_data.get('selected_files', []):
             path = f_info['path'] if isinstance(f_info, dict) else f_info
-            all_found_known.add(path)
+            all_found_known.add(path.replace('\\', '/'))
 
     config_instance.known_files = sorted(list(all_found_known))
     config_instance._load_successful = True

@@ -50,6 +50,10 @@ class ProjectManager:
             return False
 
         project_config.known_files = all_project_files
+
+        for p_data in project_config.profiles.values():
+            p_data['unknown_files'] = []
+
         if reset_selection:
             project_config.selected_files = []
             project_config.total_tokens = 0

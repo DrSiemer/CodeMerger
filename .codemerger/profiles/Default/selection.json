@@ -50,10 +50,10 @@
   },
   {
     "path": "src/core/utils.py",
-    "mtime": 1776686383.9624562,
-    "hash": "0d16e6109a05aeb8f9bb68eb62cb7ded93bf41f0",
-    "tokens": 3151,
-    "lines": 423,
+    "mtime": 1776697595.4169466,
+    "hash": "7aead4dd43d3b6d2dd24686d07f0e7359d8d7462",
+    "tokens": 3322,
+    "lines": 436,
     "ignore_tokens": false
   },
   {
@@ -72,17 +72,17 @@
   },
   {
     "path": "src/core/config_migration.py",
-    "tokens": 499,
-    "lines": 49,
-    "mtime": 1776692767.9181974,
-    "hash": "24354d70eebf2da849aade5cf01435603a74b00e"
+    "tokens": 539,
+    "lines": 53,
+    "mtime": 1776696760.362983,
+    "hash": "fa2a2b8e94f7bab02e5b8ac489313652dcb18bb0"
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776692767.9766262,
-    "hash": "292032ef9277bc3b48ea7d47d9cf8a7724dc9254",
-    "tokens": 4174,
-    "lines": 468,
+    "mtime": 1776696760.5689442,
+    "hash": "7e4c1fbc2b282c557e8310c569e207e7e2f84bc8",
+    "tokens": 3795,
+    "lines": 428,
     "ignore_tokens": false
   },
   {
@@ -94,10 +94,10 @@
   },
   {
     "path": "src/core/project_manager.py",
-    "mtime": 1776689659.7166257,
-    "hash": "273e64692abcca301505b2949a1d3678479a6ae5",
-    "tokens": 1213,
-    "lines": 164
+    "mtime": 1776696760.638443,
+    "hash": "46522818c56f124dac99305b27a0e159f0455964",
+    "tokens": 1251,
+    "lines": 169
   },
   {
     "path": "src/core/file_scanner.py",
@@ -213,11 +213,11 @@
   },
   {
     "path": "run_webview.py",
-    "tokens": 908,
+    "tokens": 1140,
     "ignoreTokens": false,
-    "lines": 112,
-    "mtime": 1776500370.3909097,
-    "hash": "ed97e5b00790c3000718bf1f3b6eb4e9a6083fc6"
+    "lines": 132,
+    "mtime": 1776694905.358484,
+    "hash": "01432244455d7660a7205a11d3bc90aacfce4082"
   },
   {
     "path": "src/api_parts/base_api.py",
@@ -622,7 +622,7 @@
     "tokens": 3693,
     "ignoreTokens": false,
     "lines": 456,
-    "mtime": 1776613245.479847,
+    "mtime": 1776694642.5426867,
     "hash": "292b5952db24027c36e951509ca4afd84fa461e4"
   },
   {
