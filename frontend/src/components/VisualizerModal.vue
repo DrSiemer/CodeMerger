@@ -470,7 +470,7 @@ const handleCopyNodeCode = async (node) => {
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
         <div class="flex items-center">
             <div v-if="viewState === 'visualizing'" class="flex items-center space-x-4">
-              <button @click="viewState = 'updating'" v-info="'viz_update_map'" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors shrink-0 flex items-center">
+              <button v-if="mapSyncState !== 'SYNCED'" @click="viewState = 'updating'" v-info="'viz_update_map'" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors shrink-0 flex items-center">
                 <RefreshCw class="w-4 h-4 mr-2" />
                 Update Map
               </button>
