@@ -36,8 +36,8 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
     # Pre-normalization for check
     current_normalized = current_content.replace('\r\n', '\n').replace('\r', '\n')
 
-    # Strategy 0.5: Replace All Shortcut: if the model provides ==ALL==, we replace the entire file content
-    if old_code.strip() == "==ALL==":
+    # Strategy 0.5: Replace All Shortcut: if the model provides the replace-all marker, we replace the entire file content
+    if old_code.strip() == "--==[ REPLACE ALL ]==--":
         return new_code, "Replace All"
 
     if not old_code.strip():

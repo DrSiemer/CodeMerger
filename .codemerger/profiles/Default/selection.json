@@ -116,10 +116,10 @@
   },
   {
     "path": "src/core/replacer.py",
-    "tokens": 1406,
-    "lines": 157,
-    "mtime": 1776629613.983109,
-    "hash": "cb3fe66859d3d99e19d7825a924e66917cbaf1cc"
+    "tokens": 1390,
+    "lines": 156,
+    "mtime": 1776689327.9251664,
+    "hash": "44d4c09e00ac11b551827bb5d6ffed184892a54f"
   },
   {
     "path": "src/core/change_applier.py",
