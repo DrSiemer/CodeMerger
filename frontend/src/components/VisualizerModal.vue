@@ -6,6 +6,7 @@ import {
   Copy,
   Check,
   FileCode,
+  ExternalLink,
   ClipboardPaste,
   AlertTriangle,
   Search,
@@ -21,6 +22,7 @@ const {
   getVisualizerPrompt,
   copyVisualizerNodeCode,
   saveVisualizerMap,
+  openFile,
   resizeWindow,
   statusMessage,
 } = useAppState();
@@ -458,8 +460,11 @@ const handleCopyNodeCode = async (node) => {
               </div>
               <div v-else-if="currentZoomNode?.files?.length" class="absolute inset-0 m-2 overflow-y-auto custom-scrollbar bg-[#222222] rounded-xl border border-gray-800 p-6 space-y-4">
                 <h4 class="text-lg font-bold text-white mb-4 flex items-center"><FileCode class="w-5 h-5 mr-2 text-cm-blue" />Files in this node</h4>
-                <div v-for="file in processedLeafFiles" :key="file.path" class="bg-[#2a2a2a] border rounded-lg p-5 shadow-sm hover:border-gray-500 transition-all duration-300" :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'border-cm-blue ring-1 ring-cm-blue/30 scale-[1.01]' : 'border-gray-700']">
-                  <div class="flex items-center space-x-2 mb-3"><span class="text-cm-blue font-mono font-bold text-sm break-all" v-html="highlightMatch(file.path, searchQuery)"></span></div>
+                <div v-for="file in processedLeafFiles" :key="file.path" @click="openFile(file.path)" class="bg-[#2a2a2a] border rounded-lg p-5 shadow-sm hover:border-gray-500 transition-all duration-300 cursor-pointer group/file" :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'border-cm-blue ring-1 ring-cm-blue/30 scale-[1.01]' : 'border-gray-700']">
+                  <div class="flex items-center justify-between mb-3 min-w-0">
+                    <span class="text-cm-blue font-mono font-bold text-sm break-all" v-html="highlightMatch(file.path, searchQuery)"></span>
+                    <ExternalLink class="w-4 h-4 text-gray-500 opacity-0 group-hover/file:opacity-100 transition-opacity shrink-0 ml-2" />
+                  </div>
                   <p class="text-gray-300 text-[15px] leading-relaxed" v-html="highlightMatch(file.description, searchQuery)"></p>
                 </div>
               </div>
@@ -484,7 +489,10 @@ const handleCopyNodeCode = async (node) => {
                 <div v-if="displayNode.files?.length" class="space-y-4 pt-6">
                   <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Files ({{ displayNode.files.length }})</div>
                   <div class="space-y-1">
-                    <div v-for="file in displayNode.files" :key="file.path" class="flex items-center space-x-2 text-gray-400 group"><FileCode class="w-3 h-3 text-gray-600 shrink-0" /><span class="text-xs font-mono truncate text-gray-300">{{ file.path }}</span></div>
+                    <div v-for="file in displayNode.files" :key="file.path" @click="openFile(file.path)" class="flex items-center space-x-2 text-gray-400 group cursor-pointer hover:text-white transition-colors">
+                        <FileCode class="w-3 h-3 text-gray-600 group-hover:text-cm-blue shrink-0 transition-colors" />
+                        <span class="text-xs font-mono truncate text-gray-300 group-hover:text-white transition-colors">{{ file.path }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
