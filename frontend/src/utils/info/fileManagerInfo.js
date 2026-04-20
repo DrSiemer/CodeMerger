@@ -18,7 +18,7 @@ export const fileManagerInfo = {
   "fm_sort_bottom": "Move to Bottom: Place the selected files at the end of the merge list.",
   "fm_sort_remove": "Delete: Take the selected files out of the merge list (does not delete files from disk).",
   "fm_add_all": "Add All: Add every file matching your current filters and search text to the merge list.",
-  "fm_save": "Save Merge List: Commit your changes to the project's .allcode file and return to the main window.",
+  "fm_save": "Save Merge List: Commit your changes to the project's .codemerger configuration and return to the main window.",
   "fm_cancel": "Cancel: Exit the merge list editor without saving. Any additions, removals, or reordering performed since opening this window will be discarded.",
   "fm_close": "Close: Exit the merge list editor. No changes have been detected."
 };

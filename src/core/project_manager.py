@@ -78,8 +78,9 @@ class ProjectManager:
                 self.project_config = None
                 return None, f"Path is not a directory: {path}"
 
+            codemerger_dir = os.path.join(path, '.codemerger')
             allcode_file = os.path.join(path, '.allcode')
-            is_new_project = not os.path.isfile(allcode_file)
+            is_new_project = not os.path.isdir(codemerger_dir) and not os.path.isfile(allcode_file)
 
             self.project_config = ProjectConfig(path)
 

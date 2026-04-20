@@ -15,13 +15,14 @@ FAST_SCAN_THRESHOLD_SECONDS = 0.5
 # File System
 # Explicit directories to ignore for performance during recursive scans
 SPECIAL_FILES_TO_IGNORE = {
-    '.allcode', '.gitignore', 'package-lock.json', 'node_modules', '.git',
-    '.venv', '__pycache__', '.idea', '.vscode', '.vs', 'bin', 'obj', 'dist', 'build'
+    '.codemerger', '.allcode', '.allcode.bak', '.gitignore', 'package-lock.json',
+    'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode',
+    '.vs', 'bin', 'obj', 'dist', 'build'
 }
 # Files treated as selected to prevent folders from appearing unselected if they are the only unselected items
 FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
 # Prefix for transient files created during atomic writes
-ALLCODE_TEMP_PREFIX = '.allcode_tmp_'
+CODEMERGER_TEMP_PREFIX = '.cm_tmp_'
 
 # API Endpoints
 GITHUB_API_URL = "https://api.github.com/repos/DrSiemer/codemerger/releases/latest"

@@ -61,7 +61,7 @@ def get_project_inventory(base_dir, cancel_event=None):
             for entry in os.scandir(current_path):
                 name_lower = entry.name.lower()
                 # Skip hard-coded performance anchors
-                if name_lower in c.SPECIAL_FILES_TO_IGNORE or name_lower.startswith(c.ALLCODE_TEMP_PREFIX):
+                if name_lower in c.SPECIAL_FILES_TO_IGNORE or name_lower.startswith(c.CODEMERGER_TEMP_PREFIX):
                     continue
 
                 if name_lower == '.git':
@@ -124,7 +124,7 @@ def get_all_matching_files(base_dir, file_extensions, gitignore_patterns=None, a
                     return
 
                 name_lower = entry.name.lower()
-                if name_lower in c.SPECIAL_FILES_TO_IGNORE or name_lower.startswith(c.ALLCODE_TEMP_PREFIX):
+                if name_lower in c.SPECIAL_FILES_TO_IGNORE or name_lower.startswith(c.CODEMERGER_TEMP_PREFIX):
                     continue
 
                 if is_ignored(entry.path, base_dir_norm, new_active_patterns):

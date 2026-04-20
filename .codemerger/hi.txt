@@ -1,0 +1,14 @@
+Hi there! This folder contains the configuration and session data for CodeMerger.
+
+CodeMerger helps you bundle your project code for language models while maintaining full custody of your context.
+
+Folder Structure:
+- config.json: Project metadata (name, color, and active profile pointer).
+- profiles/: Individual directories for your project profiles.
+- profiles/[Name]/selection.json: The list and order of files included in your context.
+- profiles/[Name]/instructions.json: Your custom Intro and Outro prompts.
+- profiles/[Name]/files.json: Profile-specific file states and token counts.
+
+These files are designed to be part of your repository.
+
+Official Repository: https://github.com/DrSiemer/CodeMerger/

@@ -140,7 +140,7 @@ def build_file_tree_data(base_dir, file_extensions, gitignore_patterns=None, fil
 
         for entry in entries:
             name_low = entry.name.lower()
-            if name_low in c.SPECIAL_FILES_TO_IGNORE or name_low.startswith(c.ALLCODE_TEMP_PREFIX):
+            if name_low in c.SPECIAL_FILES_TO_IGNORE or name_low.startswith(c.CODEMERGER_TEMP_PREFIX):
                 continue
 
             rel_path = f"{current_rel_path}/{entry.name}" if current_rel_path else entry.name

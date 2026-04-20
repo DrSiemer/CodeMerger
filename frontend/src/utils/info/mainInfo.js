@@ -1,6 +1,6 @@
 export const mainInfo = {
   // Main Window
-  "select_project": "Select a Project: Click to browse for a folder. CodeMerger will create a hidden .allcode file in that directory, that will store your file selections and project-specific instructions.",
+  "select_project": "Select a Project: Click to browse for a folder. CodeMerger will create a hidden .codemerger folder in that directory, that will store your file selections and project-specific instructions.",
   "project_name": "Project Name: This is the active project. Hover here to reveal the pen icon or double-click to set a custom title. Single-click to switch to another project (same as Select Project button).",
   "color_swatch": "Project Color: Pick a unique accent color for this project. This color is used in Compact Mode, to help you visually distinguish between multiple CodeMerger instances.",
   "minimize_to_taskbar": "Minimize without showing Compact Mode: Click to minimize the application to the taskbar. This action ignores your global 'Compact Mode' setting for this click.",
@@ -39,5 +39,5 @@ export const mainInfo = {
   "inst_intro": "Intro Instructions: This text is placed at the very top of your merged code block. Use it to introduce your project.",
   "inst_outro": "Outro Instructions: This text is placed at the bottom. Use it for code style rules or recurring constraints.",
   "inst_defaults": "Load Defaults: Click to wipe the current fields and load the global default prompts you defined in the Settings.",
-  "inst_save": "Save: Commit these instructions to the project's .allcode file. They are profile-specific."
+  "inst_save": "Save: Commit these instructions to the project's .codemerger configuration. They are profile-specific."
 };

@@ -29,7 +29,7 @@ Download the latest portable executable for Windows from the [Releases page](htt
 
 ## Core Workflow
 
-1. **Select a Project**: Browse for a folder. CodeMerger will automatically create a `.allcode` profile to save your settings.
+1. **Select a Project**: Browse for a folder. CodeMerger will automatically create a `.codemerger` configuration folder to save your settings.
 2. **Edit Merge List**: Click "Edit Merge List" to open the file manager.
    - Select the specific files you want to share with the AI.
    - Drag and drop the selected files to dictate the order in which the AI reads them. Use the "Order Request" to let an LLM determine the optimal order.
