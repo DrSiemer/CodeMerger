@@ -70,7 +70,7 @@ const deleteProfileHandler = async () => {
       <button
         id="btn-visualizer"
         class="transition-all p-1 flex items-center justify-center group"
-        title="Open Project Node Visualizer"
+        title="Open Architecture Explorer"
         @click="emit('open-visualizer')"
         v-info="'visualizer'"
         :disabled="!activeProject.path || isProjectLoading"
