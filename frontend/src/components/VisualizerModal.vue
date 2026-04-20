@@ -8,6 +8,7 @@ import {
   FileCode,
   ClipboardPaste,
   AlertTriangle,
+  Search,
 } from "lucide-vue-next";
 import { useAppState } from "../composables/useAppState";
 import { useEscapeKey } from "../composables/useEscapeKey";
@@ -28,6 +29,7 @@ const activeNode = ref(null);
 const expandedNodes = ref(new Set());
 const isPromptCopied = ref(false);
 const parseError = ref("");
+const searchQuery = ref("");
 
 const zoomPath = ref([]);
 const hoveredNode = ref(null);
@@ -38,6 +40,52 @@ const currentZoomNode = computed(() => {
 });
 
 const displayNode = computed(() => hoveredNode.value || currentZoomNode.value);
+
+const nodeHasMatch = (node, query) => {
+  if (!query) return true;
+  const q = query.toLowerCase();
+
+  // Direct file match
+  if (node.files && node.files.some(f =>
+    f.path.toLowerCase().includes(q) ||
+    (f.description && f.description.toLowerCase().includes(q))
+  )) {
+    return true;
+  }
+
+  // Recursive child match
+  if (node.children) {
+    return node.children.some(child => nodeHasMatch(child, query));
+  }
+
+  return false;
+};
+
+const processedLeafFiles = computed(() => {
+  const node = currentZoomNode.value;
+  if (!node || !node.files) return [];
+
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return node.files;
+
+  return [...node.files].sort((a, b) => {
+    const aMatch = a.path.toLowerCase().includes(query) || (a.description && a.description.toLowerCase().includes(query));
+    const bMatch = b.path.toLowerCase().includes(query) || (b.description && b.description.toLowerCase().includes(query));
+    if (aMatch && !bMatch) return -1;
+    if (!aMatch && bMatch) return 1;
+    return 0;
+  });
+});
+
+const highlightMatch = (text, query) => {
+  if (!query || !text) return text;
+  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  return parts.map(part =>
+    part.toLowerCase() === query.toLowerCase()
+      ? `<mark class="bg-yellow-500/30 text-yellow-100 rounded px-0.5">${part}</mark>`
+      : part
+  ).join('');
+};
 
 useEscapeKey(() => emit("close"));
 
@@ -236,20 +284,41 @@ const handleCopyNodeCode = async (node) => {
       <div
         class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar"
       >
-        <div class="flex items-center space-x-3 text-white">
+        <div class="flex items-center space-x-3 text-white shrink-0">
           <Network class="w-6 h-6 text-cm-blue" />
           <h2 class="text-xl font-bold">Semantic Architecture Terrain Map</h2>
           <span class="text-gray-500 text-sm font-medium"
             >/ {{ activeProject.name }}</span
           >
         </div>
-        <button
-          @click="emit('close')"
-          class="text-gray-400 hover:text-white transition-colors"
-          title="Close visualizer"
-        >
-          <X class="w-6 h-6" />
-        </button>
+
+        <div class="flex items-center space-x-6 flex-grow justify-end max-w-2xl px-6">
+            <!-- Search Bar -->
+            <div v-if="viewState === 'visualizing'" class="relative w-full max-w-sm">
+                <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Search files or descriptions..."
+                    class="w-full bg-cm-input-bg border border-gray-600 rounded-full py-1.5 pl-10 pr-10 text-sm text-white focus:border-cm-blue outline-none transition-all shadow-inner"
+                />
+                <button
+                    v-if="searchQuery"
+                    @click="searchQuery = ''"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                >
+                    <X class="w-4 h-4" />
+                </button>
+            </div>
+
+            <button
+                @click="emit('close')"
+                class="text-gray-400 hover:text-white transition-colors"
+                title="Close visualizer"
+            >
+                <X class="w-6 h-6" />
+            </button>
+        </div>
       </div>
 
       <!-- Main Body -->
@@ -373,6 +442,7 @@ const handleCopyNodeCode = async (node) => {
                   v-for="child in currentZoomNode.children"
                   :key="child.id"
                   class="absolute border border-gray-900 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:brightness-125 shadow-lg group"
+                  :class="{ 'opacity-20 grayscale': searchQuery && !nodeHasMatch(child, searchQuery) }"
                   :style="getRectStyle(child.layout)"
                   @click="zoomPath.push(child)"
                   @mouseenter="hoveredNode = child"
@@ -427,18 +497,19 @@ const handleCopyNodeCode = async (node) => {
                   Implementation Files
                 </h4>
                 <div
-                  v-for="file in currentZoomNode.files"
+                  v-for="file in processedLeafFiles"
                   :key="file.path"
-                  class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-5 shadow-sm hover:border-gray-500 transition-colors"
+                  class="bg-[#2a2a2a] border rounded-lg p-5 shadow-sm hover:border-gray-500 transition-all duration-300"
+                  :class="[
+                      searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase())))
+                        ? 'border-cm-blue ring-1 ring-cm-blue/30 scale-[1.01]'
+                        : 'border-gray-700'
+                  ]"
                 >
                   <div class="flex items-center space-x-2 mb-3">
-                    <span class="text-cm-blue font-mono font-bold text-sm break-all">{{
-                      file.path
-                    }}</span>
+                    <span class="text-cm-blue font-mono font-bold text-sm break-all" v-html="highlightMatch(file.path, searchQuery)"></span>
                   </div>
-                  <p class="text-gray-300 text-[15px] leading-relaxed">
-                    {{ file.description || "No description provided." }}
-                  </p>
+                  <p class="text-gray-300 text-[15px] leading-relaxed" v-html="highlightMatch(file.description, searchQuery)"></p>
                 </div>
               </div>
               <div v-else class="flex items-center justify-center h-full text-gray-500">
