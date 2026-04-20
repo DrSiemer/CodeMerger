@@ -27,19 +27,23 @@ _instance_lock = None
 # Global Tiktoken instance to prevent re-initialization during batch operations
 _tiktoken_encoding = None
 
+def is_dev_mode():
+    """Centralized check for development environment."""
+    return "--dev" in sys.argv or os.environ.get('CM_DEV_MODE') == '1'
+
 def is_another_instance_running():
     """
-    Identifies active instances via Named Mutex on Windows
-    Returns False if CM_DEV_MODE environment variable is active
+    Identifies active instances via Named Mutex on Windows.
+    Isolation is guaranteed by environment-specific Mutex names.
     """
     global _instance_lock
 
-    if os.environ.get('CM_DEV_MODE') == '1':
-        return False
-
     try:
         kernel32 = ctypes.windll.kernel32
-        mutex_name = "Global\\CodeMerger_Instance_Mutex_C06CFB28"
+
+        suffix = "_DEV" if is_dev_mode() else ""
+        mutex_name = f"Global\\CodeMerger_Instance_Mutex_C06CFB28{suffix}"
+
         _instance_lock = kernel32.CreateMutexW(None, False, mutex_name)
 
         if not _instance_lock:

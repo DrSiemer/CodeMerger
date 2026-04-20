@@ -80,7 +80,7 @@ class FileMonitorThread(threading.Thread):
 
         try:
             if project_config.has_external_changes():
-                log.info("External change detected in .allcode. Reloading.")
+                log.info("External change detected in project configuration. Reloading.")
                 if project_config.load():
                     self._safe_eval('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
 

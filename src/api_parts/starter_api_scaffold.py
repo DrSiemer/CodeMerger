@@ -17,12 +17,27 @@ class StarterApiScaffold:
     """API methods for scanning existing projects and scaffolding the new one."""
 
     def get_base_project_data(self, path):
-        """Loads .allcode from a path without making it active. READ-ONLY."""
+        """Loads .codemerger data from a path without making it active. READ-ONLY."""
         if not path or not os.path.isdir(path):
             return None
 
+        # Safety Check: Do not auto-migrate reference projects during a peek.
+        # We demand the user updates the project by opening it normally first.
+        codemerger_dir = os.path.join(path, '.codemerger')
+        allcode_file = os.path.join(path, '.allcode')
+
+        if not os.path.isdir(codemerger_dir) and os.path.isfile(allcode_file):
+            return {
+                "path": path,
+                "status_msg": "ERROR: Legacy project format detected. Please open this project normally in CodeMerger to update it first."
+            }
+
         config = ProjectConfig(path)
         try:
+            # If neither the new folder nor the old file exists, it's just a folder
+            if not os.path.isdir(codemerger_dir) and not os.path.isfile(allcode_file):
+                return None
+
             config.load()
             return self._format_project_response(config, "")
         except Exception as e:

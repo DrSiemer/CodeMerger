@@ -233,6 +233,11 @@ class ProjectConfig:
                             self.profiles[profile_name] = profile_data
 
             if not self.profiles:
+                # Safety Gate: If config exists but profiles dir is empty/missing, something is wrong.
+                # Abort to prevent save() from initializing a blank state and deleting data.
+                if os.path.isfile(self.config_file) and os.path.getsize(self.config_file) > 0:
+                    raise RuntimeError("Project configuration found but profiles are missing or inaccessible.")
+
                 self.profiles['default'] = self._create_empty_profile()
                 self.active_profile_name = 'default'
                 config_was_updated = True
@@ -350,15 +355,17 @@ class ProjectConfig:
                 _save_chunk('visualizer.json', profile_data.get('visualizer_map', None))
 
             # Cleanup orphaned profile items or legacy JSON files
-            for item_name in os.listdir(self.profiles_dir):
-                full_path = os.path.join(self.profiles_dir, item_name)
-                if os.path.isdir(full_path):
-                    if full_path not in active_profile_dirs:
-                        try: shutil.rmtree(full_path)
+            # Logic: only delete if load was fully successful and we found at least one valid profile
+            if self._load_successful and self.profiles:
+                for item_name in os.listdir(self.profiles_dir):
+                    full_path = os.path.join(self.profiles_dir, item_name)
+                    if os.path.isdir(full_path):
+                        if full_path not in active_profile_dirs:
+                            try: shutil.rmtree(full_path)
+                            except OSError: pass
+                    elif os.path.isfile(full_path) and full_path.endswith('.json'):
+                        try: os.remove(full_path)
                         except OSError: pass
-                elif os.path.isfile(full_path) and full_path.endswith('.json'):
-                    try: os.remove(full_path)
-                    except OSError: pass
 
             self._last_content_hash = self._calculate_hash()
 

@@ -15,13 +15,21 @@ const props = defineProps({
 
 defineEmits(['next'])
 
-const { selectDirectory, getBaseProjectData } = useAppState()
+const { selectDirectory, getBaseProjectData, statusMessage } = useAppState()
 
 const browseBaseProject = async () => {
   const folder = await selectDirectory()
   if (folder) {
     props.pData.base_project_path = folder
     const existingData = await getBaseProjectData(folder)
+
+    if (existingData?.status_msg?.startsWith("ERROR")) {
+      statusMessage.value = existingData.status_msg
+      props.pData.base_project_path = ''
+      props.pData.base_project_files = []
+      return
+    }
+
     if (existingData && existingData.selected_files?.length) {
       props.pData.base_project_files = existingData.selected_files
     } else {

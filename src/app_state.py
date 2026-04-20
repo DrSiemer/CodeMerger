@@ -11,6 +11,7 @@ class AppState:
     """
     def __init__(self, is_second_instance=False):
         self.config = load_config()
+        self.is_secondary = is_second_instance
         self.active_directory = self.config.get('active_directory', '')
 
         # Prevent secondary instances from automatically loading the last project
@@ -82,7 +83,11 @@ class AppState:
 
         # Apply settings from our current memory state.
         # This ensures "Last Changed Wins" for active project and global preferences.
-        disk_config['active_directory'] = self.active_directory
+
+        # Safety Gate: Secondary instances should not clear the global active project if they are in their boot-default empty state
+        if self.active_directory or not self.is_secondary:
+            disk_config['active_directory'] = self.active_directory
+
         disk_config['default_editor'] = self.default_editor
         disk_config['scan_for_secrets'] = self.scan_for_secrets
         disk_config['copy_merged_prompt'] = self.copy_merged_prompt

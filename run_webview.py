@@ -1,5 +1,10 @@
 import sys
 import os
+
+# Flag environment early to ensure isolated configuration paths
+if "--dev" in sys.argv:
+    os.environ['CM_DEV_MODE'] = '1'
+
 import ctypes
 from ctypes import wintypes
 import mimetypes
@@ -43,13 +48,12 @@ from src.core.window_manager import WindowManager
 log = logging.getLogger("CodeMerger")
 
 def main():
-    dev_mode = "--dev" in sys.argv
+    dev_mode = os.environ.get('CM_DEV_MODE') == '1'
     debug_mode = "--debug" in sys.argv or "--inspect" in sys.argv or dev_mode
     show_console = "--console" in sys.argv
 
-    # Detect if this instance is secondary to decide if we should boot with an active project
-    # Instance detection is disabled in dev mode to allow standard project loading during development
-    is_second_instance = is_another_instance_running() if not dev_mode else False
+    # Detect if this instance is secondary. Dev and Prod instances are isolated via unique Mutex names.
+    is_second_instance = is_another_instance_running()
 
     if show_console and sys.platform == "win32":
         try:

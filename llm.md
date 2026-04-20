@@ -73,6 +73,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **Named Mutex Single-Instance Detection**: `src/core/utils.py` uses a Named Mutex (Windows) and `fcntl` (POSIX) for instance detection instead of process scanning, avoiding the high startup cost of iterating the system process table.
 - **Adaptive Monitor Throttling**: `FileMonitorThread` scales sleep time based on scan duration ($T \times 4$). If a scan takes 3s, it sleeps for 12s. On Windows, it also calls `THREAD_MODE_BACKGROUND_BEGIN` to lower IO/CPU priority during massive project walks.
 - **API Bridge Protection**: Attributes in the `Api` class prefixed with an underscore (e.g., `self._window_manager`) are ignored by PyWebView during JS API generation, preventing premature DOM evaluation or crashes during the startup handshake.
+- **Multi-Instance Write Safety**: `AppState` uses a `is_secondary` flag to prevent background instances from overwriting the global `active_directory` with an empty string during window movement or shutdown. `ProjectConfig.load` will raise a `RuntimeError` if profiles are missing from an established project, effectively locking the state and preventing `ProjectConfig.save` from initializing a blank project and wiping actual data.
 
 ### Frontend & Web UI (`frontend/src`)
 

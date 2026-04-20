@@ -8,10 +8,10 @@
   },
   {
     "path": "llm.md",
-    "mtime": 1776688362.2696025,
-    "hash": "e5bf294f7a0e38b08922f9e820619dff20f10eae",
-    "tokens": 2418,
-    "lines": 91
+    "mtime": 1776714752.2392957,
+    "hash": "338bb5a272252c20124f93f06693a42441e5410d",
+    "tokens": 2501,
+    "lines": 92
   },
   {
     "path": "requirements.txt",
@@ -50,10 +50,10 @@
   },
   {
     "path": "src/core/utils.py",
-    "mtime": 1776697595.4169466,
-    "hash": "7aead4dd43d3b6d2dd24686d07f0e7359d8d7462",
-    "tokens": 3322,
-    "lines": 436,
+    "mtime": 1776715213.2048545,
+    "hash": "16bd079680df2348d4a9e09a02dff63d2a65a272",
+    "tokens": 3354,
+    "lines": 440,
     "ignore_tokens": false
   },
   {
@@ -79,25 +79,25 @@
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776697805.255323,
-    "hash": "8c3dbb7fb3ebff541b798925f5becf49779d65cb",
-    "tokens": 3857,
-    "lines": 436,
+    "mtime": 1776714752.183944,
+    "hash": "06222305f44dea91e7f15d667d0f2b05b3369916",
+    "tokens": 3960,
+    "lines": 443,
     "ignore_tokens": false
   },
   {
     "path": "src/app_state.py",
-    "mtime": 1776616805.0373132,
-    "hash": "2fa2f05831054144174ae5524e42729aad0b7081",
-    "tokens": 1517,
-    "lines": 161
+    "mtime": 1776714751.9802248,
+    "hash": "c02f25085b70708f455d8a3fcee7ace303a17433",
+    "tokens": 1561,
+    "lines": 166
   },
   {
     "path": "src/core/project_manager.py",
-    "mtime": 1776696760.638443,
-    "hash": "46522818c56f124dac99305b27a0e159f0455964",
-    "tokens": 1251,
-    "lines": 169
+    "mtime": 1776714256.7190328,
+    "hash": "c9f34733e01785ffac925be93857d60c2a7e2a59",
+    "tokens": 1238,
+    "lines": 168
   },
   {
     "path": "src/core/file_scanner.py",
@@ -158,11 +158,11 @@
   },
   {
     "path": "src/core/file_monitor_thread.py",
-    "tokens": 1478,
+    "tokens": 1103,
     "ignoreTokens": false,
-    "lines": 178,
-    "mtime": 1776200572.2068357,
-    "hash": "c85098ca19dc46766076f7eb344ebd12bfe1e82a"
+    "lines": 139,
+    "mtime": 1776714256.6630323,
+    "hash": "0f1fed1cb75760a482c47173eb4e5c15fd899ed9"
   },
   {
     "path": "src/core/updater.py",
@@ -213,11 +213,11 @@
   },
   {
     "path": "run_webview.py",
-    "tokens": 1140,
+    "tokens": 920,
     "ignoreTokens": false,
-    "lines": 132,
-    "mtime": 1776694905.358484,
-    "hash": "01432244455d7660a7205a11d3bc90aacfce4082"
+    "lines": 116,
+    "mtime": 1776715109.2646575,
+    "hash": "36c9d7f2a712391c2c02c190cae51d9ef5056089"
   },
   {
     "path": "src/api_parts/base_api.py",
@@ -295,11 +295,11 @@
   },
   {
     "path": "src/api_parts/starter_api_scaffold.py",
-    "tokens": 2190,
+    "tokens": 2355,
     "ignoreTokens": false,
-    "lines": 206,
-    "mtime": 1776629197.7112818,
-    "hash": "9e8d799e1423fe0dd2f07e72deada1a8c2a05414"
+    "lines": 221,
+    "mtime": 1776714209.4161558,
+    "hash": "0bfeb5e7927c329b30eb9fd5e68c5f11da1c7ac8"
   },
   {
     "path": "src/api_parts/starter_api.py",
@@ -816,8 +816,11 @@
   },
   {
     "path": "frontend/src/components/starter-steps/Step1Details.vue",
-    "tokens": 913,
-    "ignoreTokens": false
+    "tokens": 963,
+    "ignoreTokens": false,
+    "lines": 89,
+    "mtime": 1776714209.4761558,
+    "hash": "0c6b8f2fe3cd71d65a6ae8bd93067131c3cefdae"
   },
   {
     "path": "frontend/src/components/starter-steps/Step2BaseFiles.vue",

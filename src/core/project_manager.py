@@ -61,7 +61,7 @@ class ProjectManager:
 
     def load_project(self, path, cancel_event=None):
         """
-        Loads a project from a given path. If no .allcode file exists,
+        Loads a project from a given path. If no configuration exists,
         it initializes a new one. Passing None unloads the current project.
         Returns a tuple: (ProjectConfig object or None, status message string)
         """
@@ -84,9 +84,9 @@ class ProjectManager:
                 return None, f"Path is not a directory: {path}"
 
             codemerger_dir = os.path.join(path, '.codemerger')
+            # Legacy check: look for old .allcode file to trigger migration
             allcode_file = os.path.join(path, '.allcode')
             is_new_project = not os.path.isdir(codemerger_dir) and not os.path.isfile(allcode_file)
-            # Detect migration from legacy format
             is_migration = not os.path.isdir(codemerger_dir) and os.path.isfile(allcode_file)
 
             self.project_config = ProjectConfig(path)
