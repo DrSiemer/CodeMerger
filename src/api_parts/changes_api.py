@@ -249,38 +249,62 @@ class ChangesApi:
     def copy_admonishment(self):
         """
         Generates and copies a specialized prompt for corrected AI output.
-        If the last plan failed due to a Fast-Apply mismatch, it includes
-        the full source code of the affected files.
+        Distinguishes between Ambiguous matches (duplicate code) and Mismatches (not found).
         """
         plan = self._last_parsed_plan
 
         # Check if we have a specific Fast-Apply failure
         if plan and plan.get('error_type') == 'FAST_APPLY' and plan.get('failed_paths'):
-            failed_paths = plan['failed_paths']
-            project_config = self.project_manager.get_current_project()
+            failed_entries = plan['failed_paths']  # List of (path, error_str)
 
-            blocks = []
-            for rel_path in failed_paths:
-                content = self.get_file_content(rel_path)
-                if content is not None:
-                    from src.core.merger import get_language_from_path
-                    lang = get_language_from_path(rel_path)
-                    blocks.append(f"--- File: `{rel_path}` ---\n```{lang}\n{content}\n```\n--- End of file ---")
+            ambiguous_paths = []
+            mismatch_paths = []
 
-            paths_str = ", ".join([f"`{p}`" for p in failed_paths])
-            msg = (
-                "Surgical Patch Mismatch: The ORIGINAL code blocks provided for the following files do not match my current local source:\n"
-                f"{paths_str}\n\n"
-                "This error occurred because your baseline reference is out of sync with the current evolved state of the project. "
-                "To resolve this, I am providing the *actual* up-to-date source code for the affected files below. "
-                "Please use this code as your new baseline and return a CORRECTED surgical diff using ORIGINAL/UPDATED blocks.\n\n"
-                "CRITICAL: Do NOT return the full file content. Only provide the corrected surgical blocks.\n\n"
-                + "\n\n".join(blocks) + "\n\n"
-                "Please ensure your new ORIGINAL blocks are a byte-for-byte match to the code provided above and are UNIQUE within the file (provide context if needed to disambiguate)."
-            )
+            for path, err in failed_entries:
+                if "Ambiguous match" in err:
+                    ambiguous_paths.append(path)
+                else:
+                    mismatch_paths.append(path)
+
+            prompt_parts = []
+
+            # 1. Handle Ambiguity
+            if ambiguous_paths:
+                paths_str = ", ".join([f"`{p}`" for p in ambiguous_paths])
+                prompt_parts.append(
+                    "Ambiguous ORIGINAL Block: The ORIGINAL code blocks provided for the following files appear multiple times in my current local source:\n"
+                    f"{paths_str}\n\n"
+                    "This creates an ambiguous match, making it impossible to apply the patch safely. Please provide additional context lines (above or below) in your ORIGINAL block to ensure it uniquely identifies the specific segment you intend to modify."
+                )
+
+            # 2. Handle Mismatches
+            if mismatch_paths:
+                blocks = []
+                for rel_path in mismatch_paths:
+                    content = self.get_file_content(rel_path)
+                    if content is not None:
+                        from src.core.merger import get_language_from_path
+                        lang = get_language_from_path(rel_path)
+                        blocks.append(f"--- File: `{rel_path}` ---\n```{lang}\n{content}\n```\n--- End of file ---")
+
+                paths_str = ", ".join([f"`{p}`" for p in mismatch_paths])
+                prompt_parts.append(
+                    "Surgical Patch Mismatch: The ORIGINAL code blocks provided for the following files do not match my current local source:\n"
+                    f"{paths_str}\n\n"
+                    "This error occurred because your baseline reference is out of sync with the current evolved state of the project. "
+                    "To resolve this, I am providing the *actual* up-to-date source code for the affected files below. "
+                    "Please use this code as your new baseline and return a CORRECTED surgical diff using ORIGINAL/UPDATED blocks.\n\n"
+                    "CRITICAL: Do NOT return the full file content. Only provide corrected surgical blocks.\n\n"
+                    + "\n\n".join(blocks)
+                )
+
+            # Join parts and provide final uniqueness instruction
+            msg = "\n\n".join(prompt_parts)
+            msg += "\n\nPlease ensure your new ORIGINAL blocks are a byte-for-byte match to my source and are UNIQUE within the file (provide context if needed to disambiguate)."
+
             try:
                 pyperclip.copy(msg)
-                return f"Copied surgical correction prompt for {len(failed_paths)} file(s)."
+                return f"Copied surgical correction prompt for {len(failed_entries)} file(s)."
             except Exception:
                 return "Failed to copy prompt."
 

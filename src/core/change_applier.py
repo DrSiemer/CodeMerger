@@ -307,9 +307,9 @@ def parse_and_plan_changes(base_dir, markdown_text):
         return {
             'status': 'ERROR',
             'error_type': 'FAST_APPLY',
-            'failed_paths': [p for p, e in failed_paths],
+            'failed_paths': failed_paths,  # Return list of (path, err_string) tuples
             'message': f"Fast-Apply Error in {len(failed_paths)} file(s):\n{err_msg}",
-            'hint': "The AI is hallucinating old code. Click 'Copy Correction Prompt' to send the up-to-date source back to the AI."
+            'hint': "The AI is hallucinating old code or providing ambiguous snippets. Click 'Copy Correction Prompt' to send instructions back to the AI."
         }
 
     if not all_blocks:
