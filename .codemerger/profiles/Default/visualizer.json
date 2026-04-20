@@ -1,367 +1,286 @@
 {
   "tree": {
     "name": "System Architecture",
-    "description": "Complete project structure",
-    "domain": "default",
+    "description": "CodeMerger is a highly decoupled desktop application leveraging a Python backend and a Vue 3 frontend to orchestrate context for Language Models. The architecture is cleanly divided into Frontend UI, Backend Engine, and Infrastructure components, all communicating via a PyWebView API bridge.",
     "children": [
       {
-        "name": "Project Foundations",
-        "description": "Essential infrastructure, distribution manifests, and template assets defining the application's deployment and bootstrapping ecosystem.",
-        "domain": "infrastructure",
+        "name": "Frontend Application",
+        "description": "The client-side Vue 3 application responsible for state management, interactive diff reviews, and communicating with the Python host.",
+        "domain": "frontend",
         "children": [
           {
-            "name": "Documentation & Manifests",
-            "description": "Static configuration and guidance files defining project requirements and quirks.",
+            "name": "Core Application Setup",
+            "description": "Bootstrapping, routing, and primary view layouts for the Vue application.",
+            "children": [],
             "files": [
               {
-                "path": "README.md",
-                "description": "The primary user and developer manual, outlining the clipboard-based bridge philosophy. It details technical requirements, key features like 'Prompt Custody', and setup instructions for local development."
+                "path": "frontend/src/App.vue",
+                "description": "The global root component that manages the application lifecycle. It intercepts global shortcut keys (like Ctrl+V) to bypass browser restrictions and routes them to the Python bridge."
               },
               {
-                "path": "llm.md",
-                "description": "A mission-critical quirks manifest designed for AI agents to prevent redundant refactoring of intentional workarounds. It documents architectural anomalies like hybrid DPI coordinate handling and strict whitespace normalization."
+                "path": "frontend/src/views/MainView.vue",
+                "description": "The primary dashboard layout containing the project header, navigation, and core actions. Acts as the anchor for all full-screen modals."
               },
               {
-                "path": "requirements.txt",
-                "description": "The exhaustive list of Python library dependencies required by the logic engine. It ensures environment parity and includes specialized packages for tokenization and secret detection."
+                "path": "frontend/src/views/CompactView.vue",
+                "description": "An always-on-top, minimalist widget view designed to sit over an IDE. It implements custom logical-to-physical window drag calculations to ensure smooth movement on high-DPI screens."
               },
               {
-                "path": "default_filetypes.json",
-                "description": "A master registry of standard code extensions and their descriptions used for the initial application configuration. It serves as the baseline for the frontend's extension-based filtering system."
+                "path": "frontend/src/main.js",
+                "description": "The Vue 3 application entry point. Registers the router and custom directives before mounting to the DOM."
+              },
+              {
+                "path": "frontend/src/router/index.js",
+                "description": "Vue Router configuration. Uses hash-based history to maintain compatibility with PyWebView's local file protocol rendering."
               }
             ],
             "id": 3,
-            "domain": "infrastructure",
-            "color": "#DE6808",
-            "weight": 4,
-            "layout": {
-              "x": 38.46153846153847,
-              "y": 35,
-              "w": 61.53846153846153,
-              "h": 32.5
-            }
-          },
-          {
-            "name": "Build & Update Tooling",
-            "description": "Automation scripts and build definitions for compiling and packaging CodeMerger.",
-            "files": [
-              {
-                "path": "go.bat",
-                "description": "The central development task-runner for Windows, orchestrating everything from virtual environment creation to concurrent frontend/backend execution. It maps simple flags to complex CLI sequences for build, debug, and release workflows."
-              },
-              {
-                "path": "codemerger.spec",
-                "description": "The PyInstaller configuration defining how the Python engine and bundled assets are packed into a portable executable. It includes specific hooks for Tcl/Tk data and Chromium-based webview platforms."
-              },
-              {
-                "path": "setup.iss",
-                "description": "An Inno Setup script that generates the production Windows installer, handling registry key creation and installation path resolution. It ensures shell execution flags are used to avoid elevation-based webview crashes."
-              },
-              {
-                "path": ".github/workflows/release.yml",
-                "description": "The automated CI/CD pipeline for GitHub releases, triggering builds when new version tags are pushed. It handles multi-stage environment setup for Node.js and Python to compile the final distribution artifact."
-              },
-              {
-                "path": "updater_gui.py",
-                "description": "A standalone Python script compiled into a small executable to handle the self-update process. It executes a blocking check on the parent process ID to ensure a clean overwrite during software updates."
-              }
-            ],
-            "id": 4,
-            "domain": "infrastructure",
-            "color": "#DE6808",
+            "domain": "frontend",
+            "color": "#0D8319",
             "weight": 5,
             "layout": {
-              "x": 0,
-              "y": 35,
-              "w": 38.46153846153847,
-              "h": 65
+              "x": 84.0909090909091,
+              "y": 61.19929453262787,
+              "w": 15.909090909090907,
+              "h": 38.80070546737214
             }
           },
           {
-            "name": "Genesis Reference Data",
-            "description": "Guiding data used by the Project Starter to influence AI generation and plan structure.",
-            "files": [
-              {
-                "path": "assets/reference/concept_questions.json",
-                "description": "A database of strategic prompts used in Step 3 of the Project Starter to validate the quality of AI-generated concepts. It provides the metadata used by the UI's guiding-question carousel."
-              },
-              {
-                "path": "assets/reference/todo_questions.json",
-                "description": "Implementation-focused questions used to audit the feasibility of the AI-generated implementation roadmap. It ensures critical phases like environment setup and testing points are not omitted."
-              },
-              {
-                "path": "assets/reference/concept.md",
-                "description": "A foundational template defining the structural expectations for a Project Concept document. It acts as few-shot context for the LLM to ensure consistent formatting across different project types."
-              },
-              {
-                "path": "assets/reference/todo.md",
-                "description": "The reference roadmap template breaking development into distinct logical phases. It helps the LLM break down complex app goals into incremental, actionable implementation steps."
-              }
-            ],
-            "id": 5,
-            "domain": "infrastructure",
-            "color": "#DE6808",
-            "weight": 4,
-            "layout": {
-              "x": 38.46153846153847,
-              "y": 67.5,
-              "w": 61.53846153846153,
-              "h": 32.5
-            }
-          },
-          {
-            "name": "Project Template Seeds",
-            "description": "Default files and automation scripts injected into new projects scaffolded by CodeMerger.",
-            "files": [
-              {
-                "path": "assets/boilerplate/README.md",
-                "description": "A placeholder documentation file for newly created projects, containing dynamic tokens for tech stack and setup details. It encourages best practices in the user's generated codebase."
-              },
-              {
-                "path": "assets/boilerplate/llm.md",
-                "description": "A replica of CodeMerger's quirks manifest provided to the user's project to support their own AI-driven development. It establishes a standard for documenting workaround logic from the start."
-              },
-              {
-                "path": "assets/boilerplate/version.txt",
-                "description": "A semantic versioning anchor for the scaffolded project, enabling immediate use of the included release automation scripts. It standardizes the version tracking format for the user."
-              },
-              {
-                "path": "assets/boilerplate/release.bat",
-                "description": "A reusable version of CodeMerger's release logic provided to the user. It automates Git tagging and branch validation for their newly generated software."
-              },
-              {
-                "path": "assets/boilerplate/go_python.bat",
-                "description": "A boilerplate task runner for Python projects, pre-configured with virtual environment and freeze logic. It provides users with a standardized entry point for running and building their code."
-              },
-              {
-                "path": "assets/boilerplate/go_nodejs.bat",
-                "description": "A node-specific task runner script provided during project generation. It encapsulates common npm commands into the unified 'go' interface used throughout the CodeMerger ecosystem."
-              },
-              {
-                "path": "assets/boilerplate/go_docker.bat",
-                "description": "The default orchestration script for generated projects requiring containerization. It simplifies Docker-Compose interactions for users starting with microservice-oriented stacks."
-              }
-            ],
-            "id": 6,
-            "domain": "infrastructure",
-            "color": "#DE6808",
-            "weight": 7,
-            "layout": {
-              "x": 0,
-              "y": 0,
-              "w": 100,
-              "h": 35
-            }
-          }
-        ],
-        "id": 2,
-        "color": "#DE6808",
-        "files": [],
-        "weight": 21,
-        "layout": {
-          "x": 65,
-          "y": 56.52173913043478,
-          "w": 35,
-          "h": 43.47826086956522
-        }
-      },
-      {
-        "name": "Logic Engine",
-        "description": "The Python backend managing file systems, LLM interactions, and multi-window state synchronization.",
-        "domain": "backend",
-        "children": [
-          {
-            "name": "Core Orchestration",
-            "description": "Foundational modules handling application entry, global state, and system utilities.",
-            "files": [
-              {
-                "path": "run_webview.py",
-                "description": "The main bootstrapper that configures Win32 DPI awareness and registers MIME types for ES modules. It initializes the API bridge and starts the PyWebView event loop."
-              },
-              {
-                "path": "src/app_state.py",
-                "description": "The central repository for persistent application settings and cross-window coordination. It implements a non-destructive reconciliation strategy to merge configurations from concurrent instances."
-              },
-              {
-                "path": "src/constants.py",
-                "description": "Defines global magic numbers, color palettes, and performance thresholds. Crucially, it hosts the marker fragments used to avoid recursive self-parsing errors during code bundling."
-              },
-              {
-                "path": "src/core/paths.py",
-                "description": "Handles OS-specific path resolution for bundled assets and persistent user data. It distinguishes between the immutable install directory and the writable %APPDATA% config root."
-              },
-              {
-                "path": "src/core/registry.py",
-                "description": "Interfaces with the Windows Registry to manage system-level preferences like automatic update toggles. It provides fallbacks between HKCU and HKLM scopes."
-              },
-              {
-                "path": "src/core/utils.py",
-                "description": "A collection of critical logic utilities, including the Named Mutex single-instance detector and the Tiktoken context window calculator. It hosts the atomic file-writing logic used to prevent config corruption."
-              }
-            ],
-            "id": 8,
-            "domain": "backend",
-            "color": "#0078D4",
-            "weight": 6,
-            "layout": {
-              "x": 0,
-              "y": 36.84210526315789,
-              "w": 25,
-              "h": 63.15789473684211
-            }
-          },
-          {
-            "name": "File & Data Intelligence",
-            "description": "Services responsible for scanning codebases and managing project-specific configurations.",
-            "files": [
-              {
-                "path": "src/core/project_manager.py",
-                "description": "The high-level controller for project lifecycle management, responsible for initializing new .allcode profiles and maintaining the in-memory disk inventory. It provides the concurrency locks required to synchronize the monitor thread and user API requests."
-              },
-              {
-                "path": "src/core/project_config.py",
-                "description": "The logic wrapper for the .allcode file, handling profile creation, file selection state, and per-file token counting. It includes defensive loading checks to ignore collision-based empty files."
-              },
-              {
-                "path": "src/core/file_scanner.py",
-                "description": "An optimized disk walker that extracts project file lists while simultaneously discovering and parsing .gitignore patterns. It is designed to move expensive IO operations out of the UI rendering loop."
-              },
-              {
-                "path": "src/core/file_tree_builder.py",
-                "description": "The transformation engine that converts flat file lists into hierarchical Trie data for the frontend. It features an inventory-first mode for instant UI results on codebases with 10k+ files."
-              },
-              {
-                "path": "src/core/file_monitor_thread.py",
-                "description": "A daemon thread that performs background filesystem checks to alert users of new or deleted files. It uses adaptive throttling based on scan duration to minimize the app's CPU footprint."
-              },
-              {
-                "path": "src/core/logger.py",
-                "description": "Configures a sophisticated dual-logging system using the Rich library for console diagnostics and rotating file handlers for persistent logs. It includes dummy streams to prevent crashes in windowed mode."
-              }
-            ],
-            "id": 9,
-            "domain": "backend",
-            "color": "#0078D4",
-            "weight": 6,
-            "layout": {
-              "x": 25,
-              "y": 36.84210526315789,
-              "w": 25,
-              "h": 63.15789473684211
-            }
-          },
-          {
-            "name": "LLM Context Operations",
-            "description": "Specialized logic for bundling code, checking security, and applying AI-generated modifications.",
-            "files": [
-              {
-                "path": "src/core/merger.py",
-                "description": "Bundles selected files into the application's unique machine-parseable Markdown format. It manages the injection of mode-specific system instructions like 'Fast Apply' vs 'Full File'."
-              },
-              {
-                "path": "src/core/prompts.py",
-                "description": "The prompt engineering hub, containing the large prose blocks that dictate LLM stylistic guidelines and project generation constraints. It keeps logic and instruction text separate for easier maintenance."
-              },
-              {
-                "path": "src/core/secret_scanner.py",
-                "description": "A security auditing service that uses high-entropy detection to find API keys and credentials in code selections. It provides the metadata for the pre-copy warning dialogs."
-              },
-              {
-                "path": "src/core/replacer.py",
-                "description": "A sophisticated fuzzy matching engine capable of applying code patches even when line numbers or indentation vary from the model's reference. It uses multi-strategy matching to ensure reliable surgical updates."
-              },
-              {
-                "path": "src/core/change_applier.py",
-                "description": "The top-level parser for LLM responses, extracting file blocks and XML tags from Markdown. It coordinates the actual filesystem writes and standardizes all content to LF to prevent phantom diffs."
-              },
-              {
-                "path": "src/core/highlighter.py",
-                "description": "Leverages the Pygments library to generate the syntax-highlighted HTML used in the response review window. It calculates line-level differences using the standard library sequence matcher."
-              }
-            ],
-            "id": 10,
-            "domain": "backend",
-            "color": "#0078D4",
-            "weight": 6,
-            "layout": {
-              "x": 50,
-              "y": 36.84210526315789,
-              "w": 50,
-              "h": 31.578947368421055
-            }
-          },
-          {
-            "name": "GUI Management",
-            "description": "Handles the lifecycle of multiple UI windows and high-DPI coordination.",
-            "files": [
-              {
-                "path": "src/core/window_manager.py",
-                "description": "The central UI coordinator managing transitions between splash, main, and compact modes. It handles the 'handshake' logic that waits for frontend readiness before revealing the dashboard."
-              },
-              {
-                "path": "src/core/window_geometry.py",
-                "description": "Provides the mathematical foundation for Windows High-DPI coordination. It ensures windows are sized in logical units but positioned in physical units to avoid coordinate drift on scaled monitors."
-              },
-              {
-                "path": "src/core/window_splash.py",
-                "description": "Constructs the animated frameless splash screen. it uses inline Base64 assets and CSS keyframes to provide immediate visual feedback while the engine initializes in the background."
-              },
-              {
-                "path": "src/core/window_main.py",
-                "description": "Initializes the primary dashboard window and binds backend state callbacks to window events. It uses local HTTP serving to satisfy CORS requirements for ES modules."
-              },
-              {
-                "path": "src/core/window_compact.py",
-                "description": "Creates the minimalist companion widget. it includes specialized Win32 API calls to hide the widget from the taskbar, anchoring the app presence to the minimized main window."
-              },
-              {
-                "path": "src/core/updater.py",
-                "description": "Orchestrates the software update lifecycle, checking for releases and launching the external GUI installer. It uses forceful termination to ensure file locks are released for the updater process."
-              }
-            ],
-            "id": 11,
-            "domain": "backend",
-            "color": "#0078D4",
-            "weight": 6,
-            "layout": {
-              "x": 50,
-              "y": 68.42105263157895,
-              "w": 50,
-              "h": 31.578947368421055
-            }
-          },
-          {
-            "name": "API Bridge Partials",
-            "description": "Modular implementations of the frontend-accessible bridge methods.",
+            "name": "Global State Management",
+            "description": "Reactive state composables that act as a decentralized store, replacing Vuex/Pinia.",
             "children": [
               {
-                "name": "Core Logic Bridges",
-                "description": "Bridge parts for basic system, configuration, and project-level operations.",
+                "name": "Base Composables",
+                "description": "Foundational state and system-level interactions.",
+                "children": [],
                 "files": [
                   {
-                    "path": "src/api.py",
-                    "description": "The master bridge class combining all partial mixins into a single interface. It is the only object explicitly exposed to the JavaScript context for method calls."
+                    "path": "frontend/src/composables/globalState.js",
+                    "description": "The core reactive store holding the active project, file selections, and visualizer maps. Kept intentionally flat to ensure reactive properties can be easily tracked across the app."
                   },
                   {
-                    "path": "src/api_parts/base_api.py",
-                    "description": "The foundational mixin providing shared helper methods, JSON response formatters, and thread-safe dialog triggers used across all specialized API parts."
+                    "path": "frontend/src/composables/infoMode.js",
+                    "description": "Manages a stack-based tracking system for the application's hover-help feature. Uses spread operators to bypass Vue's array mutation reactivity limits across view boundaries."
                   },
                   {
-                    "path": "src/api_parts/window_api.py",
-                    "description": "Exposes low-level window controls to the frontend, including programmatic resizing, coordinate sync for drag logic, and asset encoding."
+                    "path": "frontend/src/composables/useSystem.js",
+                    "description": "Provides methods for system-level actions like resizing the window, loading native icons, and opening file explorers. Connects directly to the PyWebView bridge."
                   },
                   {
-                    "path": "src/api_parts/config_api.py",
-                    "description": "Manages global application settings and provides the bridge for clipboard utilities like the comment-cleanup prompt and update checking."
+                    "path": "frontend/src/composables/useProject.js",
+                    "description": "Handles project loading, profiling, and metadata synchronization. Updates the global state when the Python backend signals a project change."
                   },
                   {
-                    "path": "src/api_parts/project_api.py",
-                    "description": "Handles directory-level interactions, including loading projects, switching profiles, and opening folder-level command prompts or file explorers."
+                    "path": "frontend/src/composables/useAppState.js",
+                    "description": "An aggregator composable that sets up global event listeners for Python-dispatched events. Initializes the application and merges all modular composables into a single importable entity."
+                  },
+                  {
+                    "path": "frontend/src/composables/useEscapeKey.js",
+                    "description": "A standardized hook for registering and unregistering Escape key listeners. Used by modals to ensure they close cleanly and return focus."
                   }
                 ],
-                "id": 13,
-                "domain": "backend",
-                "color": "#0078D4",
+                "id": 5,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 60
+                }
+              },
+              {
+                "name": "Feature Composables",
+                "description": "State management tied to specific complex application features.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/composables/useReview.js",
+                    "description": "Coordinates the flow of pasting AI responses and tracking pending changes. Communicates with the backend to verify clipboard contents and calculate diffs."
+                  },
+                  {
+                    "path": "frontend/src/composables/useStarter.js",
+                    "description": "Encapsulates the complex multi-step state of the Project Starter. Manages the drafting, locking, and synchronization of markdown segments for the boilerplate generator."
+                  },
+                  {
+                    "path": "frontend/src/composables/useReviewerEditMode.js",
+                    "description": "Provides logic to seamlessly switch between rendered Markdown and raw textarea editing. It calculates scroll ratios to ensure the viewport remains stable during the transition."
+                  },
+                  {
+                    "path": "frontend/src/composables/useCompactHandlers.js",
+                    "description": "Separates the complex feedback timings, transient alerts, and dynamic title truncation logic out of the CompactView component to keep it declarative."
+                  }
+                ],
+                "id": 6,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 4,
+                "layout": {
+                  "x": 0,
+                  "y": 60,
+                  "w": 100,
+                  "h": 40
+                }
+              }
+            ],
+            "files": [],
+            "id": 4,
+            "domain": "frontend",
+            "color": "#0D8319",
+            "weight": 11,
+            "layout": {
+              "x": 49.09090909090909,
+              "y": 61.19929453262787,
+              "w": 35,
+              "h": 38.80070546737214
+            }
+          },
+          {
+            "name": "UI Utilities & Directives",
+            "description": "Helper functions, text dictionaries, and custom Vue directives.",
+            "children": [
+              {
+                "name": "Data Utilities",
+                "description": "Stateless transform functions.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/utils/colorUtils.js",
+                    "description": "Calculates relative luminance for user-selected project hex colors. Determines whether light or dark text should be rendered over dynamic swatches."
+                  },
+                  {
+                    "path": "frontend/src/utils/visualizerUtils.js",
+                    "description": "Algorithms for the Architecture Explorer. Calculates dynamic treemap layouts based on file weights and recursively parses LLM JSON outputs into a nested tree."
+                  },
+                  {
+                    "path": "frontend/src/utils/infoMessages.js",
+                    "description": "The central aggregator for all Info Mode hover text dictionaries. Combines modular help files into a single lookup object."
+                  }
+                ],
+                "id": 8,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 3,
+                "layout": {
+                  "x": 0,
+                  "y": 54.54545454545454,
+                  "w": 60,
+                  "h": 45.45454545454546
+                }
+              },
+              {
+                "name": "Info Definitions",
+                "description": "Text content for the hover-help system, split by domain.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/utils/info/mainInfo.js",
+                    "description": "Hover documentation for the primary dashboard buttons and profile management UI."
+                  },
+                  {
+                    "path": "frontend/src/utils/info/fileManagerInfo.js",
+                    "description": "Hover documentation detailing the merge order list, filters, and tree selection logic."
+                  },
+                  {
+                    "path": "frontend/src/utils/info/reviewInfo.js",
+                    "description": "Help text explaining the AI diff viewer, acceptance tracking, and comment parsing."
+                  },
+                  {
+                    "path": "frontend/src/utils/info/settingsInfo.js",
+                    "description": "Detailed explanations of global application settings, token limits, and filetype indexing."
+                  },
+                  {
+                    "path": "frontend/src/utils/info/starterInfo.js",
+                    "description": "Documentation for the multi-step boilerplate workflow and prompt generation mechanics."
+                  },
+                  {
+                    "path": "frontend/src/utils/info/visualizerInfo.js",
+                    "description": "Help text for the Architecture Explorer's interactive map and contextual copying features."
+                  }
+                ],
+                "id": 9,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 54.54545454545454
+                }
+              },
+              {
+                "name": "Global Directives",
+                "description": "App-wide Vue directives and CSS.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/style.css",
+                    "description": "The root Tailwind CSS import file. Contains custom scrollbar styling, keyframe animations for click pulses, and prose overrides."
+                  },
+                  {
+                    "path": "frontend/src/directives/vInfo.js",
+                    "description": "A custom Vue directive (`v-info`) that pushes and pops documentation keys to the global state stack on mouseenter/mouseleave events."
+                  }
+                ],
+                "id": 10,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 2,
+                "layout": {
+                  "x": 60,
+                  "y": 54.54545454545454,
+                  "w": 40,
+                  "h": 45.45454545454546
+                }
+              }
+            ],
+            "files": [],
+            "id": 7,
+            "domain": "frontend",
+            "color": "#0D8319",
+            "weight": 12,
+            "layout": {
+              "x": 49.09090909090909,
+              "y": 32.098765432098766,
+              "w": 50.90909090909091,
+              "h": 29.1005291005291
+            }
+          },
+          {
+            "name": "Dashboard Components",
+            "description": "Widgets and layouts visible on the primary application screen.",
+            "children": [
+              {
+                "name": "Dashboard Layout",
+                "description": "The structural elements of the main view.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/dashboard/DashboardHeader.vue",
+                    "description": "The top bar containing the project title editor and masked logo renderer. Includes an alert icon synchronized with the background file monitor."
+                  },
+                  {
+                    "path": "frontend/src/components/dashboard/DashboardNav.vue",
+                    "description": "The secondary navigation row. Provides access to profile switching, the Visualizer, the Project Starter, and the File Manager."
+                  },
+                  {
+                    "path": "frontend/src/components/dashboard/DashboardActions.vue",
+                    "description": "The central action card for the workflow loop. Contains the primary 'Copy' and 'Paste' buttons, along with context limit warnings."
+                  },
+                  {
+                    "path": "frontend/src/components/InfoPanel.vue",
+                    "description": "A persistent footer panel that subscribes to the global `infoMode` stack to display contextual documentation based on the user's cursor position."
+                  },
+                  {
+                    "path": "frontend/src/components/ColorPickerOverlay.vue",
+                    "description": "A custom-built HSL color wheel implemented via a `<canvas>` element. Generates a pixel-perfect hue ring to overcome browser limitations."
+                  }
+                ],
+                "id": 12,
+                "domain": "frontend",
+                "color": "#0D8319",
                 "weight": 5,
                 "layout": {
                   "x": 0,
@@ -371,33 +290,34 @@
                 }
               },
               {
-                "name": "Feature Bridge Modules",
-                "description": "Bridge parts supporting the main workspace features like file management and review.",
+                "name": "Dashboard Utilities",
+                "description": "Shared view components used across multiple dashboards.",
+                "children": [],
                 "files": [
                   {
-                    "path": "src/api_parts/file_api.py",
-                    "description": "The interface for the merge list, providing tree data and token estimates. it also generates the architectural context prompts for the Project Visualizer."
+                    "path": "frontend/src/components/MarkdownRenderer.vue",
+                    "description": "A wrapper around `markdown-it` that intercepts rendering to style custom task-list checkboxes and apply CodeMerger's typography rules."
                   },
                   {
-                    "path": "src/api_parts/clipboard_api.py",
-                    "description": "Bypasses browser security to provide direct system clipboard access. it handles remote paste requests used to bridge the compact widget and main window review."
+                    "path": "frontend/src/components/DiffViewer.vue",
+                    "description": "Renders line-by-line file comparisons. Delegates actual diff calculations and Pygments syntax highlighting to the Python backend for performance."
                   },
                   {
-                    "path": "src/api_parts/changes_api.py",
-                    "description": "The backend controller for the AI Response Review workflow. it routes Markdown parsing and handles the execution of individual file approvals or deletions."
+                    "path": "frontend/src/components/FileTreeNode.vue",
+                    "description": "A recursive tree node component. Applies complex styling logic to indicate new files, filtered files, and directories that are 'visually complete'."
                   },
                   {
-                    "path": "src/api_parts/starter_api.py",
-                    "description": "The aggregator for all Project Starter logic. it manages session initialization and restoration when entering and exiting the project genesis workflow."
+                    "path": "frontend/src/components/InstructionsModal.vue",
+                    "description": "An overlay for defining custom prompt headers and footers. Interacts directly with the active project's config profile."
                   },
                   {
-                    "path": "src/api_parts/starter_api_session.py",
-                    "description": "Handles the storage and retrieval of project starter drafts from persistent JSON. it also manages the export/import of project genesis configuration files."
+                    "path": "frontend/src/components/ProjectSelectorModal.vue",
+                    "description": "Displays the recently opened projects list. Filters paths dynamically and connects to the OS-native folder browser via Python."
                   }
                 ],
-                "id": 14,
-                "domain": "backend",
-                "color": "#0078D4",
+                "id": 13,
+                "domain": "frontend",
+                "color": "#0D8319",
                 "weight": 5,
                 "layout": {
                   "x": 0,
@@ -407,25 +327,26 @@
                 }
               },
               {
-                "name": "Starter Process Logic",
-                "description": "Specialized sub-APIs for the multi-step Project Starter wizard.",
+                "name": "Compact Widgets",
+                "description": "Components specific to the minimized Compact View.",
+                "children": [],
                 "files": [
                   {
-                    "path": "src/api_parts/starter_api_parsing.py",
-                    "description": "Implements the segmented parsing logic for Project Starter AI outputs. it identifies specific XML sections to populate individual concept and TODO drafts."
+                    "path": "frontend/src/components/compact/CompactFeedbackOverlay.vue",
+                    "description": "A transient animation layer that slides in to provide visual feedback (e.g., 'COPIED', 'PASTED') over the tiny widget interface."
                   },
                   {
-                    "path": "src/api_parts/starter_api_prompts.py",
-                    "description": "Constructs the complex, high-context prompts required to guide an LLM through architectural concept and boilerplate generation."
+                    "path": "frontend/src/components/compact/CompactActionsStandard.vue",
+                    "description": "The default 2-row layout for Compact Mode. Provides clearly visible copy/paste actions alongside new-file alerts."
                   },
                   {
-                    "path": "src/api_parts/starter_api_scaffold.py",
-                    "description": "The final implementation bridge of the Project Starter. it handles directory creation, boilerplate writing, and project initialization based on the final AI output."
+                    "path": "frontend/src/components/compact/CompactActionsUltra.vue",
+                    "description": "An extreme space-saving layout that condenses all CodeMerger actions into a single narrow row for minimal screen intrusion."
                   }
                 ],
-                "id": 15,
-                "domain": "backend",
-                "color": "#0078D4",
+                "id": 14,
+                "domain": "frontend",
+                "color": "#0D8319",
                 "weight": 3,
                 "layout": {
                   "x": 62.5,
@@ -435,352 +356,756 @@
                 }
               }
             ],
-            "id": 12,
-            "domain": "backend",
-            "color": "#0078D4",
             "files": [],
+            "id": 11,
+            "domain": "frontend",
+            "color": "#0D8319",
             "weight": 14,
             "layout": {
               "x": 0,
-              "y": 0,
-              "w": 100,
-              "h": 36.84210526315789
-            }
-          }
-        ],
-        "id": 7,
-        "color": "#0078D4",
-        "files": [],
-        "weight": 39,
-        "layout": {
-          "x": 0,
-          "y": 56.52173913043478,
-          "w": 65,
-          "h": 43.47826086956522
-        }
-      },
-      {
-        "name": "User Interface",
-        "description": "The Vue 3 frontend providing interactive dashboards, real-time code management, and architectural mapping.",
-        "domain": "frontend",
-        "children": [
-          {
-            "name": "Framework & Core Config",
-            "description": "The foundational environment and styling definitions for the web application.",
-            "files": [
-              {
-                "path": "frontend/package.json",
-                "description": "The Node.js manifest defining frontend dependencies like Vue 3 and Vite. it includes scripts for concurrent backend/frontend development."
-              },
-              {
-                "path": "frontend/vite.config.js",
-                "description": "Configures the Vite build system, ensuring all assets use relative paths for compatibility with the webview local filesystem protocol."
-              },
-              {
-                "path": "frontend/tailwind.config.js",
-                "description": "Defines the design tokens and color scheme. it maps specialized theme keys to the CodeMerger dark-mode palette for consistent UI styling."
-              },
-              {
-                "path": "frontend/postcss.config.js",
-                "description": "A standard configuration for processing CSS through PostCSS, ensuring Tailwind directives and autoprefixer work correctly during production builds."
-              },
-              {
-                "path": "frontend/index.html",
-                "description": "The primary entry page for the web engine. it provides the single DOM mount point for the Vue application and the favicon declaration."
-              },
-              {
-                "path": "frontend/src/main.js",
-                "description": "The JavaScript entry point, responsible for initializing the Vue app, registering the router, and applying the custom info-mode directive."
-              },
-              {
-                "path": "frontend/src/style.css",
-                "description": "The global CSS manifest containing Tailwind layers and custom reset logic. It defines common animations like the 'click-pulse' and loading dot sequences."
-              },
-              {
-                "path": "frontend/src/router/index.js",
-                "description": "Configures the frontend routes using hash-based history. it manages the navigation between the main dashboard and the specialized compact widget view."
-              }
-            ],
-            "id": 17,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 8,
-            "layout": {
-              "x": 40.91680814940577,
-              "y": 36.25541125541126,
-              "w": 59.08319185059423,
-              "h": 17.584714136438272
+              "y": 32.098765432098766,
+              "w": 25.454545454545453,
+              "h": 67.90123456790124
             }
           },
           {
-            "name": "Global State Handlers",
-            "description": "Reactivity modules managing the bridge data and application-level business logic.",
-            "files": [
-              {
-                "path": "frontend/src/composables/globalState.js",
-                "description": "The central repository for reactive singleton state. it stores active project metadata, shared image assets, and session-only review progress."
-              },
-              {
-                "path": "frontend/src/composables/useAppState.js",
-                "description": "The high-level orchestrator for the frontend, aggregating all other hooks. it manages the application initialization sequence and bridge event listeners."
-              },
-              {
-                "path": "frontend/src/composables/infoMode.js",
-                "description": "Controls the interactive documentation state. it manages the stack of active hover keys and resolves them into descriptive help text for the footer."
-              },
-              {
-                "path": "frontend/src/composables/useSystem.js",
-                "description": "Provides system-level actions like programmatic window resizing, config saving, and management of global application preferences."
-              },
-              {
-                "path": "frontend/src/composables/useProject.js",
-                "description": "Exposes hooks for project-specific operations, including directory selection, profile management, and the 'add-all' new file logic."
-              },
-              {
-                "path": "frontend/src/composables/useReview.js",
-                "description": "Manages the logic for the AI Response Review system, coordinating clipboard pasting and individual file modification approvals."
-              },
-              {
-                "path": "frontend/src/composables/useStarter.js",
-                "description": "A specialized thin client for the Project Starter API, exposing session management and segmented generation hooks to the UI wizard."
-              },
-              {
-                "path": "frontend/src/composables/useEscapeKey.js",
-                "description": "A utility hook for consistent keyboard navigation. it binds escape key events to modal closures across different workspace components."
-              },
-              {
-                "path": "frontend/src/composables/useReviewerEditMode.js",
-                "description": "Implements the complex logic for toggling between Markdown previews and raw editors while maintaining stable scroll positions for the user."
-              },
-              {
-                "path": "frontend/src/composables/useCompactHandlers.js",
-                "description": "A specialized handler for the compact widget's unique constraints, managing title abbreviations and the minimalist feedback overlay system."
-              }
-            ],
-            "id": 18,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 10,
-            "layout": {
-              "x": 22.58064516129032,
-              "y": 19.480519480519483,
-              "w": 77.41935483870968,
-              "h": 16.774891774891774
-            }
-          },
-          {
-            "name": "Visual Documentation",
-            "description": "Utility modules and dictionaries supporting the 'Info Mode' help system.",
-            "files": [
-              {
-                "path": "frontend/src/directives/vInfo.js",
-                "description": "A custom Vue directive that captures mouse hover events and pushes associated documentation keys to the global state for display in the Info Panel."
-              },
-              {
-                "path": "frontend/src/utils/infoMessages.js",
-                "description": "The main aggregator for the Info Mode system, merging specialized dictionaries from different functional modules into a single searchable object."
-              },
-              {
-                "path": "frontend/src/utils/info/mainInfo.js",
-                "description": "Contains documentation strings for the primary dashboard and project selector, explaining basic navigation and workspace interactions."
-              },
-              {
-                "path": "frontend/src/utils/info/fileManagerInfo.js",
-                "description": "Provides detailed interaction guidance for the merge list editor, including filter behavior and file reordering controls."
-              },
-              {
-                "path": "frontend/src/utils/info/reviewInfo.js",
-                "description": "Houses help text for the AI Response Review window, describing tab contents and individual file approval workflows."
-              },
-              {
-                "path": "frontend/src/utils/info/settingsInfo.js",
-                "description": "Contains descriptions for every toggle and input in the global settings menu, clarifying performance and security impacts."
-              },
-              {
-                "path": "frontend/src/utils/info/starterInfo.js",
-                "description": "Detailed help strings for the project genesis tool, guiding users through concept, stack, and TODO generation steps."
-              }
-            ],
-            "id": 19,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 7,
-            "layout": {
-              "x": 40.91680814940577,
-              "y": 53.84012539184953,
-              "w": 19.69439728353141,
-              "h": 46.15987460815047
-            }
-          },
-          {
-            "name": "Main UI Layouts",
-            "description": "The primary views and headers representing the application's root containers.",
-            "files": [
-              {
-                "path": "frontend/src/App.vue",
-                "description": "The root component coordinating the global layout. It hosts the loading overlay, status bar, and Info Panel while globally intercepting shortcuts and paste events."
-              },
-              {
-                "path": "frontend/src/views/MainView.vue",
-                "description": "The primary dashboard view. it manages the lifecycle of top-level modals and provides the logic for handling remote review signals from the compact widget."
-              },
-              {
-                "path": "frontend/src/views/CompactView.vue",
-                "description": "A specialized minimalist view for the companion widget. it implements a custom mouse-drag engine for window positioning and always-on-top interactions."
-              },
-              {
-                "path": "frontend/src/components/dashboard/DashboardHeader.vue",
-                "description": "The top-level navigation element for the dashboard, managing project renaming and the masked project swatch visual styling."
-              },
-              {
-                "path": "frontend/src/components/dashboard/DashboardNav.vue",
-                "description": "Hosts the workspace control row, providing the profile switcher and entry points for the Merge List editor and Project Visualizer."
-              },
-              {
-                "path": "frontend/src/components/dashboard/DashboardActions.vue",
-                "description": "The central action card of the main window, providing primary buttons for context copying and AI response importing."
-              }
-            ],
-            "id": 20,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 6,
-            "layout": {
-              "x": 60.611205432937176,
-              "y": 53.84012539184953,
-              "w": 39.388794567062824,
-              "h": 19.782803403493055
-            }
-          },
-          {
-            "name": "Workspace Modules",
-            "description": "Interactive tools for context management and architectural visualization.",
-            "files": [
-              {
-                "path": "frontend/src/components/FileManagerModal.vue",
-                "description": "The container for the merge list editor. It orchestrates the dual-panel layout and handles search sequencing to prevent asynchronous UI race conditions."
-              },
-              {
-                "path": "frontend/src/components/FileManagerLeftPanel.vue",
-                "description": "Manages the available project files tree. It includes smart logic for range-selection and the batch addition of files based on current filtering."
-              },
-              {
-                "path": "frontend/src/components/FileManagerRightPanel.vue",
-                "description": "Controls the merge order list and reordering toolbar. It provides the interface for 'Order Requests' to optimize how the AI reads project context."
-              },
-              {
-                "path": "frontend/src/components/FileTreeNode.vue",
-                "description": "A recursive component representing the project hierarchy. it implements visual completeness logic to color folder icons based on their selection status."
-              },
-              {
-                "path": "frontend/src/components/VisualizerModal.vue",
-                "description": "An interactive architectural map of the project. it uses a 2D map algorithm to group files into semantic layers based on AI categorization JSON."
-              }
-            ],
-            "id": 21,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 5,
-            "layout": {
-              "x": 60.611205432937176,
-              "y": 73.62292879534259,
-              "w": 24.617996604414266,
-              "h": 26.377071204657412
-            }
-          },
-          {
-            "name": "AI Review System",
-            "description": "Tools for inspecting, diffing, and applying AI-generated code modifications.",
-            "files": [
-              {
-                "path": "frontend/src/components/ReviewModal.vue",
-                "description": "The primary interface for AI response evaluation. It categorizes output into distinct tabs and manages the batch-application of proposed codebase changes."
-              },
-              {
-                "path": "frontend/src/components/DiffViewer.vue",
-                "description": "Renders line-by-line file comparisons using syntax-highlighted HTML from the backend engine. it handles scrolling and segment anchoring for large source files."
-              },
-              {
-                "path": "frontend/src/components/MarkdownRenderer.vue",
-                "description": "A stylized wrapper for AI commentary. it includes custom pre-processors for rendering interactive TODO checkboxes and high-contrast code blocks."
-              },
-              {
-                "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-                "description": "A specialized tab for managing interactive file diffs. it organizes changes by type and provides global controls to collapse or expand modification blocks."
-              },
-              {
-                "path": "frontend/src/components/review-tabs/ReviewVerificationTab.vue",
-                "description": "Displays testing steps provided by the AI. it includes session-based history navigation to allow users to revisit previous verification instructions."
-              },
-              {
-                "path": "frontend/src/components/review-tabs/ReviewFileItem.vue",
-                "description": "Represents an individual file modification in the review list. it provides granular control over individual acceptance, rejection, and undo actions."
-              },
-              {
-                "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
-                "description": "A collapsible section for the AI's technical explanation of changes. it allows users to read architectural context without leaving the diff workflow."
-              },
-              {
-                "path": "frontend/src/components/FormatErrorModal.vue",
-                "description": "A diagnostic overlay triggered when AI output lacks proper formatting. It provides a specialized correction prompt based on the specific parser failure."
-              },
-              {
-                "path": "frontend/src/components/OrderErrorModal.vue",
-                "description": "Handles validation failures during file reordering. it identifies missing or duplicate files in the AI response to help the user request a correction."
-              }
-            ],
-            "id": 22,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 9,
-            "layout": {
-              "x": 22.58064516129032,
-              "y": 36.25541125541126,
-              "w": 18.33616298811545,
-              "h": 63.74458874458874
-            }
-          },
-          {
-            "name": "Settings & Overlays",
-            "description": "Configuration dialogs and shared global utility components.",
+            "name": "File Management & Review",
+            "description": "Complex modals for selecting context and verifying AI modifications.",
             "children": [
               {
-                "name": "Settings Workspace",
-                "description": "Tabs and modules for application-wide configuration.",
+                "name": "File Manager Modals",
+                "description": "Interfaces for selecting and ordering the codebase context.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/FileManagerModal.vue",
+                    "description": "The root orchestrator for the dual-panel file manager. Coordinates search filters and handles 'Add All' logic respecting safety thresholds."
+                  },
+                  {
+                    "path": "frontend/src/components/FileManagerLeftPanel.vue",
+                    "description": "Renders the hierarchical file tree. Implements shift-click range selection and syncs with the Python background scanner."
+                  },
+                  {
+                    "path": "frontend/src/components/FileManagerRightPanel.vue",
+                    "description": "Manages the explicit merge order using drag-and-drop. Automatically colors token counts based on thresholds to warn against context bloat."
+                  },
+                  {
+                    "path": "frontend/src/components/NewProfileModal.vue",
+                    "description": "A small dialog for creating named configuration profiles. Includes toggles to inherit current file selections and prompt instructions."
+                  },
+                  {
+                    "path": "frontend/src/components/NewFiletypesModal.vue",
+                    "description": "An alert modal that appears on boot to notify the user if new default extensions (e.g., `.rs`, `.kt`) were automatically added during an update."
+                  }
+                ],
+                "id": 16,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 5,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 41.66666666666667
+                }
+              },
+              {
+                "name": "Review Components",
+                "description": "Interfaces for auditing AI-generated code.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/ReviewModal.vue",
+                    "description": "The primary response review container. Sorts the AI's segmented Markdown output into interactive tabs for Changes, Answers, and Verification."
+                  },
+                  {
+                    "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
+                    "description": "An expandable accordion that renders any technical explanation or implementation plan the AI provided before outputting code."
+                  },
+                  {
+                    "path": "frontend/src/components/review-tabs/ReviewFileItem.vue",
+                    "description": "Represents a single modified file in the review list. Provides Accept/Discard/Undo buttons and embeds the DiffViewer component."
+                  },
+                  {
+                    "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
+                    "description": "The main interactive list grouping AI proposals into Modify, Create, and Delete sections. Handles bulk actions like 'Expand All'."
+                  },
+                  {
+                    "path": "frontend/src/components/review-tabs/ReviewVerificationTab.vue",
+                    "description": "A dedicated view for testing instructions. Archives previous verification steps from the current session so users don't lose testing context."
+                  }
+                ],
+                "id": 17,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 5,
+                "layout": {
+                  "x": 0,
+                  "y": 41.66666666666667,
+                  "w": 71.42857142857143,
+                  "h": 58.33333333333333
+                }
+              },
+              {
+                "name": "Error Handlers",
+                "description": "Specialized alerts for malformed LLM outputs.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/OrderErrorModal.vue",
+                    "description": "Appears when an AI fails to return a valid JSON array for a file reorder request. Provides a one-click correction prompt for the user to paste back."
+                  },
+                  {
+                    "path": "frontend/src/components/FormatErrorModal.vue",
+                    "description": "Appears when an AI fails to wrap files in the mandatory syntax markers. Halts execution to prevent file corruption and offers a correction prompt."
+                  }
+                ],
+                "id": 18,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 2,
+                "layout": {
+                  "x": 71.42857142857143,
+                  "y": 41.66666666666667,
+                  "w": 28.57142857142857,
+                  "h": 58.33333333333333
+                }
+              }
+            ],
+            "files": [],
+            "id": 15,
+            "domain": "frontend",
+            "color": "#0D8319",
+            "weight": 13,
+            "layout": {
+              "x": 25.454545454545453,
+              "y": 32.098765432098766,
+              "w": 23.636363636363637,
+              "h": 67.90123456790124
+            }
+          },
+          {
+            "name": "Advanced Features",
+            "description": "Configuration, scaffolding workflows, and architectural visualization.",
+            "children": [
+              {
+                "name": "Settings UI & Core",
+                "description": "The main settings application window.",
+                "children": [],
                 "files": [
                   {
                     "path": "frontend/src/components/SettingsModal.vue",
-                    "description": "The master container for application preferences. it uses a sidebar-driven tab system to organize system, file manager, and editor settings."
+                    "description": "The root settings container. Manages the sidebar navigation and holds a mutable clone of the global config until 'Save' is clicked."
                   },
                   {
                     "path": "frontend/src/components/settings/SettingsAppTab.vue",
-                    "description": "Manages core application behaviors like monitor intervals, secret scanning toggles, and automatic update preferences."
+                    "description": "Exposes toggles for file monitoring intervals, background secret scanning, and automated daily update checks."
                   },
                   {
                     "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
-                    "description": "Configures the merge list editor, including token thresholds and 'Add All' safety limits to prevent context overflow."
-                  },
-                  {
-                    "path": "frontend/src/components/settings/SettingsFiletypesTab.vue",
-                    "description": "An interactive registry for managing code extensions. it allows users to define custom filetypes and toggle active indexing status for defaults."
-                  },
-                  {
-                    "path": "frontend/src/components/settings/SettingsPromptsTab.vue",
-                    "description": "Provides editors for global instruction prompts, allowing users to define a baseline code standard for all AI interactions."
-                  },
-                  {
-                    "path": "frontend/src/components/settings/SettingsStarterTab.vue",
-                    "description": "Configuration for the Project Starter, focusing on the default parent directory for new codebase generation."
+                    "description": "Configuration for the tokenizer. Allows users to set maximum token thresholds to change UI warning colors."
                   },
                   {
                     "path": "frontend/src/components/settings/SettingsEditorTab.vue",
-                    "description": "Configures the code editor integration, allowing users to select their preferred executable for opening files directly from the UI."
+                    "description": "Allows the user to explicitly define the path to a custom code editor executable for handling double-click file opening."
+                  }
+                ],
+                "id": 20,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 4,
+                "layout": {
+                  "x": 31.57894736842105,
+                  "y": 53.23076923076923,
+                  "w": 34.21052631578947,
+                  "h": 46.76923076923077
+                }
+              },
+              {
+                "name": "Settings Configuration",
+                "description": "Data and prompt preference tabs.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/settings/SettingsFiletypesTab.vue",
+                    "description": "A table interface for managing indexed file extensions. Allows users to add custom extensions or disable built-in ones to speed up scanning."
+                  },
+                  {
+                    "path": "frontend/src/components/settings/SettingsPromptsTab.vue",
+                    "description": "Provides text areas for modifying the global default headers and footers that are applied to newly created project profiles."
+                  },
+                  {
+                    "path": "frontend/src/components/settings/SettingsStarterTab.vue",
+                    "description": "Configures the default parent directory where the Project Starter tool will attempt to scaffold new application folders."
+                  }
+                ],
+                "id": 21,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 3,
+                "layout": {
+                  "x": 65.78947368421052,
+                  "y": 53.23076923076923,
+                  "w": 34.21052631578947,
+                  "h": 35.07692307692307
+                }
+              },
+              {
+                "name": "Starter Modals 1",
+                "description": "The initial data gathering phases for the Project Starter.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/ProjectStarterModal.vue",
+                    "description": "The root wizard for the Project Starter. Manages the persistent session state and tracks the maximum accessible step based on completion."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/Step1Details.vue",
+                    "description": "The first step in the wizard. Gathers the project name and allows linking an existing 'base project' folder for context."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/Step2BaseFiles.vue",
+                    "description": "An optional step that surfaces a mini file manager. Lets the user select specific reference files from a base project to pass to the LLM."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/Step3Concept.vue",
+                    "description": "The Concept generation step. Bridges the user's initial goal with the LLM to output a structured markdown document detailing features and flows."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/Step4Stack.vue",
+                    "description": "The Tech Stack step. Parses the AI's JSON recommendations into an interactive list detailing the architectural rationale for each language."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/Step5Todo.vue",
+                    "description": "The Implementation Plan step. Feeds the Concept and Stack back to the LLM to generate a phase-by-phase development task list."
+                  }
+                ],
+                "id": 22,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 24
+                }
+              },
+              {
+                "name": "Starter Modals 2",
+                "description": "Review, rewrite, and generation phases for the Project Starter.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/starter-steps/Step6Generate.vue",
+                    "description": "The final step. Bundles all approved drafts into a master prompt to scaffold the project structure, `README.md`, and batch scripts to disk."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/StepSuccess.vue",
+                    "description": "A completion screen confirming successful creation. Provides shortcuts to immediately load the new project into CodeMerger."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
+                    "description": "A widget used to review merged Markdown documents. Provides inline editing, rendering, and context-aware LLM feedback questions."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
+                    "description": "A specialized interface that allows users to review and lock specific sections of a draft (e.g., just the Database phase) before rewriting."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",
+                    "description": "A side-panel that displays pre-written 'Guiding Questions'. Clicking one automatically builds a contextual prompt to challenge the LLM."
+                  },
+                  {
+                    "path": "frontend/src/components/starter-steps/RewriteModal.vue",
+                    "description": "A draggable popup that allows the user to instruct the AI to modify the current drafts while explicitly respecting 'Locked' segments."
+                  }
+                ],
+                "id": 23,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 24,
+                  "w": 31.57894736842105,
+                  "h": 76
+                }
+              },
+              {
+                "name": "Starter Utilities",
+                "description": "Helper components for the boilerplate workflow.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/starter-steps/NotesModal.vue",
+                    "description": "A simple dialogue that displays any explanatory notes the AI provided when returning a requested Rewrite of a starter segment."
                   }
                 ],
                 "id": 24,
                 "domain": "frontend",
                 "color": "#0D8319",
-                "weight": 7,
+                "weight": 1,
+                "layout": {
+                  "x": 65.78947368421052,
+                  "y": 88.3076923076923,
+                  "w": 34.21052631578947,
+                  "h": 11.692307692307693
+                }
+              },
+              {
+                "name": "Visualizer Components",
+                "description": "The interactive Architecture Explorer interfaces.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/src/components/VisualizerModal.vue",
+                    "description": "The root container for the Architecture Explorer. Manages the visual state (Init, View, Update) and holds the parsed JSON map in memory."
+                  },
+                  {
+                    "path": "frontend/src/components/visualizer/VisualizerInit.vue",
+                    "description": "The onboarding screen. Handles copying the JSON schema prompt and gracefully catching/admonishing the LLM if the returned tree omits files."
+                  },
+                  {
+                    "path": "frontend/src/components/visualizer/VisualizerExplorer.vue",
+                    "description": "The primary interactive treemap. Dynamically sizes CSS boxes based on the file weight of each architectural domain using recursive calculation."
+                  },
+                  {
+                    "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
+                    "description": "A list view displayed when diving into the deepest nodes of the map. Shows files alongside their AI-generated architectural logic descriptions."
+                  },
+                  {
+                    "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
+                    "description": "A contextual sidebar. As the user navigates or hovers over nodes, this panel updates to show the specific responsibilities of that software layer."
+                  }
+                ],
+                "id": 25,
+                "domain": "frontend",
+                "color": "#0D8319",
+                "weight": 5,
+                "layout": {
+                  "x": 31.57894736842105,
+                  "y": 24,
+                  "w": 68.42105263157895,
+                  "h": 29.230769230769234
+                }
+              }
+            ],
+            "files": [],
+            "id": 19,
+            "domain": "frontend",
+            "color": "#0D8319",
+            "weight": 26,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "w": 100,
+              "h": 32.098765432098766
+            }
+          }
+        ],
+        "files": [],
+        "id": 2,
+        "color": "#0D8319",
+        "weight": 82,
+        "layout": {
+          "x": 0,
+          "y": 0,
+          "w": 100,
+          "h": 53.246753246753244
+        }
+      },
+      {
+        "name": "Backend Engine",
+        "description": "The Python-based core responsible for OS interactions, file system operations, text processing, and bridging with the Vue frontend.",
+        "domain": "backend",
+        "children": [
+          {
+            "name": "Entry & API Endpoints",
+            "description": "Startup routines and PyWebView API bridges.",
+            "children": [
+              {
+                "name": "Entry Points",
+                "description": "Initialization and primary application state.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "run_webview.py",
+                    "description": "The main Python executable script. It handles Windows DPI-awareness bootstrapping, sets up logging, and initializes the PyWebView instance."
+                  },
+                  {
+                    "path": "src/app_state.py",
+                    "description": "Maintains persistent global application state. It acts as the central memory hub for multi-instance syncing, saving window geometry, and tracking recent projects."
+                  },
+                  {
+                    "path": "src/api.py",
+                    "description": "The final `Api` class exposed to the frontend. It inherits all segmented API part modules into a single object passed to PyWebView."
+                  },
+                  {
+                    "path": "src/api_parts/base_api.py",
+                    "description": "A shared base class for all API mixins. Provides common utilities like triggering native confirmation dialogs centered over the active monitor."
+                  },
+                  {
+                    "path": "src/api_parts/window_api.py",
+                    "description": "API methods specifically for window orchestration. Handles minimizing, restoring, and executing DPI-aware resize/move commands via JS triggers."
+                  }
+                ],
+                "id": 28,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 5,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 33.33333333333333
+                }
+              },
+              {
+                "name": "Core Endpoints",
+                "description": "Standard API operations for configuration and merging.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "src/api_parts/config_api.py",
+                    "description": "Exposes getters and setters for the global `config.json`. Handles updating the active filetypes and managing default prompts."
+                  },
+                  {
+                    "path": "src/api_parts/project_api.py",
+                    "description": "Handles project lifecycle events like loading, renaming, and deleting profiles. Triggers native OS file dialogs for directory selection."
+                  },
+                  {
+                    "path": "src/api_parts/file_api.py",
+                    "description": "Interfaces with the file system scanners. Serves the hierarchical tree structure to the frontend and dynamically calculates token counts on demand."
+                  },
+                  {
+                    "path": "src/api_parts/clipboard_api.py",
+                    "description": "Manages direct interactions with the OS clipboard using `pyperclip`, bypassing browser security popups. Triggers background secret scanning."
+                  },
+                  {
+                    "path": "src/api_parts/changes_api.py",
+                    "description": "Routes pasted AI text to the Markdown parser and Diff generator. Applies finalized patches directly to disk."
+                  }
+                ],
+                "id": 29,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 5,
+                "layout": {
+                  "x": 0,
+                  "y": 33.33333333333333,
+                  "w": 50,
+                  "h": 66.66666666666667
+                }
+              },
+              {
+                "name": "Project Starter Endpoints",
+                "description": "API methods dedicated to the boilerplate wizard.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "src/api_parts/starter_api_session.py",
+                    "description": "Manages reading and writing the temporary Project Starter session state to disk, allowing users to safely close and resume the wizard."
+                  },
+                  {
+                    "path": "src/api_parts/starter_api_parsing.py",
+                    "description": "Extracts XML-tagged segments from raw LLM output strings and maps them securely to internal state keys for the Vue interface."
+                  },
+                  {
+                    "path": "src/api_parts/starter_api_prompts.py",
+                    "description": "Generates complex prompts dynamically by injecting user state, base project code, and specific template instructions based on the active step."
+                  },
+                  {
+                    "path": "src/api_parts/starter_api_scaffold.py",
+                    "description": "Executes the final generation phase. Safely creates target directories and writes the parsed code blocks, `README`, and scripts to the file system."
+                  },
+                  {
+                    "path": "src/api_parts/starter_api.py",
+                    "description": "The aggregator class that merges all Project Starter API mixins. Also handles disabling standard app features while the wizard is active."
+                  }
+                ],
+                "id": 30,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 5,
+                "layout": {
+                  "x": 50,
+                  "y": 33.33333333333333,
+                  "w": 50,
+                  "h": 66.66666666666667
+                }
+              }
+            ],
+            "files": [],
+            "id": 27,
+            "domain": "backend",
+            "color": "#0078D4",
+            "weight": 16,
+            "layout": {
+              "x": 0,
+              "y": 0,
+              "w": 100,
+              "h": 39.02439024390244
+            }
+          },
+          {
+            "name": "Project Logic",
+            "description": "Managers for `.codemerger` configuration data.",
+            "children": [
+              {
+                "name": "Configuration IO",
+                "description": "Reading, writing, and migrating project profiles.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "src/constants.py",
+                    "description": "A centralized repository of application constants, including UI timing variables, regex markers, API endpoints, and system paths."
+                  },
+                  {
+                    "path": "src/core/paths.py",
+                    "description": "Safely resolves system paths, abstracting whether the app is running as a bare Python script or a frozen PyInstaller executable."
+                  },
+                  {
+                    "path": "src/core/config_io.py",
+                    "description": "Provides low-level atomic write operations. Employs a robust temp-file replacement pattern to prevent config corruption if the app crashes."
+                  },
+                  {
+                    "path": "src/core/config_migration.py",
+                    "description": "Handles backward compatibility by porting legacy `.allcode` flat files into the modern modular `.codemerger` profile structure."
+                  },
+                  {
+                    "path": "src/core/project_config.py",
+                    "description": "The primary model representing a loaded project. Breaks profile data into chunks (selections, ui states, instructions) to optimize load times."
+                  },
+                  {
+                    "path": "src/core/project_manager.py",
+                    "description": "A centralized manager handling thread-safe active project assignment. Caches the raw disk inventory to prevent redundant directory walks."
+                  }
+                ],
+                "id": 32,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 100
+                }
+              }
+            ],
+            "files": [],
+            "id": 31,
+            "domain": "backend",
+            "color": "#0078D4",
+            "weight": 7,
+            "layout": {
+              "x": 44,
+              "y": 39.02439024390244,
+              "w": 56,
+              "h": 30.48780487804878
+            }
+          },
+          {
+            "name": "File System",
+            "description": "Disk scanning, text diffing, and content formatting.",
+            "children": [
+              {
+                "name": "Scanners & Builders",
+                "description": "Directory traversal and data structures.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "src/core/file_scanner.py",
+                    "description": "High-performance OS file walker. Enriches raw paths with `.gitignore` and extension metadata in a background pass to offload UI work."
+                  },
+                  {
+                    "path": "src/core/file_tree_builder.py",
+                    "description": "Consumes the flat inventory from the scanner and constructs a nested Trie data structure. Injects visual styling flags (e.g., 'purple' hidden files) for the UI."
+                  },
+                  {
+                    "path": "src/core/secret_scanner.py",
+                    "description": "Uses YELP's `detect-secrets` library to perform heuristic checks on selected files, warning the user before copying sensitive keys to an LLM."
+                  },
+                  {
+                    "path": "src/core/file_monitor_thread.py",
+                    "description": "A background daemon that periodically checks the disk for newly created files. Communicates updates proactively to the Vue frontend via events."
+                  }
+                ],
+                "id": 34,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 4,
+                "layout": {
+                  "x": 0,
+                  "y": 60,
+                  "w": 100,
+                  "h": 40
+                }
+              },
+              {
+                "name": "AI Context Processing",
+                "description": "Parsing, Diffing, and Re-assembling code strings.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "src/core/utils.py",
+                    "description": "Shared utility functions including `tiktoken` context counting, SHA-1 file hashing, and complex `.gitignore` pattern evaluation logic."
+                  },
+                  {
+                    "path": "src/core/prompts.py",
+                    "description": "A static repository of complex, multi-line instruction strings used to command the LLM. Abstracts text out of the logic layer."
+                  },
+                  {
+                    "path": "src/core/merger.py",
+                    "description": "Loops through the active file selection and concatenates contents into a single string, applying mandatory Markdown wrappers and tags."
+                  },
+                  {
+                    "path": "src/core/replacer.py",
+                    "description": "A 'Fuzzy' patch engine. Uses cascading strategies to surgically apply `ORIGINAL`/`UPDATED` diff blocks even if the LLM skewed the formatting."
+                  },
+                  {
+                    "path": "src/core/change_applier.py",
+                    "description": "Parses the raw Markdown from the clipboard. Slices out XML sections and executes the final write/delete instructions to the local disk."
+                  },
+                  {
+                    "path": "src/core/highlighter.py",
+                    "description": "Utilizes the `Pygments` library to generate static syntax-highlighted HTML tables. Replaces client-side highlighting to massively reduce frontend load."
+                  }
+                ],
+                "id": 35,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 60
+                }
+              }
+            ],
+            "files": [],
+            "id": 33,
+            "domain": "backend",
+            "color": "#0078D4",
+            "weight": 11,
+            "layout": {
+              "x": 0,
+              "y": 39.02439024390244,
+              "w": 44,
+              "h": 60.97560975609756
+            }
+          },
+          {
+            "name": "Windows Platform",
+            "description": "Native OS integration and orchestration.",
+            "children": [
+              {
+                "name": "Window Types & Handlers",
+                "description": "UI window states and Win32 geometry math.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "src/core/registry.py",
+                    "description": "Reads and writes to the Windows Registry (HKCU/HKLM) to persist specific settings that dictate system-wide behaviors."
+                  },
+                  {
+                    "path": "src/core/window_geometry.py",
+                    "description": "Calculates physical/logical pixel conversions. Relies on the `ctypes` Windows API to track monitor IDs and scaling factors during drags."
+                  },
+                  {
+                    "path": "src/core/window_splash.py",
+                    "description": "Generates a transient, frameless initialization window injected with a Base64 animated payload to display during boot."
+                  },
+                  {
+                    "path": "src/core/window_main.py",
+                    "description": "Instantiates the primary PyWebView instance. Binds system-level events (minimize/restore) back into internal class methods."
+                  },
+                  {
+                    "path": "src/core/window_compact.py",
+                    "description": "Instantiates the Compact Mode widget. Employs a specific Win32 API hack (`WS_EX_TOOLWINDOW`) to hide the widget from the Windows Taskbar."
+                  },
+                  {
+                    "path": "src/core/window_manager.py",
+                    "description": "The central UI orchestrator. Tracks coordinates, manages transitions between the Main and Compact states, and handles application teardown."
+                  }
+                ],
+                "id": 37,
+                "domain": "backend",
+                "color": "#0078D4",
+                "weight": 6,
+                "layout": {
+                  "x": 0,
+                  "y": 0,
+                  "w": 100,
+                  "h": 100
+                }
+              }
+            ],
+            "files": [],
+            "id": 36,
+            "domain": "backend",
+            "color": "#0078D4",
+            "weight": 7,
+            "layout": {
+              "x": 44,
+              "y": 69.51219512195122,
+              "w": 56,
+              "h": 30.48780487804878
+            }
+          }
+        ],
+        "files": [],
+        "id": 26,
+        "color": "#0078D4",
+        "weight": 42,
+        "layout": {
+          "x": 0,
+          "y": 53.246753246753244,
+          "w": 58.333333333333336,
+          "h": 46.753246753246756
+        }
+      },
+      {
+        "name": "Project Infrastructure",
+        "description": "Configuration artifacts, CI/CD pipelines, build scripts, and standalone templates.",
+        "domain": "infrastructure",
+        "children": [
+          {
+            "name": "Root Configurations",
+            "description": "Base level setup for the environment.",
+            "children": [
+              {
+                "name": "Frontend Setup",
+                "description": "Node/Vue environment configurations.",
+                "children": [],
+                "files": [
+                  {
+                    "path": "frontend/package.json",
+                    "description": "Defines Node.js dependencies (Vue, Tailwind, Lucide, Markdown-it) and custom NPM scripts for concurrent local development."
+                  },
+                  {
+                    "path": "frontend/vite.config.js",
+                    "description": "Configuration for the Vite bundler. Instructs Vite to compile relative assets suitable for a `file://` based PyWebView host."
+                  },
+                  {
+                    "path": "frontend/tailwind.config.js",
+                    "description": "Tailwind definitions including custom theme colors (like `cm-blue`) and explicit paths for the PurgeCSS scanner."
+                  },
+                  {
+                    "path": "frontend/postcss.config.js",
+                    "description": "Enables the PostCSS pipeline required by Tailwind to inject utility classes and auto-prefixer logic."
+                  },
+                  {
+                    "path": "frontend/index.html",
+                    "description": "The base HTML skeleton. Mounts the Vue application div and loads the `main.js` module entry point."
+                  }
+                ],
+                "id": 40,
+                "domain": "infrastructure",
+                "color": "#DE6808",
+                "weight": 5,
                 "layout": {
                   "x": 0,
                   "y": 0,
@@ -789,42 +1114,35 @@
                 }
               },
               {
-                "name": "Global Utilities",
-                "description": "Shared components providing application-wide services and overlays.",
+                "name": "Application Environment",
+                "description": "Python, Executable, and GitHub configurations.",
+                "children": [],
                 "files": [
                   {
-                    "path": "frontend/src/components/InfoPanel.vue",
-                    "description": "The dynamic documentation footer. it serves as the visual output for the v-info system, displaying context-aware tips based on user hover state."
+                    "path": "requirements.txt",
+                    "description": "A pinned list of Python pip dependencies required by the backend, including `pywebview`, `detect-secrets`, and `tiktoken`."
                   },
                   {
-                    "path": "frontend/src/components/ProjectSelectorModal.vue",
-                    "description": "A focused browser for recent and new projects, featuring real-time path filtering and masked logo swatches."
+                    "path": "default_filetypes.json",
+                    "description": "The master list of known file extensions mapped to descriptions. Used to initially populate a user's indexing rules."
                   },
                   {
-                    "path": "frontend/src/components/InstructionsModal.vue",
-                    "description": "A project-specific interface for defining Intro and Outro prompts. it allows users to wrap merged context in custom architectural goals."
+                    "path": "codemerger.spec",
+                    "description": "The PyInstaller configuration. Details the inclusion of raw data assets and Tcl/Tk bindings to compile the app into a single `.exe`."
                   },
                   {
-                    "path": "frontend/src/components/NewProfileModal.vue",
-                    "description": "A dialog for creating isolated configuration sets within a project, supporting the cloning of existing merge lists and instructions."
+                    "path": "setup.iss",
+                    "description": "The Inno Setup script. Defines the Windows installer behavior, including registry changes, context menu additions, and version migrations."
                   },
                   {
-                    "path": "frontend/src/components/NewFiletypesModal.vue",
-                    "description": "A notification layer alerting the user to new default extensions introduced by software updates, ensuring the file manager stays current."
-                  },
-                  {
-                    "path": "frontend/src/components/ColorPickerOverlay.vue",
-                    "description": "A pixel-driven HSL wheel for picking project accent colors. it includes contrast calculation logic to ensure readable UI labels."
-                  },
-                  {
-                    "path": "frontend/src/utils/colorUtils.js",
-                    "description": "A shared utility library for color mathematics. it provides functions for determining relative luminance and contrast-optimized text modes."
+                    "path": ".github/workflows/release.yml",
+                    "description": "The CI/CD pipeline definition. Automatically triggers on version tags to build the frontend, freeze the executable, and draft a GitHub Release."
                   }
                 ],
-                "id": 25,
-                "domain": "frontend",
-                "color": "#0D8319",
-                "weight": 7,
+                "id": 41,
+                "domain": "infrastructure",
+                "color": "#DE6808",
+                "weight": 5,
                 "layout": {
                   "x": 0,
                   "y": 50,
@@ -833,197 +1151,189 @@
                 }
               }
             ],
-            "id": 23,
-            "domain": "frontend",
-            "color": "#0D8319",
             "files": [],
-            "weight": 15,
+            "id": 39,
+            "domain": "infrastructure",
+            "color": "#DE6808",
+            "weight": 11,
             "layout": {
               "x": 0,
-              "y": 0,
-              "w": 100,
-              "h": 19.480519480519483
+              "y": 41.37931034482759,
+              "w": 64.70588235294117,
+              "h": 58.62068965517241
             }
           },
           {
-            "name": "Project Starter Workflow",
-            "description": "The multi-step wizard for project concept generation and boilerplate scaffolding.",
+            "name": "Executable Scripts",
+            "description": "Standalone entry files and system processes.",
+            "children": [],
+            "files": [
+              {
+                "path": "src/core/logger.py",
+                "description": "A robust logging configuration that catches and swallows output stream errors when running in a headless windowed environment."
+              },
+              {
+                "path": "src/core/updater.py",
+                "description": "Queries the GitHub API to check for newer tags. If an update is approved, it downloads the installer and triggers the external GUI."
+              },
+              {
+                "path": "updater_gui.py",
+                "description": "A small, self-contained Tkinter application. Compiled separately to wait for the main CodeMerger process to die before launching the new installer."
+              },
+              {
+                "path": "go.bat",
+                "description": "The master orchestrator batch script for development. Handles spinning up virtual environments, concurrent Dev servers, and executing PyInstaller."
+              }
+            ],
+            "id": 42,
+            "domain": "infrastructure",
+            "color": "#DE6808",
+            "weight": 4,
+            "layout": {
+              "x": 64.70588235294117,
+              "y": 41.37931034482759,
+              "w": 35.294117647058826,
+              "h": 39.08045977011494
+            }
+          },
+          {
+            "name": "Starter Assets",
+            "description": "Raw text files and references used by the Project Starter tool.",
             "children": [
               {
-                "name": "Genesis Core",
-                "description": "The primary layout and logic steps for creating new codebases.",
+                "name": "Reference Guides",
+                "description": "Templates and Q&A JSONs for prompting.",
+                "children": [],
                 "files": [
                   {
-                    "path": "frontend/src/components/ProjectStarterModal.vue",
-                    "description": "The master orchestrator for the project creation wizard. it manages navigation across the six generation phases and tracks global session state."
+                    "path": "assets/reference/concept_questions.json",
+                    "description": "A JSON map providing 'Guiding Questions' specific to each segment of the Concept document for contextual LLM challenge prompts."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/Step1Details.vue",
-                    "description": "Collects basic project metadata and manages the selection of existing projects as references for 'v2' rewrite scenarios."
+                    "path": "assets/reference/todo_questions.json",
+                    "description": "A JSON map providing 'Guiding Questions' specific to phases of the TODO Plan, ensuring the generated plan covers environment setup and edge cases."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/Step2BaseFiles.vue",
-                    "description": "A specialized tree-manager for selecting reference source code during the generation of a new project's concept."
+                    "path": "assets/reference/concept.md",
+                    "description": "The base Markdown template injected into the LLM context to ensure it generates a structurally sound and well-defined Concept outline."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/Step3Concept.vue",
-                    "description": "Manages the interactive loop for generating and refining project features and principles. it handles the transition between segmented and merged document views."
+                    "path": "assets/reference/todo.md",
+                    "description": "The base Markdown template defining standard phase breakdowns (Setup -> UI -> Logic -> Deploy) for the LLM to follow when drafting tasks."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/Step4Stack.vue",
-                    "description": "The tech-stack selection module. it allows users to review AI technology recommendations and audit the architectural warnings for each choice."
+                    "path": "assets/boilerplate/README.md",
+                    "description": "A generic README template that is injected and customized dynamically by the LLM during the final scaffolding phase."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/Step5Todo.vue",
-                    "description": "Coordinates the generation of phase-by-phase implementation roadmaps, ensuring they align with the generated concept and tech stack."
-                  },
-                  {
-                    "path": "frontend/src/components/starter-steps/Step6Generate.vue",
-                    "description": "The final stage of project genesis, validating the final AI response and requesting the backend to scaffold the project files to disk."
-                  },
-                  {
-                    "path": "frontend/src/components/starter-steps/StepSuccess.vue",
-                    "description": "The landing screen shown after successful project creation. it provides immediate links to open the new folder and activate the project profile."
+                    "path": "assets/boilerplate/llm.md",
+                    "description": "A standard set of rules and directives intended to be kept inside the final project to instruct future LLMs on how to write code for the repo."
                   }
                 ],
-                "id": 27,
-                "domain": "frontend",
-                "color": "#0D8319",
-                "weight": 8,
+                "id": 44,
+                "domain": "infrastructure",
+                "color": "#DE6808",
+                "weight": 6,
                 "layout": {
                   "x": 0,
                   "y": 0,
                   "w": 100,
-                  "h": 61.53846153846154
+                  "h": 54.54545454545454
                 }
               },
               {
-                "name": "Starter UI Helpers",
-                "description": "Widgets and overlays supporting the iterative refinement of project plans.",
+                "name": "Boilerplate Scripts",
+                "description": "Automation templates copied to new projects.",
+                "children": [],
                 "files": [
                   {
-                    "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
-                    "description": "A Markdown reviewer for merged documents. it supports context-aware AI questioning and triggers instructional rewriting for the whole file."
+                    "path": "assets/boilerplate/version.txt",
+                    "description": "A simple INI-style version tracker file included as an example in bootstrapped repositories."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
-                    "description": "A specialized interface for multi-section AI outputs. it allows users to lock finalized segments while requesting rewrites for specific incomplete drafts."
+                    "path": "assets/boilerplate/release.bat",
+                    "description": "A reusable Windows batch script template that handles Git branch validation and tag pushing, given to newly scaffolded projects."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",
-                    "description": "An interactive panel that cycles through quality-assurance criteria for project drafts. it provides 'Copy context' prompts needed for AI refinement loops."
+                    "path": "assets/boilerplate/go_python.bat",
+                    "description": "A boilerplate task runner for Python stacks. Automates creating a virtual environment using `uv` and installing dependencies."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/RewriteModal.vue",
-                    "description": "A draggable overlay for providing high-level instructions to modify project segments. it manages the assembly of locked and unsigned context for the AI."
+                    "path": "assets/boilerplate/go_nodejs.bat",
+                    "description": "A boilerplate task runner for Node.js stacks. Automates standard `npm` tasks like `run dev` and `run build` behind a unified command."
                   },
                   {
-                    "path": "frontend/src/components/starter-steps/NotesModal.vue",
-                    "description": "A simple viewer for AI-provided change summaries. it helps users understand exactly what was modified during an instructional rewrite session."
+                    "path": "assets/boilerplate/go_docker.bat",
+                    "description": "A boilerplate task runner for Docker stacks. Acts as a wrapper around `docker-compose` to handle builds, starting services, and shell access."
                   }
                 ],
-                "id": 28,
-                "domain": "frontend",
-                "color": "#0D8319",
+                "id": 45,
+                "domain": "infrastructure",
+                "color": "#DE6808",
                 "weight": 5,
                 "layout": {
                   "x": 0,
-                  "y": 61.53846153846154,
+                  "y": 54.54545454545454,
                   "w": 100,
-                  "h": 38.46153846153846
+                  "h": 45.45454545454546
                 }
               }
             ],
-            "id": 26,
-            "domain": "frontend",
-            "color": "#0D8319",
             "files": [],
-            "weight": 14,
+            "id": 43,
+            "domain": "infrastructure",
+            "color": "#DE6808",
+            "weight": 12,
             "layout": {
               "x": 0,
-              "y": 19.480519480519483,
-              "w": 22.58064516129032,
-              "h": 80.51948051948051
+              "y": 0,
+              "w": 100,
+              "h": 41.37931034482759
             }
           },
           {
-            "name": "Compact Mode Components",
-            "description": "Specialized UI elements for the minimalist companion widget.",
+            "name": "Documentation",
+            "description": "Root level informational markdown files.",
+            "children": [],
             "files": [
               {
-                "path": "frontend/src/components/compact/CompactFeedbackOverlay.vue",
-                "description": "A custom notification layer for the widget, providing success/error banners and specialized interfaces for binary confirmations like memory overwrites."
+                "path": "README.md",
+                "description": "The primary public-facing documentation for the repository. Details the core workflow, Project Starter features, and development setup."
               },
               {
-                "path": "frontend/src/components/compact/CompactActionsStandard.vue",
-                "description": "The standard button set for the compact mode dashboard, providing primary controls for context copying and Importing changes."
-              },
-              {
-                "path": "frontend/src/components/compact/CompactActionsUltra.vue",
-                "description": "A minimalist, single-character interaction layer designed for maximum space efficiency when the Ultra Compact UI mode is active."
+                "path": "llm.md",
+                "description": "CodeMerger's self-hosting LLM rule file. Outlines architectural quirks (like DPI math) and specific constraints to aid language models in maintaining the code."
               }
             ],
-            "id": 29,
-            "domain": "frontend",
-            "color": "#0D8319",
-            "weight": 3,
+            "id": 46,
+            "domain": "infrastructure",
+            "color": "#DE6808",
+            "weight": 2,
             "layout": {
-              "x": 85.22920203735144,
-              "y": 73.62292879534259,
-              "w": 14.770797962648558,
-              "h": 26.377071204657412
+              "x": 64.70588235294117,
+              "y": 80.45977011494253,
+              "w": 35.294117647058826,
+              "h": 19.54022988505747
             }
           }
         ],
-        "id": 16,
-        "color": "#0D8319",
         "files": [],
-        "weight": 78,
+        "id": 38,
+        "color": "#DE6808",
+        "weight": 30,
         "layout": {
-          "x": 0,
-          "y": 0,
-          "w": 100,
-          "h": 56.52173913043478
+          "x": 58.333333333333336,
+          "y": 53.246753246753244,
+          "w": 41.666666666666664,
+          "h": 46.753246753246756
         }
       }
     ],
-    "files": [
-      {
-        "path": "src/core/config_io.py",
-        "description": "Manages atomic filesystem operations for project metadata and profile configuration, ensuring robust data integrity during concurrent write attempts. It provides shared utilities for Windows-specific hidden attributes, random hex color generation for UI branding, and quick metadata extraction for recent project lists."
-      },
-      {
-        "path": "src/core/config_migration.py",
-        "description": "Facilitates the transition from the legacy single-file project format to the modern multi-file directory structure used in recent versions. It maps existing selections and instructions into isolated profiles while maintaining automated backups to prevent data loss during the migration process."
-      },
-      {
-        "path": "frontend/src/utils/visualizerUtils.js",
-        "description": "Centralizes the algorithmic logic for the architectural treemap, including the recursive 2D layout engine and domain-based color assignment. It handles the critical preprocessing of AI-generated JSON trees to enrich nodes with layout coordinates, total weights, and search matching flags."
-      },
-      {
-        "path": "frontend/src/utils/info/visualizerInfo.js",
-        "description": "Provides a specialized dictionary of descriptive tooltips and guidance strings for the Architectural Explorer's 'Info Mode'. It explains the function of the treemap navigation, the prompt generation workflow, and the validation steps required for importing AI-generated hierarchies."
-      },
-      {
-        "path": "frontend/src/components/visualizer/VisualizerInit.vue",
-        "description": "A multi-state view managing the initialization and update phases of the project map, including prompt copying and response parsing. It features interactive error handling that allows users to request surgical amendments or full corrections from the AI when JSON validation fails."
-      },
-      {
-        "path": "frontend/src/components/visualizer/VisualizerExplorer.vue",
-        "description": "The primary layout component for the interactive architectural map, rendering nested layers as clickable tiles based on calculated weights. It implements breadcrumb-based navigation and provides a seamless dive-in experience for exploring deep system hierarchies."
-      },
-      {
-        "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
-        "description": "A specialized list component that displays the source files associated with a specific architectural layer. It offers real-time search filtering within the node and allows users to jump directly to their external code editor via interactive file cards."
-      },
-      {
-        "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
-        "description": "A contextual sidebar that presents AI-generated descriptions and architectural metadata for the currently focused component. It enables bulk actions, such as copying the combined source code for all files within a specific architectural branch."
-      }
-    ],
     "id": 1,
+    "domain": "default",
     "color": "#4B5563",
-    "weight": 146
+    "files": [],
+    "weight": 155
   },
   "file_hashes": {
     "README.md": "53466b565d4f691d349fe6a0a1d661aab91f34f4",
@@ -1033,21 +1343,21 @@
     "src/constants.py": "649679643a129d7efad0aa7762fe45eac2704dc3",
     "src/core/paths.py": "97209033531441e3e8378481c7b0758149698b76",
     "src/core/logger.py": "3d39f1265a567ab8eb2527897554619c179b614b",
-    "src/core/utils.py": "0d16e6109a05aeb8f9bb68eb62cb7ded93bf41f0",
+    "src/core/utils.py": "7aead4dd43d3b6d2dd24686d07f0e7359d8d7462",
     "src/core/registry.py": "25dc2a962d10505a4441293347af470ff1f535cd",
     "src/core/config_io.py": "7a69f53509a7efecdfb3323fd0e7f355f90cdd54",
-    "src/core/config_migration.py": "24354d70eebf2da849aade5cf01435603a74b00e",
-    "src/core/project_config.py": "292032ef9277bc3b48ea7d47d9cf8a7724dc9254",
+    "src/core/config_migration.py": "3a253c736d98fe4938cc128464b8cb8cf1934d29",
+    "src/core/project_config.py": "8c3dbb7fb3ebff541b798925f5becf49779d65cb",
     "src/app_state.py": "2fa2f05831054144174ae5524e42729aad0b7081",
-    "src/core/project_manager.py": "273e64692abcca301505b2949a1d3678479a6ae5",
+    "src/core/project_manager.py": "46522818c56f124dac99305b27a0e159f0455964",
     "src/core/file_scanner.py": "725bb9c11cf75cf6b238a121d44686e9f0c831bc",
     "src/core/file_tree_builder.py": "5be09795a46138bddd056c502be2d1f631badd80",
-    "src/core/prompts.py": "ed3b56d21d0db0163d19c47f592af785329b53f0",
+    "src/core/prompts.py": "b63d9f627a8f79b5738aa0b403998496bd262c4e",
     "src/core/merger.py": "dd5c821c6945ec8ad15e11478d76e7299d881689",
     "src/core/replacer.py": "44d4c09e00ac11b551827bb5d6ffed184892a54f",
     "src/core/change_applier.py": "a10df5b09e3663897864342df83fab5ce747609e",
     "src/core/secret_scanner.py": "f5d9391668774d849e3d6bb5acc0f8fbe9d790c7",
-    "src/core/highlighter.py": "14c7c6d4a64dffa5cbe7765a66e9e32e84d666b7",
+    "src/core/highlighter.py": "a18f2d134829335a02e95929ddda967697cab626",
     "src/core/file_monitor_thread.py": "c85098ca19dc46766076f7eb344ebd12bfe1e82a",
     "src/core/updater.py": "952aa53206780425fc1336485e31465be5ed8085",
     "src/core/window_geometry.py": "502699166101fd5ccbd6e85bae173e446810b2af",
@@ -1055,14 +1365,14 @@
     "src/core/window_main.py": "6c225e48e203c0ecbb3b321d950778615995f4e8",
     "src/core/window_compact.py": "b93d247639f194e15e42168c96ee7c2bee2c6e9b",
     "src/core/window_manager.py": "87983dbad2a2f118946b46a6e3fe8ffee19460e8",
-    "run_webview.py": "ed97e5b00790c3000718bf1f3b6eb4e9a6083fc6",
+    "run_webview.py": "01432244455d7660a7205a11d3bc90aacfce4082",
     "src/api_parts/base_api.py": "3ebffa1482b7ca9e35f1142dc6fd6dd73f483fe0",
     "src/api_parts/window_api.py": "a15f73236578af01e88a65b3721a562dc5e3838c",
     "src/api_parts/config_api.py": "a5d273823926b1f0417132304720df7d45e50ffc",
-    "src/api_parts/project_api.py": "0f9984f0dcff438e3cc8a5c757e835c0f91c3e12",
+    "src/api_parts/project_api.py": "d6d90f127d5d2861d6a7f73a575b6ed552552c4a",
     "src/api_parts/file_api.py": "611d8ededa68fc8154fcd8cd968e507c85b0cb6c",
     "src/api_parts/clipboard_api.py": "ba67c906211a78048567f6e17bfad7d6d55b7a83",
-    "src/api_parts/changes_api.py": "777fdbe4b1892e278b6fddd9109e2c68da5d475d",
+    "src/api_parts/changes_api.py": "550794abfd36960a7f170292513cbb8e9b4c8d6f",
     "src/api_parts/starter_api_session.py": null,
     "src/api_parts/starter_api_parsing.py": null,
     "src/api_parts/starter_api_prompts.py": "93c0a25d79c1451a4cc90c922a77971cb6668263",
@@ -1077,7 +1387,7 @@
     "frontend/src/main.js": "fc69c089f98128097161f71d0d24e12a553a8754",
     "frontend/src/style.css": "8b31917208d13e3fba9d6fb2d0d6fc6fbe246c4d",
     "frontend/src/router/index.js": "ccfc393dafc5a502469659ee83739b9c7457c22c",
-    "frontend/src/composables/globalState.js": "56d7a61977a2c4e30924111003f66be94d38fdaf",
+    "frontend/src/composables/globalState.js": "2ca83ed6c10b678039871773d795e8a65a443586",
     "frontend/src/composables/infoMode.js": null,
     "frontend/src/utils/colorUtils.js": "e80bb7c40a16b23cb45e60119801bcae341ff6e4",
     "frontend/src/utils/visualizerUtils.js": "f3eb6dfe331219fd0b9d6dca7f56fd733025340c",
@@ -1145,11 +1455,11 @@
     "frontend/src/components/starter-steps/Step5Todo.vue": "922844d83ab206fab77983121245ef52e7ccd06e",
     "frontend/src/components/starter-steps/Step6Generate.vue": null,
     "frontend/src/components/starter-steps/StepSuccess.vue": "6ed7715d20788b69097c6f872ac321ab70f296e6",
-    "frontend/src/components/VisualizerModal.vue": "86071e6c81ab156bb47ac42cb5b6d74e27eff83a",
+    "frontend/src/components/VisualizerModal.vue": "674653d9ef642d1ffd9de8475184dba2a370c95a",
     "frontend/src/components/visualizer/VisualizerInit.vue": "c24360b55ba5f8ac7a446524ba620a0285b4e2e5",
     "frontend/src/components/visualizer/VisualizerExplorer.vue": "f0e5c2e521987b886222423f7f146d586f9bf746",
     "frontend/src/components/visualizer/VisualizerLeafFiles.vue": "05cafb820804e153e48c1e9ef77a0eef794e12cf",
-    "frontend/src/components/visualizer/VisualizerDetails.vue": "0509b05e7eab2228447d7718c558c4ed63a49778",
+    "frontend/src/components/visualizer/VisualizerDetails.vue": "d9fdbbb1b41009874bdb2d3fc9547c146967ba0c",
     "assets/reference/concept_questions.json": "aa50e371179585a1a80c9a4163939e386e2b21f4",
     "assets/reference/todo_questions.json": "feebf5355e153d85e488205f42a6b84f79f57008",
     "assets/reference/concept.md": "88946cad8187da9bf609979e74b58625737e9b83",

@@ -211,12 +211,14 @@ Create a hierarchical Architecture Explorer to help me visualize the project's s
 **Constraints:**
 1. Structure the system into explicit conceptual layers: High-level Domains -> Functional Features -> Structural Components -> Implementation Details.
 2. At every level, group elements so NO NODE HAS MORE THAN 6 CHILDREN. Create semantic "Aggregation Nodes" (e.g., "Core Utilities", "Auth Modules") to group smaller parts if necessary.
-3. Assign a "domain" to top-level nodes (e.g., "frontend", "backend", "libraries", "infrastructure").
-4. CRITICAL ZERO OMISSION POLICY: You are provided with an explicit list of {file_count} "Files to Categorize" below.
+3. Provide a high-level summary at the root level that serves as an intro to the code structure and explains the main division of logic.
+4. Assign a "domain" to top-level nodes (e.g., "frontend", "backend", "libraries", "infrastructure").
+5. CRITICAL ZERO OMISSION POLICY: You are provided with an explicit list of {file_count} "Files to Categorize" below.
    - You MUST assign EVERY SINGLE FILE from this list to exactly one leaf node.
+   - **ROOT LEVEL PROHIBITION:** Do NOT attach files directly to the global root node. Every file must be inside a functional or semantic grouping node.
    - Do not drop, skip, or ignore any files, even if they seem minor or redundant.
    - **MANDATORY COUNT:** Your final JSON MUST contain exactly {file_count} file entries.
-   - **Handling Uncertainty:** If a file's semantic role is unclear, place it in a catch-all node like "Project Infrastructure" or "Supporting Artifacts" rather than omitting it.
+   - **Handling Uncertainty:** If a file's semantic role is unclear (e.g., top-level config, build scripts, README), place it in a catch-all aggregation node like "Miscellaneous Artifacts" or "Project Infrastructure" rather than omitting it or leaving it at the root.
 5. **Quality over Brevity:** For each file, provide a rich, detailed description (2-4 sentences) explaining its specific role, core logic, and its importance to the overall architecture. Avoid generic filler; be specific to the code provided.
 6. Each node (category) MUST have a short, insightful description of the role that part of the system plays.
 
@@ -227,21 +229,25 @@ Create a hierarchical Architecture Explorer to help me visualize the project's s
 - If you run out of output tokens, I will ask you to continue, but you must not start by omitting files.
 
 **Output Format:**
-Return ONLY a raw JSON object (or array of objects) with the following structure:
-[
-  {{
-    "name": "Node Name",
-    "description": "Role of this part of the system.",
-    "domain": "frontend",
-    "children": [ ... recursively ],
-    "files": [
-      {{
-        "path": "path/to/file1.ext",
-        "description": "Detailed explanation of what this file does, its core logic, and why it is important."
-      }}
-    ]
-  }}
-]
+Return ONLY a raw JSON object representing the system root. The root-level "description" must contain the high-level intro to the code structure.
+{{
+  "name": "System Architecture",
+  "description": "A comprehensive intro to the code structure, explaining the main division of logic across domains.",
+  "children": [
+    {{
+      "name": "Category Name",
+      "description": "High-level role of this grouping.",
+      "domain": "frontend",
+      "children": [ ... sub-categories recursively ... ],
+      "files": [
+        {{
+          "path": "path/to/file.ext",
+          "description": "Rich 2-4 sentence explanation of the file's logic and purpose."
+        }}
+      ]
+    }}
+  ]
+}}
 
 **Files to Categorize:**
 {file_list}
@@ -261,6 +267,7 @@ VISUALIZER_AMEND_PROMPT = """I am building an Architecture Explorer and your pre
 **Instructions:**
 1. Categorize the 'Missing Files' into the architectural structure we just discussed.
 2. For each missing file, provide the 'parent' node name where it should be placed.
+   - **Semantic Grouping:** If a file doesn't fit into an existing node, suggest a NEW semantic parent name that describes its role (e.g., "Documentation Assets", "Utility Hooks").
 3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.
 4. Provide a rich description for each added file (2-4 sentences).
 

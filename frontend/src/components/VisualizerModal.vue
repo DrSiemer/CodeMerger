@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
-import { X, Network, Search, Info, RefreshCw } from "lucide-vue-next";
+import { X, Network, Search, Info, RefreshCw, Trash2 } from "lucide-vue-next";
 import { useAppState } from "../composables/useAppState";
 import { useEscapeKey } from "../composables/useEscapeKey";
 import {
@@ -137,17 +137,62 @@ onMounted(async () => {
   }
 });
 
+const moveRootFilesToMisc = (root) => {
+  // Aggressively move root-level files into a standard peer-level category
+  if (root.files && root.files.length > 0) {
+    if (!root.children) root.children = [];
+
+    let miscNode = root.children.find(c => c.name === 'Miscellaneous Artifacts');
+    if (!miscNode) {
+      miscNode = {
+        name: 'Miscellaneous Artifacts',
+        description: 'Project metadata, root configurations, and top-level documentation.',
+        domain: 'infrastructure',
+        children: [],
+        files: []
+      };
+      // Insert at the beginning so it's easy to find
+      root.children.unshift(miscNode);
+    }
+
+    miscNode.files.push(...root.files);
+    // Explicitly delete the files key from the root container to ensure it only has folders
+    delete root.files;
+  }
+};
+
+const nukeVisualizerMap = async () => {
+  if (confirm("Are you sure you want to delete all Architecture Explorer data for this profile?\n\nThis will reset the map and you will need to generate it again. This cannot be undone.")) {
+    const success = await saveVisualizerMap(null);
+    if (success) {
+      viewState.value = "init";
+      navPath.value = [];
+      activeProject.visualizerMap = null;
+      statusMessage.value = "Explorer data cleared.";
+    }
+  }
+};
+
 const loadTree = (root) => {
   const idTracker = { val: 0 };
+
+  // Ensure root-level files are moved to a 'Miscellaneous' node for clean treemap display
+  moveRootFilesToMisc(root);
+
   const reEnrich = (node, parentDomain = 'default') => {
-      node.id = ++idTracker.val;
-      node.domain = node.domain || parentDomain;
-      node.color = getColorForDomain(node.domain);
-      node.weight = node.files ? node.files.length || 1 : 1;
-      if (node.children?.length) {
-          node.weight += node.children.reduce((acc, c) => acc + reEnrich(c, node.domain), 0);
-      }
-      return node.weight;
+    node.id = ++idTracker.val;
+    node.domain = node.domain || parentDomain;
+    node.color = getColorForDomain(node.domain);
+
+    // Defensive check to ensure files list exists and items are objects
+    if (!node.files) node.files = [];
+    node.files = node.files.map(f => typeof f === 'string' ? { path: f, description: '' } : f);
+
+    node.weight = node.files.length || 1;
+    if (node.children?.length) {
+      node.weight += node.children.reduce((acc, c) => acc + reEnrich(c, node.domain), 0);
+    }
+    return node.weight;
   };
   reEnrich(root);
   computeLayouts(root);
@@ -162,7 +207,6 @@ const processRawResponse = async (raw) => {
     let root;
     // Check if this is an amendment response
     if (data.amendments) {
-      // Use draft tree if available (from a previous parse error), otherwise fall back to the existing saved map
       const sourceTree = draftTree.value || activeProject.visualizerMap?.tree;
       if (!sourceTree) {
         throw new Error("No existing tree to amend. Please paste a full hierarchy first.");
@@ -170,21 +214,30 @@ const processRawResponse = async (raw) => {
       root = JSON.parse(JSON.stringify(sourceTree));
       const { findAndAddFileToNode, removeFileFromTree } = await import("../utils/visualizerUtils");
 
-      // Handle Removals (Deduplication or Obsolete cleanup)
       if (Array.isArray(data.amendments.remove)) {
         data.amendments.remove.forEach(path => {
           removeFileFromTree(root, path);
         });
       }
 
-      // Handle Additions (Missing files or New features)
       const addList = Array.isArray(data.amendments.add) ? data.amendments.add : (Array.isArray(data.amendments) ? data.amendments : []);
       addList.forEach(item => {
         const added = findAndAddFileToNode(root, item.path, item.parent, item.description);
         if (!added) {
-          // Fallback to root if parent node could not be semantically resolved
-          if (!root.files) root.files = [];
-          root.files.push({ path: item.path, description: item.description });
+          // Dynamic Node Creation: If parent doesn't exist, create it as a new root category
+          if (!root.children) root.children = [];
+          let newNode = root.children.find(c => c.name.toLowerCase() === item.parent.toLowerCase());
+          if (!newNode) {
+            newNode = {
+              name: item.parent,
+              description: 'Newly categorized artifacts.',
+              domain: 'default',
+              children: [],
+              files: []
+            };
+            root.children.push(newNode);
+          }
+          newNode.files.push({ path: item.path, description: item.description });
         }
       });
     } else {
@@ -194,12 +247,18 @@ const processRawResponse = async (raw) => {
         : data;
     }
 
+    // Ensure the System root contains ONLY children (folders)
+    moveRootFilesToMisc(root);
+
     const idTracker = { val: 0 };
     const reEnrich = (node, parentDomain = 'default') => {
       node.id = ++idTracker.val;
       node.domain = node.domain || parentDomain;
       node.color = getColorForDomain(node.domain);
-      node.files = (node.files || []).map(f => typeof f === 'string' ? { path: f, description: '' } : f);
+
+      if (!node.files) node.files = [];
+      node.files = node.files.map(f => typeof f === 'string' ? { path: f, description: '' } : f);
+
       node.weight = node.files.length || 1;
       if (node.children?.length) {
         node.weight += node.children.reduce((acc, c) => acc + reEnrich(c, node.domain), 0);
@@ -410,15 +469,19 @@ const handleCopyNodeCode = async (node) => {
       <!-- Footer -->
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
         <div class="flex items-center">
-            <div v-if="viewState === 'visualizing' && mapSyncState !== 'SYNCED'" class="flex items-center space-x-4">
+            <div v-if="viewState === 'visualizing'" class="flex items-center space-x-4">
               <button @click="viewState = 'updating'" v-info="'viz_update_map'" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors shrink-0 flex items-center">
                 <RefreshCw class="w-4 h-4 mr-2" />
                 Update Map
               </button>
-              <div class="flex items-center space-x-2 text-blue-300/80">
+              <div v-if="mapSyncState !== 'SYNCED'" class="flex items-center space-x-2 text-blue-300/80 mr-4">
                 <Info class="w-4 h-4 shrink-0" />
                 <span class="text-sm font-medium">{{ syncMessage }}</span>
               </div>
+
+              <button @click="nukeVisualizerMap" class="text-gray-500 hover:text-red-400 transition-colors p-2" title="Clear all map data and start fresh">
+                <Trash2 class="w-5 h-5" />
+              </button>
             </div>
         </div>
         <button @click="emit('close')" class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors text-sm shrink-0">Close Map</button>
