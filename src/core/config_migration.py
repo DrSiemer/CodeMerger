@@ -17,7 +17,7 @@ def migrate_legacy_project(config_instance):
 
     if 'profiles' in data:
         config_instance.profiles = data.get('profiles', {})
-        config_instance.active_profile_name = data.get('active_profile', 'Default')
+        config_instance.active_profile_name = data.get('active_profile', 'default')
     elif 'selected_files' in data:
         default_profile = config_instance._create_empty_profile()
         default_profile['intro_text'] = data.get('intro_text', '')
@@ -25,8 +25,8 @@ def migrate_legacy_project(config_instance):
         default_profile['expanded_dirs'] = data.get('expanded_dirs', [])
         default_profile['selected_files'] = data.get('selected_files', [])
         default_profile['total_tokens'] = data.get('total_tokens', 0)
-        config_instance.profiles = {'Default': default_profile}
-        config_instance.active_profile_name = 'Default'
+        config_instance.profiles = {'default': default_profile}
+        config_instance.active_profile_name = 'default'
 
     all_found_known = {p.replace('\\', '/') for p in data.get('known_files', [])}
     for p_data in config_instance.profiles.values():

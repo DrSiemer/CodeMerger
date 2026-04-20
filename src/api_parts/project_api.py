@@ -247,21 +247,22 @@ class ProjectApi:
         if not project_config:
             return None
 
-        if project_config.create_new_profile(name, copy_files, copy_instructions):
-            project_config.active_profile_name = name
+        safe_name = project_config.create_new_profile(name, copy_files, copy_instructions)
+        if safe_name:
+            project_config.active_profile_name = safe_name
             project_config.save()
             self._broadcast_reload()
-            return self._format_project_response(project_config, f"Created and switched to profile: {name}")
-        return self._format_project_response(project_config, f"Error: Profile '{name}' already exists.")
+            return self._format_project_response(project_config, f"Created and switched to profile: {safe_name}")
+        return self._format_project_response(project_config, f"Error: Profile based on '{name}' already exists.")
 
     def delete_profile(self, name):
-        """Deletes a profile and falls back to Default."""
+        """Deletes a profile and falls back to default."""
         project_config = self.project_manager.get_current_project()
         if not project_config:
             return None
 
-        if name == "Default":
-            return self._format_project_response(project_config, "Cannot delete the Default profile.")
+        if name == "default":
+            return self._format_project_response(project_config, "Cannot delete the default profile.")
 
         if project_config.delete_profile(name):
             project_config.save()

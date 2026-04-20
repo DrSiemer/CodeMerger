@@ -4,6 +4,7 @@ import hashlib
 import logging
 import threading
 import shutil
+import re
 from pathlib import Path
 from ..constants import COMPACT_MODE_BG_COLOR
 from .utils import get_token_count_for_text, calculate_font_color, get_file_hash
@@ -33,7 +34,7 @@ class ProjectConfig:
         self.known_files = []
 
         self.profiles = {}
-        self.active_profile_name = "Default"
+        self.active_profile_name = "default"
         self._last_mtimes = {}
         self._last_content_hash = None
 
@@ -43,6 +44,13 @@ class ProjectConfig:
     @staticmethod
     def read_project_display_info(base_dir):
         return read_project_display_info(base_dir)
+
+    def _sanitize_profile_name(self, name):
+        """Converts profile name to a safe, lowercase kebab-case string for IDs and folders."""
+        if not name:
+            return "default"
+        safe = re.sub(r'[^a-z0-9_-]+', '-', name.lower()).strip('-')
+        return safe if safe else "default-profile"
 
     def get_active_profile(self):
         if self.active_profile_name not in self.profiles:
@@ -157,7 +165,7 @@ class ProjectConfig:
             self.project_name = data.get('project_name', os.path.basename(self.base_dir))
             self.project_color = data.get('project_color', generate_random_color())
             self.project_font_color = data.get('project_font_color', calculate_font_color(self.project_color))
-            self.active_profile_name = data.get('active_profile', 'Default')
+            self.active_profile_name = self._sanitize_profile_name(data.get('active_profile', 'default'))
 
             all_found_known = {p.replace('\\', '/') for p in data.get('known_files', [])}
 
@@ -167,7 +175,7 @@ class ProjectConfig:
                     full_path = os.path.join(self.profiles_dir, item_name)
 
                     if os.path.isfile(full_path) and item_name.endswith('.json'):
-                        profile_name = item_name[:-5]
+                        profile_name = self._sanitize_profile_name(item_name[:-5])
                         try:
                             with open(full_path, 'r', encoding='utf-8-sig') as f:
                                 p_data = json.load(f)
@@ -179,7 +187,7 @@ class ProjectConfig:
                         except Exception: pass
 
                     elif os.path.isdir(full_path):
-                        profile_name = item_name
+                        profile_name = self._sanitize_profile_name(item_name)
                         profile_data = self._create_empty_profile()
 
                         def load_segment(filename, key, default):
@@ -225,8 +233,8 @@ class ProjectConfig:
                             self.profiles[profile_name] = profile_data
 
             if not self.profiles:
-                self.profiles['Default'] = self._create_empty_profile()
-                self.active_profile_name = 'Default'
+                self.profiles['default'] = self._create_empty_profile()
+                self.active_profile_name = 'default'
                 config_was_updated = True
 
             for profile_name, profile_data in self.profiles.items():
@@ -314,8 +322,8 @@ class ProjectConfig:
 
             active_profile_dirs = []
             for profile_name, profile_data in self.profiles.items():
-                safe_name = "".join(c for c in profile_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                if not safe_name: safe_name = "default_profile"
+                # Profile keys are sanitized on load/create, but we reinforce here for the folder path
+                safe_name = self._sanitize_profile_name(profile_name)
 
                 profile_dir = os.path.join(self.profiles_dir, safe_name)
                 os.makedirs(profile_dir, exist_ok=True)
@@ -361,7 +369,7 @@ class ProjectConfig:
             if abs(os.path.getmtime(self.config_file) - self._last_mtimes.get(self.config_file, 0)) > 0.1:
                 return True
 
-            safe_active = "".join(c for c in self.active_profile_name if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            safe_active = self._sanitize_profile_name(self.active_profile_name)
             active_profile_dir = os.path.join(self.profiles_dir, safe_active)
 
             if os.path.isdir(active_profile_dir):
@@ -377,8 +385,10 @@ class ProjectConfig:
         return sorted(list(self.profiles.keys()))
 
     def create_new_profile(self, name, copy_files, copy_instructions):
+        """Creates a new sanitized profile and returns the resulting safe name."""
         with self._lock:
-            if name in self.profiles: return False
+            safe_name = self._sanitize_profile_name(name)
+            if safe_name in self.profiles: return None
             if copy_files or copy_instructions:
                 source = self.get_active_profile()
                 new_profile = {
@@ -390,16 +400,16 @@ class ProjectConfig:
                     "unknown_files": source.get('unknown_files', [])[:] if copy_files else []
                 }
             else: new_profile = self._create_empty_profile()
-            self.profiles[name] = new_profile
-            return True
+            self.profiles[safe_name] = new_profile
+            return safe_name
 
     def delete_profile(self, profile_name_to_delete):
         with self._lock:
-            if profile_name_to_delete == "Default" or profile_name_to_delete not in self.profiles:
+            if profile_name_to_delete == "default" or profile_name_to_delete not in self.profiles:
                 return False
             del self.profiles[profile_name_to_delete]
             if self.active_profile_name == profile_name_to_delete:
-                self.active_profile_name = "Default"
+                self.active_profile_name = "default"
             return True
 
     def update_known_files(self, paths, originating_profile_name=None):

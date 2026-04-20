@@ -72,17 +72,17 @@
   },
   {
     "path": "src/core/config_migration.py",
-    "tokens": 539,
-    "lines": 53,
-    "mtime": 1776696760.362983,
-    "hash": "fa2a2b8e94f7bab02e5b8ac489313652dcb18bb0"
+    "tokens": 522,
+    "lines": 52,
+    "mtime": 1776697805.3235848,
+    "hash": "3a253c736d98fe4938cc128464b8cb8cf1934d29"
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776696760.5689442,
-    "hash": "7e4c1fbc2b282c557e8310c569e207e7e2f84bc8",
-    "tokens": 3795,
-    "lines": 428,
+    "mtime": 1776697805.255323,
+    "hash": "8c3dbb7fb3ebff541b798925f5becf49779d65cb",
+    "tokens": 3857,
+    "lines": 436,
     "ignore_tokens": false
   },
   {
@@ -245,11 +245,11 @@
   },
   {
     "path": "src/api_parts/project_api.py",
-    "tokens": 2100,
+    "tokens": 2111,
     "ignoreTokens": false,
-    "lines": 275,
-    "mtime": 1776629197.628916,
-    "hash": "0f9984f0dcff438e3cc8a5c757e835c0f91c3e12"
+    "lines": 276,
+    "mtime": 1776697805.3871825,
+    "hash": "d6d90f127d5d2861d6a7f73a575b6ed552552c4a"
   },
   {
     "path": "src/api_parts/file_api.py",
@@ -374,8 +374,8 @@
     "tokens": 394,
     "ignoreTokens": false,
     "lines": 62,
-    "mtime": 1776679859.4865212,
-    "hash": "56d7a61977a2c4e30924111003f66be94d38fdaf"
+    "mtime": 1776697805.4496722,
+    "hash": "2ca83ed6c10b678039871773d795e8a65a443586"
   },
   {
     "path": "frontend/src/composables/infoMode.js",
