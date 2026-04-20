@@ -137,10 +137,10 @@
   },
   {
     "path": "src/core/project_manager.py",
-    "mtime": 1776686867.9542458,
-    "hash": "075ee05fc5e0a86a9d1e6a46b9151eca6ec100dd",
-    "tokens": 1117,
-    "lines": 152
+    "mtime": 1776689659.7166257,
+    "hash": "273e64692abcca301505b2949a1d3678479a6ae5",
+    "tokens": 1213,
+    "lines": 164
   },
   {
     "path": "src/core/file_monitor_thread.py",

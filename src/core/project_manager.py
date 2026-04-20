@@ -35,7 +35,7 @@ class ProjectManager:
             self._disk_inventory = inventory
             self._inventory_timestamp = time.time()
 
-    def _populate_new_project_files(self, project_config, cancel_event=None):
+    def _populate_new_project_files(self, project_config, cancel_event=None, reset_selection=True):
         """
         Helper method to scan for files and populate the ProjectConfig for a new project.
         """
@@ -50,8 +50,9 @@ class ProjectManager:
             return False
 
         project_config.known_files = all_project_files
-        project_config.selected_files = []
-        project_config.total_tokens = 0
+        if reset_selection:
+            project_config.selected_files = []
+            project_config.total_tokens = 0
         return True
 
     def load_project(self, path, cancel_event=None):
@@ -81,6 +82,8 @@ class ProjectManager:
             codemerger_dir = os.path.join(path, '.codemerger')
             allcode_file = os.path.join(path, '.allcode')
             is_new_project = not os.path.isdir(codemerger_dir) and not os.path.isfile(allcode_file)
+            # Detect migration from legacy format
+            is_migration = not os.path.isdir(codemerger_dir) and os.path.isfile(allcode_file)
 
             self.project_config = ProjectConfig(path)
 
@@ -92,15 +95,24 @@ class ProjectManager:
 
             project_display_name = self.project_config.project_name
 
-            if is_new_project:
-                success = self._populate_new_project_files(self.project_config, cancel_event=cancel_event)
+            if is_new_project or is_migration:
+                # For migrations, we scan to populate known_files but preserve existing selected_files
+                success = self._populate_new_project_files(
+                    self.project_config,
+                    cancel_event=cancel_event,
+                    reset_selection=is_new_project
+                )
 
                 if cancel_event and cancel_event.is_set():
                     self.project_config = None
                     return None, "Load cancelled."
 
                 self.project_config.save()
-                status_message = f"Initialized new project: {project_display_name}."
+
+                if is_new_project:
+                    status_message = f"Initialized new project: {project_display_name}."
+                else:
+                    status_message = f"Migrated legacy project: {project_display_name}."
             elif files_were_cleaned:
                 status_message = f"Activated project: {project_display_name} - Cleaned missing files."
             else:
