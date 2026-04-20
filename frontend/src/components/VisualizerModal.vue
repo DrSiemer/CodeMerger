@@ -372,8 +372,10 @@ const handleCopyNodeCode = async (node) => {
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar shrink-0">
         <div class="flex items-center space-x-3 text-white shrink-0">
           <Network class="w-6 h-6 text-cm-blue" />
-          <h2 class="text-xl font-bold">Architecture Explorer</h2>
-          <span class="text-gray-500 text-sm font-medium">/ {{ activeProject.name }}</span>
+          <div class="flex items-baseline space-x-2">
+            <h2 class="text-xl font-bold">Architecture Explorer</h2>
+            <span class="text-gray-500 text-sm font-medium">/ {{ activeProject.name }}</span>
+          </div>
         </div>
 
         <div class="flex items-center space-x-6 flex-grow justify-end max-w-2xl px-6">
@@ -455,7 +457,7 @@ const handleCopyNodeCode = async (node) => {
                 </div>
               </div>
               <div v-else-if="currentZoomNode?.files?.length" class="absolute inset-0 m-2 overflow-y-auto custom-scrollbar bg-[#222222] rounded-xl border border-gray-800 p-6 space-y-4">
-                <h4 class="text-lg font-bold text-white mb-4 flex items-center"><FileCode class="w-5 h-5 mr-2 text-cm-blue" />Implementation Files</h4>
+                <h4 class="text-lg font-bold text-white mb-4 flex items-center"><FileCode class="w-5 h-5 mr-2 text-cm-blue" />Files in this node</h4>
                 <div v-for="file in processedLeafFiles" :key="file.path" class="bg-[#2a2a2a] border rounded-lg p-5 shadow-sm hover:border-gray-500 transition-all duration-300" :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'border-cm-blue ring-1 ring-cm-blue/30 scale-[1.01]' : 'border-gray-700']">
                   <div class="flex items-center space-x-2 mb-3"><span class="text-cm-blue font-mono font-bold text-sm break-all" v-html="highlightMatch(file.path, searchQuery)"></span></div>
                   <p class="text-gray-300 text-[15px] leading-relaxed" v-html="highlightMatch(file.description, searchQuery)"></p>
@@ -480,7 +482,7 @@ const handleCopyNodeCode = async (node) => {
                   <button @click="handleCopyNodeCode(displayNode)" class="hover:brightness-110 text-white px-6 py-2 rounded font-black text-[10px] uppercase tracking-widest shadow-lg transition-all flex items-center justify-center space-x-2 active:scale-[0.98] w-fit" :style="{ backgroundColor: displayNode.color }"><ClipboardPaste class="w-3.5 h-3.5" /><span>Copy Merged Code</span></button>
                 </div>
                 <div v-if="displayNode.files?.length" class="space-y-4 pt-6">
-                  <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Direct Files ({{ displayNode.files.length }})</div>
+                  <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Files ({{ displayNode.files.length }})</div>
                   <div class="space-y-1">
                     <div v-for="file in displayNode.files" :key="file.path" class="flex items-center space-x-2 text-gray-400 group"><FileCode class="w-3 h-3 text-gray-600 shrink-0" /><span class="text-xs font-mono truncate text-gray-300">{{ file.path }}</span></div>
                   </div>
