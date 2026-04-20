@@ -14,9 +14,9 @@ const emit = defineEmits(['copy-code', 'open-file'])
     <div v-if="displayNode" class="space-y-8 animate-in fade-in duration-300">
       <!-- Title & Domain -->
       <div class="space-y-2">
-        <div class="flex items-center justify-between">
-          <h3 class="text-3xl font-extralight text-white leading-tight truncate pr-4">{{ displayNode.name }}</h3>
-          <span v-if="displayNode.domain" class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded" :style="{ backgroundColor: displayNode.color + '40', color: displayNode.color }">{{ displayNode.domain }}</span>
+        <div class="flex items-start justify-between">
+          <h3 class="text-3xl font-extralight text-white leading-tight break-words pr-4">{{ displayNode.name }}</h3>
+          <span v-if="displayNode.domain" class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded shrink-0" :style="{ backgroundColor: displayNode.color + '40', color: displayNode.color }">{{ displayNode.domain }}</span>
         </div>
         <div class="h-1 w-20 rounded" :style="{ backgroundColor: displayNode.color }"></div>
       </div>
