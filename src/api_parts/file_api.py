@@ -228,7 +228,7 @@ class FileApi:
         finally:
             project_config.selected_files = orig_selection
 
-    def get_visualizer_prompt(self):
+    def get_visualizer_prompt(self, previous_map_json=None):
         """Generates the prompt for the LLM to build the visualizer tree, including full source code."""
         project_config = self.project_manager.get_current_project()
         if not project_config:
@@ -249,12 +249,27 @@ class FileApi:
         file_count = len(selected_files)
         file_list_str = "\n".join([f"- {f['path']}" for f in selected_files])
 
+        prev_context = ""
+        if previous_map_json:
+            prev_context = f"\n**Previous Mapping for Reference:**\nTo maintain architectural consistency, please try to preserve the existing structure, domain assignments, and node names where appropriate, while integrating the recent changes. Only output the final JSON.\n```json\n{previous_map_json}\n```\n"
+
         from src.core import prompts as p
         return p.VISUALIZER_GENERATION_PROMPT.format(
             file_count=file_count,
             file_list=file_list_str,
+            previous_map_context=prev_context,
             merged_content=merged_code
         )
+
+    def save_visualizer_map(self, map_data):
+        """Saves the generated visualizer map to the active project profile."""
+        project_config = self.project_manager.get_current_project()
+        if project_config:
+            project_config.visualizer_map = map_data
+            project_config.save()
+            self._broadcast_reload()
+            return True
+        return False
 
     def copy_visualizer_node_code(self, file_paths):
         """Copies code for a specific subset of files defined in a visualizer node."""

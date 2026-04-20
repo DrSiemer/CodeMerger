@@ -90,8 +90,17 @@ class ProjectConfig:
             "intro_text": "",
             "outro_text": "",
             "expanded_dirs": [],
-            "unknown_files": []
+            "unknown_files": [],
+            "visualizer_map": None
         }
+
+    @property
+    def visualizer_map(self):
+        return self.get_active_profile().get('visualizer_map')
+
+    @visualizer_map.setter
+    def visualizer_map(self, value):
+        self.get_active_profile()['visualizer_map'] = value
 
     @property
     def selected_files(self):

@@ -243,6 +243,6 @@ Return ONLY a raw JSON object (or array of objects) with the following structure
 
 **Files to Categorize:**
 {file_list}
-
+{previous_map_context}
 **Project Code Content:**
 {merged_content}"""

@@ -45,6 +45,7 @@ class BaseApi:
             "selected_files": project_config.selected_files,
             "unknown_files": project_config.unknown_files,
             "expanded_dirs": list(project_config.expanded_dirs),
+            "visualizer_map": project_config.visualizer_map,
             "has_instructions": bool(project_config.intro_text or project_config.outro_text),
             "intro_text": project_config.intro_text,
             "outro_text": project_config.outro_text,

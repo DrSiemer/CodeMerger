@@ -14,7 +14,8 @@ export const activeProject = reactive({
   hasInstructions: false,
   introText: '',
   outroText: '',
-  newFileCount: 0
+  newFileCount: 0,
+  visualizerMap: null
 })
 export const statusMessage = ref('')
 export const statusVisible = ref(false)
