@@ -25,7 +25,7 @@ const emit = defineEmits([
 
 const {
   openFile, statusMessage, getClipboardText,
-  showOrderErrorModal, orderErrorMessage
+  showOrderErrorModal, orderErrorMessage, config
 } = useAppState()
 const selectedIndices = ref(new Set())
 const lastSelectedIndex = ref(null)
@@ -73,7 +73,8 @@ const getTokenColor = (file) => {
     .filter(f => f && !f.ignoreTokens)
     .map(f => f.tokens || 0)
 
-  const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, TOKEN_COLOR_RANGE_MAX) : TOKEN_COLOR_RANGE_MAX
+  const rangeMax = config.value.token_color_threshold || 4000
+  const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, rangeMax) : rangeMax
   const p = count / maxInList
   if (p < 0.2) return 'text-gray-500'
   if (p < 0.4) return 'text-gray-400'

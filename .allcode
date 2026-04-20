@@ -37,8 +37,8 @@
         },
         {
           "path": "src/constants.py",
-          "mtime": 1776630614.6010084,
-          "hash": "aaf71306870740311addcf14de1f200a95d1bb60",
+          "mtime": 1776686383.9148307,
+          "hash": "d5385a9c0116eaeeed1bcb13f1a8e79c29ceaaea",
           "tokens": 2017,
           "lines": 239
         },
@@ -58,10 +58,10 @@
         },
         {
           "path": "src/core/utils.py",
-          "mtime": 1776629197.4998705,
-          "hash": "a05f8e4d139a6a9a3a19cc244de04306aab88d1d",
-          "tokens": 3141,
-          "lines": 422,
+          "mtime": 1776686383.9624562,
+          "hash": "0d16e6109a05aeb8f9bb68eb62cb7ded93bf41f0",
+          "tokens": 3151,
+          "lines": 423,
           "ignore_tokens": false
         },
         {
@@ -584,11 +584,11 @@
         },
         {
           "path": "frontend/src/components/FileManagerRightPanel.vue",
-          "tokens": 3831,
+          "tokens": 3844,
           "ignoreTokens": false,
-          "lines": 382,
-          "mtime": 1776592574.3942766,
-          "hash": "12ea6323692657ede4328ab6c21af0e48cc47217"
+          "lines": 383,
+          "mtime": 1776686384.0104153,
+          "hash": "92a87a0fc2884378cf37a51f5a84a12d08ba4fa3"
         },
         {
           "path": "frontend/src/components/FileManagerModal.vue",
@@ -642,8 +642,11 @@
         },
         {
           "path": "frontend/src/components/settings/SettingsFileManagerTab.vue",
-          "tokens": 471,
-          "ignoreTokens": false
+          "tokens": 574,
+          "ignoreTokens": false,
+          "lines": 42,
+          "mtime": 1776686384.070197,
+          "hash": "121e33a20170a67a1eb5528e7d96852d8d191267"
         },
         {
           "path": "frontend/src/components/settings/SettingsFiletypesTab.vue",
@@ -998,7 +1001,7 @@
           "hash": "8b81e1105f1ba3a5579b34713e5e7d5788ec1bb3"
         }
       ],
-      "total_tokens": 172949,
+      "total_tokens": 173075,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

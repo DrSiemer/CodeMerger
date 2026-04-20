@@ -21,6 +21,12 @@ const props = defineProps({
       <input type="number" v-model="localConfig.token_limit" class="bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-1.5 w-24 outline-none focus:border-cm-blue">
     </div>
 
+    <div class="flex items-center space-x-3">
+      <span class="text-gray-200 w-64">Token color warning threshold:</span>
+      <input type="number" v-model="localConfig.token_color_threshold" class="bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-1.5 w-24 outline-none focus:border-cm-blue">
+      <span class="text-gray-400 text-sm">tokens</span>
+    </div>
+
     <div class="flex items-center space-x-3" v-info="'set_fm_threshold'">
       <span class="text-gray-200 w-64">Warn when 'Add all' exceeds:</span>
       <input type="number" v-model="localConfig.add_all_warning_threshold" class="bg-cm-input-bg border border-gray-600 text-white rounded px-3 py-1.5 w-24 outline-none focus:border-cm-blue">
