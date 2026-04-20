@@ -74,6 +74,20 @@ def get_highlighted_diff(old_text, new_text, filename, full_context=False):
 
     return diff_rows
 
+def get_highlighted_code(text, filename):
+    """
+    Applies syntax highlighting to a single block of code.
+    Returns a list of HTML lines.
+    """
+    try:
+        lexer = get_lexer_for_filename(filename)
+    except Exception:
+        lexer = TextLexer()
+
+    formatter = HtmlFormatter(nowrap=True)
+    html_lines = highlight(text, lexer, formatter).splitlines()
+    return html_lines
+
 def get_pygments_css():
     """Returns the CSS classes needed to render the Pygments HTML."""
     # 'monokai' is a great dark theme for CodeMerger's aesthetic

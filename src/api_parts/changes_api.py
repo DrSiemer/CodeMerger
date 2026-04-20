@@ -25,6 +25,11 @@ class ChangesApi:
         """Called by Vue to fetch the syntax highlighted diff array."""
         return get_highlighted_diff(old_text, new_text, filename, full_context)
 
+    def get_syntax_highlight(self, text, filename):
+        """Called by Vue to fetch syntax highlighted HTML lines for a single file."""
+        from src.core.highlighter import get_highlighted_code
+        return get_highlighted_code(text, filename)
+
     def get_pygments_style(self):
         """Called by Vue once on mount to inject the CSS."""
         return get_pygments_css()

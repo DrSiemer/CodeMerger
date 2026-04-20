@@ -1,5 +1,5 @@
 <script setup>
-import { FileCode, ClipboardPaste } from 'lucide-vue-next'
+import { FileCode, ClipboardPaste, ExternalLink } from 'lucide-vue-next'
 
 defineProps({
   displayNode: Object,
@@ -11,7 +11,30 @@ const emit = defineEmits(['copy-code', 'open-file'])
 
 <template>
   <div class="w-1/3 flex flex-col p-8 bg-black/20 overflow-y-auto custom-scrollbar" v-info="'viz_details'">
-    <div v-if="displayNode" class="space-y-8 animate-in fade-in duration-300">
+
+    <!-- FILE DETAILS VIEW -->
+    <div v-if="displayNode?.isFile" class="space-y-8 animate-in fade-in duration-300">
+       <div class="space-y-2">
+         <h3 class="text-xl font-mono text-cm-blue leading-tight break-all pr-4">{{ displayNode.name }}</h3>
+         <div class="text-sm font-mono text-gray-500 break-all">{{ displayNode.path }}</div>
+       </div>
+
+       <div class="space-y-4">
+         <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">File Description</div>
+         <p class="text-gray-200 text-base leading-relaxed">{{ displayNode.description || "No description provided." }}</p>
+       </div>
+
+       <div class="space-y-4 pt-6 border-t border-gray-700/50">
+         <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Actions</div>
+         <button @click="emit('open-file', displayNode.path)" class="hover:brightness-110 text-white px-6 py-2 rounded font-black text-[10px] uppercase tracking-widest shadow-lg transition-all flex items-center justify-center space-x-2 active:scale-[0.98] w-fit bg-cm-blue">
+           <ExternalLink class="w-3.5 h-3.5" />
+           <span>Open in Editor</span>
+         </button>
+       </div>
+    </div>
+
+    <!-- NODE DETAILS VIEW -->
+    <div v-else-if="displayNode" class="space-y-8 animate-in fade-in duration-300">
       <!-- Title & Domain -->
       <div class="space-y-2">
         <div class="flex items-start justify-between">

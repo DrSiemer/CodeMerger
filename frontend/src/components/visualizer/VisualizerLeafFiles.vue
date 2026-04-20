@@ -7,7 +7,7 @@ const props = defineProps({
   searchQuery: String
 })
 
-const emit = defineEmits(['open-file'])
+const emit = defineEmits(['open-file', 'select-file'])
 
 const processedLeafFiles = computed(() => {
   if (!props.node || !props.node.files) return [];
@@ -45,13 +45,19 @@ const highlightMatch = (text, query) => {
     <div
       v-for="file in processedLeafFiles"
       :key="file.path"
-      @click="emit('open-file', file.path)"
+      @click="emit('select-file', file)"
       class="bg-[#2a2a2a] border rounded-lg p-5 shadow-sm hover:border-gray-500 transition-all duration-300 cursor-pointer group/file"
       :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'border-cm-blue ring-1 ring-cm-blue/30 scale-[1.01]' : 'border-gray-700']"
     >
       <div class="flex items-center justify-between mb-3 min-w-0">
         <span class="text-cm-blue font-mono font-bold text-sm break-all" v-html="highlightMatch(file.path, searchQuery)"></span>
-        <ExternalLink class="w-4 h-4 text-gray-500 opacity-0 group-hover/file:opacity-100 transition-opacity shrink-0 ml-2" />
+        <button
+          @click.stop="emit('open-file', file.path)"
+          class="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors shrink-0 ml-2 opacity-0 group-hover/file:opacity-100 shadow"
+          title="Open in Editor"
+        >
+          <ExternalLink class="w-4 h-4" />
+        </button>
       </div>
       <p class="text-gray-300 text-[15px] leading-relaxed" v-html="highlightMatch(file.description, searchQuery)"></p>
     </div>

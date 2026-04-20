@@ -26,12 +26,16 @@ const {
   openFile,
   resizeWindow,
   statusMessage,
+  getFileContent,
 } = useAppState();
 
 const viewState = ref("init"); // 'init' | 'visualizing' | 'updating'
 const navPath = ref([]);
 const hoveredNode = ref(null);
+const highlightedLines = ref([]);
+const isCodeLoading = ref(false);
 const parseError = ref("");
+
 const searchQuery = ref("");
 
 // Memory for partial results to allow surgical amendments
@@ -42,6 +46,33 @@ const duplicateEntriesList = ref([]);
 const currentNavNode = computed(() => navPath.value[navPath.value.length - 1] || null);
 const displayNode = computed(() => hoveredNode.value || currentNavNode.value);
 
+const diveIntoFile = (f) => {
+  navPath.value.push({
+    id: 'file-' + f.path,
+    isFile: true,
+    name: f.path.split('/').pop(),
+    path: f.path,
+    description: f.description,
+    domain: currentNavNode.value?.domain,
+    color: currentNavNode.value?.color
+  });
+};
+
+watch(currentNavNode, async (node) => {
+  if (node && node.isFile) {
+    isCodeLoading.value = true;
+    highlightedLines.value = [];
+
+    const content = await getFileContent(node.path);
+    if (content !== null && window.pywebview) {
+      highlightedLines.value = await window.pywebview.api.get_syntax_highlight(content, node.path);
+    }
+    isCodeLoading.value = false;
+  } else {
+    highlightedLines.value = [];
+  }
+});
+
 // Explicitly clear hover state on navigation to prevent "sticky" UI state
 watch(navPath, () => {
   if (hoveredNode.value) {
@@ -50,22 +81,16 @@ watch(navPath, () => {
   }
 }, { deep: true });
 
-// Contextual navigation logic: Allow copying any node except the global root, provided we aren't hovering over a preview
+// Contextual navigation logic: Allow copying any node except the global root or specific files, provided we aren't hovering over a preview
 const canCopy = computed(() => {
   const navNode = currentNavNode.value;
-  if (!navNode) return false;
+  if (!navNode || navNode.isFile) return false;
 
   // Root check: navPath[0] is the root. Copying is allowed for any level below that.
   const isNotRoot = navPath.value.length > 1;
 
   // Visibility check: Only show button if we are NOT hovering over a neighbor/child (previewing)
   const result = isNotRoot && !hoveredNode.value;
-
-  console.log(
-    `[Viz Button Logic] View: "${navNode.name}" | ` +
-    `Previewing: ${hoveredNode.value ? `"${hoveredNode.value.name}"` : 'NONE'} | ` +
-    `Show Button: ${result.toString().toUpperCase()}`
-  );
 
   return result;
 });
@@ -96,6 +121,16 @@ const syncMessage = computed(() => {
 
 onMounted(async () => {
   await resizeWindow(1100, 800);
+
+  // Ensure Pygments CSS is available in the modal context
+  if (window.pywebview && !document.getElementById('pygments-css')) {
+    const css = await window.pywebview.api.get_pygments_style();
+    const style = document.createElement('style');
+    style.id = 'pygments-css';
+    style.innerHTML = css;
+    document.head.appendChild(style);
+  }
+
   if (activeProject.visualizerMap?.tree) {
     loadTree(activeProject.visualizerMap.tree);
     viewState.value = "visualizing";
@@ -335,11 +370,30 @@ const handleCopyNodeCode = async (node) => {
           @dive-in="(node) => navPath.push(node)"
           @node-hover="(node) => hoveredNode = node"
         >
+          <!-- Center Panel Code Viewer -->
+          <div v-if="currentNavNode?.isFile" class="absolute inset-0 m-2 bg-[#1e1e1e] border border-gray-800 rounded-xl shadow-inner overflow-hidden flex flex-col">
+            <div v-if="isCodeLoading" class="flex-grow flex items-center justify-center">
+               <span class="text-gray-500 italic font-mono">Loading code...</span>
+            </div>
+            <div v-else class="flex-grow overflow-auto p-4 custom-scrollbar highlight">
+              <table class="w-full border-collapse font-mono text-[12px] leading-relaxed selectable">
+                <tbody>
+                  <tr v-for="(line, idx) in highlightedLines" :key="idx" class="group">
+                    <td class="w-10 pr-4 text-right text-gray-600 select-none border-r border-gray-800/50 group-hover:text-gray-400">{{ idx + 1 }}</td>
+                    <td class="pl-4 whitespace-pre" v-html="line || ' '"></td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-if="highlightedLines.length === 0" class="p-6 text-gray-500 italic">File is empty or could not be read.</div>
+            </div>
+          </div>
+
           <VisualizerLeafFiles
-            v-if="!currentNavNode?.children?.length"
+            v-else-if="!currentNavNode?.children?.length"
             :node="currentNavNode"
             :search-query="searchQuery"
             @open-file="openFile"
+            @select-file="diveIntoFile"
           />
 
           <template #details>
