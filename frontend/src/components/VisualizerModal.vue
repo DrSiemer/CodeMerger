@@ -120,7 +120,19 @@ const handleCopyPrompt = async () => {
 };
 
 const copyCorrectionPrompt = async () => {
-  const prompt = `The JSON you provided is invalid or incomplete. Please fix the following errors and output the full JSON again:\n\n${parseError.value}`;
+  const prompt = `The JSON you provided is invalid or incomplete. You have violated the ZERO OMISSION POLICY. Your previous response was incomplete.
+
+To fix this, you must output the COMPLETE, functional JSON object again, ensuring it contains EVERY file from the merge list. I want high-quality, detailed explanations for every file, even the ones you missed.
+
+VALIDATION ERRORS TO FIX:
+${parseError.value}
+
+CRITICAL INSTRUCTIONS:
+1. Ensure the final count is exactly ${activeProject.selectedFiles.length} files.
+2. DO NOT use placeholders like "...rest of JSON".
+3. Provide deep, architectural insights for every file.
+4. If you hit a token limit, stop and I will tell you to "continue", but start with the full intent to be complete.`;
+
   await navigator.clipboard.writeText(prompt);
   statusMessage.value = "Copied correction prompt to clipboard.";
 };
@@ -350,7 +362,7 @@ const handleCopyNodeCode = async (node) => {
             </h3>
             <p class="text-gray-400 leading-relaxed">
               This tool organizes your <strong>Merge List</strong> into a
-              zoomable 2D semantic map. To begin, ask an LLM to categorize your
+              semantic map. To begin, ask an LLM to categorize your
               files into structural layers.
             </p>
           </div>

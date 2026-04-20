@@ -204,13 +204,25 @@ Instruction: {instruction_suffix}"""
 VISUALIZER_GENERATION_PROMPT = """Analyze the following project code from my Merge List.
 Create a hierarchical Architecture Explorer to help me visualize the project's structure based on logic, dependencies, and roles.
 
+**Goal:** Provide a deep, expert-level architectural breakdown. I want sophisticated insights into how these files interact and why they exist.
+
 **Constraints:**
 1. Structure the system into explicit conceptual layers: High-level Domains -> Functional Features -> Structural Components -> Implementation Details.
 2. At every level, group elements so NO NODE HAS MORE THAN 6 CHILDREN. Create semantic "Aggregation Nodes" (e.g., "Core Utilities", "Auth Modules") to group smaller parts if necessary.
 3. Assign a "domain" to top-level nodes (e.g., "frontend", "backend", "libraries", "infrastructure").
-4. CRITICAL ZERO OMISSION POLICY: You are provided with an explicit list of "Files to Categorize" below. You MUST assign EVERY SINGLE FILE from this list to exactly one leaf node. Do not drop, skip, or ignore any files, even if they seem minor or redundant. The system will strictly validate your output against this list and reject it if a single file is missing.
-5. For each file, provide a detailed description (2-3 sentences) explaining its specific role, logic, and importance. Sort the files array within each node by relevance (most important files first).
-6. Each node MUST have a short, insightful description.
+4. CRITICAL ZERO OMISSION POLICY: You are provided with an explicit list of {file_count} "Files to Categorize" below.
+   - You MUST assign EVERY SINGLE FILE from this list to exactly one leaf node.
+   - Do not drop, skip, or ignore any files, even if they seem minor or redundant.
+   - **MANDATORY COUNT:** Your final JSON MUST contain exactly {file_count} file entries.
+   - **Handling Uncertainty:** If a file's semantic role is unclear, place it in a catch-all node like "Project Infrastructure" or "Supporting Artifacts" rather than omitting it.
+5. **Quality over Brevity:** For each file, provide a rich, detailed description (2-4 sentences) explaining its specific role, core logic, and its importance to the overall architecture. Avoid generic filler; be specific to the code provided.
+6. Each node (category) MUST have a short, insightful description of the role that part of the system plays.
+
+**Self-Correction Strategy (Before Responding):**
+- Count the files in your generated JSON.
+- Compare this count against the expected total ({file_count}).
+- If you are short, find the missing files in the "Files to Categorize" list and add them.
+- If you run out of output tokens, I will ask you to continue, but you must not start by omitting files.
 
 **Output Format:**
 Return ONLY a raw JSON object (or array of objects) with the following structure:
