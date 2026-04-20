@@ -228,6 +228,11 @@ Create a hierarchical Architecture Explorer to help me visualize the project's s
 - If you are short, find the missing files in the "Files to Categorize" list and add them.
 - If you run out of output tokens, I will ask you to continue, but you must not start by omitting files.
 
+**Quality & Formatting Requirements:**
+1. For each file, provide a rich, detailed description (2-4 sentences) explaining its specific role, core logic, and importance.
+2. **Use Markdown formatting** in all description fields.
+3. Ensure every description contains **at least one bold segment** to highlight the most critical aspect of that file or node.
+
 **Output Format:**
 Return ONLY a raw JSON object representing the system root. The root-level "description" must contain the high-level intro to the code structure.
 {{
@@ -269,7 +274,7 @@ VISUALIZER_AMEND_PROMPT = """I am building an Architecture Explorer and your pre
 2. For each missing file, provide the 'parent' node name where it should be placed.
    - **Semantic Grouping:** If a file doesn't fit into an existing node, suggest a NEW semantic parent name that describes its role (e.g., "Documentation Assets", "Utility Hooks").
 3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.
-4. Provide a rich description for each added file (2-4 sentences).
+4. Provide a rich description for each added file (2-4 sentences). **Use Markdown formatting and make at least one segment of each description bold to indicate the most important part.**
 
 **Output Format:**
 Return ONLY a raw JSON object with an 'amendments' key:
@@ -306,7 +311,7 @@ VISUALIZER_UPDATE_PROMPT = """I am updating my Architecture Explorer. The projec
 1. Analyze the 'New Files' and determine their semantic placement within the 'Current Architecture Tree'.
 2. Identify existing nodes that should be the 'parent' for these files, or suggest new semantic grouping nodes if appropriate.
 3. For 'Files to REMOVE', identify their paths in the amendment JSON to ensure they are purged from the hierarchy.
-4. Provide a rich, detailed description (2-4 sentences) for each new file added. Avoid filler; be specific to the code provided.
+4. Provide a rich, detailed description (2-4 sentences) for each new file added. **Use Markdown formatting and make at least one segment of each description bold to indicate the most important part.** Avoid filler; be specific to the code provided.
 5. Ensure the final architecture respects the policy: NO NODE HAS MORE THAN 6 CHILDREN. Create grouping nodes if necessary.
 
 **Output Format:**

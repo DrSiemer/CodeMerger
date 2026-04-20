@@ -1,5 +1,7 @@
 <script setup>
 import { FileCode, ClipboardPaste, ExternalLink } from 'lucide-vue-next'
+import { useAppState } from "../../composables/useAppState"
+import MarkdownRenderer from '../MarkdownRenderer.vue'
 
 defineProps({
   displayNode: Object,
@@ -7,6 +9,7 @@ defineProps({
 })
 
 const emit = defineEmits(['copy-code', 'open-file'])
+const { editorFontSize } = useAppState()
 </script>
 
 <template>
@@ -21,7 +24,7 @@ const emit = defineEmits(['copy-code', 'open-file'])
 
        <div class="space-y-4">
          <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">File Description</div>
-         <p class="text-gray-200 text-base leading-relaxed">{{ displayNode.description || "No description provided." }}</p>
+         <MarkdownRenderer :content="displayNode.description || 'No description provided.'" :fontSize="15" />
        </div>
 
        <div class="space-y-4 pt-6 border-t border-gray-700/50">
@@ -47,7 +50,9 @@ const emit = defineEmits(['copy-code', 'open-file'])
       <!-- Description -->
       <div class="space-y-4">
         <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Architectural Description</div>
-        <p class="text-gray-200 text-lg leading-relaxed italic">"{{ displayNode.description || "No description provided for this node." }}"</p>
+        <div class="italic">
+           <MarkdownRenderer :content="displayNode.description || 'No description provided for this node.'" :fontSize="18" />
+        </div>
       </div>
 
       <!-- Actions (Contextual Copy) -->

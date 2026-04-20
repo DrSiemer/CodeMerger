@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { FileCode, ExternalLink } from 'lucide-vue-next'
+import MarkdownRenderer from '../MarkdownRenderer.vue'
 
 const props = defineProps({
   node: Object,
@@ -59,7 +60,11 @@ const highlightMatch = (text, query) => {
           <ExternalLink class="w-4 h-4" />
         </button>
       </div>
-      <p class="text-gray-300 text-[15px] leading-relaxed" v-html="highlightMatch(file.description, searchQuery)"></p>
+      <MarkdownRenderer
+        :content="highlightMatch(file.description, searchQuery)"
+        :fontSize="15"
+        class="text-gray-300"
+      />
     </div>
   </div>
 </template>
