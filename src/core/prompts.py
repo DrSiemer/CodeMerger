@@ -202,7 +202,7 @@ Instruction: {instruction_suffix}"""
 
 # Project Visualizer Prompt
 VISUALIZER_GENERATION_PROMPT = """Analyze the following project code from my Merge List.
-Create a hierarchical Semantic Architecture Terrain Map (SATM) to help me visualize the project's structure based on logic, dependencies, and roles.
+Create a hierarchical Architecture Explorer to help me visualize the project's structure based on logic, dependencies, and roles.
 
 **Constraints:**
 1. Structure the system into explicit conceptual layers: High-level Domains -> Functional Features -> Structural Components -> Implementation Details.

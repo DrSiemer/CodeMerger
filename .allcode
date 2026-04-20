@@ -73,9 +73,9 @@
         },
         {
           "path": "src/core/prompts.py",
-          "mtime": 1776675910.8704553,
-          "hash": "4d6f1322f1105ac51fd95dfa1d65b0eab7ae1481",
-          "tokens": 3219,
+          "mtime": 1776678082.3355818,
+          "hash": "beede7c1a605d2bd2678acb3388be6bd37bb56cd",
+          "tokens": 3213,
           "lines": 236
         },
         {
@@ -504,11 +504,11 @@
         },
         {
           "path": "frontend/src/views/CompactView.vue",
-          "tokens": 2984,
+          "tokens": 3000,
           "ignoreTokens": false,
-          "lines": 238,
-          "mtime": 1776627715.074981,
-          "hash": "f11bc0f831afc5862e320e39f3041d9e9d1fe495"
+          "lines": 239,
+          "mtime": 1776678394.2607358,
+          "hash": "8fd7d1a650c536675aa53663cb85f4c718ff31fa"
         },
         {
           "path": "frontend/src/components/InfoPanel.vue",
@@ -710,10 +710,10 @@
         },
         {
           "path": "frontend/src/components/compact/CompactFeedbackOverlay.vue",
-          "tokens": 811,
+          "tokens": 868,
           "lines": 53,
-          "mtime": 1776627714.9277508,
-          "hash": "12b7ffe0c479c843a2f91eab85398442488d2f61"
+          "mtime": 1776678394.3134246,
+          "hash": "ef33569e28f303486d2e0b2814c0bd6c321d3131"
         },
         {
           "path": "frontend/src/components/compact/CompactActionsStandard.vue",
@@ -950,13 +950,13 @@
         },
         {
           "path": "frontend/src/components/VisualizerModal.vue",
-          "tokens": 5493,
-          "lines": 636,
-          "mtime": 1776676692.137295,
-          "hash": "919951510e402a5f656a1e40320099bb3d582fe9"
+          "tokens": 5613,
+          "lines": 653,
+          "mtime": 1776678475.3917935,
+          "hash": "dd147bb6738ad146ccd11b3a15f62293379e5b40"
         }
       ],
-      "total_tokens": 170245,
+      "total_tokens": 170432,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, markRaw } from "vue";
+import { ref, onMounted, computed, markRaw, watch, nextTick } from "vue";
 import {
   X,
   Network,
@@ -23,6 +23,8 @@ const {
 } = useAppState();
 
 const viewState = ref("init"); // 'init' | 'visualizing'
+const initContainerRef = ref(null);
+const errorBlockRef = ref(null);
 const promptResponse = ref("");
 const treeData = ref([]);
 const activeNode = ref(null);
@@ -30,6 +32,19 @@ const expandedNodes = ref(new Set());
 const isPromptCopied = ref(false);
 const parseError = ref("");
 const searchQuery = ref("");
+
+watch(parseError, (newVal) => {
+  if (newVal) {
+    nextTick(() => {
+      // Small timeout ensures the element is rendered and layout is calculated in Edge/Chromium
+      setTimeout(() => {
+        if (errorBlockRef.value) {
+          errorBlockRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
+    });
+  }
+});
 
 const zoomPath = ref([]);
 const hoveredNode = ref(null);
@@ -286,7 +301,7 @@ const handleCopyNodeCode = async (node) => {
       >
         <div class="flex items-center space-x-3 text-white shrink-0">
           <Network class="w-6 h-6 text-cm-blue" />
-          <h2 class="text-xl font-bold">Semantic Architecture Terrain Map</h2>
+          <h2 class="text-xl font-bold">Architecture Explorer</h2>
           <span class="text-gray-500 text-sm font-medium"
             >/ {{ activeProject.name }}</span
           >
@@ -326,6 +341,7 @@ const handleCopyNodeCode = async (node) => {
         <!-- STEP 1: Initialization -->
         <div
           v-if="viewState === 'init'"
+          ref="initContainerRef"
           class="flex-grow flex flex-col items-center p-12 max-w-2xl mx-auto space-y-8 overflow-y-auto custom-scrollbar"
         >
           <div class="text-center space-y-4">
@@ -345,6 +361,7 @@ const handleCopyNodeCode = async (node) => {
             <!-- Parse Error Validation Block -->
             <div
               v-if="parseError"
+              ref="errorBlockRef"
               class="w-full bg-red-900/30 border border-red-700 p-4 rounded-xl space-y-3"
             >
               <div class="flex items-center space-x-2 text-red-400 font-bold">
@@ -405,7 +422,7 @@ const handleCopyNodeCode = async (node) => {
           </div>
         </div>
 
-        <!-- STEP 2: The Semantic Terrain Map -->
+        <!-- STEP 2: The Architecture Explorer -->
         <div v-else class="flex-grow flex flex-col min-h-0">
           <!-- Breadcrumbs -->
           <div
