@@ -207,16 +207,21 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 sanitized_new = _sanitize_content(rel_path, final_assembled_content)
             else:
                 sanitized_new = _sanitize_content(rel_path, llm_raw_content)
+
+            all_blocks.append({
+                'type': 'file',
+                'path': rel_path,
+                'span': match.span(),
+                'content': sanitized_new
+            })
         except ValueError as e:
             failed_paths.append((rel_path, str(e)))
+            # Record the span so this text isn't treated as "unformatted/orphan" text
+            all_blocks.append({
+                'type': 'failed_file',
+                'span': match.span()
+            })
             continue
-
-        all_blocks.append({
-            'type': 'file',
-            'path': rel_path,
-            'span': match.span(),
-            'content': sanitized_new
-        })
 
         if os.path.isfile(os.path.join(base_dir, rel_path)):
             old_raw = current_disk_content
@@ -251,7 +256,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 'tag': block['tag'],
                 'content': block['content']
             })
-        else:
+        elif block['type'] == 'file':
             ordered_segments.append({'type': 'file_placeholder'})
 
         last_end = block['span'][1]
@@ -287,6 +292,16 @@ def parse_and_plan_changes(base_dir, markdown_text):
                 return s['content']
         return ""
 
+    # Pre-calculate verification to allow appending notes about skipped files
+    verification_text = get_tag_content("VERIFICATION")
+    if failed_paths:
+        err_list = "\n".join([f"- {p}" for p, _ in failed_paths])
+        note = f"\n\n---\n**NOTE:** The following files were skipped due to Fast-Apply errors (code mismatch or ambiguity):\n{err_list}"
+        if not verification_text or verification_text == "-":
+            verification_text = note.lstrip()
+        else:
+            verification_text += note
+
     result = {
         'updates': files_to_update,
         'creations': files_to_create,
@@ -296,10 +311,22 @@ def parse_and_plan_changes(base_dir, markdown_text):
         'intro': get_tag_content("INTRO"),
         'changes': get_tag_content("CHANGES"),
         'delete': get_tag_content("DELETED FILES"),
-        'verification': get_tag_content("VERIFICATION"),
+        'verification': verification_text,
         'ordered_segments': ordered_segments,
         'has_any_tags': any(b['type'] == 'tag' for b in all_blocks)
     }
+
+    if failed_paths:
+        # Construct detailed error for the UI
+        err_msg = "\n".join([f"- {p}: {e}" for p, e in failed_paths])
+        result.update({
+            'status': 'ERROR',
+            'error_type': 'FAST_APPLY',
+            'failed_paths': failed_paths,
+            'message': f"Fast-Apply Error in {len(failed_paths)} file(s):\n{err_msg}",
+            'hint': "The AI is hallucinating old code or providing ambiguous snippets. You can choose to 'Continue' with valid files or 'Copy Correction Prompt' to fix the errors."
+        })
+        return result
 
     if failed_paths:
         # Construct detailed error for the UI

@@ -74,16 +74,9 @@ export function useReview() {
       }
 
       const plan = await window.pywebview.api.parse_markdown_response(text)
-      if (plan.status === 'ERROR') {
-        formatErrorMessage.value = plan.message
-        showFormatErrorModal.value = true
-        return false
-      }
 
       archivePreviousVerification()
-
       lastAiResponse.value = plan
-      hasAcceptedChanges.value = false
 
       planFileStates.value = {}
       planOriginalContents.value = {}
@@ -97,6 +90,12 @@ export function useReview() {
       Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
       Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
       deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
+
+      if (plan.status === 'ERROR') {
+        formatErrorMessage.value = plan.message
+        showFormatErrorModal.value = true
+        return false
+      }
 
       return true
     } catch (err) {

@@ -75,6 +75,11 @@ const closeFormatErrorModal = () => {
   }
 }
 
+const continueAfterError = () => {
+  showFormatErrorModal.value = false
+  openReviewModal('new')
+}
+
 // Ensures window is large enough to display custom color wheel without clipping
 watch(showColorPicker, async (val) => {
   if (val) {
@@ -219,7 +224,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Modal Layers (Global view coverage) -->
-    <FormatErrorModal v-if="showFormatErrorModal" :message="formatErrorMessage" @close="closeFormatErrorModal" />
+    <FormatErrorModal v-if="showFormatErrorModal" :message="formatErrorMessage" @close="closeFormatErrorModal" @continue="continueAfterError" />
     <ProjectSelectorModal v-if="showProjectModal" @close="showProjectModal = false" />
     <SettingsModal v-if="showSettingsModal" :initial-tab="settingsTab" @close="showSettingsModal = false" />
     <FileManagerModal v-if="showFileManagerModal" @close="showFileManagerModal = false" />

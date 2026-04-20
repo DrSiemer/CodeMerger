@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { AlertTriangle, Copy, X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
@@ -10,14 +11,20 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close'])
-const { statusMessage, copyAdmonishment } = useAppState()
+const emit = defineEmits(['close', 'continue'])
+const { statusMessage, copyAdmonishment, lastAiResponse } = useAppState()
 
 useEscapeKey(() => emit('close'))
+
+const isFastApplyError = computed(() => lastAiResponse.value?.error_type === 'FAST_APPLY')
 
 const copyCorrectionPrompt = async () => {
   await copyAdmonishment()
   emit('close')
+}
+
+const handleContinue = () => {
+  emit('continue')
 }
 </script>
 
@@ -49,14 +56,8 @@ const copyCorrectionPrompt = async () => {
       </div>
 
       <!-- Footer -->
-      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end space-x-3">
-        <button
-          @click="emit('close')"
-          class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm"
-          title="Dismiss the error message"
-        >
-          Close
-        </button>
+      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center">
+        <!-- LEFT: Admonishment -->
         <button
           id="btn-format-error-copy"
           @click="copyCorrectionPrompt"
@@ -66,6 +67,26 @@ const copyCorrectionPrompt = async () => {
           <Copy class="w-4 h-4 mr-2" />
           Copy Correction Prompt
         </button>
+
+        <!-- RIGHT: Navigation -->
+        <div class="flex items-center space-x-3">
+          <button
+            @click="emit('close')"
+            class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-6 rounded transition-colors text-sm"
+            title="Dismiss the error message"
+          >
+            Cancel
+          </button>
+
+          <button
+            v-if="isFastApplyError"
+            @click="handleContinue"
+            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm flex items-center"
+            title="Proceed to review using only the files that matched correctly"
+          >
+            Continue without mismatched
+          </button>
+        </div>
       </div>
     </div>
   </div>

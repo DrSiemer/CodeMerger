@@ -137,10 +137,10 @@
   },
   {
     "path": "src/core/change_applier.py",
-    "mtime": 1776692447.5617645,
-    "hash": "a10df5b09e3663897864342df83fab5ce747609e",
-    "tokens": 2783,
-    "lines": 323
+    "mtime": 1776723629.69417,
+    "hash": "0ae029d28aea3891c1f2970e7859b6bebf36126f",
+    "tokens": 3080,
+    "lines": 350
   },
   {
     "path": "src/core/secret_scanner.py",
@@ -151,10 +151,10 @@
   },
   {
     "path": "src/core/highlighter.py",
-    "tokens": 901,
-    "lines": 94,
-    "mtime": 1776710203.78044,
-    "hash": "a18f2d134829335a02e95929ddda967697cab626"
+    "tokens": 913,
+    "lines": 95,
+    "mtime": 1776723406.8173597,
+    "hash": "1e871872013e157dddb9a128bd5df77636e01521"
   },
   {
     "path": "src/core/file_monitor_thread.py",
@@ -469,11 +469,11 @@
   },
   {
     "path": "frontend/src/composables/useReview.js",
-    "tokens": 1547,
+    "tokens": 1500,
     "ignoreTokens": false,
-    "lines": 211,
-    "mtime": 1776523856.1550262,
-    "hash": "ed9dc796c042bbf46810cd7b3811f2235b8d08f9"
+    "lines": 208,
+    "mtime": 1776723629.8391728,
+    "hash": "dcac5dfb5a0e47327cb96e382a3f7b3e2da3fc20"
   },
   {
     "path": "frontend/src/composables/useStarter.js",
@@ -523,11 +523,11 @@
   },
   {
     "path": "frontend/src/views/MainView.vue",
-    "tokens": 1893,
+    "tokens": 1925,
     "ignoreTokens": false,
-    "lines": 232,
-    "mtime": 1776630662.6874783,
-    "hash": "fe560eb0cc584c02895a66a54715b94ce77caf0d"
+    "lines": 237,
+    "mtime": 1776723062.5606992,
+    "hash": "4741367012d2e86e9882344549afefd7aec1009d"
   },
   {
     "path": "frontend/src/views/CompactView.vue",
@@ -736,10 +736,10 @@
   },
   {
     "path": "frontend/src/components/FormatErrorModal.vue",
-    "tokens": 692,
-    "lines": 72,
-    "mtime": 1776688117.0325356,
-    "hash": "4874bfce54cf08dc685d98d5c95584ad0385ed91"
+    "tokens": 850,
+    "lines": 93,
+    "mtime": 1776723832.447425,
+    "hash": "f83bf0e27cdb9fa3d12887ab970d8fd87c43bfb8"
   },
   {
     "path": "frontend/src/components/ColorPickerOverlay.vue",
