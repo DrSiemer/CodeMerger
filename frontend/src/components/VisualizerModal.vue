@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { X, Network, Search, Info, RefreshCw } from "lucide-vue-next";
 import { useAppState } from "../composables/useAppState";
 import { useEscapeKey } from "../composables/useEscapeKey";
@@ -28,13 +28,41 @@ const {
 } = useAppState();
 
 const viewState = ref("init"); // 'init' | 'visualizing' | 'updating'
-const zoomPath = ref([]);
+const navPath = ref([]);
 const hoveredNode = ref(null);
 const parseError = ref("");
 const searchQuery = ref("");
 
-const currentZoomNode = computed(() => zoomPath.value[zoomPath.value.length - 1] || null);
-const displayNode = computed(() => hoveredNode.value || currentZoomNode.value);
+const currentNavNode = computed(() => navPath.value[navPath.value.length - 1] || null);
+const displayNode = computed(() => hoveredNode.value || currentNavNode.value);
+
+// Explicitly clear hover state on navigation to prevent "sticky" UI state
+watch(navPath, () => {
+  if (hoveredNode.value) {
+    console.log(`[Viz State] Navigation change detected. Clearing hover: "${hoveredNode.value.name}"`);
+    hoveredNode.value = null;
+  }
+}, { deep: true });
+
+// Contextual navigation logic: Allow copying any node except the global root, provided we aren't hovering over a preview
+const canCopy = computed(() => {
+  const navNode = currentNavNode.value;
+  if (!navNode) return false;
+
+  // Root check: navPath[0] is the root. Copying is allowed for any level below that.
+  const isNotRoot = navPath.value.length > 1;
+
+  // Visibility check: Only show button if we are NOT hovering over a neighbor/child (previewing)
+  const result = isNotRoot && !hoveredNode.value;
+
+  console.log(
+    `[Viz Button Logic] View: "${navNode.name}" | ` +
+    `Previewing: ${hoveredNode.value ? `"${hoveredNode.value.name}"` : 'NONE'} | ` +
+    `Show Button: ${result.toString().toUpperCase()}`
+  );
+
+  return result;
+});
 
 useEscapeKey(() => emit("close"));
 
@@ -82,7 +110,7 @@ const loadTree = (root) => {
   };
   reEnrich(root);
   computeLayouts(root);
-  zoomPath.value = [root];
+  navPath.value = [root];
 };
 
 const processRawResponse = async (raw) => {
@@ -164,7 +192,7 @@ const handleCopyNodeCode = async (node) => {
         <div class="flex items-center space-x-6 flex-grow justify-end max-w-2xl px-6">
             <div v-if="viewState === 'visualizing'" class="relative w-full max-w-sm">
                 <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                <input v-model="searchQuery" type="text" placeholder="Search files or descriptions..." class="w-full bg-cm-input-bg border border-gray-600 rounded-full py-1.5 pl-10 pr-10 text-sm text-white focus:border-cm-blue outline-none transition-all shadow-inner" />
+                <input v-model="searchQuery" v-info="'viz_search'" type="text" placeholder="Search files or descriptions..." class="w-full bg-cm-input-bg border border-gray-600 rounded-full py-1.5 pl-10 pr-10 text-sm text-white focus:border-cm-blue outline-none transition-all shadow-inner" />
                 <button v-if="searchQuery" @click="searchQuery = ''" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
                     <X class="w-4 h-4" />
                 </button>
@@ -189,15 +217,15 @@ const handleCopyNodeCode = async (node) => {
 
         <VisualizerExplorer
           v-else
-          :zoom-path="zoomPath"
+          :nav-path="navPath"
           :search-query="searchQuery"
-          @zoom-to="(idx) => zoomPath.splice(idx + 1)"
-          @zoom-in="(node) => zoomPath.push(node)"
+          @nav-to="(idx) => navPath.splice(idx + 1)"
+          @dive-in="(node) => navPath.push(node)"
           @node-hover="(node) => hoveredNode = node"
         >
           <VisualizerLeafFiles
-            v-if="!currentZoomNode?.children?.length"
-            :node="currentZoomNode"
+            v-if="!currentNavNode?.children?.length"
+            :node="currentNavNode"
             :search-query="searchQuery"
             @open-file="openFile"
           />
@@ -205,7 +233,7 @@ const handleCopyNodeCode = async (node) => {
           <template #details>
             <VisualizerDetails
               :display-node="displayNode"
-              :is-root="displayNode?.id === zoomPath[0]?.id"
+              :can-copy="canCopy"
               @open-file="openFile"
               @copy-code="handleCopyNodeCode"
             />
@@ -217,7 +245,7 @@ const handleCopyNodeCode = async (node) => {
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center shrink-0">
         <div class="flex items-center">
             <div v-if="viewState === 'visualizing' && mapSyncState !== 'SYNCED'" class="flex items-center space-x-4">
-              <button @click="viewState = 'updating'" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors shrink-0 flex items-center">
+              <button @click="viewState = 'updating'" v-info="'viz_update_map'" class="bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-1.5 rounded text-sm font-bold shadow-sm transition-colors shrink-0 flex items-center">
                 <RefreshCw class="w-4 h-4 mr-2" />
                 Update Map
               </button>

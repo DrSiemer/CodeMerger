@@ -2,11 +2,11 @@
 import { nodeHasMatch } from '../../utils/visualizerUtils'
 
 const props = defineProps({
-  zoomPath: Array,
+  navPath: Array,
   searchQuery: String
 })
 
-const emit = defineEmits(['zoom-to', 'node-hover', 'zoom-in'])
+const emit = defineEmits(['nav-to', 'node-hover', 'dive-in'])
 
 const getRectStyle = (layout) => {
   if (!layout) return {};
@@ -23,12 +23,12 @@ const getRectStyle = (layout) => {
   <div class="flex-grow flex flex-col min-h-0">
     <!-- Breadcrumbs -->
     <div class="flex items-center space-x-1 text-sm px-6 py-3 bg-gray-800 border-b border-gray-700 shrink-0">
-      <div v-for="(b, idx) in zoomPath" :key="b.id" class="flex items-center">
+      <div v-for="(b, idx) in navPath" :key="b.id" class="flex items-center">
         <span v-if="idx > 0" class="mx-2 text-gray-500">/</span>
         <button
-          @click="emit('zoom-to', idx)"
+          @click="emit('nav-to', idx)"
           class="hover:text-white transition-colors"
-          :class="idx === zoomPath.length - 1 ? 'text-white font-bold' : 'text-gray-400'"
+          :class="idx === navPath.length - 1 ? 'text-white font-bold' : 'text-gray-400'"
         >
           {{ b.name }}
         </button>
@@ -37,15 +37,15 @@ const getRectStyle = (layout) => {
 
     <!-- Tree Layout Area -->
     <div class="flex-grow flex min-h-0">
-      <div class="flex-grow border-r border-gray-700 relative bg-[#1A1A1A] overflow-hidden p-2">
-        <div v-if="zoomPath[zoomPath.length - 1]?.children?.length" class="absolute inset-0 m-2">
+      <div class="flex-grow border-r border-gray-700 relative bg-[#1A1A1A] overflow-hidden p-2" v-info="'viz_explorer_tree'">
+        <div v-if="navPath[navPath.length - 1]?.children?.length" class="absolute inset-0 m-2">
           <div
-            v-for="child in zoomPath[zoomPath.length - 1].children"
+            v-for="child in navPath[navPath.length - 1].children"
             :key="child.id"
             class="absolute border border-gray-900 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:brightness-125 shadow-lg group"
             :class="{ 'opacity-20 grayscale': searchQuery && !nodeHasMatch(child, searchQuery) }"
             :style="getRectStyle(child.layout)"
-            @click="emit('zoom-in', child)"
+            @click="emit('dive-in', child)"
             @mouseenter="emit('node-hover', child)"
             @mouseleave="emit('node-hover', null)"
           >
@@ -69,7 +69,7 @@ const getRectStyle = (layout) => {
           </div>
         </div>
 
-        <!-- Zoomed-in leaf content slot -->
+        <!-- Dive-in leaf content slot -->
         <slot></slot>
       </div>
 

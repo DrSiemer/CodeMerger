@@ -81,6 +81,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **Windows MIME Type Overrides**: `run_webview.py` explicitly registers MIME types for `.js`, `.mjs`, and `.css` in the Python `mimetypes` module. This bypasses a common Windows registry bug where `.js` is mapped to `text/plain`, which would otherwise cause Chromium to refuse ES modules.
 - **Compact Mode Transient State**: Coordinates for the Compact Mode window are strictly transient. They must reset to `None` on every application startup. If `None`, the window centers on the main dashboard using Physical Pixel arithmetic.
 - **Single-Change Auto-Verification**: If an AI response proposes only a single file change (modification, creation, or deletion), accepting that change via the file list buttons will automatically switch the review window to the Verification tab. THIS IS BY DESIGN. For responses containing multiple files, the view remains on the Changes tab after individual accepts to allow for further review, unless the 'Apply All' button is used.
+- **Visualizer Context Copying**: The "Copy Merged Code" action in the Architecture Explorer is available for any navigated node except the global root. This allows for copying entire subtrees (domains/components) or specific leaf components. To ensure intentional context sharing, the button only appears when actively navigated *into* a node and is hidden during hover previews.
 
 ### Build & Environment
 

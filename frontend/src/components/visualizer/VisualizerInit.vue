@@ -67,6 +67,7 @@ const handleCopy = () => {
       <!-- Copy Prompt Button -->
       <button
         @click="handleCopy"
+        v-info="'viz_init_copy'"
         class="w-full py-4 rounded-lg font-bold text-lg transition-all flex items-center justify-center space-x-3 shadow-lg"
         :class="isPromptCopied ? 'bg-cm-green text-white' : 'bg-cm-blue hover:bg-blue-500 text-white'"
       >
@@ -76,7 +77,7 @@ const handleCopy = () => {
       </button>
 
       <!-- Paste Area -->
-      <div class="space-y-2">
+      <div class="space-y-2" v-info="'viz_init_paste'">
         <label class="text-sm font-bold text-gray-300 uppercase tracking-widest">
           2. Paste {{ mode === 'updating' ? 'Updated ' : '' }}LLM Response (JSON)
         </label>
@@ -98,6 +99,7 @@ const handleCopy = () => {
         </button>
         <button
           @click="emit('parse', promptResponse)"
+          v-info="'viz_init_visualize'"
           :disabled="!promptResponse.trim()"
           class="flex-grow py-3 bg-cm-green hover:bg-green-600 disabled:opacity-30 text-white font-bold rounded shadow transition-all flex items-center justify-center space-x-2"
         >

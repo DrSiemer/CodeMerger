@@ -16,10 +16,10 @@
         },
         {
           "path": "llm.md",
-          "mtime": 1776625987.3671112,
-          "hash": "5345901d73316044aaa2b4584ea08cc72db43c28",
-          "tokens": 2278,
-          "lines": 89
+          "mtime": 1776686019.1644044,
+          "hash": "ee83a95a6ddca57be5a5fffa617ad4deb63c6245",
+          "tokens": 2352,
+          "lines": 90
         },
         {
           "path": "requirements.txt",
@@ -440,19 +440,19 @@
         },
         {
           "path": "frontend/src/utils/infoMessages.js",
-          "tokens": 114,
+          "tokens": 134,
           "ignoreTokens": false,
-          "lines": 14,
-          "mtime": 1776190190.2935638,
-          "hash": "4b1cea62f2a20eb8e426e805c50bfa5a5feb6565"
+          "lines": 16,
+          "mtime": 1776684819.8979146,
+          "hash": "fe127b2e98548359d7a375ef31a8df76bac97f90"
         },
         {
           "path": "frontend/src/utils/info/mainInfo.js",
-          "tokens": 1223,
+          "tokens": 1220,
           "ignoreTokens": false,
           "lines": 43,
-          "mtime": 1776630614.7668314,
-          "hash": "9ef047eaeae8e2928f9d1a586858d367966a5412"
+          "mtime": 1776684998.8453379,
+          "hash": "db3c1d51f59c401823c636bd8f03c02fa1b7238b"
         },
         {
           "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -950,10 +950,10 @@
         },
         {
           "path": "frontend/src/components/VisualizerModal.vue",
-          "tokens": 2553,
-          "lines": 239,
-          "mtime": 1776681227.6410756,
-          "hash": "c8824b19f093406dcaa97c52356474f5f718fc70"
+          "tokens": 2861,
+          "lines": 269,
+          "mtime": 1776685575.508934,
+          "hash": "b41c1f42f3b940c231ff8261f66450af66a2fcf4"
         },
         {
           "path": "frontend/src/utils/visualizerUtils.js",
@@ -964,34 +964,41 @@
         },
         {
           "path": "frontend/src/components/visualizer/VisualizerInit.vue",
-          "tokens": 1167,
-          "lines": 111,
-          "mtime": 1776681227.3651507,
-          "hash": "267fc9f61098af0c88d6adb084566e5cdc70ee40"
+          "tokens": 1193,
+          "lines": 113,
+          "mtime": 1776684819.986632,
+          "hash": "023f8998d2654f627dbc771d56c4fb217d29da43"
         },
         {
           "path": "frontend/src/components/visualizer/VisualizerExplorer.vue",
-          "tokens": 777,
+          "tokens": 787,
           "lines": 80,
-          "mtime": 1776681227.4326575,
-          "hash": "2a83cdace848a84efb75f8b4d189501b11e82359"
+          "mtime": 1776684998.995919,
+          "hash": "f0e5c2e521987b886222423f7f146d586f9bf746"
         },
         {
           "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
-          "tokens": 645,
+          "tokens": 653,
           "lines": 59,
-          "mtime": 1776681227.501172,
-          "hash": "3ac5eeb31cb8ab11cf7c1d9befa695b4f2b9efeb"
+          "mtime": 1776684820.071093,
+          "hash": "05cafb820804e153e48c1e9ef77a0eef794e12cf"
         },
         {
           "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
-          "tokens": 761,
-          "lines": 64,
-          "mtime": 1776681227.5557277,
-          "hash": "b4b4f6c859ec2b9c4d3ef9fe80fb388377815dcd"
+          "tokens": 775,
+          "lines": 65,
+          "mtime": 1776685188.4404213,
+          "hash": "48eb852f8e17cba62304607bc2343e42509ace5c"
+        },
+        {
+          "path": "frontend/src/utils/info/visualizerInfo.js",
+          "tokens": 308,
+          "lines": 12,
+          "mtime": 1776684998.8832333,
+          "hash": "8b81e1105f1ba3a5579b34713e5e7d5788ec1bb3"
         }
       ],
-      "total_tokens": 172179,
+      "total_tokens": 172944,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -2248,6 +2255,7 @@
     "frontend/src/utils/info/reviewInfo.js",
     "frontend/src/utils/info/settingsInfo.js",
     "frontend/src/utils/info/starterInfo.js",
+    "frontend/src/utils/info/visualizerInfo.js",
     "frontend/src/utils/infoMessages.js",
     "frontend/src/utils/visualizerUtils.js",
     "frontend/src/views/CompactView.vue",

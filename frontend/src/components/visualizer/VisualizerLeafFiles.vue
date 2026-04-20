@@ -36,7 +36,7 @@ const highlightMatch = (text, query) => {
 </script>
 
 <template>
-  <div class="absolute inset-0 m-2 overflow-y-auto custom-scrollbar bg-[#222222] rounded-xl border border-gray-800 p-6 space-y-4">
+  <div class="absolute inset-0 m-2 overflow-y-auto custom-scrollbar bg-[#222222] rounded-xl border border-gray-800 p-6 space-y-4" v-info="'viz_leaf_list'">
     <h4 class="text-lg font-bold text-white mb-4 flex items-center">
       <FileCode class="w-5 h-5 mr-2 text-cm-blue" />
       Files in this node
