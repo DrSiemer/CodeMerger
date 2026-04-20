@@ -8,10 +8,10 @@
   },
   {
     "path": "llm.md",
-    "mtime": 1776686019.1644044,
-    "hash": "ee83a95a6ddca57be5a5fffa617ad4deb63c6245",
-    "tokens": 2352,
-    "lines": 90
+    "mtime": 1776688362.2696025,
+    "hash": "e5bf294f7a0e38b08922f9e820619dff20f10eae",
+    "tokens": 2418,
+    "lines": 91
   },
   {
     "path": "requirements.txt",
@@ -65,10 +65,10 @@
   },
   {
     "path": "src/core/prompts.py",
-    "mtime": 1776679859.3843973,
-    "hash": "cdaf6a2e9b7d942734bdb4b72a8259de6a7f5cca",
-    "tokens": 3400,
-    "lines": 248
+    "mtime": 1776688362.4304128,
+    "hash": "c0b98c5435202145c0a25d38414c4651dc66e9fe",
+    "tokens": 3451,
+    "lines": 249
   },
   {
     "path": "src/app_state.py",
@@ -255,11 +255,11 @@
   },
   {
     "path": "src/api_parts/changes_api.py",
-    "tokens": 3099,
+    "tokens": 3116,
     "ignoreTokens": false,
     "lines": 320,
-    "mtime": 1776623793.8831666,
-    "hash": "e06962b63a10518cdbf4a6f03440df1621dfb8c8"
+    "mtime": 1776688362.4893186,
+    "hash": "8a84060acc1602efa4df0515b0b4b6e0ac6062aa"
   },
   {
     "path": "src/api_parts/starter_api_session.py",

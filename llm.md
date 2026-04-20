@@ -63,6 +63,7 @@ Before adding a note, ask: **"Would an experienced developer be surprised by thi
 - **Taskbar Continuity (Windows)**: To prevent the taskbar icon from jumping to the "back of the line" during mode switches, the Main window is never hidden; it remains in a `minimized` state to anchor the taskbar presence. The Compact window is flagged as a `WS_EX_TOOLWINDOW` via Win32 API to suppress its own taskbar button, creating the illusion of a single stable application icon.
 - **Inventory-First UI Stack**: To support 12,000+ files, `FileMonitorThread` maintains a flat memory inventory (paths + gitignore status). The `FileApi` reconstructs the UI Tree on-demand using a non-recursive Trie builder. This avoids Disk IO during filtering, searching, and sorting.
 - **Visibility Bypass (Purple Logic)**: Selected files (Merge Order) are immune to Extension and Gitignore filters. If a file is visible *only* because of this bypass, it is flagged as `is_filtered`, triggering a purple visual style to alert the user that settings would normally hide it.
+- **Surgical Diff Uniqueness (CRITICAL)**: The Fast-Apply engine requires that every `ORIGINAL` block provided in a surgical diff is unique within the target file. If a snippet appears multiple times, the LLM must provide additional lines of context (before or after) to disambiguate the target.
 
 ### Backend Logic (`src/core`, `src/api_parts`)
 

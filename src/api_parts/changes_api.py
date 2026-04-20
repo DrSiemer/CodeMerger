@@ -276,7 +276,7 @@ class ChangesApi:
                 "Please use this code as your new baseline and return a CORRECTED surgical diff using ORIGINAL/UPDATED blocks.\n\n"
                 "CRITICAL: Do NOT return the full file content. Only provide the corrected surgical blocks.\n\n"
                 + "\n\n".join(blocks) + "\n\n"
-                "Please ensure your new ORIGINAL blocks are a byte-for-byte match to the code provided above."
+                "Please ensure your new ORIGINAL blocks are a byte-for-byte match to the code provided above and are UNIQUE within the file (provide context if needed to disambiguate)."
             )
             try:
                 pyperclip.copy(msg)

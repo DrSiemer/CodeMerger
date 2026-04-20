@@ -75,6 +75,7 @@ INSTR_FAST_APPLY = """SURGICAL DIFFS (FAST APPLY):
    - **EVOLUTIONARY CONTEXT:** Do NOT use the initial source code from the start of the conversation as a reference if it has since been modified. The evolved state is your new and only baseline.
    - **Replace All Shortcut:** If you are replacing the ENTIRE content of a file, you may put `==ALL==` inside the ORIGINAL block instead of repeating the whole file verbatim.
    - The ORIGINAL section must match the current state of the code exactly (including indentation).
+   - **UNIQUENESS REQUIREMENT:** Every ORIGINAL block MUST be unique within the file. If the code you are replacing appears multiple times, include enough surrounding context (lines before/after) to make the block unique and non-ambiguous.
    - You can provide multiple blocks per file.
    - **NEW FILES:** If you are creating a file that does not yet exist in the project, do NOT use ORIGINAL/UPDATED blocks. Simply provide the full content of the file."""
 
