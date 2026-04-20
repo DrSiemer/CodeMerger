@@ -245,8 +245,10 @@ class FileApi:
         if not merged_code:
             return "Error: Merge list is empty."
 
+        file_list_str = "\n".join([f"- {f['path']}" for f in project_config.selected_files])
+
         from src.core import prompts as p
-        return p.VISUALIZER_GENERATION_PROMPT.format(merged_content=merged_code)
+        return p.VISUALIZER_GENERATION_PROMPT.format(file_list=file_list_str, merged_content=merged_code)
 
     def copy_visualizer_node_code(self, file_paths):
         """Copies code for a specific subset of files defined in a visualizer node."""

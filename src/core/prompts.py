@@ -201,25 +201,36 @@ STARTER_QUESTION_PROMPT_TEMPLATE = """### {context_label}
 Instruction: {instruction_suffix}"""
 
 # Project Visualizer Prompt
-VISUALIZER_GENERATION_PROMPT = """Analyze the following project code from my Merge List. 
-Create a hierarchical tree structure to help me visualize the project's architecture based on the actual logic, dependencies, and roles of these files.
+VISUALIZER_GENERATION_PROMPT = """Analyze the following project code from my Merge List.
+Create a hierarchical Semantic Architecture Terrain Map (SATM) to help me visualize the project's structure based on logic, dependencies, and roles.
 
 **Constraints:**
-1. Group files logically (e.g., by feature, layer, or technology).
-2. You can create empty parent nodes (folders) to group other nodes.
-3. Every file in the Merge List MUST be assigned to exactly one leaf node.
-4. Each node (parent or leaf) MUST have a short, insightful description explaining its role in the architecture.
+1. Structure the system into explicit conceptual layers: High-level Domains -> Functional Features -> Structural Components -> Implementation Details.
+2. At every level, group elements so NO NODE HAS MORE THAN 6 CHILDREN. Create semantic "Aggregation Nodes" (e.g., "Core Utilities", "Auth Modules") to group smaller parts if necessary.
+3. Assign a "domain" to top-level nodes (e.g., "frontend", "backend", "libraries", "infrastructure").
+4. CRITICAL ZERO OMISSION POLICY: You are provided with an explicit list of "Files to Categorize" below. You MUST assign EVERY SINGLE FILE from this list to exactly one leaf node. Do not drop, skip, or ignore any files, even if they seem minor or redundant. The system will strictly validate your output against this list and reject it if a single file is missing.
+5. For each file, provide a detailed description (2-3 sentences) explaining its specific role, logic, and importance. Sort the files array within each node by relevance (most important files first).
+6. Each node MUST have a short, insightful description.
 
 **Output Format:**
-Return ONLY a raw JSON array of objects with the following structure:
+Return ONLY a raw JSON object (or array of objects) with the following structure:
 [
   {{
     "name": "Node Name",
     "description": "Role of this part of the system.",
+    "domain": "frontend",
     "children": [ ... recursively ],
-    "files": ["path/to/file1.ext", "path/to/file2.ext"]
+    "files": [
+      {{
+        "path": "path/to/file1.ext",
+        "description": "Detailed explanation of what this file does, its core logic, and why it is important."
+      }}
+    ]
   }}
 ]
+
+**Files to Categorize:**
+{file_list}
 
 **Project Code Content:**
 {merged_content}"""

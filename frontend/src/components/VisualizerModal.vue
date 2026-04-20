@@ -7,10 +7,10 @@ import {
   Check,
   FileCode,
   ClipboardPaste,
+  AlertTriangle,
 } from "lucide-vue-next";
 import { useAppState } from "../composables/useAppState";
 import { useEscapeKey } from "../composables/useEscapeKey";
-import VisualizerTreeNode from "./VisualizerTreeNode.vue";
 
 const emit = defineEmits(["close"]);
 const {
@@ -27,6 +27,17 @@ const treeData = ref([]);
 const activeNode = ref(null);
 const expandedNodes = ref(new Set());
 const isPromptCopied = ref(false);
+const parseError = ref("");
+
+const zoomPath = ref([]);
+const hoveredNode = ref(null);
+
+const currentZoomNode = computed(() => {
+  if (zoomPath.length === 0) return null;
+  return zoomPath.value[zoomPath.value.length - 1];
+});
+
+const displayNode = computed(() => hoveredNode.value || currentZoomNode.value);
 
 useEscapeKey(() => emit("close"));
 
@@ -45,45 +56,161 @@ const handleCopyPrompt = async () => {
   }
 };
 
-const parseResponse = () => {
-  try {
-    let raw = promptResponse.value.trim();
-    const startIdx = raw.indexOf("[");
-    const endIdx = raw.lastIndexOf("]");
-    if (startIdx === -1 || endIdx === -1)
-      throw new Error("JSON structure not found.");
+const copyCorrectionPrompt = async () => {
+  const prompt = `The JSON you provided is invalid or incomplete. Please fix the following errors and output the full JSON again:\n\n${parseError.value}`;
+  await navigator.clipboard.writeText(prompt);
+  statusMessage.value = "Copied correction prompt to clipboard.";
+};
 
-    const jsonStr = raw.substring(startIdx, endIdx + 1);
-    const data = JSON.parse(jsonStr);
+// Layout Algorithm Core
+let nodeIdCounter = 0;
 
-    if (!Array.isArray(data)) throw new Error("Root must be an array.");
+const getColorForDomain = (domain) => {
+  const d = (domain || '').toLowerCase();
+  if (d.includes('front')) return '#0D8319'; // cm-green
+  if (d.includes('back') || d.includes('api') || d.includes('server')) return '#0078D4'; // cm-blue
+  if (d.includes('lib') || d.includes('util') || d.includes('core') || d.includes('shared')) return '#BB86FC'; // purple
+  if (d.includes('infra') || d.includes('deploy') || d.includes('config') || d.includes('db')) return '#DE6808'; // orange
+  return '#4B5563'; // gray-600 default
+};
 
-    // Recursively assign IDs
-    let idCounter = 0;
-    const processNodes = (nodes) => {
-      nodes.forEach((node) => {
-        node.id = ++idCounter;
-        if (node.children) processNodes(node.children);
-      });
-    };
-    processNodes(data);
+const enrichNodes = (nodes, parentDomain = 'default') => {
+  let totalWeight = 0;
+  nodes.forEach(node => {
+    node.id = ++nodeIdCounter;
+    node.domain = node.domain || parentDomain;
+    node.color = getColorForDomain(node.domain);
+    node.files = (node.files || []).map(f => typeof f === 'string' ? { path: f, description: '' } : f);
+    node.weight = node.files.length || 1;
 
-    treeData.value = data;
-    viewState.value = "visualizing";
-    if (data.length > 0) activeNode.value = data[0];
-  } catch (err) {
-    alert(`Could not parse architectural tree.\n\nError: ${err.message}`);
-  }
+    if (node.children && node.children.length > 0) {
+      node.weight += enrichNodes(node.children, node.domain);
+    }
+    totalWeight += node.weight;
+  });
+  return totalWeight;
+};
+
+const computeLayouts = (node) => {
+  if (!node.children || node.children.length === 0) return;
+  const sortedChildren = [...node.children].sort((a, b) => b.weight - a.weight);
+
+  let cx = 0, cy = 0, cw = 100, ch = 100;
+  let total = sortedChildren.reduce((s, c) => s + c.weight, 0);
+
+  sortedChildren.forEach((child, index) => {
+    let ratio = child.weight / total;
+    if (index === sortedChildren.length - 1) {
+      child.layout = { x: cx, y: cy, w: cw, h: ch };
+    } else {
+      if (cw > ch) {
+        let splitW = cw * ratio;
+        child.layout = { x: cx, y: cy, w: splitW, h: ch };
+        cx += splitW;
+        cw -= splitW;
+      } else {
+        let splitH = ch * ratio;
+        child.layout = { x: cx, y: cy, w: cw, h: splitH };
+        cy += splitH;
+        ch -= splitH;
+      }
+    }
+    total -= child.weight;
+    if (child.children && child.children.length > 0) {
+       computeLayouts(child);
+    }
+  });
+};
+
+const getRectStyle = (layout) => {
+  if (!layout) return {};
+  return {
+    left: `calc(${layout.x}% + 4px)`,
+    top: `calc(${layout.y}% + 4px)`,
+    width: `calc(${layout.w}% - 8px)`,
+    height: `calc(${layout.h}% - 8px)`
+  };
 };
 
 const getAllFilesUnderNode = (node) => {
-  let paths = [...(node.files || [])];
+  let paths = [...(node.files || [])].map(f => f.path);
   if (node.children) {
     node.children.forEach((child) => {
       paths = [...paths, ...getAllFilesUnderNode(child)];
     });
   }
   return paths;
+};
+
+const parseResponse = () => {
+  parseError.value = "";
+  try {
+    let raw = promptResponse.value.trim();
+    const startIdx = raw.indexOf("[") !== -1 ? Math.min(raw.indexOf("["), raw.indexOf("{")) : raw.indexOf("{");
+    const endIdx = raw.lastIndexOf("]") !== -1 ? Math.max(raw.lastIndexOf("]"), raw.lastIndexOf("}")) : raw.lastIndexOf("}");
+    if (startIdx === -1 || endIdx === -1) throw new Error("JSON structure not found.");
+
+    const jsonStr = raw.substring(startIdx, endIdx + 1);
+
+    let data;
+    try {
+      data = JSON.parse(jsonStr);
+    } catch (e) {
+      throw new Error("Invalid JSON syntax: " + e.message);
+    }
+
+    let root;
+    if (Array.isArray(data)) {
+       if (data.length === 1) root = data[0];
+       else root = { name: 'System Architecture', description: 'Complete project structure', domain: 'default', children: data, files: [] };
+    } else {
+       root = data;
+    }
+
+    nodeIdCounter = 0;
+    root.id = ++nodeIdCounter;
+    root.domain = root.domain || 'default';
+    root.color = getColorForDomain(root.domain);
+    root.files = (root.files || []).map(f => typeof f === 'string' ? { path: f, description: '' } : f);
+    root.weight = root.files.length || 1;
+
+    if (root.children && root.children.length > 0) {
+      root.weight += enrichNodes(root.children, root.domain);
+    }
+
+    // STRICT FILE VALIDATION
+    const parsedPaths = getAllFilesUnderNode(root);
+    const currentPaths = activeProject.selectedFiles.map(f => f.path);
+
+    const currentPathsSet = new Set(currentPaths);
+    const parsedPathsSet = new Set(parsedPaths);
+
+    const missingFiles = [...currentPathsSet].filter(p => !parsedPathsSet.has(p));
+    const unknownFiles = [...parsedPathsSet].filter(p => !currentPathsSet.has(p));
+    const duplicates = parsedPaths.filter((item, index) => parsedPaths.indexOf(item) !== index);
+
+    if (missingFiles.length || unknownFiles.length || duplicates.length) {
+      let errorParts = [];
+      if (missingFiles.length) {
+        errorParts.push(`Missing Files:\n${JSON.stringify(missingFiles.sort(), null, 2)}`);
+      }
+      if (unknownFiles.length) {
+        errorParts.push(`Unknown Files:\n${JSON.stringify(unknownFiles.sort(), null, 2)}`);
+      }
+      if (duplicates.length) {
+        errorParts.push(`Duplicate Entries Found:\n${JSON.stringify([...new Set(duplicates)].sort(), null, 2)}`);
+      }
+      throw new Error(errorParts.join('\n\n'));
+    }
+
+    computeLayouts(root);
+
+    zoomPath.value = [root];
+    viewState.value = "visualizing";
+  } catch (err) {
+    parseError.value = err.message;
+    promptResponse.value = "";
+  }
 };
 
 const handleCopyNodeCode = async (node) => {
@@ -94,11 +221,6 @@ const handleCopyNodeCode = async (node) => {
   }
   const result = await copyVisualizerNodeCode(paths);
   statusMessage.value = result;
-};
-
-const toggleNode = (node) => {
-  if (expandedNodes.value.has(node.id)) expandedNodes.value.delete(node.id);
-  else expandedNodes.value.add(node.id);
 };
 </script>
 
@@ -116,7 +238,7 @@ const toggleNode = (node) => {
       >
         <div class="flex items-center space-x-3 text-white">
           <Network class="w-6 h-6 text-cm-blue" />
-          <h2 class="text-xl font-bold">Project Node Visualizer</h2>
+          <h2 class="text-xl font-bold">Semantic Architecture Terrain Map</h2>
           <span class="text-gray-500 text-sm font-medium"
             >/ {{ activeProject.name }}</span
           >
@@ -135,7 +257,7 @@ const toggleNode = (node) => {
         <!-- STEP 1: Initialization -->
         <div
           v-if="viewState === 'init'"
-          class="flex-grow flex flex-col items-center justify-center p-12 max-w-2xl mx-auto space-y-8"
+          class="flex-grow flex flex-col items-center p-12 max-w-2xl mx-auto space-y-8 overflow-y-auto custom-scrollbar"
         >
           <div class="text-center space-y-4">
             <h3 class="text-2xl font-bold text-white">
@@ -143,14 +265,36 @@ const toggleNode = (node) => {
             </h3>
             <p class="text-gray-400 leading-relaxed">
               This tool organizes your <strong>Merge List</strong> into a
-              logical hierarchy. To begin, ask an LLM to categorize your files
-              by feature, layer, or role.
+              zoomable 2D semantic map. To begin, ask an LLM to categorize your
+              files into structural layers.
             </p>
           </div>
 
           <div
             class="w-full space-y-6 bg-gray-800/50 p-8 rounded-xl border border-gray-700"
           >
+            <!-- Parse Error Validation Block -->
+            <div
+              v-if="parseError"
+              class="w-full bg-red-900/30 border border-red-700 p-4 rounded-xl space-y-3"
+            >
+              <div class="flex items-center space-x-2 text-red-400 font-bold">
+                <AlertTriangle class="w-5 h-5" />
+                <span>Validation Error</span>
+              </div>
+              <div
+                class="text-sm text-gray-300 font-mono whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar"
+              >
+                {{ parseError }}
+              </div>
+              <button
+                @click="copyCorrectionPrompt"
+                class="bg-red-700 hover:bg-red-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors flex items-center shadow-lg"
+              >
+                <Copy class="w-4 h-4 mr-2" /> Copy Correction Prompt
+              </button>
+            </div>
+
             <button
               @click="handleCopyPrompt"
               class="w-full py-4 rounded-lg font-bold text-lg transition-all flex items-center justify-center space-x-3 shadow-lg"
@@ -177,7 +321,7 @@ const toggleNode = (node) => {
               <textarea
                 v-model="promptResponse"
                 class="w-full h-40 bg-cm-input-bg border border-gray-600 text-gray-200 p-4 rounded outline-none focus:border-cm-blue custom-scrollbar font-mono text-xs"
-                placeholder="Paste the JSON array of nodes here..."
+                placeholder="Paste the JSON object or array of nodes here..."
               ></textarea>
             </div>
 
@@ -192,127 +336,218 @@ const toggleNode = (node) => {
           </div>
         </div>
 
-        <!-- STEP 2: The Visualizer Tree -->
-        <div v-else class="flex-grow flex min-h-0">
-          <!-- Left Pane: Tree View -->
+        <!-- STEP 2: The Semantic Terrain Map -->
+        <div v-else class="flex-grow flex flex-col min-h-0">
+          <!-- Breadcrumbs -->
           <div
-            class="w-1/2 border-r border-gray-700 flex flex-col p-6 overflow-hidden"
+            class="flex items-center space-x-1 text-sm px-6 py-3 bg-gray-800 border-b border-gray-700 shrink-0"
           >
-            <div class="flex items-center justify-between mb-6">
-              <h3
-                class="font-bold text-gray-300 uppercase tracking-widest text-sm"
-              >
-                System Hierarchy
-              </h3>
+            <div v-for="(b, idx) in zoomPath" :key="b.id" class="flex items-center">
+              <span v-if="idx > 0" class="mx-2 text-gray-500">/</span>
               <button
-                @click="viewState = 'init'"
-                class="text-xs font-bold text-gray-500 hover:text-gray-300 uppercase tracking-tight"
+                @click="zoomPath.splice(idx + 1)"
+                class="hover:text-white transition-colors"
+                :class="
+                  idx === zoomPath.length - 1 ? 'text-white font-bold' : 'text-gray-400'
+                "
               >
-                Re-initialize
+                {{ b.name }}
               </button>
-            </div>
-
-            <div
-              class="flex-grow overflow-y-auto custom-scrollbar pr-2 space-y-1"
-            >
-              <VisualizerTreeNode
-                v-for="node in treeData"
-                :key="node.id"
-                :node="node"
-                :active-id="activeNode?.id"
-                :expanded-nodes="expandedNodes"
-                @activate="activeNode = $event"
-                @toggle="toggleNode"
-              />
             </div>
           </div>
 
-          <!-- Right Pane: Details & Copy -->
-          <div
-            class="w-1/2 flex flex-col p-8 bg-black/20 overflow-y-auto custom-scrollbar"
-          >
+          <div class="flex-grow flex min-h-0">
+            <!-- Left Pane: 2D Map -->
             <div
-              v-if="activeNode"
-              class="space-y-8 animate-in fade-in duration-300"
+              class="w-2/3 border-r border-gray-700 relative bg-[#1A1A1A] overflow-hidden p-2"
             >
-              <div class="space-y-2">
-                <h3 class="text-4xl font-extralight text-cm-blue leading-tight">
-                  {{ activeNode.name }}
-                </h3>
-                <div class="h-1 w-20 bg-cm-blue/30 rounded"></div>
-              </div>
-
-              <div class="space-y-4">
-                <div
-                  class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]"
-                >
-                  Architectural Description
-                </div>
-                <p class="text-gray-200 text-lg leading-relaxed italic">
-                  "{{
-                    activeNode.description ||
-                    "No description provided for this node."
-                  }}"
-                </p>
-              </div>
-
-              <div class="space-y-4 pt-6">
-                <div
-                  class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]"
-                >
-                  Actions
-                </div>
-                <button
-                  @click="handleCopyNodeCode(activeNode)"
-                  class="bg-cm-blue hover:bg-blue-500 text-white w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center space-x-3 active:scale-[0.98]"
-                  title="Copy all merged code for this node and its children"
-                >
-                  <ClipboardPaste class="w-6 h-6" />
-                  <span>Copy Merged Code for Node</span>
-                </button>
-              </div>
-
               <div
-                v-if="activeNode.files && activeNode.files.length > 0"
-                class="space-y-4 pt-6"
+                v-if="
+                  currentZoomNode &&
+                  currentZoomNode.children &&
+                  currentZoomNode.children.length > 0
+                "
+                class="absolute inset-0 m-2"
               >
                 <div
-                  class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]"
+                  v-for="child in currentZoomNode.children"
+                  :key="child.id"
+                  class="absolute border border-gray-900 rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:brightness-125 shadow-lg group"
+                  :style="getRectStyle(child.layout)"
+                  @click="zoomPath.push(child)"
+                  @mouseenter="hoveredNode = child"
+                  @mouseleave="hoveredNode = null"
                 >
-                  Direct Files ({{ activeNode.files.length }})
-                </div>
-                <div class="space-y-1">
+                  <!-- Background Node Color -->
                   <div
-                    v-for="file in activeNode.files"
-                    :key="file"
-                    class="flex items-center space-x-2 text-gray-400 group"
+                    class="absolute inset-0 opacity-25 group-hover:opacity-40 transition-opacity"
+                    :style="{ backgroundColor: child.color }"
+                  ></div>
+
+                  <!-- Level 2 Previews (Children's children) -->
+                  <div
+                    v-if="child.children && child.children.length > 0"
+                    class="absolute inset-0 opacity-30"
                   >
-                    <FileCode class="w-3 h-3 text-gray-600" />
-                    <span class="text-xs font-mono truncate">{{ file }}</span>
+                    <div
+                      v-for="grandchild in child.children"
+                      :key="grandchild.id"
+                      class="absolute border border-gray-900 rounded-lg"
+                      :style="[
+                        getRectStyle(grandchild.layout),
+                        { backgroundColor: grandchild.color },
+                      ]"
+                    ></div>
                   </div>
+
+                  <!-- Labels -->
+                  <div
+                    class="absolute inset-0 p-4 flex flex-col justify-start pointer-events-none"
+                  >
+                    <div class="font-bold text-white text-xl drop-shadow-md truncate">
+                      {{ child.name }}
+                    </div>
+                    <div class="text-sm text-gray-300 drop-shadow-md font-medium">
+                      {{ child.weight }} items
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Detailed File List for Leaf Nodes -->
+              <div
+                v-else-if="
+                  currentZoomNode &&
+                  currentZoomNode.files &&
+                  currentZoomNode.files.length > 0
+                "
+                class="absolute inset-0 m-2 overflow-y-auto custom-scrollbar bg-[#222222] rounded-xl border border-gray-800 p-6 space-y-4"
+              >
+                <h4 class="text-lg font-bold text-white mb-4 flex items-center">
+                  <FileCode class="w-5 h-5 mr-2 text-cm-blue" />
+                  Implementation Files
+                </h4>
+                <div
+                  v-for="file in currentZoomNode.files"
+                  :key="file.path"
+                  class="bg-[#2a2a2a] border border-gray-700 rounded-lg p-5 shadow-sm hover:border-gray-500 transition-colors"
+                >
+                  <div class="flex items-center space-x-2 mb-3">
+                    <span class="text-cm-blue font-mono font-bold text-sm break-all">{{
+                      file.path
+                    }}</span>
+                  </div>
+                  <p class="text-gray-300 text-[15px] leading-relaxed">
+                    {{ file.description || "No description provided." }}
+                  </p>
+                </div>
+              </div>
+              <div v-else class="flex items-center justify-center h-full text-gray-500">
+                <div class="text-center">
+                  <FileCode class="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <p class="text-2xl font-bold text-gray-400">
+                    {{ currentZoomNode?.name }}
+                  </p>
+                  <p class="text-sm mt-2">Empty Leaf Node</p>
                 </div>
               </div>
             </div>
 
+            <!-- Right Pane: Details & Copy -->
             <div
-              v-else
-              class="h-full flex items-center justify-center text-gray-600 italic"
+              class="w-1/3 flex flex-col p-8 bg-black/20 overflow-y-auto custom-scrollbar"
             >
-              Select a node to view details
+              <div v-if="displayNode" class="space-y-8 animate-in fade-in duration-300">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-3xl font-extralight text-white leading-tight truncate pr-4">
+                      {{ displayNode.name }}
+                    </h3>
+                    <span
+                      v-if="displayNode.domain"
+                      class="text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded"
+                      :style="{
+                        backgroundColor: displayNode.color + '40',
+                        color: displayNode.color,
+                      }"
+                    >
+                      {{ displayNode.domain }}
+                    </span>
+                  </div>
+                  <div
+                    class="h-1 w-20 rounded"
+                    :style="{ backgroundColor: displayNode.color }"
+                  ></div>
+                </div>
+
+                <div class="space-y-4">
+                  <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">
+                    Architectural Description
+                  </div>
+                  <p class="text-gray-200 text-lg leading-relaxed italic">
+                    "{{
+                      displayNode.description || "No description provided for this node."
+                    }}"
+                  </p>
+                </div>
+
+                <div
+                  v-if="zoomPath.length > 0 && displayNode.id !== zoomPath[0].id"
+                  class="space-y-4 pt-6 border-t border-gray-700/50"
+                >
+                  <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">
+                    Actions
+                  </div>
+                  <button
+                    @click="handleCopyNodeCode(displayNode)"
+                    class="hover:brightness-110 text-white w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center space-x-3 active:scale-[0.98]"
+                    :style="{ backgroundColor: displayNode.color }"
+                    title="Copy all merged code for this node and its children"
+                  >
+                    <ClipboardPaste class="w-6 h-6" />
+                    <span>Copy Merged Code</span>
+                  </button>
+                </div>
+
+                <div
+                  v-if="displayNode.files && displayNode.files.length > 0"
+                  class="space-y-4 pt-6"
+                >
+                  <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">
+                    Direct Files ({{ displayNode.files.length }})
+                  </div>
+                  <div class="space-y-1">
+                    <div
+                      v-for="file in displayNode.files"
+                      :key="file.path"
+                      class="flex items-center space-x-2 text-gray-400 group"
+                    >
+                      <FileCode class="w-3 h-3 text-gray-600 shrink-0" />
+                      <span class="text-xs font-mono truncate text-gray-300">{{
+                        file.path
+                      }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                v-else
+                class="h-full flex items-center justify-center text-gray-600 italic"
+              >
+                Select a node to view details
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Simple Footer -->
-      <div
-        class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end"
-      >
+      <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end">
         <button
           @click="emit('close')"
           class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-2 px-8 rounded transition-colors text-sm"
         >
-          Close Visualizer
+          Close Map
         </button>
       </div>
     </div>

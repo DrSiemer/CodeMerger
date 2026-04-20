@@ -73,10 +73,10 @@
         },
         {
           "path": "src/core/prompts.py",
-          "mtime": 1776630718.496843,
-          "hash": "bd1aa9871eb0a739e71b871cb76e9a5cadd644c6",
-          "tokens": 3606,
-          "lines": 297
+          "mtime": 1776675910.8704553,
+          "hash": "4d6f1322f1105ac51fd95dfa1d65b0eab7ae1481",
+          "tokens": 3219,
+          "lines": 236
         },
         {
           "path": "src/app_state.py",
@@ -247,11 +247,11 @@
         },
         {
           "path": "src/api_parts/file_api.py",
-          "tokens": 2253,
+          "tokens": 2284,
           "ignoreTokens": false,
-          "lines": 286,
-          "mtime": 1776631141.5321722,
-          "hash": "f5e48ff67e04c50e2c9b82bdd43f8e09f5ed3ec6"
+          "lines": 288,
+          "mtime": 1776675446.587298,
+          "hash": "dcfe1d842e6a7a0e263449fab2eaaa9d9f7cb975"
         },
         {
           "path": "src/api_parts/clipboard_api.py",
@@ -950,20 +950,13 @@
         },
         {
           "path": "frontend/src/components/VisualizerModal.vue",
-          "tokens": 2370,
-          "lines": 237,
-          "mtime": 1776631407.4415517,
-          "hash": "434e79fe92781b76fc4d88ce322574e922f1341a"
-        },
-        {
-          "path": "frontend/src/components/VisualizerTreeNode.vue",
-          "tokens": 607,
-          "lines": 72,
-          "mtime": 1776631333.6163518,
-          "hash": "c3c589cf6e1b467785a61d95d7a4713a4b0ac5ae"
+          "tokens": 4819,
+          "lines": 565,
+          "mtime": 1776676445.0834236,
+          "hash": "c08ec40995db66d3588b3e068a761be93a519acd"
         }
       ],
-      "total_tokens": 168085,
+      "total_tokens": 169571,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
@@ -1039,7 +1032,6 @@
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
     "frontend/src/components/VisualizerModal.vue",
-    "frontend/src/components/VisualizerTreeNode.vue",
     "frontend/src/components/compact/CompactActionsStandard.vue",
     "frontend/src/components/compact/CompactActionsUltra.vue",
     "frontend/src/components/compact/CompactFeedbackOverlay.vue",
