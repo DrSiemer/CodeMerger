@@ -42,7 +42,7 @@ const copyCorrectionPrompt = async () => {
       <div class="p-6">
         <p class="text-gray-300 text-sm font-bold mb-3 uppercase tracking-tight">Validation Details:</p>
         <div class="bg-black/30 border border-gray-800 rounded p-4 max-h-[300px] overflow-y-auto custom-scrollbar">
-          <p class="text-gray-200 text-xs font-mono leading-relaxed whitespace-pre-wrap">
+          <p class="text-gray-200 text-xs font-mono leading-relaxed whitespace-pre-wrap selectable">
             {{ message }}
           </p>
         </div>
