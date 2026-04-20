@@ -91,14 +91,15 @@ const handleCopy = async (event, bypassSecrets = null) => {
   if (!activeProject.path) return
   isCopying.value = true
   try {
-    const useWrapper = activeProject.hasInstructions && !event.ctrlKey
+    const isCtrl = event.ctrlKey
+    const useWrapper = activeProject.hasInstructions && !isCtrl
     const result = await window.pywebview.api.copy_code(useWrapper, bypassSecrets || false)
     if (result && typeof result === 'object' && result.status === 'SECRETS_DETECTED') {
       triggerFeedback('confirm', 'Secrets found!', 'secrets'); return
     }
     if (typeof result === 'string') {
       if (result.includes('Error') || result.includes('cancelled')) triggerFeedback('error', result, 'copy', 3000)
-      else triggerFeedback('success', 'COPIED', 'copy')
+      else triggerFeedback('success', 'COPIED', isCtrl ? 'copy-only' : 'copy')
     }
   } catch (err) { triggerFeedback('error', 'Copy Failed', 'copy', 3000)
   } finally { isCopying.value = false }

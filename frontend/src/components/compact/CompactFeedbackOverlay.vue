@@ -13,10 +13,10 @@ defineEmits(['confirm', 'cancel'])
   <transition name="feedback-slide">
     <div v-if="feedback.active" class="absolute inset-0 z-50 p-1.5 flex flex-col" @click.self="$emit('cancel')">
       <!-- Success/Error Banner -->
-      <div v-if="feedback.mode !== 'confirm'" class="w-full h-full rounded shadow-lg flex items-center justify-center px-2 py-1 overflow-hidden cursor-pointer" :class="feedback.mode === 'success' ? 'bg-cm-green' : 'bg-cm-warn'" @click="$emit('cancel')">
+      <div v-if="feedback.mode !== 'confirm'" class="w-full h-full rounded shadow-lg flex items-center justify-center px-2 py-1 overflow-hidden cursor-pointer" :class="feedback.mode === 'success' ? (feedback.type === 'copy-only' ? 'bg-gray-300' : 'bg-cm-green') : 'bg-cm-warn'" @click="$emit('cancel')">
         <div class="flex flex-col items-center justify-center text-center pointer-events-none">
-          <Check v-if="feedback.mode === 'success'" class="w-3.5 h-3.5 text-white mb-0.5 shrink-0" />
-          <span class="text-[9px] font-black text-white uppercase tracking-wider leading-tight whitespace-normal max-w-full px-1 text-center">{{ feedback.msg }}</span>
+          <Check v-if="feedback.mode === 'success'" class="w-3.5 h-3.5 mb-0.5 shrink-0" :class="feedback.type === 'copy-only' ? 'text-gray-900' : 'text-white'" />
+          <span class="text-[9px] font-black uppercase tracking-wider leading-tight whitespace-normal max-w-full px-1 text-center" :class="feedback.type === 'copy-only' ? 'text-gray-900' : 'text-white'">{{ feedback.msg }}</span>
         </div>
       </div>
 
