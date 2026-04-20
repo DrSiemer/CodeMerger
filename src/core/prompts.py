@@ -248,3 +248,35 @@ Return ONLY a raw JSON object (or array of objects) with the following structure
 {previous_map_context}
 **Project Code Content:**
 {merged_content}"""
+
+# Project Visualizer Amend Prompt
+VISUALIZER_AMEND_PROMPT = """I am building an Architecture Explorer and your previous response was incomplete or contained redundancies.
+
+**Missing Files to Categorize:**
+{missing_list}
+
+**Duplicate Entries Found:**
+{duplicate_list}
+
+**Instructions:**
+1. Categorize the 'Missing Files' into the architectural structure we just discussed.
+2. For each missing file, provide the 'parent' node name where it should be placed.
+3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.
+4. Provide a rich description for each added file (2-4 sentences).
+
+**Output Format:**
+Return ONLY a raw JSON object with an 'amendments' key:
+{{
+  "amendments": {{
+    "add": [
+      {{
+        "path": "path/to/missing_file.ext",
+        "parent": "Existing or New Node Name",
+        "description": "Detailed explanation of what this file does."
+      }}
+    ],
+    "remove": [
+      "path/to/duplicate_to_delete.ext"
+    ]
+  }}
+}}"""

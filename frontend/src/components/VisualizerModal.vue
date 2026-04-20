@@ -33,6 +33,11 @@ const hoveredNode = ref(null);
 const parseError = ref("");
 const searchQuery = ref("");
 
+// Memory for partial results to allow surgical amendments
+const draftTree = ref(null);
+const missingPathsList = ref([]);
+const duplicateEntriesList = ref([]);
+
 const currentNavNode = computed(() => navPath.value[navPath.value.length - 1] || null);
 const displayNode = computed(() => hoveredNode.value || currentNavNode.value);
 
@@ -117,16 +122,52 @@ const processRawResponse = async (raw) => {
   parseError.value = "";
   try {
     const data = extractJSON(raw);
-    let root = Array.isArray(data)
-      ? (data.length === 1 ? data[0] : { name: 'System Architecture', description: 'Complete project structure', domain: 'default', children: data, files: [] })
-      : data;
+
+    let root;
+    // Check if this is an amendment response
+    if (data.amendments) {
+      if (!draftTree.value) {
+        throw new Error("No draft tree in memory to amend. Please paste a full tree structure first.");
+      }
+      root = JSON.parse(JSON.stringify(draftTree.value));
+      const { findAndAddFileToNode, removeFileFromTree } = await import("../utils/visualizerUtils");
+
+      // Handle Removals (Deduplication)
+      if (Array.isArray(data.amendments.remove)) {
+        data.amendments.remove.forEach(path => {
+          removeFileFromTree(root, path);
+        });
+      }
+
+      // Handle Additions (Missing files)
+      const addList = Array.isArray(data.amendments.add) ? data.amendments.add : (Array.isArray(data.amendments) ? data.amendments : []);
+      addList.forEach(item => {
+        const added = findAndAddFileToNode(root, item.path, item.parent, item.description);
+        if (!added) {
+          if (!root.files) root.files = [];
+          root.files.push({ path: item.path, description: item.description });
+        }
+      });
+    } else {
+      // Full tree response
+      root = Array.isArray(data)
+        ? (data.length === 1 ? data[0] : { name: 'System Architecture', description: 'Complete project structure', domain: 'default', children: data, files: [] })
+        : data;
+    }
 
     const idTracker = { val: 0 };
-    root.id = ++idTracker.val;
-    root.domain = root.domain || 'default';
-    root.color = getColorForDomain(root.domain);
-    root.files = (root.files || []).map(f => typeof f === 'string' ? { path: f, description: '' } : f);
-    root.weight = (root.files.length || 1) + (root.children?.length ? enrichNodes(root.children, root.domain, idTracker) : 0);
+    const reEnrich = (node, parentDomain = 'default') => {
+      node.id = ++idTracker.val;
+      node.domain = node.domain || parentDomain;
+      node.color = getColorForDomain(node.domain);
+      node.files = (node.files || []).map(f => typeof f === 'string' ? { path: f, description: '' } : f);
+      node.weight = node.files.length || 1;
+      if (node.children?.length) {
+        node.weight += node.children.reduce((acc, c) => acc + reEnrich(c, node.domain), 0);
+      }
+      return node.weight;
+    };
+    reEnrich(root);
 
     const parsedPaths = getAllFilesUnderNode(root);
     const currentPaths = activeProject.selectedFiles.map(f => f.path);
@@ -135,14 +176,20 @@ const processRawResponse = async (raw) => {
     const dupes = parsedPaths.filter((item, index) => parsedPaths.indexOf(item) !== index);
 
     if (missing.length || unknown.length || dupes.length) {
+      // Save the current partial result as a draft to allow for amendments
+      draftTree.value = root;
+      missingPathsList.value = missing;
+      duplicateEntriesList.value = [...new Set(dupes)];
+
       let errs = [];
       if (missing.length) errs.push(`Missing Files:\n${JSON.stringify(missing.sort(), null, 2)}`);
       if (unknown.length) errs.push(`Unknown Files:\n${JSON.stringify(unknown.sort(), null, 2)}`);
-      if (dupes.length) errs.push(`Duplicate Entries Found:\n${JSON.stringify([...new Set(dupes)].sort(), null, 2)}`);
+      if (dupes.length) errs.push(`Duplicate Entries Found:\n${JSON.stringify(duplicateEntriesList.value.sort(), null, 2)}`);
       throw new Error(errs.join('\n\n'));
     }
 
     computeLayouts(root);
+    draftTree.value = null; // Clear draft on success
     const file_hashes = {};
     activeProject.selectedFiles.forEach(f => { file_hashes[f.path] = f.hash || null; });
 
@@ -162,6 +209,45 @@ const handleCopyPrompt = async (isUpdate = false) => {
   }
   const prompt = await getVisualizerPrompt(prevJson);
   if (prompt) await navigator.clipboard.writeText(prompt);
+};
+
+const handleCopyAmendPrompt = async () => {
+  const missingList = missingPathsList.value.length > 0 ? missingPathsList.value.map(p => `- ${p}`).join('\n') : "None";
+  const duplicateList = duplicateEntriesList.value.length > 0 ? duplicateEntriesList.value.map(p => `- ${p}`).join('\n') : "None";
+
+  const prompt = `I am building an Architecture Explorer and your previous response was incomplete or contained redundancies.
+
+**Missing Files to Categorize:**
+${missingList}
+
+**Duplicate Entries Found:**
+${duplicateList}
+
+**Instructions:**
+1. Categorize the 'Missing Files' into the architectural structure we just discussed.
+2. For each missing file, provide the 'parent' node name where it should be placed.
+3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.
+4. Provide a rich description for each added file (2-4 sentences).
+
+**Output Format:**
+Return ONLY a raw JSON object with an 'amendments' key:
+{
+  "amendments": {
+    "add": [
+      {
+        "path": "path/to/missing_file.ext",
+        "parent": "Existing or New Node Name",
+        "description": "Detailed explanation of what this file does."
+      }
+    ],
+    "remove": [
+      "path/to/duplicate_to_delete.ext"
+    ]
+  }
+}`;
+
+  await navigator.clipboard.writeText(prompt);
+  statusMessage.value = "Copied amend prompt to clipboard.";
 };
 
 const copyCorrectionPrompt = async () => {
@@ -211,6 +297,7 @@ const handleCopyNodeCode = async (node) => {
           :parse-error="parseError"
           @copy-prompt="handleCopyPrompt(viewState === 'updating')"
           @copy-correction="copyCorrectionPrompt"
+          @copy-amend="handleCopyAmendPrompt"
           @parse="processRawResponse"
           @cancel="viewState = 'visualizing'"
         />

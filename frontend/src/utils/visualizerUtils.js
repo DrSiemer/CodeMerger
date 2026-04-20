@@ -98,3 +98,40 @@ export const nodeHasMatch = (node, query) => {
 
   return false;
 };
+
+export const findAndAddFileToNode = (root, fileName, parentName, description) => {
+  // If this node is the target parent, add the file
+  if (root.name.toLowerCase() === parentName.toLowerCase()) {
+    if (!root.files) root.files = [];
+    // Prevent duplicates
+    if (!root.files.some(f => f.path === fileName)) {
+      root.files.push({ path: fileName, description: description });
+    }
+    return true;
+  }
+
+  // Recursive search in children
+  if (root.children) {
+    for (let child of root.children) {
+      if (findAndAddFileToNode(child, fileName, parentName, description)) return true;
+    }
+  }
+
+  return false;
+};
+
+export const removeFileFromTree = (root, filePath) => {
+  if (root.files) {
+    const initialLen = root.files.length;
+    root.files = root.files.filter(f => f.path !== filePath);
+    if (root.files.length < initialLen) return true;
+  }
+
+  if (root.children) {
+    for (let child of root.children) {
+      if (removeFileFromTree(child, filePath)) return true;
+    }
+  }
+
+  return false;
+};

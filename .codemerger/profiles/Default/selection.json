@@ -65,10 +65,10 @@
   },
   {
     "path": "src/core/prompts.py",
-    "mtime": 1776688362.4304128,
-    "hash": "c0b98c5435202145c0a25d38414c4651dc66e9fe",
-    "tokens": 3451,
-    "lines": 249
+    "mtime": 1776690705.9442613,
+    "hash": "ed3b56d21d0db0163d19c47f592af785329b53f0",
+    "tokens": 3734,
+    "lines": 282
   },
   {
     "path": "src/app_state.py",
@@ -948,24 +948,24 @@
   },
   {
     "path": "frontend/src/components/VisualizerModal.vue",
-    "tokens": 2861,
-    "lines": 269,
-    "mtime": 1776685575.508934,
-    "hash": "b41c1f42f3b940c231ff8261f66450af66a2fcf4"
+    "tokens": 3546,
+    "lines": 354,
+    "mtime": 1776690706.081334,
+    "hash": "8327e84564b13c41431a942c53a8a9ba0d32095c"
   },
   {
     "path": "frontend/src/utils/visualizerUtils.js",
-    "tokens": 897,
-    "lines": 100,
-    "mtime": 1776681227.2980726,
-    "hash": "910e173e173adc358337cc8c02a0b962066de494"
+    "tokens": 1148,
+    "lines": 137,
+    "mtime": 1776690673.213663,
+    "hash": "f3eb6dfe331219fd0b9d6dca7f56fd733025340c"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",
-    "tokens": 1193,
-    "lines": 113,
-    "mtime": 1776684819.986632,
-    "hash": "023f8998d2654f627dbc771d56c4fb217d29da43"
+    "tokens": 1752,
+    "lines": 172,
+    "mtime": 1776691149.3192787,
+    "hash": "c24360b55ba5f8ac7a446524ba620a0285b4e2e5"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerExplorer.vue",
