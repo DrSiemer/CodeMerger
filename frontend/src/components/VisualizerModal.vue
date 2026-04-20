@@ -20,6 +20,7 @@ const emit = defineEmits(["close"]);
 const {
   activeProject,
   getVisualizerPrompt,
+  getVisualizerUpdatePrompt,
   copyVisualizerNodeCode,
   saveVisualizerMap,
   openFile,
@@ -126,24 +127,27 @@ const processRawResponse = async (raw) => {
     let root;
     // Check if this is an amendment response
     if (data.amendments) {
-      if (!draftTree.value) {
-        throw new Error("No draft tree in memory to amend. Please paste a full tree structure first.");
+      // Use draft tree if available (from a previous parse error), otherwise fall back to the existing saved map
+      const sourceTree = draftTree.value || activeProject.visualizerMap?.tree;
+      if (!sourceTree) {
+        throw new Error("No existing tree to amend. Please paste a full hierarchy first.");
       }
-      root = JSON.parse(JSON.stringify(draftTree.value));
+      root = JSON.parse(JSON.stringify(sourceTree));
       const { findAndAddFileToNode, removeFileFromTree } = await import("../utils/visualizerUtils");
 
-      // Handle Removals (Deduplication)
+      // Handle Removals (Deduplication or Obsolete cleanup)
       if (Array.isArray(data.amendments.remove)) {
         data.amendments.remove.forEach(path => {
           removeFileFromTree(root, path);
         });
       }
 
-      // Handle Additions (Missing files)
+      // Handle Additions (Missing files or New features)
       const addList = Array.isArray(data.amendments.add) ? data.amendments.add : (Array.isArray(data.amendments) ? data.amendments : []);
       addList.forEach(item => {
         const added = findAndAddFileToNode(root, item.path, item.parent, item.description);
         if (!added) {
+          // Fallback to root if parent node could not be semantically resolved
           if (!root.files) root.files = [];
           root.files.push({ path: item.path, description: item.description });
         }
@@ -202,13 +206,34 @@ const processRawResponse = async (raw) => {
   }
 };
 
-const handleCopyPrompt = async (isUpdate = false) => {
-  let prevJson = null;
-  if (isUpdate) {
-    prevJson = JSON.stringify(activeProject.visualizerMap.tree, (k, v) => ['id', 'layout', 'color', 'weight'].includes(k) ? undefined : v, 2);
+const handleCopyPrompt = async () => {
+  const isUpdateMode = viewState.value === 'updating';
+
+  if (isUpdateMode && activeProject.visualizerMap) {
+    // Identify specific path diffs to request an AMENDMENT prompt
+    const mapHashes = activeProject.visualizerMap.file_hashes || {};
+    const mapPaths = Object.keys(mapHashes);
+    const currentPaths = activeProject.selectedFiles.map(f => f.path);
+
+    const missingPaths = currentPaths.filter(p => !mapPaths.includes(p));
+    const obsoletePaths = mapPaths.filter(p => !currentPaths.includes(p));
+
+    // Strip UI-specific properties (id, layout, etc) before sending current tree to LLM
+    const prevJson = JSON.stringify(activeProject.visualizerMap.tree, (k, v) =>
+      ['id', 'layout', 'color', 'weight'].includes(k) ? undefined : v, 2
+    );
+
+    const prompt = await getVisualizerUpdatePrompt(prevJson, missingPaths, obsoletePaths);
+    if (prompt) {
+      await navigator.clipboard.writeText(prompt);
+    }
+  } else {
+    // Standard Full Generation for uninitialized maps or fallback
+    const prompt = await getVisualizerPrompt();
+    if (prompt) {
+      await navigator.clipboard.writeText(prompt);
+    }
   }
-  const prompt = await getVisualizerPrompt(prevJson);
-  if (prompt) await navigator.clipboard.writeText(prompt);
 };
 
 const handleCopyAmendPrompt = async () => {

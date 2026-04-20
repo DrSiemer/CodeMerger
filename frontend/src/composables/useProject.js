@@ -206,6 +206,7 @@ export function useProject() {
   const getRecentProjects = async () => window.pywebview ? await window.pywebview.api.get_recent_projects() : []
 
   const getVisualizerPrompt = async (prevMapJson = null) => window.pywebview ? await window.pywebview.api.get_visualizer_prompt(prevMapJson) : ""
+  const getVisualizerUpdatePrompt = async (prevJson, missing, obsolete) => window.pywebview ? await window.pywebview.api.get_visualizer_update_prompt(prevJson, missing, obsolete) : ""
   const copyVisualizerNodeCode = async (paths) => window.pywebview ? await window.pywebview.api.copy_visualizer_node_code(paths) : "Error"
 
   const saveVisualizerMap = async (mapData) => {
@@ -241,6 +242,7 @@ export function useProject() {
     saveInstructions,
     getRecentProjects,
     getVisualizerPrompt,
+    getVisualizerUpdatePrompt,
     copyVisualizerNodeCode,
     saveVisualizerMap
   }

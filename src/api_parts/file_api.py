@@ -271,6 +271,24 @@ class FileApi:
             return True
         return False
 
+    def get_visualizer_update_prompt(self, previous_tree_json, missing_paths, obsolete_paths):
+        """Generates a specialized prompt to update the Architecture Explorer via amendments."""
+        project_config = self.project_manager.get_current_project()
+        if not project_config:
+            return ""
+
+        from src.core.merger import generate_subset_output
+        new_files_code = generate_subset_output(project_config.base_dir, missing_paths)
+
+        obsolete_list = "\n".join([f"- {p}" for p in obsolete_paths]) if obsolete_paths else "None"
+
+        from src.core import prompts as p
+        return p.VISUALIZER_UPDATE_PROMPT.format(
+            current_tree=previous_tree_json,
+            obsolete_list=obsolete_list,
+            new_files_content=new_files_code
+        )
+
     def copy_visualizer_node_code(self, file_paths):
         """Copies code for a specific subset of files defined in a visualizer node."""
         project_config = self.project_manager.get_current_project()

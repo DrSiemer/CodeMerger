@@ -987,32 +987,67 @@
         }
       }
     ],
-    "files": [],
+    "files": [
+      {
+        "path": "src/core/config_io.py",
+        "description": "Manages atomic filesystem operations for project metadata and profile configuration, ensuring robust data integrity during concurrent write attempts. It provides shared utilities for Windows-specific hidden attributes, random hex color generation for UI branding, and quick metadata extraction for recent project lists."
+      },
+      {
+        "path": "src/core/config_migration.py",
+        "description": "Facilitates the transition from the legacy single-file project format to the modern multi-file directory structure used in recent versions. It maps existing selections and instructions into isolated profiles while maintaining automated backups to prevent data loss during the migration process."
+      },
+      {
+        "path": "frontend/src/utils/visualizerUtils.js",
+        "description": "Centralizes the algorithmic logic for the architectural treemap, including the recursive 2D layout engine and domain-based color assignment. It handles the critical preprocessing of AI-generated JSON trees to enrich nodes with layout coordinates, total weights, and search matching flags."
+      },
+      {
+        "path": "frontend/src/utils/info/visualizerInfo.js",
+        "description": "Provides a specialized dictionary of descriptive tooltips and guidance strings for the Architectural Explorer's 'Info Mode'. It explains the function of the treemap navigation, the prompt generation workflow, and the validation steps required for importing AI-generated hierarchies."
+      },
+      {
+        "path": "frontend/src/components/visualizer/VisualizerInit.vue",
+        "description": "A multi-state view managing the initialization and update phases of the project map, including prompt copying and response parsing. It features interactive error handling that allows users to request surgical amendments or full corrections from the AI when JSON validation fails."
+      },
+      {
+        "path": "frontend/src/components/visualizer/VisualizerExplorer.vue",
+        "description": "The primary layout component for the interactive architectural map, rendering nested layers as clickable tiles based on calculated weights. It implements breadcrumb-based navigation and provides a seamless dive-in experience for exploring deep system hierarchies."
+      },
+      {
+        "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
+        "description": "A specialized list component that displays the source files associated with a specific architectural layer. It offers real-time search filtering within the node and allows users to jump directly to their external code editor via interactive file cards."
+      },
+      {
+        "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
+        "description": "A contextual sidebar that presents AI-generated descriptions and architectural metadata for the currently focused component. It enables bulk actions, such as copying the combined source code for all files within a specific architectural branch."
+      }
+    ],
     "id": 1,
     "color": "#4B5563",
-    "weight": 139
+    "weight": 146
   },
   "file_hashes": {
-    "README.md": "a724bc9d19b6f7c7e4b2283991cfd843c61f80e9",
-    "llm.md": "5345901d73316044aaa2b4584ea08cc72db43c28",
+    "README.md": "53466b565d4f691d349fe6a0a1d661aab91f34f4",
+    "llm.md": "e5bf294f7a0e38b08922f9e820619dff20f10eae",
     "requirements.txt": "281aa9cbdfd03d722b050293a3bef72b39eb42b0",
     "default_filetypes.json": "42d1aa400cf8d97d102d11956930c2443d6b6f1f",
-    "src/constants.py": "aaf71306870740311addcf14de1f200a95d1bb60",
+    "src/constants.py": "649679643a129d7efad0aa7762fe45eac2704dc3",
     "src/core/paths.py": "97209033531441e3e8378481c7b0758149698b76",
     "src/core/logger.py": "3d39f1265a567ab8eb2527897554619c179b614b",
-    "src/core/utils.py": "a05f8e4d139a6a9a3a19cc244de04306aab88d1d",
+    "src/core/utils.py": "0d16e6109a05aeb8f9bb68eb62cb7ded93bf41f0",
     "src/core/registry.py": "25dc2a962d10505a4441293347af470ff1f535cd",
-    "src/core/prompts.py": "cdaf6a2e9b7d942734bdb4b72a8259de6a7f5cca",
+    "src/core/config_io.py": "7a69f53509a7efecdfb3323fd0e7f355f90cdd54",
+    "src/core/config_migration.py": "24354d70eebf2da849aade5cf01435603a74b00e",
+    "src/core/project_config.py": "292032ef9277bc3b48ea7d47d9cf8a7724dc9254",
     "src/app_state.py": "2fa2f05831054144174ae5524e42729aad0b7081",
-    "src/core/project_config.py": "2e297376bd319a022e3bd843d1f8dd87fce7fde5",
+    "src/core/project_manager.py": "273e64692abcca301505b2949a1d3678479a6ae5",
     "src/core/file_scanner.py": "725bb9c11cf75cf6b238a121d44686e9f0c831bc",
-    "src/core/file_tree_builder.py": "613aa8b98f3a831b7783dccfeb3edf6f7becdebd",
+    "src/core/file_tree_builder.py": "5be09795a46138bddd056c502be2d1f631badd80",
+    "src/core/prompts.py": "ed3b56d21d0db0163d19c47f592af785329b53f0",
     "src/core/merger.py": "dd5c821c6945ec8ad15e11478d76e7299d881689",
+    "src/core/replacer.py": "44d4c09e00ac11b551827bb5d6ffed184892a54f",
+    "src/core/change_applier.py": "a10df5b09e3663897864342df83fab5ce747609e",
     "src/core/secret_scanner.py": "f5d9391668774d849e3d6bb5acc0f8fbe9d790c7",
-    "src/core/replacer.py": "cb3fe66859d3d99e19d7825a924e66917cbaf1cc",
-    "src/core/change_applier.py": "f7ed8e2cfabee1b8fe661819c465fbfbd87b30e3",
     "src/core/highlighter.py": "14c7c6d4a64dffa5cbe7765a66e9e32e84d666b7",
-    "src/core/project_manager.py": "ded1bccc2c13d7e28166f6eb2102cbf6a2dd247d",
     "src/core/file_monitor_thread.py": "c85098ca19dc46766076f7eb344ebd12bfe1e82a",
     "src/core/updater.py": "952aa53206780425fc1336485e31465be5ed8085",
     "src/core/window_geometry.py": "502699166101fd5ccbd6e85bae173e446810b2af",
@@ -1025,9 +1060,9 @@
     "src/api_parts/window_api.py": "a15f73236578af01e88a65b3721a562dc5e3838c",
     "src/api_parts/config_api.py": "a5d273823926b1f0417132304720df7d45e50ffc",
     "src/api_parts/project_api.py": "0f9984f0dcff438e3cc8a5c757e835c0f91c3e12",
-    "src/api_parts/file_api.py": "826cc6ed0b93a74de36420266da425a0d8981a8e",
+    "src/api_parts/file_api.py": "611d8ededa68fc8154fcd8cd968e507c85b0cb6c",
     "src/api_parts/clipboard_api.py": "ba67c906211a78048567f6e17bfad7d6d55b7a83",
-    "src/api_parts/changes_api.py": "e06962b63a10518cdbf4a6f03440df1621dfb8c8",
+    "src/api_parts/changes_api.py": "777fdbe4b1892e278b6fddd9109e2c68da5d475d",
     "src/api_parts/starter_api_session.py": null,
     "src/api_parts/starter_api_parsing.py": null,
     "src/api_parts/starter_api_prompts.py": "93c0a25d79c1451a4cc90c922a77971cb6668263",
@@ -1044,8 +1079,17 @@
     "frontend/src/router/index.js": "ccfc393dafc5a502469659ee83739b9c7457c22c",
     "frontend/src/composables/globalState.js": "56d7a61977a2c4e30924111003f66be94d38fdaf",
     "frontend/src/composables/infoMode.js": null,
+    "frontend/src/utils/colorUtils.js": "e80bb7c40a16b23cb45e60119801bcae341ff6e4",
+    "frontend/src/utils/visualizerUtils.js": "f3eb6dfe331219fd0b9d6dca7f56fd733025340c",
+    "frontend/src/utils/info/mainInfo.js": "ec9da75f8466325183ef58f37894a9004dc43a1f",
+    "frontend/src/utils/info/fileManagerInfo.js": "9b30e0ea6f2777614187c5cf7cc416315d930268",
+    "frontend/src/utils/info/reviewInfo.js": "48e0b973ef230878cd28c260272f59064952d03d",
+    "frontend/src/utils/info/settingsInfo.js": "4d20241d0d67d26548670a8674fb8ed3692a8cf9",
+    "frontend/src/utils/info/starterInfo.js": "cb5057c5667e06c68df6fa57e1b10e849e3a5218",
+    "frontend/src/utils/info/visualizerInfo.js": "8b81e1105f1ba3a5579b34713e5e7d5788ec1bb3",
+    "frontend/src/utils/infoMessages.js": "fe127b2e98548359d7a375ef31a8df76bac97f90",
     "frontend/src/composables/useSystem.js": "eae632ebc19d2d51134870c5c4bb8c8deea5ec9a",
-    "frontend/src/composables/useProject.js": "27e5151a76c6407ea876ca1baefcfbadd97e85be",
+    "frontend/src/composables/useProject.js": "af01acc99180ffd5868885f92c6e0fe4b967d9b8",
     "frontend/src/composables/useReview.js": "ed9dc796c042bbf46810cd7b3811f2235b8d08f9",
     "frontend/src/composables/useStarter.js": null,
     "frontend/src/composables/useAppState.js": "79b897c9f49d7ccf8adfc710f354ddd057148584",
@@ -1053,12 +1097,6 @@
     "frontend/src/composables/useReviewerEditMode.js": null,
     "frontend/src/composables/useCompactHandlers.js": "ea60e0fa366e429798b5820f50324041db0cef88",
     "frontend/src/directives/vInfo.js": "e026e392a3c7ca30b008edc4bfa5c86cb23df1cd",
-    "frontend/src/utils/infoMessages.js": "4b1cea62f2a20eb8e426e805c50bfa5a5feb6565",
-    "frontend/src/utils/info/mainInfo.js": "9ef047eaeae8e2928f9d1a586858d367966a5412",
-    "frontend/src/utils/info/fileManagerInfo.js": "920acdb137040a5b5677b94658c5db1e2981c6e4",
-    "frontend/src/utils/info/reviewInfo.js": "48e0b973ef230878cd28c260272f59064952d03d",
-    "frontend/src/utils/info/settingsInfo.js": "4d20241d0d67d26548670a8674fb8ed3692a8cf9",
-    "frontend/src/utils/info/starterInfo.js": "cb5057c5667e06c68df6fa57e1b10e849e3a5218",
     "frontend/src/App.vue": "0a060558a5d08a2bb620570c81264e1abe55258f",
     "frontend/src/views/MainView.vue": "fe560eb0cc584c02895a66a54715b94ce77caf0d",
     "frontend/src/views/CompactView.vue": "8fd7d1a650c536675aa53663cb85f4c718ff31fa",
@@ -1071,15 +1109,16 @@
     "frontend/src/components/FileTreeNode.vue": "4044abcb65435ac52c60dc25097213b01de49df6",
     "frontend/src/components/ProjectSelectorModal.vue": "2ee71c5749996774f2a2c78281ef408337e7aad1",
     "frontend/src/components/FileManagerLeftPanel.vue": "81fdab373cd6ada09aa86e14f5919bc289faff1f",
-    "frontend/src/components/FileManagerRightPanel.vue": "12ea6323692657ede4328ab6c21af0e48cc47217",
+    "frontend/src/components/FileManagerRightPanel.vue": "f6451f490c09ce9e60315ac4b937e27b81b28463",
     "frontend/src/components/FileManagerModal.vue": "292b5952db24027c36e951509ca4afd84fa461e4",
     "frontend/src/components/ReviewModal.vue": "8fe77009809daeda4f50e34637e3a3f8625cddf3",
     "frontend/src/components/review-tabs/ReviewCommentary.vue": null,
     "frontend/src/components/review-tabs/ReviewFileItem.vue": null,
     "frontend/src/components/review-tabs/ReviewChangesTab.vue": "bdf48d3a4b2268bb7f216561c8436ebb029bb4e9",
+    "frontend/src/components/review-tabs/ReviewVerificationTab.vue": "f67a5e7ee34cfefc8aacd32a0ea8bdaa300b0cbb",
     "frontend/src/components/SettingsModal.vue": "a5ddecdd12d5f088365238f1f9361b2f3e09af03",
     "frontend/src/components/settings/SettingsAppTab.vue": "7520d8710d2cfb2296bfc431c42ab940619b4618",
-    "frontend/src/components/settings/SettingsFileManagerTab.vue": null,
+    "frontend/src/components/settings/SettingsFileManagerTab.vue": "121e33a20170a67a1eb5528e7d96852d8d191267",
     "frontend/src/components/settings/SettingsFiletypesTab.vue": "9bd7abf43a23fda9b8b39b5bd367ea555a6ac4bb",
     "frontend/src/components/settings/SettingsPromptsTab.vue": null,
     "frontend/src/components/settings/SettingsStarterTab.vue": null,
@@ -1087,8 +1126,8 @@
     "frontend/src/components/InstructionsModal.vue": "830f2f2e756b2add72bdd1f0a15dcd5c5d93466e",
     "frontend/src/components/NewProfileModal.vue": null,
     "frontend/src/components/NewFiletypesModal.vue": "a2fc309c08957f6cbf049bacf6e4fc15e46c39f4",
-    "frontend/src/components/OrderErrorModal.vue": null,
-    "frontend/src/components/FormatErrorModal.vue": "98dcaef63fcf2e6afbbd69750e1533c100a024a1",
+    "frontend/src/components/OrderErrorModal.vue": "c67d6b783bc9d7156e461539126752c1ef4607af",
+    "frontend/src/components/FormatErrorModal.vue": "4874bfce54cf08dc685d98d5c95584ad0385ed91",
     "frontend/src/components/ColorPickerOverlay.vue": "c48ed191579d055cc0e275cb499bbb85c6339cd9",
     "frontend/src/components/compact/CompactFeedbackOverlay.vue": "ef33569e28f303486d2e0b2814c0bd6c321d3131",
     "frontend/src/components/compact/CompactActionsStandard.vue": "d168c26e7d707ab00d16f5ad99b5e053ac2f7015",
@@ -1106,6 +1145,11 @@
     "frontend/src/components/starter-steps/Step5Todo.vue": "922844d83ab206fab77983121245ef52e7ccd06e",
     "frontend/src/components/starter-steps/Step6Generate.vue": null,
     "frontend/src/components/starter-steps/StepSuccess.vue": "6ed7715d20788b69097c6f872ac321ab70f296e6",
+    "frontend/src/components/VisualizerModal.vue": "86071e6c81ab156bb47ac42cb5b6d74e27eff83a",
+    "frontend/src/components/visualizer/VisualizerInit.vue": "c24360b55ba5f8ac7a446524ba620a0285b4e2e5",
+    "frontend/src/components/visualizer/VisualizerExplorer.vue": "f0e5c2e521987b886222423f7f146d586f9bf746",
+    "frontend/src/components/visualizer/VisualizerLeafFiles.vue": "05cafb820804e153e48c1e9ef77a0eef794e12cf",
+    "frontend/src/components/visualizer/VisualizerDetails.vue": "0509b05e7eab2228447d7718c558c4ed63a49778",
     "assets/reference/concept_questions.json": "aa50e371179585a1a80c9a4163939e386e2b21f4",
     "assets/reference/todo_questions.json": "feebf5355e153d85e488205f42a6b84f79f57008",
     "assets/reference/concept.md": "88946cad8187da9bf609979e74b58625737e9b83",
@@ -1121,9 +1165,6 @@
     "updater_gui.py": "7a0d20c050a30eb87d490d3276e8bc3f782f85da",
     "codemerger.spec": "e09375e860fc155600c35948936af7463b0a96b7",
     "setup.iss": "1e66d44cb2f43463d06979821ab1e066eacfda5f",
-    ".github/workflows/release.yml": "1c527956cd20c258174e0faf87c76c5cb0ddf506",
-    "frontend/src/components/review-tabs/ReviewVerificationTab.vue": "f67a5e7ee34cfefc8aacd32a0ea8bdaa300b0cbb",
-    "frontend/src/utils/colorUtils.js": "e80bb7c40a16b23cb45e60119801bcae341ff6e4",
-    "frontend/src/components/VisualizerModal.vue": "7906a1c6823f75d3a0e914909953d75706dea302"
+    ".github/workflows/release.yml": "1c527956cd20c258174e0faf87c76c5cb0ddf506"
   }
 }

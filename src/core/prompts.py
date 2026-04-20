@@ -56,7 +56,7 @@ Only keep a comment if an experienced developer would be surprised by the code.
 **Stylistic Rules:**
 1. **Remove Redundancy:** Delete comments that explain the obvious or restate code in English.
 2. **Placement:** Move comments from the end of a line to the line *above* the code.
-3. **Formatting:** Do not use numbering. Prefer single-line comments for single sentences.
+3. **Formatting:** Do not use numbering. Prefer single-line sentences.
 4. **Punctuation:** Remove dots from the end of single-line comments.
 5. **Tense:** Remove historical/past-tense commentary (e.g., change "Fixed crash" to "Prevents crash"). Do not alter the grammar of existing present-tense or CLI-standard comments.
 6. **Spaces:** Do not delete spaces inside the code itself (e.g., do not turn `a = []` into `a =[]`).
@@ -277,6 +277,44 @@ Return ONLY a raw JSON object with an 'amendments' key:
     ],
     "remove": [
       "path/to/duplicate_to_delete.ext"
+    ]
+  }}
+}}"""
+
+# Project Visualizer Update Prompt
+VISUALIZER_UPDATE_PROMPT = """I am updating my Architecture Explorer. The project structure has evolved, and I need you to provide an AMENDMENT to the existing hierarchy.
+
+**Current Architecture Tree:**
+```json
+{current_tree}
+```
+
+**Files to REMOVE (Obsolete):**
+{obsolete_list}
+
+**New Files to ADD (Categorize These):**
+{new_files_content}
+
+**Instructions:**
+1. Analyze the 'New Files' and determine their semantic placement within the 'Current Architecture Tree'.
+2. Identify existing nodes that should be the 'parent' for these files, or suggest new semantic grouping nodes if appropriate.
+3. For 'Files to REMOVE', identify their paths in the amendment JSON to ensure they are purged from the hierarchy.
+4. Provide a rich, detailed description (2-4 sentences) for each new file added. Avoid filler; be specific to the code provided.
+5. Ensure the final architecture respects the policy: NO NODE HAS MORE THAN 6 CHILDREN. Create grouping nodes if necessary.
+
+**Output Format:**
+Return ONLY a raw JSON object with an 'amendments' key:
+{{
+  "amendments": {{
+    "add": [
+      {{
+        "path": "path/to/new_file.ext",
+        "parent": "Existing or New Node Name",
+        "description": "Detailed explanation of what this file does, its core logic, and why it is important."
+      }}
+    ],
+    "remove": [
+      "path/to/obsolete_file.ext"
     ]
   }}
 }}"""
