@@ -121,6 +121,8 @@
     "src/constants.py",
     "src/core/__init__.py",
     "src/core/change_applier.py",
+    "src/core/config_io.py",
+    "src/core/config_migration.py",
     "src/core/file_monitor_thread.py",
     "src/core/file_scanner.py",
     "src/core/file_tree_builder.py",
@@ -145,5 +147,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 176484
+  "total_tokens": 177055
 }

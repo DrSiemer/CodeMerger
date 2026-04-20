@@ -79,10 +79,10 @@
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776687967.030372,
-    "hash": "e94328a7c1423cbd9ed9c05313b6aa0cb9933f71",
-    "tokens": 5155,
-    "lines": 574,
+    "mtime": 1776692767.9766262,
+    "hash": "292032ef9277bc3b48ea7d47d9cf8a7724dc9254",
+    "tokens": 4174,
+    "lines": 468,
     "ignore_tokens": false
   },
   {
@@ -994,5 +994,19 @@
     "lines": 12,
     "mtime": 1776684998.8832333,
     "hash": "8b81e1105f1ba3a5579b34713e5e7d5788ec1bb3"
+  },
+  {
+    "path": "src/core/config_io.py",
+    "tokens": 1053,
+    "lines": 114,
+    "mtime": 1776692767.8531373,
+    "hash": "7a69f53509a7efecdfb3323fd0e7f355f90cdd54"
+  },
+  {
+    "path": "src/core/config_migration.py",
+    "tokens": 499,
+    "lines": 49,
+    "mtime": 1776692767.9181974,
+    "hash": "24354d70eebf2da849aade5cf01435603a74b00e"
   }
 ]

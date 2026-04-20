@@ -1,36 +1,18 @@
 import os
 import json
-import random
-import re
-import colorsys
 import hashlib
-import tempfile
-import time
-import sys
 import logging
 import threading
 import shutil
 from pathlib import Path
-from ..constants import COMPACT_MODE_BG_COLOR, CODEMERGER_TEMP_PREFIX
-from .utils import get_token_count_for_text, calculate_font_color
+from ..constants import COMPACT_MODE_BG_COLOR
+from .utils import get_token_count_for_text, calculate_font_color, get_file_hash
+from .config_io import (
+    generate_random_color, ensure_dir_hidden, write_hi_text,
+    atomic_write, read_project_display_info
+)
 
 log = logging.getLogger("CodeMerger")
-
-def _get_file_hash(full_path):
-    try:
-        with open(full_path, 'rb') as f:
-            return hashlib.sha1(f.read()).hexdigest()
-    except (IOError, OSError):
-        return None
-
-def _generate_random_color():
-    """Generates a random visually pleasing hex color string"""
-    hue = random.random()
-    saturation = random.uniform(0.5, 0.7)
-    value = random.uniform(0.6, 0.8)
-    r, g, b = colorsys.hsv_to_rgb(hue, saturation, value)
-    r_int, g_int, b_int = int(r * 255), int(g * 255), int(b * 255)
-    return f"#{r_int:02x}{g_int:02x}{b_int:02x}"
 
 class ProjectConfig:
     """
@@ -60,28 +42,7 @@ class ProjectConfig:
 
     @staticmethod
     def read_project_display_info(base_dir):
-        config_file = os.path.join(base_dir, '.codemerger', 'config.json')
-        legacy_path = os.path.join(base_dir, '.allcode')
-        project_name = os.path.basename(base_dir)
-        project_color = COMPACT_MODE_BG_COLOR
-
-        target_file = config_file if os.path.isfile(config_file) else legacy_path
-        if not os.path.isfile(target_file):
-            return project_name, project_color
-
-        try:
-            with open(target_file, 'r', encoding='utf-8-sig') as f:
-                content = f.read()
-                if not content: return project_name, project_color
-                data = json.loads(content)
-                project_name = data.get('project_name', project_name)
-                color_value = data.get('project_color')
-                if color_value and isinstance(color_value, str) and re.match(r'^#[0-9a-fA-F]{6}$', color_value):
-                        project_color = color_value
-        except (json.JSONDecodeError, IOError):
-            pass
-
-        return project_name, project_color
+        return read_project_display_info(base_dir)
 
     def get_active_profile(self):
         if self.active_profile_name not in self.profiles:
@@ -167,7 +128,8 @@ class ProjectConfig:
                 return False
 
             if not os.path.isfile(self.config_file) and os.path.isfile(self.legacy_allcode_path):
-                return self._migrate_legacy_project()
+                from .config_migration import migrate_legacy_project
+                return migrate_legacy_project(self)
 
             try:
                 self._last_mtimes[self.config_file] = os.path.getmtime(self.config_file)
@@ -193,7 +155,7 @@ class ProjectConfig:
                 raise RuntimeError("Config file contained an empty JSON object.")
 
             self.project_name = data.get('project_name', os.path.basename(self.base_dir))
-            self.project_color = data.get('project_color', _generate_random_color())
+            self.project_color = data.get('project_color', generate_random_color())
             self.project_font_color = data.get('project_font_color', calculate_font_color(self.project_color))
             self.active_profile_name = data.get('active_profile', 'Default')
 
@@ -352,7 +314,7 @@ class ProjectConfig:
                     try:
                         with open(full_path, 'r', encoding='utf-8', errors='ignore') as f: content = f.read()
                         mtime = os.path.getmtime(full_path)
-                        file_hash = _get_file_hash(full_path)
+                        file_hash = get_file_hash(full_path)
                         tokens = get_token_count_for_text(content)
                         lines = content.count('\n') + 1
                         cleaned_selection.append({'path': f_path, 'mtime': mtime, 'hash': file_hash, 'tokens': tokens, 'lines': lines})
@@ -371,74 +333,6 @@ class ProjectConfig:
 
         return files_were_cleaned, profile_was_updated
 
-    def _ensure_dir_hidden(self, dir_path):
-        if sys.platform == "win32" and os.path.exists(dir_path):
-            try:
-                import ctypes
-                FILE_ATTRIBUTE_HIDDEN = 0x02
-                attrs = ctypes.windll.kernel32.GetFileAttributesW(dir_path)
-                if attrs != -1 and not (attrs & FILE_ATTRIBUTE_HIDDEN):
-                    ctypes.windll.kernel32.SetFileAttributesW(dir_path, attrs | FILE_ATTRIBUTE_HIDDEN)
-            except Exception: pass
-
-    def _write_hi_text(self):
-        """Creates a helpful hi.txt file in the .codemerger root."""
-        content = """Hi there! This folder contains the configuration and session data for CodeMerger.
-
-CodeMerger helps you bundle your project code for language models while maintaining full custody of your context.
-
-Folder Structure:
-- config.json: Project metadata (name, color, and active profile pointer).
-- profiles/: Individual directories for your project profiles.
-- profiles/[Name]/selection.json: The list and order of files included in your context.
-- profiles/[Name]/instructions.json: Your custom Intro and Outro prompts.
-- profiles/[Name]/files.json: Profile-specific file states and token counts.
-
-These files are designed to be part of your repository.
-
-Official Repository: https://github.com/DrSiemer/CodeMerger/
-"""
-        try:
-            with open(self.hi_file, 'w', encoding='utf-8') as f:
-                f.write(content)
-        except Exception: pass
-
-    def _atomic_write(self, target_path, data):
-        fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(target_path), prefix=CODEMERGER_TEMP_PREFIX)
-        try:
-            with os.fdopen(fd, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
-
-            max_retries = 5
-            is_windows = sys.platform == "win32"
-            was_hidden = False
-
-            for attempt in range(max_retries):
-                try:
-                    if is_windows and os.path.exists(target_path):
-                        import ctypes
-                        FILE_ATTRIBUTE_HIDDEN = 0x02
-                        attrs = ctypes.windll.kernel32.GetFileAttributesW(target_path)
-                        if attrs != -1 and (attrs & FILE_ATTRIBUTE_HIDDEN):
-                            was_hidden = True
-                            ctypes.windll.kernel32.SetFileAttributesW(target_path, attrs & ~FILE_ATTRIBUTE_HIDDEN)
-
-                    os.replace(temp_path, target_path)
-                    temp_path = None
-
-                    if is_windows and was_hidden:
-                        attrs = ctypes.windll.kernel32.GetFileAttributesW(target_path)
-                        if attrs != -1:
-                            ctypes.windll.kernel32.SetFileAttributesW(target_path, attrs | FILE_ATTRIBUTE_HIDDEN)
-                    break
-                except PermissionError:
-                    if attempt == max_retries - 1: raise
-                    time.sleep(0.1)
-        finally:
-            if temp_path and os.path.exists(temp_path):
-                try: os.remove(temp_path)
-                except Exception: pass
-
     def save(self):
         """Saves configuration by breaking it into logical chunks per profile."""
         with self._lock:
@@ -446,9 +340,9 @@ Official Repository: https://github.com/DrSiemer/CodeMerger/
                 return
 
             os.makedirs(self.config_dir, exist_ok=True)
-            self._ensure_dir_hidden(self.config_dir)
+            ensure_dir_hidden(self.config_dir)
             os.makedirs(self.profiles_dir, exist_ok=True)
-            self._write_hi_text()
+            write_hi_text(self.hi_file)
 
             config_data = {
                 "project_name": self.project_name,
@@ -457,7 +351,7 @@ Official Repository: https://github.com/DrSiemer/CodeMerger/
                 "active_profile": self.active_profile_name
             }
 
-            self._atomic_write(self.config_file, config_data)
+            atomic_write(self.config_file, config_data)
             self._last_mtimes[self.config_file] = os.path.getmtime(self.config_file)
 
             active_profile_dirs = []
@@ -471,7 +365,7 @@ Official Repository: https://github.com/DrSiemer/CodeMerger/
 
                 def _save_chunk(filename, data):
                     filepath = os.path.join(profile_dir, filename)
-                    self._atomic_write(filepath, data)
+                    atomic_write(filepath, data)
                     self._last_mtimes[filepath] = os.path.getmtime(filepath)
 
                 _save_chunk('instructions.json', {
