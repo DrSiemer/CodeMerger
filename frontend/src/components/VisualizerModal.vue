@@ -525,6 +525,7 @@ const handleCopyNodeCode = async (node) => {
                   <FileCode class="w-5 h-5 mr-2 text-cm-blue" />
                   Implementation Files
                 </h4>
+
                 <div
                   v-for="file in processedLeafFiles"
                   :key="file.path"
@@ -591,7 +592,7 @@ const handleCopyNodeCode = async (node) => {
                 </div>
 
                 <div
-                  v-if="zoomPath.length > 0 && displayNode.id !== zoomPath[0].id"
+                  v-if="displayNode && currentZoomNode && displayNode.id === currentZoomNode.id && displayNode.id !== zoomPath[0]?.id"
                   class="space-y-4 pt-6 border-t border-gray-700/50"
                 >
                   <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">
@@ -599,11 +600,11 @@ const handleCopyNodeCode = async (node) => {
                   </div>
                   <button
                     @click="handleCopyNodeCode(displayNode)"
-                    class="hover:brightness-110 text-white w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all flex items-center justify-center space-x-3 active:scale-[0.98]"
+                    class="hover:brightness-110 text-white px-6 py-2 rounded font-black text-[10px] uppercase tracking-widest shadow-lg transition-all flex items-center justify-center space-x-2 active:scale-[0.98] w-fit"
                     :style="{ backgroundColor: displayNode.color }"
                     title="Copy all merged code for this node and its children"
                   >
-                    <ClipboardPaste class="w-6 h-6" />
+                    <ClipboardPaste class="w-3.5 h-3.5" />
                     <span>Copy Merged Code</span>
                   </button>
                 </div>

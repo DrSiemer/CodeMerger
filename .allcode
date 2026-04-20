@@ -950,13 +950,13 @@
         },
         {
           "path": "frontend/src/components/VisualizerModal.vue",
-          "tokens": 5739,
-          "lines": 665,
-          "mtime": 1776678836.5066407,
-          "hash": "a88366f304576e31090762f987ba8da1c6e85540"
+          "tokens": 5758,
+          "lines": 666,
+          "mtime": 1776679584.1997502,
+          "hash": "3fc51dcc2dd88f9bb482666ed1374cac3e4a77a4"
         }
       ],
-      "total_tokens": 170766,
+      "total_tokens": 170785,
       "intro_text": "Hi! I am working on an app that bundles code into a single string to be in full control of what is shared with a language model.\n\nQUESTION\n",
       "outro_text": "Stylistic Guidelines\n\nDO:\n- end your output with clear instructions on how to check if the code you proposed works\n- make sure empty lines are actually empty: avoid generating lines of spaces or tabs\n- always place closing triple backticks (```) on their own, new line\n\nDo NOT:\n- remove my original comments\n- shorten code with comments like `... Unchanged` or `Same as before`\n- use numbered steps (e.g., \"1. Do this first\") in comments\n- use <summary> tags\n- end comments with dots (unless you are using multiple sentences)\n- call something \"final\" or \"definitive\"; it usually isn't\n- use double newlines between code\n- add comments if the code itself makes it pretty clear what it does\n- remove logs when you think you have solved a problem; wait for confirmation that the issue is resolved\n- use !important to solve HTML styling issues\n\nUse the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them.",
       "expanded_dirs": [
