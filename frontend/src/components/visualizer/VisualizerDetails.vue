@@ -10,7 +10,8 @@ const props = defineProps({
   rankedMtimeMap: {
     type: Object,
     default: () => ({})
-  }
+  },
+  searchQuery: String
 })
 
 const emit = defineEmits(['copy-code', 'open-file'])
@@ -87,7 +88,8 @@ const { editorFontSize } = useAppState()
             v-for="file in displayNode.files"
             :key="file.path"
             @click="emit('open-file', file.path)"
-            class="flex items-center space-x-3 text-gray-400 group cursor-pointer hover:text-white transition-colors p-1.5 rounded hover:bg-white/5 border-l-4"
+            class="flex items-center space-x-3 text-gray-400 group cursor-pointer hover:text-white transition-all p-1.5 rounded hover:bg-white/5 border-l-4"
+            :class="{ 'opacity-30 grayscale': searchQuery && !(file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) }"
             :style="{ borderLeftColor: getFileFreshnessColor(file.path) }"
             :title="file.path"
           >

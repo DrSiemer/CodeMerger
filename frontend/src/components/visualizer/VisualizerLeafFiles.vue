@@ -62,7 +62,10 @@ const getFileFreshnessColor = (path) => {
       :key="file.path"
       @click="emit('select-file', file)"
       class="bg-[#2a2a2a] border border-gray-800 border-l-4 rounded-lg p-5 shadow-sm hover:border-gray-600 transition-all duration-300 cursor-pointer group/file"
-      :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'ring-1 ring-cm-blue/30 scale-[1.01]' : '']"
+      :class="[
+        searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'ring-1 ring-cm-blue/30 scale-[1.01]' : '',
+        searchQuery && !(file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'opacity-30 grayscale' : ''
+      ]"
       :style="{ borderLeftColor: getFileFreshnessColor(file.path) }"
     >
       <div class="flex items-center justify-between mb-3 min-w-0">

@@ -833,10 +833,10 @@
   },
   {
     "path": "frontend/src/components/VisualizerModal.vue",
-    "tokens": 1563,
-    "lines": 134,
-    "mtime": 1776775222.6162095,
-    "hash": "3477d1e7f49c6f396717d1208e6acf1499dcc0f5"
+    "tokens": 1571,
+    "lines": 135,
+    "mtime": 1776775464.6279333,
+    "hash": "b01bb39f3f041335725869e5e8c923c9885a0fbf"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",
@@ -854,17 +854,17 @@
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
-    "tokens": 890,
-    "lines": 87,
-    "mtime": 1776761434.4715586,
-    "hash": "981dc8874794e1d863eedd962ded4ba2580115e1"
+    "tokens": 930,
+    "lines": 90,
+    "mtime": 1776775464.781669,
+    "hash": "950471d607d63a650053007cd8c42e85e88b22e6"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
-    "tokens": 1281,
-    "lines": 105,
-    "mtime": 1776761563.870939,
-    "hash": "f5288a1bd9f53d08cbb2c29d8076fd3aa5342c82"
+    "tokens": 1325,
+    "lines": 107,
+    "mtime": 1776775464.7009196,
+    "hash": "f69032db0431f0eba5194b1d3992b08286c46d6d"
   },
   {
     "path": "assets/reference/concept_questions.json",

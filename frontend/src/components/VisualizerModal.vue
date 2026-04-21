@@ -103,6 +103,7 @@ onMounted(async () => {
               :display-node="displayNode"
               :can-copy="canCopy"
               :ranked-mtime-map="rankedMtimeMap"
+              :search-query="searchQuery"
               @open-file="openFile"
               @copy-code="handleCopyNodeCode"
             />
