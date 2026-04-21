@@ -132,18 +132,20 @@ const generateAndCopy = async (e) => {
     }
   }
 
-  const prompt = await getStarterRewritePrompt(
-    instruction.value.trim(),
-    targets,
-    references,
-    names,
-    data,
-    props.isMergedMode
-  )
-
-  await navigator.clipboard.writeText(prompt)
-
   const target = e.target
+
+  if (!e.ctrlKey) {
+    const prompt = await getStarterRewritePrompt(
+      instruction.value.trim(),
+      targets,
+      references,
+      names,
+      data,
+      props.isMergedMode
+    )
+
+    await navigator.clipboard.writeText(prompt)
+  }
   const originalText = target.innerText
   target.innerText = "Copied!"
   target.classList.add("bg-cm-green", "text-white")

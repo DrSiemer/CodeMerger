@@ -66,8 +66,10 @@ const browseParentFolder = async () => {
 
 const copyMasterPrompt = async (e) => {
   const btn = e.currentTarget
-  const prompt = await generateMasterPrompt(props.pData)
-  await copyToClipboard(prompt, btn)
+  if (!e.ctrlKey) {
+    const prompt = await generateMasterPrompt(props.pData)
+    await copyToClipboard(prompt, btn)
+  }
   showPasteArea.value = true
 }
 

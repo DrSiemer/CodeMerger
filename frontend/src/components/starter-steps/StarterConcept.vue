@@ -57,11 +57,13 @@ const isGoalFilled = computed(() => {
 
 const generateConcept = async (e) => {
   const btn = e.currentTarget
-  const prompt = await generateConceptPrompt(props.pData, props.conceptQuestionsMap)
-  await navigator.clipboard.writeText(prompt)
-  const originalText = btn.innerText
-  btn.innerText = "Copied!"
-  setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)
+  if (!e.ctrlKey) {
+    const prompt = await generateConceptPrompt(props.pData, props.conceptQuestionsMap)
+    await navigator.clipboard.writeText(prompt)
+    const originalText = btn.innerText
+    btn.innerText = "Copied!"
+    setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)
+  }
   showPasteArea.value = true
 }
 

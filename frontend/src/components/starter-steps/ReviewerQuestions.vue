@@ -32,14 +32,19 @@ const next = () => {
   if (currentIndex.value < props.questions.length - 1) currentIndex.value++
 }
 
-const handleCopy = async () => {
+const handleCopy = async (e) => {
   const questionToCopy = isCustom.value ? customText.value.trim() : currentQuestion.value
 
   if (!questionToCopy) return
 
-  const prompt = await props.getPrompt(questionToCopy)
-  if (prompt) {
-    await navigator.clipboard.writeText(prompt)
+  if (!e.ctrlKey) {
+    const prompt = await props.getPrompt(questionToCopy)
+    if (prompt) {
+      await navigator.clipboard.writeText(prompt)
+      isCopied.value = true
+      setTimeout(() => { isCopied.value = false }, 2000)
+    }
+  } else {
     isCopied.value = true
     setTimeout(() => { isCopied.value = false }, 2000)
   }
@@ -117,7 +122,7 @@ const isCopyDisabled = computed(() => {
 
     <div class="flex justify-start">
       <button
-        @click="handleCopy"
+        @click="handleCopy($event)"
         :disabled="isCopyDisabled"
         v-info="'starter_questions_copy'"
         class="flex items-center space-x-2 px-4 py-2 rounded text-xs font-bold transition-all active:scale-95 disabled:opacity-50"

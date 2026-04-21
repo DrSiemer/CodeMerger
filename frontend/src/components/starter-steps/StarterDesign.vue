@@ -62,11 +62,13 @@ const getFriendlyNames = () => {
 
 const generateDesign = async (e) => {
   const btn = e.currentTarget
-  const prompt = await generateDesignPrompt(props.pData, props.designQuestionsMap)
-  await navigator.clipboard.writeText(prompt)
-  const originalText = btn.innerText
-  btn.innerText = "Copied!"
-  setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)
+  if (!e.ctrlKey) {
+    const prompt = await generateDesignPrompt(props.pData, props.designQuestionsMap)
+    await navigator.clipboard.writeText(prompt)
+    const originalText = btn.innerText
+    btn.innerText = "Copied!"
+    setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)
+  }
   showPasteArea.value = true
 }
 
@@ -277,7 +279,7 @@ const handleReset = () => {
 
         <div class="flex justify-between items-center bg-gray-800 p-4 rounded border border-gray-700 mt-4">
           <div class="text-gray-300"><span class="font-bold text-white">1.</span> Copy prompt for LLM</div>
-          <button @click="generateDesign" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy Design Prompt</button>
+          <button @click="generateDesign" v-info="'starter_design_gen'" class="bg-cm-blue hover:bg-blue-500 text-white px-4 py-2 rounded shadow transition-colors font-bold">Copy Design Prompt</button>
         </div>
 
         <div v-if="showPasteArea" class="bg-gray-800 p-4 rounded border border-gray-700 mt-4">

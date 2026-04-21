@@ -121,8 +121,10 @@ const saveDefaultExperience = async () => {
 
 const goToPasting = async (e) => {
   const btn = e.currentTarget
-  const prompt = await generateStackPrompt(props.pData)
-  await copyToClipboard(prompt, btn)
+  if (!e.ctrlKey) {
+    const prompt = await generateStackPrompt(props.pData)
+    await copyToClipboard(prompt, btn)
+  }
   viewState.value = 'pasting'
 }
 
