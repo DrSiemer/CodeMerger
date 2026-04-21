@@ -93,9 +93,13 @@ class ProjectManager:
 
             try:
                 files_were_cleaned = self.project_config.load()
-            except RuntimeError as e:
-                self.project_config = None
-                return None, str(e)
+            except Exception as e:
+                # Defensive check: if load fails (e.g. initial corrupted file),
+                # but we already had a config in memory, keep the old one.
+                if not self.project_config._load_successful:
+                    self.project_config = None
+                    return None, f"Failed to load project: {e}"
+                files_were_cleaned = False
 
             project_display_name = self.project_config.project_name
 

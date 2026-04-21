@@ -129,16 +129,13 @@ class ProjectConfig:
         self.get_active_profile()['unknown_files'] = sorted(list(set(value)))
 
     def load(self):
-        """Loads and reconciles project settings using multi-segment aggregation logic"""
+        """
+        Loads and reconciles project settings using multi-segment aggregation logic.
+        Uses atomic state updates to prevent data loss on transient file access errors.
+        """
         with self._lock:
-            # Safety Gate: If we have unsaved changes in memory, do NOT allow a reload
-            # from disk to overwrite them (prevents race conditions during batch applies)
             if self.is_dirty:
                 return False
-
-            data = {}
-            config_was_updated = False
-            files_were_cleaned_globally = False
 
             if not os.path.isfile(self.config_file) and not os.path.isfile(self.legacy_allcode_path):
                 self._load_successful = True
@@ -148,13 +145,21 @@ class ProjectConfig:
                 from .config_migration import migrate_legacy_project
                 return migrate_legacy_project(self)
 
-            # Retry loop for transient Windows file locks
-            max_retries = 3
+            # Local buffers to ensure atomicity
+            loaded_data = {}
+            loaded_profiles = {}
+            config_was_updated = False
+            files_were_cleaned_globally = False
+
+            # Retry loop for transient Windows file locks (crucial when CM edits itself)
+            max_retries = 5
             last_err = None
             for attempt in range(max_retries):
                 try:
+                    if not os.path.isfile(self.config_file):
+                        return False
                     if os.path.getsize(self.config_file) == 0:
-                        time.sleep(0.05)
+                        time.sleep(0.1)
                         continue
 
                     self._last_mtimes[self.config_file] = os.path.getmtime(self.config_file)
@@ -162,34 +167,27 @@ class ProjectConfig:
                         content = f.read()
                         if content:
                             try:
-                                data = json.loads(content)
+                                loaded_data = json.loads(content)
                                 last_err = None
                                 break
                             except json.JSONDecodeError:
                                 json_start_index = content.find('{')
                                 if json_start_index != -1:
-                                    data = json.loads(content[json_start_index:])
+                                    loaded_data = json.loads(content[json_start_index:])
                                     config_was_updated = True
                                     last_err = None
                                     break
                 except (IOError, OSError) as e:
                     last_err = e
-                    time.sleep(0.05)
+                    time.sleep(0.1)
 
-            if last_err or not data:
-                raise RuntimeError(f"Failed to read project config (file may be locked): {last_err or 'Empty file'}")
+            if last_err or not loaded_data:
+                # Log but don't raise; allows ProjectManager to keep current memory state
+                log.warning(f"ProjectConfig: Transient load failure (file locked or empty): {last_err or 'Empty file'}")
+                return False
 
-            if not data:
-                raise RuntimeError("Config file contained an empty JSON object.")
+            all_found_known = {p.replace('\\', '/') for p in loaded_data.get('known_files', [])}
 
-            self.project_name = data.get('project_name', os.path.basename(self.base_dir))
-            self.project_color = data.get('project_color', generate_random_color())
-            self.project_font_color = data.get('project_font_color', calculate_font_color(self.project_color))
-            self.active_profile_name = self._sanitize_profile_name(data.get('active_profile', 'default'))
-
-            all_found_known = {p.replace('\\', '/') for p in data.get('known_files', [])}
-
-            self.profiles = {}
             if os.path.isdir(self.profiles_dir):
                 for item_name in os.listdir(self.profiles_dir):
                     full_path = os.path.join(self.profiles_dir, item_name)
@@ -204,7 +202,7 @@ class ProjectConfig:
                                 if 'known_files' in p_data:
                                     for p in p_data.pop('known_files', []):
                                         all_found_known.add(p.replace('\\', '/'))
-                                self.profiles[profile_id] = p_data
+                                loaded_profiles[profile_id] = p_data
                             config_was_updated = True
                         except Exception: pass
 
@@ -226,9 +224,6 @@ class ProjectConfig:
                                 profile_data[key] = default
                                 return True
 
-                        # Renamed: instructions.json (Legacy: settings.json)
-                        # We abort the load of this profile if critical segments fail to load
-                        # to prevent initializing a blank state and wiping user data on next save.
                         load_segment('instructions.json', 'inst', None)
                         if not profile_data.get('inst'):
                             load_segment('settings.json', 'inst', None)
@@ -237,11 +232,10 @@ class ProjectConfig:
                             inst = profile_data.pop('inst')
                             profile_data['intro_text'] = inst.get('intro_text', '')
                             profile_data['outro_text'] = inst.get('outro_text', '')
-                            if 'total_tokens' in inst: # Migration path from settings.json
+                            if 'total_tokens' in inst:
                                 profile_data['total_tokens'] = inst['total_tokens']
 
                         load_segment('selection.json', 'selected_files', [])
-
                         load_segment('files.json', 'files_data', None)
                         if profile_data.get('files_data'):
                             fd = profile_data.pop('files_data')
@@ -258,18 +252,23 @@ class ProjectConfig:
 
                         load_segment('visualizer.json', 'visualizer_map', None)
 
-                        if profile_id not in self.profiles:
-                            self.profiles[profile_id] = profile_data
+                        if profile_id not in loaded_profiles:
+                            loaded_profiles[profile_id] = profile_data
 
-            if not self.profiles:
-                # Safety Gate: If config exists but profiles dir is empty/missing, something is wrong.
-                # Abort to prevent save() from initializing a blank state and deleting data.
-                if os.path.isfile(self.config_file) and os.path.getsize(self.config_file) > 0:
-                    raise RuntimeError("Project configuration found but profiles are missing or inaccessible.")
+            if not loaded_profiles:
+                if os.path.isfile(self.config_file) and os.path.getsize(self.config_file) > 10:
+                    log.error("ProjectConfig: Configuration exists but profiles are missing or inaccessible.")
+                    return False
 
-                self.profiles['default'] = self._create_empty_profile(name='Default')
-                self.active_profile_name = 'default'
+                loaded_profiles['default'] = self._create_empty_profile(name='Default')
                 config_was_updated = True
+
+            # Atomic Swap: Apply local buffers to self only after successful sequence
+            self.project_name = loaded_data.get('project_name', os.path.basename(self.base_dir))
+            self.project_color = loaded_data.get('project_color', generate_random_color())
+            self.project_font_color = loaded_data.get('project_font_color', calculate_font_color(self.project_color))
+            self.active_profile_name = self._sanitize_profile_name(loaded_data.get('active_profile', 'default'))
+            self.profiles = loaded_profiles
 
             for profile_name, profile_data in self.profiles.items():
                 profile_data['unknown_files'] = sorted(list({p.replace('\\', '/') for p in profile_data.get('unknown_files', [])}))
@@ -335,7 +334,11 @@ class ProjectConfig:
         return files_were_cleaned, profile_was_updated
 
     def save(self):
-        """Saves configuration by breaking it into logical chunks per profile."""
+        """
+        Saves configuration by breaking it into logical chunks per profile.
+        Orphaned profile cleanup is intentionally excluded here to prevent data loss
+        during race conditions; cleanup is handled explicitly in delete_profile.
+        """
         with self._lock:
             if not self._load_successful and (os.path.isfile(self.config_file) or os.path.isfile(self.legacy_allcode_path)):
                 return
@@ -357,14 +360,10 @@ class ProjectConfig:
             atomic_write(self.config_file, config_data)
             self._last_mtimes[self.config_file] = os.path.getmtime(self.config_file)
 
-            active_profile_dirs = []
             for profile_name, profile_data in self.profiles.items():
-                # Profile keys are sanitized on load/create, but we reinforce here for the folder path
                 safe_name = self._sanitize_profile_name(profile_name)
-
                 profile_dir = os.path.join(self.profiles_dir, safe_name)
                 os.makedirs(profile_dir, exist_ok=True)
-                active_profile_dirs.append(profile_dir)
 
                 def _save_chunk(filename, data):
                     filepath = os.path.join(profile_dir, filename)
@@ -386,19 +385,6 @@ class ProjectConfig:
                     'total_tokens': profile_data.get('total_tokens', 0)
                 })
                 _save_chunk('visualizer.json', profile_data.get('visualizer_map', None))
-
-            # Cleanup orphaned profile items or legacy JSON files
-            # Logic: only delete if load was fully successful and we found at least one valid profile
-            if self._load_successful and self.profiles:
-                for item_name in os.listdir(self.profiles_dir):
-                    full_path = os.path.join(self.profiles_dir, item_name)
-                    if os.path.isdir(full_path):
-                        if full_path not in active_profile_dirs:
-                            try: shutil.rmtree(full_path)
-                            except OSError: pass
-                    elif os.path.isfile(full_path) and full_path.endswith('.json'):
-                        try: os.remove(full_path)
-                        except OSError: pass
 
             self._last_content_hash = self._calculate_hash()
 
@@ -446,12 +432,25 @@ class ProjectConfig:
             return safe_name
 
     def delete_profile(self, profile_name_to_delete):
+        """Explicitly removes a profile from memory and physically deletes its directory."""
         with self._lock:
             if profile_name_to_delete == "default" or profile_name_to_delete not in self.profiles:
                 return False
+
+            safe_name = self._sanitize_profile_name(profile_name_to_delete)
+            profile_dir = os.path.join(self.profiles_dir, safe_name)
+
             del self.profiles[profile_name_to_delete]
+
             if self.active_profile_name == profile_name_to_delete:
                 self.active_profile_name = "default"
+
+            if os.path.isdir(profile_dir):
+                try:
+                    shutil.rmtree(profile_dir)
+                except OSError as e:
+                    log.error(f"ProjectConfig: Failed to delete profile directory: {e}")
+
             return True
 
     def update_known_files(self, paths, originating_profile_name=None):
