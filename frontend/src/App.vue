@@ -18,7 +18,8 @@ const {
   newlyAddedFiletypes,
   resetEditorFontSize,
   isProjectLoading,
-  cancelLoadProject
+  cancelLoadProject,
+  openProjectFolder
 } = useAppState()
 const route = useRoute()
 const router = useRouter()
@@ -69,12 +70,11 @@ onMounted(() => {
     const isCtrl = e.ctrlKey || e.metaKey
     const isShift = e.shiftKey
     const key = e.key.toLowerCase()
+    const activeEl = document.activeElement
+    const isInput = activeEl && (activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type === 'text') || activeEl.isContentEditable)
 
     if (isCtrl && key === 'v') {
       e.preventDefault()
-
-      const activeEl = document.activeElement
-      const isInput = activeEl && (activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type === 'text'))
 
       if (isInput) {
         const text = await getClipboardText()
@@ -111,6 +111,22 @@ onMounted(() => {
     if (isCtrl && key === '0') {
       e.preventDefault()
       resetEditorFontSize()
+    }
+
+    // Global Action Shortcuts (c: Console, f: Folder, p: Path)
+    // Protected by isInput check to ensure they only fire when the window is focused but no input is active
+    if (!isInput && !isCtrl && !e.metaKey && !e.altKey && !isShift && activeProject.path) {
+      if (key === 'c') {
+        e.preventDefault()
+        await openProjectFolder({ ctrlKey: false, altKey: true })
+      } else if (key === 'f') {
+        e.preventDefault()
+        await openProjectFolder({ ctrlKey: false, altKey: false })
+      } else if (key === 'p') {
+        e.preventDefault()
+        await openProjectFolder({ ctrlKey: true, altKey: false })
+        window.dispatchEvent(new CustomEvent('cm-shortcut-path-copy'))
+      }
     }
   })
 })

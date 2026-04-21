@@ -162,6 +162,7 @@ onMounted(async () => {
   window.addEventListener('blur', onBlur)
   window.addEventListener('cm-compact-paste', (e) => handlePaste({ ctrlKey: e.detail.isAuto }))
   window.addEventListener('cm-compact-copy', (e) => handleCopy({ ctrlKey: e.detail.codeOnly }))
+  window.addEventListener('cm-shortcut-path-copy', () => triggerFeedback('success', 'Path copied', 'copy-path'))
   window.addEventListener('cm-project-reloaded', updatePendingStatus)
   statusCheckInterval = setInterval(updatePendingStatus, 2000)
 })

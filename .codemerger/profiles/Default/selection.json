@@ -514,11 +514,11 @@
   },
   {
     "path": "frontend/src/App.vue",
-    "tokens": 1361,
+    "tokens": 1609,
     "ignoreTokens": false,
-    "lines": 179,
-    "mtime": 1776189343.034713,
-    "hash": "0a060558a5d08a2bb620570c81264e1abe55258f"
+    "lines": 198,
+    "mtime": 1776785146.9075327,
+    "hash": "661c2396b908340632d26153f277621621672f06"
   },
   {
     "path": "frontend/src/views/MainView.vue",
@@ -530,11 +530,11 @@
   },
   {
     "path": "frontend/src/views/CompactView.vue",
-    "tokens": 3075,
+    "tokens": 3100,
     "ignoreTokens": false,
-    "lines": 243,
-    "mtime": 1776784725.3318486,
-    "hash": "d1aaaf02879375962b5b8af3744e1b464cc8ee64"
+    "lines": 244,
+    "mtime": 1776785146.9075327,
+    "hash": "701be75c7946aea0acfe5a6637859aea25c21a4e"
   },
   {
     "path": "frontend/src/components/InfoPanel.vue",
