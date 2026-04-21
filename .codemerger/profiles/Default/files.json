@@ -137,7 +137,11 @@
     "src/core/paths.py",
     "src/core/project_config.py",
     "src/core/project_manager.py",
-    "src/core/prompts.py",
+    "src/core/prompts/__init__.py",
+    "src/core/prompts/main.py",
+    "src/core/prompts/starter.py",
+    "src/core/prompts/surgical.py",
+    "src/core/prompts/visualizer.py",
     "src/core/registry.py",
     "src/core/replacer.py",
     "src/core/secret_scanner.py",
@@ -152,5 +156,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 192407
+  "total_tokens": 191930
 }
