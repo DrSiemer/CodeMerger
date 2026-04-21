@@ -33,13 +33,21 @@ class BaseApi:
         """Formats ProjectConfig into a dictionary suitable for JSON serialization"""
         if not project_config:
             return None
+
+        # Return profile ID and Name to preserve original capitalization in UI
+        profile_ids = project_config.get_profile_names()
+        profiles_meta = [
+            {"id": pid, "name": project_config.profiles[pid].get("name", pid)}
+            for pid in profile_ids
+        ]
+
         return {
             "path": project_config.base_dir,
             "project_name": project_config.project_name,
             "project_color": project_config.project_color,
             "project_font_color": project_config.project_font_color,
             "active_profile": project_config.active_profile_name,
-            "profiles": project_config.get_profile_names(),
+            "profiles": profiles_meta,
             "new_file_count": len(project_config.unknown_files),
             "total_tokens": project_config.total_tokens,
             "selected_files": project_config.selected_files,

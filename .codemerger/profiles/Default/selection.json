@@ -79,10 +79,10 @@
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776714752.183944,
-    "hash": "06222305f44dea91e7f15d667d0f2b05b3369916",
-    "tokens": 3960,
-    "lines": 443,
+    "mtime": 1776762654.6533928,
+    "hash": "21a1b2d91435c77b9cd782bf44999a0803b4efbe",
+    "tokens": 4035,
+    "lines": 449,
     "ignore_tokens": false
   },
   {
@@ -221,11 +221,11 @@
   },
   {
     "path": "src/api_parts/base_api.py",
-    "tokens": 771,
+    "tokens": 829,
     "ignoreTokens": false,
-    "lines": 92,
-    "mtime": 1776679859.3284774,
-    "hash": "3ebffa1482b7ca9e35f1142dc6fd6dd73f483fe0"
+    "lines": 100,
+    "mtime": 1776762654.7114053,
+    "hash": "5b76776f287af7431ca89020c91cf6f1e488ae91"
   },
   {
     "path": "src/api_parts/window_api.py",
@@ -371,11 +371,11 @@
   },
   {
     "path": "frontend/src/composables/globalState.js",
-    "tokens": 394,
+    "tokens": 403,
     "ignoreTokens": false,
     "lines": 62,
-    "mtime": 1776697805.4496722,
-    "hash": "2ca83ed6c10b678039871773d795e8a65a443586"
+    "mtime": 1776762654.7706957,
+    "hash": "d41d67aeec49753dc424b0a246a268ae3f949d02"
   },
   {
     "path": "frontend/src/composables/infoMode.js",
@@ -461,11 +461,11 @@
   },
   {
     "path": "frontend/src/composables/useProject.js",
-    "tokens": 1854,
+    "tokens": 1872,
     "ignoreTokens": false,
     "lines": 249,
-    "mtime": 1776693915.2609344,
-    "hash": "af01acc99180ffd5868885f92c6e0fe4b967d9b8"
+    "mtime": 1776762654.8356977,
+    "hash": "e371b9971ef713861b1dd19249ee63026e8a53e5"
   },
   {
     "path": "frontend/src/composables/useReview.js",
@@ -555,11 +555,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardNav.vue",
-    "tokens": 1261,
+    "tokens": 1305,
     "ignoreTokens": false,
-    "lines": 115,
-    "mtime": 1776630960.9698813,
-    "hash": "d80593e35a71bd59e4a52a22c385e76ee3859c72"
+    "lines": 116,
+    "mtime": 1776762833.5687902,
+    "hash": "0ff2bba8d40844fe9337ca2f6f6086d2aa3d4018"
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
@@ -715,8 +715,11 @@
   },
   {
     "path": "frontend/src/components/NewProfileModal.vue",
-    "tokens": 972,
-    "ignoreTokens": false
+    "tokens": 944,
+    "ignoreTokens": false,
+    "lines": 105,
+    "mtime": 1776762655.203302,
+    "hash": "4bc48d7fe85ae7d6c164299f1b04eb53d0911b80"
   },
   {
     "path": "frontend/src/components/NewFiletypesModal.vue",

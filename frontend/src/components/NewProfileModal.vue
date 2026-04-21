@@ -26,7 +26,7 @@ const handleCreate = async () => {
   const name = profileName.value.trim()
   if (!name) return
 
-  if (activeProject.profiles.some(p => p.toLowerCase() === name.toLowerCase())) {
+  if (activeProject.profiles.some(p => p.name.toLowerCase() === name.toLowerCase())) {
     alert(`A profile named '${name}' already exists.`)
     return
   }

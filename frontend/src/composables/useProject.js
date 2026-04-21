@@ -8,8 +8,8 @@ export function useProject() {
       activeProject.name = projData.project_name
       activeProject.color = projData.project_color
       activeProject.fontColor = projData.project_font_color
-      activeProject.activeProfile = projData.active_profile || 'Default'
-      activeProject.profiles = projData.profiles || ['Default']
+      activeProject.activeProfile = projData.active_profile || 'default'
+      activeProject.profiles = projData.profiles || [{ id: 'default', name: 'Default' }]
       activeProject.totalTokens = projData.total_tokens
       activeProject.selectedFiles = projData.selected_files || []
       activeProject.expandedDirs = projData.expanded_dirs || []
@@ -27,8 +27,8 @@ export function useProject() {
       activeProject.name = null
       activeProject.color = null
       activeProject.fontColor = null
-      activeProject.activeProfile = 'Default'
-      activeProject.profiles = ['Default']
+      activeProject.activeProfile = 'default'
+      activeProject.profiles = [{ id: 'default', name: 'Default' }]
       activeProject.totalTokens = 0
       activeProject.selectedFiles = []
       activeProject.expandedDirs = []

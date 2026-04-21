@@ -7,7 +7,7 @@ export const activeProject = reactive({
   color: null,
   fontColor: null,
   activeProfile: 'default',
-  profiles: ['default'],
+  profiles: [{ id: 'default', name: 'Default' }],
   totalTokens: 0,
   selectedFiles: [],
   expandedDirs: [],

@@ -57,8 +57,9 @@ class ProjectConfig:
             self.profiles[self.active_profile_name] = self._create_empty_profile()
         return self.profiles[self.active_profile_name]
 
-    def _create_empty_profile(self):
+    def _create_empty_profile(self, name="Default"):
         return {
+            "name": name,
             "selected_files": [],
             "total_tokens": 0,
             "intro_text": "",
@@ -175,20 +176,22 @@ class ProjectConfig:
                     full_path = os.path.join(self.profiles_dir, item_name)
 
                     if os.path.isfile(full_path) and item_name.endswith('.json'):
-                        profile_name = self._sanitize_profile_name(item_name[:-5])
+                        profile_id = self._sanitize_profile_name(item_name[:-5])
                         try:
                             with open(full_path, 'r', encoding='utf-8-sig') as f:
                                 p_data = json.load(f)
+                                if 'name' not in p_data:
+                                    p_data['name'] = item_name[:-5]
                                 if 'known_files' in p_data:
                                     for p in p_data.pop('known_files', []):
                                         all_found_known.add(p.replace('\\', '/'))
-                                self.profiles[profile_name] = p_data
+                                self.profiles[profile_id] = p_data
                             config_was_updated = True
                         except Exception: pass
 
                     elif os.path.isdir(full_path):
-                        profile_name = self._sanitize_profile_name(item_name)
-                        profile_data = self._create_empty_profile()
+                        profile_id = self._sanitize_profile_name(item_name)
+                        profile_data = self._create_empty_profile(name=item_name)
 
                         def load_segment(filename, key, default):
                             filepath = os.path.join(full_path, filename)
@@ -225,12 +228,13 @@ class ProjectConfig:
                         load_segment('ui.json', 'ui_data', None)
                         if profile_data.get('ui_data'):
                             ui_data = profile_data.pop('ui_data')
+                            profile_data['name'] = ui_data.get('name', item_name)
                             profile_data['expanded_dirs'] = ui_data.get('expanded_dirs', [])
 
                         load_segment('visualizer.json', 'visualizer_map', None)
 
-                        if profile_name not in self.profiles:
-                            self.profiles[profile_name] = profile_data
+                        if profile_id not in self.profiles:
+                            self.profiles[profile_id] = profile_data
 
             if not self.profiles:
                 # Safety Gate: If config exists but profiles dir is empty/missing, something is wrong.
@@ -238,7 +242,7 @@ class ProjectConfig:
                 if os.path.isfile(self.config_file) and os.path.getsize(self.config_file) > 0:
                     raise RuntimeError("Project configuration found but profiles are missing or inaccessible.")
 
-                self.profiles['default'] = self._create_empty_profile()
+                self.profiles['default'] = self._create_empty_profile(name='Default')
                 self.active_profile_name = 'default'
                 config_was_updated = True
 
@@ -345,6 +349,7 @@ class ProjectConfig:
                 })
                 _save_chunk('selection.json', profile_data.get('selected_files', []))
                 _save_chunk('ui.json', {
+                    'name': profile_data.get('name', profile_name),
                     'expanded_dirs': profile_data.get('expanded_dirs', [])
                 })
                 _save_chunk('files.json', {
@@ -399,6 +404,7 @@ class ProjectConfig:
             if copy_files or copy_instructions:
                 source = self.get_active_profile()
                 new_profile = {
+                    "name": name,
                     "selected_files": [dict(f) for f in source.get('selected_files', [])] if copy_files else [],
                     "total_tokens": source.get('total_tokens', 0) if copy_files else 0,
                     "intro_text": source.get('intro_text', '') if copy_instructions else '',
@@ -406,7 +412,7 @@ class ProjectConfig:
                     "expanded_dirs": source.get('expanded_dirs', [])[:] if copy_files else [],
                     "unknown_files": source.get('unknown_files', [])[:] if copy_files else []
                 }
-            else: new_profile = self._create_empty_profile()
+            else: new_profile = self._create_empty_profile(name=name)
             self.profiles[safe_name] = new_profile
             return safe_name
 
