@@ -13,10 +13,11 @@ const props = defineProps({
   rankedMtimeMap: {
     type: Object,
     default: () => ({})
-  }
+  },
+  targetScrollPath: String
 })
 
-const emit = defineEmits(['open-file', 'select-file'])
+const emit = defineEmits(['open-file', 'open-code'])
 
 const processedLeafFiles = computed(() => {
   if (!props.node || !props.node.files) return [];
@@ -48,6 +49,32 @@ const getFileFreshnessColor = (path) => {
   const ratio = props.rankedMtimeMap[path] !== undefined ? props.rankedMtimeMap[path] : 1.0;
   return getFreshnessColor(ratio);
 };
+
+const getFileId = (path) => `viz-file-${path.replace(/[\\/.]/g, '-')}`;
+
+import { watch, ref } from 'vue'
+
+const activeHighlightPath = ref(null);
+let highlightTimer = null;
+
+// Handle scroll requests from the Sidebar
+watch(() => props.targetScrollPath, (newPath) => {
+  if (!newPath) return;
+
+  const id = getFileId(newPath);
+  const el = document.getElementById(id);
+
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    // Trigger temporary visual feedback
+    activeHighlightPath.value = newPath;
+    if (highlightTimer) clearTimeout(highlightTimer);
+    highlightTimer = setTimeout(() => {
+      activeHighlightPath.value = null;
+    }, 2000);
+  }
+});
 </script>
 
 <template>
@@ -60,11 +87,13 @@ const getFileFreshnessColor = (path) => {
     <div
       v-for="file in processedLeafFiles"
       :key="file.path"
-      @click="emit('select-file', file)"
+      :id="getFileId(file.path)"
+      @click="emit('open-code', file)"
       class="bg-[#2a2a2a] border border-gray-800 border-l-4 rounded-lg p-5 shadow-sm hover:border-gray-600 transition-all duration-300 cursor-pointer group/file"
       :class="[
         searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'ring-1 ring-cm-blue/30 scale-[1.01]' : '',
-        searchQuery && !(file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'opacity-30 grayscale' : ''
+        searchQuery && !(file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'opacity-30 grayscale' : '',
+        activeHighlightPath === file.path ? 'ring-1 ring-cm-blue bg-[#333333] scale-[1.02] shadow-xl' : ''
       ]"
       :style="{ borderLeftColor: getFileFreshnessColor(file.path) }"
     >

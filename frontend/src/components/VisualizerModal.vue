@@ -15,16 +15,15 @@ const emit = defineEmits(["close"]);
 const { activeProject, openFile, resizeWindow } = useAppState();
 
 const {
-  viewState, navPath, hoveredNode, parseError, currentNavNode,
+  viewState, navPath, hoveredNode, targetScrollPath, parseError, currentNavNode, displayNode,
   rankedMtimeMap, canCopy, mapSyncState, syncMessage,
   highlightedLines, isCodeLoading,
   processRawResponse, handleCopyPrompt, handleCopyAmendPrompt,
   copyCorrectionPrompt, handleCopyNodeCode, nukeVisualizerMap,
-  diveIntoFile
+  diveIntoFile, scrollToAndHighlight
 } = useVisualizer();
 
 const searchQuery = ref("");
-const displayNode = computed(() => hoveredNode.value || currentNavNode.value);
 
 useEscapeKey(() => emit("close"));
 
@@ -35,7 +34,7 @@ onMounted(async () => {
 
 <template>
   <div id="visualizer-modal" class="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-6">
-    <div class="bg-cm-dark-bg w-full max-w-6xl h-full max-h-[90vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
+    <div class="bg-cm-dark-bg w-full h-full max-h-[92vh] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden">
       <!-- Header -->
       <div class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar shrink-0">
         <div class="flex items-center space-x-3 text-white shrink-0">
@@ -74,7 +73,6 @@ onMounted(async () => {
         />
 
         <VisualizerExplorer
-          v-else
           :nav-path="navPath"
           :search-query="searchQuery"
           :ranked-mtime-map="rankedMtimeMap"
@@ -94,8 +92,9 @@ onMounted(async () => {
             :node="currentNavNode"
             :search-query="searchQuery"
             :ranked-mtime-map="rankedMtimeMap"
+            :target-scroll-path="targetScrollPath"
             @open-file="openFile"
-            @select-file="diveIntoFile"
+            @open-code="diveIntoFile"
           />
 
           <template #details="{ rankedMtimeMap }">
@@ -105,6 +104,7 @@ onMounted(async () => {
               :ranked-mtime-map="rankedMtimeMap"
               :search-query="searchQuery"
               @open-file="openFile"
+              @scroll-to-file="(f) => scrollToAndHighlight(f.path)"
               @copy-code="handleCopyNodeCode"
             />
           </template>

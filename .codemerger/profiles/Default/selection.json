@@ -826,10 +826,10 @@
   },
   {
     "path": "frontend/src/components/VisualizerModal.vue",
-    "tokens": 1571,
+    "tokens": 1581,
     "lines": 135,
-    "mtime": 1776775464.6279333,
-    "hash": "b01bb39f3f041335725869e5e8c923c9885a0fbf"
+    "mtime": 1776799348.4619799,
+    "hash": "757729ef54f20400e83c8da2bdbffa3401e678a9"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",
@@ -847,17 +847,17 @@
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
-    "tokens": 930,
-    "lines": 90,
-    "mtime": 1776775464.781669,
-    "hash": "950471d607d63a650053007cd8c42e85e88b22e6"
+    "tokens": 1146,
+    "lines": 119,
+    "mtime": 1776799348.5645838,
+    "hash": "850d98ad8dda9fcf55a6bf953b675fd5faac592c"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
-    "tokens": 1325,
-    "lines": 107,
-    "mtime": 1776775464.7009196,
-    "hash": "f69032db0431f0eba5194b1d3992b08286c46d6d"
+    "tokens": 1010,
+    "lines": 86,
+    "mtime": 1776799669.95106,
+    "hash": "702553a019b98ca14c4c088474b035616c120fd5"
   },
   {
     "path": "assets/reference/concept_questions.json",
@@ -1037,10 +1037,10 @@
   },
   {
     "path": "frontend/src/composables/useVisualizer.js",
-    "tokens": 2828,
-    "lines": 293,
-    "mtime": 1776798484.7468407,
-    "hash": "90adb06abd6b9a82421fe207246ffd25d6889270"
+    "tokens": 2960,
+    "lines": 313,
+    "mtime": 1776799348.3407123,
+    "hash": "0530ff21fe9c935cf8ab6703ab3c4c5c80acd599"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerCodeViewer.vue",

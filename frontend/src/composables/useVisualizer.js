@@ -25,6 +25,7 @@ export function useVisualizer() {
   const viewState = ref("init"); // 'init' | 'visualizing' | 'updating'
   const navPath = ref([]);
   const hoveredNode = ref(null);
+  const targetScrollPath = ref(null);
   const highlightedLines = ref([]);
   const isCodeLoading = ref(false);
   const parseError = ref("");
@@ -34,6 +35,8 @@ export function useVisualizer() {
   const duplicateEntriesList = ref([]);
 
   const currentNavNode = computed(() => navPath.value[navPath.value.length - 1] || null);
+
+  const displayNode = computed(() => hoveredNode.value || currentNavNode.value);
 
   const rankedMtimeMap = computed(() => {
     const files = [...activeProject.selectedFiles]
@@ -75,8 +78,8 @@ export function useVisualizer() {
   });
 
   const canCopy = computed(() => {
-    const navNode = currentNavNode.value;
-    if (!navNode || navNode.isFile) return false;
+    const node = currentNavNode.value;
+    if (!node || node.isFile) return false;
     return navPath.value.length > 1 && !hoveredNode.value;
   });
 
@@ -258,7 +261,23 @@ Return ONLY a raw JSON object with an 'amendments' key:
   };
 
   const diveIntoFile = (f) => {
-    navPath.value.push({ id: 'file-' + f.path, isFile: true, name: f.path.split('/').pop(), path: f.path, description: f.description, domain: currentNavNode.value?.domain, color: currentNavNode.value?.color });
+    navPath.value.push({
+      id: 'file-' + f.path,
+      isFile: true,
+      name: f.path.split('/').pop(),
+      path: f.path,
+      description: f.description,
+      domain: currentNavNode.value?.domain,
+      color: currentNavNode.value?.color
+    });
+  };
+
+  const scrollToAndHighlight = (path) => {
+    targetScrollPath.value = path;
+    // Reset after a short delay so the same path can be clicked again to re-trigger the highlight
+    setTimeout(() => {
+      if (targetScrollPath.value === path) targetScrollPath.value = null;
+    }, 2000);
   };
 
   watch(currentNavNode, async (node) => {
@@ -283,11 +302,11 @@ Return ONLY a raw JSON object with an 'amendments' key:
   });
 
   return {
-    viewState, navPath, hoveredNode, parseError, currentNavNode,
+    viewState, navPath, hoveredNode, targetScrollPath, parseError, currentNavNode, displayNode,
     rankedMtimeMap, canCopy, mapSyncState, syncMessage,
     highlightedLines, isCodeLoading,
     loadTree, processRawResponse, handleCopyPrompt,
     handleCopyAmendPrompt, copyCorrectionPrompt,
-    handleCopyNodeCode, nukeVisualizerMap, diveIntoFile
+    handleCopyNodeCode, nukeVisualizerMap, diveIntoFile, scrollToAndHighlight
   };
 }
