@@ -53,8 +53,6 @@ const handleNext = () => {
 }
 
 const discardPivot = (chunk) => {
-  if (!confirm("Accept this path and discard all alternatives? This will permanently remove the alternatives JSON from the document.")) return
-
   // Regex to target this specific selected path + alternatives block
   // We use escaping on the text to ensure the match is precise
   const escapedText = chunk.selectedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
