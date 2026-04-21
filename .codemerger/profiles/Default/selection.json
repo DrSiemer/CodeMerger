@@ -627,11 +627,11 @@
   },
   {
     "path": "frontend/src/components/ReviewModal.vue",
-    "tokens": 3079,
+    "tokens": 3174,
     "ignoreTokens": false,
-    "lines": 308,
-    "mtime": 1776628751.0268579,
-    "hash": "8fe77009809daeda4f50e34637e3a3f8625cddf3"
+    "lines": 316,
+    "mtime": 1776762962.1690435,
+    "hash": "12b449aabf1b3d23f07061515cbcba9482855023"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",

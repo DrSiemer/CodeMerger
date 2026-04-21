@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import {
   X, CheckCircle, FileCode, MessageSquare,
   HelpCircle, ShieldCheck, AlertTriangle,
-  ClipboardPaste
+  ClipboardPaste, Loader2
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
@@ -36,6 +36,7 @@ const {
 
 const activeTab = ref('')
 const tabContentContainer = ref(null)
+const isApplyingAll = ref(false)
 
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
@@ -128,33 +129,38 @@ onMounted(async () => {
 // --- Logic Actions ---
 
 const applyAllPending = async () => {
-  const pending = Object.entries(planFileStates.value).filter(([p, s]) => s === 'pending')
+  isApplyingAll.value = true
+  try {
+    const pending = Object.entries(planFileStates.value).filter(([p, s]) => s === 'pending')
 
-  const sortedPending = pending.sort(([pathA], [pathB]) => {
-    const getTypePriority = (path) => {
-      if (lastAiResponse.value.creations[path]) return 0
-      if (lastAiResponse.value.deletions_proposed.includes(path)) return 2
-      return 1
+    const sortedPending = pending.sort(([pathA], [pathB]) => {
+      const getTypePriority = (path) => {
+        if (lastAiResponse.value.creations[path]) return 0
+        if (lastAiResponse.value.deletions_proposed.includes(path)) return 2
+        return 1
+      }
+      return getTypePriority(pathA) - getTypePriority(pathB)
+    })
+
+    for (const [path, state] of sortedPending) {
+      let type = 'modify'
+      if (lastAiResponse.value.creations[path]) type = 'create'
+      else if (lastAiResponse.value.deletions_proposed.includes(path)) type = 'delete'
+
+      const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
+      const success = (type === 'delete') ? await deleteFile(path) : await applyFileChange(path, content)
+
+      if (success) {
+        planFileStates.value[path] = (type === 'delete') ? 'deleted' : 'applied'
+      }
     }
-    return getTypePriority(pathA) - getTypePriority(pathB)
-  })
 
-  for (const [path, state] of sortedPending) {
-    let type = 'modify'
-    if (lastAiResponse.value.creations[path]) type = 'create'
-    else if (lastAiResponse.value.deletions_proposed.includes(path)) type = 'delete'
-
-    const content = lastAiResponse.value.updates[path] || lastAiResponse.value.creations[path]
-    const success = (type === 'delete') ? await deleteFile(path) : await applyFileChange(path, content)
-
-    if (success) {
-      planFileStates.value[path] = (type === 'delete') ? 'deleted' : 'applied'
+    // Always attempt to switch to verification after a bulk apply (BY DESIGN)
+    if (tabs.value.find(t => t.id === 'verification')) {
+      activeTab.value = 'verification'
     }
-  }
-
-  // Always attempt to switch to verification after a bulk apply (BY DESIGN)
-  if (tabs.value.find(t => t.id === 'verification')) {
-    activeTab.value = 'verification'
+  } finally {
+    isApplyingAll.value = false
   }
 }
 
@@ -293,12 +299,14 @@ const applyAllLabel = computed(() => {
             id="btn-review-apply"
             v-if="getPendingCount > 0"
             @click="applyAllPending"
+            :disabled="isApplyingAll"
             v-info="'review_apply'"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-12 rounded shadow-md transition-all text-sm flex items-center justify-center whitespace-nowrap"
+            class="bg-cm-blue hover:bg-blue-500 disabled:bg-cm-blue/50 text-white font-bold py-2 px-12 rounded shadow-md transition-all text-sm flex items-center justify-center whitespace-nowrap"
             title="Accept and write all pending modifications to disk"
           >
-            <CheckCircle class="w-4 h-4 mr-2" />
-            <span>{{ applyAllLabel }}</span>
+            <Loader2 v-if="isApplyingAll" class="w-4 h-4 mr-2 animate-spin" />
+            <CheckCircle v-else class="w-4 h-4 mr-2" />
+            <span>{{ isApplyingAll ? 'Applying...' : applyAllLabel }}</span>
           </button>
         </div>
       </div>
