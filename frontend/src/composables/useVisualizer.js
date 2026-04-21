@@ -30,6 +30,7 @@ export function useVisualizer() {
   const parseError = ref("");
   const draftTree = ref(null);
   const missingPathsList = ref([]);
+  const unknownPathsList = ref([]);
   const duplicateEntriesList = ref([]);
 
   const currentNavNode = computed(() => navPath.value[navPath.value.length - 1] || null);
@@ -152,13 +153,20 @@ export function useVisualizer() {
       const unknown = parsedPaths.filter(p => !currentPaths.includes(p));
       const dupes = parsedPaths.filter((item, index) => parsedPaths.indexOf(item) !== index);
 
-      if (missing.length || unknown.length || dupes.length) {
-        draftTree.value = root;
-        missingPathsList.value = missing;
-        duplicateEntriesList.value = [...new Set(dupes)];
+      // Silently remove hallucinated files from the tree to avoid error-blocking or broken UI nodes
+      if (unknown.length > 0) {
+        unknown.forEach(p => removeFileFromTree(root, p));
+      }
+
+      // We always store the result in the draftTree so following amendments are additive
+      draftTree.value = root;
+      missingPathsList.value = missing;
+      unknownPathsList.value = []; // Cleared as they are now ignored/removed
+      duplicateEntriesList.value = [...new Set(dupes)];
+
+      if (missing.length || dupes.length) {
         let errs = [];
         if (missing.length) errs.push(`Missing Files:\n${JSON.stringify(missing.sort(), null, 2)}`);
-        if (unknown.length) errs.push(`Unknown Files:\n${JSON.stringify(unknown.sort(), null, 2)}`);
         if (dupes.length) errs.push(`Duplicate Entries Found:\n${JSON.stringify(duplicateEntriesList.value.sort(), null, 2)}`);
         throw new Error(errs.join('\n\n'));
       }
@@ -194,7 +202,8 @@ export function useVisualizer() {
   const handleCopyAmendPrompt = async () => {
     const missingList = missingPathsList.value.length > 0 ? missingPathsList.value.map(p => `- ${p}`).join('\n') : "None";
     const duplicateList = duplicateEntriesList.value.length > 0 ? duplicateEntriesList.value.map(p => `- ${p}`).join('\n') : "None";
-    const prompt = `I am building an Architecture Explorer and your previous response was incomplete or contained redundancies.
+
+    const prompt = `I am building an Architecture Explorer and your previous response was incomplete or had redundancies.
 
 **Missing Files to Categorize:**
 ${missingList}
@@ -205,7 +214,7 @@ ${duplicateList}
 **Instructions:**
 1. Categorize the 'Missing Files' into the architectural structure we just discussed.
 2. For each missing file, provide the 'parent' node name where it should be placed.
-3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.
+3. For 'Duplicate Entries', identify the redundant paths that should be REMOVED from the tree.
 4. Provide a rich description for each added file (2-4 sentences).
 
 **Output Format:**
@@ -220,7 +229,7 @@ Return ONLY a raw JSON object with an 'amendments' key:
       }
     ],
     "remove": [
-      "path/to/duplicate.ext"
+      "path/to/duplicate_to_delete.ext"
     ]
   }
 }`;
@@ -232,6 +241,8 @@ Return ONLY a raw JSON object with an 'amendments' key:
     const prompt = `The JSON you provided is invalid or incomplete. You have violated the ZERO OMISSION POLICY.\n\nVALIDATION ERRORS TO FIX:\n${parseError.value}`;
     await navigator.clipboard.writeText(prompt);
     statusMessage.value = "Copied correction prompt.";
+    // Reset error state to hide the error block and return to Step 1
+    parseError.value = "";
   };
 
   const handleCopyNodeCode = async (node) => {

@@ -46,7 +46,6 @@ const startAmend = () => {
 const startFullCorrection = () => {
   emit('copy-correction')
   promptResponse.value = ''
-  interactionMode.value = 'correct_full'
 }
 
 const cancelCorrection = () => {
@@ -67,7 +66,7 @@ const pastePlaceholder = computed(() => {
 <template>
   <div class="flex-grow flex flex-col items-center p-12 max-w-2xl mx-auto space-y-8 overflow-y-auto custom-scrollbar">
     <!-- Introduction Header -->
-    <div v-if="interactionMode === 'default'" class="text-center space-y-4">
+    <div v-if="interactionMode === 'default'" class="text-left w-full space-y-4">
       <h3 class="text-2xl font-bold text-white">
         {{ mode === 'init' ? 'Initialize Architectural View' : 'Update Architectural View' }}
       </h3>
@@ -86,17 +85,16 @@ const pastePlaceholder = computed(() => {
           <AlertTriangle class="w-5 h-5" />
           <span>Validation Error</span>
         </div>
-        <div class="text-sm text-gray-300 font-mono whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar">
+        <div class="text-sm text-gray-300 font-mono whitespace-pre-wrap max-h-40 overflow-y-auto custom-scrollbar selectable">
           {{ parseError }}
         </div>
 
         <!-- Choice Buttons (Only in 'error' mode) -->
         <div v-if="interactionMode === 'error'" class="flex space-x-2">
           <button
-            v-if="parseError.includes('Missing Files') || parseError.includes('Duplicate')"
             @click="startAmend"
             class="flex-1 bg-[#DE6808] hover:bg-orange-500 text-white font-bold py-2 px-4 rounded text-sm transition-colors flex items-center justify-center shadow-lg"
-            title="Ask the LLM only for the missing or duplicate files"
+            title="Ask the LLM for an amendment to fix these errors"
           >
             <Plus class="w-4 h-4 mr-2" /> Amend Prompt
           </button>
@@ -112,7 +110,7 @@ const pastePlaceholder = computed(() => {
 
       <!-- Main Input Flow (Hidden in 'error' choice mode) -->
       <template v-if="interactionMode !== 'error'">
-        <!-- Copy Prompt Button (Hidden in 'amend' mode as it was already copied on click) -->
+        <!-- Copy Prompt Button -->
         <button
           v-if="interactionMode !== 'correct_amend'"
           @click="handleCopy"
