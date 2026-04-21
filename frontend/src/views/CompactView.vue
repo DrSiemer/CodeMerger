@@ -30,9 +30,13 @@ const startDrag = (e) => {
   const now = Date.now()
   if (now - lastClickTime < 300) { isDragging = false; restoreMainWindow(); return }
   lastClickTime = now
-  if (e.altKey) {
-    openProjectFolder({ ctrlKey: false, altKey: true }).then(res => {
-      if (res && res.includes('Error')) triggerTitleError('CMD FAIL')
+  if (e.altKey || e.ctrlKey) {
+    openProjectFolder({ ctrlKey: e.ctrlKey, altKey: e.altKey }).then(res => {
+      if (res && res.includes('Error')) {
+        triggerTitleError(e.altKey ? 'CMD FAIL' : 'COPY FAIL')
+      } else if (e.ctrlKey) {
+        triggerFeedback('success', 'Path copied', 'copy-path')
+      }
     })
     return
   }
@@ -197,7 +201,7 @@ const pasteTooltipText = computed(() => {
 <template>
   <div id="compact-view" class="h-full flex flex-col bg-cm-dark-bg border border-gray-600 select-none overflow-hidden font-sans">
     <!-- Header (Draggable Zone) -->
-    <div v-if="!isUltra" id="compact-move-bar" @mousedown="startDrag" class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move" title="Double-click to restore. Alt-Click for CMD.">
+    <div v-if="!isUltra" id="compact-move-bar" @mousedown="startDrag" class="h-7 bg-cm-top-bar flex items-center justify-between px-2 shrink-0 border-b border-gray-700 cursor-move" title="Double-click: Restore | Ctrl-Click: Copy Path | Alt-Click: CMD">
       <div class="flex items-center space-x-2 min-w-0 pointer-events-none h-full">
         <img v-if="appIcon" :src="appIcon" class="w-4 h-4 shrink-0" />
         <span class="text-[11px] font-mono font-bold tracking-widest px-1 rounded whitespace-nowrap overflow-hidden h-[18px] flex items-center pt-[1px] antialiased shrink-0 transition-colors duration-300" :style="{ color: activeProject.fontColor === 'dark' || titleOverride ? '#000000' : '#FFFFFF', backgroundColor: titleOverride ? '#DF2622' : (activeProject.color || '#666666') }">{{ titleAbbr }}</span>
@@ -210,7 +214,7 @@ const pasteTooltipText = computed(() => {
     <div id="compact-content-root" class="relative flex-grow">
       <div id="compact-actions" class="flex flex-col transition-opacity duration-200" :class="{ 'opacity-0 pointer-events-none': feedback.active }">
         <div v-if="isUltra" class="flex flex-col w-full pt-0.5">
-          <div class="h-6 flex items-center px-1 cursor-move" @mousedown="startDrag">
+          <div class="h-6 flex items-center px-1 cursor-move" @mousedown="startDrag" title="Drag to move. Double-click: Restore | Ctrl-Click: Copy Path | Alt-Click: CMD">
             <img v-if="appIcon" :src="appIcon" class="w-4 h-4 shrink-0 pointer-events-none mr-1" />
             <div class="flex-grow flex justify-center pointer-events-none">
               <span class="text-[11px] font-mono font-bold w-5 rounded h-[18px] flex items-center justify-center antialiased shrink-0 transition-colors duration-300" :style="{ color: activeProject.fontColor === 'dark' || titleOverride ? '#000000' : '#FFFFFF', backgroundColor: titleOverride ? '#DF2622' : (activeProject.color || '#666666') }">{{ titleAbbr }}</span>

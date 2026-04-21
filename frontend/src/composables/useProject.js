@@ -135,6 +135,7 @@ export function useProject() {
     if (!activeProject.path) return
     const msg = await window.pywebview.api.open_project_folder(event.ctrlKey, event.altKey)
     statusMessage.value = msg
+    return msg
   }
 
   const clearUnknownFiles = async () => {

@@ -457,11 +457,11 @@
   },
   {
     "path": "frontend/src/composables/useProject.js",
-    "tokens": 1872,
+    "tokens": 1876,
     "ignoreTokens": false,
-    "lines": 249,
-    "mtime": 1776762654.8356977,
-    "hash": "e371b9971ef713861b1dd19249ee63026e8a53e5"
+    "lines": 250,
+    "mtime": 1776784635.2453768,
+    "hash": "de636bcc5007cdef1725baaba61c6e82b7be2ee8"
   },
   {
     "path": "frontend/src/composables/useReview.js",
@@ -530,11 +530,11 @@
   },
   {
     "path": "frontend/src/views/CompactView.vue",
-    "tokens": 3000,
+    "tokens": 3075,
     "ignoreTokens": false,
-    "lines": 239,
-    "mtime": 1776678394.2607358,
-    "hash": "8fd7d1a650c536675aa53663cb85f4c718ff31fa"
+    "lines": 243,
+    "mtime": 1776784725.3318486,
+    "hash": "d1aaaf02879375962b5b8af3744e1b464cc8ee64"
   },
   {
     "path": "frontend/src/components/InfoPanel.vue",
@@ -752,10 +752,10 @@
   },
   {
     "path": "frontend/src/components/compact/CompactFeedbackOverlay.vue",
-    "tokens": 868,
+    "tokens": 887,
     "lines": 53,
-    "mtime": 1776678394.3134246,
-    "hash": "ef33569e28f303486d2e0b2814c0bd6c321d3131"
+    "mtime": 1776784770.8085997,
+    "hash": "1fe56369b85355094d61a5de6a88fd5340b877f2"
   },
   {
     "path": "frontend/src/components/compact/CompactActionsStandard.vue",
