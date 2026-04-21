@@ -1,5 +1,6 @@
 import sys
 import os
+import signal
 
 # Flag environment early to ensure isolated configuration paths
 if "--dev" in sys.argv:
@@ -48,6 +49,10 @@ from src.core.window_manager import WindowManager
 log = logging.getLogger("CodeMerger")
 
 def main():
+    # Forceful exit handlers for terminal signals
+    signal.signal(signal.SIGINT, lambda s, f: os._exit(0))
+    signal.signal(signal.SIGTERM, lambda s, f: os._exit(0))
+
     dev_mode = os.environ.get('CM_DEV_MODE') == '1'
     debug_mode = "--debug" in sys.argv or "--inspect" in sys.argv or dev_mode
     show_console = "--console" in sys.argv

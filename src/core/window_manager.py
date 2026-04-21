@@ -313,6 +313,13 @@ class WindowManager:
         self._is_shutting_down = True
         self._stop_failsafe.set()
 
+        # Forceful Exit Watchdog: If the WebView engine hangs during teardown (common on Windows),
+        # this thread ensures the process actually dies after a short delay.
+        def _force_exit_watchdog():
+            time.sleep(1.5)
+            os._exit(0)
+        threading.Thread(target=_force_exit_watchdog, daemon=True).start()
+
         try:
             # Sync final window geometry to internal config dict before reconciled save
             if self.main_last_x is not None and self.main_last_y is not None:

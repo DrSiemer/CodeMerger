@@ -198,19 +198,19 @@
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 3126,
+    "tokens": 3198,
     "ignoreTokens": false,
-    "lines": 373,
-    "mtime": 1776620222.7443328,
-    "hash": "87983dbad2a2f118946b46a6e3fe8ffee19460e8"
+    "lines": 380,
+    "mtime": 1776781132.7347276,
+    "hash": "7e658883ce5bf9e55932581826a2f48638a32369"
   },
   {
     "path": "run_webview.py",
-    "tokens": 920,
+    "tokens": 969,
     "ignoreTokens": false,
-    "lines": 116,
-    "mtime": 1776715109.2646575,
-    "hash": "36c9d7f2a712391c2c02c190cae51d9ef5056089"
+    "lines": 121,
+    "mtime": 1776781132.675729,
+    "hash": "d0dd574a70e33b4683638849039578749202b867"
   },
   {
     "path": "src/api_parts/base_api.py",
@@ -312,11 +312,11 @@
   },
   {
     "path": "frontend/package.json",
-    "tokens": 283,
+    "tokens": 281,
     "ignoreTokens": false,
     "lines": 28,
-    "mtime": 1776599712.27271,
-    "hash": "2d56a2287bc34488a1cd158531cb84958dad508e"
+    "mtime": 1776781132.7927272,
+    "hash": "0cb29e4844f24aa0814a9e48f83e05e2c90fd898"
   },
   {
     "path": "frontend/vite.config.js",
