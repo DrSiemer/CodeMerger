@@ -1009,10 +1009,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
-    "tokens": 3996,
-    "lines": 410,
-    "mtime": 1776774902.3626947,
-    "hash": "af1db56168df43ff7d04269c7beecc14661c22be"
+    "tokens": 4026,
+    "lines": 412,
+    "mtime": 1776779515.1694937,
+    "hash": "81f38b397de2aa5afcd6377379391586abed0ef7"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterDesign.vue",

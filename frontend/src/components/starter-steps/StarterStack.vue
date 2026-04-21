@@ -233,6 +233,7 @@ const handleReset = () => {
         <div class="shrink-0 flex items-center justify-between bg-gray-800/50 p-4 rounded border border-gray-700">
           <div class="flex items-center space-x-3 text-sm">
             <button
+              v-if="pData.stack_experience !== (config.user_experience || '')"
               @click="loadDefaultExperience"
               class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 font-bold"
               title="Load saved experience from settings"
@@ -241,6 +242,7 @@ const handleReset = () => {
               <span>Load Default</span>
             </button>
             <button
+              v-if="pData.stack_experience !== (config.user_experience || '')"
               @click="saveDefaultExperience"
               class="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors px-3 py-1.5 rounded hover:bg-gray-700 font-bold"
               title="Save current text as your app-wide default"
