@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import markdownit from 'markdown-it'
 
 const props = defineProps({
@@ -15,6 +15,8 @@ const props = defineProps({
 
 defineEmits(['dblclick'])
 
+const rootRef = ref(null)
+
 const md = markdownit({
   html: true,
   linkify: true,
@@ -25,18 +27,63 @@ const md = markdownit({
 const renderedHtml = computed(() => {
   if (!props.content) return ''
 
-  // Pre-process task lists before rendering markdown
-  // Matches "- [ ] " or "- [x] " at the start of lines, preserving indentation
   const processed = props.content
     .replace(/^(\s*)-\s+\[ \]\s+/gm, '$1- <span class="cm-todo-unfilled">☐</span> ')
     .replace(/^(\s*)-\s+\[x\]\s+/gim, '$1- <span class="cm-todo-filled">☑</span> ')
 
   return md.render(processed)
 })
+
+const highlightCodeBlocks = async () => {
+  if (!rootRef.value || !window.pywebview?.api) return
+
+  const blocks = rootRef.value.querySelectorAll('pre code[class^="language-"]')
+  for (const codeEl of blocks) {
+    if (codeEl.dataset.highlighted) continue
+
+    const preEl = codeEl.parentElement
+    const langClass = Array.from(codeEl.classList).find(c => c.startsWith('language-'))
+    const lang = langClass ? langClass.replace('language-', '') : 'text'
+    const rawText = codeEl.innerText.trim()
+
+    try {
+      const htmlLines = await window.pywebview.api.get_syntax_highlight(rawText, lang)
+      if (htmlLines && htmlLines.length > 0) {
+        codeEl.innerHTML = htmlLines.join('\n')
+        codeEl.dataset.highlighted = 'true'
+        // Apply the CSS trigger class specifically to the code block container
+        if (preEl) preEl.classList.add('highlight')
+      }
+    } catch (err) {
+      console.error("[MarkdownRenderer] Highlighting failed:", err)
+    }
+  }
+}
+
+watch(renderedHtml, () => {
+  nextTick(() => highlightCodeBlocks())
+})
+
+onMounted(async () => {
+  // Ensure Pygments CSS is loaded for this view
+  if (window.pywebview && !document.getElementById('pygments-css')) {
+    try {
+      const css = await window.pywebview.api.get_pygments_style()
+      const style = document.createElement('style')
+      style.id = 'pygments-css'
+      style.innerHTML = css
+      document.head.appendChild(style)
+    } catch (err) {
+      console.error("[MarkdownRenderer] Failed to load highlighting CSS:", err)
+    }
+  }
+  highlightCodeBlocks()
+})
 </script>
 
 <template>
   <div
+    ref="rootRef"
     class="prose prose-invert max-w-none leading-relaxed text-gray-300 prose-headings:text-white prose-a:text-cm-blue prose-code:text-[#DEB887] prose-pre:bg-cm-input-bg prose-pre:border prose-pre:border-gray-700 selectable"
     :style="{ fontSize: fontSize + 'px' }"
     v-html="renderedHtml"
@@ -48,6 +95,15 @@ const renderedHtml = computed(() => {
 <style>
 .selectable {
   user-select: text;
+}
+
+/* Remove default Tailwind prose backticks from code elements to ensure clean syntax highlighting */
+.prose code::before {
+  content: "" !important;
+}
+
+.prose code::after {
+  content: "" !important;
 }
 
 .cm-todo-unfilled {

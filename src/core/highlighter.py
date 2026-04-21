@@ -1,9 +1,19 @@
 import html
 import difflib
 from pygments import highlight
-from pygments.lexers import get_lexer_for_filename
+from pygments.lexers import get_lexer_for_filename, get_lexer_by_name
 from pygments.lexers.special import TextLexer
 from pygments.formatters import HtmlFormatter
+
+def _get_lexer(filename_or_lang):
+    """Attempt to find a lexer by filename, then by language name."""
+    try:
+        return get_lexer_for_filename(filename_or_lang)
+    except Exception:
+        try:
+            return get_lexer_by_name(filename_or_lang)
+        except Exception:
+            return TextLexer()
 
 def get_highlighted_diff(old_text, new_text, filename, full_context=False):
     """
@@ -21,10 +31,7 @@ def get_highlighted_diff(old_text, new_text, filename, full_context=False):
         old_html_lines = [html.escape(line) for line in old_raw_lines]
         new_html_lines = [html.escape(line) for line in new_raw_lines]
     else:
-        try:
-            lexer = get_lexer_for_filename(filename)
-        except Exception:
-            lexer = TextLexer()
+        lexer = _get_lexer(filename)
 
         # nowrap=True prevents Pygments from wrapping the output in <pre> tags
         formatter = HtmlFormatter(nowrap=True)
@@ -79,10 +86,7 @@ def get_highlighted_code(text, filename):
     Applies syntax highlighting to a single block of code.
     Returns a list of HTML lines.
     """
-    try:
-        lexer = get_lexer_for_filename(filename)
-    except Exception:
-        lexer = TextLexer()
+    lexer = _get_lexer(filename)
 
     formatter = HtmlFormatter(nowrap=True)
     html_lines = highlight(text, lexer, formatter).splitlines()

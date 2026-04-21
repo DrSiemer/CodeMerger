@@ -144,10 +144,10 @@
   },
   {
     "path": "src/core/highlighter.py",
-    "tokens": 913,
-    "lines": 95,
-    "mtime": 1776723406.8173597,
-    "hash": "1e871872013e157dddb9a128bd5df77636e01521"
+    "tokens": 944,
+    "lines": 98,
+    "mtime": 1776782329.677683,
+    "hash": "465a72a1ab6d4a478e2eae29a87f51d505019c48"
   },
   {
     "path": "src/core/file_monitor_thread.py",
@@ -570,11 +570,11 @@
   },
   {
     "path": "frontend/src/components/MarkdownRenderer.vue",
-    "tokens": 930,
+    "tokens": 1311,
     "ignoreTokens": false,
-    "lines": 132,
-    "mtime": 1776192103.9599543,
-    "hash": "a995272b9fa8faef61431a507dcc0bb77a85e8a5"
+    "lines": 185,
+    "mtime": 1776782657.7160547,
+    "hash": "9b9ca098dd4e74e97822a22565249077e77152ce"
   },
   {
     "path": "frontend/src/components/DiffViewer.vue",
