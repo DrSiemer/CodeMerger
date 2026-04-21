@@ -221,8 +221,8 @@ watch(() => props.baselines?.['__merged__'], (newVal) => {
 
               <!-- Alternatives Grid -->
               <transition name="pivot-slide">
-                <div v-if="openPivotIndex === chunk.id" class="pl-4 border-l-2 border-dashed border-gray-700 space-y-4 py-2">
-                  <div class="flex items-center justify-between mb-2 ml-2">
+                <div v-if="openPivotIndex === chunk.id" class="pl-4 border-l-2 border-dashed border-gray-700 space-y-2 pt-7 pb-2">
+                  <div class="flex items-center justify-between ml-2">
                     <div class="flex items-center text-gray-500">
                       <Waypoints class="w-4 h-4 mr-2" />
                       <span class="text-[10px] font-black uppercase tracking-widest">Architectural Alternatives</span>

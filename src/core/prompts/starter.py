@@ -30,10 +30,13 @@ STARTER_DESIGN_PROMPT_INSTR = """
 ### Instructions
 1. **Be Specific:** Do not write generic advice. Define actual table names, component hierarchies, state management strategies, and data payloads based on the concept and chosen stack.
 2. **Present Alternatives (CRITICAL):** Whenever you make a significant architectural decision that has a viable alternative (e.g., SQLite vs Postgres, SPA vs SSR, REST vs GraphQL, Context API vs Redux), you MUST wrap your chosen path in `<SELECTEDPATH>` and `</SELECTEDPATH>` tags.
-3. **Alternative JSON Block:** Immediately after the closing `</SELECTEDPATH>` tag, provide a JSON array of the alternative options wrapped in `<ALTERNATIVES>` and `</ALTERNATIVES>` tags. Format the JSON strictly as:
+3. **Alternative JSON Block:** Immediately after the closing `</SELECTEDPATH>` tag, provide a JSON array of valid options wrapped in `<ALTERNATIVES>` and `</ALTERNATIVES>` tags.
+   - **Lateral Engineering Pivots:** Do NOT provide 'discarded' or 'rejected' ideas. Instead, identify high-quality, defensible architectural paths that reflect legitimate engineering trade-offs.
+   - **Contextual Superiority:** Each alternative must be presented as a choice that becomes the **superior path** under different strategic priorities (e.g., prioritizing extreme horizontal scale vs. low infrastructure complexity).
+   - **Format:** Format the JSON strictly as:
 <ALTERNATIVES>
 [
-  {{ "title": "Use [Alternative]", "description": "Explanation of the alternative and why it might be chosen instead." }}
+  { "title": "Pivot to [Option Name]", "description": "A high-level technical description of this path and the specific scenario or priority where this choice would be superior to the current selection." }
 ]
 </ALTERNATIVES>
 4. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
