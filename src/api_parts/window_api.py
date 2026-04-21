@@ -56,8 +56,8 @@ class WindowApi:
         target_w_phys = int(width * scale)
         target_h_phys = int(height * scale)
 
-        # Safety Clamp against monitor resolution
-        margin_phys = int(40 * scale)
+        # Safety Clamp against monitor resolution (10px logical margin)
+        margin_phys = int(10 * scale)
         max_allowed_w = m_w_phys - (margin_phys * 2)
         max_allowed_h = m_h_phys - (margin_phys * 2)
 
@@ -72,19 +72,25 @@ class WindowApi:
         if applied_w_phys <= curr_w_phys and applied_h_phys <= curr_h_phys:
             return
 
+        # Purposeful choice: grow the window outwards from its current center
         center_x_phys = curr_x_phys + (curr_w_phys // 2)
         center_y_phys = curr_y_phys + (curr_h_phys // 2)
 
         new_x_phys = center_x_phys - (applied_w_phys // 2)
         new_y_phys = center_y_phys - (applied_h_phys // 2)
 
-        # Desktop boundary constraints
+        # Overlapping-edge enforcement system
+        # 1. Right/Bottom checks (may push window Left/Up to stay in bounds)
         if new_x_phys + applied_w_phys > m_r_phys - margin_phys:
             new_x_phys = (m_r_phys - margin_phys) - applied_w_phys
-        if new_x_phys < m_l_phys + margin_phys:
-            new_x_phys = m_l_phys + margin_phys
         if new_y_phys + applied_h_phys > m_b_phys - margin_phys:
             new_y_phys = (m_b_phys - margin_phys) - applied_h_phys
+
+        # 2. Left/Top checks (may push window Right/Down - ABSOLUTE PRIORITY)
+        # This second pass ensures that even if stage 1 pushed the window up, the title bar
+        # is never sacrificed. If the window is too big for the screen, the bottom overflows.
+        if new_x_phys < m_l_phys + margin_phys:
+            new_x_phys = m_l_phys + margin_phys
         if new_y_phys < m_t_phys + margin_phys:
             new_y_phys = m_t_phys + margin_phys
 
