@@ -79,7 +79,6 @@ const contentChunks = computed(() => {
 })
 
 const discardPivot = (chunk) => {
-  if (!confirm("Accept this path and discard all alternatives?")) return
   const escapedText = chunk.selectedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const pattern = new RegExp(`<SELECTEDPATH>\\s*${escapedText}\\s*<\/SELECTEDPATH>\\s*<ALTERNATIVES>[\\s\\S]*?<\/ALTERNATIVES>`, 'gi')
   const newContent = activeSegmentContent.value.replace(pattern, chunk.selectedText)
