@@ -79,10 +79,10 @@
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776762654.6533928,
-    "hash": "21a1b2d91435c77b9cd782bf44999a0803b4efbe",
-    "tokens": 4035,
-    "lines": 449,
+    "mtime": 1776772178.5999467,
+    "hash": "7e63c0864b42fc4a153c4b0b9f966408cb9be270",
+    "tokens": 4248,
+    "lines": 478,
     "ignore_tokens": false
   },
   {
@@ -229,11 +229,11 @@
   },
   {
     "path": "src/api_parts/window_api.py",
-    "tokens": 1492,
+    "tokens": 1600,
     "ignoreTokens": false,
-    "lines": 177,
-    "mtime": 1776627561.513805,
-    "hash": "a15f73236578af01e88a65b3721a562dc5e3838c"
+    "lines": 183,
+    "mtime": 1776774021.487401,
+    "hash": "79c8be16e9efc1956624cc3d43ac63ebeaa484b0"
   },
   {
     "path": "src/api_parts/config_api.py",
@@ -253,11 +253,11 @@
   },
   {
     "path": "src/api_parts/file_api.py",
-    "tokens": 2623,
+    "tokens": 2631,
     "ignoreTokens": false,
-    "lines": 327,
-    "mtime": 1776693446.5180855,
-    "hash": "611d8ededa68fc8154fcd8cd968e507c85b0cb6c"
+    "lines": 328,
+    "mtime": 1776772178.6588745,
+    "hash": "a570a2e6e789a6e3627cf402e001e24e3b06e18f"
   },
   {
     "path": "src/api_parts/clipboard_api.py",
@@ -269,11 +269,11 @@
   },
   {
     "path": "src/api_parts/changes_api.py",
-    "tokens": 3361,
+    "tokens": 3385,
     "ignoreTokens": false,
-    "lines": 349,
-    "mtime": 1776710203.832438,
-    "hash": "550794abfd36960a7f170292513cbb8e9b4c8d6f"
+    "lines": 352,
+    "mtime": 1776772178.718872,
+    "hash": "4d382aba28db9d7b8010bcc36d7a192e466ed601"
   },
   {
     "path": "src/api_parts/starter_api_session.py",

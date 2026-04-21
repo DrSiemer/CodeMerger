@@ -71,6 +71,7 @@ class ChangesApi:
         if not project_config:
             return False, "No active project."
 
+        project_config.is_dirty = True
         success, err = change_applier.apply_single_file(project_config.base_dir, rel_path, content)
         if success:
             sanitized = change_applier._sanitize_content(rel_path, content)
@@ -114,6 +115,7 @@ class ChangesApi:
         if not project_config:
             return False, "No active project."
 
+        project_config.is_dirty = True
         success, err = change_applier.delete_single_file(project_config.base_dir, rel_path)
         if success:
             if rel_path in project_config.known_files:
@@ -191,6 +193,7 @@ class ChangesApi:
         if not project_config:
             return False, "No active project."
 
+        project_config.is_dirty = True
         updates = plan.get('updates', {})
         creations = plan.get('creations', {})
         deletions = plan.get('deletions_proposed', [])

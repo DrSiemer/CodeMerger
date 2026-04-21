@@ -38,6 +38,9 @@ class ProjectConfig:
         self._last_mtimes = {}
         self._last_content_hash = None
 
+        # State Latch: Prevents background reloads from reverting unsaved memory changes
+        self.is_dirty = False
+
         self._load_successful = False
         self._lock = threading.RLock()
 
@@ -128,6 +131,11 @@ class ProjectConfig:
     def load(self):
         """Loads and reconciles project settings using multi-segment aggregation logic"""
         with self._lock:
+            # Safety Gate: If we have unsaved changes in memory, do NOT allow a reload
+            # from disk to overwrite them (prevents race conditions during batch applies)
+            if self.is_dirty:
+                return False
+
             data = {}
             config_was_updated = False
             files_were_cleaned_globally = False
@@ -140,25 +148,36 @@ class ProjectConfig:
                 from .config_migration import migrate_legacy_project
                 return migrate_legacy_project(self)
 
-            try:
-                self._last_mtimes[self.config_file] = os.path.getmtime(self.config_file)
-                if os.path.getsize(self.config_file) == 0:
-                    raise RuntimeError("Config file is empty or locked.")
+            # Retry loop for transient Windows file locks
+            max_retries = 3
+            last_err = None
+            for attempt in range(max_retries):
+                try:
+                    if os.path.getsize(self.config_file) == 0:
+                        time.sleep(0.05)
+                        continue
 
-                with open(self.config_file, 'r', encoding='utf-8-sig') as f:
-                    content = f.read()
-                    if content:
-                        try:
-                            data = json.loads(content)
-                        except json.JSONDecodeError:
-                            json_start_index = content.find('{')
-                            if json_start_index != -1:
-                                data = json.loads(content[json_start_index:])
-                                config_was_updated = True
-                            else:
-                                raise RuntimeError("Config file contains no valid JSON.")
-            except (json.JSONDecodeError, IOError, OSError) as e:
-                raise RuntimeError(f"Failed to read project config: {e}")
+                    self._last_mtimes[self.config_file] = os.path.getmtime(self.config_file)
+                    with open(self.config_file, 'r', encoding='utf-8-sig') as f:
+                        content = f.read()
+                        if content:
+                            try:
+                                data = json.loads(content)
+                                last_err = None
+                                break
+                            except json.JSONDecodeError:
+                                json_start_index = content.find('{')
+                                if json_start_index != -1:
+                                    data = json.loads(content[json_start_index:])
+                                    config_was_updated = True
+                                    last_err = None
+                                    break
+                except (IOError, OSError) as e:
+                    last_err = e
+                    time.sleep(0.05)
+
+            if last_err or not data:
+                raise RuntimeError(f"Failed to read project config (file may be locked): {last_err or 'Empty file'}")
 
             if not data:
                 raise RuntimeError("Config file contained an empty JSON object.")
@@ -197,13 +216,19 @@ class ProjectConfig:
                             filepath = os.path.join(full_path, filename)
                             if os.path.isfile(filepath):
                                 try:
+                                    if os.path.getsize(filepath) == 0: return False
                                     self._last_mtimes[filepath] = os.path.getmtime(filepath)
                                     with open(filepath, 'r', encoding='utf-8-sig') as f:
                                         profile_data[key] = json.load(f)
-                                except Exception: profile_data[key] = default
-                            else: profile_data[key] = default
+                                    return True
+                                except Exception: return False
+                            else:
+                                profile_data[key] = default
+                                return True
 
                         # Renamed: instructions.json (Legacy: settings.json)
+                        # We abort the load of this profile if critical segments fail to load
+                        # to prevent initializing a blank state and wiping user data on next save.
                         load_segment('instructions.json', 'inst', None)
                         if not profile_data.get('inst'):
                             load_segment('settings.json', 'inst', None)
@@ -267,6 +292,7 @@ class ProjectConfig:
             if config_was_updated or files_were_cleaned_globally:
                 self.save()
 
+            self.is_dirty = False
             return content_changed
 
     def _calculate_hash(self):
@@ -313,6 +339,8 @@ class ProjectConfig:
         with self._lock:
             if not self._load_successful and (os.path.isfile(self.config_file) or os.path.isfile(self.legacy_allcode_path)):
                 return
+
+            self.is_dirty = False
 
             os.makedirs(self.config_dir, exist_ok=True)
             ensure_dir_hidden(self.config_dir)
@@ -376,6 +404,7 @@ class ProjectConfig:
 
     def has_external_changes(self):
         """Checks for external modifications by probing chunks of the active profile."""
+        if self.is_dirty: return False
         if not os.path.isfile(self.config_file): return False
         try:
             if abs(os.path.getmtime(self.config_file) - self._last_mtimes.get(self.config_file, 0)) > 0.1:

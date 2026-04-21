@@ -138,6 +138,7 @@ class FileApi:
         ]
 
         added_count = 0
+        project_config.is_dirty = True
         for path in files_to_add:
             full_path = os.path.join(base_dir, path)
             try:
