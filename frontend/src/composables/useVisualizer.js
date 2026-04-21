@@ -194,7 +194,36 @@ export function useVisualizer() {
   const handleCopyAmendPrompt = async () => {
     const missingList = missingPathsList.value.length > 0 ? missingPathsList.value.map(p => `- ${p}`).join('\n') : "None";
     const duplicateList = duplicateEntriesList.value.length > 0 ? duplicateEntriesList.value.map(p => `- ${p}`).join('\n') : "None";
-    const prompt = `I am building an Architecture Explorer and your previous response was incomplete or contained redundancies.\n\n**Missing Files to Categorize:**\n${missingList}\n\n**Duplicate Entries Found:**\n${duplicateList}\n\n**Instructions:**\n1. Categorize the 'Missing Files' into the architectural structure we just discussed.\n2. For each missing file, provide the 'parent' node name where it should be placed.\n3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.\n4. Provide a rich description for each added file (2-4 sentences).\n\n**Output Format:**\nReturn ONLY a raw JSON object with an 'amendments' key:\n{ "amendments": { "add": [ { "path": "path/to/missing_file.ext", "parent": "Node Name", "description": "..." } ], "remove": [ "path/to/duplicate.ext" ] } }`;
+    const prompt = `I am building an Architecture Explorer and your previous response was incomplete or contained redundancies.
+
+**Missing Files to Categorize:**
+${missingList}
+
+**Duplicate Entries Found:**
+${duplicateList}
+
+**Instructions:**
+1. Categorize the 'Missing Files' into the architectural structure we just discussed.
+2. For each missing file, provide the 'parent' node name where it should be placed.
+3. For 'Duplicate Entries', identify which redundant instances should be REMOVED to satisfy the 'One File, One Node' policy.
+4. Provide a rich description for each added file (2-4 sentences).
+
+**Output Format:**
+Return ONLY a raw JSON object with an 'amendments' key:
+{
+  "amendments": {
+    "add": [
+      {
+        "path": "path/to/missing_file.ext",
+        "parent": "Node Name",
+        "description": "..."
+      }
+    ],
+    "remove": [
+      "path/to/duplicate.ext"
+    ]
+  }
+}`;
     await navigator.clipboard.writeText(prompt);
     statusMessage.value = "Copied amend prompt.";
   };
