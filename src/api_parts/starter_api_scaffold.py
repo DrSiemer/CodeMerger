@@ -202,13 +202,13 @@ class StarterApiScaffold:
 
         normalized_files = []
         # Excludes temporary files and specific artifacts from the initial merge selection
-        merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt', c.ALLCODE_TEMP_PREFIX]
+        merge_order_exclusion_list = ['.gitignore', 'project-starter.json', '2do.txt', c.CODEMERGER_TEMP_PREFIX]
         for f in files_created:
              norm = f.replace('\\', '/')
              filename = os.path.basename(norm)
              if filename not in merge_order_exclusion_list and \
                 filename not in c.FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS and \
-                not filename.startswith(c.ALLCODE_TEMP_PREFIX):
+                not filename.startswith(c.CODEMERGER_TEMP_PREFIX):
                  normalized_files.append({'path': norm})
 
         self.project_manager.create_project_with_defaults(

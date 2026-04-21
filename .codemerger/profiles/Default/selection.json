@@ -291,11 +291,11 @@
   },
   {
     "path": "src/api_parts/starter_api_scaffold.py",
-    "tokens": 2520,
+    "tokens": 2522,
     "ignoreTokens": false,
     "lines": 230,
-    "mtime": 1776767807.2645984,
-    "hash": "b4ec0d8b067fbd7302f712fd3b0901dc5d3e474c"
+    "mtime": 1776783389.7339027,
+    "hash": "fd813421e0ba5fb8cc4eb31c044b17c8a53d683f"
   },
   {
     "path": "src/api_parts/starter_api.py",
