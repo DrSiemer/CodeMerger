@@ -1,0 +1,26 @@
+{
+  "arch_overview": {
+    "label": "Architecture Overview",
+    "questions": [
+      "Does this architectural flow directly support the 'User Actions & Flows' defined in the Concept?",
+      "Are the responsibilities between frontend and backend clearly delineated?",
+      "Does this high-level structure match the technologies chosen in the Tech Stack?"
+    ]
+  },
+  "data_models": {
+    "label": "Data Models & State",
+    "questions": [
+      "Are the database relationships (e.g., one-to-many) correctly mapped to support the Key Features?",
+      "Is the 'Source of Truth' and state management strategy clearly defined?",
+      "Are there any missing data entities that would be required to fulfill the User Goal?"
+    ]
+  },
+  "component_breakdown": {
+    "label": "Component Breakdown",
+    "questions": [
+      "Are the UI components modular and reusable where appropriate?",
+      "Does the breakdown cover all visual states (Loading, Error, Empty) required by the concept?",
+      "Are the core backend services logically separated to handle the specified business logic?"
+    ]
+  }
+}

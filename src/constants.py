@@ -67,6 +67,17 @@ CONCEPT_ORDER = [
     "problem_statement", "core_principles", "key_features", "user_flows", "tech_constraints"
 ]
 
+# System Design Segments
+DESIGN_SEGMENTS = {
+    "arch_overview": "Architecture Overview",
+    "data_models": "Data Models & State",
+    "component_breakdown": "Component Breakdown"
+}
+
+DESIGN_ORDER = [
+    "arch_overview", "data_models", "component_breakdown"
+]
+
 # TODO Generation Phases
 TODO_PHASES = {
     "setup": "Environment Setup",

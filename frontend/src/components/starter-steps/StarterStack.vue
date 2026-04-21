@@ -390,7 +390,7 @@ const handleReset = () => {
 
         <div v-if="!isLookingBack" class="shrink-0 pt-6 flex justify-end">
           <button @click="$emit('next')" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
-            Next Step: TODO Plan
+            Next Step: System Design
             <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>

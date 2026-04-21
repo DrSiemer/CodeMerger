@@ -11,6 +11,8 @@
     "assets/boilerplate/version.txt",
     "assets/reference/concept.md",
     "assets/reference/concept_questions.json",
+    "assets/reference/design.md",
+    "assets/reference/design_questions.json",
     "assets/reference/todo.md",
     "assets/reference/todo_questions.json",
     "codemerger.spec",
@@ -56,12 +58,13 @@
     "frontend/src/components/starter-steps/NotesModal.vue",
     "frontend/src/components/starter-steps/ReviewerQuestions.vue",
     "frontend/src/components/starter-steps/RewriteModal.vue",
-    "frontend/src/components/starter-steps/Step1Details.vue",
-    "frontend/src/components/starter-steps/Step2BaseFiles.vue",
-    "frontend/src/components/starter-steps/Step3Concept.vue",
-    "frontend/src/components/starter-steps/Step4Stack.vue",
-    "frontend/src/components/starter-steps/Step5Todo.vue",
-    "frontend/src/components/starter-steps/Step6Generate.vue",
+    "frontend/src/components/starter-steps/StarterBaseFiles.vue",
+    "frontend/src/components/starter-steps/StarterConcept.vue",
+    "frontend/src/components/starter-steps/StarterDesign.vue",
+    "frontend/src/components/starter-steps/StarterDetails.vue",
+    "frontend/src/components/starter-steps/StarterGenerate.vue",
+    "frontend/src/components/starter-steps/StarterStack.vue",
+    "frontend/src/components/starter-steps/StarterTodo.vue",
     "frontend/src/components/starter-steps/StepSuccess.vue",
     "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
     "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
@@ -147,5 +150,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 182656
+  "total_tokens": 191508
 }

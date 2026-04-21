@@ -2,7 +2,8 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import {
   HelpCircle, Check, X as XIcon, CheckCheck,
-  LockKeyhole, LockKeyholeOpen, PencilLine
+  LockKeyhole, LockKeyholeOpen, PencilLine, Waypoints,
+  ChevronDown, ChevronUp, Trash2
 } from 'lucide-vue-next'
 import MarkdownRenderer from '../../MarkdownRenderer.vue'
 import ReviewerQuestions from '../ReviewerQuestions.vue'
@@ -21,7 +22,7 @@ const props = defineProps({
   showQuestions: Boolean
 })
 
-const emit = defineEmits(['reset', 'rewrite', 'merge', 'update:showQuestions'])
+const emit = defineEmits(['reset', 'rewrite', 'merge', 'update:showQuestions', 'pivot'])
 
 const { editorFontSize, handleZoom } = useAppState()
 
@@ -33,6 +34,59 @@ const { reviewerEditMode, toggleReviewerEditMode } = useReviewerEditMode(scrollR
 const acceptAllConfirm = ref(false)
 let acceptAllTimer = null
 
+// --- Interactive Pivot State ---
+const openPivotIndex = ref(null)
+
+const togglePivot = (idx) => {
+  if (openPivotIndex.value === idx) openPivotIndex.value = null
+  else openPivotIndex.value = idx
+}
+
+watch(activeSegmentKey, () => { openPivotIndex.value = null })
+
+// --- Fragmented Rendering Engine ---
+const activeSegmentContent = computed(() => {
+  if (!activeSegmentKey.value) return '';
+  return props.segments[activeSegmentKey.value] || '';
+});
+
+const contentChunks = computed(() => {
+  const chunks = []
+  const txt = activeSegmentContent.value
+  const regex = /<SELECTEDPATH>([\s\S]*?)<\/SELECTEDPATH>\s*<ALTERNATIVES>([\s\S]*?)<\/ALTERNATIVES>/gi
+
+  let lastIdx = 0
+  let match
+  let pivotIdx = 0
+
+  while ((match = regex.exec(txt)) !== null) {
+    if (match.index > lastIdx) {
+      chunks.push({ type: 'text', content: txt.substring(lastIdx, match.index) })
+    }
+    try {
+      const selectedText = match[1].trim()
+      const alternatives = JSON.parse(match[2].trim())
+      chunks.push({ type: 'pivot', id: pivotIdx++, selectedText, alternatives })
+    } catch (e) {
+      chunks.push({ type: 'text', content: match[0] })
+    }
+    lastIdx = regex.lastIndex
+  }
+  if (lastIdx < txt.length) {
+    chunks.push({ type: 'text', content: txt.substring(lastIdx) })
+  }
+  return chunks
+})
+
+const discardPivot = (chunk) => {
+  if (!confirm("Accept this path and discard all alternatives?")) return
+  const escapedText = chunk.selectedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const pattern = new RegExp(`<SELECTEDPATH>\\s*${escapedText}\\s*<\/SELECTEDPATH>\\s*<ALTERNATIVES>[\\s\\S]*?<\/ALTERNATIVES>`, 'gi')
+  const newContent = activeSegmentContent.value.replace(pattern, chunk.selectedText)
+  props.segments[activeSegmentKey.value] = newContent
+  openPivotIndex.value = null
+}
+
 onMounted(() => {
   if (props.orderedKeys.length) {
     const firstUnlocked = props.orderedKeys.find(k => !props.signoffs[k])
@@ -40,9 +94,7 @@ onMounted(() => {
   }
 })
 
-onUnmounted(() => {
-  if (acceptAllTimer) clearTimeout(acceptAllTimer)
-})
+onUnmounted(() => { if (acceptAllTimer) clearTimeout(acceptAllTimer) })
 
 watch(() => props.orderedKeys, (newKeys) => {
   if (newKeys.length > 0 && !newKeys.includes(activeSegmentKey.value)) {
@@ -65,6 +117,15 @@ const getPromptForCurrentSegment = async (question) => {
 }
 
 const toggleSignoff = (key) => {
+  if (!props.signoffs[key]) {
+      // Locking attempt
+      const content = props.segments[key] || ''
+      if (/<ALTERNATIVES>[\s\S]*?<\/ALTERNATIVES>/gi.test(content)) {
+          alert("You must resolve all architectural alternatives (Pivot or Discard) in this segment before locking it.")
+          return
+      }
+  }
+
   props.signoffs[key] = !props.signoffs[key]
   if (props.signoffs[key]) {
     if (activeSegmentKey.value === key) reviewerEditMode.value = false
@@ -74,6 +135,13 @@ const toggleSignoff = (key) => {
 
 const handleSignoffAndNext = () => {
   const key = activeSegmentKey.value
+  const content = props.segments[key] || ''
+
+  if (/<ALTERNATIVES>[\s\S]*?<\/ALTERNATIVES>/gi.test(content)) {
+      alert("You must resolve all architectural alternatives (Pivot or Discard) in this segment before locking it.")
+      return
+  }
+
   props.signoffs[key] = true
   props.baselines[key] = undefined
 
@@ -100,20 +168,14 @@ const refuseDiff = () => {
   }
 }
 
-const acceptDiff = () => {
-  if (activeSegmentKey.value) props.baselines[activeSegmentKey.value] = undefined
-}
+const acceptDiff = () => { if (activeSegmentKey.value) props.baselines[activeSegmentKey.value] = undefined }
 
 const handleAcceptAllClick = () => {
   if (acceptAllConfirm.value) {
-    for (const k in props.baselines) {
-      if (k !== '__merged__') props.baselines[k] = undefined
-    }
-    acceptAllConfirm.value = false
-    clearTimeout(acceptAllTimer)
+    for (const k in props.baselines) if (k !== '__merged__') props.baselines[k] = undefined
+    acceptAllConfirm.value = false; clearTimeout(acceptAllTimer)
   } else {
-    acceptAllConfirm.value = true
-    acceptAllTimer = setTimeout(() => { acceptAllConfirm.value = false }, 2500)
+    acceptAllConfirm.value = true; acceptAllTimer = setTimeout(() => { acceptAllConfirm.value = false }, 2500)
   }
 }
 </script>
@@ -184,11 +246,82 @@ const handleAcceptAllClick = () => {
         :getPrompt="getPromptForCurrentSegment"
       />
 
-      <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden" v-info="'starter_view_toggle'">
-          <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
+      <div class="flex-grow border border-gray-700 rounded bg-cm-input-bg overflow-hidden flex flex-col min-h-0" v-info="'starter_view_toggle'">
+          <textarea v-if="reviewerEditMode" ref="scrollRef" v-model="segments[activeSegmentKey]" class="w-full h-full bg-cm-input-bg text-white p-6 outline-none custom-scrollbar font-sans leading-relaxed selectable shrink-0" :style="{ fontSize: editorFontSize + 'px' }"></textarea>
           <div v-else ref="scrollRef" class="w-full h-full overflow-y-auto p-6 custom-scrollbar">
             <DiffViewer v-if="baselines[activeSegmentKey]" :oldText="baselines[activeSegmentKey]" :newText="segments[activeSegmentKey]" :fontSize="editorFontSize" :fullContext="true" />
-            <MarkdownRenderer v-else :content="segments[activeSegmentKey]" :fontSize="editorFontSize" @dblclick="!signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)" />
+
+            <div v-else class="space-y-4">
+               <template v-for="chunk in contentChunks" :key="chunk.id || chunk.content">
+                  <MarkdownRenderer
+                    v-if="chunk.type === 'text'"
+                    :content="chunk.content"
+                    :fontSize="editorFontSize"
+                    class="fragmented-md"
+                    @dblclick="!signoffs[activeSegmentKey] && toggleReviewerEditMode($event, true)"
+                  />
+
+                  <!-- Interactive Pivot Zones -->
+                  <div v-else class="pt-6 mb-0">
+                    <div
+                      @click="!signoffs[activeSegmentKey] && togglePivot(chunk.id)"
+                      class="border-l-4 border-cm-blue pl-6 pt-8 pb-1 bg-blue-900/10 rounded-r-lg text-gray-200 shadow-md relative group transition-all mb-0"
+                      :class="!signoffs[activeSegmentKey] ? 'cursor-pointer hover:bg-blue-900/20' : 'cursor-default'"
+                    >
+                      <!-- Decision Header (Anchored to Top) -->
+                      <div class="absolute -top-3.5 left-3 right-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-2 pointer-events-none">
+                          <span class="bg-cm-blue text-white text-[10px] font-black px-2 py-1 rounded shadow tracking-widest uppercase">Selected Path</span>
+                          <div v-if="!signoffs[activeSegmentKey]" class="bg-gray-800 text-cm-blue text-[10px] font-bold px-2 py-1 rounded shadow border border-cm-blue/30 group-hover:border-cm-blue transition-colors">Click to see alternatives</div>
+                        </div>
+
+                        <div v-if="!signoffs[activeSegmentKey]" class="flex items-center space-x-3">
+                          <!-- Integrated Accept Button -->
+                          <button
+                            @click.stop="discardPivot(chunk)"
+                            class="bg-cm-top-bar border border-gray-600 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-cm-green hover:border-cm-green/50 flex items-center px-3 py-1 rounded shadow-lg transition-all active:scale-95 pointer-events-auto"
+                            title="Finalize this choice and remove alternatives"
+                          >
+                            <Check class="w-3.5 h-3.5 mr-1.5" />
+                            Accept Path
+                          </button>
+
+                          <div class="text-cm-blue/60 group-hover:text-cm-blue transition-colors bg-cm-top-bar p-1 rounded-full border border-gray-600 shadow-md pointer-events-none">
+                             <ChevronDown v-if="openPivotIndex !== chunk.id" class="w-5 h-5" />
+                             <ChevronUp v-else class="w-5 h-5" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <MarkdownRenderer :content="chunk.selectedText" :fontSize="editorFontSize" />
+                    </div>
+
+                    <!-- Alternatives Grid -->
+                    <transition name="pivot-slide">
+                      <div v-if="openPivotIndex === chunk.id && !signoffs[activeSegmentKey]" class="pl-4 border-l-2 border-dashed border-gray-700 space-y-4 py-2">
+                        <div class="flex items-center justify-between mb-2 ml-2">
+                          <div class="flex items-center text-gray-500">
+                            <Waypoints class="w-4 h-4 mr-2" />
+                            <span class="text-[10px] font-black uppercase tracking-widest">Architectural Alternatives</span>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                          <button
+                            v-for="alt in chunk.alternatives"
+                            :key="alt.title"
+                            @click="$emit('pivot', alt, chunk.selectedText, activeSegmentKey)"
+                            class="bg-gray-800 border border-gray-700 hover:border-cm-blue hover:bg-gray-700 p-4 rounded-lg text-left transition-all group flex flex-col shadow-sm relative overflow-hidden"
+                          >
+                            <div class="absolute top-0 right-0 w-1 h-full bg-cm-blue transform translate-x-full group-hover:translate-x-0 transition-transform"></div>
+                            <div class="font-bold text-cm-blue mb-1 text-base group-hover:text-blue-400">{{ alt.title }}</div>
+                            <div class="text-sm text-gray-400 group-hover:text-gray-300 leading-relaxed">{{ alt.description }}</div>
+                          </button>
+                        </div>
+                      </div>
+                    </transition>
+                  </div>
+               </template>
+            </div>
           </div>
       </div>
       <div class="shrink-0 pt-4 flex justify-end space-x-4">
@@ -205,3 +338,9 @@ const handleAcceptAllClick = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.pivot-slide-enter-active, .pivot-slide-leave-active { transition: all 0.3s ease-out; max-height: 800px; }
+.pivot-slide-enter-from, .pivot-slide-leave-to { opacity: 0; max-height: 0; transform: translateY(-10px); }
+:deep(.fragmented-md .prose) { margin-top: 0 !important; margin-bottom: 0 !important; }
+</style>

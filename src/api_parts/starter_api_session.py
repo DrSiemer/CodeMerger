@@ -92,6 +92,15 @@ class StarterApiSession:
         except Exception:
             return {}
 
+    def get_design_questions(self):
+        """Loads guiding questions for the System Design step."""
+        path = os.path.join(REFERENCE_DIR, "design_questions.json")
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
     def get_todo_questions(self):
         """Loads guiding questions for the TODO step."""
         path = os.path.join(REFERENCE_DIR, "todo_questions.json")
@@ -104,6 +113,15 @@ class StarterApiSession:
     def get_concept_template(self):
         """Returns the raw content of the reference concept template."""
         path = os.path.join(REFERENCE_DIR, "concept.md")
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return f.read()
+        except Exception:
+            return ""
+
+    def get_design_template(self):
+        """Returns the raw content of the reference design template."""
+        path = os.path.join(REFERENCE_DIR, "design.md")
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 return f.read()

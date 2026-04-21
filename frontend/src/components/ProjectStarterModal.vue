@@ -4,12 +4,13 @@ import { Leaf, Save, Upload, Trash2, LogOut } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
 
-import Step1Details from './starter-steps/Step1Details.vue'
-import Step2BaseFiles from './starter-steps/Step2BaseFiles.vue'
-import Step3Concept from './starter-steps/Step3Concept.vue'
-import Step4Stack from './starter-steps/Step4Stack.vue'
-import Step5Todo from './starter-steps/Step5Todo.vue'
-import Step6Generate from './starter-steps/Step6Generate.vue'
+import StarterDetails from './starter-steps/StarterDetails.vue'
+import StarterBaseFiles from './starter-steps/StarterBaseFiles.vue'
+import StarterConcept from './starter-steps/StarterConcept.vue'
+import StarterStack from './starter-steps/StarterStack.vue'
+import StarterDesign from './starter-steps/StarterDesign.vue'
+import StarterTodo from './starter-steps/StarterTodo.vue'
+import StarterGenerate from './starter-steps/StarterGenerate.vue'
 import StepSuccess from './starter-steps/StepSuccess.vue'
 
 const emit = defineEmits(['close'])
@@ -22,6 +23,7 @@ const {
   exportStarterConfig,
   loadStarterConfig,
   getConceptQuestions,
+  getDesignQuestions,
   getTodoQuestions
 } = useAppState()
 
@@ -41,6 +43,7 @@ const pData = reactive({
   stack_experience: '',
   goal: '',
   concept_md: '',
+  design_md: '',
   todo_md: '',
   base_project_path: '',
   base_project_files: [],
@@ -48,12 +51,16 @@ const pData = reactive({
 
   concept_llm_response: '',
   stack_llm_response: '',
+  design_llm_response: '',
   todo_llm_response: '',
   generate_llm_response: '',
 
   concept_segments: {},
   concept_signoffs: {},
   concept_baselines: {},
+  design_segments: {},
+  design_signoffs: {},
+  design_baselines: {},
   todo_phases: [],
   todo_segments: {},
   todo_signoffs: {},
@@ -61,6 +68,7 @@ const pData = reactive({
 })
 
 const conceptQuestionsMap = ref({})
+const designQuestionsMap = ref({})
 const todoQuestionsMap = ref({})
 const successScreenData = ref(null)
 
@@ -69,8 +77,9 @@ const stepNames = {
   2: 'Base Files',
   3: 'Concept',
   4: 'Stack',
-  5: 'TODO',
-  6: 'Generate'
+  5: 'System Design',
+  6: 'TODO',
+  7: 'Generate'
 }
 
 const handleClose = async (wasCreated = false) => {
@@ -91,6 +100,7 @@ onMounted(async () => {
   }
 
   conceptQuestionsMap.value = await getConceptQuestions()
+  designQuestionsMap.value = await getDesignQuestions()
   todoQuestionsMap.value = await getTodoQuestions()
 
   const saved = await getStarterSession()
@@ -116,6 +126,7 @@ onMounted(async () => {
 onUnmounted(() => {
   // Automatic acceptance of all pending diffs on exit
   pData.concept_baselines = {}
+  pData.design_baselines = {}
   pData.todo_baselines = {}
 })
 
@@ -129,6 +140,7 @@ const recalcProgress = () => {
   const hasDetails = !!pData.name
   const hasConcept = (!Object.keys(pData.concept_segments).length) && !!pData.concept_md
   const hasStack = pData.stack && pData.stack.length > 0
+  const hasDesign = (!Object.keys(pData.design_segments).length) && !!pData.design_md
   const hasTodo = (!Object.keys(pData.todo_segments).length) && !!pData.todo_md
 
   let targetMax = 1
@@ -137,9 +149,12 @@ const recalcProgress = () => {
     if (hasConcept) {
       targetMax = 4 // Move to Stack
       if (hasStack) {
-        targetMax = 5 // Move to TODO
-        if (hasTodo) {
-          targetMax = 6 // Move to Generate
+        targetMax = 5 // Move to Design
+        if (hasDesign) {
+            targetMax = 6 // Move to TODO
+            if (hasTodo) {
+              targetMax = 7 // Move to Generate
+            }
         }
       }
     }
@@ -195,6 +210,7 @@ const performReset = async () => {
   pData.stack_experience = config.value?.user_experience || ''
   pData.goal = ''
   pData.concept_md = ''
+  pData.design_md = ''
   pData.todo_md = ''
   pData.base_project_path = ''
   pData.base_project_files = []
@@ -202,12 +218,16 @@ const performReset = async () => {
 
   pData.concept_llm_response = ''
   pData.stack_llm_response = ''
+  pData.design_llm_response = ''
   pData.todo_llm_response = ''
   pData.generate_llm_response = ''
 
   pData.concept_segments = {}
   pData.concept_signoffs = {}
   pData.concept_baselines = {}
+  pData.design_segments = {}
+  pData.design_signoffs = {}
+  pData.design_baselines = {}
   pData.todo_phases = []
   pData.todo_segments = {}
   pData.todo_signoffs = {}
@@ -238,7 +258,7 @@ const onProjectCreated = async (res) => {
 const activeStepsList = computed(() => {
   const steps = [1]
   if (pData.base_project_path) steps.push(2)
-  steps.push(3, 4, 5, 6)
+  steps.push(3, 4, 5, 6, 7)
   return steps
 })
 
@@ -257,8 +277,15 @@ const isNextDisabled = computed(() => {
     return !hasMergedDoc || hasActiveSegments
   }
 
-  // Step 5 (TODO): Can only proceed if plan is merged and segments are cleared
+  // Step 5 (Design): Can only proceed if plan is merged and segments are cleared
   if (currentStep.value === 5) {
+    const hasMergedDoc = !!pData.design_md.trim()
+    const hasActiveSegments = Object.keys(pData.design_segments).length > 0
+    return !hasMergedDoc || hasActiveSegments
+  }
+
+  // Step 6 (TODO): Can only proceed if plan is merged and segments are cleared
+  if (currentStep.value === 6) {
     const hasMergedDoc = !!pData.todo_md.trim()
     const hasActiveSegments = Object.keys(pData.todo_segments).length > 0
     return !hasMergedDoc || hasActiveSegments
@@ -272,9 +299,11 @@ const isStarterEmpty = computed(() => {
          !pData.goal.trim() &&
          !pData.base_project_path &&
          !pData.concept_md &&
+         !pData.design_md &&
          !pData.todo_md &&
          !pData.concept_llm_response &&
          !pData.stack_llm_response &&
+         !pData.design_llm_response &&
          !pData.todo_llm_response &&
          !pData.generate_llm_response
 })
@@ -306,7 +335,19 @@ const nextStep = () => {
         return
       }
     }
+
     if (currentStep.value === 5) {
+      if (Object.keys(pData.design_segments).length > 0) {
+        alert("You must merge the System Design into a final document before proceeding.")
+        return
+      }
+      if (!pData.design_md) {
+        alert("The system design cannot be empty.")
+        return
+      }
+    }
+
+    if (currentStep.value === 6) {
       if (Object.keys(pData.todo_segments).length > 0) {
         alert("You must merge the TODO plan into a final document before proceeding.")
         return
@@ -392,12 +433,13 @@ const nextStep = () => {
       <!-- Body: Full scrollable region for all content below the tabs -->
       <div id="starter-step-container" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg flex flex-col items-center h-0 min-h-0">
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 min-h-0">
-          <Step1Details v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
-          <Step2BaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
-          <Step3Concept v-if="currentStep === 3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
-          <Step4Stack v-if="currentStep === 4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
-          <Step5Todo v-if="currentStep === 5" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
-          <Step6Generate v-if="currentStep === 6" :pData="pData" @projectCreated="onProjectCreated" />
+          <StarterDetails v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <StarterBaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
+          <StarterConcept v-if="currentStep === 3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
+          <StarterStack v-if="currentStep === 4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <StarterDesign v-if="currentStep === 5" :pData="pData" :isLookingBack="isLookingBack" :designQuestionsMap="designQuestionsMap" @next="nextStep" />
+          <StarterTodo v-if="currentStep === 6" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
+          <StarterGenerate v-if="currentStep === 7" :pData="pData" @projectCreated="onProjectCreated" />
         </div>
       </div>
     </template>

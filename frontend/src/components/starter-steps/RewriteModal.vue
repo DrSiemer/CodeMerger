@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { X } from 'lucide-vue-next'
+import { X, Copy } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -9,6 +9,11 @@ const props = defineProps({
     required: true
   },
   isMergedMode: {
+    type: Boolean,
+    default: false
+  },
+  // If true, the parent will have already placed the compiled prompt on the clipboard
+  isPivotMode: {
     type: Boolean,
     default: false
   }
@@ -179,8 +184,12 @@ const applyChanges = () => {
           class="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-cm-top-bar shrink-0 cursor-move select-none"
         >
           <div class="min-w-0">
-            <h2 class="text-xl font-bold text-white pointer-events-none truncate">{{ isMergedMode ? 'Rewrite Document' : 'Rewrite Unsigned Segments' }}</h2>
-            <p class="text-gray-400 text-sm mt-1 pointer-events-none">Provide an instruction to modify the content.</p>
+            <h2 class="text-xl font-bold text-white pointer-events-none truncate">
+              {{ isPivotMode ? 'Apply Architectural Pivot' : (isMergedMode ? 'Rewrite Document' : 'Rewrite Unsigned Segments') }}
+            </h2>
+            <p class="text-gray-400 text-sm mt-1 pointer-events-none">
+              {{ isPivotMode ? 'Apply the LLM response to complete the pivot.' : 'Provide an instruction to modify the content.' }}
+            </p>
           </div>
           <button @click="emit('close')" class="text-gray-400 hover:text-white transition-colors shrink-0">
             <X class="w-6 h-6" />
@@ -189,8 +198,17 @@ const applyChanges = () => {
 
         <div class="flex-grow overflow-y-auto p-6 flex flex-col space-y-6 custom-scrollbar">
 
-          <!-- Instruction Section -->
-          <div class="space-y-2 shrink-0">
+          <!-- Pivot Alert (Bypasses Step 1) -->
+          <div v-if="isPivotMode" class="bg-cm-blue/10 border border-cm-blue/30 rounded p-4 flex items-center space-x-3 text-blue-100">
+             <Copy class="w-5 h-5 text-cm-blue shrink-0" />
+             <div class="text-sm leading-relaxed">
+               <span class="font-bold text-cm-blue">Pivot Prompt Copied!</span>
+               Paste the generated prompt into your LLM, then paste its response below to orchestrate the architectural pivot across your project drafts.
+             </div>
+          </div>
+
+          <!-- Instruction Section (Hidden in Pivot Mode) -->
+          <div v-if="!isPivotMode" class="space-y-2 shrink-0">
             <label class="text-white font-bold">1. Your Instruction</label>
             <textarea
               v-model="instruction"
@@ -210,7 +228,7 @@ const applyChanges = () => {
 
           <!-- Response Section -->
           <div class="space-y-2 flex-grow flex flex-col min-h-[200px]">
-            <label class="text-white font-bold">2. Paste LLM Response</label>
+            <label class="text-white font-bold">{{ isPivotMode ? 'Paste LLM Response' : '2. Paste LLM Response' }}</label>
             <textarea
               v-model="response"
               v-info="'rewrite_response'"

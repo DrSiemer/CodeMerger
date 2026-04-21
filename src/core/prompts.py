@@ -122,13 +122,49 @@ STARTER_STACK_PROMPT_INSTR = """
    - Example: [{"tech": "PostgreSQL", "rationale": "Relational handling for user data", "warning": "Switching to NoSQL would require a total rewrite of our complex analytical queries."}]
 """
 
+STARTER_DESIGN_PROMPT_INTRO = "You are a Senior Systems Architect. Based on the following Project Concept and Tech Stack, create a comprehensive System Design document."
+
+STARTER_DESIGN_PROMPT_INSTR = """
+### Instructions
+1. **Be Specific:** Do not write generic advice. Define actual table names, component hierarchies, state management strategies, and data payloads based on the concept and chosen stack.
+2. **Present Alternatives (CRITICAL):** Whenever you make a significant architectural decision that has a viable alternative (e.g., SQLite vs Postgres, SPA vs SSR, REST vs GraphQL, Context API vs Redux), you MUST wrap your chosen path in `<SELECTEDPATH>` and `</SELECTEDPATH>` tags.
+3. **Alternative JSON Block:** Immediately after the closing `</SELECTEDPATH>` tag, provide a JSON array of the alternative options wrapped in `<ALTERNATIVES>` and `</ALTERNATIVES>` tags. Format the JSON strictly as:
+<ALTERNATIVES>
+[
+  {{ "title": "Use [Alternative]", "description": "Explanation of the alternative and why it might be chosen instead." }}
+]
+</ALTERNATIVES>
+4. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
+   - Required Phase Names: {headers_str}.
+"""
+
+STARTER_PIVOT_PROMPT_TEMPLATE = """You are a Project Editor. The user has elected to pivot the system design.
+In the segment **{active_key}**, locate the following selected path:
+```
+{selected_path_text}
+```
+Replace this path with the following alternative: **{alt_title} - {alt_desc}**.
+
+### Content to Update
+{targets}
+
+{references}
+
+### Instructions
+1. Rewrite the '{active_key}' segment to fully integrate this new direction. Remove the `<ALTERNATIVES>` block for this specific choice once applied. You may leave the `<SELECTEDPATH>` wrapper or remove it, but integrate the new text smoothly.
+2. Review all other unlocked draft segments (Content to Update). If this architectural pivot affects them, update them to remain perfectly consistent.
+3. Ensure consistency with 'Locked Sections' (Reference Only), but do not modify them.
+4. Keep any other `<SELECTEDPATH>` and `<ALTERNATIVES>` blocks in the document exactly as they are, unless this new pivot makes them logically impossible.
+5. Return the COMPLETE updated text for all modified segments using the `<SECTION name="...">` format.
+6. Start your response with a brief summary wrapped in `<NOTES>...</NOTES>` explaining what you changed across the system design."""
+
 STARTER_TODO_PROMPT_INTRO = """You are a Technical Project Manager.
-Based on the following project Concept and Tech Stack, create a detailed TODO plan."""
+Based on the following project Concept, Tech Stack, and System Design, create a detailed TODO plan."""
 
 STARTER_TODO_PROMPT_INSTR = """
 ### Instructions
-1. **Analyze Relevance:** Compare the Reference Template against the Concept. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).
-2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be specific to this project (e.g., change 'Create tables' to 'Create `users` and `products` tables').
+1. **Analyze Relevance:** Compare the Reference Template against the Concept and System Design. **SKIP** any phase from the template that is not appropriate for this specific project (e.g., remove 'Database' for a static site, remove 'API' for a CLI tool).
+2. **Adapt Tasks:** For the phases you keep, adapt the tasks to be highly specific to the provided System Design (e.g., instead of 'Create tables', write 'Create `users` and `products` tables as defined in Data Models').
 3. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
    - Suggested Phase Names: {headers_str}.
    - **ADDITIONAL PHASES:** You are encouraged to add project-specific phases if the suggested list is insufficient. Simply create a descriptive name for any new section.

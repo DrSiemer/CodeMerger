@@ -100,6 +100,68 @@ class StarterApiPrompts:
         ]
         return "\n".join(parts)
 
+    def generate_design_prompt(self, project_data, questions_map):
+        """Constructs and returns the System Design prompt."""
+        if project_data is None: project_data = {}
+
+        concept_md = project_data.get("concept_md")
+        if not concept_md and project_data.get("concept_segments"):
+            concept_md = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
+
+        stack_raw = project_data.get("stack", "")
+        stack = self._format_stack_for_prompt(stack_raw)
+
+        friendly_map = {k: v.get("label", k) for k, v in questions_map.items()} if questions_map else c.DESIGN_SEGMENTS
+
+        valid_headers = [v for k, v in c.DESIGN_SEGMENTS.items()]
+        headers_str = ", ".join([f'"{h}"' for h in valid_headers])
+
+        parts = [
+            p.STARTER_DESIGN_PROMPT_INTRO,
+            "\n### Tech Stack\n" + stack,
+            "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
+            self._get_base_project_content(project_data),
+            p.STARTER_DESIGN_PROMPT_INSTR.format(headers_str=headers_str)
+        ]
+        return "\n".join(parts)
+
+    def get_starter_pivot_prompt(self, alternative, selected_text, active_key, targets, references, names, data, is_merged_mode=False):
+        """Generates the prompt for a contextual architectural pivot based on a chosen alternative."""
+        if data is None: data = {}
+
+        if is_merged_mode:
+            target_blocks = [f"{data.get('full_content', '')}"]
+            reference_blocks = []
+        else:
+            target_blocks = []
+            for t in targets:
+                name = names.get(t, t)
+                content = data.get(t, "")
+                target_blocks.append(f"--- Draft: {name} ---\n{content}\n")
+
+            reference_blocks = []
+            for r in references:
+                name = names.get(r, r)
+                content = data.get(r, "")
+                reference_blocks.append(f"--- Locked Section: {name} ---\n{content}\n")
+
+        references_str = ""
+        if reference_blocks:
+            references_str = "\n\n### Locked Sections (Reference Only - DO NOT CHANGE)\n" + "".join(reference_blocks)
+
+        alt_title = alternative.get("title", "Alternative Option")
+        alt_desc = alternative.get("description", "Apply this alternative direction.")
+        friendly_key = names.get(active_key, active_key)
+
+        return p.STARTER_PIVOT_PROMPT_TEMPLATE.format(
+            active_key=friendly_key,
+            selected_path_text=selected_text,
+            alt_title=alt_title,
+            alt_desc=alt_desc,
+            targets=''.join(target_blocks),
+            references=references_str
+        )
+
     def generate_todo_prompt(self, project_data, questions_map):
         """Constructs and returns the TODO plan generation prompt."""
         if project_data is None: project_data = {}
@@ -107,6 +169,10 @@ class StarterApiPrompts:
         concept_md = project_data.get("concept_md")
         if not concept_md and project_data.get("concept_segments"):
             concept_md = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
+
+        design_md = project_data.get("design_md")
+        if not design_md and project_data.get("design_segments"):
+            design_md = self.assemble_starter_document(project_data["design_segments"], c.DESIGN_ORDER, c.DESIGN_SEGMENTS)
 
         stack_raw = project_data.get("stack", "")
         stack = self._format_stack_for_prompt(stack_raw)
@@ -120,6 +186,7 @@ class StarterApiPrompts:
             p.STARTER_TODO_PROMPT_INTRO,
             "\n### Tech Stack\n" + stack,
             "\n### Project Concept\n```markdown\n" + (concept_md or "No concept provided.") + "\n```",
+            "\n### System Design\n```markdown\n" + (design_md or "No design provided.") + "\n```",
             example_code,
             "\n### Reference Template (Standard TODO List)\n```markdown\n" + todo_template + "\n```",
             p.STARTER_TODO_PROMPT_INSTR.format(headers_str=headers_str)
@@ -135,6 +202,7 @@ class StarterApiPrompts:
         stack = self._format_stack_for_prompt(stack_raw)
 
         concept = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS) if project_data.get("concept_segments") else project_data.get("concept_md", "")
+        design = self.assemble_starter_document(project_data["design_segments"], c.DESIGN_ORDER, c.DESIGN_SEGMENTS) if project_data.get("design_segments") else project_data.get("design_md", "")
         todo = self.assemble_starter_document(project_data["todo_segments"], c.TODO_ORDER, c.TODO_PHASES) if project_data.get("todo_segments") else project_data.get("todo_md", "")
 
         prompt_content = ""
@@ -161,6 +229,7 @@ class StarterApiPrompts:
             p.STARTER_GENERATE_MASTER_INTRO.format(name=name, stack=stack),
             "\n### Provided Files\n" + prompt_content,
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
+            "\n### System Design\n```markdown\n" + design + "\n```",
             "\n### TODO Plan\n```markdown\n" + todo + "\n```",
             example_code,
             p.STARTER_GENERATE_MASTER_INSTR

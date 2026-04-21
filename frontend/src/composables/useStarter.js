@@ -11,6 +11,7 @@ export function useStarter() {
   const exportStarterConfig = async (data) => window.pywebview ? await window.pywebview.api.export_starter_config(data) : false
   const loadStarterConfig = async () => window.pywebview ? await window.pywebview.api.load_starter_config() : null
   const getConceptQuestions = async () => window.pywebview ? await window.pywebview.api.get_concept_questions() : {}
+  const getDesignQuestions = async () => window.pywebview ? await window.pywebview.api.get_design_questions() : {}
   const getTodoQuestions = async () => window.pywebview ? await window.pywebview.api.get_todo_questions() : {}
   const getTodoTemplate = async () => window.pywebview ? await window.pywebview.api.get_todo_template() : ""
   const getBaseProjectData = async (path) => window.pywebview ? await window.pywebview.api.get_base_project_data(path) : null
@@ -18,6 +19,7 @@ export function useStarter() {
   const getTokenCountForPath = async (base, rel) => window.pywebview ? await window.pywebview.api.get_token_count_for_path(base, rel) : 0
   const generateConceptPrompt = async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_concept_prompt(data, qMap) : ""
   const generateStackPrompt = async (data) => window.pywebview ? await window.pywebview.api.generate_stack_prompt(data) : ""
+  const generateDesignPrompt = async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_design_prompt(data, qMap) : ""
   const generateTodoPrompt = async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_todo_prompt(data, qMap) : ""
   const generateMasterPrompt = async (data) => window.pywebview ? await window.pywebview.api.generate_master_prompt(data) : ""
   const parseStarterSegments = async (text) => window.pywebview ? await window.pywebview.api.parse_starter_segments(text) : {}
@@ -25,6 +27,7 @@ export function useStarter() {
   const getStarterRewritePrompt = async (inst, targets, Hacker, names, data, merged) => window.pywebview ? await window.pywebview.api.get_starter_rewrite_prompt(inst, targets, Hacker, names, data, merged) : ""
   const getStarterSyncPrompt = async (k, names, data, targets, Hacker) => window.pywebview ? await window.pywebview.api.get_starter_sync_prompt(k, names, data, targets, Hacker) : ""
   const getStarterQuestionPrompt = async (ctx, name, text, q) => window.pywebview ? await window.pywebview.api.get_starter_question_prompt(ctx, name, text, q) : ""
+  const getStarterPivotPrompt = async (alt, text, k, targets, refs, names, data, merged) => window.pywebview ? await window.pywebview.api.get_starter_pivot_prompt(alt, text, k, targets, refs, names, data, merged) : ""
   const mapParsedSegmentsToKeys = async (parsed, names) => window.pywebview ? await window.pywebview.api.map_parsed_segments_to_keys(parsed, names) : {}
   const createStarterProject = async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project(output, includeRef, pitch, data) : null
   const createStarterProjectOverwrite = async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project_overwrite(output, includeRef, pitch, data) : null
@@ -38,6 +41,7 @@ export function useStarter() {
     exportStarterConfig,
     loadStarterConfig,
     getConceptQuestions,
+    getDesignQuestions,
     getTodoQuestions,
     getTodoTemplate,
     getBaseProjectData,
@@ -45,6 +49,7 @@ export function useStarter() {
     getTokenCountForPath,
     generateConceptPrompt,
     generateStackPrompt,
+    generateDesignPrompt,
     generateTodoPrompt,
     generateMasterPrompt,
     parseStarterSegments,
@@ -52,6 +57,7 @@ export function useStarter() {
     getStarterRewritePrompt,
     getStarterSyncPrompt,
     getStarterQuestionPrompt,
+    getStarterPivotPrompt,
     mapParsedSegmentsToKeys,
     createStarterProject,
     createStarterProjectOverwrite,

@@ -170,6 +170,15 @@ class StarterApiScaffold:
                 (project_path / "concept.md").write_text(concept_content, encoding="utf-8")
                 files_created.append("concept.md")
 
+            design_segs = project_data.get("design_segments")
+            design_content = self.assemble_starter_document(design_segs, c.DESIGN_ORDER, c.DESIGN_SEGMENTS) if design_segs else project_data.get("design_md", "")
+            if design_content:
+                # Silently strip any lingering architectural pivot tags before rendering the final file to disk
+                clean_design_content = re.sub(r'<ALTERNATIVES>[\s\S]*?<\/ALTERNATIVES>', '', design_content, flags=re.IGNORECASE)
+                clean_design_content = re.sub(r'<\/?SELECTEDPATH>', '', clean_design_content, flags=re.IGNORECASE)
+                (project_path / "design.md").write_text(clean_design_content.strip(), encoding="utf-8")
+                files_created.append("design.md")
+
             todo_segs = project_data.get("todo_segments")
             todo_content = self.assemble_starter_document(todo_segs, c.TODO_ORDER, c.TODO_PHASES) if todo_segs else project_data.get("todo_md", "")
             if todo_content:
