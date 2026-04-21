@@ -68,6 +68,7 @@
     "frontend/src/components/starter-steps/StepSuccess.vue",
     "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
     "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
+    "frontend/src/components/visualizer/VisualizerCodeViewer.vue",
     "frontend/src/components/visualizer/VisualizerDetails.vue",
     "frontend/src/components/visualizer/VisualizerExplorer.vue",
     "frontend/src/components/visualizer/VisualizerInit.vue",
@@ -82,6 +83,7 @@
     "frontend/src/composables/useReviewerEditMode.js",
     "frontend/src/composables/useStarter.js",
     "frontend/src/composables/useSystem.js",
+    "frontend/src/composables/useVisualizer.js",
     "frontend/src/directives/vInfo.js",
     "frontend/src/main.js",
     "frontend/src/router/index.js",
@@ -150,5 +152,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 192580
+  "total_tokens": 192315
 }

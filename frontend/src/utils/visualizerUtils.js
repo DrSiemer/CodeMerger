@@ -136,6 +136,30 @@ export const removeFileFromTree = (root, filePath) => {
   return false;
 };
 
+export const moveRootFilesToMisc = (root) => {
+  // Aggressively move root-level files into a standard peer-level category
+  if (root.files && root.files.length > 0) {
+    if (!root.children) root.children = [];
+
+    let miscNode = root.children.find(c => c.name === 'Miscellaneous Artifacts');
+    if (!miscNode) {
+      miscNode = {
+        name: 'Miscellaneous Artifacts',
+        description: 'Project metadata, root configurations, and top-level documentation.',
+        domain: 'infrastructure',
+        children: [],
+        files: []
+      };
+      // Insert at the beginning so it's easy to find
+      root.children.unshift(miscNode);
+    }
+
+    miscNode.files.push(...root.files);
+    // Explicitly delete the files key from the root container to ensure it only has folders
+    delete root.files;
+  }
+};
+
 /**
  * Calculates a freshness color based on a rank ratio (0.0 to 1.0).
  * Gradient (Young to Old): #4CAF50, #8FAF4D, #C9A646, #8B5E3C, #6B7280
