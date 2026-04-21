@@ -103,8 +103,36 @@ watch(() => props.orderedKeys, (newKeys) => {
 }, { deep: true })
 
 watch(activeSegmentKey, () => {
-  nextTick(() => { if (scrollRef.value) scrollRef.value.scrollTop = 0 })
+  nextTick(() => {
+    if (scrollRef.value) {
+      scrollRef.value.scrollTop = 0
+
+      // If the newly selected segment has a diff, automatically scroll to the first changed line
+      if (props.baselines[activeSegmentKey.value]) {
+        setTimeout(() => {
+          const el = scrollRef.value
+          if (!el) return
+          const firstDiff = el.querySelector('.bg-\\[\\#1e301e\\], .bg-\\[\\#3a1e1e\\]')
+          if (firstDiff) {
+            firstDiff.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }, 200)
+      }
+    }
+  })
 })
+
+// Automatically switch to the first segment containing a diff after a Rewrite is applied
+watch(() => props.baselines, (newB) => {
+  if (!newB) return
+  const keysWithDiffs = props.orderedKeys.filter(k => newB[k] !== undefined)
+  if (keysWithDiffs.length > 0) {
+    // If the currently viewed segment doesn't have a diff, jump to the first one that does
+    if (!activeSegmentKey.value || newB[activeSegmentKey.value] === undefined) {
+      activeSegmentKey.value = keysWithDiffs[0]
+    }
+  }
+}, { deep: true })
 
 const hasPendingDiffs = computed(() => {
   return Object.keys(props.baselines).some(k => k !== '__merged__' && props.baselines[k] !== undefined)

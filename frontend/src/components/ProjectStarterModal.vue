@@ -372,7 +372,7 @@ const nextStep = () => {
 
     <StepSuccess v-if="successScreenData" :successScreenData="successScreenData" @close="emit('close')" />
 
-    <template v-else>
+    <div v-else class="flex-grow flex flex-col min-h-0">
       <!-- Header -->
       <div id="starter-header" class="bg-cm-top-bar border-b border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-4">
@@ -388,8 +388,8 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
-          <template v-if="!isStarterEmpty || true">
-            <button v-if="!isStarterEmpty" id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
+          <template v-if="!isStarterEmpty">
+            <button id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
               <Save class="w-4 h-4 mr-0 lg:mr-2"/>
               <span class="hidden lg:inline text-xs">Export</span>
             </button>
@@ -397,12 +397,12 @@ const nextStep = () => {
               <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
               <span class="hidden lg:inline text-xs">Import</span>
             </button>
-            <button v-if="!isStarterEmpty" id="btn-starter-reset" @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Wipe all progress and start fresh">
+            <button id="btn-starter-reset" @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Wipe all progress and start fresh">
               <Trash2 class="w-4 h-4 mr-0 lg:mr-2"/>
               <span class="hidden lg:inline text-xs">Reset</span>
             </button>
 
-            <div v-if="!isStarterEmpty" class="w-px h-6 bg-gray-600 mx-1"></div>
+            <div class="w-px h-6 bg-gray-600 mx-1"></div>
           </template>
 
           <button id="btn-starter-exit" @click="handleClose(false)" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
@@ -433,19 +433,19 @@ const nextStep = () => {
       <!-- Body: Full scrollable region for all content below the tabs -->
       <div id="starter-step-container" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg flex flex-col items-center h-0 min-h-0">
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 min-h-0">
-          <StarterDetails v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
-          <StarterBaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
-          <StarterConcept v-if="currentStep === 3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
-          <StarterStack v-if="currentStep === 4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
-          <StarterDesign v-if="currentStep === 5" :pData="pData" :isLookingBack="isLookingBack" :designQuestionsMap="designQuestionsMap" @next="nextStep" />
-          <StarterTodo v-if="currentStep === 6" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
-          <StarterGenerate v-if="currentStep === 7" :pData="pData" @projectCreated="onProjectCreated" />
+          <StarterDetails v-if="currentStep === 1" key="step1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <StarterBaseFiles v-if="currentStep === 2" key="step2" :pData="pData" :isLookingBack="isLookingBack" />
+          <StarterConcept v-if="currentStep === 3" key="step3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
+          <StarterStack v-if="currentStep === 4" key="step4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <StarterDesign v-if="currentStep === 5" key="step5" :pData="pData" :isLookingBack="isLookingBack" :designQuestionsMap="designQuestionsMap" @next="nextStep" />
+          <StarterTodo v-if="currentStep === 6" key="step6" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
+          <StarterGenerate v-if="currentStep === 7" key="step7" :pData="pData" @projectCreated="onProjectCreated" />
         </div>
       </div>
-    </template>
+    </div>
 
     <!-- Navigation Bar at Bottom -->
-    <div v-if="!successScreenData" id="starter-footer" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
+    <div v-if="!successScreenData" id="starter-footer" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0 relative z-10">
         <div class="flex items-center space-x-3">
              <button
                 id="btn-starter-prev"
@@ -474,6 +474,8 @@ const nextStep = () => {
         </div>
     </div>
 
+    <!-- Stable Teleport Target for Step Modals (Prevents VDOM reconciliation crashes) -->
+    <div id="starter-teleport-anchor"></div>
   </div>
 </template>
 

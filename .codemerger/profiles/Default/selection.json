@@ -780,27 +780,27 @@
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",
-    "tokens": 4290,
+    "tokens": 4343,
     "ignoreTokens": false,
-    "lines": 483,
-    "mtime": 1776768438.0505445,
-    "hash": "12227d43cb81e5cead559346cacc22689eab2d6f"
+    "lines": 485,
+    "mtime": 1776774634.2194917,
+    "hash": "ac2cc7c663adfaaa6ffb298349b61a9b59c47429"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
-    "tokens": 2872,
+    "tokens": 3064,
     "ignoreTokens": false,
-    "lines": 246,
-    "mtime": 1776771885.4101706,
-    "hash": "d65c1e5a8b95fa2f157e195d02da7f0488ab11c0"
+    "lines": 265,
+    "mtime": 1776774520.7295513,
+    "hash": "ebc06f8f14329441b50e9b2c0f2a6eee6ec21b17"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
-    "tokens": 4328,
+    "tokens": 4593,
     "ignoreTokens": false,
-    "lines": 346,
-    "mtime": 1776771885.4851725,
-    "hash": "721ae2ceb8e1590c94443b282c61718298e7e571"
+    "lines": 374,
+    "mtime": 1776774185.7033381,
+    "hash": "ef995f8094ef160c8682e9c51ad618678029766b"
   },
   {
     "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",
@@ -812,11 +812,11 @@
   },
   {
     "path": "frontend/src/components/starter-steps/RewriteModal.vue",
-    "tokens": 2103,
+    "tokens": 2107,
     "ignoreTokens": false,
     "lines": 250,
-    "mtime": 1776767807.8172133,
-    "hash": "a00fa2e89360803e8b5ea3cbbc63bcb95f604241"
+    "mtime": 1776774634.2982671,
+    "hash": "ac9429886d2d9ba5f81e1c59c16f177568399b02"
   },
   {
     "path": "frontend/src/components/starter-steps/NotesModal.vue",

@@ -170,8 +170,8 @@ const applyChanges = () => {
 </script>
 
 <template>
-  <Teleport to="#project-starter-modal">
-    <div class="absolute inset-0 bg-black/70 z-[100]">
+  <Teleport to="#starter-teleport-anchor">
+    <div class="fixed inset-0 bg-black/70 z-[100] pointer-events-auto">
       <div
         ref="modalRef"
         class="bg-cm-dark-bg w-[700px] h-[85%] rounded shadow-2xl border border-gray-600 flex flex-col overflow-hidden absolute"

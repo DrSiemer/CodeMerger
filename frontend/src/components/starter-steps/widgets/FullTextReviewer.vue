@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 import { HelpCircle, ChevronRight, Check, X as XIcon, PencilLine, Waypoints, ChevronDown, ChevronUp, Trash2 } from 'lucide-vue-next'
 import MarkdownRenderer from '../../MarkdownRenderer.vue'
 import ReviewerQuestions from '../ReviewerQuestions.vue'
@@ -106,6 +106,25 @@ const acceptDiff = () => {
     props.baselines['__merged__'] = undefined
   }
 }
+
+// Automatically scroll to the first diff line when the diff view is activated after a rewrite
+watch(() => props.baselines?.['__merged__'], (newVal) => {
+  if (newVal !== undefined) {
+    nextTick(() => {
+      // Small delay to allow DiffViewer to fetch highlighted lines via IPC and mount them in DOM
+      setTimeout(() => {
+        const container = scrollRef.value
+        if (!container) return
+
+        // Look for the first line with an 'add' or 'remove' background color (Tailwind escaped brackets)
+        const firstDiff = container.querySelector('.bg-\\[\\#1e301e\\], .bg-\\[\\#3a1e1e\\]')
+        if (firstDiff) {
+          firstDiff.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 200)
+    })
+  }
+})
 </script>
 
 <template>
