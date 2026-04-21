@@ -776,24 +776,24 @@
     "tokens": 4343,
     "ignoreTokens": false,
     "lines": 485,
-    "mtime": 1776774634.2194917,
-    "hash": "ac2cc7c663adfaaa6ffb298349b61a9b59c47429"
+    "mtime": 1776782914.2261617,
+    "hash": "34592195465fe017b094cde2f6937c242adf9645"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
-    "tokens": 3064,
+    "tokens": 3037,
     "ignoreTokens": false,
-    "lines": 265,
-    "mtime": 1776780983.3089106,
-    "hash": "d521bdead4794e94c40445f98c6e7135c9bf01e7"
+    "lines": 263,
+    "mtime": 1776782914.3121626,
+    "hash": "029244bdeb3dda2df299fc6b19101bb43301d154"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
-    "tokens": 4593,
+    "tokens": 4577,
     "ignoreTokens": false,
-    "lines": 374,
-    "mtime": 1776780983.3919127,
-    "hash": "372c4884b16cfb1c88cd816330c220a0d3508ad7"
+    "lines": 373,
+    "mtime": 1776782914.3935182,
+    "hash": "2925ecf842d2fa5f93ffe3e112f7daa6c5ee2e0c"
   },
   {
     "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",
