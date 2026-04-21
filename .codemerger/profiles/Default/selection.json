@@ -391,10 +391,10 @@
   },
   {
     "path": "frontend/src/utils/visualizerUtils.js",
-    "tokens": 1148,
-    "lines": 137,
-    "mtime": 1776690673.213663,
-    "hash": "f3eb6dfe331219fd0b9d6dca7f56fd733025340c"
+    "tokens": 1541,
+    "lines": 170,
+    "mtime": 1776760645.1580484,
+    "hash": "6007b01c53935328ac394c3393b63260e2600112"
   },
   {
     "path": "frontend/src/utils/info/mainInfo.js",
@@ -866,10 +866,10 @@
   },
   {
     "path": "frontend/src/components/VisualizerModal.vue",
-    "tokens": 4788,
-    "lines": 496,
-    "mtime": 1776721743.2924557,
-    "hash": "c9d3b665c30dd6533a57892a19573fe6828e8c3c"
+    "tokens": 5078,
+    "lines": 529,
+    "mtime": 1776761188.2850196,
+    "hash": "eac11fa63f6f9d1dd9d25227881a2f438addeb75"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",
@@ -880,24 +880,24 @@
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerExplorer.vue",
-    "tokens": 787,
-    "lines": 80,
-    "mtime": 1776684998.995919,
-    "hash": "f0e5c2e521987b886222423f7f146d586f9bf746"
+    "tokens": 825,
+    "lines": 84,
+    "mtime": 1776761188.378024,
+    "hash": "97291e0c53fad97ba63f407cf94ad3f65df434d6"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
-    "tokens": 720,
-    "lines": 70,
-    "mtime": 1776721232.5786586,
-    "hash": "a41f0ffe22f2b1553664cc2394e853766d4666f3"
+    "tokens": 890,
+    "lines": 87,
+    "mtime": 1776761434.4715586,
+    "hash": "981dc8874794e1d863eedd962ded4ba2580115e1"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerDetails.vue",
-    "tokens": 1144,
-    "lines": 93,
-    "mtime": 1776721232.5006604,
-    "hash": "429ba4e07bdd3bec585c41f8d5e241c6b902b981"
+    "tokens": 1281,
+    "lines": 105,
+    "mtime": 1776761563.870939,
+    "hash": "f5288a1bd9f53d08cbb2c29d8076fd3aa5342c82"
   },
   {
     "path": "assets/reference/concept_questions.json",

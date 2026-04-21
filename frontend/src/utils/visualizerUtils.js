@@ -135,3 +135,36 @@ export const removeFileFromTree = (root, filePath) => {
 
   return false;
 };
+
+/**
+ * Calculates a freshness color based on a rank ratio (0.0 to 1.0).
+ * Gradient (Young to Old): #4CAF50, #8FAF4D, #C9A646, #8B5E3C, #6B7280
+ */
+export const getFreshnessColor = (ratio) => {
+  if (ratio === undefined || ratio === null) return '#4B5563';
+
+  // Normalize ratio: 0 (youngest) to 1 (oldest)
+  const t = Math.max(0, Math.min(1, ratio));
+
+  const stops = [
+    [76, 175, 80],   // #4CAF50 (Youngest)
+    [143, 175, 77],  // #8FAF4D
+    [201, 166, 70],  // #C9A646
+    [139, 94, 60],   // #8B5E3C
+    [107, 114, 128]  // #6B7280 (Oldest)
+  ];
+
+  const segmentCount = stops.length - 1;
+  const scaledT = t * segmentCount;
+  const idx = Math.min(Math.floor(scaledT), segmentCount - 1);
+  const factor = scaledT - idx;
+
+  const c1 = stops[idx];
+  const c2 = stops[idx + 1];
+
+  const r = Math.round(c1[0] + (c2[0] - c1[0]) * factor);
+  const g = Math.round(c1[1] + (c2[1] - c1[1]) * factor);
+  const b = Math.round(c1[2] + (c2[2] - c1[2]) * factor);
+
+  return `rgb(${r}, ${g}, ${b})`;
+};

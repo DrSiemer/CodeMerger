@@ -46,6 +46,36 @@ const duplicateEntriesList = ref([]);
 const currentNavNode = computed(() => navPath.value[navPath.value.length - 1] || null);
 const displayNode = computed(() => hoveredNode.value || currentNavNode.value);
 
+/**
+ * Ranks all selected files by modification date (Youngest to Oldest).
+ * Uses file path as a tie-breaker to ensure every file gets a unique rank.
+ * Returns a map of path -> ratio (0.0 to 1.0).
+ */
+const rankedMtimeMap = computed(() => {
+  const files = [...activeProject.selectedFiles]
+    .filter(f => f.mtime)
+    .sort((a, b) => {
+      // Primary: Modification date (Descending)
+      if (b.mtime !== a.mtime) return b.mtime - a.mtime;
+      // Secondary: Path name (Stable unique ranking)
+      return a.path.localeCompare(b.path);
+    });
+
+  const map = {};
+  const count = files.length;
+
+  if (count === 1) {
+    map[files[0].path] = 0;
+  } else if (count > 1) {
+    files.forEach((f, idx) => {
+      // Equal distribution: 0.0 for youngest, 1.0 for oldest
+      map[f.path] = idx / (count - 1);
+    });
+  }
+
+  return map;
+});
+
 const diveIntoFile = (f) => {
   navPath.value.push({
     id: 'file-' + f.path,
@@ -425,6 +455,7 @@ const handleCopyNodeCode = async (node) => {
           v-else
           :nav-path="navPath"
           :search-query="searchQuery"
+          :ranked-mtime-map="rankedMtimeMap"
           @nav-to="(idx) => navPath.splice(idx + 1)"
           @dive-in="(node) => navPath.push(node)"
           @node-hover="(node) => hoveredNode = node"
@@ -451,14 +482,16 @@ const handleCopyNodeCode = async (node) => {
             v-else-if="!currentNavNode?.children?.length"
             :node="currentNavNode"
             :search-query="searchQuery"
+            :ranked-mtime-map="rankedMtimeMap"
             @open-file="openFile"
             @select-file="diveIntoFile"
           />
 
-          <template #details>
+          <template #details="{ rankedMtimeMap }">
             <VisualizerDetails
               :display-node="displayNode"
               :can-copy="canCopy"
+              :ranked-mtime-map="rankedMtimeMap"
               @open-file="openFile"
               @copy-code="handleCopyNodeCode"
             />

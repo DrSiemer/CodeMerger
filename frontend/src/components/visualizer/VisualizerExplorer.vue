@@ -3,7 +3,11 @@ import { nodeHasMatch } from '../../utils/visualizerUtils'
 
 const props = defineProps({
   navPath: Array,
-  searchQuery: String
+  searchQuery: String,
+  rankedMtimeMap: {
+    type: Object,
+    default: () => ({})
+  }
 })
 
 const emit = defineEmits(['nav-to', 'node-hover', 'dive-in'])
@@ -38,7 +42,7 @@ const getRectStyle = (layout) => {
     <!-- Tree Layout Area -->
     <div class="flex-grow flex min-h-0">
       <!-- Side panel slot moved to the left -->
-      <slot name="details"></slot>
+      <slot name="details" :rankedMtimeMap="rankedMtimeMap"></slot>
 
       <div class="flex-grow border-l border-gray-700 relative bg-[#1A1A1A] overflow-hidden p-2" v-info="'viz_explorer_tree'">
         <div v-if="navPath[navPath.length - 1]?.children?.length" class="absolute inset-0 m-2">

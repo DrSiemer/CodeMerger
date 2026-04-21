@@ -2,13 +2,23 @@
 import { FileCode, ClipboardPaste, ExternalLink } from 'lucide-vue-next'
 import { useAppState } from "../../composables/useAppState"
 import MarkdownRenderer from '../MarkdownRenderer.vue'
+import { getFreshnessColor } from '../../utils/visualizerUtils'
 
-defineProps({
+const props = defineProps({
   displayNode: Object,
-  canCopy: Boolean
+  canCopy: Boolean,
+  rankedMtimeMap: {
+    type: Object,
+    default: () => ({})
+  }
 })
 
 const emit = defineEmits(['copy-code', 'open-file'])
+
+const getFileFreshnessColor = (path) => {
+  const ratio = props.rankedMtimeMap[path] !== undefined ? props.rankedMtimeMap[path] : 1.0;
+  return getFreshnessColor(ratio);
+};
 const { editorFontSize } = useAppState()
 </script>
 
@@ -72,15 +82,17 @@ const { editorFontSize } = useAppState()
       <!-- Quick File List -->
       <div v-if="displayNode.files?.length" class="space-y-4 pt-6">
         <div class="text-xs font-black text-gray-500 uppercase tracking-[0.2em]">Files ({{ displayNode.files.length }})</div>
-        <div class="space-y-1">
+        <div class="space-y-2">
           <div
             v-for="file in displayNode.files"
             :key="file.path"
             @click="emit('open-file', file.path)"
-            class="flex items-center space-x-2 text-gray-400 group cursor-pointer hover:text-white transition-colors"
+            class="flex items-center space-x-3 text-gray-400 group cursor-pointer hover:text-white transition-colors p-1.5 rounded hover:bg-white/5 border-l-4"
+            :style="{ borderLeftColor: getFileFreshnessColor(file.path) }"
+            :title="file.path"
           >
-              <FileCode class="w-3 h-3 text-gray-600 group-hover:text-cm-blue shrink-0 transition-colors" />
-              <span class="text-xs font-mono truncate text-gray-300 group-hover:text-white transition-colors">{{ file.path }}</span>
+              <FileCode class="w-4 h-4 shrink-0 transition-colors" :style="{ color: getFileFreshnessColor(file.path) }" />
+              <span class="text-xs font-mono truncate text-gray-300 group-hover:text-white transition-colors">{{ file.path.split('/').pop() }}</span>
           </div>
         </div>
       </div>

@@ -2,10 +2,18 @@
 import { computed } from 'vue'
 import { FileCode, ExternalLink } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
+import { useAppState } from '../../composables/useAppState'
+import { getFreshnessColor } from '../../utils/visualizerUtils'
+
+const { activeProject } = useAppState()
 
 const props = defineProps({
   node: Object,
-  searchQuery: String
+  searchQuery: String,
+  rankedMtimeMap: {
+    type: Object,
+    default: () => ({})
+  }
 })
 
 const emit = defineEmits(['open-file', 'select-file'])
@@ -34,6 +42,12 @@ const highlightMatch = (text, query) => {
       : part
   ).join('');
 };
+
+const getFileFreshnessColor = (path) => {
+  // If the file isn't in the rank map (e.g. out of sync), default to 1.0 (Oldest color)
+  const ratio = props.rankedMtimeMap[path] !== undefined ? props.rankedMtimeMap[path] : 1.0;
+  return getFreshnessColor(ratio);
+};
 </script>
 
 <template>
@@ -47,11 +61,14 @@ const highlightMatch = (text, query) => {
       v-for="file in processedLeafFiles"
       :key="file.path"
       @click="emit('select-file', file)"
-      class="bg-[#2a2a2a] border rounded-lg p-5 shadow-sm hover:border-gray-500 transition-all duration-300 cursor-pointer group/file"
-      :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'border-cm-blue ring-1 ring-cm-blue/30 scale-[1.01]' : 'border-gray-700']"
+      class="bg-[#2a2a2a] border border-gray-800 border-l-4 rounded-lg p-5 shadow-sm hover:border-gray-600 transition-all duration-300 cursor-pointer group/file"
+      :class="[searchQuery && (file.path.toLowerCase().includes(searchQuery.toLowerCase()) || (file.description && file.description.toLowerCase().includes(searchQuery.toLowerCase()))) ? 'ring-1 ring-cm-blue/30 scale-[1.01]' : '']"
+      :style="{ borderLeftColor: getFileFreshnessColor(file.path) }"
     >
       <div class="flex items-center justify-between mb-3 min-w-0">
-        <span class="text-cm-blue font-mono font-bold text-sm break-all" v-html="highlightMatch(file.path, searchQuery)"></span>
+        <div class="flex items-center truncate mr-2">
+          <span class="text-cm-blue font-mono font-bold text-sm truncate" v-html="highlightMatch(file.path, searchQuery)"></span>
+        </div>
         <button
           @click.stop="emit('open-file', file.path)"
           class="p-1.5 rounded bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 transition-colors shrink-0 ml-2 opacity-0 group-hover/file:opacity-100 shadow"

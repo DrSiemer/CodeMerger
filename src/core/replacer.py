@@ -264,7 +264,7 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
 
         return None
 
-    # Strategy 5: Whitespace-Normalized Match (Raincast Fallback)
+    # Strategy 5: Whitespace-Normalized Match
     res = apply_normalized_match(normalize_whitespace, "Whitespace-Normalized Match")
     if res: return res
 
