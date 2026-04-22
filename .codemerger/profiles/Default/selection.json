@@ -775,9 +775,9 @@
     "path": "frontend/src/components/ProjectStarterModal.vue",
     "tokens": 4343,
     "ignoreTokens": false,
-    "lines": 485,
-    "mtime": 1776782914.2261617,
-    "hash": "34592195465fe017b094cde2f6937c242adf9645"
+    "lines": 486,
+    "mtime": 1776894625.2033887,
+    "hash": "ef976c12c9b262a1eb36c7a6f157145939c6a542"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
@@ -1067,8 +1067,8 @@
     "path": "src/core/prompts/starter.py",
     "tokens": 2109,
     "lines": 144,
-    "mtime": 1776780769.6009562,
-    "hash": "b9cef659a64f65b960454087039228970a8b3a9c"
+    "mtime": 1776895015.3821542,
+    "hash": "9da8068681816a8f351db4b47eda4a2f45579deb"
   },
   {
     "path": "src/core/prompts/visualizer.py",

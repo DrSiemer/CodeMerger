@@ -36,7 +36,7 @@ STARTER_DESIGN_PROMPT_INSTR = """
    - **Format:** Format the JSON strictly as:
 <ALTERNATIVES>
 [
-  { "title": "Pivot to [Option Name]", "description": "A high-level technical description of this path and the specific scenario or priority where this choice would be superior to the current selection." }
+  {{ "title": "Pivot to [Option Name]", "description": "A high-level technical description of this path and the specific scenario or priority where this choice would be superior to the current selection." }}
 ]
 </ALTERNATIVES>
 4. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
