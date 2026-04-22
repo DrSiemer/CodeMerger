@@ -388,11 +388,12 @@ const nextStep = () => {
             {{ toastMessage }}
           </span>
 
+          <button id="btn-starter-import" @click="importConfig" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Restore project configuration from JSON">
+            <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
+            <span class="hidden lg:inline text-xs">Import</span>
+          </button>
+
           <template v-if="!isStarterEmpty">
-            <button id="btn-starter-import" @click="importConfig" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Restore project configuration from JSON">
-              <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
-              <span class="hidden lg:inline text-xs">Import</span>
-            </button>
             <button id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
               <Save class="w-4 h-4 mr-0 lg:mr-2"/>
               <span class="hidden lg:inline text-xs">Export</span>
