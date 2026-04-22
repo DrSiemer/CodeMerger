@@ -136,3 +136,33 @@ class StarterApiSession:
                 return f.read()
         except Exception:
             return ""
+
+    def get_random_silly_suggestion(self):
+        """Returns a random project title from the silly suggestions reference list."""
+        import random
+        path = os.path.join(REFERENCE_DIR, "silly_suggestions.json")
+        try:
+            if not os.path.exists(path):
+                return "e.g. My Next Big Idea"
+            with open(path, "r", encoding="utf-8") as f:
+                suggestions = json.load(f)
+                if not suggestions:
+                    return "e.g. My Next Big Idea"
+                return "e.g. " + random.choice(suggestions)
+        except Exception:
+            return "e.g. My Next Big Idea"
+
+    def get_random_silly_suggestion(self):
+        """Returns a random project idea from the silly suggestions reference list."""
+        import random
+        path = os.path.join(REFERENCE_DIR, "silly_suggestions.json")
+        try:
+            if not os.path.exists(path):
+                return "e.g. A desktop tool that bundles project code..."
+            with open(path, "r", encoding="utf-8") as f:
+                suggestions = json.load(f)
+                if not suggestions:
+                    return "e.g. A desktop tool that bundles project code..."
+                return "e.g. " + random.choice(suggestions)
+        except Exception:
+            return "e.g. A desktop tool that bundles project code..."

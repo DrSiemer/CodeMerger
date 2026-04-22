@@ -232,7 +232,7 @@ const handleReset = () => {
       <div class="max-w-3xl mx-auto w-full flex flex-col h-full space-y-4 text-gray-100">
         <div class="shrink-0">
           <h3 class="text-2xl font-bold text-white">Project Concept</h3>
-          <p class="text-gray-400 mt-1">Describe what you want to build in a few sentences. The LLM will use this to generate the core sections.</p>
+          <p class="text-gray-400 mt-1">Describe what you want to build. Provide as much detail as you can; features, logic, and goals.</p>
         </div>
 
         <textarea

@@ -1,4 +1,5 @@
 <script setup>
+import { ref, onMounted } from 'vue'
 import { FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
@@ -15,7 +16,13 @@ const props = defineProps({
 
 defineEmits(['next'])
 
-const { selectDirectory, getBaseProjectData, statusMessage } = useAppState()
+const { selectDirectory, getBaseProjectData, getRandomSillySuggestion, statusMessage } = useAppState()
+
+const placeholderName = ref('e.g. My Next Big Idea')
+
+onMounted(async () => {
+  placeholderName.value = await getRandomSillySuggestion()
+})
 
 const browseBaseProject = async () => {
   const folder = await selectDirectory()
@@ -55,7 +62,7 @@ const clearBaseProject = () => {
       <div class="space-y-6">
         <div v-info="'starter_details_name'">
           <label class="block text-gray-200 font-bold mb-2 uppercase tracking-wider text-xs">Project Name</label>
-          <input v-model="pData.name" type="text" class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 focus:border-cm-blue outline-none text-lg" placeholder="e.g. My Next Big Idea">
+          <input v-model="pData.name" type="text" class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 focus:border-cm-blue outline-none text-lg" :placeholder="placeholderName">
         </div>
 
         <div class="pt-6 border-t border-gray-700">

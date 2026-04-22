@@ -13,6 +13,7 @@
     "assets/reference/concept_questions.json",
     "assets/reference/design.md",
     "assets/reference/design_questions.json",
+    "assets/reference/silly_suggestions.json",
     "assets/reference/todo.md",
     "assets/reference/todo_questions.json",
     "codemerger.spec",
@@ -156,5 +157,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 193887
+  "total_tokens": 194596
 }

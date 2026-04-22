@@ -310,6 +310,10 @@ const isStarterEmpty = computed(() => {
 
 const goToStep = (step) => {
   if (step <= maxAccessibleStep.value || step === 2) {
+    // If navigating to the Concept step and goal is empty, seed it with the project name
+    if (step === 3 && !pData.goal.trim() && pData.name.trim()) {
+      pData.goal = pData.name
+    }
     currentStep.value = step
     saveState()
   }

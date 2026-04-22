@@ -33,6 +33,7 @@ export function useStarter() {
   const createStarterProjectOverwrite = async (output, includeRef, pitch, data) => window.pywebview ? await window.pywebview.api.create_starter_project_overwrite(output, includeRef, pitch, data) : null
   const selectDirectory = async () => window.pywebview ? await window.pywebview.api.select_directory() : null
   const openPath = async (path) => window.pywebview ? await window.pywebview.api.open_path(path) : false
+  const getRandomSillySuggestion = async () => window.pywebview ? await window.pywebview.api.get_random_silly_suggestion() : "e.g. My Next Big Idea"
 
   return {
     clearStarterSession,
@@ -62,6 +63,7 @@ export function useStarter() {
     createStarterProject,
     createStarterProjectOverwrite,
     selectDirectory,
-    openPath
+    openPath,
+    getRandomSillySuggestion
   }
 }

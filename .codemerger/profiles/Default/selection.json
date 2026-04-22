@@ -270,11 +270,11 @@
   },
   {
     "path": "src/api_parts/starter_api_session.py",
-    "tokens": 1055,
+    "tokens": 1334,
     "ignoreTokens": false,
-    "lines": 138,
-    "mtime": 1776768598.328565,
-    "hash": "087c528a0e44de36251885301ca66b206b57a5dd"
+    "lines": 168,
+    "mtime": 1776896420.2113416,
+    "hash": "c693634cb1f3067ecdd99020766f00af6f45329c"
   },
   {
     "path": "src/api_parts/starter_api_parsing.py",
@@ -473,11 +473,11 @@
   },
   {
     "path": "frontend/src/composables/useStarter.js",
-    "tokens": 1195,
+    "tokens": 1241,
     "ignoreTokens": false,
-    "lines": 67,
-    "mtime": 1776767807.7002041,
-    "hash": "9b16ac3e287f97dfe092016170b312bd0ea6df22"
+    "lines": 69,
+    "mtime": 1776896420.2743406,
+    "hash": "0316faf49b31b527d008e72d4c155c8b6feee294"
   },
   {
     "path": "frontend/src/composables/useAppState.js",
@@ -773,11 +773,11 @@
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",
-    "tokens": 4343,
+    "tokens": 4391,
     "ignoreTokens": false,
-    "lines": 486,
-    "mtime": 1776894625.2033887,
-    "hash": "ef976c12c9b262a1eb36c7a6f157145939c6a542"
+    "lines": 490,
+    "mtime": 1776896650.5822802,
+    "hash": "d79a6569b743f367a8110839d92a22c81ad4210b"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
@@ -988,10 +988,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterDetails.vue",
-    "tokens": 963,
-    "lines": 89,
-    "mtime": 1776768437.4134235,
-    "hash": "0c6b8f2fe3cd71d65a6ae8bd93067131c3cefdae"
+    "tokens": 1009,
+    "lines": 96,
+    "mtime": 1776896420.3473423,
+    "hash": "679796103e8fa23dc7c98315ccc2a49d4bcaf874"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterBaseFiles.vue",
@@ -1002,10 +1002,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterConcept.vue",
-    "tokens": 2475,
+    "tokens": 2482,
     "lines": 269,
-    "mtime": 1776893246.6231523,
-    "hash": "53f1a78567890dca542d0da1c996e7a090df8903"
+    "mtime": 1776896650.5832827,
+    "hash": "cdbe5ff002b66ffe0c31d947b3af1d78b86df2cc"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
@@ -1083,5 +1083,12 @@
     "lines": 42,
     "mtime": 1776777470.1522586,
     "hash": "e39dc89f36152f7407d8ac46db526527d6f0b940"
+  },
+  {
+    "path": "assets/reference/silly_suggestions.json",
+    "tokens": 283,
+    "lines": 36,
+    "mtime": 1776896943.7299097,
+    "hash": "0ce7ee05147dae9914332c1da8a38c0bd631edc0"
   }
 ]
