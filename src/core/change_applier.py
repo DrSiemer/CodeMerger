@@ -197,6 +197,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     failed_paths = []
     for match in file_block_regex.finditer(markdown_text):
         rel_path = match.group('path').strip('`\'"').replace('\\', '/').lstrip('./').lstrip('/')
+        llm_raw_content = match.group('content')
 
         current_disk_content = get_current_file_content(base_dir, rel_path)
 
@@ -326,17 +327,6 @@ def parse_and_plan_changes(base_dir, markdown_text):
             'hint': "The AI is hallucinating old code or providing ambiguous snippets. You can choose to 'Continue' with valid files or 'Copy Correction Prompt' to fix the errors."
         })
         return result
-
-    if failed_paths:
-        # Construct detailed error for the UI
-        err_msg = "\n".join([f"- {p}: {e}" for p, e in failed_paths])
-        return {
-            'status': 'ERROR',
-            'error_type': 'FAST_APPLY',
-            'failed_paths': failed_paths,  # Return list of (path, err_string) tuples
-            'message': f"Fast-Apply Error in {len(failed_paths)} file(s):\n{err_msg}",
-            'hint': "The AI is hallucinating old code or providing ambiguous snippets. Click 'Copy Correction Prompt' to send instructions back to the AI."
-        }
 
     if not all_blocks:
         result['status'] = 'UNFORMATTED'
