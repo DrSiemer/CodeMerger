@@ -130,9 +130,9 @@
   },
   {
     "path": "src/core/change_applier.py",
-    "mtime": 1776723629.69417,
-    "hash": "0ae029d28aea3891c1f2970e7859b6bebf36126f",
-    "tokens": 3080,
+    "mtime": 1776892341.9080148,
+    "hash": "9e894ed4c2d5085ad18ed8075a84f2e05f2f6b2d",
+    "tokens": 3102,
     "lines": 350
   },
   {
@@ -262,11 +262,11 @@
   },
   {
     "path": "src/api_parts/changes_api.py",
-    "tokens": 3385,
+    "tokens": 3648,
     "ignoreTokens": false,
-    "lines": 352,
-    "mtime": 1776772178.718872,
-    "hash": "4d382aba28db9d7b8010bcc36d7a192e466ed601"
+    "lines": 377,
+    "mtime": 1776892341.8490145,
+    "hash": "ea7ff8ec0831249a7d0c1d217802a16fccfff89d"
   },
   {
     "path": "src/api_parts/starter_api_session.py",

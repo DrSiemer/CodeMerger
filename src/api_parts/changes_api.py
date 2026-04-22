@@ -4,6 +4,8 @@ import pyperclip
 from src.core.utils import get_token_count_for_text, get_file_hash
 from src.core import change_applier
 from src.core.highlighter import get_highlighted_diff, get_pygments_css
+from src.core.merger import get_language_from_path
+from .. import constants as c
 
 log = logging.getLogger("CodeMerger")
 
@@ -288,14 +290,37 @@ class ChangesApi:
             # 2. Handle Mismatches
             if mismatch_paths:
                 blocks = []
-                for rel_path in mismatch_paths:
-                    content = self.get_file_content(rel_path)
-                    if content is not None:
-                        from src.core.merger import get_language_from_path
-                        lang = get_language_from_path(rel_path)
-                        blocks.append(f"--- File: `{rel_path}` ---\n```{lang}\n{content}\n```\n--- End of file ---")
+                project_config = self.project_manager.get_current_project()
+                known_files = project_config.known_files if project_config else []
+                resolved_paths_for_header = []
 
-                paths_str = ", ".join([f"`{p}`" for p in mismatch_paths])
+                for rel_path in mismatch_paths:
+                    # Logic to resolve paths that look "fine" but might have captured quotes or inconsistent slashes
+                    lookup_path = rel_path.strip('`\'"').replace('\\', '/').lstrip('./').lstrip('/')
+                    content = self.get_file_content(lookup_path)
+                    actual_path = lookup_path
+
+                    # Deep Resolution: If direct hit fails, check known files for suffix matches
+                    if content is None and known_files:
+                        for k_path in known_files:
+                            if k_path.endswith(lookup_path) or lookup_path.endswith(k_path):
+                                resolved_content = self.get_file_content(k_path)
+                                if resolved_content is not None:
+                                    content = resolved_content
+                                    actual_path = k_path
+                                    break
+
+                    if content is not None:
+                        lang = get_language_from_path(actual_path)
+                        header = f"{c.MARKER_PREFIX}{c.MARKER_FILE}`{actual_path}` ---"
+                        footer = f"{c.MARKER_PREFIX}{c.MARKER_EOF} ---"
+                        blocks.append(f"{header}\n```{lang}\n{content}\n```\n{footer}")
+                        resolved_paths_for_header.append(actual_path)
+                    else:
+                        blocks.append(f"--- Note: Current source code for `{rel_path}` could not be retrieved. Please verify the file path. ---")
+                        resolved_paths_for_header.append(rel_path)
+
+                paths_str = ", ".join([f"`{p}`" for p in resolved_paths_for_header])
                 prompt_parts.append(
                     "Surgical Patch Mismatch: The ORIGINAL code blocks provided for the following files do not match my current local source:\n"
                     f"{paths_str}\n\n"
@@ -317,7 +342,7 @@ class ChangesApi:
                 return "Failed to copy prompt."
 
         # Standard Format Admonishment
-        LT, RT, PRE = "<", ">", "--- "
+        LT, RT, PRE = "<", ">", c.MARKER_PREFIX
         IN_T, ANS_W = "INTRO", "ANSWERS TO DIRECT USER QUESTIONS"
         CHA_N, VER_I, UNC_H = "CHANGES", "VERIFICATION", "UNCHANGED"
 

@@ -182,7 +182,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
         deletions_proposed = [m.strip().replace('\\', '/') for m in del_matches if m.strip()]
 
     file_block_regex = re.compile(
-        r'^' + re.escape(c.MARKER_PREFIX) + r'File: [`\'](?P<path>[^`\n]+)[`\'] ---\s*\n+'
+        r'^' + re.escape(c.MARKER_PREFIX) + r'File: [`\'"]?(?P<path>[^`\'"\n]+)[`\'"]? ---\s*\n+'
         r'```[^\n]*\n'
         r'(?P<content>.*?)'
         r'\n```\s*\n'
@@ -196,8 +196,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
     failed_paths = []
     for match in file_block_regex.finditer(markdown_text):
-        rel_path = match.group('path').strip().replace('\\', '/')
-        llm_raw_content = match.group('content')
+        rel_path = match.group('path').strip('`\'"').replace('\\', '/').lstrip('./').lstrip('/')
 
         current_disk_content = get_current_file_content(base_dir, rel_path)
 
