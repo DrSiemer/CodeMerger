@@ -1,12 +1,29 @@
 import logging
 import sys
 import os
+import re
 from logging.handlers import RotatingFileHandler
 from rich.logging import RichHandler
 from .paths import PERSISTENT_DATA_DIR
 from .. import constants as c
 
 log = logging.getLogger("CodeMerger")
+
+_SECRET_PATTERNS = [
+    (re.compile(r"(?i)(bearer\s+)[^\s\"']+"), r"\1[REDACTED]"),
+    (re.compile(r"(?i)(api[_-]key[\"']?\s*[:=]\s*[\"']?)[^\s\"']+"), r"\1[REDACTED]"),
+    (re.compile(r"(?i)(sk-[A-Za-z0-9]{20,})"), "[REDACTED_OPENAI]"),
+    (re.compile(r"(?i)(ghp_[A-Za-z0-9]{20,})"), "[REDACTED_GITHUB]"),
+    (re.compile(r"(?i)(https?://)[^:@\s]+:[^@\s]+@"), r"\1[USER:PASS_REDACTED]@")
+]
+
+class RedactingFormatter(logging.Formatter):
+    """Wraps log records to scrub sensitive data before output."""
+    def format(self, record):
+        msg = super().format(record)
+        for pattern, replacement in _SECRET_PATTERNS:
+            msg = pattern.sub(replacement, msg)
+        return msg
 
 class DummyStream:
     """Swallows writes to prevent crashes when standard streams are unavailable"""
@@ -44,7 +61,8 @@ def setup_logging():
                     tracebacks_show_locals=True,
                     markup=True
                 )
-                console_handler.setFormatter(logging.Formatter("%(message)s"))
+                # Use RedactingFormatter even for console output
+                console_handler.setFormatter(RedactingFormatter("%(message)s"))
                 log.addHandler(console_handler)
             except Exception:
                 pass
@@ -57,7 +75,7 @@ def setup_logging():
                 backupCount=c.LOG_BACKUP_COUNT,
                 encoding='utf-8'
             )
-            file_formatter = logging.Formatter(
+            file_formatter = RedactingFormatter(
                 '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
             )
             file_handler.setFormatter(file_formatter)
