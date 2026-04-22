@@ -83,9 +83,9 @@ const processDesign = async () => {
 
   const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
 
-  for (const k in props.pData.design_segments) delete props.pData.design_segments[k]
-  for (const k in props.pData.design_signoffs) delete props.pData.design_signoffs[k]
-  for (const k in props.pData.design_baselines) delete props.pData.design_baselines[k]
+  Object.keys(props.pData.design_segments).forEach(k => delete props.pData.design_segments[k])
+  Object.keys(props.pData.design_signoffs).forEach(k => delete props.pData.design_signoffs[k])
+  Object.keys(props.pData.design_baselines).forEach(k => delete props.pData.design_baselines[k])
 
   Object.assign(props.pData.design_segments, mapped)
   Object.keys(mapped).forEach(k => props.pData.design_signoffs[k] = false)
@@ -100,9 +100,9 @@ const mergeDesign = async () => {
   const md = await assembleStarterDocument(props.pData.design_segments, DESIGN_ORDER, getFriendlyNames())
   props.pData.design_md = md
 
-  for (const k in props.pData.design_segments) delete props.pData.design_segments[k]
-  for (const k in props.pData.design_signoffs) delete props.pData.design_signoffs[k]
-  for (const k in props.pData.design_baselines) delete props.pData.design_baselines[k]
+  Object.keys(props.pData.design_segments).forEach(k => delete props.pData.design_segments[k])
+  Object.keys(props.pData.design_signoffs).forEach(k => delete props.pData.design_signoffs[k])
+  Object.keys(props.pData.design_baselines).forEach(k => delete props.pData.design_baselines[k])
 }
 
 // --- Rewrite Logic ---
@@ -224,9 +224,9 @@ const getMergedQuestionPrompt = async (question) => {
 
 const handleReset = () => {
   if (confirm("Are you sure you want to start over? This will clear current progress for the Design step.")) {
-    for (const k in props.pData.design_segments) delete props.pData.design_segments[k]
-    for (const k in props.pData.design_signoffs) delete props.pData.design_signoffs[k]
-    for (const k in props.pData.design_baselines) delete props.pData.design_baselines[k]
+    Object.keys(props.pData.design_segments).forEach(k => delete props.pData.design_segments[k])
+    Object.keys(props.pData.design_signoffs).forEach(k => delete props.pData.design_signoffs[k])
+    Object.keys(props.pData.design_baselines).forEach(k => delete props.pData.design_baselines[k])
     props.pData.design_md = ""
     props.pData.design_llm_response = ""
     showPasteArea.value = false

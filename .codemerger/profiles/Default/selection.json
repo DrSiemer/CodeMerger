@@ -1004,8 +1004,8 @@
     "path": "frontend/src/components/starter-steps/StarterConcept.vue",
     "tokens": 2475,
     "lines": 269,
-    "mtime": 1776778495.12522,
-    "hash": "27d120ee3e1d8f13394ad5d2dcd79bd23b388edb"
+    "mtime": 1776893246.6231523,
+    "hash": "53f1a78567890dca542d0da1c996e7a090df8903"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
@@ -1018,15 +1018,15 @@
     "path": "frontend/src/components/starter-steps/StarterDesign.vue",
     "tokens": 2677,
     "lines": 309,
-    "mtime": 1776774902.456696,
-    "hash": "74118776ba7775241e47229cb6586183be1a7dbd"
+    "mtime": 1776893246.6971552,
+    "hash": "1d13e702d5a8d6e0ef78bc5af80e272456adc294"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterTodo.vue",
     "tokens": 2430,
     "lines": 277,
-    "mtime": 1776774902.5397356,
-    "hash": "0348fc75cbaa97f402af0e6a76179f42c2aecef4"
+    "mtime": 1776893246.7651515,
+    "hash": "88482ff1414da64977655cdeabf8e68745907ee6"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterGenerate.vue",

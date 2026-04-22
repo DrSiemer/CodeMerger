@@ -92,9 +92,9 @@ const processTodo = async () => {
 
   const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
 
-  for (const k in props.pData.todo_segments) delete props.pData.todo_segments[k]
-  for (const k in props.pData.todo_signoffs) delete props.pData.todo_signoffs[k]
-  for (const k in props.pData.todo_baselines) delete props.pData.todo_baselines[k]
+  Object.keys(props.pData.todo_segments).forEach(k => delete props.pData.todo_segments[k])
+  Object.keys(props.pData.todo_signoffs).forEach(k => delete props.pData.todo_signoffs[k])
+  Object.keys(props.pData.todo_baselines).forEach(k => delete props.pData.todo_baselines[k])
 
   Object.assign(props.pData.todo_segments, mapped)
   Object.keys(mapped).forEach(k => props.pData.todo_signoffs[k] = false)
@@ -109,9 +109,9 @@ const mergeTodo = async () => {
   const md = await assembleStarterDocument(props.pData.todo_segments, orderedTodoKeys.value, getFriendlyNames())
   props.pData.todo_md = md
 
-  for (const k in props.pData.todo_segments) delete props.pData.todo_segments[k]
-  for (const k in props.pData.todo_signoffs) delete props.pData.todo_signoffs[k]
-  for (const k in props.pData.todo_baselines) delete props.pData.todo_baselines[k]
+  Object.keys(props.pData.todo_segments).forEach(k => delete props.pData.todo_segments[k])
+  Object.keys(props.pData.todo_signoffs).forEach(k => delete props.pData.todo_signoffs[k])
+  Object.keys(props.pData.todo_baselines).forEach(k => delete props.pData.todo_baselines[k])
 }
 
 // --- Rewrite Logic ---
@@ -195,9 +195,9 @@ const getMergedQuestionPrompt = async (question) => {
 
 const handleReset = () => {
   if (confirm("Are you sure you want to start over? This will clear current progress for the TODO step.")) {
-    for (const k in props.pData.todo_segments) delete props.pData.todo_segments[k]
-    for (const k in props.pData.todo_signoffs) delete props.pData.todo_signoffs[k]
-    for (const k in props.pData.todo_baselines) delete props.pData.todo_baselines[k]
+    Object.keys(props.pData.todo_segments).forEach(k => delete props.pData.todo_segments[k])
+    Object.keys(props.pData.todo_signoffs).forEach(k => delete props.pData.todo_signoffs[k])
+    Object.keys(props.pData.todo_baselines).forEach(k => delete props.pData.todo_baselines[k])
     props.pData.todo_md = ""
     props.pData.todo_llm_response = ""
     showPasteArea.value = false

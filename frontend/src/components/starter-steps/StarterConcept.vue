@@ -78,9 +78,9 @@ const processConcept = async () => {
 
   const mapped = await mapParsedSegmentsToKeys(parsed, getFriendlyNames())
 
-  for (const k in props.pData.concept_segments) delete props.pData.concept_segments[k]
-  for (const k in props.pData.concept_signoffs) delete props.pData.concept_signoffs[k]
-  for (const k in props.pData.concept_baselines) delete props.pData.concept_baselines[k]
+  Object.keys(props.pData.concept_segments).forEach(k => delete props.pData.concept_segments[k])
+  Object.keys(props.pData.concept_signoffs).forEach(k => delete props.pData.concept_signoffs[k])
+  Object.keys(props.pData.concept_baselines).forEach(k => delete props.pData.concept_baselines[k])
 
   Object.assign(props.pData.concept_segments, mapped)
   Object.keys(mapped).forEach(k => props.pData.concept_signoffs[k] = false)
@@ -95,9 +95,9 @@ const mergeConcept = async () => {
   const md = await assembleStarterDocument(props.pData.concept_segments, CONCEPT_ORDER, getFriendlyNames())
   props.pData.concept_md = md
 
-  for (const k in props.pData.concept_segments) delete props.pData.concept_segments[k]
-  for (const k in props.pData.concept_signoffs) delete props.pData.concept_signoffs[k]
-  for (const k in props.pData.concept_baselines) delete props.pData.concept_baselines[k]
+  Object.keys(props.pData.concept_segments).forEach(k => delete props.pData.concept_segments[k])
+  Object.keys(props.pData.concept_signoffs).forEach(k => delete props.pData.concept_signoffs[k])
+  Object.keys(props.pData.concept_baselines).forEach(k => delete props.pData.concept_baselines[k])
 }
 
 // --- Rewrite Logic ---
@@ -181,9 +181,9 @@ const getMergedQuestionPrompt = async (question) => {
 
 const handleReset = () => {
   if (confirm("Are you sure you want to start over? This will clear current progress for the Concept step.")) {
-    for (const k in props.pData.concept_segments) delete props.pData.concept_segments[k]
-    for (const k in props.pData.concept_signoffs) delete props.pData.concept_signoffs[k]
-    for (const k in props.pData.concept_baselines) delete props.pData.concept_baselines[k]
+    Object.keys(props.pData.concept_segments).forEach(k => delete props.pData.concept_segments[k])
+    Object.keys(props.pData.concept_signoffs).forEach(k => delete props.pData.concept_signoffs[k])
+    Object.keys(props.pData.concept_baselines).forEach(k => delete props.pData.concept_baselines[k])
     props.pData.concept_md = ""
     props.pData.concept_llm_response = ""
     showPasteArea.value = false
