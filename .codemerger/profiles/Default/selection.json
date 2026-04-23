@@ -151,17 +151,17 @@
   },
   {
     "path": "src/core/prompts/__init__.py",
-    "tokens": 302,
-    "lines": 49,
-    "mtime": 1776933178.028414,
-    "hash": "46e9621bbdf37e682d7c5b6b389a5a8bcab47a29"
+    "tokens": 308,
+    "lines": 50,
+    "mtime": 1776934247.9495468,
+    "hash": "b67f77674137fd0a6e519edb59cf86614de2b93d"
   },
   {
     "path": "src/core/prompts/main.py",
-    "tokens": 968,
-    "lines": 59,
-    "mtime": 1776777465.7701669,
-    "hash": "d4169ac41bbe675e60d2bd96ab878e8a88748b1f"
+    "tokens": 1835,
+    "lines": 113,
+    "mtime": 1776934593.1397676,
+    "hash": "33b574989dadd03ed7daa1ad22411ae8791da226"
   },
   {
     "path": "src/core/prompts/surgical.py",
@@ -273,11 +273,11 @@
   },
   {
     "path": "src/api_parts/config_api.py",
-    "tokens": 807,
+    "tokens": 838,
     "ignoreTokens": false,
-    "lines": 108,
-    "mtime": 1776933178.1143415,
-    "hash": "02de53eb0cf47e10114f52eccef345389f011263"
+    "lines": 111,
+    "mtime": 1776934248.002673,
+    "hash": "a9b4f7b44305b69c20cb2adc87fbb629de766df3"
   },
   {
     "path": "src/api_parts/project_api.py",
@@ -443,8 +443,8 @@
     "tokens": 1222,
     "ignoreTokens": false,
     "lines": 43,
-    "mtime": 1776933203.8599126,
-    "hash": "8eac6e28872f233ca1879a3951e2d5d04974bfd8"
+    "mtime": 1776934438.2855716,
+    "hash": "a91d645cc365638e8c330694bf83ffb7ab8af4bc"
   },
   {
     "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -624,11 +624,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
-    "tokens": 2353,
+    "tokens": 2401,
     "ignoreTokens": false,
-    "lines": 225,
-    "mtime": 1776933208.258579,
-    "hash": "e796c2f428fb4c62249cf6e4d44b19f74a206e96"
+    "lines": 226,
+    "mtime": 1776934248.052003,
+    "hash": "24229bd45af25252571576ec5b3309c416e33468"
   },
   {
     "path": "frontend/src/components/FileTreeNode.vue",

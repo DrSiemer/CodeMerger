@@ -24,6 +24,22 @@ Do NOT:
 
 Use the following format if you want to add temporary notification comments: // [KEYWORD] Comment (e.g., [FIX] Now using correct value, [MODIFIED] Improved algorithm). These comments are transient and exist only to show the user what you've changed. If you find them in code you are reviewing, remove these comments as the user will have already seen them."""
 
+MAGIC_NUMBER_PROMPT = """Let's hunt down "magic numbers" in this codebase.
+
+**CRITICAL CONSTRAINTS:**
+- **No Behavior Changes:** Logic must remain functionally identical. Do not alter the mathematical outcome, visual dimensions, or conditional logic.
+- **Centralized Definition:** Extract hardcoded numbers (e.g., dimensions, timeouts, thresholds) and define them as named constants. If a constants or config file already exists in the provided context, you MUST use it. Otherwise, create a new centralized file (e.g., `constants.py`, `constants.js`).
+- **Meaningful Names:** Give the extracted numbers descriptive, uppercase names (e.g., `MAX_RETRIES = 5` instead of `FIVE = 5`).
+- **Provide Reasoning:** In your `<CHANGES>` section, clearly list which numbers were extracted, what they represent, and where they were moved.
+
+**1. Identify Magic Numbers:**
+- Scan the provided code for hardcoded numerical values embedded directly within logic, layout, or calculations (excluding obvious context-free numbers like 0 or 1 in loops).
+
+**2. Extraction & Refactoring:**
+- Move these values into the existing project-wide constants file if one is present, or create a logically placed new one.
+- Replace the original hardcoded values with references to the extracted constants.
+- Ensure all necessary imports are added to the affected files so the project remains functional."""
+
 COMMENT_CLEANUP_PROMPT = """Let's clean up the comments in this project.
 
 **CRITICAL CONSTRAINTS:**

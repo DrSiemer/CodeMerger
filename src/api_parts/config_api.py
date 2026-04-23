@@ -85,6 +85,9 @@ class ConfigApi:
             elif prompt_type == 'dry_up':
                 pyperclip.copy(p.DRY_UP_PROMPT)
                 return "Copied DRY up code prompt."
+            elif prompt_type == 'magic_numbers':
+                pyperclip.copy(p.MAGIC_NUMBER_PROMPT)
+                return "Copied magic number hunter prompt."
             return "Unknown prompt type."
         except Exception as e:
             log.error(f"Failed to copy prompt: {e}")

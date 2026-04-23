@@ -9,7 +9,8 @@ from .main import (
     DEFAULT_OUTRO_PROMPT,
     COMMENT_CLEANUP_PROMPT,
     DEAD_WEIGHT_PROMPT,
-    DRY_UP_PROMPT
+    DRY_UP_PROMPT,
+    MAGIC_NUMBER_PROMPT
 )
 
 from .surgical import (

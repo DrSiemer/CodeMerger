@@ -103,6 +103,7 @@ const pasteTooltipText = computed(() => {
                 <button @click="handleCopyPrompt('cleanup')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Comment Cleanup</button>
                 <button @click="handleCopyPrompt('dead_weight')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Find Dead Weight</button>
                 <button @click="handleCopyPrompt('dry_up')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">DRY up code</button>
+                <button @click="handleCopyPrompt('magic_numbers')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Hunt Magic Numbers</button>
               </div>
             </div>
 
