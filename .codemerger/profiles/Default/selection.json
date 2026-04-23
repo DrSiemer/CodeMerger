@@ -151,10 +151,10 @@
   },
   {
     "path": "src/core/prompts/__init__.py",
-    "tokens": 289,
-    "lines": 47,
-    "mtime": 1776932149.6598504,
-    "hash": "22def6e9ec1a4fb65d335317add37f0cf6783b20"
+    "tokens": 302,
+    "lines": 49,
+    "mtime": 1776933178.028414,
+    "hash": "46e9621bbdf37e682d7c5b6b389a5a8bcab47a29"
   },
   {
     "path": "src/core/prompts/main.py",
@@ -273,11 +273,11 @@
   },
   {
     "path": "src/api_parts/config_api.py",
-    "tokens": 730,
+    "tokens": 807,
     "ignoreTokens": false,
-    "lines": 100,
-    "mtime": 1776620222.7028916,
-    "hash": "a5d273823926b1f0417132304720df7d45e50ffc"
+    "lines": 108,
+    "mtime": 1776933178.1143415,
+    "hash": "02de53eb0cf47e10114f52eccef345389f011263"
   },
   {
     "path": "src/api_parts/project_api.py",
@@ -440,8 +440,8 @@
     "tokens": 1222,
     "ignoreTokens": false,
     "lines": 43,
-    "mtime": 1776686867.995164,
-    "hash": "ec9da75f8466325183ef58f37894a9004dc43a1f"
+    "mtime": 1776933203.8599126,
+    "hash": "8eac6e28872f233ca1879a3951e2d5d04974bfd8"
   },
   {
     "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -492,11 +492,11 @@
   },
   {
     "path": "frontend/src/composables/useSystem.js",
-    "tokens": 901,
+    "tokens": 908,
     "ignoreTokens": false,
     "lines": 140,
-    "mtime": 1776602514.45013,
-    "hash": "eae632ebc19d2d51134870c5c4bb8c8deea5ec9a"
+    "mtime": 1776933178.1962554,
+    "hash": "79ea737c42f9b21b3066a90fd64d442307878923"
   },
   {
     "path": "frontend/src/composables/useProject.js",
@@ -628,11 +628,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
-    "tokens": 2052,
+    "tokens": 2353,
     "ignoreTokens": false,
-    "lines": 212,
-    "mtime": 1776606378.052204,
-    "hash": "21bf952f741b55c4f8f9ad6ffbfe15a06f353eb7"
+    "lines": 225,
+    "mtime": 1776933208.258579,
+    "hash": "e796c2f428fb4c62249cf6e4d44b19f74a206e96"
   },
   {
     "path": "frontend/src/components/FileTreeNode.vue",

@@ -105,9 +105,9 @@ export function useSystem() {
     return null
   }
 
-  const copyCleanupPrompt = async () => {
+  const copyUsefulPrompt = async (promptType) => {
     if (window.pywebview) {
-      const msg = await window.pywebview.api.copy_comment_cleanup_prompt()
+      const msg = await window.pywebview.api.copy_useful_prompt(promptType)
       statusMessage.value = msg
     }
   }
@@ -134,7 +134,7 @@ export function useSystem() {
     minimizeWindow,
     closeApp,
     selectEditorExecutable,
-    copyCleanupPrompt,
+    copyUsefulPrompt,
     checkForUpdatesManual
   }
 }

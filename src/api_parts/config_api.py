@@ -73,13 +73,21 @@ class ConfigApi:
 
         return self._format_project_response(project_config, "Instructions saved successfully.")
 
-    def copy_comment_cleanup_prompt(self):
-        """Copies the standard comment cleanup instruction to the clipboard."""
+    def copy_useful_prompt(self, prompt_type):
+        """Copies a specialized prompt to the clipboard."""
         try:
-            pyperclip.copy(p.COMMENT_CLEANUP_PROMPT)
-            return "Copied comment cleanup prompt."
+            if prompt_type == 'cleanup':
+                pyperclip.copy(p.COMMENT_CLEANUP_PROMPT)
+                return "Copied comment cleanup prompt."
+            elif prompt_type == 'dead_weight':
+                pyperclip.copy(p.DEAD_WEIGHT_PROMPT)
+                return "Copied dead weight prompt."
+            elif prompt_type == 'dry_up':
+                pyperclip.copy(p.DRY_UP_PROMPT)
+                return "Copied DRY up code prompt."
+            return "Unknown prompt type."
         except Exception as e:
-            log.error(f"Failed to copy cleanup prompt: {e}")
+            log.error(f"Failed to copy prompt: {e}")
             return "Failed to copy prompt."
 
     def select_editor_executable(self):

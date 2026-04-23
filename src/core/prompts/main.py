@@ -57,3 +57,41 @@ Only keep a comment if an experienced developer would be surprised by the code.
 6. **Spaces:** Do not delete spaces inside the code itself (e.g., do not turn `a = []` into `a =[]`).
 
 Note: If your cleanup removes almost ALL comments in a file, re-verify that you are preserving structural headers and the 'why' context for complex logic blocks."""
+
+DEAD_WEIGHT_PROMPT = """Let's audit this project for unused "dead weight."
+
+**CRITICAL CONSTRAINTS:**
+- **No Logic Changes:** Do NOT refactor, "improve," or simplify any logic. Your only job is to excise what isn't being used.
+- **Conservative Deletion:** If a file or function appears unused but might be an entry point or required by a file NOT in the current context, LEAVE IT ALONE.
+- **Provide Reasoning:** In your `<CHANGES>` section, provide a clear explanation for every file deleted and every block of code removed, justifying why it was deemed unused.
+
+**1. Unused Files (Orphans):**
+- Identify files that are never imported, required, or referenced by any other file in this context.
+- List these strictly in the `<DELETED FILES>` section using the format: `DELETE FILE: path/to/file.ext`.
+
+**2. Unused Code (Dead Branches):**
+- Identify and remove functions, classes, variables, or imports that are defined but never called or referenced.
+- Remove unreachable code (e.g., logic following a `return` or `break`).
+
+**3. Cleanup Directive:**
+- If a removal leaves behind empty brackets or dangling commas, clean them up to ensure the code remains valid and syntactically correct.
+- If a file becomes completely empty after removing unused code, move it to the `<DELETED FILES>` section instead of outputting an empty file."""
+
+DRY_UP_PROMPT = """Let's DRY up this project (Don't Repeat Yourself).
+
+**CRITICAL CONSTRAINTS:**
+- **No Behavior Changes:** Logic must remain functionally identical. Do not add new features or change how the code currently handles inputs/outputs.
+- **Clarity Over Abstraction:** Do not over-engineer. Only abstract code if it truly reduces the maintenance burden. Avoid deep nesting or overly complex "generic" functions that make the code harder to read.
+- **Provide Reasoning:** In your `<CHANGES>` section, clearly explain what logic was consolidated and why the new shared structure was chosen.
+
+**1. Identify Redundancy:**
+- Scan for duplicated logic blocks, repeated string/numeric constants, or functions that perform nearly identical tasks with minor variations.
+
+**2. Consolidation:**
+- Abstract shared patterns into reusable functions, constants, or components.
+- If logic is shared across multiple files, move it to a centralized utility file (e.g., `utils.py`, `helpers.js`) or a relevant core module.
+- If this consolidation makes a file obsolete, list it in the `<DELETED FILES>` section.
+
+**3. Update References:**
+- Replace the original redundant code with calls to your new abstracted logic.
+- Ensure all necessary imports/exports are added to the affected files so the project remains functional."""

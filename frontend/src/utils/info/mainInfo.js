@@ -12,7 +12,7 @@ export const mainInfo = {
   "copy_with_instructions": "Copy Prompt with Instructions (Ctrl+C): Merges code and wraps it in your custom Intro/Outro. Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Code Only'.",
   "paste_changes": "Paste Changes (Ctrl+V): Instantly applies code from your clipboard. Depending on your settings, this opens a review window or writes directly to disk. Ctrl-click to toggle the review behavior. Alt-click to open the manual paste window for raw text input.",
   "response_review": "AI Response Review: Opens the review window to see the most recently applied changes and associated AI commentary.",
-  "cleanup": "Comment Cleanup: Copies a specialized prompt, that tells the AI to strip out it's own transient tags like [FIX] or [MODIFIED], while keeping listical logic comments.",
+  "useful_prompts": "Useful Prompts: Access a menu of specialized prompts for your LLM, such as Comment Cleanup, finding Dead Weight, or DRYing up your code.",
   "fast_apply_toggle": "Fast Apply: Toggles Surgical Diff mode. When ON, the AI is instructed to output only specific ORIGINAL/UPDATED blocks rather than full files, saving tokens and speed. Turn OFF if using weaker models that struggle with patching.",
   "settings": "Application Settings: Configure application behavior.",
   "starter": "Project Starter: Launch a guided workflow for starting new projects. Assists you in creating a concept, tech stack, and step-by-step implementation plan using AI.",

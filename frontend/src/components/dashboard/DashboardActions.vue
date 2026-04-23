@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2, Zap } from 'lucide-vue-next'
+import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2, Zap, Sparkles } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const emit = defineEmits(['open-settings', 'open-instructions-modal', 'open-review-modal'])
@@ -10,7 +10,7 @@ const {
   isProjectLoading,
   lastAiResponse,
   hasPendingChanges,
-  copyCleanupPrompt,
+  copyUsefulPrompt,
   copyCode,
   processPaste,
   clearPasteData,
@@ -18,16 +18,18 @@ const {
   toggleFastApply
 } = useAppState()
 
-const cleanupPulse = ref(false)
+const showPromptsMenu = ref(false)
+const promptPulse = ref(false)
 
 const isCopyingInstructions = ref(false)
 const isCopyingOnly = ref(false)
 
-const handleCleanup = async () => {
-  cleanupPulse.value = true
-  await copyCleanupPrompt()
+const handleCopyPrompt = async (type) => {
+  showPromptsMenu.value = false
+  promptPulse.value = true
+  await copyUsefulPrompt(type)
   setTimeout(() => {
-    cleanupPulse.value = false
+    promptPulse.value = false
   }, 450)
 }
 
@@ -81,17 +83,28 @@ const pasteTooltipText = computed(() => {
           <h2 class="text-[17px] font-medium text-white">Actions</h2>
 
           <div class="flex items-center space-x-3">
-            <button
-              id="btn-comment-cleanup"
-              @click="handleCleanup"
-              class="text-gray-500 hover:text-gray-300 text-sm font-mono font-bold transition-colors relative"
-              :class="{ 'click-pulse': cleanupPulse }"
-              :style="cleanupPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
-              title="Copy comment cleanup prompt"
-              v-info="'cleanup'"
-            >
-              //
-            </button>
+            <div class="relative">
+              <button
+                @click="showPromptsMenu = !showPromptsMenu"
+                class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-white/5 flex items-center justify-center relative"
+                :class="{ 'click-pulse': promptPulse }"
+                :style="promptPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
+                title="Useful AI Prompts"
+                v-info="'useful_prompts'"
+              >
+                <Sparkles class="w-4 h-4" />
+              </button>
+
+              <!-- Transparent overlay to catch outside clicks -->
+              <div v-if="showPromptsMenu" class="fixed inset-0 z-40" @click="showPromptsMenu = false"></div>
+
+              <!-- Dropdown Menu -->
+              <div v-if="showPromptsMenu" class="absolute right-0 top-full mt-2 w-48 bg-cm-input-bg border border-gray-600 rounded shadow-xl z-50 overflow-hidden text-sm py-1">
+                <button @click="handleCopyPrompt('cleanup')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Comment Cleanup</button>
+                <button @click="handleCopyPrompt('dead_weight')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Find Dead Weight</button>
+                <button @click="handleCopyPrompt('dry_up')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">DRY up code</button>
+              </div>
+            </div>
 
             <!-- Mini Fast Apply Toggle -->
             <button
