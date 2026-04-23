@@ -15,6 +15,8 @@ export function useVisualizer() {
     activeProject,
     getVisualizerPrompt,
     getVisualizerUpdatePrompt,
+    getVisualizerAmendPrompt,
+    getVisualizerErrorPrompt,
     copyVisualizerNodeCode,
     saveVisualizerMap,
     statusMessage,
@@ -203,49 +205,21 @@ export function useVisualizer() {
   };
 
   const handleCopyAmendPrompt = async () => {
-    const missingList = missingPathsList.value.length > 0 ? missingPathsList.value.map(p => `- ${p}`).join('\n') : "None";
-    const duplicateList = duplicateEntriesList.value.length > 0 ? duplicateEntriesList.value.map(p => `- ${p}`).join('\n') : "None";
-
-    const prompt = `I am building an Architecture Explorer and your previous response was incomplete or had redundancies.
-
-**Missing Files to Categorize:**
-${missingList}
-
-**Duplicate Entries Found:**
-${duplicateList}
-
-**Instructions:**
-1. Categorize the 'Missing Files' into the architectural structure we just discussed.
-2. For each missing file, provide the 'parent' node name where it should be placed.
-3. For 'Duplicate Entries', identify the redundant paths that should be REMOVED from the tree.
-4. Provide a rich description for each added file (2-4 sentences).
-
-**Output Format:**
-Return ONLY a raw JSON object with an 'amendments' key:
-{
-  "amendments": {
-    "add": [
-      {
-        "path": "path/to/missing_file.ext",
-        "parent": "Node Name",
-        "description": "..."
-      }
-    ],
-    "remove": [
-      "path/to/duplicate_to_delete.ext"
-    ]
+    const prompt = await getVisualizerAmendPrompt(missingPathsList.value, duplicateEntriesList.value);
+    if (prompt) {
+      await copyText(prompt);
+      statusMessage.value = "Copied amend prompt.";
     }
-}`;
-    await copyText(prompt);
-    statusMessage.value = "Copied amend prompt.";
   };
 
   const copyCorrectionPrompt = async () => {
-    const prompt = `The JSON you provided is invalid or incomplete. You have violated the ZERO OMISSION POLICY.\n\nVALIDATION ERRORS TO FIX:\n${parseError.value}`;
-    await copyText(prompt);
-    statusMessage.value = "Copied correction prompt.";
-    // Reset error state to hide the error block and return to Step 1
-    parseError.value = "";
+    const prompt = await getVisualizerErrorPrompt(parseError.value);
+    if (prompt) {
+      await copyText(prompt);
+      statusMessage.value = "Copied correction prompt.";
+      // Reset error state to hide the error block and return to Step 1
+      parseError.value = "";
+    }
   };
 
   const handleCopyNodeCode = async (node) => {

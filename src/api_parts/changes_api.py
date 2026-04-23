@@ -277,15 +277,12 @@ class ChangesApi:
                     mismatch_paths.append(path)
 
             prompt_parts = []
+            from src.core import prompts as p
 
             # 1. Handle Ambiguity
             if ambiguous_paths:
                 paths_str = ", ".join([f"`{p}`" for p in ambiguous_paths])
-                prompt_parts.append(
-                    "Ambiguous ORIGINAL Block: The ORIGINAL code blocks provided for the following files appear multiple times in my current local source:\n"
-                    f"{paths_str}\n\n"
-                    "This creates an ambiguous match, making it impossible to apply the patch safely. Please provide additional context lines (above or below) in your ORIGINAL block to ensure it uniquely identifies the specific segment you intend to modify."
-                )
+                prompt_parts.append(p.SURGICAL_AMBIGUOUS_PROMPT_TEMPLATE.format(paths_str=paths_str))
 
             # 2. Handle Mismatches
             if mismatch_paths:
@@ -321,19 +318,14 @@ class ChangesApi:
                         resolved_paths_for_header.append(rel_path)
 
                 paths_str = ", ".join([f"`{p}`" for p in resolved_paths_for_header])
-                prompt_parts.append(
-                    "Surgical Patch Mismatch: The ORIGINAL code blocks provided for the following files do not match my current local source:\n"
-                    f"{paths_str}\n\n"
-                    "This error occurred because your baseline reference is out of sync with the current evolved state of the project. "
-                    "To resolve this, I am providing the *actual* up-to-date source code for the affected files below. "
-                    "Please use this code as your new baseline and return a CORRECTED surgical diff using ORIGINAL/UPDATED blocks.\n\n"
-                    "CRITICAL: Do NOT return the full file content. Only provide corrected surgical blocks.\n\n"
-                    + "\n\n".join(blocks)
-                )
+                blocks_str = "\n\n".join(blocks)
+                prompt_parts.append(p.SURGICAL_MISMATCH_PROMPT_TEMPLATE.format(
+                    paths_str=paths_str,
+                    blocks_str=blocks_str
+                ))
 
-            # Join parts and provide final uniqueness instruction
             msg = "\n\n".join(prompt_parts)
-            msg += "\n\nPlease ensure your new ORIGINAL blocks are a byte-for-byte match to my source and are UNIQUE within the file (provide context if needed to disambiguate)."
+            msg += f"\n\n{p.SURGICAL_UNIQUENESS_INSTRUCTION}"
 
             try:
                 pyperclip.copy(msg)
@@ -342,19 +334,11 @@ class ChangesApi:
                 return "Failed to copy prompt."
 
         # Standard Format Admonishment
-        LT, RT, PRE = "<", ">", c.MARKER_PREFIX
-        IN_T, ANS_W = "INTRO", "ANSWERS TO DIRECT USER QUESTIONS"
-        CHA_N, VER_I, UNC_H = "CHANGES", "VERIFICATION", "UNCHANGED"
-
-        msg = (
-            "Please follow the output format strictly as described in your instructions. "
-            "Your previous response did not fully comply with the required formatting standards. "
-            "Specifically, please ensure that:\n"
-            f"- ALL commentary and explanations must be placed inside one of the allowed XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}, {LT}{UNC_H}{RT}).\n"
-            "- No text or commentary exists outside of these tags.\n"
-            f"- File markers are present and correctly formatted ({PRE}File: `path` --- and {PRE}End of file ---).\n"
-            "- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.\n"
-            "Please re-output the response correctly."
+        from src.core import prompts as p
+        msg = p.FORMAT_CORRECTION_PROMPT_TEMPLATE.format(
+            LT="<", RT=">", PRE=c.MARKER_PREFIX,
+            IN_T="INTRO", ANS_W="ANSWERS TO DIRECT USER QUESTIONS",
+            CHA_N="CHANGES", VER_I="VERIFICATION", UNC_H="UNCHANGED"
         )
         try:
             pyperclip.copy(msg)
@@ -364,12 +348,8 @@ class ChangesApi:
 
     def copy_order_admonishment(self, error_msg):
         """Generates and copies a specialized prompt to correct a failed file order request."""
-        msg = (
-            "The file list you provided for the merge order is invalid. "
-            "Please provide only the JSON array of strings in the exact same format as requested. "
-            "Ensure you do not omit any files from the current selection and do not add files that were not requested.\n\n"
-            f"Validation Errors:\n{error_msg}"
-        )
+        from src.core import prompts as p
+        msg = p.ORDER_CORRECTION_PROMPT_TEMPLATE.format(error_msg=error_msg)
         try:
             pyperclip.copy(msg)
             return "Copied order correction prompt."

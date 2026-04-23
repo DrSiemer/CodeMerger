@@ -89,3 +89,15 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 </VERIFICATION>"""
 
 AUTOMATION_WARNING_TEMPLATE = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and {marker_prefix}{marker_file} wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
+
+FORMAT_CORRECTION_PROMPT_TEMPLATE = """Please follow the output format strictly as described in your instructions. Your previous response did not fully comply with the required formatting standards. Specifically, please ensure that:
+- ALL commentary and explanations must be placed inside one of the allowed XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}, {LT}{UNC_H}{RT}).
+- No text or commentary exists outside of these tags.
+- File markers are present and correctly formatted ({PRE}File: `path` --- and {PRE}End of file ---).
+- You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.
+Please re-output the response correctly."""
+
+ORDER_CORRECTION_PROMPT_TEMPLATE = """The file list you provided for the merge order is invalid. Please provide only the JSON array of strings in the exact same format as requested. Ensure you do not omit any files from the current selection and do not add files that were not requested.
+
+Validation Errors:
+{error_msg}"""

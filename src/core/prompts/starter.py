@@ -147,3 +147,19 @@ STARTER_QUESTION_PROMPT_TEMPLATE = """### {context_label}
 {question}
 
 Instruction: {instruction_suffix}"""
+
+STARTER_DEFAULT_SCAFFOLD_INTRO_TEMPLATE = """We are working on {project_pitch}.
+
+Continue work on the plan laid out in `todo.md`. If a bug is reported, fix it first. ONLY output `todo.md` (in full, without omissions) when explicitly updating checkbox status."""
+
+STARTER_SECTION_INSTRUCTIONS_TEMPLATE = """You MUST structure your response using specific section separators.
+Do not add any text outside these sections.
+For each section, output the delimiter followed immediately by the content and close it.
+
+REQUIRED FORMAT:
+{delimiters}"""
+
+STARTER_REFERENCE_PROJECT_HEADER = """
+### REFERENCE PROJECT (TECHNICAL REFERENCE GUIDE)
+--- IMPORTANT: The code provided below is a strong guide for the technology stack, architectural patterns, and coding standards intended for this project. Use these files to determine the framework (e.g., CodeIgniter, React) and libraries to use. Note that you are designing a NEW project from scratch; do NOT assume a pre-prepared environment exists. ---
+"""

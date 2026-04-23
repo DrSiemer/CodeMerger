@@ -213,11 +213,13 @@ class FileApi:
                 return "Failed to generate request: Could not merge file content."
 
             paths = [f['path'] for f in selected_files]
-            prepend_text = "Please provide me with the optimal order in which to present these files to a language model. Only return the file list in the exact same format I will use here:\n\n"
             json_payload = json.dumps(paths, indent=2)
-            content_intro = "Here's the content of the files, to help you determine the best order:"
 
-            final_string = f"{prepend_text}{json_payload}\n\n{content_intro}\n\n{merged_code}"
+            from src.core import prompts as p
+            final_string = p.ORDER_REQUEST_PROMPT_TEMPLATE.format(
+                json_payload=json_payload,
+                merged_code=merged_code
+            )
 
             pyperclip.copy(final_string)
             return "Order request with file content copied to clipboard."
@@ -287,6 +289,23 @@ class FileApi:
             obsolete_list=obsolete_list,
             new_files_content=new_files_code
         )
+
+    def get_visualizer_amend_prompt(self, missing_paths, duplicate_paths):
+        from src.core import prompts as p
+        missing_list = "\n".join([f"- {p}" for p in missing_paths]) if missing_paths else "None"
+        duplicate_list = "\n".join([f"- {p}" for p in duplicate_paths]) if duplicate_paths else "None"
+        return p.VISUALIZER_AMEND_PROMPT.format(
+            missing_list=missing_list,
+            duplicate_list=duplicate_list
+        )
+
+    def get_visualizer_error_prompt(self, parse_error):
+        from src.core import prompts as p
+        return p.VISUALIZER_ERROR_PROMPT_TEMPLATE.format(parse_error=parse_error)
+
+    def get_split_file_prompt(self, path):
+        from src.core import prompts as p
+        return p.SPLIT_FILE_PROMPT_TEMPLATE.format(path=path)
 
     def copy_visualizer_node_code(self, file_paths):
         """Copies code for a specific subset of files defined in a visualizer node."""

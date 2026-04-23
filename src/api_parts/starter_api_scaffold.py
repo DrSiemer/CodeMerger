@@ -193,8 +193,9 @@ class StarterApiScaffold:
                 except Exception as e:
                     log.error(f"Failed to write project_reference.md: {e}")
 
+        from src.core import prompts as p
         conf = load_config()
-        intro = f"We are working on {project_pitch}.\n\nContinue work on the plan laid out in `todo.md`. If a bug is reported, fix it first. ONLY output `todo.md` (in full, without omissions) when explicitly updating checkbox status."
+        intro = p.STARTER_DEFAULT_SCAFFOLD_INTRO_TEMPLATE.format(project_pitch=project_pitch)
         outro = conf.get('default_outro_prompt', p.DEFAULT_OUTRO_PROMPT)
 
         normalized_files = []

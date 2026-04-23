@@ -143,9 +143,12 @@ const handleTokenInteraction = (index, event) => {
     item.ignoreTokens = !item.ignoreTokens
   } else if (event.ctrlKey) {
     const path = item.path
-    const breakupMsg = `\`${path}\` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality.`
-    navigator.clipboard.writeText(breakupMsg)
-    statusMessage.value = `Copied breakup request for ${path.split('/').pop()}`
+    if (window.pywebview) {
+      window.pywebview.api.get_split_file_prompt(path).then(breakupMsg => {
+        navigator.clipboard.writeText(breakupMsg)
+        statusMessage.value = `Copied breakup request for ${path.split('/').pop()}`
+      })
+    }
   }
 }
 

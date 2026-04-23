@@ -208,6 +208,9 @@ export function useProject() {
 
   const getVisualizerPrompt = async (prevMapJson = null) => window.pywebview ? await window.pywebview.api.get_visualizer_prompt(prevMapJson) : ""
   const getVisualizerUpdatePrompt = async (prevJson, missing, obsolete) => window.pywebview ? await window.pywebview.api.get_visualizer_update_prompt(prevJson, missing, obsolete) : ""
+  const getVisualizerAmendPrompt = async (missing, duplicate) => window.pywebview ? await window.pywebview.api.get_visualizer_amend_prompt(missing, duplicate) : ""
+  const getVisualizerErrorPrompt = async (errorMsg) => window.pywebview ? await window.pywebview.api.get_visualizer_error_prompt(errorMsg) : ""
+  const getSplitFilePrompt = async (path) => window.pywebview ? await window.pywebview.api.get_split_file_prompt(path) : ""
   const copyVisualizerNodeCode = async (paths) => window.pywebview ? await window.pywebview.api.copy_visualizer_node_code(paths) : "Error"
 
   const saveVisualizerMap = async (mapData) => {
@@ -244,6 +247,9 @@ export function useProject() {
     getRecentProjects,
     getVisualizerPrompt,
     getVisualizerUpdatePrompt,
+    getVisualizerAmendPrompt,
+    getVisualizerErrorPrompt,
+    getSplitFilePrompt,
     copyVisualizerNodeCode,
     saveVisualizerMap
   }

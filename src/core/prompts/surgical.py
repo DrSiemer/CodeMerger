@@ -30,3 +30,19 @@ OR for total rewrites / NEW files:
 =======
 [entirely new file content]
 >>>>>>> UPDATED"""
+
+SURGICAL_AMBIGUOUS_PROMPT_TEMPLATE = """Ambiguous ORIGINAL Block: The ORIGINAL code blocks provided for the following files appear multiple times in my current local source:
+{paths_str}
+
+This creates an ambiguous match, making it impossible to apply the patch safely. Please provide additional context lines (above or below) in your ORIGINAL block to ensure it uniquely identifies the specific segment you intend to modify."""
+
+SURGICAL_MISMATCH_PROMPT_TEMPLATE = """Surgical Patch Mismatch: The ORIGINAL code blocks provided for the following files do not match my current local source:
+{paths_str}
+
+This error occurred because your baseline reference is out of sync with the current evolved state of the project. To resolve this, I am providing the *actual* up-to-date source code for the affected files below. Please use this code as your new baseline and return a CORRECTED surgical diff using ORIGINAL/UPDATED blocks.
+
+CRITICAL: Do NOT return the full file content. Only provide corrected surgical blocks.
+
+{blocks_str}"""
+
+SURGICAL_UNIQUENESS_INSTRUCTION = "Please ensure your new ORIGINAL blocks are a byte-for-byte match to my source and are UNIQUE within the file (provide context if needed to disambiguate)."

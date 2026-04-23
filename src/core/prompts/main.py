@@ -1,7 +1,11 @@
 # Default Project Instructions
 DEFAULT_COPY_MERGED_PROMPT = "Here is the most recent code, please use this when making changes:\n"
 
-DEFAULT_INTRO_PROMPT = "We are working on REPLACE_ME.\n\nQUESTION\n\n"
+DEFAULT_INTRO_PROMPT = """We are working on REPLACE_ME.
+
+QUESTION
+
+"""
 
 DEFAULT_OUTRO_PROMPT = """Stylistic Guidelines (The Harness Standard)
 
@@ -111,3 +115,13 @@ DRY_UP_PROMPT = """Let's DRY up this project (Don't Repeat Yourself).
 **3. Update References:**
 - Replace the original redundant code with calls to your new abstracted logic.
 - Ensure all necessary imports/exports are added to the affected files so the project remains functional."""
+
+ORDER_REQUEST_PROMPT_TEMPLATE = """Please provide me with the optimal order in which to present these files to a language model. Only return the file list in the exact same format I will use here:
+
+{json_payload}
+
+Here's the content of the files, to help you determine the best order:
+
+{merged_code}"""
+
+SPLIT_FILE_PROMPT_TEMPLATE = "`{path}` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality."

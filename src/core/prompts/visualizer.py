@@ -126,3 +126,8 @@ Return ONLY a raw JSON object with an 'amendments' key:
     ]
   }}
 }}"""
+
+VISUALIZER_ERROR_PROMPT_TEMPLATE = """The JSON you provided is invalid or incomplete. You have violated the ZERO OMISSION POLICY.
+
+VALIDATION ERRORS TO FIX:
+{parse_error}"""

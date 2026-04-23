@@ -37,10 +37,8 @@ class StarterApiPrompts:
         if not base_path or not base_files:
             return ""
 
-        content_blocks = [
-            "\n### REFERENCE PROJECT (TECHNICAL REFERENCE GUIDE)",
-            "--- IMPORTANT: The code provided below is a strong guide for the technology stack, architectural patterns, and coding standards intended for this project. Use these files to determine the framework (e.g., CodeIgniter, React) and libraries to use. Note that you are designing a NEW project from scratch; do NOT assume a pre-prepared environment exists. ---\n"
-        ]
+        from src.core import prompts as p
+        content_blocks = [p.STARTER_REFERENCE_PROJECT_HEADER]
         for file_info in base_files:
             rel_path = file_info['path']
             full_path = os.path.join(base_path, rel_path)
@@ -55,17 +53,13 @@ class StarterApiPrompts:
         return "\n".join(content_blocks)
 
     def _build_prompt_instructions(self, segment_keys, friendly_names_map):
-        instructions = [
-            "You MUST structure your response using specific section separators.",
-            "Do not add any text outside these sections.",
-            "For each section, output the delimiter followed immediately by the content and close it.",
-            "\nREQUIRED FORMAT:"
-        ]
+        from src.core import prompts as p
+        delimiters = []
         for key in segment_keys:
             name = friendly_names_map.get(key, key)
             delimiter = c.DELIMITER_TEMPLATE.format(name=name)
-            instructions.append(f"{delimiter}\n... content for {name} ...\n</SECTION>")
-        return "\n".join(instructions)
+            delimiters.append(f"{delimiter}\n... content for {name} ...\n</SECTION>")
+        return p.STARTER_SECTION_INSTRUCTIONS_TEMPLATE.format(delimiters="\n".join(delimiters))
 
     def generate_concept_prompt(self, project_data, questions_map):
         """Constructs and returns the Concept generation prompt."""
