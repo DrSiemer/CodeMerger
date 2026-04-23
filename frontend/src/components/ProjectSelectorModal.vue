@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { X, Search, FolderPlus, Trash2 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { WINDOW_SIZES } from '../utils/constants'
 
 const emit = defineEmits(['close'])
 const { getRecentProjects, removeRecentProject, loadProject, selectProject, getImage, resizeWindow, infoModeActive } = useAppState()
@@ -16,7 +17,7 @@ useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   const footerHeight = infoModeActive.value ? 116 : 36
-  await resizeWindow(800, 500 + footerHeight)
+  await resizeWindow(WINDOW_SIZES.PROJECT_SELECTOR.width, WINDOW_SIZES.PROJECT_SELECTOR.height + footerHeight)
 
   const initialRecents = await getRecentProjects()
   recents.value = Array.isArray(initialRecents) ? initialRecents : []

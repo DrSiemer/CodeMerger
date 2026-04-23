@@ -3,6 +3,7 @@ import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
 import { Leaf, Save, Upload, Trash2, LogOut } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { WINDOW_SIZES } from '../utils/constants'
 
 import StarterDetails from './starter-steps/StarterDetails.vue'
 import StarterBaseFiles from './starter-steps/StarterBaseFiles.vue'
@@ -92,7 +93,7 @@ const handleClose = async (wasCreated = false) => {
 useEscapeKey(() => handleClose())
 
 onMounted(async () => {
-  await resizeWindow(1100, 850)
+  await resizeWindow(WINDOW_SIZES.PROJECT_STARTER.width, WINDOW_SIZES.PROJECT_STARTER.height)
 
   // Requirement: Deactivate current model and disable compact mode
   if (window.pywebview) {

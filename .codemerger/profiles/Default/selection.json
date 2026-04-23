@@ -29,10 +29,10 @@
   },
   {
     "path": "src/constants.py",
-    "mtime": 1776933525.099317,
-    "hash": "d27141676f512c0a7c04140d0f235620bc33c7b0",
-    "tokens": 1188,
-    "lines": 155
+    "mtime": 1776934081.485335,
+    "hash": "26588a3c8e4b2686900976dde6bf145274e58892",
+    "tokens": 1213,
+    "lines": 158
   },
   {
     "path": "src/core/paths.py",
@@ -225,11 +225,11 @@
   },
   {
     "path": "src/core/window_main.py",
-    "tokens": 364,
+    "tokens": 382,
     "ignoreTokens": false,
-    "lines": 37,
-    "mtime": 1776188732.8850648,
-    "hash": "6c225e48e203c0ecbb3b321d950778615995f4e8"
+    "lines": 39,
+    "mtime": 1776934081.555693,
+    "hash": "850a27583567a9361fa6777ee73e525639539f61"
   },
   {
     "path": "src/core/window_compact.py",
@@ -544,13 +544,6 @@
     "ignoreTokens": false
   },
   {
-    "path": "frontend/src/composables/useCompactHandlers.js",
-    "tokens": 1221,
-    "lines": 157,
-    "mtime": 1776624543.5022354,
-    "hash": "ea60e0fa366e429798b5820f50324041db0cef88"
-  },
-  {
     "path": "frontend/src/composables/useVisualizer.js",
     "tokens": 2937,
     "lines": 311,
@@ -575,19 +568,19 @@
   },
   {
     "path": "frontend/src/views/MainView.vue",
-    "tokens": 1925,
+    "tokens": 1947,
     "ignoreTokens": false,
-    "lines": 237,
-    "mtime": 1776723062.5606992,
-    "hash": "4741367012d2e86e9882344549afefd7aec1009d"
+    "lines": 238,
+    "mtime": 1776934081.4111724,
+    "hash": "b4677e20baa14078112ffc708ec376cec0aa26ca"
   },
   {
     "path": "frontend/src/views/CompactView.vue",
-    "tokens": 3100,
+    "tokens": 3116,
     "ignoreTokens": false,
-    "lines": 244,
-    "mtime": 1776785146.9075327,
-    "hash": "701be75c7946aea0acfe5a6637859aea25c21a4e"
+    "lines": 245,
+    "mtime": 1776934080.5991046,
+    "hash": "eb5637fe6b5e06c3304728221061e9ba86ffa392"
   },
   {
     "path": "frontend/src/components/InfoPanel.vue",
@@ -655,27 +648,27 @@
   },
   {
     "path": "frontend/src/components/FileManagerRightPanel.vue",
-    "tokens": 3844,
+    "tokens": 3857,
     "ignoreTokens": false,
-    "lines": 383,
-    "mtime": 1776692976.9806728,
-    "hash": "f6451f490c09ce9e60315ac4b937e27b81b28463"
+    "lines": 384,
+    "mtime": 1776934080.670889,
+    "hash": "7aef024d7a3250c224a4bb248fe9c1ecb3672fbc"
   },
   {
     "path": "frontend/src/components/FileManagerModal.vue",
-    "tokens": 3693,
+    "tokens": 3712,
     "ignoreTokens": false,
-    "lines": 456,
-    "mtime": 1776694642.5426867,
-    "hash": "292b5952db24027c36e951509ca4afd84fa461e4"
+    "lines": 457,
+    "mtime": 1776934080.7526305,
+    "hash": "4e268019dfa11298ccf4841e27a4e101adf7962b"
   },
   {
     "path": "frontend/src/components/ReviewModal.vue",
-    "tokens": 3174,
+    "tokens": 3193,
     "ignoreTokens": false,
-    "lines": 316,
-    "mtime": 1776762962.1690435,
-    "hash": "12b449aabf1b3d23f07061515cbcba9482855023"
+    "lines": 317,
+    "mtime": 1776934081.284039,
+    "hash": "2cf6242cf37c0cc115be86e6181b91607b67d5f3"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
@@ -704,11 +697,11 @@
   },
   {
     "path": "frontend/src/components/SettingsModal.vue",
-    "tokens": 1390,
+    "tokens": 1564,
     "ignoreTokens": false,
-    "lines": 144,
-    "mtime": 1776192750.1378667,
-    "hash": "a5ddecdd12d5f088365238f1f9361b2f3e09af03"
+    "lines": 162,
+    "mtime": 1776934081.3479118,
+    "hash": "f3106998e5d0da90777644bf59c5d6391cacd452"
   },
   {
     "path": "frontend/src/components/settings/SettingsAppTab.vue",
@@ -751,35 +744,35 @@
   },
   {
     "path": "frontend/src/components/InstructionsModal.vue",
-    "tokens": 1220,
+    "tokens": 1211,
     "ignoreTokens": false,
-    "lines": 133,
-    "mtime": 1776192766.1892385,
-    "hash": "830f2f2e756b2add72bdd1f0a15dcd5c5d93466e"
+    "lines": 127,
+    "mtime": 1776934080.819986,
+    "hash": "9471c2ebaa6015ef1c263b14467075a387648843"
   },
   {
     "path": "frontend/src/components/ProjectSelectorModal.vue",
-    "tokens": 1682,
+    "tokens": 1671,
     "ignoreTokens": false,
-    "lines": 182,
-    "mtime": 1776192299.5879896,
-    "hash": "2ee71c5749996774f2a2c78281ef408337e7aad1"
+    "lines": 177,
+    "mtime": 1776934080.9314706,
+    "hash": "bf439aac8816c22d05b25c3fe707c9a9407d4d05"
   },
   {
     "path": "frontend/src/components/NewProfileModal.vue",
-    "tokens": 944,
+    "tokens": 964,
     "ignoreTokens": false,
-    "lines": 105,
-    "mtime": 1776762655.203302,
-    "hash": "4bc48d7fe85ae7d6c164299f1b04eb53d0911b80"
+    "lines": 106,
+    "mtime": 1776934080.9941804,
+    "hash": "3f39d495eb28d9c567d4d3267a4b2e978666edfd"
   },
   {
     "path": "frontend/src/components/NewFiletypesModal.vue",
-    "tokens": 530,
+    "tokens": 552,
     "ignoreTokens": false,
-    "lines": 55,
-    "mtime": 1776192768.5954244,
-    "hash": "a2fc309c08957f6cbf049bacf6e4fc15e46c39f4"
+    "lines": 56,
+    "mtime": 1776934081.0622132,
+    "hash": "33881307bb5742ddd05a7304ee5392a8155ad127"
   },
   {
     "path": "frontend/src/components/OrderErrorModal.vue",
@@ -826,11 +819,11 @@
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",
-    "tokens": 4391,
+    "tokens": 4414,
     "ignoreTokens": false,
-    "lines": 490,
-    "mtime": 1776896650.5822802,
-    "hash": "d79a6569b743f367a8110839d92a22c81ad4210b"
+    "lines": 491,
+    "mtime": 1776934081.1252751,
+    "hash": "e7456e95f4d71c1e21f8e6269898e0834b0a97c1"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
@@ -928,10 +921,10 @@
   },
   {
     "path": "frontend/src/components/VisualizerModal.vue",
-    "tokens": 1581,
-    "lines": 135,
-    "mtime": 1776799348.4619799,
-    "hash": "757729ef54f20400e83c8da2bdbffa3401e678a9"
+    "tokens": 1604,
+    "lines": 136,
+    "mtime": 1776934081.193685,
+    "hash": "26764f890defc82ed05d5743f1832129e4a68f62"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",
@@ -1101,5 +1094,12 @@
     "hash": "1c527956cd20c258174e0faf87c76c5cb0ddf506",
     "tokens": 680,
     "lines": 100
+  },
+  {
+    "path": "frontend/src/utils/constants.js",
+    "tokens": 206,
+    "lines": 17,
+    "mtime": 1776934080.5426953,
+    "hash": "f08190923e070210dc85091687ff2639d5d12d2f"
   }
 ]

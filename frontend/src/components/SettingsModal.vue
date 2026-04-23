@@ -6,6 +6,7 @@ import {
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { WINDOW_SIZES } from '../utils/constants'
 
 import SettingsAppTab from './settings/SettingsAppTab.vue'
 import SettingsFileManagerTab from './settings/SettingsFileManagerTab.vue'
@@ -36,7 +37,7 @@ useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
   // Smart Growth: Ensure the main window is large enough for the settings layout
-  await resizeWindow(1000, 700)
+  await resizeWindow(WINDOW_SIZES.SETTINGS.width, WINDOW_SIZES.SETTINGS.height)
 
   localConfig.value = JSON.parse(JSON.stringify(config.value))
   initialConfigString.value = JSON.stringify(localConfig.value)

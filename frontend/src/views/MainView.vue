@@ -14,6 +14,7 @@ import VisualizerModal from '../components/VisualizerModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
 import ColorPickerOverlay from '../components/ColorPickerOverlay.vue'
 import FormatErrorModal from '../components/FormatErrorModal.vue'
+import { WINDOW_SIZES } from '../utils/constants'
 
 const app = useAppState()
 
@@ -83,7 +84,7 @@ const continueAfterError = () => {
 // Ensures window is large enough to display custom color wheel without clipping
 watch(showColorPicker, async (val) => {
   if (val) {
-    await resizeWindow(800, 540)
+    await resizeWindow(WINDOW_SIZES.COLOR_PICKER.width, WINDOW_SIZES.COLOR_PICKER.height)
   }
 })
 

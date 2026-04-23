@@ -5,6 +5,7 @@ import {
   ArrowDownUp
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
+import { DEFAULT_TOKEN_COLOR_THRESHOLD } from '../utils/constants'
 
 const props = defineProps({
   listItems: Array,
@@ -73,7 +74,7 @@ const getTokenColor = (file) => {
     .filter(f => f && !f.ignoreTokens)
     .map(f => f.tokens || 0)
 
-  const rangeMax = config.value.token_color_threshold || 4000
+  const rangeMax = config.value.token_color_threshold || DEFAULT_TOKEN_COLOR_THRESHOLD
   const maxInList = tokenValues.length > 0 ? Math.max(...tokenValues, rangeMax) : rangeMax
   const p = count / maxInList
   if (p < 0.2) return 'text-gray-500'

@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { X, BookOpen, RotateCcw, Save } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { WINDOW_SIZES } from '../utils/constants'
 
 const emit = defineEmits(['close'])
 const { activeProject, config, saveInstructions, resizeWindow } = useAppState()
@@ -13,7 +14,7 @@ const localOutro = ref('')
 useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
-  await resizeWindow(800, 650)
+  await resizeWindow(WINDOW_SIZES.INSTRUCTIONS.width, WINDOW_SIZES.INSTRUCTIONS.height)
 
   localIntro.value = activeProject.introText || ''
   localOutro.value = activeProject.outroText || ''

@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { X } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { WINDOW_SIZES } from '../utils/constants'
 
 const emit = defineEmits(['close'])
 const { activeProject, createProfile, resizeWindow } = useAppState()
@@ -15,7 +16,7 @@ const nameInput = ref(null)
 useEscapeKey(() => emit('close'))
 
 onMounted(async () => {
-  await resizeWindow(800, 550)
+  await resizeWindow(WINDOW_SIZES.NEW_PROFILE.width, WINDOW_SIZES.NEW_PROFILE.height)
 
   nextTick(() => {
     nameInput.value?.focus()

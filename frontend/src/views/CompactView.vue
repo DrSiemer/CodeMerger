@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useAppState } from '../composables/useAppState'
 import { Expand } from 'lucide-vue-next'
+import { COMPACT_TITLE_MAX_LEN } from '../utils/constants'
 import CompactFeedbackOverlay from '../components/compact/CompactFeedbackOverlay.vue'
 import CompactActionsStandard from '../components/compact/CompactActionsStandard.vue'
 import CompactActionsUltra from '../components/compact/CompactActionsUltra.vue'
@@ -180,7 +181,7 @@ const titleAbbr = computed(() => {
   if (titleOverride.value) return titleOverride.value
   const name = activeProject.name || 'CodeMerger'
   if (isUltra.value) return name.charAt(0).toUpperCase()
-  const maxLen = 8, chars = [...name], capIdx = []
+  const maxLen = COMPACT_TITLE_MAX_LEN, chars = [...name], capIdx = []
   for (let i = 0; i < chars.length; i++) if (chars[i] >= 'A' && chars[i] <= 'Z') capIdx.push(i)
   if (capIdx.length > 1) {
     const lowIdx = []

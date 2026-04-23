@@ -4,6 +4,7 @@ import { X, Save, Search } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
 import { useDragAndDrop } from '@formkit/drag-and-drop/vue'
+import { WINDOW_SIZES } from '../utils/constants'
 import FileManagerLeftPanel from './FileManagerLeftPanel.vue'
 import FileManagerRightPanel from './FileManagerRightPanel.vue'
 import OrderErrorModal from './OrderErrorModal.vue'
@@ -57,7 +58,7 @@ const debounce = (fn, delay) => {
 
 onMounted(async () => {
   console.log("[FileManager] Mounted. Current newFileCount:", activeProject.newFileCount);
-  await resizeWindow(1100, 800)
+  await resizeWindow(WINDOW_SIZES.FILE_MANAGER.width, WINDOW_SIZES.FILE_MANAGER.height)
   await refreshTree()
   await autoHandleNewFiles()
   // Triggered on mount to clear UI alert immediately upon entry

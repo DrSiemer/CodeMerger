@@ -1,11 +1,12 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAppState } from '../composables/useAppState'
+import { WINDOW_SIZES } from '../utils/constants'
 
 const { newlyAddedFiletypes, clearNewlyAddedFiletypes, resizeWindow } = useAppState()
 
 onMounted(async () => {
-  await resizeWindow(500, 500)
+  await resizeWindow(WINDOW_SIZES.NEW_FILETYPES.width, WINDOW_SIZES.NEW_FILETYPES.height)
 })
 </script>
 

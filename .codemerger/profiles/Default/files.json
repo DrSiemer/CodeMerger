@@ -77,7 +77,6 @@
     "frontend/src/composables/globalState.js",
     "frontend/src/composables/infoMode.js",
     "frontend/src/composables/useAppState.js",
-    "frontend/src/composables/useCompactHandlers.js",
     "frontend/src/composables/useEscapeKey.js",
     "frontend/src/composables/useProject.js",
     "frontend/src/composables/useReview.js",
@@ -90,6 +89,7 @@
     "frontend/src/router/index.js",
     "frontend/src/style.css",
     "frontend/src/utils/colorUtils.js",
+    "frontend/src/utils/constants.js",
     "frontend/src/utils/info/fileManagerInfo.js",
     "frontend/src/utils/info/mainInfo.js",
     "frontend/src/utils/info/reviewInfo.js",
@@ -158,5 +158,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 193740
+  "total_tokens": 193099
 }

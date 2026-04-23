@@ -1,12 +1,14 @@
 import webview
 import logging
+from src import constants as c
 
 log = logging.getLogger("CodeMerger")
 
 def create_main_window(manager, m_left, m_top, m_w_phys, m_h_phys, scale):
     """Initializes the primary dashboard window and binds lifecycle events."""
     info_active = manager.api.app_state.config.get('info_mode_active', True)
-    m_w_log, m_h_log = 800, 550 if info_active else 500
+    m_w_log = c.MAIN_WINDOW_WIDTH
+    m_h_log = c.MAIN_WINDOW_HEIGHT_INFO_ON if info_active else c.MAIN_WINDOW_HEIGHT_INFO_OFF
 
     m_x_phys = int(m_left + (m_w_phys - (m_w_log * scale)) / 2)
     m_y_phys = int(m_top + (m_h_phys - (m_h_log * scale)) / 2)

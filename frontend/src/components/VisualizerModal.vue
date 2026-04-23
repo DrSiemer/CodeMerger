@@ -4,6 +4,7 @@ import { X, Network, Search, Info, RefreshCw, Trash2 } from "lucide-vue-next";
 import { useAppState } from "../composables/useAppState";
 import { useEscapeKey } from "../composables/useEscapeKey";
 import { useVisualizer } from "../composables/useVisualizer";
+import { WINDOW_SIZES } from "../utils/constants";
 
 import VisualizerInit from "./visualizer/VisualizerInit.vue";
 import VisualizerExplorer from "./visualizer/VisualizerExplorer.vue";
@@ -28,7 +29,7 @@ const searchQuery = ref("");
 useEscapeKey(() => emit("close"));
 
 onMounted(async () => {
-  await resizeWindow(1100, 800);
+  await resizeWindow(WINDOW_SIZES.VISUALIZER.width, WINDOW_SIZES.VISUALIZER.height);
 });
 </script>
 

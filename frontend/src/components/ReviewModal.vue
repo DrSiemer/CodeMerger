@@ -7,6 +7,7 @@ import {
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { WINDOW_SIZES } from '../utils/constants'
 import MarkdownRenderer from './MarkdownRenderer.vue'
 import ReviewChangesTab from './review-tabs/ReviewChangesTab.vue'
 import ReviewVerificationTab from './review-tabs/ReviewVerificationTab.vue'
@@ -94,7 +95,7 @@ useEscapeKey(() => {
 })
 
 onMounted(async () => {
-  await resizeWindow(1100, 850)
+  await resizeWindow(WINDOW_SIZES.REVIEW.width, WINDOW_SIZES.REVIEW.height)
 
   if (tabs.value.length > 0) {
     const tabIds = tabs.value.map(t => t.id)
