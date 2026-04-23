@@ -139,6 +139,7 @@
     "src/core/project_config.py",
     "src/core/project_manager.py",
     "src/core/prompts/__init__.py",
+    "src/core/prompts/formatting.py",
     "src/core/prompts/main.py",
     "src/core/prompts/starter.py",
     "src/core/prompts/surgical.py",
@@ -157,5 +158,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 194596
+  "total_tokens": 194698
 }

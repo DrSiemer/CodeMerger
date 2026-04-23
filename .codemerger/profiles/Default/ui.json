@@ -24,6 +24,7 @@
     "src",
     "src/api_parts",
     "src/core",
+    "src/core/prompts",
     "src/ui",
     "src/ui/app_window_parts",
     "src/ui/file_manager",

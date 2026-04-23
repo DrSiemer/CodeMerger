@@ -17,6 +17,11 @@ from .surgical import (
     EXAMPLE_FAST_APPLY
 )
 
+from .formatting import (
+    FORMATTING_INSTRUCTION_TEMPLATE,
+    AUTOMATION_WARNING_TEMPLATE
+)
+
 from .starter import (
     STARTER_CONCEPT_DEFAULT_GOAL,
     STARTER_CONCEPT_PROMPT_INTRO,

@@ -116,10 +116,10 @@
   },
   {
     "path": "src/core/merger.py",
-    "mtime": 1776630614.6874301,
-    "hash": "dd5c821c6945ec8ad15e11478d76e7299d881689",
-    "tokens": 2154,
-    "lines": 225
+    "mtime": 1776932168.1094658,
+    "hash": "268f6594d6319e897f6d60b8054f266320e7aae2",
+    "tokens": 1165,
+    "lines": 152
   },
   {
     "path": "src/core/replacer.py",
@@ -136,6 +136,13 @@
     "lines": 350
   },
   {
+    "path": "src/core/highlighter.py",
+    "tokens": 944,
+    "lines": 98,
+    "mtime": 1776782329.677683,
+    "hash": "465a72a1ab6d4a478e2eae29a87f51d505019c48"
+  },
+  {
     "path": "src/core/secret_scanner.py",
     "mtime": 1772545862.8628814,
     "hash": "f5d9391668774d849e3d6bb5acc0f8fbe9d790c7",
@@ -143,11 +150,47 @@
     "lines": 68
   },
   {
-    "path": "src/core/highlighter.py",
-    "tokens": 944,
-    "lines": 98,
-    "mtime": 1776782329.677683,
-    "hash": "465a72a1ab6d4a478e2eae29a87f51d505019c48"
+    "path": "src/core/prompts/__init__.py",
+    "tokens": 289,
+    "lines": 47,
+    "mtime": 1776932149.6598504,
+    "hash": "22def6e9ec1a4fb65d335317add37f0cf6783b20"
+  },
+  {
+    "path": "src/core/prompts/main.py",
+    "tokens": 968,
+    "lines": 59,
+    "mtime": 1776777465.7701669,
+    "hash": "d4169ac41bbe675e60d2bd96ab878e8a88748b1f"
+  },
+  {
+    "path": "src/core/prompts/surgical.py",
+    "tokens": 1,
+    "lines": 1,
+    "mtime": 1776777466.7122176,
+    "hash": "11f6ad8ec52a2984abaafd7c3b516503785c2072"
+  },
+  {
+    "path": "src/core/prompts/formatting.py",
+    "tokens": 1069,
+    "ignoreTokens": false,
+    "lines": 90,
+    "mtime": 1776932328.772666,
+    "hash": "52e41abdb48029f561db1e5621398e05cf0730eb"
+  },
+  {
+    "path": "src/core/prompts/starter.py",
+    "tokens": 2109,
+    "lines": 144,
+    "mtime": 1776895015.3821542,
+    "hash": "9da8068681816a8f351db4b47eda4a2f45579deb"
+  },
+  {
+    "path": "src/core/prompts/visualizer.py",
+    "tokens": 1448,
+    "lines": 128,
+    "mtime": 1776777469.0893798,
+    "hash": "fff57fa0c5e000835ba01f49d80a6e88b390b68b"
   },
   {
     "path": "src/core/file_monitor_thread.py",
@@ -505,6 +548,13 @@
     "hash": "ea60e0fa366e429798b5820f50324041db0cef88"
   },
   {
+    "path": "frontend/src/composables/useVisualizer.js",
+    "tokens": 2960,
+    "lines": 313,
+    "mtime": 1776799348.3407123,
+    "hash": "0530ff21fe9c935cf8ab6703ab3c4c5c80acd599"
+  },
+  {
     "path": "frontend/src/directives/vInfo.js",
     "tokens": 382,
     "ignoreTokens": false,
@@ -545,6 +595,22 @@
     "hash": "29fd3db8fb34d6b43a854f3c1a9ded16846a7f0d"
   },
   {
+    "path": "frontend/src/components/MarkdownRenderer.vue",
+    "tokens": 1311,
+    "ignoreTokens": false,
+    "lines": 185,
+    "mtime": 1776782657.7160547,
+    "hash": "9b9ca098dd4e74e97822a22565249077e77152ce"
+  },
+  {
+    "path": "frontend/src/components/DiffViewer.vue",
+    "tokens": 797,
+    "ignoreTokens": false,
+    "lines": 101,
+    "mtime": 1776600202.8980494,
+    "hash": "df70f9bd589e577b091f15a3e9d0296abba00062"
+  },
+  {
     "path": "frontend/src/components/dashboard/DashboardHeader.vue",
     "tokens": 1616,
     "ignoreTokens": false,
@@ -569,36 +635,12 @@
     "hash": "21bf952f741b55c4f8f9ad6ffbfe15a06f353eb7"
   },
   {
-    "path": "frontend/src/components/MarkdownRenderer.vue",
-    "tokens": 1311,
-    "ignoreTokens": false,
-    "lines": 185,
-    "mtime": 1776782657.7160547,
-    "hash": "9b9ca098dd4e74e97822a22565249077e77152ce"
-  },
-  {
-    "path": "frontend/src/components/DiffViewer.vue",
-    "tokens": 797,
-    "ignoreTokens": false,
-    "lines": 101,
-    "mtime": 1776600202.8980494,
-    "hash": "df70f9bd589e577b091f15a3e9d0296abba00062"
-  },
-  {
     "path": "frontend/src/components/FileTreeNode.vue",
     "tokens": 1771,
     "ignoreTokens": false,
     "lines": 237,
     "mtime": 1776611237.948174,
     "hash": "4044abcb65435ac52c60dc25097213b01de49df6"
-  },
-  {
-    "path": "frontend/src/components/ProjectSelectorModal.vue",
-    "tokens": 1682,
-    "ignoreTokens": false,
-    "lines": 182,
-    "mtime": 1776192299.5879896,
-    "hash": "2ee71c5749996774f2a2c78281ef408337e7aad1"
   },
   {
     "path": "frontend/src/components/FileManagerLeftPanel.vue",
@@ -713,6 +755,14 @@
     "hash": "830f2f2e756b2add72bdd1f0a15dcd5c5d93466e"
   },
   {
+    "path": "frontend/src/components/ProjectSelectorModal.vue",
+    "tokens": 1682,
+    "ignoreTokens": false,
+    "lines": 182,
+    "mtime": 1776192299.5879896,
+    "hash": "2ee71c5749996774f2a2c78281ef408337e7aad1"
+  },
+  {
     "path": "frontend/src/components/NewProfileModal.vue",
     "tokens": 944,
     "ignoreTokens": false,
@@ -825,6 +875,55 @@
     "hash": "6ed7715d20788b69097c6f872ac321ab70f296e6"
   },
   {
+    "path": "frontend/src/components/starter-steps/StarterDetails.vue",
+    "tokens": 1009,
+    "lines": 96,
+    "mtime": 1776896420.3473423,
+    "hash": "679796103e8fa23dc7c98315ccc2a49d4bcaf874"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/StarterBaseFiles.vue",
+    "tokens": 1058,
+    "lines": 101,
+    "mtime": 1776768437.4974232,
+    "hash": "be75f082e5b920e01e8f8598953cd53f1b871f22"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/StarterConcept.vue",
+    "tokens": 2482,
+    "lines": 269,
+    "mtime": 1776896650.5832827,
+    "hash": "cdbe5ff002b66ffe0c31d947b3af1d78b86df2cc"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/StarterStack.vue",
+    "tokens": 4026,
+    "lines": 412,
+    "mtime": 1776779515.1694937,
+    "hash": "81f38b397de2aa5afcd6377379391586abed0ef7"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/StarterDesign.vue",
+    "tokens": 2677,
+    "lines": 309,
+    "mtime": 1776893246.6971552,
+    "hash": "1d13e702d5a8d6e0ef78bc5af80e272456adc294"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/StarterTodo.vue",
+    "tokens": 2430,
+    "lines": 277,
+    "mtime": 1776893246.7651515,
+    "hash": "88482ff1414da64977655cdeabf8e68745907ee6"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/StarterGenerate.vue",
+    "tokens": 1612,
+    "lines": 150,
+    "mtime": 1776774902.622779,
+    "hash": "1d8a77ef1e748b82e95ebc513c29227f36c64243"
+  },
+  {
     "path": "frontend/src/components/VisualizerModal.vue",
     "tokens": 1581,
     "lines": 135,
@@ -860,6 +959,13 @@
     "hash": "702553a019b98ca14c4c088474b035616c120fd5"
   },
   {
+    "path": "frontend/src/components/visualizer/VisualizerCodeViewer.vue",
+    "tokens": 310,
+    "lines": 29,
+    "mtime": 1776775118.5928383,
+    "hash": "3eda8a36dd7b52dc93637d1bf33c1a6cf8fbf2a3"
+  },
+  {
     "path": "assets/reference/concept_questions.json",
     "mtime": 1772545862.890881,
     "hash": "aa50e371179585a1a80c9a4163939e386e2b21f4",
@@ -886,6 +992,27 @@
     "hash": "7ccfbc3fb41d3f73047238cd3660549deca857f4",
     "tokens": 1135,
     "lines": 88
+  },
+  {
+    "path": "assets/reference/design_questions.json",
+    "tokens": 231,
+    "lines": 26,
+    "mtime": 1776767806.928591,
+    "hash": "fe54c0969e25dd2b52b156f13e391081c7ac6dc8"
+  },
+  {
+    "path": "assets/reference/design.md",
+    "tokens": 298,
+    "lines": 35,
+    "mtime": 1776767806.9782581,
+    "hash": "58921b5a41ed5a0dd23008123e4700a813e0198c"
+  },
+  {
+    "path": "assets/reference/silly_suggestions.json",
+    "tokens": 283,
+    "lines": 36,
+    "mtime": 1776896943.7299097,
+    "hash": "0ce7ee05147dae9914332c1da8a38c0bd631edc0"
   },
   {
     "path": "assets/boilerplate/README.md",
@@ -971,124 +1098,5 @@
     "hash": "1c527956cd20c258174e0faf87c76c5cb0ddf506",
     "tokens": 680,
     "lines": 100
-  },
-  {
-    "path": "assets/reference/design_questions.json",
-    "tokens": 231,
-    "lines": 26,
-    "mtime": 1776767806.928591,
-    "hash": "fe54c0969e25dd2b52b156f13e391081c7ac6dc8"
-  },
-  {
-    "path": "assets/reference/design.md",
-    "tokens": 298,
-    "lines": 35,
-    "mtime": 1776767806.9782581,
-    "hash": "58921b5a41ed5a0dd23008123e4700a813e0198c"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterDetails.vue",
-    "tokens": 1009,
-    "lines": 96,
-    "mtime": 1776896420.3473423,
-    "hash": "679796103e8fa23dc7c98315ccc2a49d4bcaf874"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterBaseFiles.vue",
-    "tokens": 1058,
-    "lines": 101,
-    "mtime": 1776768437.4974232,
-    "hash": "be75f082e5b920e01e8f8598953cd53f1b871f22"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterConcept.vue",
-    "tokens": 2482,
-    "lines": 269,
-    "mtime": 1776896650.5832827,
-    "hash": "cdbe5ff002b66ffe0c31d947b3af1d78b86df2cc"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterStack.vue",
-    "tokens": 4026,
-    "lines": 412,
-    "mtime": 1776779515.1694937,
-    "hash": "81f38b397de2aa5afcd6377379391586abed0ef7"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterDesign.vue",
-    "tokens": 2677,
-    "lines": 309,
-    "mtime": 1776893246.6971552,
-    "hash": "1d13e702d5a8d6e0ef78bc5af80e272456adc294"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterTodo.vue",
-    "tokens": 2430,
-    "lines": 277,
-    "mtime": 1776893246.7651515,
-    "hash": "88482ff1414da64977655cdeabf8e68745907ee6"
-  },
-  {
-    "path": "frontend/src/components/starter-steps/StarterGenerate.vue",
-    "tokens": 1612,
-    "lines": 150,
-    "mtime": 1776774902.622779,
-    "hash": "1d8a77ef1e748b82e95ebc513c29227f36c64243"
-  },
-  {
-    "path": "frontend/src/composables/useVisualizer.js",
-    "tokens": 2960,
-    "lines": 313,
-    "mtime": 1776799348.3407123,
-    "hash": "0530ff21fe9c935cf8ab6703ab3c4c5c80acd599"
-  },
-  {
-    "path": "frontend/src/components/visualizer/VisualizerCodeViewer.vue",
-    "tokens": 310,
-    "lines": 29,
-    "mtime": 1776775118.5928383,
-    "hash": "3eda8a36dd7b52dc93637d1bf33c1a6cf8fbf2a3"
-  },
-  {
-    "path": "src/core/prompts/main.py",
-    "tokens": 968,
-    "lines": 59,
-    "mtime": 1776777465.7701669,
-    "hash": "d4169ac41bbe675e60d2bd96ab878e8a88748b1f"
-  },
-  {
-    "path": "src/core/prompts/surgical.py",
-    "tokens": 1,
-    "lines": 1,
-    "mtime": 1776777466.7122176,
-    "hash": "11f6ad8ec52a2984abaafd7c3b516503785c2072"
-  },
-  {
-    "path": "src/core/prompts/starter.py",
-    "tokens": 2109,
-    "lines": 144,
-    "mtime": 1776895015.3821542,
-    "hash": "9da8068681816a8f351db4b47eda4a2f45579deb"
-  },
-  {
-    "path": "src/core/prompts/visualizer.py",
-    "tokens": 1448,
-    "lines": 128,
-    "mtime": 1776777469.0893798,
-    "hash": "fff57fa0c5e000835ba01f49d80a6e88b390b68b"
-  },
-  {
-    "path": "src/core/prompts/__init__.py",
-    "tokens": 267,
-    "lines": 42,
-    "mtime": 1776777470.1522586,
-    "hash": "e39dc89f36152f7407d8ac46db526527d6f0b940"
-  },
-  {
-    "path": "assets/reference/silly_suggestions.json",
-    "tokens": 283,
-    "lines": 36,
-    "mtime": 1776896943.7299097,
-    "hash": "0ce7ee05147dae9914332c1da8a38c0bd631edc0"
   }
 ]

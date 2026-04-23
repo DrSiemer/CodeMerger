@@ -1,7 +1,10 @@
 import os
 import json
 from .. import constants as c
-from .prompts import INSTR_FULL_FILE, INSTR_FAST_APPLY, EXAMPLE_FULL_FILE, EXAMPLE_FAST_APPLY
+from .prompts import (
+    INSTR_FULL_FILE, INSTR_FAST_APPLY, EXAMPLE_FULL_FILE, EXAMPLE_FAST_APPLY,
+    FORMATTING_INSTRUCTION_TEMPLATE, AUTOMATION_WARNING_TEMPLATE
+)
 from .utils import get_token_count_for_text
 
 def get_language_from_path(path):
@@ -55,94 +58,18 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         mode_instruction = INSTR_FAST_APPLY if enable_fast_apply else INSTR_FULL_FILE
         example_content = EXAMPLE_FAST_APPLY if enable_fast_apply else EXAMPLE_FULL_FILE
 
-        formatting_instruction = f"""**CRITICAL INSTRUCTIONS FOR CODE GENERATION - READ CAREFULLY:**
+        formatting_instruction = FORMATTING_INSTRUCTION_TEMPLATE.format(
+            mode_instruction=mode_instruction,
+            example_content=example_content,
+            marker_prefix=c.MARKER_PREFIX,
+            marker_file=c.MARKER_FILE,
+            marker_eof=c.MARKER_EOF
+        )
 
-1. **MANDATORY TAGGING & CLOSING POLICY:**
-   Every section of your response (Answers, Intro, Changes, Delete, Verification) MUST be explicitly wrapped in tags.
-   **CRITICAL:** Every opening tag MUST have an identical closing tag.
-   Format: `<INTRO>[content]</INTRO>`
-
-2. **INTRO, ANSWERS & CHANGES (PRE-CODE):**
-   Immediately before the code blocks, provide these sections in this order:
-   - **<INTRO>**: Use this to provide a technical implementation plan or architectural summary.
-   - **<ANSWERS TO DIRECT USER QUESTIONS>**: If the user asked a specific question (usually ending with a '?'), answer it here. If there is no question mark in the prompt, there is no question. In that case, this block MUST remain empty (use a single dash `-`). Do NOT fill it with filler text like "None" or "No questions".
-   - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
-
-3. **{mode_instruction}**
-
-4. **EVOLVED BASELINE AWARENESS (SESSION CONTEXT):**
-   - You must acknowledge that the codebase evolves. If a file has been modified in previous turns of this conversation, that modified version is your only valid baseline for the ORIGINAL block.
-   - NEVER reference the initial code blocks from the start of the chat if they have been superceded by your own subsequent changes.
-
-5. **FUNCTIONAL PRESERVATION:**
-   - Do not remove or break any existing functionality.
-   - NO SILENT REFACTORING: Do not "improve," "clean up," or "simplify" any code that is not directly related to the requested change. Leave unrelated logic and comments untouched.
-
-6. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
-   - ONLY output files that have actually been modified.
-   - If a file's final code is **byte-for-byte identical** to the current state of the project, **DO NOT** include it in your output.
-   - **UNCHANGED FILES (LAST RESORT ONLY):** If you feel a strict compulsion to acknowledge files you didn't modify, use the optional `<UNCHANGED>` block at the very end of your response. DO NOT output this block if you can simply stop yourself from outputting unchanged files. It is only here to prevent you from wasting tokens on unmodified code blocks.
-
-7. **MANDATORY OUTPUT FORMAT (PARSER COMPATIBILITY):**
-   - Every modified file MUST be wrapped exactly like this template, including the trailing marker:
-
-{c.MARKER_PREFIX}{c.MARKER_FILE}`path/to/file.ext` ---
-```[language_id]
-{example_content}
-```
-{c.MARKER_PREFIX}{c.MARKER_EOF} ---
-
-   - **CRITICAL:** The `{c.MARKER_PREFIX}{c.MARKER_EOF} ---` marker is a machine-parseable sentinel. It MUST be present after every file block.
-
-8. **DELETE, VERIFICATION & UNCHANGED (POST-CODE):**
-   Immediately following the final "--- End of file ---" marker, provide these sections:
-
-   <DELETED FILES>
-   STRICT FILE PATHS ONLY.
-   FORMAT: DELETE FILE: path/to/obsolete_file.ext
-   PROHIBITION: Do NOT describe code-level removals, logic deletions, or "cleanup."
-   If no files were deleted from the filesystem, this section should ONLY contain a single dash (`-`). Do NOT write "None" or any other text.
-   </DELETED FILES>
-
-   <VERIFICATION>
-   - Steps to test the changes.
-   </VERIFICATION>
-
-   <UNCHANGED>
-   (OPTIONAL: You may list the names of unchanged files here to satisfy any compulsion to acknowledge them without outputting their code. Omit this block entirely if possible.)
-   </UNCHANGED>
-
-==========
-
-You MUST format your EXACT output using this skeleton. Do not deviate from this structure:
-
-<INTRO>
-(Implementation plan)
-</INTRO>
-
-<ANSWERS TO DIRECT USER QUESTIONS>
-(Answer any direct questions here, otherwise `-`)
-</ANSWERS TO DIRECT USER QUESTIONS>
-
-<CHANGES>
-(List of changes)
-</CHANGES>
-
-{c.MARKER_PREFIX}{c.MARKER_FILE}`path/to/file.ext` ---
-```language
-(Full unabridged file code or surgical blocks as instructed)
-```
-{c.MARKER_PREFIX}{c.MARKER_EOF} ---
-
-<DELETED FILES>
-(Files to delete, or `-`)
-</DELETED FILES>
-
-<VERIFICATION>
-(Testing steps)
-</VERIFICATION>"""
-
-        automation_warning = f"CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and {c.MARKER_PREFIX}{c.MARKER_FILE} wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
+        automation_warning = AUTOMATION_WARNING_TEMPLATE.format(
+            marker_prefix=c.MARKER_PREFIX,
+            marker_file=c.MARKER_FILE
+        )
 
         final_parts = [f"# {project_title}"]
 
