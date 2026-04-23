@@ -172,11 +172,11 @@
   },
   {
     "path": "src/core/prompts/formatting.py",
-    "tokens": 1069,
+    "tokens": 1098,
     "ignoreTokens": false,
-    "lines": 90,
-    "mtime": 1776932328.772666,
-    "hash": "52e41abdb48029f561db1e5621398e05cf0730eb"
+    "lines": 91,
+    "mtime": 1776932348.5349271,
+    "hash": "de73618a77953e585eed04ba9070914620bebb1c"
   },
   {
     "path": "src/core/prompts/starter.py",

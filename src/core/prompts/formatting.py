@@ -22,6 +22,7 @@ FORMATTING_INSTRUCTION_TEMPLATE = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION
 5. **FUNCTIONAL PRESERVATION:**
    - Do not remove or break any existing functionality.
    - NO SILENT REFACTORING: Do not "improve," "clean up," or "simplify" any code that is not directly related to the requested change. Leave unrelated logic and comments untouched.
+   - IMPORTANT: Try to preserve the original code and the logic of the original code as much as possible, unless explicitly instructed to change something.
 
 6. **STRICT CHANGE DETECTION & OUTPUT MINIMIZATION:**
    - ONLY output files that have actually been modified.
