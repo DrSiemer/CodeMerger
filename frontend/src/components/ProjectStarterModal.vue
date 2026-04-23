@@ -39,6 +39,7 @@ let toastTimer = null
 
 const pData = reactive({
   name: '',
+  starting_mode: null, // 'fresh' | 'base'
   parent_folder: '',
   stack: [],
   stack_experience: '',
@@ -138,7 +139,7 @@ watch(() => pData, () => {
 }, { deep: true })
 
 const recalcProgress = () => {
-  const hasDetails = !!pData.name
+  const hasDetails = !!pData.starting_mode
   const hasConcept = (!Object.keys(pData.concept_segments).length) && !!pData.concept_md
   const hasStack = pData.stack && pData.stack.length > 0
   const hasDesign = (!Object.keys(pData.design_segments).length) && !!pData.design_md
@@ -146,7 +147,9 @@ const recalcProgress = () => {
 
   let targetMax = 1
   if (hasDetails) {
-    targetMax = 3 // Move to Concept
+    // Jump to Concept (3) if fresh, otherwise allow Base Files (2)
+    targetMax = pData.starting_mode === 'base' ? 2 : 3
+
     if (hasConcept) {
       targetMax = 4 // Move to Stack
       if (hasStack) {
@@ -258,7 +261,8 @@ const onProjectCreated = async (res) => {
 // --- Navigation ---
 const activeStepsList = computed(() => {
   const steps = [1]
-  if (pData.base_project_path) steps.push(2)
+  // Only show Step 2 if the user is using a reference project
+  if (pData.starting_mode === 'base') steps.push(2)
   steps.push(3, 4, 5, 6, 7)
   return steps
 })
@@ -266,9 +270,9 @@ const activeStepsList = computed(() => {
 const isLookingBack = computed(() => currentStep.value < maxAccessibleStep.value)
 
 const isNextDisabled = computed(() => {
-  // Step 1: Name is mandatory
+  // Step 1: Starting choice is mandatory
   if (currentStep.value === 1) {
-    return !pData.name.trim()
+    return !pData.starting_mode
   }
 
   // Step 3 (Concept): Can only proceed if document is merged and segments are cleared

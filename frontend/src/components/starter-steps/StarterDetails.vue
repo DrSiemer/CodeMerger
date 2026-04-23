@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { FolderPlus, Trash2 } from 'lucide-vue-next'
+import { FolderPlus, Trash2, Sparkles, LayoutPanelLeft } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -14,15 +13,17 @@ const props = defineProps({
   }
 })
 
-defineEmits(['next'])
+const emit = defineEmits(['next'])
 
-const { selectDirectory, getBaseProjectData, getRandomSillySuggestion, statusMessage } = useAppState()
+const { selectDirectory, getBaseProjectData, statusMessage } = useAppState()
 
-const placeholderName = ref('e.g. My Next Big Idea')
+const setStartFresh = () => {
+  props.pData.starting_mode = 'fresh'
+}
 
-onMounted(async () => {
-  placeholderName.value = await getRandomSillySuggestion()
-})
+const setUseReference = () => {
+  props.pData.starting_mode = 'base'
+}
 
 const browseBaseProject = async () => {
   const folder = await selectDirectory()
@@ -37,6 +38,8 @@ const browseBaseProject = async () => {
       return
     }
 
+    props.pData.starting_mode = 'base'
+
     if (existingData && existingData.selected_files?.length) {
       props.pData.base_project_files = existingData.selected_files
     } else {
@@ -48,45 +51,64 @@ const browseBaseProject = async () => {
 const clearBaseProject = () => {
   props.pData.base_project_path = ''
   props.pData.base_project_files = []
+  props.pData.starting_mode = null
 }
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto flex flex-col h-full w-full">
+  <div class="max-w-4xl mx-auto flex flex-col h-full w-full">
     <div class="space-y-8">
-      <h3 class="text-2xl font-bold text-white">Project Details</h3>
-      <div class="space-y-4">
-        <p class="text-gray-400 text-lg">Enter the initial details for your new project.</p>
+      <div class="text-center space-y-2">
+        <h3 class="text-3xl font-bold text-white">Choose your starting point</h3>
+        <p class="text-gray-400 text-lg">Decide whether to begin with a blank slate or use an existing project as a reference.</p>
       </div>
 
-      <div class="space-y-6">
-        <div v-info="'starter_details_name'">
-          <label class="block text-gray-200 font-bold mb-2 uppercase tracking-wider text-xs">Project Name</label>
-          <input v-model="pData.name" type="text" class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 focus:border-cm-blue outline-none text-lg" :placeholder="placeholderName">
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
+        <!-- Option 1: Start Fresh -->
+        <button
+          @click="setStartFresh"
+          class="flex flex-col items-center text-center p-8 rounded-xl border-2 transition-all duration-300 group relative overflow-hidden"
+          :class="pData.starting_mode === 'fresh' ? 'bg-cm-blue/10 border-cm-blue shadow-lg' : 'bg-gray-800/40 border-gray-700 hover:border-gray-500 hover:bg-gray-800/60'"
+        >
+          <div class="w-16 h-16 rounded-full bg-cm-blue/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <Sparkles class="w-8 h-8 text-cm-blue" />
+          </div>
+          <h4 class="text-xl font-bold text-white mb-2">Start Fresh</h4>
+          <p class="text-gray-400 text-sm leading-relaxed">Begin a completely new project from scratch. Best for exploring new ideas or unique architectures.</p>
+        </button>
 
-        <div class="pt-6 border-t border-gray-700">
-          <label class="block text-gray-200 font-bold mb-2 uppercase tracking-wider text-xs">Start from an existing project <span class="text-[#DE6808]">(OPTIONAL)</span></label>
-          <div class="flex items-center space-x-4 mt-3">
-            <button @click="browseBaseProject" v-info="'starter_details_base'" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded font-semibold transition-colors flex items-center shrink-0">
-              <FolderPlus class="w-5 h-5 mr-2" />
-              {{ pData.base_project_path ? 'Change base project' : 'Select base project' }}
+        <!-- Option 2: Reference Project -->
+        <div
+          @click="setUseReference"
+          class="flex flex-col items-center text-center p-8 rounded-xl border-2 transition-all duration-300 group relative overflow-hidden cursor-pointer"
+          :class="pData.starting_mode === 'base' ? 'bg-cm-blue/10 border-cm-blue shadow-lg' : 'bg-gray-800/40 border-gray-700 hover:border-gray-500 hover:bg-gray-800/60'"
+        >
+          <div class="w-16 h-16 rounded-full bg-cm-blue/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <LayoutPanelLeft class="w-8 h-8 text-cm-blue" />
+          </div>
+          <h4 class="text-xl font-bold text-white mb-2">Use Reference</h4>
+          <p class="text-gray-400 text-sm leading-relaxed mb-6">Load an existing project to guide the AI on coding style, tech stack, and architectural patterns.</p>
+
+          <button
+            @click.stop="browseBaseProject"
+            v-info="'starter_details_base'"
+            class="mt-auto bg-gray-700 hover:bg-gray-600 text-white px-6 py-2.5 rounded font-bold transition-colors flex items-center text-sm shadow-md"
+          >
+            <FolderPlus class="w-4 h-4 mr-2" />
+            {{ pData.base_project_path ? 'Change reference' : 'Select reference folder' }}
+          </button>
+
+          <div v-if="pData.base_project_path" class="mt-4 flex items-center space-x-2 bg-black/30 px-3 py-1.5 rounded-full border border-gray-700 max-w-full">
+            <span class="text-gray-300 font-mono text-[10px] truncate">{{ pData.base_project_path }}</span>
+            <button @click="clearBaseProject" class="text-gray-500 hover:text-red-400 transition-colors" title="Clear selection">
+               <Trash2 class="w-3.5 h-3.5" />
             </button>
-
-            <div v-if="pData.base_project_path" class="flex items-center space-x-3 bg-cm-input-bg border border-gray-600 rounded px-4 py-2 max-w-full overflow-hidden">
-              <span class="text-gray-300 font-mono text-sm truncate">{{ pData.base_project_path }}</span>
-              <button @click="clearBaseProject" class="text-gray-500 hover:text-red-400 p-1 rounded transition-colors shrink-0" title="Clear base project">
-                <Trash2 class="w-4 h-4" />
-              </button>
-            </div>
-            <span v-else class="text-gray-400 font-mono text-sm break-all">No base project selected</span>
           </div>
         </div>
-
       </div>
     </div>
 
-    <div class="mt-auto pt-8 pb-8">
+    <div class="mt-auto pt-12 pb-8">
       <div class="bg-cm-blue/10 border border-cm-blue/30 rounded p-4 text-sm text-blue-100 leading-relaxed italic shadow-inner space-y-2">
         <p>Tip: It is highly recommended to start a fresh chat with your LLM before pasting prompts from this starter.</p>
         <p>Note: All project documentation is written in <span class="font-bold">Markdown</span>. See the <a href="https://www.markdownguide.org/basic-syntax/" target="_blank" class="text-cm-blue hover:underline not-italic font-bold ml-1">Basic Syntax Guide</a> for formatting tips.</p>

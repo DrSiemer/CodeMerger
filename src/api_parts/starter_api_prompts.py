@@ -32,6 +32,10 @@ class StarterApiPrompts:
         if project_data is None:
             project_data = {}
 
+        # Rule: Only include reference content if the project is in 'base' mode
+        if project_data.get("starting_mode") != "base":
+            return ""
+
         base_path = project_data.get("base_project_path", "")
         base_files = project_data.get("base_project_files", [])
         if not base_path or not base_files:
@@ -189,6 +193,21 @@ class StarterApiPrompts:
             p.STARTER_TODO_PROMPT_INSTR.format(headers_str=headers_str)
         ]
         return "\n".join(parts)
+
+    def generate_name_suggestions_prompt(self, project_data):
+        """Generates a prompt asking for name suggestions based on project context."""
+        if project_data is None: project_data = {}
+
+        concept = project_data.get("concept_md", "")
+        if not concept and project_data.get("concept_segments"):
+            concept = self.assemble_starter_document(project_data["concept_segments"], c.CONCEPT_ORDER, c.CONCEPT_SEGMENTS)
+
+        stack = self._format_stack_for_prompt(project_data.get("stack", []))
+
+        return p.STARTER_NAME_SUGGESTIONS_PROMPT_TEMPLATE.format(
+            concept=concept or "No concept provided.",
+            stack=stack
+        )
 
     def generate_master_prompt(self, project_data):
         """Constructs and returns the final Project Boilerplate generation prompt."""

@@ -163,3 +163,13 @@ STARTER_REFERENCE_PROJECT_HEADER = """
 ### REFERENCE PROJECT (TECHNICAL REFERENCE GUIDE)
 --- IMPORTANT: The code provided below is a strong guide for the technology stack, architectural patterns, and coding standards intended for this project. Use these files to determine the framework (e.g., CodeIgniter, React) and libraries to use. Note that you are designing a NEW project from scratch; do NOT assume a pre-prepared environment exists. ---
 """
+
+STARTER_NAME_SUGGESTIONS_PROMPT_TEMPLATE = """Act as a branding expert and creative consultant. Based on the project details provided below, suggest 10 unique and catchy project names.
+
+### Project Concept
+{concept}
+
+### Tech Stack
+{stack}
+
+Provide a diverse list of suggestions (ranging from literal and professional to creative and abstract) and include a one-sentence rationale for each."""

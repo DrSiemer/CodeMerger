@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAppState } from '../../composables/useAppState'
 import RewriteModal from './RewriteModal.vue'
 import NotesModal from './NotesModal.vue'
@@ -31,12 +31,18 @@ const {
   mapParsedSegmentsToKeys,
   assembleStarterDocument,
   getStarterQuestionPrompt,
+  getRandomSillySuggestion,
   editorFontSize,
   handleZoom,
   copyText
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.concept_llm_response)
+const placeholderGoal = ref('e.g. A desktop tool that bundles project code...')
+
+onMounted(async () => {
+  placeholderGoal.value = await getRandomSillySuggestion()
+})
 const showQuestions = ref(false)
 const showRewriteModal = ref(false)
 const rewriteContext = ref(null)
@@ -241,7 +247,7 @@ const handleReset = () => {
           v-info="'starter_concept_goal'"
           class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue selectable text-lg leading-relaxed custom-scrollbar"
           :style="{ fontSize: editorFontSize + 'px' }"
-          placeholder="e.g. A desktop tool that bundles project code..."
+          :placeholder="placeholderGoal"
         ></textarea>
 
         <div v-if="isGoalFilled || showPasteArea" class="shrink-0 bg-gray-800 p-6 rounded border border-gray-700 space-y-4">

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Upload, Copy, Check } from 'lucide-vue-next'
+import { Upload, Copy, Check, Sparkles } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -14,6 +14,7 @@ const emit = defineEmits(['projectCreated'])
 
 const {
   generateMasterPrompt,
+  generateNameSuggestionsPrompt,
   createStarterProject,
   createStarterProjectOverwrite,
   selectDirectory,
@@ -24,6 +25,7 @@ const {
 
 const showPasteArea = ref(!!props.pData.generate_llm_response)
 const isPathCopied = ref(false)
+const isSuggestionsCopied = ref(false)
 
 const isFolderValid = computed(() => {
   return props.pData.parent_folder && props.pData.parent_folder.trim() !== ''
@@ -57,6 +59,15 @@ const copyPathToClipboard = async () => {
   setTimeout(() => { isPathCopied.value = false }, 2000)
 }
 
+const copyNameSuggestionsPrompt = async () => {
+  const prompt = await generateNameSuggestionsPrompt(props.pData)
+  if (prompt) {
+    await copyText(prompt)
+    isSuggestionsCopied.value = true
+    setTimeout(() => { isSuggestionsCopied.value = false }, 2000)
+  }
+}
+
 const browseParentFolder = async () => {
   const folder = await selectDirectory()
   if (folder) {
@@ -75,7 +86,7 @@ const copyMasterPrompt = async (e) => {
 }
 
 const isGenerateReady = computed(() => {
-  if (!props.pData.name || !props.pData.parent_folder || !props.pData.generate_llm_response) return false
+  if (!props.pData.name.trim() || !props.pData.parent_folder || !props.pData.generate_llm_response) return false
   const content = props.pData.generate_llm_response
   if (!content.includes('--- File: ') || !content.includes('--- End of file ---')) return false
   if (!content.includes('<PITCH>') || !content.includes('</PITCH>')) return false
@@ -86,9 +97,6 @@ const createProject = async () => {
   const pitchMatch = props.pData.generate_llm_response.match(/<PITCH>(.*?)<\/PITCH>/i)
   const pitch = pitchMatch ? pitchMatch[1].trim() : "a new project"
 
-  // Note: We no longer pass cleanData (pData) across the bridge to create the project.
-  // The Python backend now loads this data directly from the local session file
-  // to avoid bridge serialization errors and extremely large IPC payloads.
   let res = await createStarterProject(props.pData.generate_llm_response, props.pData.include_base_reference, pitch)
 
   if (res?.status === 'EXISTS' && confirm("Project folder already exists. Overwrite?")) {
@@ -107,8 +115,25 @@ const createProject = async () => {
   <div class="max-w-3xl mx-auto w-full space-y-8 text-gray-100 pb-8" @wheel.ctrl.prevent="handleZoom">
     <h3 class="text-2xl font-bold text-white">Finalize and Generate</h3>
     <div class="bg-gray-800 p-8 rounded border border-gray-700 space-y-6">
-      <div class="space-y-3" v-info="'starter_gen_parent'">
-        <label class="block text-gray-300 font-bold text-sm uppercase">1. Destination Folder</label>
+
+      <div class="space-y-3 border-b border-gray-700 pb-6" v-info="'starter_details_name'">
+        <div class="flex items-center justify-between">
+          <label class="block text-gray-300 font-bold text-sm uppercase">1. Project Name</label>
+          <button
+            @click="copyNameSuggestionsPrompt"
+            class="flex items-center space-x-1.5 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded border transition-all active:scale-95"
+            :class="isSuggestionsCopied ? 'bg-cm-green text-white border-cm-green' : 'bg-gray-700 text-gray-400 border-gray-600 hover:text-white hover:border-gray-500'"
+            title="Ask the AI for name suggestions based on your project context"
+          >
+            <Sparkles class="w-3 h-3" />
+            <span>{{ isSuggestionsCopied ? 'Prompt Copied!' : 'Suggest Names' }}</span>
+          </button>
+        </div>
+        <input v-model="pData.name" type="text" class="w-full bg-cm-input-bg border border-gray-600 text-white rounded p-3 focus:border-cm-blue outline-none text-lg" placeholder="Enter a name for your project...">
+      </div>
+
+      <div class="space-y-3 pt-2" v-info="'starter_gen_parent'">
+        <label class="block text-gray-300 font-bold text-sm uppercase">2. Destination Folder</label>
         <div class="flex space-x-3">
           <input v-model="pData.parent_folder" type="text" class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-2 text-sm outline-none focus:border-cm-blue">
           <button @click="browseParentFolder" class="bg-gray-700 px-4 py-2 rounded text-sm hover:bg-gray-600 font-bold">Browse</button>
@@ -132,11 +157,11 @@ const createProject = async () => {
       </div>
 
       <div v-if="isFolderValid" class="pt-6 border-t border-gray-700 flex flex-col space-y-4">
-        <label class="block text-gray-300 font-bold text-sm uppercase">2. Creation Prompt</label>
+        <label class="block text-gray-300 font-bold text-sm uppercase">3. Creation Prompt</label>
         <button @click="copyMasterPrompt" v-info="'starter_gen_prompt'" class="bg-cm-blue text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-500 transition-colors">Copy Final Creation Prompt</button>
 
         <div v-if="showPasteArea" class="pt-4 flex flex-col space-y-3">
-          <label class="block text-gray-300 font-bold text-sm uppercase">3. Paste the LLM Output</label>
+          <label class="block text-gray-300 font-bold text-sm uppercase">4. Paste the LLM Output</label>
           <textarea v-model="pData.generate_llm_response" v-info="'starter_gen_response'" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
         </div>
       </div>

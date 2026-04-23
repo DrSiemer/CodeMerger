@@ -21,6 +21,7 @@ export function useStarter() {
   const generateStackPrompt = async (data) => window.pywebview ? await window.pywebview.api.generate_stack_prompt(data) : ""
   const generateDesignPrompt = async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_design_prompt(data, qMap) : ""
   const generateTodoPrompt = async (data, qMap) => window.pywebview ? await window.pywebview.api.generate_todo_prompt(data, qMap) : ""
+  const generateNameSuggestionsPrompt = async (data) => window.pywebview ? await window.pywebview.api.generate_name_suggestions_prompt(data) : ""
   const generateMasterPrompt = async (data) => window.pywebview ? await window.pywebview.api.generate_master_prompt(data) : ""
   const parseStarterSegments = async (text) => window.pywebview ? await window.pywebview.api.parse_starter_segments(text) : {}
   const assembleStarterDocument = async (segments, order, names) => window.pywebview ? await window.pywebview.api.assemble_starter_document(segments, order, names) : ""
@@ -52,6 +53,7 @@ export function useStarter() {
     generateStackPrompt,
     generateDesignPrompt,
     generateTodoPrompt,
+    generateNameSuggestionsPrompt,
     generateMasterPrompt,
     parseStarterSegments,
     assembleStarterDocument,
