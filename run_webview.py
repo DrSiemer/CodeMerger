@@ -32,10 +32,9 @@ import base64
 import threading
 from src.api import Api
 from src.core.logger import setup_logging
-from src.core.paths import get_bundle_dir, SPLASH_1_PATH, SPLASH_2_PATH, SPLASH_3_PATH
+from src.core.paths import get_bundle_dir
 from src.core.file_monitor_thread import FileMonitorThread
 from src.core.updater import Updater
-from src.core.utils import load_app_version
 from src import constants as c
 
 from src.app_state import AppState

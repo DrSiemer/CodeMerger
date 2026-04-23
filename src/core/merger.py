@@ -1,5 +1,4 @@
 import os
-import json
 from .. import constants as c
 from .prompts import (
     INSTR_FULL_FILE, INSTR_FAST_APPLY, EXAMPLE_FULL_FILE, EXAMPLE_FAST_APPLY,

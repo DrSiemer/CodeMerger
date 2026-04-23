@@ -3,9 +3,7 @@ import json
 import pyperclip
 import logging
 import subprocess
-import sys
-import time
-from src.core.utils import parse_gitignore, get_token_count_for_text, is_ignored, get_file_hash
+from src.core.utils import get_token_count_for_text, get_file_hash
 from src.core.file_tree_builder import build_file_tree_data
 from src.core.merger import generate_output_string
 from src.core.file_scanner import get_project_inventory

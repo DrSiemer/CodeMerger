@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { ChevronRight, Save, RotateCcw, Plus, Trash2, ChevronDown, ChevronUp, AlertCircle, PencilLine, Check } from 'lucide-vue-next'
+import { ChevronRight, Save, RotateCcw, Plus, Trash2, ChevronDown, ChevronUp, PencilLine } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({

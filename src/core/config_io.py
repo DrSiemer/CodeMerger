@@ -7,7 +7,6 @@ import tempfile
 import time
 import sys
 from ..constants import COMPACT_MODE_BG_COLOR, CODEMERGER_TEMP_PREFIX
-from .utils import calculate_font_color
 
 def generate_random_color():
     """Generates a random visually pleasing hex color string"""

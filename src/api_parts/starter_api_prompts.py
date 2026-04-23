@@ -1,6 +1,5 @@
 import os
 import logging
-import tkinter as tk
 from src.core import prompts as p
 from src import constants as c
 from src.core.paths import BOILERPLATE_DIR, REFERENCE_DIR

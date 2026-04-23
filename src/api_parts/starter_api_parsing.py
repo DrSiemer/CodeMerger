@@ -1,6 +1,5 @@
 import re
 import logging
-from src import constants as c
 
 log = logging.getLogger("CodeMerger")
 

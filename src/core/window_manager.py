@@ -6,7 +6,7 @@ import threading
 import json
 from src.core.paths import get_bundle_dir
 from src.core.updater import Updater
-from src.core.utils import load_app_version, save_config
+from src.core.utils import load_app_version
 
 from src.core.window_geometry import WindowGeometry
 from src.core.window_splash import create_splash_window

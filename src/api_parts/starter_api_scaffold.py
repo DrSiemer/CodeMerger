@@ -1,15 +1,12 @@
 import os
 import re
 import logging
-import webview
 import json
 from pathlib import Path
 from src.core.project_config import ProjectConfig
 from src.core.utils import parse_gitignore, load_config
 from src.core.file_tree_builder import build_file_tree_data
 from src import constants as c
-from src.core import prompts as p
-from src.core.paths import BOILERPLATE_DIR
 
 log = logging.getLogger("CodeMerger")
 

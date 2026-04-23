@@ -11,23 +11,6 @@ export const getColorForDomain = (domain) => {
   return '#4B5563';
 };
 
-export const enrichNodes = (nodes, parentDomain = 'default', idTracker = { val: 0 }) => {
-  let totalWeight = 0;
-  nodes.forEach(node => {
-    node.id = ++idTracker.val;
-    node.domain = node.domain || parentDomain;
-    node.color = getColorForDomain(node.domain);
-    node.files = (node.files || []).map(f => typeof f === 'string' ? { path: f, description: '' } : f);
-    node.weight = node.files.length || 1;
-
-    if (node.children && node.children.length > 0) {
-      node.weight += enrichNodes(node.children, node.domain, idTracker);
-    }
-    totalWeight += node.weight;
-  });
-  return totalWeight;
-};
-
 export const computeLayouts = (node) => {
   if (!node.children || node.children.length === 0) return;
   const sortedChildren = [...node.children].sort((a, b) => b.weight - a.weight);

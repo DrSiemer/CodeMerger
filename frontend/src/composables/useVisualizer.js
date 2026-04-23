@@ -1,7 +1,6 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useAppState } from "./useAppState";
 import {
-  enrichNodes,
   computeLayouts,
   getAllFilesUnderNode,
   extractJSON,

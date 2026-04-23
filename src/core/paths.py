@@ -40,11 +40,6 @@ DEFAULT_FILETYPES_CONFIG_PATH = os.path.join(BUNDLE_DIR, 'default_filetypes.json
 BOILERPLATE_DIR = os.path.join(BUNDLE_DIR, 'assets', 'boilerplate')
 REFERENCE_DIR = os.path.join(BUNDLE_DIR, 'assets', 'reference')
 
-ICON_PATH = os.path.join(BUNDLE_DIR, 'assets', 'icon.ico')
-
-LOGO_MASK_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask.png')
-LOGO_MASK_SMALL_PATH = os.path.join(BUNDLE_DIR, 'assets', 'logo_mask_small.png')
-
 SPLASH_1_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_1.png')
 SPLASH_2_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_2.png')
 SPLASH_3_PATH = os.path.join(BUNDLE_DIR, 'assets', 'splash_3.png')

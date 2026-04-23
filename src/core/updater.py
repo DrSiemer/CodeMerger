@@ -1,11 +1,9 @@
 import json
-import webbrowser
 import os
 import sys
 import subprocess
 import logging
 import tkinter as tk
-import ctypes
 from datetime import datetime
 from urllib import request, error
 from tkinter import messagebox
@@ -13,15 +11,6 @@ from .. import constants as c
 from ..core.paths import BUNDLE_DIR
 
 log = logging.getLogger("CodeMerger")
-
-def is_pid_running_win32(pid):
-    """Windows-specific PID check using kernel32"""
-    PROCESS_QUERY_INFORMATION = 0x0400
-    handle = ctypes.windll.kernel32.OpenProcess(PROCESS_QUERY_INFORMATION, 0, pid)
-    if handle == 0:
-        return False
-    ctypes.windll.kernel32.CloseHandle(handle)
-    return True
 
 class Updater:
     """

@@ -3,7 +3,7 @@ import threading
 import logging
 import time
 from .project_config import ProjectConfig
-from .utils import parse_gitignore, calculate_font_color
+from .utils import calculate_font_color
 from .file_scanner import get_all_matching_files
 
 log = logging.getLogger("CodeMerger")

@@ -89,115 +89,19 @@ TODO_PHASES = {
     "deployment": "Deployment"
 }
 
-# TODO configuration UI
-TODO_DESCRIPTIONS = {
-    "setup": "Project initialization, folder structure, and basic 'go' automation scripts.",
-    "database": "Data modeling, schema implementation, migrations, and initial seed data.",
-    "api": "Server-side architecture, controllers, business logic, and API documentation.",
-    "frontend": "User interface components, layout, client-side routing, and styling.",
-    "logic": "State management, complex algorithms, and third-party integrations.",
-    "polish": "Error handling, animations, responsive design, and final code cleanup.",
-    "deployment": "Production builds, environment variables, and hosting configuration."
-}
-
 # TODO document section order
 TODO_ORDER = [
     "setup", "database", "api", "frontend", "logic", "polish", "deployment"
 ]
 
 # UI Theming & Configuration
-PROJECT_TITLE_MAX_LENGTH = 64
-COMPACT_MODE_PROJECT_TITLE_MAX_LENGTH = 8
 COMPACT_MODE_BG_COLOR = "#6f6f6f"
-TOKEN_COUNT_ENABLED_DEFAULT = True
-TOKEN_COLOR_RANGE_MIN_MAX = 4000
-COMPACT_MODE_MOVE_BAR_HEIGHT = 14
-COMPACT_MODE_BORDER_WIDTH = 1
-DEFAULT_LIST_ITEM_HEIGHT = 25
 
 # Compact Window Dimensions (Logical Units)
 COMPACT_WINDOW_WIDTH_LOGICAL = 131
 COMPACT_WINDOW_HEIGHT_LOGICAL = 112
 ULTRA_COMPACT_WINDOW_WIDTH_LOGICAL = 76
 ULTRA_COMPACT_WINDOW_HEIGHT_LOGICAL = 86
-
-# UI Default Dimensions
-DEFAULT_WINDOW_GEOMETRY = "660x360"
-MIN_WINDOW_WIDTH = 800
-MIN_WINDOW_HEIGHT = 500
-FILE_MANAGER_DEFAULT_GEOMETRY = "1000x700"
-FILE_MANAGER_MIN_WIDTH = 600
-FILE_MANAGER_MIN_HEIGHT = 200
-SETTINGS_WINDOW_DEFAULT_GEOMETRY = "500x640"
-SETTINGS_WINDOW_MIN_WIDTH = 500
-SETTINGS_WINDOW_MIN_HEIGHT = 300
-FILETYPES_WINDOW_DEFAULT_GEOMETRY = "330x550"
-INSTRUCTIONS_WINDOW_DEFAULT_GEOMETRY = "700x500"
-PROJECT_SELECTOR_WIDTH = 450
-TITLE_EDIT_DIALOG_WIDTH = 400
-PROJECT_STARTER_GEOMETRY = "1000x750"
-VISUALIZER_GEOMETRY = "1000x750"
-NOTES_DIALOG_DEFAULT_GEOMETRY = "600x350"
-
-# UI Color Palette (dark to light)
-
-# Grayscale
-TOP_BAR_BG = '#252525'
-DARK_BG = '#2E2E2E'
-BTN_GRAY_TEXT = '#333333'
-STATUS_BG = '#3A3A3A'
-TEXT_INPUT_BG = '#3C3C3C'
-WRAPPER_BORDER = '#555555'
-SUBTLE_HIGHLIGHT_COLOR = "#555555"
-TEXT_SUBTLE_COLOR = '#A0A0A0'
-BTN_GRAY_BG = '#CCCCCC'
-STATUS_FG = '#D3D3D3'
-TEXT_COLOR = '#FFFFFF'
-BTN_GREEN_TEXT = '#FFFFFF'
-BTN_BLUE_TEXT = '#FFFFFF'
-INFO_PANEL_BG = "#1A1A1A"
-
-# Colors
-BTN_GREEN = '#0D8319'
-BTN_BLUE = '#0078D4'
-NOTE = "#B77B06"
-WARN = "#DF2622"
-ATTENTION = "#DE6808"
-FILTER_ACTIVE_BORDER = '#009900'
-TEXT_FILTERED_COLOR = '#BB86FC'
-
-# Diff Colors - Optimized for Dark Theme Legibility
-DIFF_ADD_BG = '#1e301e'
-DIFF_ADD_FG = '#a7f0a7'
-DIFF_REMOVE_BG = '#3a1e1e'
-DIFF_REMOVE_FG = '#f0a7a7'
-DIFF_HEADER_FG = '#85b5d5'
-
-# UI Fonts
-FONT_FAMILY_PRIMARY = "Segoe UI"
-FONT_FAMILY_SECONDARY = "Helvetica"
-FONT_FAMILY_TOOLTIP = "tahoma"
-
-FONT_DEFAULT = (FONT_FAMILY_PRIMARY, 11)
-FONT_COMPACT_TITLE = (FONT_FAMILY_PRIMARY, 8)
-FONT_COMPACT_BUTTON = (FONT_FAMILY_PRIMARY, 8, 'bold')
-FONT_STATUS_BAR = (FONT_FAMILY_PRIMARY, 9)
-FONT_SMALL_BUTTON = (FONT_FAMILY_PRIMARY, 9)
-FONT_WRAPPER_SUBTITLE = (FONT_FAMILY_SECONDARY, 10)
-FONT_WRAPPER_TITLE = (FONT_FAMILY_SECONDARY, 10, 'bold')
-FONT_NORMAL = (FONT_FAMILY_PRIMARY, 12)
-FONT_BOLD = (FONT_FAMILY_PRIMARY, 12, 'bold')
-FONT_FILE_MANAGER_BUTTON = (FONT_FAMILY_PRIMARY, 14)
-FONT_BUTTON = (FONT_FAMILY_PRIMARY, 16)
-FONT_LOADING_TITLE = (FONT_FAMILY_PRIMARY, 18, 'bold')
-FONT_LARGE_BOLD = (FONT_FAMILY_PRIMARY, 24, 'bold')
-FONT_H2 = (FONT_FAMILY_PRIMARY, 18, 'bold')
-FONT_H3 = (FONT_FAMILY_PRIMARY, 14, 'bold')
-FONT_TOOLTIP = (FONT_FAMILY_TOOLTIP, 8, "normal")
-FONT_INFO_PANEL = (FONT_FAMILY_PRIMARY, 10)
-
-# Info Mode Config
-INFO_PANEL_HEIGHT = 80
 
 # Data Mappings
 LANGUAGE_MAP = {

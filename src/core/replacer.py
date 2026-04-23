@@ -3,14 +3,6 @@ import logging
 
 log = logging.getLogger("CodeMerger")
 
-def strip_indentation(text):
-    """Removes common leading whitespace from a block of text."""
-    lines = text.split('\n')
-    non_empty = [line for line in lines if line.strip()]
-    if not non_empty: return text
-    min_indent = min(len(re.match(r'^([ \t]*)', line).group(1)) for line in non_empty)
-    return '\n'.join(line[min_indent:] if line.strip() else line for line in lines)
-
 def levenshtein(a, b):
     """Calculates the Levenshtein distance between two strings."""
     if a == b: return 0

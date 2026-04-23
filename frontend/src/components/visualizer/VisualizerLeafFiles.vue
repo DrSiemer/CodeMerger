@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watch, ref } from 'vue'
 import { FileCode, ExternalLink } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import { useAppState } from '../../composables/useAppState'
@@ -51,8 +51,6 @@ const getFileFreshnessColor = (path) => {
 };
 
 const getFileId = (path) => `viz-file-${path.replace(/[\\/.]/g, '-')}`;
-
-import { watch, ref } from 'vue'
 
 const activeHighlightPath = ref(null);
 let highlightTimer = null;

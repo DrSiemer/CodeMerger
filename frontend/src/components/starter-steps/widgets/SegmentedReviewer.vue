@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import {
   HelpCircle, Check, X as XIcon, CheckCheck,
   LockKeyhole, LockKeyholeOpen, PencilLine, Waypoints,
-  ChevronDown, ChevronUp, Trash2
+  ChevronDown, ChevronUp
 } from 'lucide-vue-next'
 import MarkdownRenderer from '../../MarkdownRenderer.vue'
 import ReviewerQuestions from '../ReviewerQuestions.vue'

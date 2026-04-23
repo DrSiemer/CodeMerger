@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch, nextTick } from 'vue'
-import { HelpCircle, ChevronRight, Check, X as XIcon, PencilLine, Waypoints, ChevronDown, ChevronUp, Trash2 } from 'lucide-vue-next'
+import { HelpCircle, ChevronRight, Check, X as XIcon, PencilLine, Waypoints, ChevronDown, ChevronUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../../MarkdownRenderer.vue'
 import ReviewerQuestions from '../ReviewerQuestions.vue'
 import DiffViewer from '../../DiffViewer.vue'
