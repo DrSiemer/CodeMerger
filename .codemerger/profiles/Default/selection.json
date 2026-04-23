@@ -123,10 +123,10 @@
   },
   {
     "path": "src/core/replacer.py",
-    "tokens": 2496,
+    "tokens": 2494,
     "lines": 274,
-    "mtime": 1776933525.5400257,
-    "hash": "0fe3cf8a6ff768e5a288abb399301494d33bec00"
+    "mtime": 1776953900.9373906,
+    "hash": "65ba0e4c7667400beb68d9a5528c1172d9fbc111"
   },
   {
     "path": "src/core/change_applier.py",

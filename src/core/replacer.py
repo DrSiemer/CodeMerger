@@ -44,7 +44,7 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
     # Pre-normalization for check
     current_normalized = current_content.replace('\r\n', '\n').replace('\r', '\n')
 
-    # Strategy 0.5: Replace All Shortcut: if the model provides the replace-all marker, we replace the entire file content
+    # Strategy 1: Replace All Shortcut: if the model provides the replace-all marker, we replace the entire file content
     if old_code.strip() == "--==[ REPLACE ALL ]==--":
         return new_code, "Replace All"
 
@@ -53,17 +53,17 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
             return new_code, "Creation"
         raise ValueError("The 'ORIGINAL' block provided by the AI is empty.")
 
-    # Strategy 0: Already Applied
-    if new_code and new_code in current_normalized:
-        return current_normalized, "Already Applied"
-
-    # Strategy 1: Exact Match
+    # Strategy 2: Exact Match
     if old_code in current_normalized:
         if current_normalized.count(old_code) > 1:
             raise ValueError("Ambiguous match: ORIGINAL code appears multiple times. Needs more context.")
         return current_normalized.replace(old_code, new_code, 1), "Exact"
 
-    # Strategy 2: Significant Line Match (Handles blank line differences)
+    # Strategy 3: Already Applied
+    if new_code and new_code in current_normalized:
+        return current_normalized, "Already Applied"
+
+    # Strategy 4: Significant Line Match (Handles blank line differences)
     content_lines = current_normalized.split('\n')
     old_lines = old_code.split('\n')
 
@@ -122,7 +122,7 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
     elif match_count > 1:
         raise ValueError("Ambiguous match: Sequence of code found multiple times. Needs more context.")
 
-    # Strategy 3: Indentation-Flexible Significant Match
+    # Strategy 5: Indentation-Flexible Significant Match
     match_count = 0
     for i in range(len(content_lines)):
         if _is_line_match(content_lines[i], old_lines[significant_old_indices[0]], fuzzy=True):
@@ -157,7 +157,7 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
         result_lines = prefix + ([new_code] if new_code else []) + suffix
         return '\n'.join(result_lines), "Indentation-Flexible Match"
 
-    # Strategy 4: Block-Anchor Match (Levenshtein)
+    # Strategy 6: Block-Anchor Match (Levenshtein)
     # Anchors on the first and last non-empty lines. Scans all candidate blocks
     # whose boundaries match. Scores middle lines via Levenshtein distance.
     if len(significant_old_indices) >= 3:
@@ -256,18 +256,18 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
 
         return None
 
-    # Strategy 5: Whitespace-Normalized Match
+    # Strategy 7: Whitespace-Normalized Match
     res = apply_normalized_match(normalize_whitespace, "Whitespace-Normalized Match")
     if res: return res
 
-    # Strategy 6: All-Whitespace-Stripped Match (Aggressive Fallback)
+    # Strategy 8: All-Whitespace-Stripped Match (Aggressive Fallback)
     def strip_all_whitespace(text):
         return re.sub(r'\s+', '', text)
 
     res = apply_normalized_match(strip_all_whitespace, "All-Whitespace-Stripped Match")
     if res: return res
 
-    # Strategy 7: Diagnostic check
+    # Strategy 9: Diagnostic check
     if normalize_whitespace(old_code) in normalize_whitespace(current_normalized):
         raise ValueError("Code found, but the structure is too different to apply safely.")
 
