@@ -1,6 +1,10 @@
 <script setup>
 import { ref, computed, nextTick } from 'vue'
-import { ChevronRight, Save, RotateCcw, Plus, Trash2, ChevronDown, ChevronUp, PencilLine } from 'lucide-vue-next'
+import {
+  ChevronRight, Save, RotateCcw, Plus, Trash2,
+  ChevronDown, ChevronUp, PencilLine,
+  ChevronDownSquare, ChevronUpSquare
+} from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
 const props = defineProps({
@@ -45,6 +49,25 @@ const startEditingName = (idx) => {
 
 const stopEditingName = () => {
   editingNameIndex.value = null
+}
+
+const isAllExpanded = computed(() => {
+  const expandable = props.pData.stack.filter(item => !!item.rationale)
+  if (expandable.length === 0) return false
+  return expandable.every(item => {
+    const idx = props.pData.stack.indexOf(item)
+    return expandedIndices.value.has(idx)
+  })
+})
+
+const toggleAll = () => {
+  if (isAllExpanded.value) {
+    expandedIndices.value.clear()
+  } else {
+    props.pData.stack.forEach((item, idx) => {
+      if (item.rationale) expandedIndices.value.add(idx)
+    })
+  }
 }
 
 // Deletion Confirmation State
@@ -323,6 +346,17 @@ const handleReset = () => {
             <p class="text-gray-400 mt-1">Review the chosen technologies. Click a subject to reveal its architectural rationale.</p>
           </div>
           <button @click="handleReset" v-info="'starter_nav_reset'" class="text-gray-500 hover:text-red-400 transition-colors text-xs font-bold uppercase tracking-widest">Start Over</button>
+        </div>
+
+        <div v-if="pData.stack.some(i => !!i.rationale)" class="flex justify-end items-center shrink-0">
+          <button
+            @click="toggleAll"
+            class="text-[10px] font-bold text-gray-500 hover:text-white flex items-center space-x-2 transition-colors uppercase tracking-widest"
+            :title="isAllExpanded ? 'Collapse all rationales' : 'Expand all rationales'"
+          >
+            <component :is="isAllExpanded ? ChevronUpSquare : ChevronDownSquare" class="w-3.5 h-3.5" />
+            <span>{{ isAllExpanded ? 'Collapse All' : 'Expand All' }}</span>
+          </button>
         </div>
 
         <div class="flex-grow overflow-y-auto custom-scrollbar space-y-2 pr-2" v-info="'starter_stack_edit'">

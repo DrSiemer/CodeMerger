@@ -893,10 +893,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
-    "tokens": 4021,
-    "lines": 412,
-    "mtime": 1776935110.506563,
-    "hash": "d6771cdc1b9e8a866a03706e39257d26fc56ffab"
+    "tokens": 4313,
+    "lines": 446,
+    "mtime": 1776936661.5587814,
+    "hash": "f1515331dad6aab361dcb441bd6803e9d892ee86"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterDesign.vue",
