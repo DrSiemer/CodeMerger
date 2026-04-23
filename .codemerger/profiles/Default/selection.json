@@ -682,11 +682,11 @@
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-    "tokens": 2230,
+    "tokens": 2268,
     "ignoreTokens": false,
-    "lines": 264,
-    "mtime": 1776628751.0859227,
-    "hash": "bdf48d3a4b2268bb7f216561c8436ebb029bb4e9"
+    "lines": 269,
+    "mtime": 1776936943.5053923,
+    "hash": "c93bbadfe8a7125e87e3127444e4ab468887e02a"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewVerificationTab.vue",

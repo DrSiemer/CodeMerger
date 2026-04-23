@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { ChevronDownSquare, ChevronUpSquare } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import ReviewCommentary from './ReviewCommentary.vue'
@@ -25,6 +25,11 @@ const {
 } = useAppState()
 
 const visibleDiffs = ref(new Set())
+
+// Ensure all diffs are collapsed when a new response is loaded (e.g. via Paste Next)
+watch(lastAiResponse, () => {
+  visibleDiffs.value.clear()
+})
 
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
