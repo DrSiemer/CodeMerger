@@ -440,11 +440,11 @@
   },
   {
     "path": "frontend/src/utils/info/mainInfo.js",
-    "tokens": 1222,
+    "tokens": 1274,
     "ignoreTokens": false,
-    "lines": 43,
-    "mtime": 1776934438.2855716,
-    "hash": "a91d645cc365638e8c330694bf83ffb7ab8af4bc"
+    "lines": 44,
+    "mtime": 1776954290.3067539,
+    "hash": "67ca93ea1a1e9c398d19b797f2d54b5712c0f78a"
   },
   {
     "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -576,11 +576,11 @@
   },
   {
     "path": "frontend/src/views/CompactView.vue",
-    "tokens": 3116,
+    "tokens": 3159,
     "ignoreTokens": false,
-    "lines": 245,
-    "mtime": 1776934080.5991046,
-    "hash": "eb5637fe6b5e06c3304728221061e9ba86ffa392"
+    "lines": 251,
+    "mtime": 1776954413.0332465,
+    "hash": "6a861fa0dc64c0bac92b301bd4c4f403b2de5659"
   },
   {
     "path": "frontend/src/components/InfoPanel.vue",
@@ -608,11 +608,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardHeader.vue",
-    "tokens": 1616,
+    "tokens": 1624,
     "ignoreTokens": false,
-    "lines": 204,
-    "mtime": 1776192945.9591272,
-    "hash": "9af0b3c01fb38f3be2902deb0493b9b89b81f7ff"
+    "lines": 205,
+    "mtime": 1776954290.3741512,
+    "hash": "55f690612176e5024b285a8e0096ddfa2b5d23de"
   },
   {
     "path": "frontend/src/components/dashboard/DashboardNav.vue",
@@ -805,17 +805,17 @@
   },
   {
     "path": "frontend/src/components/compact/CompactActionsStandard.vue",
-    "tokens": 733,
-    "lines": 70,
-    "mtime": 1776624999.8682308,
-    "hash": "d168c26e7d707ab00d16f5ad99b5e053ac2f7015"
+    "tokens": 751,
+    "lines": 71,
+    "mtime": 1776954290.436518,
+    "hash": "35fedc44704486c484ec167afbb66db8d8817f80"
   },
   {
     "path": "frontend/src/components/compact/CompactActionsUltra.vue",
-    "tokens": 728,
-    "lines": 73,
-    "mtime": 1776626355.6409497,
-    "hash": "c0e0fd41d1921c1b5864355cfff5fcb316a2b76b"
+    "tokens": 750,
+    "lines": 74,
+    "mtime": 1776954290.489327,
+    "hash": "65d64d9cb9b1f20ae2dbaa0a8f8eeb1864646add"
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",

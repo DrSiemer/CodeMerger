@@ -10,7 +10,8 @@ import CompactActionsUltra from '../components/compact/CompactActionsUltra.vue'
 const app = useAppState()
 const {
   activeProject, lastAiResponse, appIcon, copyCode, restoreMainWindow,
-  closeApp, openProjectFolder, checkPendingChanges, clearPasteData, init, config, claimLastPlan
+  closeApp, openProjectFolder, checkPendingChanges, clearPasteData, init, config, claimLastPlan,
+  addAllNewFiles
 } = app
 
 const isCopying = ref(false)
@@ -136,7 +137,12 @@ const handleRestore = (e) => {
   else restoreMainWindow()
 }
 
-const handleManage = async () => {
+const handleManage = async (event) => {
+  if (event?.ctrlKey) {
+    await addAllNewFiles()
+    triggerFeedback('success', 'Files Added', 'add-files')
+    return
+  }
   if (window.pywebview && window.pywebview.api) await window.pywebview.api.restore_main_window_and_trigger_fm()
 }
 

@@ -18,6 +18,7 @@ export const mainInfo = {
   "starter": "Project Starter: Launch a guided workflow for starting new projects. Assists you in creating a concept, tech stack, and step-by-step implementation plan using AI.",
   "visualizer": "Architecture Explorer: Explore a semantic map of your project. This tool uses AI to organize your Merge List into logical layers, making it easier to navigate complex codebases and copy code for specific features.",
   "info_toggle": "Info Mode: Toggles help panels on all application windows. Useful for learning how to work with CodeMerger.",
+  "new_files_alert": "New Files Detected: CodeMerger has found files on disk that match your allowed extensions but are not yet in your merge list. Click to open the File Manager. Ctrl-click to instantly add all detected files to your selection.",
   "profile_nav": "Profile Switcher: Swap between different configurations for the same project. Each profile has its own file selection and instruction set.",
   "profile_add": "Add Profile: Create a new named configuration. Useful for separating different tasks like 'Backend' or 'Feature Development' within the same project.",
   "profile_delete": "Delete Profile: Remove the currently active profile. The 'Default' profile cannot be deleted.",

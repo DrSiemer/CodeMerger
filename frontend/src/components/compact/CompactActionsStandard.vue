@@ -29,9 +29,10 @@ defineEmits(['copy', 'paste', 'clear', 'review', 'manage'])
 
       <button
         v-if="newFileCount > 0"
-        @click="$emit('manage')"
+        @click="$emit('manage', $event)"
+        v-info="'new_files_alert'"
         class="bg-gray-800 hover:bg-gray-700 text-cm-green w-6 py-1.5 rounded flex items-center justify-center transition-all active:scale-95 shadow shrink-0 h-8"
-        title="New files detected! Click to manage."
+        title="New files detected! Click: Manage, Ctrl-Click: Add all"
       >
         <AlertTriangle class="w-4 h-4 animate-pulse" />
       </button>

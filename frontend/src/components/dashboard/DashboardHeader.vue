@@ -174,6 +174,7 @@ const minimizeTitle = computed(() => {
         class="flex items-center text-cm-green cursor-pointer hover:brightness-125 transition-all"
         title="New files found. Click: Open manager, Ctrl-Click: Add all to merge list"
         @click="handleNewFilesClick($event)"
+        v-info="'new_files_alert'"
       >
         <AlertTriangle class="w-6 h-6" />
       </div>
