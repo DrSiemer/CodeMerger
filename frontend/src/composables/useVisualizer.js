@@ -19,6 +19,7 @@ export function useVisualizer() {
     saveVisualizerMap,
     statusMessage,
     getFileContent,
+    copyText
   } = useAppState();
 
   const viewState = ref("init"); // 'init' | 'visualizing' | 'updating'
@@ -194,10 +195,10 @@ export function useVisualizer() {
       const obsoletePaths = mapPaths.filter(p => !currentPaths.includes(p));
       const prevJson = JSON.stringify(activeProject.visualizerMap.tree, (k, v) => ['id', 'layout', 'color', 'weight'].includes(k) ? undefined : v, 2);
       const prompt = await getVisualizerUpdatePrompt(prevJson, missingPaths, obsoletePaths);
-      if (prompt) await navigator.clipboard.writeText(prompt);
+      if (prompt) await copyText(prompt);
     } else {
       const prompt = await getVisualizerPrompt();
-      if (prompt) await navigator.clipboard.writeText(prompt);
+      if (prompt) await copyText(prompt);
     }
   };
 
@@ -233,15 +234,15 @@ Return ONLY a raw JSON object with an 'amendments' key:
     "remove": [
       "path/to/duplicate_to_delete.ext"
     ]
-  }
+    }
 }`;
-    await navigator.clipboard.writeText(prompt);
+    await copyText(prompt);
     statusMessage.value = "Copied amend prompt.";
   };
 
   const copyCorrectionPrompt = async () => {
     const prompt = `The JSON you provided is invalid or incomplete. You have violated the ZERO OMISSION POLICY.\n\nVALIDATION ERRORS TO FIX:\n${parseError.value}`;
-    await navigator.clipboard.writeText(prompt);
+    await copyText(prompt);
     statusMessage.value = "Copied correction prompt.";
     // Reset error state to hide the error block and return to Step 1
     parseError.value = "";

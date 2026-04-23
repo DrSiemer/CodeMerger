@@ -40,7 +40,8 @@ const {
   assembleStarterDocument,
   getStarterQuestionPrompt,
   editorFontSize,
-  handleZoom
+  handleZoom,
+  copyText
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.todo_llm_response)
@@ -73,7 +74,7 @@ const generateTodo = async (e) => {
   const btn = e.currentTarget
   if (!e.ctrlKey) {
     const prompt = await generateTodoPrompt(props.pData, props.todoQuestionsMap)
-    await navigator.clipboard.writeText(prompt)
+    await copyText(prompt)
     const originalText = btn.innerText
     btn.innerText = "Copied!"
     setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)

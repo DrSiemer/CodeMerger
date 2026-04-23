@@ -32,7 +32,8 @@ const {
   assembleStarterDocument,
   getStarterQuestionPrompt,
   editorFontSize,
-  handleZoom
+  handleZoom,
+  copyText
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.concept_llm_response)
@@ -59,7 +60,7 @@ const generateConcept = async (e) => {
   const btn = e.currentTarget
   if (!e.ctrlKey) {
     const prompt = await generateConceptPrompt(props.pData, props.conceptQuestionsMap)
-    await navigator.clipboard.writeText(prompt)
+    await copyText(prompt)
     const originalText = btn.innerText
     btn.innerText = "Copied!"
     setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)

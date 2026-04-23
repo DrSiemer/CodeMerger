@@ -119,6 +119,13 @@ export function useSystem() {
     return false
   }
 
+  const copyText = async (text) => {
+    if (window.pywebview) {
+      return await window.pywebview.api.copy_text(text)
+    }
+    return false
+  }
+
   return {
     resetEditorFontSize,
     handleZoom,
@@ -135,6 +142,7 @@ export function useSystem() {
     closeApp,
     selectEditorExecutable,
     copyUsefulPrompt,
-    checkForUpdatesManual
+    checkForUpdatesManual,
+    copyText
   }
 }

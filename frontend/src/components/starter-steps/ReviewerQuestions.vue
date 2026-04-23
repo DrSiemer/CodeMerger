@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { ChevronLeft, ChevronRight, Copy, Check, MessageSquarePlus, BookOpen } from 'lucide-vue-next'
+import { useAppState } from '../../composables/useAppState'
+
+const { copyText } = useAppState()
 
 const props = defineProps({
   questions: {
@@ -40,7 +43,7 @@ const handleCopy = async (e) => {
   if (!e.ctrlKey) {
     const prompt = await props.getPrompt(questionToCopy)
     if (prompt) {
-      await navigator.clipboard.writeText(prompt)
+      await copyText(prompt)
       isCopied.value = true
       setTimeout(() => { isCopied.value = false }, 2000)
     }

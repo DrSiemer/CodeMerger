@@ -9,17 +9,20 @@ STARTER_CONCEPT_PROMPT_CORE_INSTR = """
 1. Fill in every section with specific details relevant to the user's goal.
 2. Ensure the 'User Flows' section covers the complete lifecycle of the main data entity.
 3. **Readability & Formatting:** Use frequent line breaks and short paragraphs to avoid dense blocks of text. Utilize Markdown elements (bullet points, bolding) to ensure the document is highly readable and visually structured.
+4. **Technical Alignment:** If a 'Reference Project' is provided, use it as a technical guide. Your concept should describe a new project that follows the architectural patterns and logic style found in that reference code.
 """
 
-STARTER_STACK_PROMPT_INTRO = "Act as a Senior Software Architect. Your goal is to select the leanest, most performant technical stack for the project below."
+STARTER_STACK_PROMPT_INTRO = "Act as a Senior Software Architect. Your goal is to determine the optimal stack for the new project below, ensuring technical continuity with the core ecosystem of the Reference Project (if provided)."
 
 STARTER_STACK_PROMPT_INSTR = """
 ### Constraints
-1. **Requirement-First Selection:** Analyze the Project Concept first. Suggest technologies that are objectively the best fit for the problem, regardless of what's in the Developer Experience list.
-2. **Experience-Second Filtering:** Use the "Developer Experience" list ONLY to choose between technically equal paths. Do not default to Python or other listed languages if they are inappropriate for the project concept.
-3. **Deep Rationale:** For every choice, provide a technical rationale explaining why it is the optimal fit for this specific project.
-4. **The "Why Not Delete" Warning:** For every technology, generate a one-sentence "warning" explaining exactly what would be lost or what significant technical hurdle would be introduced if this item were removed from the stack.
-5. **Format:** Return ONLY a raw JSON array of objects.
+1. **Ecosystem Continuity:** If a 'Reference Project' is provided, you MUST stick to its primary language and framework (e.g., if the reference is PHP/CodeIgniter, the new stack must be PHP/CodeIgniter). Do NOT suggest a different primary ecosystem simply because it appears in the Competency Profile.
+2. **Requirement-First Flexibility:** While you must maintain the core ecosystem, you are FREE to pick the supporting technologies (databases, caching, utilities, frontend libraries) that work best for the *new* project goal. Do not feel obligated to use a specific library or database from the Reference Project if it is not the best fit for the new requirements.
+3. **Discard Irrelevant Legacy:** If the Reference Project contains technologies, patterns, or integrations that do not relate to the NEW project goal, DISCARD them. Your priority is a lean, goal-focused stack.
+4. **Competency Profile:** Treat the 'USER COMPETENCY PROFILE' as a background skills profile. Use it to verify the user is comfortable with your recommendations.
+5. **Deep Rationale:** For every choice, provide a technical rationale explaining why it is the optimal fit for this specific project and how it aligns with the core ecosystem.
+6. **The "Why Not Delete" Warning:** For every technology, generate a one-sentence "warning" explaining exactly what would be lost or what significant technical hurdle would be introduced if this item were removed.
+7. **Format:** Return ONLY a raw JSON array of objects.
    - Format: [{"tech": "Name", "rationale": "Reasoning", "warning": "Consequence of removal"}]
    - Example: [{"tech": "PostgreSQL", "rationale": "Relational handling for user data", "warning": "Switching to NoSQL would require a total rewrite of our complex analytical queries."}]
 """
@@ -41,6 +44,7 @@ STARTER_DESIGN_PROMPT_INSTR = """
 </ALTERNATIVES>
 4. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
    - Required Phase Names: {headers_str}.
+5. **Architectural Consistency:** If a 'Reference Project' is provided, your design MUST respect the established architectural patterns (e.g., MVC, Hexagonal, etc.) found in that code to ensure the new features are a natural fit for the existing system.
 """
 
 STARTER_PIVOT_PROMPT_TEMPLATE = """You are a Project Editor. The user has elected to pivot the system design.
@@ -75,6 +79,7 @@ STARTER_TODO_PROMPT_INSTR = """
    - **ADDITIONAL PHASES:** You are encouraged to add project-specific phases if the suggested list is insufficient. Simply create a descriptive name for any new section.
    - **DO NOT** output sections for phases you decided to skip.
 4. **THE DEPLOYMENT ANCHOR (CRITICAL):** Regardless of how many custom phases you add, the "Deployment" phase MUST be the final section of your response. All other phases (suggested or custom) must be placed before it.
+5. **Base Code Integration:** If a 'Reference Project' is provided, ensure your tasks account for it (e.g., 'Migrate data models from legacy reference' or 'Replace utility patterns found in example code').
 """
 
 STARTER_GENERATE_MASTER_INTRO = "You are a senior developer creating a boilerplate for: {name}\nStack: {stack}"

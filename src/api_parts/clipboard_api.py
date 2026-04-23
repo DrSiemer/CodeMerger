@@ -165,3 +165,12 @@ class ClipboardApi:
         except Exception as e:
             log.error(f"Failed to read system clipboard: {e}")
             return ""
+
+    def copy_text(self, text):
+        """Copies arbitrary text to the system clipboard via Python."""
+        try:
+            pyperclip.copy(text)
+            return True
+        except Exception as e:
+            log.error(f"Failed to copy text to clipboard: {e}")
+            return False

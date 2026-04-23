@@ -20,7 +20,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['close', 'apply'])
-const { getStarterRewritePrompt } = useAppState()
+const { getStarterRewritePrompt, copyText } = useAppState()
 
 const modalRef = ref(null)
 const instruction = ref('')
@@ -144,7 +144,7 @@ const generateAndCopy = async (e) => {
       props.isMergedMode
     )
 
-    await navigator.clipboard.writeText(prompt)
+    await copyText(prompt)
   }
   const originalText = target.innerText
   target.innerText = "Copied!"

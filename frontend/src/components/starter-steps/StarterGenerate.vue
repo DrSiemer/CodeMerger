@@ -18,7 +18,8 @@ const {
   createStarterProjectOverwrite,
   selectDirectory,
   editorFontSize,
-  handleZoom
+  handleZoom,
+  copyText
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.generate_llm_response)
@@ -43,7 +44,7 @@ const fullPathPreview = computed(() => {
 
 const copyToClipboard = async (text, el) => {
   if (!el) return
-  await navigator.clipboard.writeText(text)
+  await copyText(text)
   const originalText = el.innerText
   el.innerText = "Copied!"
   setTimeout(() => { if (el) el.innerText = originalText }, 2000)
@@ -51,7 +52,7 @@ const copyToClipboard = async (text, el) => {
 
 const copyPathToClipboard = async () => {
   if (!fullPathPreview.value) return
-  await navigator.clipboard.writeText(fullPathPreview.value)
+  await copyText(fullPathPreview.value)
   isPathCopied.value = true
   setTimeout(() => { isPathCopied.value = false }, 2000)
 }

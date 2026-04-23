@@ -39,7 +39,8 @@ const {
   getStarterQuestionPrompt,
   getStarterPivotPrompt,
   editorFontSize,
-  handleZoom
+  handleZoom,
+  copyText
 } = useAppState()
 
 const showPasteArea = ref(!!props.pData.design_llm_response)
@@ -64,7 +65,7 @@ const generateDesign = async (e) => {
   const btn = e.currentTarget
   if (!e.ctrlKey) {
     const prompt = await generateDesignPrompt(props.pData, props.designQuestionsMap)
-    await navigator.clipboard.writeText(prompt)
+    await copyText(prompt)
     const originalText = btn.innerText
     btn.innerText = "Copied!"
     setTimeout(() => { if (btn) btn.innerText = originalText }, 2000)
@@ -195,7 +196,7 @@ const handlePivot = async (alternative, selectedText, activeKey = 'full_content'
   );
 
   // 2. Put it on clipboard automatically
-  await navigator.clipboard.writeText(prompt);
+  await copyText(prompt);
 
   // 3. Open Rewrite Modal in Pivot mode (skips manual instruction step)
   openRewriteModal(isMergedMode, true);

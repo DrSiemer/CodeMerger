@@ -16,7 +16,7 @@ const props = defineProps({
 
 const emit = defineEmits(['next'])
 
-const { config, saveConfig, generateStackPrompt, editorFontSize, handleZoom } = useAppState()
+const { config, saveConfig, generateStackPrompt, editorFontSize, handleZoom, copyText } = useAppState()
 
 // Sub-states: 'input' | 'pasting' | 'review'
 const viewState = ref((Array.isArray(props.pData.stack) && props.pData.stack.length > 0) ? 'review' : (props.pData.stack_llm_response ? 'pasting' : 'input'))
@@ -88,7 +88,7 @@ const hasVisibleWarning = computed(() => {
 
 const copyToClipboard = async (text, el) => {
   if (!el) return
-  await navigator.clipboard.writeText(text)
+  await copyText(text)
   const originalText = el.innerText
   el.innerText = "Copied!"
   setTimeout(() => { if (el) el.innerText = originalText }, 2000)

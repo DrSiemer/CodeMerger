@@ -37,7 +37,10 @@ class StarterApiPrompts:
         if not base_path or not base_files:
             return ""
 
-        content_blocks = ["\n### Example Project Code (For Reference Only)\n"]
+        content_blocks = [
+            "\n### REFERENCE PROJECT (TECHNICAL REFERENCE GUIDE)",
+            "--- IMPORTANT: The code provided below is a strong guide for the technology stack, architectural patterns, and coding standards intended for this project. Use these files to determine the framework (e.g., CodeIgniter, React) and libraries to use. Note that you are designing a NEW project from scratch; do NOT assume a pre-prepared environment exists. ---\n"
+        ]
         for file_info in base_files:
             rel_path = file_info['path']
             full_path = os.path.join(base_path, rel_path)
@@ -93,8 +96,9 @@ class StarterApiPrompts:
         experience = project_data.get("stack_experience", "")
         parts = [
             p.STARTER_STACK_PROMPT_INTRO,
-            "\n### Developer Experience\n```\n" + (experience.strip() if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
+            "\n### USER COMPETENCY PROFILE (Skill-Verification Only)\n```\n" + (experience.strip() if experience.strip() else "No specific experience listed. Recommend standard industry defaults.") + "\n```",
             "\n### Project Concept\n```markdown\n" + concept + "\n```",
+            self._get_base_project_content(project_data),
             p.STARTER_STACK_PROMPT_INSTR
         ]
         return "\n".join(parts)
