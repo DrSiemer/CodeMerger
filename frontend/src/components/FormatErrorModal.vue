@@ -57,18 +57,19 @@ const handleContinue = () => {
 
       <!-- Footer -->
       <div class="px-6 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-between items-center">
-        <!-- LEFT: Admonishment -->
-        <button
-          id="btn-format-error-copy"
-          @click="copyCorrectionPrompt"
-          class="bg-[#DE6808] hover:bg-orange-500 text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm flex items-center"
-          title="Copy the formatting correction prompt for the LLM"
-        >
-          <Copy class="w-4 h-4 mr-2" />
-          Copy Correction Prompt
-        </button>
+        <!-- LEFT: Selection Continuation -->
+        <div class="flex justify-start">
+          <button
+            v-if="isFastApplyError"
+            @click="handleContinue"
+            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm flex items-center"
+            title="Proceed to review using only the files that matched correctly"
+          >
+            Continue without mismatched
+          </button>
+        </div>
 
-        <!-- RIGHT: Navigation -->
+        <!-- RIGHT: Correction and Actions -->
         <div class="flex items-center space-x-3">
           <button
             @click="emit('close')"
@@ -79,12 +80,13 @@ const handleContinue = () => {
           </button>
 
           <button
-            v-if="isFastApplyError"
-            @click="handleContinue"
-            class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm flex items-center"
-            title="Proceed to review using only the files that matched correctly"
+            id="btn-format-error-copy"
+            @click="copyCorrectionPrompt"
+            class="bg-[#DE6808] hover:bg-orange-500 text-white font-bold py-2 px-6 rounded shadow-md transition-all text-sm flex items-center"
+            title="Copy the formatting correction prompt for the LLM"
           >
-            Continue without mismatched
+            <Copy class="w-4 h-4 mr-2" />
+            Copy Correction Prompt
           </button>
         </div>
       </div>

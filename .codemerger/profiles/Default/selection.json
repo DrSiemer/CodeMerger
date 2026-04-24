@@ -784,10 +784,10 @@
   },
   {
     "path": "frontend/src/components/FormatErrorModal.vue",
-    "tokens": 850,
-    "lines": 93,
-    "mtime": 1776723832.447425,
-    "hash": "f83bf0e27cdb9fa3d12887ab970d8fd87c43bfb8"
+    "tokens": 865,
+    "lines": 95,
+    "mtime": 1777033203.0928576,
+    "hash": "527094c1c6771b6f31c39aff04cce749eb3d971b"
   },
   {
     "path": "frontend/src/components/ColorPickerOverlay.vue",
