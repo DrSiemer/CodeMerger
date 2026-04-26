@@ -51,8 +51,9 @@ const tabs = computed(() => {
   const segments = lastAiResponse.value.ordered_segments || []
 
   segments.forEach(seg => {
-    // Filter out segments with no content or just a placeholder dash
-    const hasContent = seg.content && seg.content.trim() !== '' && seg.content.trim() !== '-'
+    // Filter out segments with no meaningful content or just placeholder symbols/bullets
+    const trimmed = seg.content?.trim()
+    const hasContent = trimmed && !['-', '•', '*', '.'].includes(trimmed)
 
     if (seg.type === 'tag') {
       if (seg.tag === 'INTRO' && hasContent) {

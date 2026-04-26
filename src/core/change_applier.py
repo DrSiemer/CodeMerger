@@ -244,7 +244,8 @@ def parse_and_plan_changes(base_dir, markdown_text):
 
     for block in all_blocks:
         gap_text = markdown_text[last_end:block['span'][0]].strip()
-        if gap_text:
+        # Only treat gap as an orphan if it contains more than just placeholder characters/bullets
+        if gap_text and gap_text not in ["-", "•", "*", "."]:
             ordered_segments.append({
                 'type': 'orphan',
                 'content': gap_text

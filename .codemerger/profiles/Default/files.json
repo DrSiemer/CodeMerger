@@ -39,6 +39,7 @@
     "frontend/src/components/ProjectStarterModal.vue",
     "frontend/src/components/ReviewModal.vue",
     "frontend/src/components/SettingsModal.vue",
+    "frontend/src/components/UsefulPromptsModal.vue",
     "frontend/src/components/VisualizerModal.vue",
     "frontend/src/components/compact/CompactActionsStandard.vue",
     "frontend/src/components/compact/CompactActionsUltra.vue",
@@ -158,5 +159,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 196464
+  "total_tokens": 197558
 }

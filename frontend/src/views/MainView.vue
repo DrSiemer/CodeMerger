@@ -12,6 +12,7 @@ import InstructionsModal from '../components/InstructionsModal.vue'
 import ProjectStarterModal from '../components/ProjectStarterModal.vue'
 import VisualizerModal from '../components/VisualizerModal.vue'
 import NewProfileModal from '../components/NewProfileModal.vue'
+import UsefulPromptsModal from '../components/UsefulPromptsModal.vue'
 import ColorPickerOverlay from '../components/ColorPickerOverlay.vue'
 import FormatErrorModal from '../components/FormatErrorModal.vue'
 import { WINDOW_SIZES } from '../utils/constants'
@@ -43,6 +44,7 @@ const showInstructionsModal = ref(false)
 const showStarterModal = ref(false)
 const showVisualizerModal = ref(false)
 const showNewProfileModal = ref(false)
+const showPromptsModal = ref(false)
 const settingsTab = ref('application')
 
 const showReviewModal = ref(false)
@@ -218,6 +220,7 @@ onUnmounted(() => {
           @open-settings="openSettings"
           @open-instructions-modal="showInstructionsModal = true"
           @open-review-modal="openReviewModal"
+          @open-prompts-modal="showPromptsModal = true"
         />
 
         <!-- Fancy Color Picker (Absolute to this container) -->
@@ -234,5 +237,6 @@ onUnmounted(() => {
     <ProjectStarterModal v-if="showStarterModal" @close="showStarterModal = false" />
     <VisualizerModal v-if="showVisualizerModal" @close="showVisualizerModal = false" />
     <NewProfileModal v-if="showNewProfileModal" @close="showNewProfileModal = false" />
+    <UsefulPromptsModal v-if="showPromptsModal" @close="showPromptsModal = false" />
   </div>
 </template>

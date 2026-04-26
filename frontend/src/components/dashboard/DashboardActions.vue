@@ -1,16 +1,18 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2, Zap, Sparkles } from 'lucide-vue-next'
+import {
+  Settings, Copy, ClipboardPaste, BookOpen, Eye, Loader2, Trash2, Zap, Sparkles,
+  Eraser, Anchor, Droplets, Hash, Skull
+} from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 
-const emit = defineEmits(['open-settings', 'open-instructions-modal', 'open-review-modal'])
+const emit = defineEmits(['open-settings', 'open-instructions-modal', 'open-review-modal', 'open-prompts-modal'])
 
 const {
   activeProject,
   isProjectLoading,
   lastAiResponse,
   hasPendingChanges,
-  copyUsefulPrompt,
   copyCode,
   processPaste,
   clearPasteData,
@@ -18,20 +20,8 @@ const {
   toggleFastApply
 } = useAppState()
 
-const showPromptsMenu = ref(false)
-const promptPulse = ref(false)
-
 const isCopyingInstructions = ref(false)
 const isCopyingOnly = ref(false)
-
-const handleCopyPrompt = async (type) => {
-  showPromptsMenu.value = false
-  promptPulse.value = true
-  await copyUsefulPrompt(type)
-  setTimeout(() => {
-    promptPulse.value = false
-  }, 450)
-}
 
 const handleCopy = async (useWrapper, event) => {
   const finalUseWrapper = useWrapper && !event.ctrlKey
@@ -83,29 +73,14 @@ const pasteTooltipText = computed(() => {
           <h2 class="text-[17px] font-medium text-white">Actions</h2>
 
           <div class="flex items-center space-x-3">
-            <div class="relative">
-              <button
-                @click="showPromptsMenu = !showPromptsMenu"
-                class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-white/5 flex items-center justify-center relative"
-                :class="{ 'click-pulse': promptPulse }"
-                :style="promptPulse ? { '--click-color': 'rgba(255, 255, 255, 0.2)' } : {}"
-                title="Useful AI Prompts"
-                v-info="'useful_prompts'"
-              >
-                <Sparkles class="w-4 h-4" />
-              </button>
-
-              <!-- Transparent overlay to catch outside clicks -->
-              <div v-if="showPromptsMenu" class="fixed inset-0 z-40" @click="showPromptsMenu = false"></div>
-
-              <!-- Dropdown Menu -->
-              <div v-if="showPromptsMenu" class="absolute right-0 top-full mt-2 w-48 bg-cm-input-bg border border-gray-600 rounded shadow-xl z-50 overflow-hidden text-sm py-1">
-                <button @click="handleCopyPrompt('cleanup')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Comment Cleanup</button>
-                <button @click="handleCopyPrompt('dead_weight')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Find Dead Weight</button>
-                <button @click="handleCopyPrompt('dry_up')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">DRY up code</button>
-                <button @click="handleCopyPrompt('magic_numbers')" class="w-full text-left px-4 py-2 hover:bg-cm-blue hover:text-white transition-colors text-gray-200">Hunt Magic Numbers</button>
-              </div>
-            </div>
+            <button
+              @click="emit('open-prompts-modal')"
+              class="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded hover:bg-white/5 flex items-center justify-center relative"
+              title="Useful AI Prompts"
+              v-info="'useful_prompts'"
+            >
+              <Sparkles class="w-4 h-4" />
+            </button>
 
             <!-- Mini Fast Apply Toggle -->
             <button

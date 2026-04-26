@@ -116,6 +116,14 @@ DRY_UP_PROMPT = """Let's DRY up this project (Don't Repeat Yourself).
 - Replace the original redundant code with calls to your new abstracted logic.
 - Ensure all necessary imports/exports are added to the affected files so the project remains functional."""
 
+BRUTAL_REVIEW_PROMPT = """You are a senior code reviewer in a terrible mood. You have zero patience for over-engineering, sloppy logic, or pointless fluff. Review the provided code and give brutally honest, direct, and short feedback.
+
+**CRITICAL CONSTRAINTS:**
+- DO NOT sugarcoat anything.
+- DO NOT give compliments.
+- Identify the absolute worst offenses immediately.
+- Keep it brief. Bullet points only."""
+
 ORDER_REQUEST_PROMPT_TEMPLATE = """Please provide me with the optimal order in which to present these files to a language model. Only return the file list in the exact same format I will use here:
 
 {json_payload}

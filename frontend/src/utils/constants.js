@@ -11,5 +11,6 @@ export const WINDOW_SIZES = {
   VISUALIZER: { width: 1100, height: 800 },
   REVIEW: { width: 1100, height: 850 },
   SETTINGS: { width: 1000, height: 700 },
-  COLOR_PICKER: { width: 800, height: 540 }
+  COLOR_PICKER: { width: 800, height: 540 },
+  USEFUL_PROMPTS: { width: 800, height: 750 }
 };
