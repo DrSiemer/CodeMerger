@@ -245,15 +245,16 @@ const handleReset = () => {
         <textarea
           v-model="pData.goal"
           v-info="'starter_concept_goal'"
-          class="flex-grow bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue selectable text-lg leading-relaxed custom-scrollbar"
+          class="bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue selectable text-lg leading-relaxed custom-scrollbar"
+          :class="showPasteArea ? 'h-48' : 'h-96'"
           :style="{ fontSize: editorFontSize + 'px' }"
           :placeholder="placeholderGoal"
         ></textarea>
 
-        <div v-if="isGoalFilled || showPasteArea" class="shrink-0 bg-gray-800 p-6 rounded border border-gray-700 space-y-4">
+        <div v-if="isGoalFilled || showPasteArea" class="bg-gray-800 p-6 rounded border border-gray-700 space-y-4 shadow-xl">
           <button v-if="isGoalFilled" @click="generateConcept" v-info="'starter_concept_gen'" class="w-full bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 rounded transition-all active:scale-95 shadow-lg">1. Copy Prompt for LLM</button>
           <template v-if="showPasteArea">
-            <textarea v-model="pData.concept_llm_response" v-info="'starter_gen_response'" class="w-full h-32 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue text-sm font-mono custom-scrollbar" :style="{ fontSize: (editorFontSize - 2) + 'px' }" placeholder="Paste LLM response here..."></textarea>
+            <textarea v-model="pData.concept_llm_response" v-info="'starter_gen_response'" class="w-full h-80 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue text-sm font-mono custom-scrollbar" :style="{ fontSize: (editorFontSize - 2) + 'px' }" placeholder="Paste LLM response here..."></textarea>
             <button @click="processConcept" v-info="'starter_gen_process'" :disabled="!pData.concept_llm_response" class="w-full bg-cm-green text-white font-bold py-3 rounded disabled:opacity-50 transition-all active:scale-95 shadow-lg">2. Process & Review</button>
           </template>
         </div>

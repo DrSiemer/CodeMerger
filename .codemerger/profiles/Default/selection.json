@@ -886,10 +886,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterConcept.vue",
-    "tokens": 2515,
-    "lines": 276,
-    "mtime": 1776944097.5720396,
-    "hash": "db912e5118cbdd59d65a1655c07aaa707fc658fd"
+    "tokens": 2530,
+    "lines": 277,
+    "mtime": 1777200449.6100328,
+    "hash": "a281c89c439daa443daedfcd6b7d13027cf80b63"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
@@ -900,24 +900,24 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterDesign.vue",
-    "tokens": 2675,
+    "tokens": 2688,
     "lines": 310,
-    "mtime": 1776935110.6356406,
-    "hash": "98822dea869229af3b95b5c70751a14a851477f6"
+    "mtime": 1777200449.2769103,
+    "hash": "713a03e9ac57310f7ee2b686153e6627e219670a"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterTodo.vue",
-    "tokens": 2431,
+    "tokens": 2444,
     "lines": 278,
-    "mtime": 1776935110.7008045,
-    "hash": "f191b1c994d7653e30ad04ead62b01b4ece35999"
+    "mtime": 1777200449.1889138,
+    "hash": "7d0c58f40e291db8e1f072fe435dfcc52b801eab"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterGenerate.vue",
-    "tokens": 1923,
-    "lines": 176,
-    "mtime": 1776946478.5331688,
-    "hash": "a0dda0fafc879822083c9f89f681536e64a69cff"
+    "tokens": 1943,
+    "lines": 179,
+    "mtime": 1777200449.1004539,
+    "hash": "a083e85bebcfcfaca81fade282825dea1c2d4fd6"
   },
   {
     "path": "frontend/src/components/VisualizerModal.vue",

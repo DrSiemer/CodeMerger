@@ -112,9 +112,9 @@ const createProject = async () => {
 </script>
 
 <template>
-  <div class="max-w-3xl mx-auto w-full space-y-8 text-gray-100 pb-8" @wheel.ctrl.prevent="handleZoom">
+  <div class="max-w-3xl mx-auto w-full space-y-8 text-gray-100 pb-12" @wheel.ctrl.prevent="handleZoom">
     <h3 class="text-2xl font-bold text-white">Finalize and Generate</h3>
-    <div class="bg-gray-800 p-8 rounded border border-gray-700 space-y-6">
+    <div class="bg-gray-800 p-8 rounded border border-gray-700 space-y-6 shadow-xl">
 
       <div class="space-y-3 border-b border-gray-700 pb-6" v-info="'starter_details_name'">
         <div class="flex items-center justify-between">
@@ -156,18 +156,21 @@ const createProject = async () => {
         </div>
       </div>
 
-      <div v-if="isFolderValid" class="pt-6 border-t border-gray-700 flex flex-col space-y-4">
-        <label class="block text-gray-300 font-bold text-sm uppercase">3. Creation Prompt</label>
-        <button @click="copyMasterPrompt" v-info="'starter_gen_prompt'" class="bg-cm-blue text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-500 transition-colors">Copy Final Creation Prompt</button>
+      <div v-if="isFolderValid" class="pt-6 border-t border-gray-700 space-y-6">
+        <div class="space-y-3">
+          <label class="block text-gray-300 font-bold text-sm uppercase">3. Creation Prompt</label>
+          <button @click="copyMasterPrompt" v-info="'starter_gen_prompt'" class="w-full bg-cm-blue text-white font-bold py-4 rounded text-lg shadow-lg hover:bg-blue-500 transition-colors">Copy Final Creation Prompt</button>
+        </div>
 
-        <div v-if="showPasteArea" class="pt-4 flex flex-col space-y-3">
+        <div v-if="showPasteArea" class="pt-4 space-y-3">
           <label class="block text-gray-300 font-bold text-sm uppercase">4. Paste the LLM Output</label>
-          <textarea v-model="pData.generate_llm_response" v-info="'starter_gen_response'" class="w-full h-48 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
+          <textarea v-model="pData.generate_llm_response" v-info="'starter_gen_response'" class="w-full h-96 bg-cm-input-bg border border-gray-700 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar font-mono" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste generated code blocks here..."></textarea>
         </div>
       </div>
     </div>
-    <div class="flex justify-end mt-4">
-      <button @click="createProject" v-info="'starter_gen_create'" :disabled="!isGenerateReady" class="bg-cm-green hover:bg-green-600 disabled:bg-gray-700 disabled:opacity-50 text-white font-bold px-12 py-4 rounded-lg shadow-xl text-xl flex items-center transition-all">
+
+    <div class="flex justify-end pt-4">
+      <button @click="createProject" v-info="'starter_gen_create'" :disabled="!isGenerateReady" class="bg-cm-green hover:bg-green-600 disabled:bg-gray-700 disabled:opacity-50 text-white font-bold px-12 py-4 rounded-lg shadow-xl text-xl flex items-center transition-all active:scale-95">
         <Upload class="w-6 h-6 mr-3" />
         Create Project Files
       </button>
