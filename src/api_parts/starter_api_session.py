@@ -121,7 +121,7 @@ class StarterApiSession:
 
     def get_design_template(self):
         """Returns the raw content of the reference design template."""
-        path = os.path.join(REFERENCE_DIR, "design.md")
+        path = os.path.join(REFERENCE_DIR, "architecture.md")
         try:
             with open(path, 'r', encoding='utf-8') as f:
                 return f.read()

@@ -173,8 +173,8 @@ class StarterApiScaffold:
                 # Silently strip any lingering architectural pivot tags before rendering the final file to disk
                 clean_design_content = re.sub(r'<ALTERNATIVES>[\s\S]*?<\/ALTERNATIVES>', '', design_content, flags=re.IGNORECASE)
                 clean_design_content = re.sub(r'<\/?SELECTEDPATH>', '', clean_design_content, flags=re.IGNORECASE)
-                (project_path / "design.md").write_text(clean_design_content.strip(), encoding="utf-8")
-                files_created.append("design.md")
+                (project_path / "architecture.md").write_text(clean_design_content.strip(), encoding="utf-8")
+                files_created.append("architecture.md")
 
             todo_segs = project_data.get("todo_segments")
             todo_content = self.assemble_starter_document(todo_segs, c.TODO_ORDER, c.TODO_PHASES) if todo_segs else project_data.get("todo_md", "")

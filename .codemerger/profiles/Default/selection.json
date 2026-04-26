@@ -316,8 +316,8 @@
     "tokens": 1334,
     "ignoreTokens": false,
     "lines": 168,
-    "mtime": 1776896420.2113416,
-    "hash": "c693634cb1f3067ecdd99020766f00af6f45329c"
+    "mtime": 1777193425.428558,
+    "hash": "280241ec6898f71f267c79fbab1a67d9ec25eeb5"
   },
   {
     "path": "src/api_parts/starter_api_parsing.py",
@@ -340,8 +340,8 @@
     "tokens": 2472,
     "ignoreTokens": false,
     "lines": 228,
-    "mtime": 1776937593.1941767,
-    "hash": "ee03c6ac510be530f80efea8298761c2c43c4790"
+    "mtime": 1777193425.3670373,
+    "hash": "d989ce10911637c488e9e9e33969364af6ea3bc9"
   },
   {
     "path": "src/api_parts/starter_api.py",
@@ -997,13 +997,6 @@
     "hash": "fe54c0969e25dd2b52b156f13e391081c7ac6dc8"
   },
   {
-    "path": "assets/reference/design.md",
-    "tokens": 298,
-    "lines": 35,
-    "mtime": 1776767806.9782581,
-    "hash": "58921b5a41ed5a0dd23008123e4700a813e0198c"
-  },
-  {
     "path": "assets/reference/silly_suggestions.json",
     "tokens": 283,
     "lines": 36,
@@ -1101,5 +1094,12 @@
     "lines": 17,
     "mtime": 1776934080.5426953,
     "hash": "f08190923e070210dc85091687ff2639d5d12d2f"
+  },
+  {
+    "path": "assets/reference/architecture.md",
+    "tokens": 298,
+    "lines": 35,
+    "mtime": 1777193425.1560235,
+    "hash": "8574ea486109ba6fdabe43979f06749132e30be1"
   }
 ]

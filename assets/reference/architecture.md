@@ -1,4 +1,4 @@
-# System Design Template
+# System Architecture Template
 
 ## Architecture Overview
 The application follows a standard client-server architecture. The frontend application handles user interaction, state management, and view rendering. The backend provides a RESTful/GraphQL API, enforces business logic, and manages the database.
