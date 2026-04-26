@@ -440,11 +440,11 @@
   },
   {
     "path": "frontend/src/utils/info/mainInfo.js",
-    "tokens": 1359,
+    "tokens": 1373,
     "ignoreTokens": false,
     "lines": 47,
-    "mtime": 1777199855.9946356,
-    "hash": "a5982df603d7feb5f427af037915b0ef729ab3f7"
+    "mtime": 1777205056.3265088,
+    "hash": "c8f2477af9b2af76624f1f86b31c2bef55eb5ba2"
   },
   {
     "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -616,11 +616,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardNav.vue",
-    "tokens": 1305,
+    "tokens": 1624,
     "ignoreTokens": false,
-    "lines": 116,
-    "mtime": 1776762833.5687902,
-    "hash": "0ff2bba8d40844fe9337ca2f6f6086d2aa3d4018"
+    "lines": 191,
+    "mtime": 1777205174.042339,
+    "hash": "50de5d73f01f5cf652b5a5b0f6e61c96e08340a2"
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
