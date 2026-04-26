@@ -527,11 +527,11 @@
   },
   {
     "path": "frontend/src/composables/useAppState.js",
-    "tokens": 918,
+    "tokens": 936,
     "ignoreTokens": false,
-    "lines": 131,
-    "mtime": 1777198018.7681472,
-    "hash": "70c7a40912b30e6c4d3134f95b86683e567850e1"
+    "lines": 120,
+    "mtime": 1777205536.0991993,
+    "hash": "d17cb9aa4bedd62dd849a0c8eb77e2eeca0a4d1b"
   },
   {
     "path": "frontend/src/composables/useEscapeKey.js",

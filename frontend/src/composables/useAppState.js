@@ -14,6 +14,7 @@ let statusTimeout = null
 let statusFadeTimeout = null
 let isInitialized = false
 let isAppSetup = false
+let initPromise = null
 
 export function useAppState() {
   const system = useSystem()
@@ -57,7 +58,6 @@ export function useAppState() {
       project.applyProjectData(proj)
     }
 
-    // Ensure AI response state is consistent with the backend on reload
     if (window.pywebview) {
       const status = await review.checkPendingChanges()
       if (!status.exists && globalState.lastAiResponse.value) {
@@ -71,51 +71,40 @@ export function useAppState() {
   }
 
   const init = async () => {
-    if (window.pywebview) {
-      if (!isAppSetup) {
-        globalState.config.value = await window.pywebview.api.get_app_config()
-        infoMode.infoModeActive.value = globalState.config.value.info_mode_active ?? true
+    if (!window.pywebview) return
+    if (isAppSetup) return await refreshProject()
+    if (initPromise) return await initPromise
 
-        globalState.newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
+    initPromise = (async () => {
+      globalState.config.value = await window.pywebview.api.get_app_config()
+      infoMode.infoModeActive.value = globalState.config.value.info_mode_active ?? true
+      globalState.newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
+      globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')
+      globalState.logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
+      globalState.logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
 
-        globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')
-        globalState.logoMask.value = await window.pywebview.api.get_image_base64('logo_mask.png')
-        globalState.logoMaskSmall.value = await window.pywebview.api.get_image_base64('logo_mask_small.png')
+      window.addEventListener('cm-new-files', (e) => { globalState.activeProject.newFileCount = e.detail.count })
+      window.addEventListener('cm-project-reloaded', (e) => { refreshProject(e.detail) })
+      window.addEventListener('cm-config-updated', (e) => { globalState.config.value = e.detail })
+      window.addEventListener('cm-close-review', () => {
+        globalState.showReviewModal.value = false
+        globalState.revertToCompactOnClose.value = false
+      })
+      window.addEventListener('cm-archive-verification', (e) => { review.addToVerificationHistory(e.detail.content) })
+      window.addEventListener('cm-plan-cleared', () => {
+        globalState.lastAiResponse.value = null
+        globalState.planFileStates.value = {}
+        globalState.planOriginalContents.value = {}
+        globalState.showReviewModal.value = false
+        globalState.revertToCompactOnClose.value = false
+      })
 
-        window.addEventListener('cm-new-files', (e) => {
-          globalState.activeProject.newFileCount = e.detail.count
-        })
-
-        window.addEventListener('cm-project-reloaded', (e) => {
-          refreshProject(e.detail)
-        })
-
-        window.addEventListener('cm-config-updated', (e) => {
-          globalState.config.value = e.detail
-        })
-
-        window.addEventListener('cm-close-review', () => {
-          globalState.showReviewModal.value = false
-          globalState.revertToCompactOnClose.value = false
-        })
-
-        window.addEventListener('cm-archive-verification', (e) => {
-          review.addToVerificationHistory(e.detail.content)
-        })
-
-        window.addEventListener('cm-plan-cleared', () => {
-          globalState.lastAiResponse.value = null
-          globalState.planFileStates.value = {}
-          globalState.planOriginalContents.value = {}
-          globalState.showReviewModal.value = false
-          globalState.revertToCompactOnClose.value = false
-        })
-
-        isAppSetup = true
-      }
-
+      isAppSetup = true
       await refreshProject()
-    }
+      initPromise = null
+    })()
+
+    return await initPromise
   }
 
   return {
