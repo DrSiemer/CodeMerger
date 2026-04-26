@@ -180,10 +180,10 @@
   },
   {
     "path": "src/core/prompts/starter.py",
-    "tokens": 2697,
-    "lines": 175,
-    "mtime": 1776946608.4672887,
-    "hash": "58444edbdc6d258fd08828fca3302a3c139812c1"
+    "tokens": 2755,
+    "lines": 176,
+    "mtime": 1777239394.980452,
+    "hash": "e68b5a6ec6f3ac5c8324e54f688f97d575a41f6c"
   },
   {
     "path": "src/core/prompts/visualizer.py",

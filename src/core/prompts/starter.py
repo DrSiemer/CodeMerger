@@ -31,9 +31,10 @@ STARTER_DESIGN_PROMPT_INTRO = "You are a Senior Systems Architect. Based on the 
 
 STARTER_DESIGN_PROMPT_INSTR = """
 ### Instructions
-1. **Be Specific:** Do not write generic advice. Define actual table names, component hierarchies, state management strategies, and data payloads based on the concept and chosen stack.
-2. **Present Alternatives (CRITICAL):** Whenever you make a significant architectural decision that has a viable alternative (e.g., SQLite vs Postgres, SPA vs SSR, REST vs GraphQL, Context API vs Redux), you MUST wrap your chosen path in `<SELECTEDPATH>` and `</SELECTEDPATH>` tags.
-3. **Alternative JSON Block:** Immediately after the closing `</SELECTEDPATH>` tag, provide a JSON array of valid options wrapped in `<ALTERNATIVES>` and `</ALTERNATIVES>` tags.
+1. **Keep it Simple & Comprehensible:** Do not over-engineer. Write for an experienced developer, but keep the architecture as simple and understandable as possible. Avoid unnecessary abstractions, dense enterprise patterns, and overly verbose payload structures unless strictly required.
+2. **Be Specific but Concise:** Do not write generic advice. Define actual table names, component hierarchies, and data models based on the concept and chosen stack, but keep explanations clear and concise.
+3. **Present Alternatives (CRITICAL):** Whenever you make a significant architectural decision that has a viable alternative (e.g., SQLite vs Postgres, SPA vs SSR, REST vs GraphQL, Context API vs Redux), you MUST wrap your chosen path in `<SELECTEDPATH>` and `</SELECTEDPATH>` tags.
+4. **Alternative JSON Block:** Immediately after the closing `</SELECTEDPATH>` tag, provide a JSON array of valid options wrapped in `<ALTERNATIVES>` and `</ALTERNATIVES>` tags.
    - **Lateral Engineering Pivots:** Do NOT provide 'discarded' or 'rejected' ideas. Instead, identify high-quality, defensible architectural paths that reflect legitimate engineering trade-offs.
    - **Contextual Superiority:** Each alternative must be presented as a choice that becomes the **superior path** under different strategic priorities (e.g., prioritizing extreme horizontal scale vs. low infrastructure complexity).
    - **Format:** Format the JSON strictly as:
@@ -42,9 +43,9 @@ STARTER_DESIGN_PROMPT_INSTR = """
   {{ "title": "Pivot to [Option Name]", "description": "A high-level technical description of this path and the specific scenario or priority where this choice would be superior to the current selection." }}
 ]
 </ALTERNATIVES>
-4. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
+5. **Format & Custom Phases:** You MUST output the plan using `<SECTION name="Phase Name">` followed by content and closing with `</SECTION>`.
    - Required Phase Names: {headers_str}.
-5. **Architectural Consistency:** If a 'Reference Project' is provided, your design MUST respect the established architectural patterns (e.g., MVC, Hexagonal, etc.) found in that code to ensure the new features are a natural fit for the existing system.
+6. **Architectural Consistency:** If a 'Reference Project' is provided, your design MUST respect the established architectural patterns (e.g., MVC, Hexagonal, etc.) found in that code to ensure the new features are a natural fit for the existing system.
 """
 
 STARTER_PIVOT_PROMPT_TEMPLATE = """You are a Project Editor. The user has elected to pivot the system design.
