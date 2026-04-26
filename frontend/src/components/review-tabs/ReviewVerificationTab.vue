@@ -57,7 +57,7 @@ watch(lastAiResponse, () => {
 </script>
 
 <template>
-  <div class="relative min-h-full">
+  <div class="relative min-h-full review-verification-container">
     <!-- Verification History Floating Navigation -->
     <div
       v-if="allVerifications.length > 1"
@@ -118,3 +118,10 @@ watch(lastAiResponse, () => {
     <div class="clear-both"></div>
   </div>
 </template>
+
+<style scoped>
+:deep(.cm-verification-note) {
+  margin-top: 1rem;
+  opacity: 0.9;
+}
+</style>

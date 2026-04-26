@@ -297,7 +297,7 @@ def parse_and_plan_changes(base_dir, markdown_text):
     verification_text = get_tag_content("VERIFICATION")
     if failed_paths:
         err_list = "\n".join([f"- {p}" for p, _ in failed_paths])
-        note = f"\n\n---\n**NOTE:** The following files were skipped due to Fast-Apply errors (code mismatch or ambiguity):\n{err_list}"
+        note = f"\n\n---\n\n<div class=\"cm-verification-note\">\n\n**NOTE:** The following files were skipped due to Fast-Apply errors (code mismatch or ambiguity):\n{err_list}\n\n</div>"
         if not verification_text or verification_text == "-":
             verification_text = note.lstrip()
         else:

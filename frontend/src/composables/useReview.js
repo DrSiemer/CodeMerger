@@ -88,11 +88,16 @@ export function useReview() {
       const creations = plan.creations || {}
       const deletions = plan.deletions_proposed || []
       const skipped = plan.skipped_files || []
+      const failed = plan.failed_paths || []
 
-      // Initialize states including the new 'skipped' status for NO-OP files
+      // Initialize states including handled status for NO-OP and Failed files
+      // This prevents the "phantom accepted" bug where uninitialized paths defaulted to strikethrough
       Object.keys(updates).forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
       Object.keys(creations).forEach(p => planFileStates.value[p] = 'pending')
       deletions.forEach(p => planFileStates.value[p] = skipped.includes(p) ? 'skipped' : 'pending')
+
+      // Explicitly mark errors so they appear in the review list if the user proceeds
+      failed.forEach(([p, e]) => planFileStates.value[p] = 'failed')
 
       if (plan.status === 'ERROR') {
         formatErrorMessage.value = plan.message

@@ -34,6 +34,7 @@ watch(lastAiResponse, () => {
 const hasUpdates = computed(() => Object.keys(lastAiResponse.value?.updates || {}).length > 0)
 const hasCreations = computed(() => Object.keys(lastAiResponse.value?.creations || {}).length > 0)
 const hasDeletions = computed(() => (lastAiResponse.value?.deletions_proposed || []).length > 0)
+const hasFailures = computed(() => (lastAiResponse.value?.failed_paths || []).length > 0)
 
 const allReviewPaths = computed(() => {
   const response = lastAiResponse.value
@@ -41,16 +42,17 @@ const allReviewPaths = computed(() => {
   return [
     ...Object.keys(response.updates || {}),
     ...Object.keys(response.creations || {}),
-    ...(response.deletions_proposed || [])
+    ...(response.deletions_proposed || []),
+    ...(response.failed_paths || []).map(f => f[0])
   ]
 })
 
 const totalFileCount = computed(() => allReviewPaths.value.length)
 
 const expandablePaths = computed(() => {
-  const allNonSkipped = allReviewPaths.value.filter(p => planFileStates.value[p] !== 'skipped')
-  const pending = allNonSkipped.filter(p => planFileStates.value[p] === 'pending')
-  return pending.length > 0 ? pending : allNonSkipped
+  const allInteractable = allReviewPaths.value.filter(p => !['skipped', 'failed'].includes(planFileStates.value[p]))
+  const pending = allInteractable.filter(p => planFileStates.value[p] === 'pending')
+  return pending.length > 0 ? pending : allInteractable
 })
 
 const isAllExpanded = computed(() => {
@@ -156,6 +158,11 @@ const getSkippedMessage = (path) => {
   const isDeletion = lastAiResponse.value?.deletions_proposed?.includes(path)
   return isDeletion ? 'Already deleted' : 'No changes'
 }
+
+const getErrorMessage = (path) => {
+  const failedEntry = lastAiResponse.value?.failed_paths?.find(f => f[0] === path)
+  return failedEntry ? failedEntry[1] : 'Unknown error'
+}
 </script>
 
 <template>
@@ -163,6 +170,27 @@ const getSkippedMessage = (path) => {
 
     <!-- AI Commentary -->
     <ReviewCommentary v-if="commentary" :commentary="commentary" />
+
+    <!-- Failures (Errors) -->
+    <div v-if="hasFailures">
+      <div class="flex items-center space-x-4 mb-4">
+        <h4 class="text-xs font-bold text-[#DF2622] uppercase tracking-widest shrink-0">Fast-Apply Errors</h4>
+        <div class="h-px bg-red-900/30 flex-grow"></div>
+      </div>
+      <div class="space-y-3">
+        <ReviewFileItem
+          v-for="[path, error] in lastAiResponse.failed_paths"
+          :key="path"
+          :path="path"
+          type="modify"
+          state="failed"
+          :error-message="error"
+          :header-id="getHeaderId(path)"
+          :get-skipped-message="getSkippedMessage"
+          @toggle-diff="toggleDiff"
+        />
+      </div>
+    </div>
 
     <!-- Bulk Toggle Toolbar (Top) -->
     <div v-if="totalFileCount > 1" class="flex justify-end items-center">
