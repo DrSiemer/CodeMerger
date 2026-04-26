@@ -241,11 +241,11 @@
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 3243,
+    "tokens": 3534,
     "ignoreTokens": false,
-    "lines": 388,
-    "mtime": 1777194582.154741,
-    "hash": "4ca618c061814c48526d1cdf1407f0cde79836c0"
+    "lines": 423,
+    "mtime": 1777198539.0844893,
+    "hash": "9defcd23b0185e194d713e2233f1c7e9c187fb65"
   },
   {
     "path": "run_webview.py",
@@ -297,11 +297,11 @@
   },
   {
     "path": "src/api_parts/clipboard_api.py",
-    "tokens": 1532,
+    "tokens": 1615,
     "ignoreTokens": false,
-    "lines": 176,
-    "mtime": 1776935110.3926194,
-    "hash": "d8121ffb1d0e7534afc5a366707e6f1e87473753"
+    "lines": 183,
+    "mtime": 1777198018.5422797,
+    "hash": "42c37c547f71d10d4badde8e458037d5f88dd76a"
   },
   {
     "path": "src/api_parts/changes_api.py",
@@ -503,19 +503,19 @@
   },
   {
     "path": "frontend/src/composables/useProject.js",
-    "tokens": 2002,
+    "tokens": 2061,
     "ignoreTokens": false,
-    "lines": 256,
-    "mtime": 1776937593.3214648,
-    "hash": "d44df345cfd16fb0f348debaabaf0d5c6175aa6e"
+    "lines": 264,
+    "mtime": 1777198018.682631,
+    "hash": "82d5897069575496cf2198ddcbf9e7e078030f83"
   },
   {
     "path": "frontend/src/composables/useReview.js",
-    "tokens": 1500,
+    "tokens": 1499,
     "ignoreTokens": false,
-    "lines": 208,
-    "mtime": 1776723629.8391728,
-    "hash": "dcac5dfb5a0e47327cb96e382a3f7b3e2da3fc20"
+    "lines": 212,
+    "mtime": 1777198018.6053543,
+    "hash": "432da0f3a2bd5950ec24a0a2547bb79f1106d812"
   },
   {
     "path": "frontend/src/composables/useStarter.js",
@@ -527,11 +527,11 @@
   },
   {
     "path": "frontend/src/composables/useAppState.js",
-    "tokens": 893,
+    "tokens": 918,
     "ignoreTokens": false,
-    "lines": 127,
-    "mtime": 1776620222.7877524,
-    "hash": "79b897c9f49d7ccf8adfc710f354ddd057148584"
+    "lines": 131,
+    "mtime": 1777198018.7681472,
+    "hash": "70c7a40912b30e6c4d3134f95b86683e567850e1"
   },
   {
     "path": "frontend/src/composables/useEscapeKey.js",
@@ -568,11 +568,11 @@
   },
   {
     "path": "frontend/src/views/MainView.vue",
-    "tokens": 2012,
+    "tokens": 2033,
     "ignoreTokens": false,
-    "lines": 242,
-    "mtime": 1777196460.4286554,
-    "hash": "b324093fde092ec260ec52d57eb337523b2a5338"
+    "lines": 246,
+    "mtime": 1777198018.8479948,
+    "hash": "45964f876aa60861456a39bc380b091dfcd95f53"
   },
   {
     "path": "frontend/src/views/CompactView.vue",

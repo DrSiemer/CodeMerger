@@ -1,8 +1,16 @@
-import { activeProject, statusMessage, isProjectLoading, showColorPicker, originalProjectColor } from './globalState'
+import { activeProject, statusMessage, isProjectLoading, showColorPicker, originalProjectColor, verificationHistory } from './globalState'
 
 export function useProject() {
   const applyProjectData = (projData) => {
     console.log("[useProject] applyProjectData called", projData);
+
+    // Clear verification history on project switch
+    if (projData && projData.path && projData.path !== activeProject.path) {
+      verificationHistory.value = []
+    } else if (!projData || !projData.path) {
+      verificationHistory.value = []
+    }
+
     if (projData && projData.path) {
       activeProject.path = projData.path
       activeProject.name = projData.project_name

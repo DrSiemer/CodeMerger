@@ -126,6 +126,13 @@ class ClipboardApi:
                 if success:
                     self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
                     self._broadcast_reload()
+
+                    # Fix: Archive verification for auto-applied plan even if Main window is minimized
+                    v_text = plan.get('verification', '')
+                    if v_text and v_text != '-':
+                        v_json = json.dumps(v_text)
+                        self._window_manager.main_window.evaluate_js(f"window.dispatchEvent(new CustomEvent('cm-archive-verification', {{ detail: {{ content: {v_json} }} }}))")
+
                     return msg
 
         self._window_manager.restore_main()

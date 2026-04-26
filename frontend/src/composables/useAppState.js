@@ -99,6 +99,10 @@ export function useAppState() {
           globalState.revertToCompactOnClose.value = false
         })
 
+        window.addEventListener('cm-archive-verification', (e) => {
+          review.addToVerificationHistory(e.detail.content)
+        })
+
         window.addEventListener('cm-plan-cleared', () => {
           globalState.lastAiResponse.value = null
           globalState.planFileStates.value = {}

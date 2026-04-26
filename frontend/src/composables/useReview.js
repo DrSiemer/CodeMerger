@@ -19,19 +19,14 @@ export function useReview() {
     return ""
   }
 
-  // Helper to archive the verification section of the interaction that just ended
-  const archivePreviousVerification = () => {
-    const prevPlan = lastAiResponse.value
-    if (!prevPlan || !hasAcceptedChanges.value) return
-
-    const vContent = prevPlan.verification || ''
-    if (!vContent || vContent === '-' || vContent.trim().length === 0) return
+  const addToVerificationHistory = (content) => {
+    if (!content || content === '-' || content.trim().length === 0) return
 
     const history = verificationHistory.value
     const lastEntry = history.length > 0 ? history[history.length - 1] : null
 
     // Ignore identical verification in succession
-    if (!lastEntry || lastEntry.content !== vContent) {
+    if (!lastEntry || lastEntry.content !== content) {
       const now = new Date()
 
       const displayTimestamp = now.toLocaleString([], {
@@ -44,11 +39,19 @@ export function useReview() {
       })
 
       history.push({
-        content: vContent,
+        content: content,
         timestamp: displayTimestamp,
         rawTime: now.getTime()
       })
     }
+  }
+
+  // Helper to archive the verification section of the interaction that just ended
+  const archivePreviousVerification = () => {
+    const prevPlan = lastAiResponse.value
+    if (!prevPlan || !hasAcceptedChanges.value) return
+
+    addToVerificationHistory(prevPlan.verification)
 
     // Reset the modification flag for the next response
     hasAcceptedChanges.value = false
@@ -202,6 +205,8 @@ export function useReview() {
     claimLastPlan,
     checkPendingChanges,
     syncPlanStates,
-    applyFullPlan
+    applyFullPlan,
+    addToVerificationHistory,
+    archivePreviousVerification
   }
 }

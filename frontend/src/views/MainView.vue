@@ -29,6 +29,7 @@ const {
   claimLastPlan,
   processPaste,
   applyFullPlan,
+  archivePreviousVerification,
   config,
   statusMessage,
   showColorPicker,
@@ -101,6 +102,9 @@ const onRemotePasteRequest = async (event) => {
     alert(plan.message)
     return
   }
+
+  // Ensure current plan is archived before overwriting
+  archivePreviousVerification()
 
   lastAiResponse.value = plan
   revertToCompactOnClose.value = revertOnClose
