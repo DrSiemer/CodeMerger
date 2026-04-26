@@ -1,13 +1,24 @@
+# Environment & Dependencies
 __pycache__/
 /cm-venv
+
+# Build & Distribution
 /build
 /dist
 /dist-installer
-*.log
 
+# Application Data & Local Config
 /2do.txt
-/codemerger.log
 /config.json
 /filetypes.json
 /project_starter_session.json
+
+# Development Handshakes
+frontend/.vite-port
+
+# Logs
+*.log
+/codemerger.log
+
+# IDEs
 .vscode
