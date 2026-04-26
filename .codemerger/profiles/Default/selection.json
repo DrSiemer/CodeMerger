@@ -440,11 +440,11 @@
   },
   {
     "path": "frontend/src/utils/info/mainInfo.js",
-    "tokens": 1274,
+    "tokens": 1359,
     "ignoreTokens": false,
-    "lines": 44,
-    "mtime": 1776954290.3067539,
-    "hash": "67ca93ea1a1e9c398d19b797f2d54b5712c0f78a"
+    "lines": 47,
+    "mtime": 1777199855.9946356,
+    "hash": "a5982df603d7feb5f427af037915b0ef729ab3f7"
   },
   {
     "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -1092,8 +1092,8 @@
     "path": "frontend/src/utils/constants.js",
     "tokens": 204,
     "lines": 16,
-    "mtime": 1777196691.5391006,
-    "hash": "fbec0e51497514af21c52a039e0b254756455479"
+    "mtime": 1777199936.8038085,
+    "hash": "930bae4e5a57a677bc496d8835891cb9822d9b42"
   },
   {
     "path": "assets/reference/architecture.md",
@@ -1104,9 +1104,9 @@
   },
   {
     "path": "frontend/src/components/UsefulPromptsModal.vue",
-    "tokens": 1408,
-    "lines": 161,
-    "mtime": 1777197278.8387828,
-    "hash": "0716d0b97afeca42c0b72d49d5a834ad021e88cf"
+    "tokens": 1361,
+    "lines": 153,
+    "mtime": 1777199856.071638,
+    "hash": "90106be1ccc1ca1f50484d2549698debc0b25bb9"
   }
 ]

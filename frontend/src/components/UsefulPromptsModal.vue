@@ -73,7 +73,7 @@ const toggleExpand = (id) => {
 
       <!-- Header -->
       <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700 bg-cm-top-bar">
-        <div class="flex items-center space-x-3 text-white">
+        <div class="flex items-center space-x-3 text-white" v-info="'useful_prompts'">
           <Sparkles class="w-5 h-5 text-cm-blue" />
           <h2 class="text-xl font-bold">Useful Prompts</h2>
         </div>
@@ -83,7 +83,7 @@ const toggleExpand = (id) => {
       </div>
 
       <div class="p-5 flex-grow flex flex-col min-h-0">
-        <p class="text-gray-400 text-sm mb-4">Click a prompt to copy it to your clipboard and close this window.</p>
+        <p class="text-gray-400 text-sm mb-4" v-info="'useful_prompts_instruction'">Click a prompt to copy it to your clipboard and close this window.</p>
 
         <!-- List Container -->
         <div class="flex-grow overflow-y-auto pr-1 custom-scrollbar">
@@ -96,6 +96,7 @@ const toggleExpand = (id) => {
               <!-- Copy Action Zone -->
               <button
                 @click="handleCopyAndClose(p.id)"
+                v-info="'useful_prompts_item'"
                 class="flex-grow flex items-center py-2 px-4 space-x-4 text-left hover:bg-white/5 transition-colors"
               >
                 <div
@@ -110,6 +111,7 @@ const toggleExpand = (id) => {
               <!-- Expand Toggle Zone -->
               <button
                 @click="toggleExpand(p.id)"
+                v-info="'useful_prompts_expand'"
                 class="w-12 shrink-0 flex items-center justify-center hover:bg-white/10 transition-colors text-gray-500 hover:text-gray-300"
                 :title="expandedId === p.id ? 'Hide description' : 'Show description'"
               >
@@ -130,16 +132,6 @@ const toggleExpand = (id) => {
             </transition>
           </div>
         </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="px-5 py-4 border-t border-gray-700 bg-cm-top-bar flex justify-end">
-        <button
-          @click="emit('close')"
-          class="bg-gray-600 hover:bg-gray-500 text-white font-medium py-1.5 px-8 rounded transition-colors text-sm"
-        >
-          Close
-        </button>
       </div>
 
     </div>

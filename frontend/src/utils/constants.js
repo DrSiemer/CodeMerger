@@ -12,5 +12,5 @@ export const WINDOW_SIZES = {
   REVIEW: { width: 1100, height: 850 },
   SETTINGS: { width: 1000, height: 700 },
   COLOR_PICKER: { width: 800, height: 540 },
-  USEFUL_PROMPTS: { width: 800, height: 750 }
+  USEFUL_PROMPTS: { width: 550, height: 600 }
 };
