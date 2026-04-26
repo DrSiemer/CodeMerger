@@ -28,6 +28,15 @@ def _set_skip_taskbar(title):
                 new_style = (style & ~WS_EX_APPWINDOW) | WS_EX_TOOLWINDOW
 
                 ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, new_style)
+
+                # Force Windows to apply the new style and update the taskbar immediately
+                SWP_NOMOVE = 0x0002
+                SWP_NOSIZE = 0x0001
+                SWP_NOZORDER = 0x0004
+                SWP_NOACTIVATE = 0x0010
+                SWP_FRAMECHANGED = 0x0020
+                ctypes.windll.user32.SetWindowPos(hwnd, 0, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED | SWP_NOACTIVATE)
         except Exception as e:
             log.debug(f"Failed to set skip taskbar style: {e}")
 

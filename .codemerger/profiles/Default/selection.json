@@ -233,19 +233,19 @@
   },
   {
     "path": "src/core/window_compact.py",
-    "tokens": 1026,
+    "tokens": 1164,
     "ignoreTokens": false,
-    "lines": 98,
-    "mtime": 1776617080.426736,
-    "hash": "b93d247639f194e15e42168c96ee7c2bee2c6e9b"
+    "lines": 107,
+    "mtime": 1777194754.012224,
+    "hash": "1c3df25a9a698e003db14ea7a91dd66b2a395584"
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 3195,
+    "tokens": 3243,
     "ignoreTokens": false,
-    "lines": 380,
-    "mtime": 1776933525.3814936,
-    "hash": "24192bba99a77addd923b0ec657b4db237889c22"
+    "lines": 388,
+    "mtime": 1777194582.154741,
+    "hash": "4ca618c061814c48526d1cdf1407f0cde79836c0"
   },
   {
     "path": "run_webview.py",

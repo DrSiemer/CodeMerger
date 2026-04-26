@@ -276,7 +276,11 @@ class WindowManager:
         if self._transitioning or self._is_shutting_down: return
         self._transitioning = True
         try:
-            if self.compact_window: self.compact_window.hide()
+            if self.compact_window:
+                try:
+                    self.compact_window.move(-10000, -10000)
+                except Exception: pass
+                self.compact_window.hide()
             if self.main_window:
                 self.broadcast_project_reload()
             if self.monitor: self.monitor.update_window(self.main_window)
@@ -349,7 +353,11 @@ class WindowManager:
         if self._transitioning or self._is_shutting_down: return
         self._transitioning = True
         try:
-            if self.compact_window: self.compact_window.hide()
+            if self.compact_window:
+                try:
+                    self.compact_window.move(-10000, -10000)
+                except Exception: pass
+                self.compact_window.hide()
             if self.main_window:
                 self.main_window.show()
                 self.main_window.restore()
