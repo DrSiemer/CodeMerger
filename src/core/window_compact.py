@@ -51,7 +51,7 @@ def create_compact_window(manager):
         min_size=(10, 10),
         frameless=True, on_top=True, hidden=True, background_color='#2E2E2E'
     )
-    manager.compact_window.events.closing += manager._on_compact_closing
+    manager.compact_window.events.closing += manager.event_handler.on_compact_closing
 
 def show_compact_window(manager):
     """Calculates boundaries and places the compact window using Hybrid coordination logic"""

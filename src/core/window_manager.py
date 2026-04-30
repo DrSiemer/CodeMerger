@@ -3,7 +3,6 @@ import webview
 import logging
 import time
 import threading
-import json
 from src.core.paths import get_bundle_dir
 from src.core.updater import Updater
 from src.core.utils import load_app_version
@@ -12,6 +11,9 @@ from src.core.window_geometry import WindowGeometry
 from src.core.window_splash import create_splash_window
 from src.core.window_main import create_main_window
 from src.core.window_compact import create_compact_window, show_compact_window
+from src.core.vite_handshake import get_dev_url
+from src.core.window_broadcaster import WindowBroadcaster
+from src.core.window_events import WindowEventHandler
 
 log = logging.getLogger("CodeMerger")
 
@@ -41,6 +43,9 @@ class WindowManager:
         self._stop_failsafe = threading.Event()
         self._current_main_monitor = None
 
+        self.broadcaster = WindowBroadcaster(self)
+        self.event_handler = WindowEventHandler(self)
+
         # Latch to override minimize behavior for a single event
         self._override_compact_behavior = None
 
@@ -65,7 +70,7 @@ class WindowManager:
         self.compact_mode_last_main_monitor = None
 
         if dev_mode:
-            self.base_url = self._get_dev_url()
+            self.base_url = get_dev_url()
         else:
             bundle_dir = get_bundle_dir()
             index_path = os.path.join(bundle_dir, 'frontend', 'dist', 'index.html')
@@ -88,35 +93,11 @@ class WindowManager:
 
     def _dispatch_project_reload(self, win):
         """Broadcasts current project state to a window, bypassing async round-trips"""
-        if not win or not self.api: return
-        if not self._handshake_received: return
-        project_config = self.api.project_manager.get_current_project()
-        data = self.api._format_project_response(project_config, "") if project_config else None
-        data_json = json.dumps(data)
-        try:
-            win.evaluate_js(f'window.dispatchEvent(new CustomEvent("cm-project-reloaded", {{ detail: {data_json} }}))')
-        except Exception as e:
-            log.debug(f"Failed to evaluate JS on window: {e}")
+        self.broadcaster._dispatch_project_reload(win)
 
     def broadcast_project_reload(self):
         """Pushes current state to all windows to ensure hidden windows stay synchronized"""
-        if not self.api: return
-        if not self._handshake_received: return
-        project_config = self.api.project_manager.get_current_project()
-        data = self.api._format_project_response(project_config, "") if project_config else None
-        data_json = json.dumps(data)
-        js = f'window.dispatchEvent(new CustomEvent("cm-project-reloaded", {{ detail: {data_json} }}))'
-
-        if self.main_window:
-            try:
-                self.main_window.evaluate_js(js)
-            except Exception as e:
-                log.debug(f"Failed to evaluate JS on main window: {e}")
-        if self.compact_window:
-            try:
-                self.compact_window.evaluate_js(js)
-            except Exception as e:
-                log.debug(f"Failed to evaluate JS on compact window: {e}")
+        self.broadcaster.broadcast_project_reload()
 
     def on_config_changed(self, config_data):
         """Called when global application settings are updated."""
@@ -128,24 +109,11 @@ class WindowManager:
 
     def broadcast_config_update(self, config_data):
         """Pushes global config updates to all frontend contexts."""
-        if not self._handshake_received: return
-        js = f'window.dispatchEvent(new CustomEvent("cm-config-updated", {{ detail: {json.dumps(config_data)} }}))'
-
-        if self.main_window:
-            try: self.main_window.evaluate_js(js)
-            except Exception: pass
-        if self.compact_window:
-            try: self.compact_window.evaluate_js(js)
-            except Exception: pass
+        self.broadcaster.broadcast_config_update(config_data)
 
     def trigger_file_manager_in_main(self):
         """Forces the main window to open the File Manager."""
-        if self.main_window:
-            log.info("WindowManager: Triggering remote openFileManager JS call.")
-            try:
-                self.main_window.evaluate_js("if (window.openFileManager) window.openFileManager();")
-            except Exception as e:
-                log.debug(f"Failed to evaluate JS on main window: {e}")
+        self.broadcaster.trigger_file_manager_in_main()
 
     def start(self):
         """Initializes windows and starts the PyWebView UI loop"""
@@ -246,146 +214,6 @@ class WindowManager:
         if self.updater:
             threading.Thread(target=self.updater.check_for_updates, daemon=True).start()
 
-    def _on_main_moved(self, x, y):
-        if self.main_window and not self._is_shutting_down:
-            try:
-                if getattr(self, 'main_is_maximized', False):
-                    return
-
-                wx, wy = self.main_window.x, self.main_window.y
-                if wx < -10000 or wy < -10000:
-                    return
-
-                self.main_last_x, self.main_last_y = wx, wy
-
-                current_mon = self._get_target_monitor_handle()
-                if current_mon:
-                    if self._current_main_monitor is None:
-                        self._current_main_monitor = current_mon
-                    elif self._current_main_monitor != current_mon:
-                        self._current_main_monitor = current_mon
-            except Exception: pass
-
-    def _on_main_resized(self, width, height):
-        if self.main_window and not self._is_shutting_down:
-            try:
-                if getattr(self, 'main_is_maximized', False):
-                    return
-
-                wx, wy = self.main_window.x, self.main_window.y
-                if wx < -10000 or wy < -10000: return
-
-                ww, wh = self.main_window.width, self.main_window.height
-                if ww < 100 or wh < 100: return
-
-                self.main_last_w, self.main_last_h = ww, wh
-            except Exception: pass
-
-    def _on_main_restored(self):
-        self.main_is_maximized = False
-        if self._transitioning or self._is_shutting_down: return
-        self._transitioning = True
-        try:
-            if self.compact_window:
-                try:
-                    self.compact_window.move(-10000, -10000)
-                except Exception: pass
-                self.compact_window.hide()
-            if self.main_window:
-                self.broadcast_project_reload()
-            if self.monitor: self.monitor.update_window(self.main_window)
-        finally: self._transitioning = False
-
-    def _on_main_maximized(self):
-        self.main_is_maximized = True
-        if self._transitioning or self._is_shutting_down: return
-        self._transitioning = True
-        try:
-            if self.compact_window:
-                try:
-                    self.compact_window.move(-10000, -10000)
-                except Exception: pass
-                self.compact_window.hide()
-            if self.main_window:
-                self.broadcast_project_reload()
-            if self.monitor: self.monitor.update_window(self.main_window)
-        finally: self._transitioning = False
-
-    def _on_main_shown(self):
-        if self._transitioning or self._is_shutting_down: return
-        self._transitioning = True
-        try:
-            if self.compact_window:
-                try:
-                    self.compact_window.move(-10000, -10000)
-                except Exception: pass
-                self.compact_window.hide()
-            if self.main_window:
-                self.broadcast_project_reload()
-            if self.monitor: self.monitor.update_window(self.main_window)
-        finally: self._transitioning = False
-
-    def _on_main_minimized(self):
-        if self._transitioning or self._is_shutting_down: return
-
-        # Requirement: Project Starter should never minimize to Compact Mode
-        if self.is_starter_active:
-            return
-
-        should_compact = self.api.app_state.config.get('enable_compact_mode_on_minimize', False)
-
-        if self._override_compact_behavior is not None:
-            should_compact = self._override_compact_behavior
-            self._override_compact_behavior = None
-
-        if should_compact:
-            self._transitioning = True
-            try:
-                if self.main_window:
-                    try:
-                        self.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-close-review"))')
-                    except Exception:
-                        pass
-                self.show_compact()
-            finally:
-                self._transitioning = False
-
-    def _on_main_closing(self):
-        """Perform a final reconciled save of application state and geometry on shutdown"""
-        if self._is_shutting_down: return
-        self._is_shutting_down = True
-        self._stop_failsafe.set()
-
-        # Forceful Exit Watchdog: If the WebView engine hangs during teardown (common on Windows),
-        # this thread ensures the process actually dies after a short delay.
-        def _force_exit_watchdog():
-            time.sleep(1.5)
-            os._exit(0)
-        threading.Thread(target=_force_exit_watchdog, daemon=True).start()
-
-        try:
-            # Sync final window geometry to internal config dict before reconciled save
-            if self.main_last_x is not None and self.main_last_y is not None:
-                self.api.app_state.config['main_window_geom'] = {
-                    'x': int(self.main_last_x), 'y': int(self.main_last_y),
-                    'w': int(self.main_last_w), 'h': int(self.main_last_h),
-                    'is_maximized': getattr(self, 'main_is_maximized', False)
-                }
-
-            # Execute reconciled save to implement "Last Closed Wins" for Active Project
-            self.api.app_state._save()
-        except Exception: pass
-
-        for win in [self.compact_window, self.splash_window]:
-            if win:
-                try: win.destroy()
-                except Exception: pass
-
-    def _on_compact_closing(self):
-        if self._is_shutting_down: return True
-        self.restore_main()
-        return False
-
     def show_compact(self):
         show_compact_window(self)
 
@@ -433,53 +261,3 @@ class WindowManager:
         else:
             import os
             os._exit(0)
-
-    def _get_dev_url(self):
-        """
-        Reads the port from the .vite-port handshake file written by the Vite plugin.
-        Ensures the backend connects to the correct frontend instance.
-        """
-        import time
-        import socket
-        port_file = os.path.join(get_bundle_dir(), 'frontend', '.vite-port')
-
-        # CRITICAL: Purge stale port file from previous sessions to avoid reading old data
-        if os.path.exists(port_file):
-            try:
-                os.remove(port_file)
-            except OSError:
-                pass
-
-        log.info("Dev Mode: Waiting for Vite port handshake...")
-
-        # Wait up to 5 seconds for Vite to initialize and write the port file
-        for _ in range(25):
-            if os.path.exists(port_file):
-                try:
-                    with open(port_file, 'r') as f:
-                        port_str = f.read().strip()
-                        if port_str:
-                            port = int(port_str)
-                            # Verification: Ensure Vite is actually listening
-                            if self._wait_for_listener(port):
-                                log.info(f"Vite handshake received. Using port {port}")
-                                return f"http://localhost:{port}"
-                except (ValueError, Exception):
-                    pass
-            time.sleep(0.2)
-
-        log.warning("Vite handshake timed out. Falling back to default port 5173.")
-        return "http://localhost:5173"
-
-    def _wait_for_listener(self, port, timeout=2.0):
-        """Checks if a local port is actually accepting connections."""
-        import socket
-        import time
-        start = time.time()
-        while time.time() - start < timeout:
-            try:
-                with socket.create_connection(("localhost", port), timeout=0.1):
-                    return True
-            except (ConnectionRefusedError, socket.timeout):
-                time.sleep(0.1)
-        return False

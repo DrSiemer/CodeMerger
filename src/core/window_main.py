@@ -24,15 +24,15 @@ def create_main_window(manager, m_left, m_top, m_w_phys, m_h_phys, scale):
         hidden=True, x=m_x_phys, y=m_y_phys
     )
 
-    win.events.minimized += manager._on_main_minimized
-    win.events.closing += manager._on_main_closing
+    win.events.minimized += manager.event_handler.on_main_minimized
+    win.events.closing += manager.event_handler.on_main_closing
 
     try:
-        win.events.moved += manager._on_main_moved
-        win.events.resized += manager._on_main_resized
-        win.events.restored += manager._on_main_restored
-        win.events.maximized += manager._on_main_maximized
-        win.events.shown += manager._on_main_shown
+        win.events.moved += manager.event_handler.on_main_moved
+        win.events.resized += manager.event_handler.on_main_resized
+        win.events.restored += manager.event_handler.on_main_restored
+        win.events.maximized += manager.event_handler.on_main_maximized
+        win.events.shown += manager.event_handler.on_main_shown
     except AttributeError:
         pass
 

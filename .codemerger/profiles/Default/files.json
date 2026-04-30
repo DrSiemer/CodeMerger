@@ -153,7 +153,10 @@
     "src/core/secret_scanner.py",
     "src/core/updater.py",
     "src/core/utils.py",
+    "src/core/vite_handshake.py",
+    "src/core/window_broadcaster.py",
     "src/core/window_compact.py",
+    "src/core/window_events.py",
     "src/core/window_geometry.py",
     "src/core/window_main.py",
     "src/core/window_manager.py",
@@ -162,5 +165,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 202839
+  "total_tokens": 203186
 }

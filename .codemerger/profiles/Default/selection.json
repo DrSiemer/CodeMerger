@@ -232,27 +232,27 @@
   },
   {
     "path": "src/core/window_main.py",
-    "tokens": 382,
+    "tokens": 389,
     "ignoreTokens": false,
     "lines": 39,
-    "mtime": 1777553016.5407014,
-    "hash": "43d52dde4f825757eef2f265821000d24a5ca8be"
+    "mtime": 1777579392.8064222,
+    "hash": "db9b37cd4cd1a66aab70574a71df596370b9e3e3"
   },
   {
     "path": "src/core/window_compact.py",
-    "tokens": 1390,
+    "tokens": 1391,
     "ignoreTokens": false,
     "lines": 130,
-    "mtime": 1777578884.5801706,
-    "hash": "6d43f5ae0c2f1092b5c0a98ae8bb6742e01a290b"
+    "mtime": 1777579392.866155,
+    "hash": "05b9adb8abb40b80bedf26f643d9ad9de41cb247"
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 3971,
+    "tokens": 2124,
     "ignoreTokens": false,
-    "lines": 485,
-    "mtime": 1777578884.521171,
-    "hash": "1015ed447b237c9fab3c29e18aece77ad2ad5888"
+    "lines": 263,
+    "mtime": 1777579392.743852,
+    "hash": "c73248ba2dab7037b044ffb39685a3aaec83024c"
   },
   {
     "path": "src/api_parts/base_api.py",
@@ -1175,5 +1175,26 @@
     "lines": 59,
     "mtime": 1777577886.0984244,
     "hash": "32667522aaecc6a805cde8f2393fa33a438838f3"
+  },
+  {
+    "path": "src/core/window_broadcaster.py",
+    "tokens": 538,
+    "lines": 53,
+    "mtime": 1777579392.622892,
+    "hash": "5bdb32ea68045d62aa37aaf61ed4450292f72693"
+  },
+  {
+    "path": "src/core/vite_handshake.py",
+    "tokens": 396,
+    "lines": 53,
+    "mtime": 1777579392.4082794,
+    "hash": "92ffabbb0813a537619102b4a3d75b104c770301"
+  },
+  {
+    "path": "src/core/window_events.py",
+    "tokens": 1252,
+    "lines": 151,
+    "mtime": 1777579392.6838515,
+    "hash": "96027c7fa7b40eaa77300a18cf2d2e6731c8b4f7"
   }
 ]
