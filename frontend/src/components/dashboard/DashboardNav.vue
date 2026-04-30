@@ -37,11 +37,15 @@ const handleOpenNewProfile = () => {
 const deleteProfileHandler = async (id, name) => {
   if (confirm(`Are you sure you want to delete the profile '${name}'?\nThis cannot be undone.`)) {
     await deleteProfile(id)
+    if (activeProject.profiles.length <= 1) {
+      showProfileDropdown.value = false
+    }
   }
 }
 
 const toggleDropdown = () => {
   if (isProjectLoading.value) return
+  if (activeProject.profiles.length <= 1) return
   showProfileDropdown.value = !showProfileDropdown.value
 }
 
@@ -80,12 +84,13 @@ onUnmounted(() => {
           <button
             @click="toggleDropdown"
             v-info="'profile_nav'"
-            class="flex items-center justify-between bg-cm-input-bg hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] transition-colors min-w-[120px] max-w-[200px]"
+            class="flex items-center justify-between bg-cm-input-bg text-white px-4 py-2 rounded text-sm font-medium border border-gray-600 h-[38px] transition-colors min-w-[120px] max-w-[200px]"
+            :class="activeProject.profiles.length > 1 ? 'hover:bg-gray-700 cursor-pointer' : 'cursor-default'"
             :disabled="isProjectLoading"
-            title="Switch project profile"
+            :title="activeProject.profiles.length > 1 ? 'Switch project profile' : 'Current profile'"
           >
-            <span class="truncate pr-2">{{ currentProfileDisplay }}</span>
-            <ChevronDown class="w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200" :class="{'rotate-180': showProfileDropdown}" />
+            <span class="truncate" :class="{ 'pr-2': activeProject.profiles.length > 1 }">{{ currentProfileDisplay }}</span>
+            <ChevronDown v-if="activeProject.profiles.length > 1" class="w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200" :class="{'rotate-180': showProfileDropdown}" />
           </button>
 
           <!-- Quick Add Profile -->

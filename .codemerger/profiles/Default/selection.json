@@ -651,11 +651,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardNav.vue",
-    "tokens": 1660,
+    "tokens": 1762,
     "ignoreTokens": false,
-    "lines": 198,
-    "mtime": 1777541498.0380814,
-    "hash": "b19306b3ecd4bb781d1ebf877cf1e5a90880eb55"
+    "lines": 203,
+    "mtime": 1777578318.0056257,
+    "hash": "b23abaea6b178b747dd3f2f432a43bc8ac36a90a"
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",

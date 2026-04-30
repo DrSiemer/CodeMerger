@@ -122,7 +122,11 @@ class ProjectConfig:
         return has_external_config_changes(self)
 
     def get_profile_names(self):
-        return sorted(list(self.profiles.keys()))
+        names = sorted(list(self.profiles.keys()))
+        if "default" in names:
+            names.remove("default")
+            names.insert(0, "default")
+        return names
 
     def create_new_profile(self, name, copy_files, copy_instructions):
         with self._lock:
