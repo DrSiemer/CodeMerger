@@ -86,10 +86,10 @@
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1777542342.4248044,
-    "hash": "049112e873c4286245c9c037c94fe9d8cf1e6db5",
-    "tokens": 4304,
-    "lines": 491,
+    "mtime": 1777577886.0994265,
+    "hash": "0c1695cca83d04e6865624270caa5249a144c98d",
+    "tokens": 945,
+    "lines": 136,
     "ignore_tokens": false
   },
   {
@@ -1154,5 +1154,26 @@
     "hash": "1c527956cd20c258174e0faf87c76c5cb0ddf506",
     "tokens": 680,
     "lines": 100
+  },
+  {
+    "path": "src/core/profile_logic.py",
+    "tokens": 779,
+    "lines": 99,
+    "mtime": 1777577886.097424,
+    "hash": "aea771e3940bc176b877dc5c18737f9f8015e54a"
+  },
+  {
+    "path": "src/core/config_persistence.py",
+    "tokens": 2285,
+    "lines": 232,
+    "mtime": 1777577886.0984244,
+    "hash": "55a0a191678a56c4f617fe6894632703501513d3"
+  },
+  {
+    "path": "src/core/file_metadata.py",
+    "tokens": 549,
+    "lines": 59,
+    "mtime": 1777577886.0984244,
+    "hash": "32667522aaecc6a805cde8f2393fa33a438838f3"
   }
 ]

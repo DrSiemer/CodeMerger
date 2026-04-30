@@ -130,6 +130,8 @@
     "src/core/change_applier.py",
     "src/core/config_io.py",
     "src/core/config_migration.py",
+    "src/core/config_persistence.py",
+    "src/core/file_metadata.py",
     "src/core/file_monitor_thread.py",
     "src/core/file_scanner.py",
     "src/core/file_tree_builder.py",
@@ -137,6 +139,7 @@
     "src/core/logger.py",
     "src/core/merger.py",
     "src/core/paths.py",
+    "src/core/profile_logic.py",
     "src/core/project_config.py",
     "src/core/project_manager.py",
     "src/core/prompts/__init__.py",
@@ -159,5 +162,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 202315
+  "total_tokens": 202569
 }
