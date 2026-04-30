@@ -10,7 +10,7 @@ import { DEFAULT_TOKEN_COLOR_THRESHOLD } from '../utils/constants'
 const props = defineProps({
   listItems: Array,
   filterText: String,
-  mergeListRef: Object,
+  setListRef: Function,
   totalTokens: Number,
   tokenColorClass: String,
   showFullPaths: Boolean,
@@ -36,6 +36,11 @@ const listRoot = ref(null)
 const tempHighlightedPath = ref(null)
 let highlightTimeout = null
 
+const handleListRef = (el) => {
+  listRoot.value = el
+  if (props.setListRef) props.setListRef(el)
+}
+
 const onKeyDown = (e) => {
   if (e.key === 'Delete' && selectedIndices.value.size > 0) {
     const target = e.target
@@ -46,10 +51,6 @@ const onKeyDown = (e) => {
 }
 
 onMounted(() => {
-  // Synchronize the local element with the parent's Drag and Drop ref
-  if (props.mergeListRef && listRoot.value) {
-    props.mergeListRef.value = listRoot.value
-  }
   window.addEventListener('keydown', onKeyDown)
 })
 
@@ -330,7 +331,7 @@ defineExpose({
 
     <!-- Merge List -->
     <div class="flex-grow overflow-y-auto custom-scrollbar mb-2 pr-2" v-info="'fm_list'">
-      <ul ref="listRoot" class="space-y-1">
+      <ul :ref="handleListRef" class="space-y-1">
         <li
           v-for="(file, index) in listItems"
           :key="file.path"

@@ -23,6 +23,10 @@ const [mergeListRef, listItems] = useDragAndDrop(
   { handle: '.drag-handle' }
 )
 
+const setMergeListRef = (el) => {
+  mergeListRef.value = el
+}
+
 const leftPanelRef = ref(null)
 const rightPanelRef = ref(null)
 const fileTree = ref([])
@@ -355,7 +359,7 @@ const handleSave = async () => {
           :class="showFullPaths ? 'w-3/5' : 'w-1/2'"
           :listItems="listItems"
           :filterText="filterText"
-          :mergeListRef="mergeListRef"
+          :setListRef="setMergeListRef"
           :totalTokens="totalTokens"
           :tokenColorClass="tokenColorClass"
           v-model:showFullPaths="showFullPaths"

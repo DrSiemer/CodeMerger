@@ -10,7 +10,7 @@ export const mainInfo = {
   "instructions": "Define Instructions: Set a project-specific Intro and Outro. This text will be wrapped around your code whenever you use 'Copy with Instructions'.",
   "copy_code": "Copy Code Only (Ctrl+Shift+C): Merges all selected files with a standard prompt header. Useful for providing updated context to an LLM without repeating project goals. Ctrl-clicking the Adaptive Copy button in Compact mode also triggers this action.",
   "copy_with_instructions": "Copy Prompt with Instructions (Ctrl+C): Merges code and wraps it in your custom Intro/Outro. Strictly enforces 'No Code Truncation' rules. Ctrl-click to perform 'Copy Code Only'.",
-  "paste_changes": "Paste Changes (Ctrl+V): Instantly applies code from your clipboard. Depending on your settings, this opens a review window or writes directly to disk. Ctrl-click to toggle the review behavior. Alt-click to open the manual paste window for raw text input.",
+  "paste_changes": "Paste Changes (Ctrl+V): Instantly applies code from your clipboard. Depending on your settings, this opens a review window or writes directly to disk. Ctrl-click to toggle the review behavior. Alt-click to instantly overwrite an unapplied response in memory.",
   "response_review": "AI Response Review: Opens the review window to see the most recently applied changes and associated AI commentary.",
   "useful_prompts": "Useful Prompts: Access a menu of pre-written, specialized prompts designed to help you perform common refactoring, auditing, and maintenance tasks with your LLM.",
   "useful_prompts_instruction": "Selection Tip: Click any prompt title to copy the text to your clipboard. The window will close automatically after copying.",
