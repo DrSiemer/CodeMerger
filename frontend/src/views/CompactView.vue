@@ -113,9 +113,10 @@ const handleCopy = async (event, bypassSecrets = null) => {
 
 const handlePaste = async (event, forceOverwrite = false) => {
   if (!window.pywebview) return
-  if (hasPendingChangesInternal.value && !forceOverwrite) { triggerFeedback('confirm', 'Overwrite memory?', 'overwrite'); return }
+  const force = (event.altKey && hasPendingChangesInternal.value) || forceOverwrite
+  if (hasPendingChangesInternal.value && !force) { triggerFeedback('confirm', 'Overwrite memory?', 'overwrite'); return }
   try {
-    const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey, forceOverwrite)
+    const result = await window.pywebview.api.request_remote_paste(true, !!event.ctrlKey, force)
     if (result === true || typeof result === 'string') lastAiResponse.value = await claimLastPlan()
     await updatePendingStatus()
     if (typeof result === 'string') triggerFeedback(result.includes('Error') || result.includes('empty') ? 'error' : 'success', result.includes('Error') || result.includes('empty') ? result : 'PASTED', 'paste', 3000)
@@ -202,7 +203,7 @@ const titleAbbr = computed(() => {
 
 const pasteTooltipText = computed(() => {
   const showReview = config.value.show_feedback_on_paste ?? true
-  return `${showReview ? "Paste and Review changes" : "Paste and Apply changes immediately"}\n(Ctrl-Click: ${showReview ? "Apply immediately" : "Apply with Review"}, Alt-Click: manual window)`
+  return `${showReview ? "Paste and Review changes" : "Paste and Apply changes immediately"}\n(Ctrl-Click: ${showReview ? "Apply immediately" : "Apply with Review"}, Alt-Click: overwrite existing response)`
 })
 </script>
 

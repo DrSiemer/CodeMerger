@@ -524,11 +524,11 @@
   },
   {
     "path": "frontend/src/composables/useReview.js",
-    "tokens": 1563,
+    "tokens": 1570,
     "ignoreTokens": false,
     "lines": 217,
-    "mtime": 1777204338.2190468,
-    "hash": "ff226ccd211dfe368c91b5bdbc4a8ddf3cf3750b"
+    "mtime": 1777559814.5098548,
+    "hash": "7c9ac49885077b65d0ac5c135a48c1f685fd7d2d"
   },
   {
     "path": "frontend/src/composables/useStarter.js",
@@ -611,11 +611,11 @@
   },
   {
     "path": "frontend/src/views/CompactView.vue",
-    "tokens": 3159,
+    "tokens": 3176,
     "ignoreTokens": false,
-    "lines": 251,
-    "mtime": 1776954413.0332465,
-    "hash": "6a861fa0dc64c0bac92b301bd4c4f403b2de5659"
+    "lines": 252,
+    "mtime": 1777559814.630578,
+    "hash": "947c37c7c534da71dc38b35f66c33c4c9c4027ea"
   },
   {
     "path": "frontend/src/components/InfoPanel.vue",
@@ -659,11 +659,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
-    "tokens": 1994,
+    "tokens": 2011,
     "ignoreTokens": false,
-    "lines": 201,
-    "mtime": 1777196460.3496196,
-    "hash": "cebf2d61c7e28ba9b77f33d2eabca253f68d8a4b"
+    "lines": 202,
+    "mtime": 1777559814.5676036,
+    "hash": "f4ca588a6010bf06e326b2f59ed714483e685915"
   },
   {
     "path": "frontend/src/components/FileTreeNode.vue",

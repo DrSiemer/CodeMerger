@@ -40,8 +40,9 @@ const handleCopy = async (useWrapper, event) => {
   }
 }
 
-const handlePasteChanges = async () => {
-  const success = await processPaste()
+const handlePasteChanges = async (event) => {
+  const force = event.altKey && hasPendingChanges.value
+  const success = await processPaste(force)
   if (success) {
     emit('open-review-modal', 'new')
   }
@@ -55,7 +56,7 @@ const pasteTooltipText = computed(() => {
   const showReview = config.value.show_feedback_on_paste ?? true
   const base = showReview ? "Paste and Review changes (Ctrl+V)" : "Paste and Apply changes immediately (Ctrl+V)"
   const override = showReview ? "Apply immediately" : "Apply with Review"
-  return `${base}\n(Ctrl-Click: ${override}, Alt-Click: open manual paste window)`
+  return `${base}\n(Ctrl-Click: ${override}, Alt-Click: overwrite existing response)`
 })
 </script>
 
@@ -156,7 +157,7 @@ const pasteTooltipText = computed(() => {
             <div class="relative w-full">
               <button
                 id="btn-paste-changes"
-                @click="handlePasteChanges"
+                @click="handlePasteChanges($event)"
                 :disabled="isProjectLoading"
                 class="relative w-full text-white font-semibold py-2.5 rounded shadow-sm flex items-center justify-center space-x-2 transition-colors text-[15px] disabled:opacity-50"
                 :class="hasPendingChanges ? 'bg-[#DE6808] hover:bg-orange-500' : 'bg-cm-green hover:bg-green-600'"

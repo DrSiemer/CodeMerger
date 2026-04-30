@@ -57,11 +57,11 @@ export function useReview() {
     hasAcceptedChanges.value = false
   }
 
-  const processPaste = async () => {
+  const processPaste = async (force = false) => {
     if (!window.pywebview) return false
 
     // OVERWRITE CHECK
-    if (hasPendingChanges.value) {
+    if (hasPendingChanges.value && !force) {
       if (!confirm("An AI response is already in memory with changes that have not been applied yet.\n\nDo you want to overwrite it with the new response from your clipboard?")) {
         return false
       }
