@@ -79,6 +79,8 @@ OR for total rewrites / NEW files:
    (OPTIONAL: You may list the names of unchanged files here to satisfy any compulsion to acknowledge them without outputting their code. Omit this block entirely if possible.)
    </UNCHANGED>
 
+9. **ASSUMPTION OF APPLICATION:** You MUST assume that I have successfully applied your previous output to my local files unless I explicitly state that an issue occurred (e.g., a surgical diff mismatch or incorrectly formatted output). Do not repeat changes from previous turns unless providing a requested correction.
+
 ==========
 
 You MUST format your EXACT output using this skeleton. Do not deviate from this structure:
