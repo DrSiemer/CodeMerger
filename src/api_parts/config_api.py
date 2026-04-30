@@ -93,6 +93,9 @@ class ConfigApi:
             elif prompt_type == 'brutal_review':
                 pyperclip.copy(p.BRUTAL_REVIEW_PROMPT)
                 return "Copied brutal review prompt."
+            elif prompt_type == 'eli5':
+                pyperclip.copy(p.ELI5_PROMPT)
+                return "Copied ELI5 breakdown prompt."
             return "Unknown prompt type."
         except Exception as e:
             log.error(f"Failed to copy prompt: {e}")

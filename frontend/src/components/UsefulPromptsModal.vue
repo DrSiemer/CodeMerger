@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import {
   X, Sparkles, Eraser, Anchor, Droplets,
-  Hash, Skull, ChevronDown, ChevronUp
+  Hash, Skull, ChevronDown, ChevronUp, Baby
 } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
@@ -50,6 +50,13 @@ const prompts = [
     icon: Hash,
     hoverColor: 'group-hover:text-purple-400',
     description: 'Focuses on extracting hardcoded numerical values into named constants, moving them to your project\'s centralized constants or configuration files.'
+  },
+  {
+    id: 'eli5',
+    title: 'ELI5 Breakdown',
+    icon: Baby,
+    hoverColor: 'group-hover:text-cyan-400',
+    description: 'Requests a high-level, "Explain Like I\'m 5" summary of the code. Uses simple analogies to describe the purpose and logic without technical jargon.'
   }
 ]
 

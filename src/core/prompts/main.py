@@ -151,3 +151,11 @@ SPLIT_FILE_PROMPT_TEMPLATE = """The file `{path}` exceeds optimal token limits f
 
 **Output Requirement:**
 Provide the updated code for `{path}` and all newly created modules. Use the surgical diff format (ORIGINAL/UPDATED) for existing files and provide full content for new ones."""
+
+ELI5_PROMPT = """Please provide an ELI5 (Explain Like I'm 5) breakdown of the provided code.
+
+**Guidelines:**
+- **Simple Analogies:** Use non-technical analogies to explain complex logic.
+- **Focus on 'What' and 'Why':** Explain what the code does and why it exists, rather than focusing on specific syntax.
+- **No Jargon:** Avoid technical terms. If a term must be used, explain it simply.
+- **High-Level Flow:** Describe the journey of data through this logic as if it were a physical process."""
