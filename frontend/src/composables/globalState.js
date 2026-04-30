@@ -1,6 +1,8 @@
 import { ref, reactive, computed } from 'vue'
 
 export const config = ref({})
+export const isDev = ref(false)
+export const reloadTime = ref('')
 export const activeProject = reactive({
   path: null,
   name: null,

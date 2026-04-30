@@ -77,6 +77,10 @@ export function useAppState() {
 
     initPromise = (async () => {
       globalState.config.value = await window.pywebview.api.get_app_config()
+      globalState.isDev.value = globalState.config.value.is_dev || false
+      if (globalState.isDev.value) {
+        globalState.reloadTime.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+      }
       infoMode.infoModeActive.value = globalState.config.value.info_mode_active ?? true
       globalState.newlyAddedFiletypes.value = await window.pywebview.api.get_newly_added_filetypes()
       globalState.appIcon.value = await window.pywebview.api.get_image_base64('icon.ico')

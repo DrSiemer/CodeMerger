@@ -13,8 +13,10 @@ class ConfigApi:
 
     def get_app_config(self):
         """Returns the global application configuration, integrating registry settings."""
+        from src.core.utils import is_dev_mode
         config = self.app_state.config.copy()
         config['check_for_updates'] = self.app_state.check_for_updates
+        config['is_dev'] = is_dev_mode()
         return config
 
     def save_app_config(self, new_config):

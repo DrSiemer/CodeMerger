@@ -19,9 +19,13 @@ const {
   resetEditorFontSize,
   isProjectLoading,
   cancelLoadProject,
-  openProjectFolder
+  openProjectFolder,
+  isDev,
+  reloadTime
 } = useAppState()
 const route = useRoute()
+
+const showDevReload = ref(true)
 const router = useRouter()
 
 const isCompact = computed(() => {
@@ -41,7 +45,13 @@ onMounted(() => {
           }
 
           await window.pywebview.api.signal_ui_ready()
-          init()
+          await init()
+
+          if (isDev.value) {
+            setTimeout(() => {
+              showDevReload.value = false
+            }, 5000)
+          }
         } catch (err) {
           console.error("Ready signal error:", err)
         }
@@ -181,9 +191,19 @@ onMounted(() => {
           >
             {{ statusMessage }}
           </div>
-          <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors shrink-0" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
-            <Info class="w-5 h-5" />
-          </button>
+
+          <div class="flex items-center space-x-4 shrink-0">
+            <!-- Dev Reload Indicator -->
+            <transition name="fade">
+              <div v-if="isDev && showDevReload" class="flex items-center">
+                <span class="text-[10px] font-black uppercase tracking-widest text-orange-500/60">Reloaded {{ reloadTime }}</span>
+              </div>
+            </transition>
+
+            <button @click="toggleInfoMode" v-info="'info_toggle'" class="transition-colors" :class="infoModeActive ? 'text-cm-blue hover:text-blue-400' : 'text-gray-400 hover:text-white'" title="Toggle Info Mode">
+              <Info class="w-5 h-5" />
+            </button>
+          </div>
         </footer>
       </div>
     </template>
