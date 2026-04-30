@@ -945,10 +945,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
-    "tokens": 4313,
-    "lines": 446,
-    "mtime": 1776936661.5587814,
-    "hash": "f1515331dad6aab361dcb441bd6803e9d892ee86"
+    "tokens": 720,
+    "lines": 106,
+    "mtime": 1777583320.1717782,
+    "hash": "722da82d83e50603d238420f02ecba2d6123e157"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterDesign.vue",
@@ -1252,5 +1252,33 @@
     "lines": 82,
     "mtime": 1777582555.005235,
     "hash": "c00f35f21ca01a8aa3d1b455187fd6f9198265fe"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/stack/StackDeleteModal.vue",
+    "tokens": 550,
+    "lines": 44,
+    "mtime": 1777583319.865117,
+    "hash": "7398213f12556e3e24c4ce0d3cef5d38ed8d9a5c"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/stack/StackExperienceInput.vue",
+    "tokens": 797,
+    "lines": 86,
+    "mtime": 1777583319.9519145,
+    "hash": "d46dc935f4e1caba6e05d5d161a64548c7cb897d"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/stack/StackPasteResponse.vue",
+    "tokens": 883,
+    "lines": 96,
+    "mtime": 1777583320.0276244,
+    "hash": "2fad53c14a6663ed34ce5c484805bc21dfde3a9f"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/stack/StackReviewList.vue",
+    "tokens": 1627,
+    "lines": 164,
+    "mtime": 1777583320.1006012,
+    "hash": "30d750215b32a5e5a18af02b1eef09b47ff22173"
   }
 ]

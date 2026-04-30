@@ -73,6 +73,10 @@
     "frontend/src/components/starter-steps/StarterStack.vue",
     "frontend/src/components/starter-steps/StarterTodo.vue",
     "frontend/src/components/starter-steps/StepSuccess.vue",
+    "frontend/src/components/starter-steps/stack/StackDeleteModal.vue",
+    "frontend/src/components/starter-steps/stack/StackExperienceInput.vue",
+    "frontend/src/components/starter-steps/stack/StackPasteResponse.vue",
+    "frontend/src/components/starter-steps/stack/StackReviewList.vue",
     "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
     "frontend/src/components/starter-steps/widgets/InteractivePivot.vue",
     "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
@@ -173,5 +177,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 203674
+  "total_tokens": 203938
 }
