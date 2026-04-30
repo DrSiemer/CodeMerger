@@ -180,10 +180,10 @@
   },
   {
     "path": "src/core/prompts/main.py",
-    "tokens": 2024,
-    "lines": 135,
-    "mtime": 1777195029.4689825,
-    "hash": "2537490e56a17f01eadbe67a4bcae4680975b47d"
+    "tokens": 2345,
+    "lines": 153,
+    "mtime": 1777563611.4649546,
+    "hash": "4a273f185e9e393ff7b5df1c97b835bc4947b078"
   },
   {
     "path": "src/core/prompts/surgical.py",

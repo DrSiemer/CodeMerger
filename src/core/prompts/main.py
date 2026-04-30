@@ -132,4 +132,22 @@ Here's the content of the files, to help you determine the best order:
 
 {merged_code}"""
 
-SPLIT_FILE_PROMPT_TEMPLATE = "`{path}` is too big. Please help me split it up into multiple files. Be careful not to break any of the existing logic and functionality."
+SPLIT_FILE_PROMPT_TEMPLATE = """The file `{path}` exceeds optimal token limits for efficient processing and needs to be refactored into smaller, modular components.
+
+**Objective:** Deconstruct this file into a set of smaller, logically separated files. The goal is to achieve a low token count per module while ensuring the system remains 100% functional.
+
+**Refactoring Framework & Best Practices:**
+- **Avoid "Container Creep":** Do not simply move the entire contents into one new file with a different name. Aim for true functional decomposition.
+- **Single Responsibility:** Extract logic into focused modules (e.g., separate UI components from business logic, or isolate API methods from data parsers).
+- **Utility Extraction:** Identify repetitive helper functions or standalone logic and move them into shared utility files (e.g., `utils.js` or `helpers.py`).
+- **Functional Preservation:** Maintain all existing logic and external interfaces. Ensure all imports and exports are correctly updated in every affected file.
+- **Token Efficiency:** Smaller files are easier to maintain and lead to more reliable AI outputs. Aim for high modularity.
+
+**Proposed Strategy:**
+1. **Analyze Dependencies:** Identify logic blocks that can exist independently with minimal cross-references.
+2. **Extract Constants & Types:** Move hardcoded values, configuration, or type definitions to centralized files.
+3. **Decompose:** Split the core functionality of `{path}` into smaller units.
+4. **Integrate:** Update the original file `{path}` (or create a new entry point) to orchestrate these new modules.
+
+**Output Requirement:**
+Provide the updated code for `{path}` and all newly created modules. Use the surgical diff format (ORIGINAL/UPDATED) for existing files and provide full content for new ones."""
