@@ -1,10 +1,16 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-vue-next'
+import { ChevronLeft, ChevronRight, ArrowUpRight, FolderOpen } from 'lucide-vue-next'
 import { useAppState } from '../../composables/useAppState'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 
-const { lastAiResponse, editorFontSize, verificationHistory } = useAppState()
+const {
+  lastAiResponse,
+  editorFontSize,
+  verificationHistory,
+  openProjectFolder,
+  activeProject
+} = useAppState()
 
 const selectedHistoryIndex = ref(0)
 
@@ -58,15 +64,28 @@ watch(lastAiResponse, () => {
 
 <template>
   <div class="relative min-h-full review-verification-container">
-    <!-- Verification History Floating Navigation -->
+    <!-- Floating Toolbar (History & Folder Access) -->
     <div
-      v-if="allVerifications.length > 1"
-      v-info="'review_verification_history'"
       class="relative z-20 float-right ml-6 mb-2 flex flex-col items-end space-y-2 select-none pointer-events-auto"
-      :class="isHistorical ? 'opacity-100' : 'opacity-40 hover:opacity-100 transition-opacity'"
-      title="Browse past verification steps from this session"
+      :class="isHistorical || allVerifications.length <= 1 ? 'opacity-100' : 'opacity-40 hover:opacity-100 transition-opacity'"
     >
-      <div class="flex items-center space-x-1 bg-black/40 border border-gray-700 rounded-md p-1 shadow-sm">
+      <!-- Quick Folder Access -->
+      <button
+        v-if="activeProject.path"
+        @click="openProjectFolder($event)"
+        v-info="'folder_icon'"
+        class="p-2 text-gray-400 hover:text-white bg-black/40 border border-gray-700 rounded-md shadow-sm transition-colors"
+        title="Open project folder (Ctrl-Click: Copy Path, Alt-Click: Open Command Prompt)"
+      >
+        <FolderOpen class="w-5 h-5" />
+      </button>
+
+      <!-- Verification History Navigation -->
+      <div
+        v-if="allVerifications.length > 1"
+        v-info="'review_verification_history'"
+        class="flex items-center space-x-1 bg-black/40 border border-gray-700 rounded-md p-1 shadow-sm"
+      >
         <button
           @click="selectedHistoryIndex--"
           :disabled="selectedHistoryIndex <= 0"

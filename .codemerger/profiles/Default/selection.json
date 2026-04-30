@@ -354,7 +354,10 @@
   {
     "path": "src/api.py",
     "tokens": 213,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 26,
+    "mtime": 1776950117.9168065,
+    "hash": "3b8d35e1dcbd86d2c0e6c2be5e9c6b810b4ddd03"
   },
   {
     "path": "frontend/package.json",
@@ -375,17 +378,26 @@
   {
     "path": "frontend/tailwind.config.js",
     "tokens": 151,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 21,
+    "mtime": 1776094379.7621002,
+    "hash": "3a95080704c00fc3c552be5f4c2900276ef42e3f"
   },
   {
     "path": "frontend/postcss.config.js",
     "tokens": 21,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 6,
+    "mtime": 1776094379.7367966,
+    "hash": "51bfdf10a43b2d8dc05ff53763203a4277bed0cc"
   },
   {
     "path": "frontend/index.html",
     "tokens": 112,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 13,
+    "mtime": 1776094379.7357965,
+    "hash": "3eb67b9377ed0955948fc26d9c4d2aaf08758478"
   },
   {
     "path": "frontend/src/main.js",
@@ -421,8 +433,11 @@
   },
   {
     "path": "frontend/src/composables/infoMode.js",
-    "tokens": 217,
-    "ignoreTokens": false
+    "tokens": 247,
+    "ignoreTokens": false,
+    "lines": 31,
+    "mtime": 1776332566.240633,
+    "hash": "26ccd26dcc9ed6a19a33d1d358e1167816f18d93"
   },
   {
     "path": "frontend/src/utils/colorUtils.js",
@@ -536,12 +551,18 @@
   {
     "path": "frontend/src/composables/useEscapeKey.js",
     "tokens": 81,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 15,
+    "mtime": 1776332566.240633,
+    "hash": "ada29c8501f82f32b7816f7b160b3364d42d1628"
   },
   {
     "path": "frontend/src/composables/useReviewerEditMode.js",
     "tokens": 673,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 85,
+    "mtime": 1776332566.2426338,
+    "hash": "b6528b13f51253aa909bec881321d35c17fd89eb"
   },
   {
     "path": "frontend/src/composables/useVisualizer.js",
@@ -672,8 +693,11 @@
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
-    "tokens": 558,
-    "ignoreTokens": false
+    "tokens": 592,
+    "ignoreTokens": false,
+    "lines": 62,
+    "mtime": 1777550943.398234,
+    "hash": "3e7c82007ec966ff23f26274846ce7f67e706792"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewFileItem.vue",
@@ -693,10 +717,10 @@
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewVerificationTab.vue",
-    "tokens": 1166,
-    "lines": 128,
-    "mtime": 1777204939.6099207,
-    "hash": "fb67cbec3a3377df39406278a6e0d62bbe79ab13"
+    "tokens": 1282,
+    "lines": 146,
+    "mtime": 1777550838.941957,
+    "hash": "5ee5c7c24c1a50e832d0dde1dd963454a5f57301"
   },
   {
     "path": "frontend/src/components/SettingsModal.vue",
@@ -733,17 +757,26 @@
   {
     "path": "frontend/src/components/settings/SettingsPromptsTab.vue",
     "tokens": 344,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 39,
+    "mtime": 1776094379.7480419,
+    "hash": "7d7a92415cec7c4cbef6db309df69634627aa6dc"
   },
   {
     "path": "frontend/src/components/settings/SettingsStarterTab.vue",
     "tokens": 263,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 39,
+    "mtime": 1776094379.7490418,
+    "hash": "ca2369c4f14c1891e00cdfff978e6b6f2ab52c31"
   },
   {
     "path": "frontend/src/components/settings/SettingsEditorTab.vue",
     "tokens": 372,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 47,
+    "mtime": 1776094379.747037,
+    "hash": "9c7ca96cfbbc4ac59b37a1e56d4de12b6ade3c7f"
   },
   {
     "path": "frontend/src/components/InstructionsModal.vue",
@@ -863,7 +896,10 @@
   {
     "path": "frontend/src/components/starter-steps/NotesModal.vue",
     "tokens": 295,
-    "ignoreTokens": false
+    "ignoreTokens": false,
+    "lines": 32,
+    "mtime": 1776094379.7490418,
+    "hash": "0682a993c771047851aa5177dd8f82bbea90aabb"
   },
   {
     "path": "frontend/src/components/starter-steps/StepSuccess.vue",
