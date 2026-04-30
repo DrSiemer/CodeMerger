@@ -1,8 +1,10 @@
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
 import { Leaf, Save, Upload, Trash2, LogOut } from 'lucide-vue-next'
 import { useAppState } from '../composables/useAppState'
 import { useEscapeKey } from '../composables/useEscapeKey'
+import { useStarterState } from '../composables/starter/useStarterState'
+import { useStarterNavigation } from '../composables/starter/useStarterNavigation'
 import { WINDOW_SIZES } from '../utils/constants'
 
 import StarterDetails from './starter-steps/StarterDetails.vue'
@@ -15,80 +17,23 @@ import StarterGenerate from './starter-steps/StarterGenerate.vue'
 import StepSuccess from './starter-steps/StepSuccess.vue'
 
 const emit = defineEmits(['close'])
+const { showStarterModal, resizeWindow } = useAppState()
+
 const {
-  config,
-  showStarterModal,
-  resizeWindow,
-  getStarterSession,
-  saveStarterSession,
-  clearStarterSession,
-  exportStarterConfig,
-  loadStarterConfig,
-  getConceptQuestions,
-  getDesignQuestions,
-  getTodoQuestions
-} = useAppState()
+  pData, isLoading, isResetting, toastMessage, showToast,
+  conceptQuestionsMap, designQuestionsMap, todoQuestionsMap,
+  loadSession, saveState, performReset, handleExport, handleImport
+} = useStarterState()
 
-const currentStep = ref(1)
-const maxAccessibleStep = ref(1)
-const isLoading = ref(true)
-const isResetting = ref(false)
+const {
+  currentStep, maxAccessibleStep, stepNames, activeStepsList,
+  isLookingBack, isNextDisabled, recalcProgress, goToStep, prevStep, nextStep
+} = useStarterNavigation(pData)
 
-const toastMessage = ref('')
-const showToast = ref(false)
-let toastTimer = null
-
-const pData = reactive({
-  name: '',
-  starting_mode: null, // 'fresh' | 'base'
-  parent_folder: '',
-  stack: [],
-  stack_experience: '',
-  goal: '',
-  concept_md: '',
-  design_md: '',
-  todo_md: '',
-  base_project_path: '',
-  base_project_files: [],
-  include_base_reference: true,
-
-  concept_llm_response: '',
-  stack_llm_response: '',
-  design_llm_response: '',
-  todo_llm_response: '',
-  generate_llm_response: '',
-
-  concept_segments: {},
-  concept_signoffs: {},
-  concept_baselines: {},
-  design_segments: {},
-  design_signoffs: {},
-  design_baselines: {},
-  todo_phases: [],
-  todo_segments: {},
-  todo_signoffs: {},
-  todo_baselines: {}
-})
-
-const conceptQuestionsMap = ref({})
-const designQuestionsMap = ref({})
-const todoQuestionsMap = ref({})
 const successScreenData = ref(null)
 
-const stepNames = {
-  1: 'Details',
-  2: 'Base Files',
-  3: 'Concept',
-  4: 'Stack',
-  5: 'System Design',
-  6: 'TODO',
-  7: 'Generate'
-}
-
 const handleClose = async (wasCreated = false) => {
-  if (window.pywebview) {
-    await window.pywebview.api.on_starter_close(wasCreated)
-  }
+  if (window.pywebview) await window.pywebview.api.on_starter_close(wasCreated)
   showStarterModal.value = false
 }
 
@@ -96,286 +41,56 @@ useEscapeKey(() => handleClose())
 
 onMounted(async () => {
   await resizeWindow(WINDOW_SIZES.PROJECT_STARTER.width, WINDOW_SIZES.PROJECT_STARTER.height)
+  if (window.pywebview) await window.pywebview.api.on_starter_open()
 
-  // Requirement: Deactivate current model and disable compact mode
-  if (window.pywebview) {
-    await window.pywebview.api.on_starter_open()
-  }
-
-  conceptQuestionsMap.value = await getConceptQuestions()
-  designQuestionsMap.value = await getDesignQuestions()
-  todoQuestionsMap.value = await getTodoQuestions()
-
-  const saved = await getStarterSession()
-  if (saved && Object.keys(saved).length > 0) {
-    // Migration logic for stack string to array of objects
-    if (typeof saved.stack === 'string' && saved.stack.trim()) {
-      saved.stack = saved.stack.split('\n').filter(s => s.trim()).map(s => ({ tech: s, rationale: 'Imported from previous version' }))
-    } else if (!saved.stack) {
-      saved.stack = []
-    }
-
-    Object.assign(pData, saved)
-    recalcProgress()
-    currentStep.value = maxAccessibleStep.value
-  } else {
-    pData.parent_folder = config.value?.default_parent_folder || ''
-    pData.stack_experience = config.value?.user_experience || ''
-  }
-
-  isLoading.value = false
+  const startStep = await loadSession()
+  recalcProgress()
+  currentStep.value = maxAccessibleStep.value || startStep
 })
 
 onUnmounted(() => {
-  // Automatic acceptance of all pending diffs on exit
-  pData.concept_baselines = {}
-  pData.design_baselines = {}
-  pData.todo_baselines = {}
+  pData.concept_baselines = {}; pData.design_baselines = {}; pData.todo_baselines = {}
 })
 
-watch(() => pData, () => {
+watch(pData, () => {
   if (isResetting.value) return
   recalcProgress()
-  saveState()
+  saveState(currentStep.value)
 }, { deep: true })
 
-const recalcProgress = () => {
-  const hasDetails = !!pData.starting_mode
-  const hasConcept = !!pData.concept_md
-  const hasStack = pData.stack && pData.stack.length > 0
-  const hasDesign = !!pData.design_md
-  const hasTodo = !!pData.todo_md
-
-  let targetMax = 1
-  if (hasDetails) {
-    // Jump to Concept (3) if fresh, otherwise allow Base Files (2)
-    targetMax = pData.starting_mode === 'base' ? 2 : 3
-
-    if (hasConcept) {
-      targetMax = 4 // Move to Stack
-      if (hasStack) {
-        targetMax = 5 // Move to Design
-        if (hasDesign) {
-            targetMax = 6 // Move to TODO
-            if (hasTodo) {
-              targetMax = 7 // Move to Generate
-            }
-        }
-      }
-    }
-  }
-
-  if (targetMax > maxAccessibleStep.value) {
-      maxAccessibleStep.value = targetMax
-  }
-}
-
-const saveState = async () => {
-  if (isLoading.value || isResetting.value) return
-  await saveStarterSession({ current_step: currentStep.value, ...pData })
-}
-
-const showToastNotification = (msg) => {
-  toastMessage.value = msg
-  showToast.value = true
-  if (toastTimer) clearTimeout(toastTimer)
-  toastTimer = setTimeout(() => {
-    showToast.value = false
-  }, 3000)
-}
-
-const exportConfig = async () => {
-  const exportData = { current_step: currentStep.value, ...pData }
-  const success = await exportStarterConfig(exportData)
-  if (success) {
-    showToastNotification("Config saved successfully.")
-  }
-}
-
-const importConfig = async () => {
-  const loadedData = await loadStarterConfig()
-  if (loadedData) {
-    Object.assign(pData, loadedData)
-    recalcProgress()
-    currentStep.value = maxAccessibleStep.value
-    saveState()
-    showToastNotification("Config loaded successfully.")
-  }
-}
-
-// Resets all reactive data and deletes the session file from disk
-const performReset = async () => {
-  isResetting.value = true
-
-  await clearStarterSession()
-
-  pData.name = ''
-  pData.parent_folder = config.value?.default_parent_folder || ''
-  pData.stack = []
-  pData.stack_experience = config.value?.user_experience || ''
-  pData.goal = ''
-  pData.concept_md = ''
-  pData.design_md = ''
-  pData.todo_md = ''
-  pData.base_project_path = ''
-  pData.base_project_files = []
-  pData.include_base_reference = true
-
-  pData.concept_llm_response = ''
-  pData.stack_llm_response = ''
-  pData.design_llm_response = ''
-  pData.todo_llm_response = ''
-  pData.generate_llm_response = ''
-
-  pData.concept_segments = {}
-  pData.concept_signoffs = {}
-  pData.concept_baselines = {}
-  pData.design_segments = {}
-  pData.design_signoffs = {}
-  pData.design_baselines = {}
-  pData.todo_phases = []
-  pData.todo_segments = {}
-  pData.todo_signoffs = {}
-  pData.todo_baselines = {}
-
-  currentStep.value = 1
-  maxAccessibleStep.value = 1
-
-  isResetting.value = false
+const onProjectCreated = async (res) => {
+  await performReset()
+  if (window.pywebview) await window.pywebview.api.on_starter_close(true)
+  successScreenData.value = res
 }
 
 const clearAll = async () => {
   if (confirm("Are you sure you want to clear all project data and start fresh?")) {
     await performReset()
+    currentStep.value = 1
+    maxAccessibleStep.value = 1
   }
 }
-
-const onProjectCreated = async (res) => {
-  await performReset()
-  // Call API to signify project was created (Requirement: don't restore previous)
-  if (window.pywebview) {
-    await window.pywebview.api.on_starter_close(true)
-  }
-  successScreenData.value = res
-}
-
-// --- Navigation ---
-const activeStepsList = computed(() => {
-  const steps = [1]
-  // Only show Step 2 if the user is using a reference project
-  if (pData.starting_mode === 'base') steps.push(2)
-  steps.push(3, 4, 5, 6, 7)
-  return steps
-})
-
-const isLookingBack = computed(() => currentStep.value < maxAccessibleStep.value)
-
-const isNextDisabled = computed(() => {
-  if (currentStep.value === 1) return !pData.starting_mode
-
-  const hasDiffs = (baselines) => baselines && Object.values(baselines).some(v => v !== undefined)
-
-  // Rule: If document is merged, allow proceed (ignores leftover legacy segments)
-  // If not merged, the button is disabled (user must merge from within the step component)
-  if (currentStep.value === 3) {
-    return hasDiffs(pData.concept_baselines) || !pData.concept_md.trim()
-  }
-
-  if (currentStep.value === 5) {
-    return hasDiffs(pData.design_baselines) || !pData.design_md.trim()
-  }
-
-  if (currentStep.value === 6) {
-    return hasDiffs(pData.todo_baselines) || !pData.todo_md.trim()
-  }
-
-  return false
-})
 
 const isStarterEmpty = computed(() => {
-  return !pData.name.trim() &&
-         !pData.goal.trim() &&
-         !pData.base_project_path &&
-         !pData.concept_md &&
-         !pData.design_md &&
-         !pData.todo_md &&
-         !pData.concept_llm_response &&
-         !pData.stack_llm_response &&
-         !pData.design_llm_response &&
-         !pData.todo_llm_response &&
-         !pData.generate_llm_response
+  return !pData.name.trim() && !pData.goal.trim() && !pData.base_project_path && !pData.concept_md && !pData.design_md && !pData.todo_md && !pData.concept_llm_response && !pData.stack_llm_response && !pData.design_llm_response && !pData.todo_llm_response && !pData.generate_llm_response
 })
 
-const goToStep = (step) => {
-  if (step <= maxAccessibleStep.value || step === 2) {
-    // If navigating to the Concept step and goal is empty, seed it with the project name
-    if (step === 3 && !pData.goal.trim() && pData.name.trim()) {
-      pData.goal = pData.name
-    }
-    currentStep.value = step
-    saveState()
-  }
-}
-
-const prevStep = () => {
-  const idx = activeStepsList.value.indexOf(currentStep.value)
-  if (idx > 0) goToStep(activeStepsList.value[idx - 1])
-}
-
-const nextStep = () => {
-  const idx = activeStepsList.value.indexOf(currentStep.value)
-  if (idx < activeStepsList.value.length - 1) {
-    const targetStep = activeStepsList.value[idx + 1]
-
-    if (currentStep.value === 3) {
-      if (!pData.concept_md) {
-        if (Object.keys(pData.concept_segments).length > 0) {
-          alert("You must merge the concept segments into a final document before proceeding.")
-        } else {
-          alert("The concept document cannot be empty.")
-        }
-        return
-      }
-    }
-
-    if (currentStep.value === 5) {
-      if (!pData.design_md) {
-        if (Object.keys(pData.design_segments).length > 0) {
-          alert("You must merge the System Design into a final document before proceeding.")
-        } else {
-          alert("The system design cannot be empty.")
-        }
-        return
-      }
-    }
-
-    if (currentStep.value === 6) {
-      if (!pData.todo_md) {
-        if (Object.keys(pData.todo_segments).length > 0) {
-          alert("You must merge the TODO plan into a final document before proceeding.")
-        } else {
-          alert("The TODO plan cannot be empty.")
-        }
-        return
-      }
-    }
-
-    if (targetStep > maxAccessibleStep.value) {
-      maxAccessibleStep.value = targetStep
-    }
-
-    goToStep(targetStep)
+const triggerImport = async () => {
+  const step = await handleImport()
+  if (step) {
+    recalcProgress()
+    currentStep.value = maxAccessibleStep.value
+    saveState(currentStep.value)
   }
 }
 </script>
 
 <template>
   <div id="project-starter-modal" class="absolute inset-0 bg-cm-dark-bg z-50 flex flex-col overflow-hidden text-gray-100 font-sans">
-
     <StepSuccess v-if="successScreenData" :successScreenData="successScreenData" @close="emit('close')" />
 
     <div v-else class="flex-grow flex flex-col min-h-0">
-      <!-- Header -->
       <div id="starter-header" class="bg-cm-top-bar border-b border-gray-700 px-6 py-4 flex items-center justify-between shrink-0">
         <div class="flex items-center space-x-4">
           <Leaf class="w-6 h-6 text-cm-blue" />
@@ -383,106 +98,51 @@ const nextStep = () => {
         </div>
 
         <div class="flex items-center space-x-2">
-          <span
-            class="text-cm-green text-sm font-bold transition-opacity duration-500 mr-2"
-            :class="showToast ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-          >
-            {{ toastMessage }}
-          </span>
-
-          <button id="btn-starter-import" @click="importConfig" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Restore project configuration from JSON">
-            <Upload class="w-4 h-4 mr-0 lg:mr-2"/>
-            <span class="hidden lg:inline text-xs">Import</span>
+          <span class="text-cm-green text-sm font-bold transition-opacity duration-500 mr-2" :class="showToast ? 'opacity-100' : 'opacity-0 pointer-events-none'">{{ toastMessage }}</span>
+          <button @click="triggerImport" v-info="'starter_header_load'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm">
+            <Upload class="w-4 h-4 mr-0 lg:mr-2"/><span class="hidden lg:inline text-xs">Import</span>
           </button>
-
           <template v-if="!isStarterEmpty">
-            <button id="btn-starter-export" @click="exportConfig" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Export configuration to JSON file">
-              <Save class="w-4 h-4 mr-0 lg:mr-2"/>
-              <span class="hidden lg:inline text-xs">Export</span>
+            <button @click="handleExport(currentStep)" v-info="'starter_header_save'" class="px-3 py-1.5 text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm">
+              <Save class="w-4 h-4 mr-0 lg:mr-2"/><span class="hidden lg:inline text-xs">Export</span>
             </button>
-            <button id="btn-starter-reset" @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm" title="Wipe all progress and start fresh">
-              <Trash2 class="w-4 h-4 mr-0 lg:mr-2"/>
-              <span class="hidden lg:inline text-xs">Reset</span>
+            <button @click="clearAll" v-info="'starter_header_clear'" class="px-3 py-1.5 text-gray-400 hover:text-red-400 transition-colors border border-gray-600 rounded bg-gray-800 flex items-center font-bold shadow-sm">
+              <Trash2 class="w-4 h-4 mr-0 lg:mr-2"/><span class="hidden lg:inline text-xs">Reset</span>
             </button>
-
             <div class="w-px h-6 bg-gray-600 mx-1"></div>
           </template>
-
-          <button id="btn-starter-exit" @click="handleClose(false)" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm" :title="isStarterEmpty ? 'Exit' : 'Save and Exit'">
-            <LogOut class="w-4 h-4 mr-2" />
-            <span class="text-xs font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
+          <button @click="handleClose(false)" v-info="'starter_header_exit'" class="flex items-center text-gray-400 hover:text-white transition-colors border border-gray-600 rounded bg-gray-800 hover:bg-gray-700 px-3 py-1.5 shadow-sm">
+            <LogOut class="w-4 h-4 mr-2" /><span class="text-xs font-bold">{{ isStarterEmpty ? 'Exit' : 'Save and Exit' }}</span>
           </button>
         </div>
       </div>
 
-      <!-- Tabs (Left aligned) -->
       <div id="starter-tabs" class="flex bg-gray-800 border-b border-gray-700 px-4 shrink-0 overflow-x-auto justify-start">
-        <button
-          v-for="(stepId, index) in activeStepsList"
-          :key="stepId"
-          @click="goToStep(stepId)"
-          class="px-5 py-3 text-sm font-medium transition-all border-b-2 whitespace-nowrap"
-          :class="[
-            currentStep === stepId ? 'border-cm-blue text-white bg-white/10' : 'border-transparent',
-            (stepId <= maxAccessibleStep || stepId === 2) ? 'text-white font-bold hover:bg-white/5' : 'text-gray-500 cursor-not-allowed'
-          ]"
-          :disabled="stepId > maxAccessibleStep && stepId !== 2"
-          :title="`Jump to ${stepNames[stepId]} step`"
-        >
+        <button v-for="(stepId, index) in activeStepsList" :key="stepId" @click="goToStep(stepId)" class="px-5 py-3 text-sm font-medium transition-all border-b-2 whitespace-nowrap" :class="[currentStep === stepId ? 'border-cm-blue text-white bg-white/10' : 'border-transparent', (stepId <= maxAccessibleStep || stepId === 2) ? 'text-white font-bold hover:bg-white/5' : 'text-gray-500 cursor-not-allowed']" :disabled="stepId > maxAccessibleStep && stepId !== 2">
           {{ index + 1 }}. {{ stepNames[stepId] }}
         </button>
       </div>
 
-      <!-- Body: Full scrollable region for all content below the tabs -->
       <div id="starter-step-container" class="flex-grow overflow-y-auto custom-scrollbar bg-cm-dark-bg flex flex-col items-center h-0 min-h-0">
         <div class="w-full max-w-6xl flex-grow flex flex-col p-8 min-h-0">
-          <StarterDetails v-if="currentStep === 1" key="step1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
-          <StarterBaseFiles v-if="currentStep === 2" key="step2" :pData="pData" :isLookingBack="isLookingBack" />
-          <StarterConcept v-if="currentStep === 3" key="step3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
-          <StarterStack v-if="currentStep === 4" key="step4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
-          <StarterDesign v-if="currentStep === 5" key="step5" :pData="pData" :isLookingBack="isLookingBack" :designQuestionsMap="designQuestionsMap" @next="nextStep" />
-          <StarterTodo v-if="currentStep === 6" key="step6" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
-          <StarterGenerate v-if="currentStep === 7" key="step7" :pData="pData" @projectCreated="onProjectCreated" />
+          <StarterDetails v-if="currentStep === 1" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <StarterBaseFiles v-if="currentStep === 2" :pData="pData" :isLookingBack="isLookingBack" />
+          <StarterConcept v-if="currentStep === 3" :pData="pData" :isLookingBack="isLookingBack" :conceptQuestionsMap="conceptQuestionsMap" @next="nextStep" />
+          <StarterStack v-if="currentStep === 4" :pData="pData" :isLookingBack="isLookingBack" @next="nextStep" />
+          <StarterDesign v-if="currentStep === 5" :pData="pData" :isLookingBack="isLookingBack" :designQuestionsMap="designQuestionsMap" @next="nextStep" />
+          <StarterTodo v-if="currentStep === 6" :pData="pData" :isLookingBack="isLookingBack" :todoQuestionsMap="todoQuestionsMap" @next="nextStep" />
+          <StarterGenerate v-if="currentStep === 7" :pData="pData" @projectCreated="onProjectCreated" />
         </div>
       </div>
     </div>
 
-    <!-- Navigation Bar at Bottom -->
     <div v-if="!successScreenData" id="starter-footer" class="bg-cm-top-bar border-t border-gray-700 px-6 py-4 flex items-center justify-between shrink-0 relative z-10">
-        <div class="flex items-center space-x-3">
-             <button
-                id="btn-starter-prev"
-                v-if="currentStep > 1"
-                @click="prevStep"
-                v-info="'starter_nav_prev'"
-                class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded font-bold transition-all flex items-center"
-                title="Return to the previous phase"
-             >
-                &lt; Previous Step
-             </button>
-        </div>
-
-        <div class="flex items-center space-x-3">
-             <button
-                id="btn-starter-next"
-                v-if="activeStepsList.indexOf(currentStep) < activeStepsList.length - 1"
-                @click="nextStep"
-                :disabled="isNextDisabled"
-                v-info="'starter_nav_next'"
-                class="bg-cm-blue hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white px-10 py-2 rounded font-bold shadow-lg transition-all flex items-center"
-                title="Proceed to the next phase"
-             >
-                {{ currentStep === 4 && (!Array.isArray(pData.stack) ? !pData.stack.trim() : !pData.stack.length) ? 'Skip Stack' : 'Next Step >' }}
-             </button>
-        </div>
+      <button v-if="currentStep > 1" @click="prevStep" v-info="'starter_nav_prev'" class="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded font-bold transition-all flex items-center">&lt; Previous Step</button>
+      <div v-else></div>
+      <button v-if="activeStepsList.indexOf(currentStep) < activeStepsList.length - 1" @click="nextStep" :disabled="isNextDisabled" v-info="'starter_nav_next'" class="bg-cm-blue hover:bg-blue-500 disabled:bg-gray-700 disabled:opacity-50 text-white px-10 py-2 rounded font-bold shadow-lg transition-all flex items-center">
+        {{ currentStep === 4 && (Array.isArray(pData.stack) ? !pData.stack.length : !pData.stack.trim()) ? 'Skip Stack' : 'Next Step >' }}
+      </button>
     </div>
-
-    <!-- Stable Teleport Target for Step Modals (Prevents VDOM reconciliation crashes) -->
     <div id="starter-teleport-anchor"></div>
   </div>
 </template>
-
-<style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.5s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-</style>

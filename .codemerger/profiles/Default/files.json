@@ -88,6 +88,8 @@
     "frontend/src/components/visualizer/VisualizerLeafFiles.vue",
     "frontend/src/composables/globalState.js",
     "frontend/src/composables/infoMode.js",
+    "frontend/src/composables/starter/useStarterNavigation.js",
+    "frontend/src/composables/starter/useStarterState.js",
     "frontend/src/composables/useAppState.js",
     "frontend/src/composables/useEscapeKey.js",
     "frontend/src/composables/useFileManager.js",
@@ -177,5 +179,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 203938
+  "total_tokens": 203710
 }
