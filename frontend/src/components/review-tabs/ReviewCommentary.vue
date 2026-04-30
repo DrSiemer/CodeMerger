@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { BookOpen, ChevronDown, ChevronRight, ChevronUp } from 'lucide-vue-next'
 import MarkdownRenderer from '../MarkdownRenderer.vue'
 import { useAppState } from '../../composables/useAppState'
@@ -13,6 +13,11 @@ const props = defineProps({
 
 const { editorFontSize } = useAppState()
 const showCommentary = ref(false)
+
+// Reset state when new commentary content is provided (new paste)
+watch(() => props.commentary, () => {
+  showCommentary.value = false
+})
 
 const collapseCommentary = () => {
   showCommentary.value = false
