@@ -62,6 +62,7 @@ class WindowManager:
         # Compact Mode Position is strictly transient and resets every session
         self.compact_mode_last_x = None
         self.compact_mode_last_y = None
+        self.compact_mode_last_main_monitor = None
 
         if dev_mode:
             self.base_url = self._get_dev_url()

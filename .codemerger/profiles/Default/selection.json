@@ -8,9 +8,9 @@
   },
   {
     "path": "llm.md",
-    "mtime": 1776946609.9230895,
-    "hash": "99e8e098bab3c8e6d94067cbeaffa6c2bf1009e9",
-    "tokens": 2572,
+    "mtime": 1777579008.626166,
+    "hash": "f01291831ce02484988c984f917ab3241d548e95",
+    "tokens": 2626,
     "lines": 93
   },
   {
@@ -240,19 +240,19 @@
   },
   {
     "path": "src/core/window_compact.py",
-    "tokens": 1287,
+    "tokens": 1390,
     "ignoreTokens": false,
-    "lines": 119,
-    "mtime": 1777562544.6729827,
-    "hash": "4a03412be33e096708e36925e1592c207d80e016"
+    "lines": 130,
+    "mtime": 1777578884.5801706,
+    "hash": "6d43f5ae0c2f1092b5c0a98ae8bb6742e01a290b"
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 3960,
+    "tokens": 3971,
     "ignoreTokens": false,
-    "lines": 484,
-    "mtime": 1777562544.4739914,
-    "hash": "621296cda15eb201f5f46b76d2e6b9d77eaf5392"
+    "lines": 485,
+    "mtime": 1777578884.521171,
+    "hash": "1015ed447b237c9fab3c29e18aece77ad2ad5888"
   },
   {
     "path": "src/api_parts/base_api.py",

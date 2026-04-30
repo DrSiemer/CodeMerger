@@ -63,16 +63,27 @@ def show_compact_window(manager):
     if manager.compact_mode_last_x is not None and manager.compact_mode_last_y is not None:
         h_mon_compact = manager._get_monitor_from_logical(manager.compact_mode_last_x, manager.compact_mode_last_y)
 
-        # If the monitors match, we keep the saved position.
-        # If they don't match, the user moved the app to a new screen, so we reset to center.
-        if h_mon_compact != h_mon_main:
-            manager.compact_mode_last_x = None
-            manager.compact_mode_last_y = None
-            h_mon = h_mon_main
+        # Check if the main window changed monitors since we last placed compact mode
+        main_monitor_changed = (manager.compact_mode_last_main_monitor is not None and manager.compact_mode_last_main_monitor != h_mon_main)
+
+        if main_monitor_changed:
+            if h_mon_main == h_mon_compact:
+                # Main window moved to the SAME screen Compact Mode is already on.
+                # Keep compact mode where it is.
+                h_mon = h_mon_compact
+            else:
+                # Main window moved to a DIFFERENT screen.
+                # Reset compact mode to be behind the main window.
+                manager.compact_mode_last_x = None
+                manager.compact_mode_last_y = None
+                h_mon = h_mon_main
         else:
+            # Main window hasn't changed monitors. Keep compact mode where it is.
             h_mon = h_mon_compact
     else:
         h_mon = h_mon_main
+
+    manager.compact_mode_last_main_monitor = h_mon_main
 
     scale = manager._get_scale_factor(h_mon)
     m_l, m_t, m_r, m_b = manager._get_monitor_work_area_phys(h_mon)
