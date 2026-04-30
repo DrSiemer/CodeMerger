@@ -112,9 +112,9 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 AUTOMATION_WARNING_TEMPLATE = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and {marker_prefix}{marker_file} wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
 
 FORMAT_CORRECTION_PROMPT_TEMPLATE = """Please follow the output format strictly as described in your instructions. Your previous response did not fully comply with the required formatting standards. Specifically, please ensure that:
-- ALL commentary and explanations must be placed inside one of the allowed XML tags ({{LT}}{{IN_T}}{{RT}}, {{LT}}{{ANS_W}}{{RT}}, {{LT}}{{CHA_N}}{{RT}}, {{LT}}{{VER_I}}{{RT}}, {{LT}}{{UNC_H}}{{RT}}).
+- ALL commentary and explanations must be placed inside one of the allowed XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}, {LT}{UNC_H}{RT}).
 - No text or commentary exists outside of these tags.
-- File markers are present and correctly formatted ({{PRE}}File: `path` --- and {{PRE}}End of file ---).
+- File markers are present and correctly formatted ({PRE}File: `path` --- and {PRE}End of file ---).
 - You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.
 Please re-output the response correctly."""
 
