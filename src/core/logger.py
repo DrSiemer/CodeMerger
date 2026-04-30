@@ -50,7 +50,6 @@ def setup_logging():
     log.propagate = False
 
     if not log.handlers:
-        # Detect if we should use the Rich handler (standard TTY or forced via --console)
         is_console_forced = "--console" in sys.argv
         is_tty = sys.stdout and hasattr(sys.stdout, 'isatty') and sys.stdout.isatty()
 
@@ -61,7 +60,6 @@ def setup_logging():
                     tracebacks_show_locals=True,
                     markup=True
                 )
-                # Use RedactingFormatter even for console output
                 console_handler.setFormatter(RedactingFormatter("%(message)s"))
                 log.addHandler(console_handler)
             except Exception:

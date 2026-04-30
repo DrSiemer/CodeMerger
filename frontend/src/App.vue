@@ -71,7 +71,7 @@ onMounted(() => {
     })
   }
 
-  // Globally intercepting and preventing the browser paste event bypasses security popups and routes clipboard access exclusively through our Python pyperclip bridge
+  // Globally intercepts paste to bypass browser security popups and route via Python bridge
   window.addEventListener('paste', (e) => {
     e.preventDefault()
   }, true)
@@ -130,7 +130,7 @@ onMounted(() => {
     }
 
     // Global Action Shortcuts (c: Console, f: Folder, p: Path)
-    // Protected by isInput check to ensure they only fire when the window is focused but no input is active
+    // Fires only when the window is focused and no input field is active
     if (!isInput && !isCtrl && !e.metaKey && !e.altKey && !isShift && activeProject.path) {
       if (key === 'c') {
         e.preventDefault()

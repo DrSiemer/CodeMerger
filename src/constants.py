@@ -7,9 +7,9 @@ NEW_FILE_ALERT_THRESHOLD_DEFAULT = 5
 STATUS_FADE_SECONDS = 5
 
 # Performance Thresholds
-# Projects larger than this will trigger CPU protection/throttling
+# Projects larger than this trigger CPU protection
 LARGE_PROJECT_THRESHOLD = 1000
-# Scans faster than this will ignore adaptive throttling multipliers
+# Scans faster than this ignore adaptive throttling multipliers
 FAST_SCAN_THRESHOLD_SECONDS = 0.5
 
 # File System
@@ -19,7 +19,7 @@ SPECIAL_FILES_TO_IGNORE = {
     'node_modules', '.git', '.venv', '__pycache__', '.idea', '.vscode',
     '.vs', 'bin', 'obj', 'dist', 'build'
 }
-# Files treated as selected to prevent folders from appearing unselected if they are the only unselected items
+# Prevents folders from appearing unselected if these are the only children
 FILES_TO_IGNORE_FOR_VISUAL_COMPLETENESS = {'__init__.py'}
 # Prefix for transient files created during atomic writes
 CODEMERGER_TEMP_PREFIX = '.cm_tmp_'

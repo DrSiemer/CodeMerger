@@ -40,15 +40,11 @@ def delete_single_file(base_dir, rel_path):
         return False, str(e)
 
 def _sanitize_content(path, content):
-    """
-    Normalizes content for writing and comparison.
-    Aggressively stripping trailing whitespace ensures we don't get phantom diffs
-    where invisible space differences from LLM outputs trigger false file changes.
-    """
+    # Aggressively strips trailing whitespace to prevent phantom diffs from LLM outputs
     if not content:
         return ""
 
-    # Normalizes line endings to LF to adhere to PyWebView and JS standards
+    # Normalizes line endings to LF for PyWebView and JS compatibility
     content = content.replace('\r\n', '\n').replace('\r', '\n')
 
     lines = content.split('\n')
@@ -95,8 +91,6 @@ def execute_plan(base_dir, updates, creations, deletions=None):
     return True, msg + "."
 
 def process_surgical_blocks(current_content, llm_content):
-    """Parses ORIGINAL/UPDATED blocks and applies them via the Fuzzy Engine."""
-    # Updated regex to handle empty ORIGINAL sections correctly (optional newline before separator)
     patch_regex = re.compile(
         r'<<<<<<< ORIGINAL[ \t]*\n(.*?)\n?=======[ \t]*\n?(.*?)\n?>>>>>>> UPDATED',
         re.DOTALL

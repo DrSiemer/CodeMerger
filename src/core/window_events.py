@@ -115,13 +115,12 @@ class WindowEventHandler:
                 self.manager._transitioning = False
 
     def on_main_closing(self):
-        """Perform a final reconciled save of application state and geometry on shutdown"""
+        # Performs a final reconciled save of state and geometry on shutdown
         if self.manager._is_shutting_down: return
         self.manager._is_shutting_down = True
         self.manager._stop_failsafe.set()
 
-        # Forceful Exit Watchdog: If the WebView engine hangs during teardown (common on Windows),
-        # this thread ensures the process actually dies after a short delay.
+        # Exit Watchdog ensures the process dies if the WebView engine hangs during teardown
         def _force_exit_watchdog():
             time.sleep(1.5)
             os._exit(0)

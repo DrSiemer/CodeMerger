@@ -32,10 +32,7 @@ def is_dev_mode():
     return "--dev" in sys.argv or os.environ.get('CM_DEV_MODE') == '1'
 
 def is_another_instance_running():
-    """
-    Identifies active instances via Named Mutex on Windows.
-    Isolation is guaranteed by environment-specific Mutex names.
-    """
+    # Identifies active instances via Named Mutex on Windows for environment isolation
     global _instance_lock
 
     try:
@@ -58,9 +55,6 @@ def is_another_instance_running():
         return False
 
 def strip_markdown_wrapper(text):
-    """
-    Removes triple backtick wrappers from a string
-    """
     if not text:
         return ""
 
@@ -73,20 +67,17 @@ def strip_markdown_wrapper(text):
     return clean_text
 
 def get_token_count_for_text(text):
-    """Calculates the token count for a string"""
     global _tiktoken_encoding
     try:
         if _tiktoken_encoding is None:
             # Uses cl100k_base encoding for compatibility with gpt-4
             _tiktoken_encoding = tiktoken.get_encoding("cl100k_base")
 
-        # Counts all tokens including special sequences
         return len(_tiktoken_encoding.encode(text, disallowed_special=()))
     except Exception:
         return -1
 
 def get_file_hash(full_path):
-    """Calculates the SHA1 hash of file content"""
     try:
         with open(full_path, 'rb') as f:
             return hashlib.sha1(f.read()).hexdigest()
@@ -94,7 +85,6 @@ def get_file_hash(full_path):
         return None
 
 def _get_default_config_dict():
-    """Returns a dictionary with default application settings"""
     return {
         'active_directory': '',
         'default_editor': '',
@@ -123,7 +113,6 @@ def _get_default_config_dict():
     }
 
 def _load_default_filetypes(target_dict):
-    """Safely loads and populates the default filetypes array from disk"""
     try:
         with open(DEFAULT_FILETYPES_CONFIG_PATH, 'r', encoding='utf-8-sig') as f:
             target_dict.setdefault('user_lists', {})['filetypes'] = json.load(f)
@@ -131,19 +120,13 @@ def _load_default_filetypes(target_dict):
         pass
 
 def _create_and_get_default_config():
-    """
-    Initializes configuration from the default template and saves to disk
-    """
     config = _get_default_config_dict()
     _load_default_filetypes(config)
     save_config(config)
     return config
 
 def load_config():
-    """
-    Loads configuration using a non-destructive reconciliation strategy
-    Merges user values with the default template and applies necessary migrations
-    """
+    # Merges user values with the default template and applies migrations
     defaults = _get_default_config_dict()
     _load_default_filetypes(defaults)
 
@@ -178,13 +161,10 @@ def load_config():
             loaded_config.pop(old_key)
             migration_occurred = True
 
-    # Deep Reconciliation
-    # Ensures all current keys exist without wiping user settings
     final_config = defaults.copy()
 
     for key in defaults:
         if key not in loaded_config:
-            # Prevents forced saves on boot unless essential configuration is missing
             if key != 'info_mode_active':
                 migration_occurred = True
 
@@ -200,10 +180,7 @@ def load_config():
     return final_config
 
 def save_config(config):
-    """
-    Saves application configuration to disk using an atomic replacement.
-    This prevents file corruption or data loss in multi-instance environments.
-    """
+    # Uses atomic replacement to prevent file corruption in multi-instance environments
     export_data = config.copy()
 
     user_lists_data = export_data.pop('user_lists', {'recent_projects': [], 'filetypes': []})
@@ -213,7 +190,6 @@ def save_config(config):
 
     export_data['user_lists'] = user_lists_data
 
-    # Use atomic write pattern to prevent corruption during concurrent access
     fd, temp_path = tempfile.mkstemp(dir=PERSISTENT_DATA_DIR, prefix='config_tmp_')
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as f:
@@ -239,10 +215,7 @@ def save_config(config):
                 pass
 
 def update_and_get_new_filetypes():
-    """
-    Synchronizes local filetype settings with the bundled default template
-    Returns a list of newly added filetype dictionaries
-    """
+    # Synchronizes local filetype settings with the bundled default template
     config = load_config()
     user_lists = config.setdefault('user_lists', {})
     local_filetypes = user_lists.get('filetypes', [])
@@ -296,10 +269,7 @@ def load_active_file_extensions():
     return {item['ext'] for item in all_types if item.get('active', False)}
 
 def parse_gitignore(base_dir):
-    """
-    Parses all .gitignore files starting from the project root.
-    Optimized to return string-based paths and patterns to speed up subsequent matching.
-    """
+    # Returns string-based paths and patterns for high-performance matching
     gitignore_data = []
     base_dir_norm = os.path.abspath(base_dir).replace('\\', '/')
 
@@ -323,17 +293,13 @@ def parse_gitignore(base_dir):
             except (IOError, OSError):
                 pass
 
-        # Prunes ignored directories in-place to prevent os.walk from entering them
         if gitignore_data:
             dirs[:] = [d for d in dirs if not is_ignored(os.path.join(root, d), base_dir_norm, gitignore_data)]
 
     return gitignore_data
 
 def is_ignored(path, base_dir, gitignore_data):
-    """
-    Determines if a path should be ignored based on parsed .gitignore rules.
-    Follows standard Git rules: anchored vs match-anywhere, negated patterns, and dir-only.
-    """
+    # Follows standard Git rules: anchored vs match-anywhere, negated patterns, and dir-only
     if not gitignore_data:
         return False
 
@@ -342,14 +308,12 @@ def is_ignored(path, base_dir, gitignore_data):
         return True
 
     is_ignored_flag = False
-    is_dir = None # Lazy-load directory status only if needed
+    is_dir = None
 
-    # Process gitignores in order (top-down)
     for gitignore_dir_str, patterns in gitignore_data:
         if not path_norm.startswith(gitignore_dir_str):
             continue
 
-        # Get path relative to this .gitignore's location
         rel_path_str = path_norm[len(gitignore_dir_str):].lstrip('/')
         if not rel_path_str:
             continue
@@ -365,19 +329,14 @@ def is_ignored(path, base_dir, gitignore_data):
             if is_negated:
                 p = p[1:]
 
-            # A pattern is anchored if it has a slash (other than a trailing one)
             is_dir_only = p.endswith('/')
             p_clean = p.rstrip('/')
 
-            # If pattern starts with /, it's anchored to the gitignore root.
-            # If it has a slash anywhere else (middle), it's also relative to the gitignore root.
             is_anchored = '/' in p_clean or p_orig.startswith('/')
             p_final = p_clean.lstrip('/')
 
             match = False
             if not is_anchored:
-                # MATCH ANYWHERE: Pattern matches against any component of the path
-                # e.g., 'vendor/' matches 'a/vendor/b'
                 if any(fnmatch.fnmatch(part, p_final) for part in parts[:-1]):
                     match = True
                 elif fnmatch.fnmatch(parts[-1], p_final):
@@ -387,8 +346,6 @@ def is_ignored(path, base_dir, gitignore_data):
                         if is_dir is None: is_dir = os.path.isdir(path)
                         if is_dir: match = True
             else:
-                # ANCHORED: Pattern is relative to the directory of the .gitignore
-                # e.g., '/httpdocs/vendor/' matches 'httpdocs/vendor/a' but not 'other/httpdocs/vendor'
                 if rel_path_str.startswith(p_final + '/'):
                     match = True
                 elif fnmatch.fnmatch(rel_path_str, p_final):
@@ -404,9 +361,6 @@ def is_ignored(path, base_dir, gitignore_data):
     return is_ignored_flag
 
 def load_app_version():
-    """
-    Returns the version string from version.txt
-    """
     try:
         version_data = {}
         with open(VERSION_FILE_PATH, 'r', encoding='utf-8-sig') as f:
@@ -425,10 +379,7 @@ def load_app_version():
         return "v?.?.?"
 
 def calculate_font_color(hex_color):
-    """
-    Selects 'light' or 'dark' text identifier based on background luminance.
-    Used for contrasting text against project-specific accent colors.
-    """
+    # Selects 'light' or 'dark' text based on background luminance
     try:
         hex_color = hex_color.lstrip('#')
         r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))

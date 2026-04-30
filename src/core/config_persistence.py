@@ -11,7 +11,6 @@ from .file_metadata import clean_and_update_metadata
 log = logging.getLogger("CodeMerger")
 
 def calculate_content_hash(config_instance):
-    """Generates an MD5 hash of the current project state to detect internal changes."""
     state = {
         "name": config_instance.project_name,
         "color": config_instance.project_color,
@@ -22,7 +21,7 @@ def calculate_content_hash(config_instance):
     return hashlib.md5(json.dumps(state, sort_keys=True).encode()).hexdigest()
 
 def has_external_config_changes(config_instance):
-    """Checks mtimes of config files to identify modifications from outside the app."""
+    # Checks mtimes of config files to identify external modifications
     if config_instance.is_dirty: return False
     if not os.path.isfile(config_instance.config_file): return False
     try:
@@ -42,7 +41,7 @@ def has_external_config_changes(config_instance):
     except OSError: return False
 
 def load_project_config(config_instance):
-    """Executes the procedural logic to load and reconcile project configuration chunks."""
+    # Procedural reconciliation of master config and profile segments
     if not os.path.isfile(config_instance.config_file) and not os.path.isfile(config_instance.legacy_allcode_path):
         config_instance._load_successful = True
         return False

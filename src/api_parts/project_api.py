@@ -186,7 +186,7 @@ class ProjectApi:
 
         if is_alt:
             try:
-                # Environment scrubbing logic to ensure a clean shell
+                # Scrubs environment variables to ensure a clean command prompt instance
                 new_env = os.environ.copy()
                 venv_root = new_env.pop('VIRTUAL_ENV', None)
                 new_env.pop('PYTHONHOME', None)

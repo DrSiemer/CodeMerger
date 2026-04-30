@@ -10,9 +10,6 @@ from .. import constants as c
 log = logging.getLogger("CodeMerger")
 
 class FileMonitorThread(threading.Thread):
-    """
-    Background daemon thread that periodically scans the active project for new files.
-    """
     def __init__(self, window, app_state, project_manager):
         super().__init__()
         self.name = "FileMonitor"
@@ -56,6 +53,7 @@ class FileMonitorThread(threading.Thread):
             duration = end_time - start_time
 
             user_interval = config.get('new_file_check_interval', 5)
+            # Scans faster than FAST_SCAN_THRESHOLD_SECONDS ignore adaptive multipliers
             adaptive_interval = max(user_interval, int(duration * 4)) if duration > c.FAST_SCAN_THRESHOLD_SECONDS else user_interval
 
             self._force_check_event.clear()
@@ -106,7 +104,6 @@ class FileMonitorThread(threading.Thread):
             current_set = set(profile_all_files)
             config_changed = False
 
-            # Prune deleted
             missing = known_set - current_set
             truly_deleted = {p for p in missing if not os.path.exists(os.path.join(base_dir, p))}
             if truly_deleted:
@@ -117,7 +114,6 @@ class FileMonitorThread(threading.Thread):
                     p_data['unknown_files'] = [f for f in p_data.get('unknown_files', []) if f not in truly_deleted]
                 config_changed = True
 
-            # Detect New
             brand_new = current_set - set(project_config.known_files)
             if brand_new:
                 log.info(f"Monitor: NEW files detected: {list(brand_new)}")
@@ -129,7 +125,6 @@ class FileMonitorThread(threading.Thread):
                 project_config.save()
                 log.info("Monitor: Save complete. Notifying frontend.")
 
-                # Notify frontend only AFTER save is confirmed
                 count = len(project_config.unknown_files)
                 self._safe_eval(f'window.dispatchEvent(new CustomEvent("cm-new-files", {{ detail: {{ count: {count} }} }}))')
                 if truly_deleted:

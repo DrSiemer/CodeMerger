@@ -12,13 +12,7 @@ class ClipboardApi:
     """API methods for accessing the clipboard and copying finalized prompts"""
 
     def copy_code(self, use_wrapper, allow_secrets=None):
-        """
-        Merges selected files and copies the result to the clipboard.
-        allow_secrets:
-          None  -> Use default blocking dialog (Main window)
-          True  -> Copy anyway (Widget confirmation)
-          False -> Check and return error if found (Widget initial check)
-        """
+        # allow_secrets: None (Blocking Dialog), True (Bypass), False (Widget Error Check)
         project_config = self.project_manager.get_current_project()
         if not project_config or not project_config.selected_files:
             return "No files selected to copy"
@@ -126,7 +120,7 @@ class ClipboardApi:
                     self._window_manager.main_window.evaluate_js('window.dispatchEvent(new CustomEvent("cm-project-reloaded"))')
                     self._broadcast_reload()
 
-                    # Fix: Archive verification for auto-applied plan even if Main window is minimized
+                    # Archives verification for auto-applied plan even if Main window is minimized
                     v_text = plan.get('verification', '')
                     if v_text and v_text != '-':
                         v_json = json.dumps(v_text)

@@ -36,9 +36,9 @@
   },
   {
     "path": "src/constants.py",
-    "mtime": 1776934081.485335,
-    "hash": "26588a3c8e4b2686900976dde6bf145274e58892",
-    "tokens": 1213,
+    "mtime": 1777584491.4656913,
+    "hash": "f401cb1a37b53084b0f320b7ef3e6699c42ccb07",
+    "tokens": 1202,
     "lines": 158
   },
   {
@@ -50,17 +50,17 @@
   },
   {
     "path": "src/core/logger.py",
-    "mtime": 1776896006.3154576,
-    "hash": "689271c85bd873f1e462e5b88291028f7e374d39",
-    "tokens": 732,
-    "lines": 87
+    "mtime": 1777584499.2855005,
+    "hash": "04629ebf7d41e4af02ed3be28921a5a39a1bcf1d",
+    "tokens": 687,
+    "lines": 84
   },
   {
     "path": "src/core/utils.py",
-    "mtime": 1777560268.4235325,
-    "hash": "be269772bb7db7a111f90e3c01b29d2f02228637",
-    "tokens": 3346,
-    "lines": 439,
+    "mtime": 1777584536.609176,
+    "hash": "6ff9d7ba85ad907eb8fb951279a51a81bed731aa",
+    "tokens": 2913,
+    "lines": 390,
     "ignore_tokens": false
   },
   {
@@ -72,10 +72,10 @@
   },
   {
     "path": "src/core/profile_logic.py",
-    "tokens": 779,
-    "lines": 99,
-    "mtime": 1777577886.097424,
-    "hash": "aea771e3940bc176b877dc5c18737f9f8015e54a"
+    "tokens": 739,
+    "lines": 97,
+    "mtime": 1777584548.10914,
+    "hash": "fb721037afdd153225e8945b6f039a4fbcc499c1"
   },
   {
     "path": "src/core/config_io.py",
@@ -93,10 +93,10 @@
   },
   {
     "path": "src/core/config_persistence.py",
-    "tokens": 2285,
-    "lines": 232,
-    "mtime": 1777577886.0984244,
-    "hash": "55a0a191678a56c4f617fe6894632703501513d3"
+    "tokens": 2262,
+    "lines": 231,
+    "mtime": 1777584609.8627412,
+    "hash": "c34438f4a93c563d90ffb6e2eac9290c47dfd5ff"
   },
   {
     "path": "src/core/config_migration.py",
@@ -115,17 +115,17 @@
   },
   {
     "path": "src/app_state.py",
-    "mtime": 1777560268.4803429,
-    "hash": "038772936801709fec35301ba9165e71dce173ba",
-    "tokens": 1515,
-    "lines": 163
+    "mtime": 1777584610.0098462,
+    "hash": "371f57a0f64399c1074c594a029b4ef840299c13",
+    "tokens": 1439,
+    "lines": 157
   },
   {
     "path": "src/core/file_scanner.py",
-    "mtime": 1776198744.024785,
-    "hash": "725bb9c11cf75cf6b238a121d44686e9f0c831bc",
-    "tokens": 1050,
-    "lines": 133
+    "mtime": 1777584610.154848,
+    "hash": "ef5cfe0fb291ba30cb5ba3b1cc492bc11f546d89",
+    "tokens": 1253,
+    "lines": 158
   },
   {
     "path": "src/core/file_tree_builder.py",
@@ -144,32 +144,32 @@
   },
   {
     "path": "src/core/file_monitor_thread.py",
-    "tokens": 1103,
+    "tokens": 1079,
     "ignoreTokens": false,
-    "lines": 139,
-    "mtime": 1776714256.6630323,
-    "hash": "0f1fed1cb75760a482c47173eb4e5c15fd899ed9"
+    "lines": 134,
+    "mtime": 1777584610.2748468,
+    "hash": "bb0009b9da9179c2c8e6afa319771c4861a6bd24"
   },
   {
     "path": "src/core/merger.py",
-    "mtime": 1777561732.6723628,
-    "hash": "253d6db9b2171c144cf4a978989bb4488c321950",
-    "tokens": 1078,
-    "lines": 144
+    "mtime": 1777584610.372897,
+    "hash": "ac9bf6ff4900c037acfe222c933782fc34727367",
+    "tokens": 1029,
+    "lines": 136
   },
   {
     "path": "src/core/replacer.py",
-    "tokens": 2494,
-    "lines": 274,
-    "mtime": 1776953900.9373906,
-    "hash": "65ba0e4c7667400beb68d9a5528c1172d9fbc111"
+    "tokens": 2432,
+    "lines": 270,
+    "mtime": 1777584610.4914124,
+    "hash": "fe3a569e3b4da2524d539d68a1536c31b77efabe"
   },
   {
     "path": "src/core/change_applier.py",
-    "mtime": 1777204854.7977488,
-    "hash": "8a5e909b6336d22118a70d5dc93f65d9474f72e4",
-    "tokens": 3019,
-    "lines": 341
+    "mtime": 1777584610.621414,
+    "hash": "d47b13c30a697f1d58ee7222bba33041016fcbd3",
+    "tokens": 2945,
+    "lines": 334
   },
   {
     "path": "src/core/highlighter.py",
@@ -187,10 +187,10 @@
   },
   {
     "path": "src/core/updater.py",
-    "mtime": 1776933525.6454046,
-    "hash": "823b09dce0fee0c51b89af3bc7349469feca9c05",
-    "tokens": 1863,
-    "lines": 217
+    "mtime": 1777584610.7529337,
+    "hash": "0e24a33546292c6c3fc9382b12e19b85ba1a1df1",
+    "tokens": 1855,
+    "lines": 214
   },
   {
     "path": "src/core/prompts/__init__.py",
@@ -237,11 +237,11 @@
   },
   {
     "path": "src/core/window_geometry.py",
-    "tokens": 941,
+    "tokens": 939,
     "ignoreTokens": false,
     "lines": 98,
-    "mtime": 1776188713.320907,
-    "hash": "502699166101fd5ccbd6e85bae173e446810b2af"
+    "mtime": 1777584610.8749819,
+    "hash": "9bf0df9f8948a3d32f73503702d27d44e3581078"
   },
   {
     "path": "src/core/window_splash.py",
@@ -253,19 +253,19 @@
   },
   {
     "path": "src/core/window_main.py",
-    "tokens": 389,
+    "tokens": 363,
     "ignoreTokens": false,
-    "lines": 39,
-    "mtime": 1777579392.8064222,
-    "hash": "db9b37cd4cd1a66aab70574a71df596370b9e3e3"
+    "lines": 37,
+    "mtime": 1777584611.0120895,
+    "hash": "d4101984c31840bea214fbe374941466a7cea8c0"
   },
   {
     "path": "src/core/window_compact.py",
-    "tokens": 1391,
+    "tokens": 1347,
     "ignoreTokens": false,
-    "lines": 130,
-    "mtime": 1777579392.866155,
-    "hash": "05b9adb8abb40b80bedf26f643d9ad9de41cb247"
+    "lines": 126,
+    "mtime": 1777584612.5753233,
+    "hash": "f70886731af4f791f48abcc3bdc76f686df8141b"
   },
   {
     "path": "src/core/window_broadcaster.py",
@@ -276,10 +276,10 @@
   },
   {
     "path": "src/core/window_events.py",
-    "tokens": 1252,
-    "lines": 151,
-    "mtime": 1777579392.6838515,
-    "hash": "96027c7fa7b40eaa77300a18cf2d2e6731c8b4f7"
+    "tokens": 1234,
+    "lines": 150,
+    "mtime": 1777584612.7088718,
+    "hash": "4b92f208f45e02c4a50ee2b66d9843fb4df1a631"
   },
   {
     "path": "src/core/vite_handshake.py",
@@ -290,19 +290,19 @@
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 2124,
+    "tokens": 2115,
     "ignoreTokens": false,
-    "lines": 263,
-    "mtime": 1777579392.743852,
-    "hash": "c73248ba2dab7037b044ffb39685a3aaec83024c"
+    "lines": 260,
+    "mtime": 1777584612.8568726,
+    "hash": "740d61179b6e52847923366ae3e81f54cf16ab5f"
   },
   {
     "path": "src/api_parts/base_api.py",
-    "tokens": 829,
+    "tokens": 796,
     "ignoreTokens": false,
-    "lines": 100,
-    "mtime": 1776762654.7114053,
-    "hash": "5b76776f287af7431ca89020c91cf6f1e488ae91"
+    "lines": 96,
+    "mtime": 1777584613.0175462,
+    "hash": "fa0cc38de7f0c564ff497782cd427abe0db923c8"
   },
   {
     "path": "src/api_parts/window_api.py",
@@ -322,11 +322,11 @@
   },
   {
     "path": "src/api_parts/project_api.py",
-    "tokens": 2111,
+    "tokens": 2113,
     "ignoreTokens": false,
     "lines": 276,
-    "mtime": 1776697805.3871825,
-    "hash": "d6d90f127d5d2861d6a7f73a575b6ed552552c4a"
+    "mtime": 1777584613.2725804,
+    "hash": "3e27c53507036cadd0749e559839858e672df675"
   },
   {
     "path": "src/api_parts/file_api.py",
@@ -338,11 +338,11 @@
   },
   {
     "path": "src/api_parts/clipboard_api.py",
-    "tokens": 1604,
+    "tokens": 1565,
     "ignoreTokens": false,
-    "lines": 182,
-    "mtime": 1777560268.5758107,
-    "hash": "cf2318c993825e461abda98eed8134a9233a8198"
+    "lines": 176,
+    "mtime": 1777584613.131548,
+    "hash": "895e131ccc85b796b5a49d8bd54e09cc8cc54c55"
   },
   {
     "path": "src/api_parts/changes_api.py",
@@ -402,11 +402,11 @@
   },
   {
     "path": "run_webview.py",
-    "tokens": 942,
+    "tokens": 915,
     "ignoreTokens": false,
-    "lines": 120,
-    "mtime": 1776933525.3138368,
-    "hash": "6a4afd2c7b5f76a36686e3d240c8e60f5235d98d"
+    "lines": 119,
+    "mtime": 1777584613.396105,
+    "hash": "217586fcf575fe793bd595b2c414c89a41978834"
   },
   {
     "path": "frontend/package.json",
@@ -634,11 +634,11 @@
   },
   {
     "path": "frontend/src/directives/vInfo.js",
-    "tokens": 382,
+    "tokens": 385,
     "ignoreTokens": false,
     "lines": 58,
-    "mtime": 1776190024.157303,
-    "hash": "e026e392a3c7ca30b008edc4bfa5c86cb23df1cd"
+    "mtime": 1777584613.9403093,
+    "hash": "68d838f4f843561237a7e4994a63a4e2fab7f67a"
   },
   {
     "path": "frontend/src/router/index.js",
@@ -658,11 +658,11 @@
   },
   {
     "path": "frontend/src/App.vue",
-    "tokens": 1788,
+    "tokens": 1770,
     "ignoreTokens": false,
     "lines": 224,
-    "mtime": 1777551846.1265607,
-    "hash": "557ec52ed90d7c2929e0a55e0ee0cbf676b9d08b"
+    "mtime": 1777584613.5181592,
+    "hash": "ba63938fe2306d36a7e70b48819459614274dd6c"
   },
   {
     "path": "frontend/src/views/MainView.vue",
@@ -674,11 +674,11 @@
   },
   {
     "path": "frontend/src/views/CompactView.vue",
-    "tokens": 3176,
+    "tokens": 3167,
     "ignoreTokens": false,
     "lines": 252,
-    "mtime": 1777559814.630578,
-    "hash": "947c37c7c534da71dc38b35f66c33c4c9c4027ea"
+    "mtime": 1777584613.723794,
+    "hash": "98a8cd8ce989aad264813032387d9888f017e9ae"
   },
   {
     "path": "frontend/src/components/InfoPanel.vue",
@@ -693,8 +693,8 @@
     "tokens": 1311,
     "ignoreTokens": false,
     "lines": 185,
-    "mtime": 1776782657.7160547,
-    "hash": "9b9ca098dd4e74e97822a22565249077e77152ce"
+    "mtime": 1777584614.0865207,
+    "hash": "f3501162fd6f672aae4b7e31873d9bfe6226ccad"
   },
   {
     "path": "frontend/src/components/DiffViewer.vue",

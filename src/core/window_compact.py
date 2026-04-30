@@ -6,10 +6,7 @@ from src import constants as c
 log = logging.getLogger("CodeMerger")
 
 def _set_skip_taskbar(title):
-    """
-    Win32 implementation to strip the taskbar button from the compact widget.
-    This ensures the app's taskbar presence remains anchored to the minimized Main Window.
-    """
+    # Strips the taskbar button to anchor presence to the minimized Main Window
     if sys.platform == "win32":
         try:
             import ctypes
@@ -116,8 +113,7 @@ def show_compact_window(manager):
     # Ensure Vue has rendered the state in the background buffer
     manager._dispatch_project_reload(manager.compact_window)
 
-    # Runtime resize consumes physical units while move consumes logical units
-    # Due to a PyWebView High-DPI quirk on Windows, we must use physical pixels for resizing but logical pixels for moving
+    # Windows quirk: resize consumes physical pixels but move consumes logical units
     manager.compact_window.resize(w_phys, h_phys)
     manager.compact_window.move(exec_x_log, exec_y_log)
     manager.compact_window.show()

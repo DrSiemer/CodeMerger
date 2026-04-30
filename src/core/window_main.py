@@ -13,9 +13,7 @@ def create_main_window(manager, m_left, m_top, m_w_phys, m_h_phys, scale):
     m_x_phys = int(m_left + (m_w_phys - (m_w_log * scale)) / 2)
     m_y_phys = int(m_top + (m_h_phys - (m_h_log * scale)) / 2)
 
-    # Passing the base_url directly triggers PyWebView's internal HTTP server
-    # which bypasses file:// CORS restrictions for Vue 3 ES modules
-    # Width and height use logical units, x and y use physical position
+    # Passes base_url to trigger internal server to bypass file:// CORS for Vue 3 modules
     win = webview.create_window(
         "CodeMerger", url=manager.base_url, js_api=manager.api,
         width=m_w_log, height=m_h_log,

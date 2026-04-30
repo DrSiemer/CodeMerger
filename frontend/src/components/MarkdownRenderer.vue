@@ -51,7 +51,7 @@ const highlightCodeBlocks = async () => {
       if (htmlLines && htmlLines.length > 0) {
         codeEl.innerHTML = htmlLines.join('\n')
         codeEl.dataset.highlighted = 'true'
-        // Apply the CSS trigger class specifically to the code block container
+        // Applies the CSS trigger class specifically to the code block container
         if (preEl) preEl.classList.add('highlight')
       }
     } catch (err) {

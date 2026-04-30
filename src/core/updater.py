@@ -24,10 +24,7 @@ class Updater:
         self.repo_url = c.GITHUB_API_URL
 
     def _get_dialog_parent(self):
-        """
-        Creates a hidden temporary Tk root if no parent is available.
-        Forces the hidden root to the top so messageboxes appear over Webview.
-        """
+        # Forces a hidden Tk root to the top so messageboxes appear over the PyWebView window
         if self.parent and hasattr(self.parent, 'winfo_exists') and self.parent.winfo_exists():
             return self.parent
 
@@ -208,7 +205,7 @@ class Updater:
 
             log.info("Updater launched. Force-terminating main application for update cycle.")
 
-            # Immediate termination prevents COM teardown hangs that block the external updater
+            # Bypasses COM teardown hangs that often block the external updater from accessing the PID
             os._exit(0)
 
         except Exception as e:

@@ -18,16 +18,13 @@ from src.core.window_events import WindowEventHandler
 log = logging.getLogger("CodeMerger")
 
 class WindowManager:
-    """
-    Coordinates the visibility and lifecycle of application windows
-    Uses a persistent window strategy for the minimalist compact widget
+    # Persistent window strategy for maintaining the compact widget lifecycle
 
-    UNIT COORDINATION STRATEGY (PyWebView 5.3+ / Windows DPI Awareness V2):
-    - CONSTRUCTOR (create_window): Position (x,y) = PHYSICAL | Size (w,h) = LOGICAL
-    - RUNTIME (move, resize): move = LOGICAL | resize = PHYSICAL
-    - PROPERTIES (win.x, win.width): All = PHYSICAL
-    - EVENTS (moved, resized): All = LOGICAL
-    """
+    # UNIT COORDINATION STRATEGY (PyWebView 5.3+ / Windows DPI Awareness V2):
+    # - CONSTRUCTOR (create_window): Position (x,y) = PHYSICAL | Size (w,h) = LOGICAL
+    # - RUNTIME (move, resize): move = LOGICAL | resize = PHYSICAL
+    # - PROPERTIES (win.x, win.width): All = PHYSICAL
+    # - EVENTS (moved, resized): All = LOGICAL
     def __init__(self, api, monitor, dev_mode=False, debug_mode=False):
         self.api = api
         self.monitor = monitor

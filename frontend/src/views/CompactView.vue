@@ -19,7 +19,7 @@ const hasPendingChangesInternal = ref(false)
 const feedback = reactive({ active: false, mode: 'none', msg: '', type: '' })
 const titleOverride = ref(null)
 
-// --- DRAG ENGINE (CRITICAL: Handlers and variables must stay in-view for zero-latency moving) ---
+// Handlers and variables remain in-view to ensure zero-latency window dragging
 const localWinX = ref(0), localWinY = ref(0)
 let isDragging = false, ticking = false
 let startMouseX = 0, startMouseY = 0, startWinX = 0, startWinY = 0, lastClickTime = 0
@@ -68,7 +68,7 @@ let statusCheckInterval = null, feedbackTimer = null, titleTimer = null
 const updatePendingStatus = async () => {
   if (!window.pywebview || !window.pywebview.api) return
 
-  // Synchronize local coordinates with the backend to prevent drag offsets/jumps
+  // Synchronizes local coordinates with the backend to prevent drag offsets
   const pos = await window.pywebview.api.get_compact_window_pos()
   if (pos) {
     localWinX.value = pos.x

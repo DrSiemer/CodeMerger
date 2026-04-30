@@ -37,7 +37,6 @@ def _is_line_match(line_a, line_b, fuzzy=False):
     return line_a.rstrip() == line_b.rstrip()
 
 def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
-    """Attempts to replace old_code with new_code using cascading strategies."""
     old_code = _clean_block(old_code_raw)
     new_code = _clean_block(new_code_raw)
 
@@ -67,8 +66,7 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
     content_lines = current_normalized.split('\n')
     old_lines = old_code.split('\n')
 
-    # Filter for lines that actually contain code.
-    # This allows us to jump over variable amounts of whitespace/blank lines between code blocks.
+    # Filters for lines with code to allow jumping over variable whitespace or blank lines
     significant_old_indices = [i for i, l in enumerate(old_lines) if l.strip()]
     if not significant_old_indices:
         raise ValueError("The 'ORIGINAL' block contains no code-bearing lines.")
@@ -158,8 +156,6 @@ def apply_fuzzy_patch(current_content, old_code_raw, new_code_raw):
         return '\n'.join(result_lines), "Indentation-Flexible Match"
 
     # Strategy 6: Block-Anchor Match (Levenshtein)
-    # Anchors on the first and last non-empty lines. Scans all candidate blocks
-    # whose boundaries match. Scores middle lines via Levenshtein distance.
     if len(significant_old_indices) >= 3:
         first_search = old_lines[significant_old_indices[0]].strip()
         last_search = old_lines[significant_old_indices[-1]].strip()

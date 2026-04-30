@@ -11,10 +11,7 @@ def get_language_from_path(path):
     return c.LANGUAGE_MAP.get(ext.lower(), '')
 
 def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
-    """
-    Concatenates selected files into a single machine-parseable string
-    Returns the final string and a status message
-    """
+    # Concatenates selected files into a machine-parseable Markdown bundle
     if not project_config.selected_files:
         return None, "No files selected to copy"
 
@@ -33,7 +30,6 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
 
         language = get_language_from_path(path)
 
-        # Build block using central markers
         block_header = f"{c.MARKER_PREFIX}{c.MARKER_FILE}`{path}` ---"
         block_footer = f"{c.MARKER_PREFIX}{c.MARKER_EOF} ---"
 
@@ -119,11 +115,7 @@ def generate_subset_output(base_dir, paths):
     return '\n\n'.join(output_blocks)
 
 def recalculate_token_count(base_dir, selected_files_info):
-    """
-    Summarizes total tokens for the current selection set.
-    Optimized to handle massive projects by processing files individually
-    to reduce memory overhead and re-using the global tokenizer instance.
-    """
+    # Processes files individually to minimize memory overhead in massive projects
     if not selected_files_info:
         return 0
 

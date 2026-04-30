@@ -1,7 +1,7 @@
 import sys
 
 class WindowGeometry:
-    """Provides stateless utility functions for Windows High-DPI physical math"""
+    # Shared physical coordinate math for Windows High-DPI environments
 
     @staticmethod
     def get_target_monitor_handle(main_window, main_last_x, main_last_y):

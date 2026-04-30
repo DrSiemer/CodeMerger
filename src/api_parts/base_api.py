@@ -4,8 +4,7 @@ class BaseApi:
     """Provides base state and shared helper methods for the API mixins"""
 
     def __init__(self, app_state, project_manager, newly_added_filetypes=None):
-        # Prefixing with an underscore prevents PyWebView from inspecting this attribute
-        # during JS API generation, which avoids a premature DOM evaluation crash
+        # Underscore prefix prevents PyWebView inspection and potential startup crashes
         self._window_manager = None
         self._color_picker_active = False
 
@@ -61,10 +60,7 @@ class BaseApi:
         }
 
     def _show_managed_confirmation(self, title, message):
-        """
-        Displays a native confirmation dialog centered on the monitor
-        Uses a topmost hidden parent to ensure it appears in front of the Compact Mode window
-        """
+        # Displays a native dialog centered on the monitor using a topmost hidden parent
         import tkinter as tk
         from tkinter import messagebox
         from src.core.window_geometry import WindowGeometry

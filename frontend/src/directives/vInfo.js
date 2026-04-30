@@ -1,6 +1,6 @@
 import { useAppState } from '../composables/useAppState'
 
-// Global hover stack for Info Mode documentation
+// Orchestrates the global hover stack for contextual Info Mode documentation
 export default {
   mounted(el, binding) {
     const { setHoverInfo, clearHoverInfo } = useAppState()
