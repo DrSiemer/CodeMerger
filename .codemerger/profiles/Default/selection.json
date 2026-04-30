@@ -876,19 +876,19 @@
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
-    "tokens": 3104,
+    "tokens": 3111,
     "ignoreTokens": false,
-    "lines": 271,
-    "mtime": 1777550363.952258,
-    "hash": "4de510c12d55a6628d1c25742dad6c4b853078d4"
+    "lines": 272,
+    "mtime": 1777563040.3529675,
+    "hash": "13302fec875c375a670c0a026ace95e2b59312d3"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
-    "tokens": 4603,
+    "tokens": 4631,
     "ignoreTokens": false,
-    "lines": 381,
-    "mtime": 1777550364.0414867,
-    "hash": "cb0f3ab50fc9483a701818e643fcb219b8ee2ee6"
+    "lines": 384,
+    "mtime": 1777563040.4250176,
+    "hash": "3cd1822893b30571c1db907cebc0159de5929d43"
   },
   {
     "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",

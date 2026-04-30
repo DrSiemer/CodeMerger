@@ -126,6 +126,9 @@ watch(() => props.baselines, (newB) => {
   if (!newB) return
   const keysWithDiffs = props.orderedKeys.filter(k => newB[k] !== undefined)
   if (keysWithDiffs.length > 0) {
+    // If a rewrite was applied, we always exit edit mode to show the render/diff view
+    reviewerEditMode.value = false
+
     // If the currently viewed segment doesn't have a diff, jump to the first one that does
     if (!activeSegmentKey.value || newB[activeSegmentKey.value] === undefined) {
       activeSegmentKey.value = keysWithDiffs[0]

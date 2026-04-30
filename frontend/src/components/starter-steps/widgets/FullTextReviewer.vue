@@ -112,6 +112,7 @@ const acceptDiff = () => {
 // Automatically scroll to the first diff line when the diff view is activated after a rewrite
 watch(() => props.baselines?.['__merged__'], (newVal) => {
   if (newVal !== undefined) {
+    reviewerEditMode.value = false
     nextTick(() => {
       // Small delay to allow DiffViewer to fetch highlighted lines via IPC and mount them in DOM
       setTimeout(() => {
