@@ -360,7 +360,15 @@ const handleAcceptAllClick = () => {
             <LockKeyhole class="w-4 h-4 mr-2" :stroke-width="2.5" />
             <span>Lock & Next</span>
           </button>
-          <button v-if="allSigned" @click="$emit('merge')" v-info="'starter_seg_merge'" class="bg-cm-blue hover:bg-blue-500 text-white px-8 py-2 rounded font-bold shadow transition-colors">Merge & Finalize</button>
+          <button
+            v-if="allSigned"
+            :disabled="hasPendingDiffs"
+            @click="$emit('merge')"
+            v-info="'starter_seg_merge'"
+            class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:bg-gray-700 text-white px-8 py-2 rounded font-bold shadow transition-colors"
+          >
+            Merge & Finalize
+          </button>
       </div>
     </div>
   </div>

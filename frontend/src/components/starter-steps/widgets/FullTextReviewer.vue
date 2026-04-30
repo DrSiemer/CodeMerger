@@ -45,6 +45,10 @@ const hasUnresolvedPivots = computed(() => {
 })
 
 const handleNext = () => {
+  if (props.baselines && props.baselines['__merged__'] !== undefined) {
+    alert("You must accept or refuse the pending changes before proceeding.")
+    return
+  }
   if (hasUnresolvedPivots.value) {
     alert("You must resolve all architectural alternatives (either Pivot or Discard) before proceeding to the next step.")
     return
@@ -248,7 +252,11 @@ watch(() => props.baselines?.['__merged__'], (newVal) => {
     </div>
 
     <div v-if="!isLookingBack" class="shrink-0 pt-6 flex justify-end">
-      <button @click="handleNext" class="bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group">
+      <button
+        @click="handleNext"
+        :disabled="baselines && baselines['__merged__'] !== undefined"
+        class="bg-cm-blue hover:bg-blue-500 disabled:opacity-50 disabled:bg-gray-700 text-white font-bold py-3 px-12 rounded shadow-lg transition-all flex items-center group"
+      >
         {{ nextButtonText }}
         <ChevronRight class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
       </button>

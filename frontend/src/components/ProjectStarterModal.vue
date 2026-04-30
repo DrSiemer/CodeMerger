@@ -276,8 +276,12 @@ const isNextDisabled = computed(() => {
     return !pData.starting_mode
   }
 
+  // Helper to check for unaccepted changes in baselines
+  const hasDiffs = (baselines) => baselines && Object.values(baselines).some(v => v !== undefined)
+
   // Step 3 (Concept): Can only proceed if document is merged and segments are cleared
   if (currentStep.value === 3) {
+    if (hasDiffs(pData.concept_baselines)) return true
     const hasMergedDoc = !!pData.concept_md.trim()
     const hasActiveSegments = Object.keys(pData.concept_segments).length > 0
     return !hasMergedDoc || hasActiveSegments
@@ -285,6 +289,7 @@ const isNextDisabled = computed(() => {
 
   // Step 5 (Design): Can only proceed if plan is merged and segments are cleared
   if (currentStep.value === 5) {
+    if (hasDiffs(pData.design_baselines)) return true
     const hasMergedDoc = !!pData.design_md.trim()
     const hasActiveSegments = Object.keys(pData.design_segments).length > 0
     return !hasMergedDoc || hasActiveSegments
@@ -292,6 +297,7 @@ const isNextDisabled = computed(() => {
 
   // Step 6 (TODO): Can only proceed if plan is merged and segments are cleared
   if (currentStep.value === 6) {
+    if (hasDiffs(pData.todo_baselines)) return true
     const hasMergedDoc = !!pData.todo_md.trim()
     const hasActiveSegments = Object.keys(pData.todo_segments).length > 0
     return !hasMergedDoc || hasActiveSegments
