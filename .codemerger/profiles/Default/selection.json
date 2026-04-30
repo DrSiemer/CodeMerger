@@ -683,11 +683,11 @@
   },
   {
     "path": "frontend/src/components/FileManagerRightPanel.vue",
-    "tokens": 3849,
+    "tokens": 2476,
     "ignoreTokens": false,
-    "lines": 385,
-    "mtime": 1777559201.196195,
-    "hash": "76029adfe0a57f00b7beed578455aa894162b0fa"
+    "lines": 280,
+    "mtime": 1777582101.4612868,
+    "hash": "0f420d874e41696194e0cd1135b17a79c929d2cc"
   },
   {
     "path": "frontend/src/components/FileManagerModal.vue",
@@ -1196,5 +1196,26 @@
     "lines": 151,
     "mtime": 1777579392.6838515,
     "hash": "96027c7fa7b40eaa77300a18cf2d2e6731c8b4f7"
+  },
+  {
+    "path": "frontend/src/components/file-manager/MergeListItem.vue",
+    "tokens": 797,
+    "lines": 75,
+    "mtime": 1777582101.2241917,
+    "hash": "5c506efe1db5448f71d8f1ac3c5d187661686a6e"
+  },
+  {
+    "path": "frontend/src/components/file-manager/MergeListToolbar.vue",
+    "tokens": 485,
+    "lines": 47,
+    "mtime": 1777582101.3100326,
+    "hash": "a0d68e4834e815e5fcf88429aa8755fee84c8e08"
+  },
+  {
+    "path": "frontend/src/components/file-manager/ReorderToolbar.vue",
+    "tokens": 494,
+    "lines": 19,
+    "mtime": 1777582101.3873723,
+    "hash": "87c0031df7ca043b0e185efb3289f42a30c45a78"
   }
 ]

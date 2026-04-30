@@ -47,6 +47,9 @@
     "frontend/src/components/dashboard/DashboardActions.vue",
     "frontend/src/components/dashboard/DashboardHeader.vue",
     "frontend/src/components/dashboard/DashboardNav.vue",
+    "frontend/src/components/file-manager/MergeListItem.vue",
+    "frontend/src/components/file-manager/MergeListToolbar.vue",
+    "frontend/src/components/file-manager/ReorderToolbar.vue",
     "frontend/src/components/review-tabs/ReviewChangesTab.vue",
     "frontend/src/components/review-tabs/ReviewCommentary.vue",
     "frontend/src/components/review-tabs/ReviewFileItem.vue",
@@ -165,5 +168,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 203186
+  "total_tokens": 203589
 }
