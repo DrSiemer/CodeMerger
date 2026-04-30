@@ -151,15 +151,38 @@ class ProjectManager:
                 new_paths = set()
 
                 for item in initial_selected_files:
-                    if isinstance(item, str):
-                        path_str = item
-                        processed_selection.append({'path': path_str})
-                        new_paths.add(path_str)
-                    elif isinstance(item, dict) and 'path' in item:
-                        processed_selection.append(item)
-                        new_paths.add(item['path'])
+                    path_str = item if isinstance(item, str) else item.get('path')
+                    if not path_str:
+                        continue
+
+                    norm_path = path_str.replace('\\', '/')
+                    full_path = os.path.join(path, norm_path)
+
+                    # Requirement: Proactively calculate metadata for initial selection to avoid UI question marks
+                    if os.path.isfile(full_path):
+                        try:
+                            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                                content = f.read()
+                            tokens = get_token_count_for_text(content)
+                            lines = content.count('\n') + 1
+                            mtime = os.path.getmtime(full_path)
+                            f_hash = get_file_hash(full_path)
+                            processed_selection.append({
+                                'path': norm_path,
+                                'tokens': tokens,
+                                'lines': lines,
+                                'mtime': mtime,
+                                'hash': f_hash
+                            })
+                        except OSError:
+                            processed_selection.append({'path': norm_path})
+                    else:
+                        processed_selection.append({'path': norm_path})
+
+                    new_paths.add(norm_path)
 
                 config.selected_files = processed_selection
+                config.total_tokens = sum(f.get('tokens', 0) for f in processed_selection)
                 config.known_files = sorted(list(set(config.known_files) | new_paths))
 
             config.intro_text = intro_text

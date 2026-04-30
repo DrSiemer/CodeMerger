@@ -81,6 +81,19 @@ const tabs = computed(() => {
     list.push({ id: 'verification', name: 'Verification', icon: ShieldCheck, content: '', color: 'text-cm-green', tooltip: 'Review past and current verification steps' })
   }
 
+  // Fallback: If no content segments or files were found (unformatted garbage or massive markers mismatch),
+  // provide a generic summary tab to avoid an empty window.
+  if (list.length === 0) {
+    list.push({
+      id: 'placeholder',
+      name: 'Response Summary',
+      icon: MessageSquare,
+      content: lastAiResponse.value?.unformatted || 'The AI response contained only code blocks or metadata with no accompanying text.',
+      color: 'text-gray-400',
+      tooltip: 'View the raw response content'
+    })
+  }
+
   return list
 })
 

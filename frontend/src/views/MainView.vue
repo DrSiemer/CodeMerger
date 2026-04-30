@@ -38,18 +38,20 @@ const {
   formatErrorMessage
 } = app
 
-const showProjectModal = ref(false)
-const showSettingsModal = ref(false)
-const showFileManagerModal = ref(false)
-const showInstructionsModal = ref(false)
-const showStarterModal = ref(false)
-const showVisualizerModal = ref(false)
-const showNewProfileModal = ref(false)
-const showPromptsModal = ref(false)
 const settingsTab = ref('application')
 
-const showReviewModal = ref(false)
-const reviewMode = ref('new')
+const {
+  showProjectModal,
+  showSettingsModal,
+  showFileManagerModal,
+  showInstructionsModal,
+  showStarterModal,
+  showVisualizerModal,
+  showNewProfileModal,
+  showPromptsModal,
+  showReviewModal,
+  reviewMode
+} = app
 
 const openSettings = (tab = 'application') => {
   settingsTab.value = tab
@@ -93,6 +95,7 @@ watch(showColorPicker, async (val) => {
 
 // Handles paste handoff requests originating from the Compact window context
 const onRemotePasteRequest = async (event) => {
+  if (app.isProjectLoading.value) return
   const { revertOnClose } = event.detail
 
   const plan = await claimLastPlan()
@@ -128,6 +131,7 @@ const onRemotePasteRequest = async (event) => {
 
 // Handles review-resume requests originating from the Compact window context
 const onRemoteReviewRequest = async (event) => {
+  if (app.isProjectLoading.value) return
   const { revertOnClose } = event.detail
 
   const plan = await claimLastPlan()

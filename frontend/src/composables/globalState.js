@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 
 export const config = ref({})
 export const activeProject = reactive({
@@ -31,6 +31,30 @@ export const logoMaskSmall = ref('')
 export const showReviewModal = ref(false)
 export const reviewMode = ref('new')
 export const revertToCompactOnClose = ref(false)
+
+// Dashboard Tool Modals Visibility
+export const showProjectModal = ref(false)
+export const showSettingsModal = ref(false)
+export const showFileManagerModal = ref(false)
+export const showInstructionsModal = ref(false)
+export const showStarterModal = ref(false)
+export const showVisualizerModal = ref(false)
+export const showNewProfileModal = ref(false)
+export const showPromptsModal = ref(false)
+
+// A tool modal is "blocking" if it covers the dashboard and handles its own input/shortcuts
+export const isBlockingModalActive = computed(() => {
+  return showProjectModal.value ||
+         showSettingsModal.value ||
+         showFileManagerModal.value ||
+         showInstructionsModal.value ||
+         showStarterModal.value ||
+         showVisualizerModal.value ||
+         showNewProfileModal.value ||
+         showPromptsModal.value ||
+         showColorPicker.value ||
+         showFormatErrorModal.value
+})
 
 // Color Picker State
 export const showColorPicker = ref(false)

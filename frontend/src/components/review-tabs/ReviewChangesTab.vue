@@ -281,6 +281,11 @@ const getErrorMessage = (path) => {
       </div>
     </div>
 
+    <!-- Empty State Placeholder -->
+    <div v-if="!hasUpdates && !hasCreations && !hasDeletions && !hasFailures" class="py-20 text-center">
+      <p class="text-gray-500 italic">No pending file changes in this response.</p>
+    </div>
+
     <!-- Bulk Toggle Toolbar (Bottom) -->
     <div v-if="totalFileCount > 2" class="flex justify-end items-center pt-4">
       <button

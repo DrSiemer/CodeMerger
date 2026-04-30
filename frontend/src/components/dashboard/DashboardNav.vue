@@ -27,9 +27,11 @@ const handleSwitch = async (id) => {
   }
 }
 
+const { showNewProfileModal } = useAppState()
+
 const handleOpenNewProfile = () => {
   showProfileDropdown.value = false
-  emit('open-new-profile-modal')
+  showNewProfileModal.value = true
 }
 
 const deleteProfileHandler = async (id, name) => {

@@ -30,6 +30,9 @@ class StarterApi(
         if self._window_manager:
             self._window_manager.is_starter_active = False
 
+        # Ensure the shared AI response memory is cleared to prevent scaffolding leaks
+        self.clear_parsed_plan()
+
         # Requirements: reactivate the project on close unless activating a created project
         if not project_created and self._previous_project_path:
             self.load_project(self._previous_project_path)

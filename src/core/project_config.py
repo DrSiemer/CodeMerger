@@ -320,16 +320,30 @@ class ProjectConfig:
                     except OSError: continue
         else:
             for f_info in original_selection:
-                if os.path.isfile(os.path.join(self.base_dir, f_info['path'])):
-                    f_info['path'] = f_info['path'].replace('\\', '/')
-                    if 'tokens' not in f_info: profile_was_updated = True
+                rel_path = f_info['path'].replace('\\', '/')
+                full_path = os.path.join(self.base_dir, rel_path)
+                if os.path.isfile(full_path):
+                    f_info['path'] = rel_path
+                    # Requirement: Ensure accurate token counts and metadata exist for all entries
+                    if any(k not in f_info for k in ['tokens', 'mtime', 'hash', 'lines']):
+                        try:
+                            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                                content = f.read()
+                            f_info['tokens'] = get_token_count_for_text(content)
+                            f_info['lines'] = content.count('\n') + 1
+                            f_info['mtime'] = os.path.getmtime(full_path)
+                            f_info['hash'] = get_file_hash(full_path)
+                            profile_was_updated = True
+                        except OSError:
+                            pass
                     cleaned_selection.append(f_info)
 
         profile_data['selected_files'] = cleaned_selection
         files_were_cleaned = len(cleaned_selection) < len(original_selection)
-        if files_were_cleaned:
+
+        # Recalculate total tokens if files were removed OR if metadata was computed for incomplete entries
+        if files_were_cleaned or profile_was_updated:
             profile_data['total_tokens'] = sum(f.get('tokens', 0) for f in cleaned_selection)
-            profile_was_updated = True
 
         return files_were_cleaned, profile_was_updated
 

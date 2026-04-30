@@ -96,6 +96,8 @@ export function useAppState() {
         globalState.planFileStates.value = {}
         globalState.planOriginalContents.value = {}
         globalState.showReviewModal.value = false
+        globalState.showFormatErrorModal.value = false
+        globalState.formatErrorMessage.value = ''
         globalState.revertToCompactOnClose.value = false
       })
 
@@ -109,6 +111,7 @@ export function useAppState() {
 
   return {
     ...globalState,
+    isBlockingModalActive: globalState.isBlockingModalActive,
     ...infoMode,
     ...system,
     ...project,

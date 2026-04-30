@@ -67,6 +67,8 @@ onMounted(() => {
   }, true)
 
   window.addEventListener('keydown', async (e) => {
+    if (isProjectLoading.value) return
+
     const isCtrl = e.ctrlKey || e.metaKey
     const isShift = e.shiftKey
     const key = e.key.toLowerCase()
@@ -74,9 +76,8 @@ onMounted(() => {
     const isInput = activeEl && (activeEl.tagName === 'TEXTAREA' || (activeEl.tagName === 'INPUT' && activeEl.type === 'text') || activeEl.isContentEditable)
 
     if (isCtrl && key === 'v') {
-      e.preventDefault()
-
       if (isInput) {
+        e.preventDefault()
         const text = await getClipboardText()
         if (text) {
           const start = activeEl.selectionStart
@@ -88,6 +89,11 @@ onMounted(() => {
         }
         return
       }
+
+      // Requirement: Block AI response pasting unless on the Main Screen or in Compact Mode
+      if (isBlockingModalActive.value) return
+
+      e.preventDefault()
 
       if (isCompact.value) {
         window.dispatchEvent(new CustomEvent('cm-compact-paste', { detail: { isAuto: isShift } }))

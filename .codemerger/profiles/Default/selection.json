@@ -79,10 +79,10 @@
   },
   {
     "path": "src/core/project_config.py",
-    "mtime": 1776772178.5999467,
-    "hash": "7e63c0864b42fc4a153c4b0b9f966408cb9be270",
-    "tokens": 4248,
-    "lines": 478,
+    "mtime": 1777542342.4248044,
+    "hash": "049112e873c4286245c9c037c94fe9d8cf1e6db5",
+    "tokens": 4304,
+    "lines": 491,
     "ignore_tokens": false
   },
   {
@@ -94,10 +94,10 @@
   },
   {
     "path": "src/core/project_manager.py",
-    "mtime": 1776933525.4306507,
-    "hash": "26fee206bab3599f62fa18329ab7984fd9ca136a",
-    "tokens": 1292,
-    "lines": 172
+    "mtime": 1777542342.4792564,
+    "hash": "353051665757a48233e9195ca6eb0332ea447a43",
+    "tokens": 1475,
+    "lines": 195
   },
   {
     "path": "src/core/file_scanner.py",
@@ -345,11 +345,11 @@
   },
   {
     "path": "src/api_parts/starter_api.py",
-    "tokens": 343,
+    "tokens": 365,
     "ignoreTokens": false,
-    "lines": 43,
-    "mtime": 1776501930.8874934,
-    "hash": "d9850ce787f8f98014845237476c5b93d7e0d385"
+    "lines": 46,
+    "mtime": 1777541231.9663372,
+    "hash": "9b8cff39802eef49b137595ef0e879a0eed68320"
   },
   {
     "path": "src/api.py",
@@ -413,11 +413,11 @@
   },
   {
     "path": "frontend/src/composables/globalState.js",
-    "tokens": 403,
+    "tokens": 588,
     "ignoreTokens": false,
-    "lines": 62,
-    "mtime": 1776762654.7706957,
-    "hash": "d41d67aeec49753dc424b0a246a268ae3f949d02"
+    "lines": 86,
+    "mtime": 1777541773.7333603,
+    "hash": "b0e7a3c119cb9508b526b6a7060c63c5a06aef7f"
   },
   {
     "path": "frontend/src/composables/infoMode.js",
@@ -527,11 +527,11 @@
   },
   {
     "path": "frontend/src/composables/useAppState.js",
-    "tokens": 936,
+    "tokens": 968,
     "ignoreTokens": false,
-    "lines": 120,
-    "mtime": 1777205536.0991993,
-    "hash": "d17cb9aa4bedd62dd849a0c8eb77e2eeca0a4d1b"
+    "lines": 123,
+    "mtime": 1777541497.8437252,
+    "hash": "867e882b681d05fa7ba04aaab0cecc8940c0b6e2"
   },
   {
     "path": "frontend/src/composables/useEscapeKey.js",
@@ -560,19 +560,19 @@
   },
   {
     "path": "frontend/src/App.vue",
-    "tokens": 1609,
+    "tokens": 1653,
     "ignoreTokens": false,
-    "lines": 198,
-    "mtime": 1776785146.9075327,
-    "hash": "661c2396b908340632d26153f277621621672f06"
+    "lines": 204,
+    "mtime": 1777541497.9058259,
+    "hash": "7396f6765fd6f26b649f48f2af33a1413d8ecad5"
   },
   {
     "path": "frontend/src/views/MainView.vue",
-    "tokens": 2033,
+    "tokens": 2030,
     "ignoreTokens": false,
-    "lines": 246,
-    "mtime": 1777198018.8479948,
-    "hash": "45964f876aa60861456a39bc380b091dfcd95f53"
+    "lines": 250,
+    "mtime": 1777541497.9724276,
+    "hash": "97b088cf5b69d56e45225bea0b8f9c86dee3d1be"
   },
   {
     "path": "frontend/src/views/CompactView.vue",
@@ -616,11 +616,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardNav.vue",
-    "tokens": 1624,
+    "tokens": 1660,
     "ignoreTokens": false,
-    "lines": 191,
-    "mtime": 1777205174.042339,
-    "hash": "50de5d73f01f5cf652b5a5b0f6e61c96e08340a2"
+    "lines": 198,
+    "mtime": 1777541498.0380814,
+    "hash": "b19306b3ecd4bb781d1ebf877cf1e5a90880eb55"
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
@@ -664,11 +664,11 @@
   },
   {
     "path": "frontend/src/components/ReviewModal.vue",
-    "tokens": 3202,
+    "tokens": 3319,
     "ignoreTokens": false,
-    "lines": 318,
-    "mtime": 1777196022.7862797,
-    "hash": "7e210192ab3818db53eff09c71958c0d94333cb6"
+    "lines": 331,
+    "mtime": 1777541231.816578,
+    "hash": "c5feb6d9645161741e1ac744878dc939bbef51dd"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
@@ -685,11 +685,11 @@
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewChangesTab.vue",
-    "tokens": 2546,
+    "tokens": 2611,
     "ignoreTokens": false,
-    "lines": 297,
-    "mtime": 1777204338.220045,
-    "hash": "8fe93f0a09eb58fad5fdde841286a3fb89151524"
+    "lines": 302,
+    "mtime": 1777541231.8798406,
+    "hash": "2ffbbf1e632da1d3b0e45c4369a925b46a7b67e5"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewVerificationTab.vue",
@@ -822,11 +822,11 @@
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",
-    "tokens": 4477,
+    "tokens": 4487,
     "ignoreTokens": false,
-    "lines": 495,
-    "mtime": 1776946912.4675338,
-    "hash": "c85f364e729322ed83a16d99b85fb012b2480b1c"
+    "lines": 496,
+    "mtime": 1777541498.1017072,
+    "hash": "c01903b1e2dda65528fa3b8e70e30d86ea67a3fb"
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",

@@ -17,6 +17,7 @@ import StepSuccess from './starter-steps/StepSuccess.vue'
 const emit = defineEmits(['close'])
 const {
   config,
+  showStarterModal,
   resizeWindow,
   getStarterSession,
   saveStarterSession,
@@ -88,7 +89,7 @@ const handleClose = async (wasCreated = false) => {
   if (window.pywebview) {
     await window.pywebview.api.on_starter_close(wasCreated)
   }
-  emit('close')
+  showStarterModal.value = false
 }
 
 useEscapeKey(() => handleClose())
