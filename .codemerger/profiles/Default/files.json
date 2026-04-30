@@ -74,7 +74,9 @@
     "frontend/src/components/starter-steps/StarterTodo.vue",
     "frontend/src/components/starter-steps/StepSuccess.vue",
     "frontend/src/components/starter-steps/widgets/FullTextReviewer.vue",
+    "frontend/src/components/starter-steps/widgets/InteractivePivot.vue",
     "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
+    "frontend/src/components/starter-steps/widgets/SegmentedSidebar.vue",
     "frontend/src/components/visualizer/VisualizerCodeViewer.vue",
     "frontend/src/components/visualizer/VisualizerDetails.vue",
     "frontend/src/components/visualizer/VisualizerExplorer.vue",
@@ -171,5 +173,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 203776
+  "total_tokens": 203674
 }

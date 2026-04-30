@@ -134,7 +134,7 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
 
   if (notes) {
     notesContent.value = notes
-    showNotesModal.value = true
+    showNotesModal = true
   }
 
   if (rewriteIsMergedMode.value) {
@@ -236,7 +236,7 @@ const handleReset = () => {
     </template>
 
     <template v-else>
-      <div class="max-w-3xl mx-auto w-full flex flex-col h-full space-y-4 text-gray-100">
+      <div class="max-w-3xl mx-auto w-full flex flex-col flex-grow space-y-4 text-gray-100 min-h-0">
         <div class="shrink-0">
           <h3 class="text-2xl font-bold text-white">Project Concept</h3>
           <p class="text-gray-400 mt-1">Describe what you want to build. Provide as much detail as you can; features, logic, and goals.</p>
@@ -245,17 +245,16 @@ const handleReset = () => {
         <textarea
           v-model="pData.goal"
           v-info="'starter_concept_goal'"
-          class="bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue selectable text-lg leading-relaxed custom-scrollbar"
-          :class="showPasteArea ? 'h-48' : 'h-96'"
+          class="bg-cm-input-bg border border-gray-600 text-white rounded p-6 outline-none focus:border-cm-blue selectable text-lg leading-relaxed custom-scrollbar flex-grow min-h-[150px]"
           :style="{ fontSize: editorFontSize + 'px' }"
           :placeholder="placeholderGoal"
         ></textarea>
 
-        <div v-if="isGoalFilled || showPasteArea" class="bg-gray-800 p-6 rounded border border-gray-700 space-y-4 shadow-xl">
-          <button v-if="isGoalFilled" @click="generateConcept" v-info="'starter_concept_gen'" class="w-full bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 rounded transition-all active:scale-95 shadow-lg">1. Copy Prompt for LLM</button>
+        <div v-if="isGoalFilled || showPasteArea" class="bg-gray-800 p-6 rounded border border-gray-700 space-y-4 shadow-xl flex flex-col min-h-0" :class="showPasteArea ? 'flex-[2] min-h-[250px]' : 'shrink-0'">
+          <button v-if="isGoalFilled" @click="generateConcept" v-info="'starter_concept_gen'" class="w-full bg-cm-blue hover:bg-blue-500 text-white font-bold py-3 rounded transition-all active:scale-95 shadow-lg shrink-0">1. Copy Prompt for LLM</button>
           <template v-if="showPasteArea">
-            <textarea v-model="pData.concept_llm_response" v-info="'starter_gen_response'" class="w-full h-80 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue text-sm font-mono custom-scrollbar" :style="{ fontSize: (editorFontSize - 2) + 'px' }" placeholder="Paste LLM response here..."></textarea>
-            <button @click="processConcept" v-info="'starter_gen_process'" :disabled="!pData.concept_llm_response" class="w-full bg-cm-green text-white font-bold py-3 rounded disabled:opacity-50 transition-all active:scale-95 shadow-lg">2. Process & Review</button>
+            <textarea v-model="pData.concept_llm_response" v-info="'starter_gen_response'" class="w-full flex-grow min-h-[150px] bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue text-sm font-mono custom-scrollbar" :style="{ fontSize: (editorFontSize - 2) + 'px' }" placeholder="Paste LLM response here..."></textarea>
+            <button @click="processConcept" v-info="'starter_gen_process'" :disabled="!pData.concept_llm_response" class="w-full bg-cm-green text-white font-bold py-3 rounded disabled:opacity-50 transition-all active:scale-95 shadow-lg shrink-0">2. Process & Review</button>
           </template>
         </div>
       </div>

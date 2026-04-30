@@ -236,62 +236,62 @@ const handleReset = () => {
 }
 </script>
 
-    <template>
-      <div class="h-full flex flex-col relative" @wheel.ctrl.prevent="handleZoom">
-        <template v-if="pData.design_md">
-          <FullTextReviewer
-            title="Review System Design"
-            :content="pData.design_md"
-            @update:content="val => pData.design_md = val"
-            v-model:showQuestions="showQuestions"
-            :baselines="pData.design_baselines"
-            :questions="['Are the data models normalized correctly?', 'Does the component breakdown cover all user flows?']"
-            :getQuestionPrompt="getMergedQuestionPrompt"
-            :isLookingBack="isLookingBack"
-            reviewInfoKey="starter_design_review"
-            nextButtonText="Next Step: TODO Plan"
-            @reset="handleReset"
-            @rewrite="openRewriteModal(true)"
-            @pivot="handlePivot"
-            @next="$emit('next')"
-          />
-        </template>
+<template>
+  <div class="h-full flex flex-col relative" @wheel.ctrl.prevent="handleZoom">
+    <template v-if="pData.design_md">
+      <FullTextReviewer
+        title="Review System Design"
+        :content="pData.design_md"
+        @update:content="val => pData.design_md = val"
+        v-model:showQuestions="showQuestions"
+        :baselines="pData.design_baselines"
+        :questions="['Are the data models normalized correctly?', 'Does the component breakdown cover all user flows?']"
+        :getQuestionPrompt="getMergedQuestionPrompt"
+        :isLookingBack="isLookingBack"
+        reviewInfoKey="starter_design_review"
+        nextButtonText="Next Step: TODO Plan"
+        @reset="handleReset"
+        @rewrite="openRewriteModal(true)"
+        @pivot="handlePivot"
+        @next="$emit('next')"
+      />
+    </template>
 
-        <template v-else-if="Object.keys(pData.design_segments).length">
-          <SegmentedReviewer
-            :segments="pData.design_segments"
-            :signoffs="pData.design_signoffs"
-            :baselines="pData.design_baselines"
-            v-model:showQuestions="showQuestions"
-            :orderedKeys="DESIGN_ORDER"
-            :friendlyNames="getFriendlyNames()"
-            :questionsMap="designQuestionsMap"
-            :getQuestionPrompt="getSegmentedQuestionPrompt"
-            @reset="handleReset"
-            @rewrite="openRewriteModal(false)"
-            @pivot="handlePivot"
-            @merge="mergeDesign"
-          />
-        </template>
+    <template v-else-if="Object.keys(pData.design_segments).length">
+      <SegmentedReviewer
+        :segments="pData.design_segments"
+        :signoffs="pData.design_signoffs"
+        :baselines="pData.design_baselines"
+        v-model:showQuestions="showQuestions"
+        :orderedKeys="DESIGN_ORDER"
+        :friendlyNames="getFriendlyNames()"
+        :questionsMap="designQuestionsMap"
+        :getQuestionPrompt="getSegmentedQuestionPrompt"
+        @reset="handleReset"
+        @rewrite="openRewriteModal(false)"
+        @pivot="handlePivot"
+        @merge="mergeDesign"
+      />
+    </template>
 
-        <template v-else>
-          <div class="max-w-3xl mx-auto w-full space-y-6 text-gray-100 pb-12">
-            <h3 class="text-2xl font-bold text-white">Generate System Design</h3>
+    <template v-else>
+      <div class="max-w-3xl mx-auto w-full space-y-6 text-gray-100 flex flex-col flex-grow min-h-0">
+        <h3 class="text-2xl font-bold text-white shrink-0">Generate System Design</h3>
 
-            <div class="flex justify-between items-center bg-gray-800 p-6 rounded border border-gray-700 shadow-lg">
-              <div class="text-gray-300"><span class="font-bold text-white">1.</span> Copy prompt for LLM</div>
-              <button @click="generateDesign" v-info="'starter_design_gen'" class="bg-cm-blue hover:bg-blue-500 text-white px-6 py-2.5 rounded shadow transition-colors font-bold">Copy Design Prompt</button>
-            </div>
+        <div class="flex justify-between items-center bg-gray-800 p-6 rounded border border-gray-700 shadow-lg shrink-0">
+          <div class="text-gray-300"><span class="font-bold text-white">1.</span> Copy prompt for LLM</div>
+          <button @click="generateDesign" v-info="'starter_design_gen'" class="bg-cm-blue hover:bg-blue-500 text-white px-6 py-2.5 rounded shadow transition-colors font-bold">Copy Design Prompt</button>
+        </div>
 
-            <div v-if="showPasteArea" class="bg-gray-800 p-6 rounded border border-gray-700 shadow-lg space-y-4">
-              <div class="text-gray-300"><span class="font-bold text-white">2.</span> Paste LLM Response (with tags)</div>
-              <textarea v-model="pData.design_llm_response" class="w-full h-96 bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste response here..."></textarea>
-              <div class="flex justify-end">
-                <button @click="processDesign" :disabled="!pData.design_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-10 py-3 rounded shadow-lg transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">Process & Review</button>
-              </div>
-            </div>
+        <div v-if="showPasteArea" class="bg-gray-800 p-6 rounded border border-gray-700 shadow-lg space-y-4 flex flex-col flex-grow min-h-0">
+          <div class="text-gray-300 shrink-0"><span class="font-bold text-white">2.</span> Paste LLM Response (with tags)</div>
+          <textarea v-model="pData.design_llm_response" class="w-full flex-grow min-h-[150px] bg-cm-input-bg border border-gray-600 text-white rounded p-4 outline-none focus:border-cm-blue custom-scrollbar selectable" :style="{ fontSize: editorFontSize + 'px' }" placeholder="Paste response here..."></textarea>
+          <div class="flex justify-end shrink-0">
+            <button @click="processDesign" :disabled="!pData.design_llm_response" class="bg-cm-green hover:bg-green-600 text-white px-10 py-3 rounded shadow-lg transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">Process & Review</button>
           </div>
-        </template>
+        </div>
+      </div>
+    </template>
 
     <RewriteModal
       v-if="showRewriteModal"

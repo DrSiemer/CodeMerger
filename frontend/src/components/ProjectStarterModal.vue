@@ -141,10 +141,10 @@ watch(() => pData, () => {
 
 const recalcProgress = () => {
   const hasDetails = !!pData.starting_mode
-  const hasConcept = (!Object.keys(pData.concept_segments).length) && !!pData.concept_md
+  const hasConcept = !!pData.concept_md
   const hasStack = pData.stack && pData.stack.length > 0
-  const hasDesign = (!Object.keys(pData.design_segments).length) && !!pData.design_md
-  const hasTodo = (!Object.keys(pData.todo_segments).length) && !!pData.todo_md
+  const hasDesign = !!pData.design_md
+  const hasTodo = !!pData.todo_md
 
   let targetMax = 1
   if (hasDetails) {
@@ -271,36 +271,22 @@ const activeStepsList = computed(() => {
 const isLookingBack = computed(() => currentStep.value < maxAccessibleStep.value)
 
 const isNextDisabled = computed(() => {
-  // Step 1: Starting choice is mandatory
-  if (currentStep.value === 1) {
-    return !pData.starting_mode
-  }
+  if (currentStep.value === 1) return !pData.starting_mode
 
-  // Helper to check for unaccepted changes in baselines
   const hasDiffs = (baselines) => baselines && Object.values(baselines).some(v => v !== undefined)
 
-  // Step 3 (Concept): Can only proceed if document is merged and segments are cleared
+  // Rule: If document is merged, allow proceed (ignores leftover legacy segments)
+  // If not merged, the button is disabled (user must merge from within the step component)
   if (currentStep.value === 3) {
-    if (hasDiffs(pData.concept_baselines)) return true
-    const hasMergedDoc = !!pData.concept_md.trim()
-    const hasActiveSegments = Object.keys(pData.concept_segments).length > 0
-    return !hasMergedDoc || hasActiveSegments
+    return hasDiffs(pData.concept_baselines) || !pData.concept_md.trim()
   }
 
-  // Step 5 (Design): Can only proceed if plan is merged and segments are cleared
   if (currentStep.value === 5) {
-    if (hasDiffs(pData.design_baselines)) return true
-    const hasMergedDoc = !!pData.design_md.trim()
-    const hasActiveSegments = Object.keys(pData.design_segments).length > 0
-    return !hasMergedDoc || hasActiveSegments
+    return hasDiffs(pData.design_baselines) || !pData.design_md.trim()
   }
 
-  // Step 6 (TODO): Can only proceed if plan is merged and segments are cleared
   if (currentStep.value === 6) {
-    if (hasDiffs(pData.todo_baselines)) return true
-    const hasMergedDoc = !!pData.todo_md.trim()
-    const hasActiveSegments = Object.keys(pData.todo_segments).length > 0
-    return !hasMergedDoc || hasActiveSegments
+    return hasDiffs(pData.todo_baselines) || !pData.todo_md.trim()
   }
 
   return false
@@ -342,34 +328,34 @@ const nextStep = () => {
     const targetStep = activeStepsList.value[idx + 1]
 
     if (currentStep.value === 3) {
-      if (Object.keys(pData.concept_segments).length > 0) {
-        alert("You must merge the concept segments into a final document before proceeding.")
-        return
-      }
       if (!pData.concept_md) {
-        alert("The concept document cannot be empty.")
+        if (Object.keys(pData.concept_segments).length > 0) {
+          alert("You must merge the concept segments into a final document before proceeding.")
+        } else {
+          alert("The concept document cannot be empty.")
+        }
         return
       }
     }
 
     if (currentStep.value === 5) {
-      if (Object.keys(pData.design_segments).length > 0) {
-        alert("You must merge the System Design into a final document before proceeding.")
-        return
-      }
       if (!pData.design_md) {
-        alert("The system design cannot be empty.")
+        if (Object.keys(pData.design_segments).length > 0) {
+          alert("You must merge the System Design into a final document before proceeding.")
+        } else {
+          alert("The system design cannot be empty.")
+        }
         return
       }
     }
 
     if (currentStep.value === 6) {
-      if (Object.keys(pData.todo_segments).length > 0) {
-        alert("You must merge the TODO plan into a final document before proceeding.")
-        return
-      }
       if (!pData.todo_md) {
-        alert("The TODO plan cannot be empty.")
+        if (Object.keys(pData.todo_segments).length > 0) {
+          alert("You must merge the TODO plan into a final document before proceeding.")
+        } else {
+          alert("The TODO plan cannot be empty.")
+        }
         return
       }
     }

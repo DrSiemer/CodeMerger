@@ -884,11 +884,11 @@
   },
   {
     "path": "frontend/src/components/starter-steps/widgets/SegmentedReviewer.vue",
-    "tokens": 4631,
+    "tokens": 2686,
     "ignoreTokens": false,
-    "lines": 384,
-    "mtime": 1777563040.4250176,
-    "hash": "3cd1822893b30571c1db907cebc0159de5929d43"
+    "lines": 200,
+    "mtime": 1777582555.105237,
+    "hash": "4dc39b970fbdff32c3d7d5c7edc7f5fdf4874c5b"
   },
   {
     "path": "frontend/src/components/starter-steps/ReviewerQuestions.vue",
@@ -938,10 +938,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterConcept.vue",
-    "tokens": 2530,
-    "lines": 277,
-    "mtime": 1777200449.6100328,
-    "hash": "a281c89c439daa443daedfcd6b7d13027cf80b63"
+    "tokens": 2565,
+    "lines": 276,
+    "mtime": 1777583159.70557,
+    "hash": "f9ce6f4c69a8153bddd19bc014587a8f355a9704"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
@@ -952,32 +952,32 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterDesign.vue",
-    "tokens": 2688,
+    "tokens": 2719,
     "lines": 310,
-    "mtime": 1777200449.2769103,
-    "hash": "713a03e9ac57310f7ee2b686153e6627e219670a"
+    "mtime": 1777583159.8136394,
+    "hash": "5f5a947ed02694be15e5f0da1ec09d8124cf7ab3"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterTodo.vue",
-    "tokens": 2444,
+    "tokens": 2475,
     "lines": 278,
-    "mtime": 1777200449.1889138,
-    "hash": "7d0c58f40e291db8e1f072fe435dfcc52b801eab"
+    "mtime": 1777583160.3241017,
+    "hash": "6c575cd0b008523460e129daad8050437b0734e9"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterGenerate.vue",
-    "tokens": 1943,
+    "tokens": 1968,
     "lines": 179,
-    "mtime": 1777200449.1004539,
-    "hash": "a083e85bebcfcfaca81fade282825dea1c2d4fd6"
+    "mtime": 1777583038.663366,
+    "hash": "fc9e7f8d728bf8df545abb779f5c97f904ca7a69"
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",
-    "tokens": 4576,
+    "tokens": 4374,
     "ignoreTokens": false,
-    "lines": 502,
-    "mtime": 1777550363.8841822,
-    "hash": "162ac960afcf46628605f66b0db36e7433a32784"
+    "lines": 488,
+    "mtime": 1777582749.255648,
+    "hash": "fdab8c9b80570619ee7f10080db8cbb6dd69ad6c"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",
@@ -1238,5 +1238,19 @@
     "lines": 90,
     "mtime": 1777582353.514726,
     "hash": "42ea9a55644c04ccd56ec6d8815b37f71c397e9e"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/widgets/SegmentedSidebar.vue",
+    "tokens": 925,
+    "lines": 75,
+    "mtime": 1777582554.9101944,
+    "hash": "d7d3e33f34006d1304c94622c7c753aad838eed2"
+  },
+  {
+    "path": "frontend/src/components/starter-steps/widgets/InteractivePivot.vue",
+    "tokens": 998,
+    "lines": 82,
+    "mtime": 1777582555.005235,
+    "hash": "c00f35f21ca01a8aa3d1b455187fd6f9198265fe"
   }
 ]
