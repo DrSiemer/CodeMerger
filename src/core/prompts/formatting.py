@@ -13,7 +13,16 @@ FORMATTING_INSTRUCTION_TEMPLATE = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION
    - **<ANSWERS TO DIRECT USER QUESTIONS>**: If the user asked a specific question (usually ending with a '?'), answer it here. If there is no question mark in the prompt, there is no question. In that case, this block MUST remain empty (use a single dash `-`). Do NOT fill it with filler text like "None" or "No questions".
    - **<CHANGES>**: List of behavioral, algorithmic, or visual changes.
 
-3. **{mode_instruction}**
+3. **SURGICAL DIFFS (FAST APPLY):**
+   - Only output the specific changes using ORIGINAL/UPDATED blocks.
+   - **Baseline Awareness (STRICT REQUIREMENT):** Your reference for the ORIGINAL block MUST be the *current* state of the code as it exists *now*. If we have been editing a file throughout this session, the ORIGINAL block must reflect the code *after* your most recent modification.
+   - **EVOLUTIONARY CONTEXT:** Do NOT use the initial source code from the start of the conversation as a reference if it has since been modified. The evolved state is your new and only baseline.
+   - **REPLACE ALL POLICY:** If any single segment you want to replace in this file is more than 50 lines of code, or if you are replacing the ENTIRE content of a file, you MUST use the Replace All shortcut.
+   - **Replace All Shortcut:** Put `--==[ REPLACE ALL ]==--` inside the ORIGINAL block instead of repeating code verbatim.
+   - The ORIGINAL section must match the current state of the code exactly (including indentation).
+   - **UNIQUENESS REQUIREMENT:** Every ORIGINAL block MUST be unique within the file. If the code you are replacing appears multiple times, include enough surrounding context (lines before/after) to make the block unique and non-ambiguous.
+   - You can provide multiple blocks per file.
+   - **NEW FILES:** If you are creating a file that does not yet exist in the project, do NOT use ORIGINAL/UPDATED blocks. Simply provide the full content of the file.
 
 4. **EVOLVED BASELINE AWARENESS (SESSION CONTEXT):**
    - You must acknowledge that the codebase evolves. If a file has been modified in previous turns of this conversation, that modified version is your only valid baseline for the ORIGINAL block.
@@ -34,7 +43,19 @@ FORMATTING_INSTRUCTION_TEMPLATE = """**CRITICAL INSTRUCTIONS FOR CODE GENERATION
 
 {marker_prefix}{marker_file}`path/to/file.ext` ---
 ```[language_id]
-{example_content}
+<<<<<<< ORIGINAL
+[existing code to replace]
+=======
+[new code]
+>>>>>>> UPDATED
+
+OR for total rewrites / NEW files:
+
+<<<<<<< ORIGINAL
+--==[ REPLACE ALL ]==--
+=======
+[entirely new file content]
+>>>>>>> UPDATED
 ```
 {marker_prefix}{marker_eof} ---
 
@@ -91,9 +112,9 @@ You MUST format your EXACT output using this skeleton. Do not deviate from this 
 AUTOMATION_WARNING_TEMPLATE = "CRITICAL: I am using an automated parser. Please begin your response directly with the <INTRO> tag. You MUST use the exact XML tags and {marker_prefix}{marker_file} wrappers shown in the template. If you use `// ...` or `[rest of code]`, the parser will crash and your response will be useless. You must mirror every single line of the file (or the exact surgical blocks) without omitting lines within the block."
 
 FORMAT_CORRECTION_PROMPT_TEMPLATE = """Please follow the output format strictly as described in your instructions. Your previous response did not fully comply with the required formatting standards. Specifically, please ensure that:
-- ALL commentary and explanations must be placed inside one of the allowed XML tags ({LT}{IN_T}{RT}, {LT}{ANS_W}{RT}, {LT}{CHA_N}{RT}, {LT}{VER_I}{RT}, {LT}{UNC_H}{RT}).
+- ALL commentary and explanations must be placed inside one of the allowed XML tags ({{LT}}{{IN_T}}{{RT}}, {{LT}}{{ANS_W}}{{RT}}, {{LT}}{{CHA_N}}{{RT}}, {{LT}}{{VER_I}}{{RT}}, {{LT}}{{UNC_H}}{{RT}}).
 - No text or commentary exists outside of these tags.
-- File markers are present and correctly formatted ({PRE}File: `path` --- and {PRE}End of file ---).
+- File markers are present and correctly formatted ({{PRE}}File: `path` --- and {{PRE}}End of file ---).
 - You provide the full, complete code for modified files without using placeholders like '// ... rest of code'.
 Please re-output the response correctly."""
 

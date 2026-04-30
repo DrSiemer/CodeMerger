@@ -57,10 +57,10 @@
   },
   {
     "path": "src/core/utils.py",
-    "mtime": 1776715213.2048545,
-    "hash": "16bd079680df2348d4a9e09a02dff63d2a65a272",
-    "tokens": 3354,
-    "lines": 440,
+    "mtime": 1777560268.4235325,
+    "hash": "be269772bb7db7a111f90e3c01b29d2f02228637",
+    "tokens": 3346,
+    "lines": 439,
     "ignore_tokens": false
   },
   {
@@ -94,10 +94,10 @@
   },
   {
     "path": "src/app_state.py",
-    "mtime": 1776714751.9802248,
-    "hash": "c02f25085b70708f455d8a3fcee7ace303a17433",
-    "tokens": 1561,
-    "lines": 166
+    "mtime": 1777560268.4803429,
+    "hash": "038772936801709fec35301ba9165e71dce173ba",
+    "tokens": 1515,
+    "lines": 163
   },
   {
     "path": "src/core/project_manager.py",
@@ -123,10 +123,10 @@
   },
   {
     "path": "src/core/merger.py",
-    "mtime": 1776933525.4914227,
-    "hash": "fdd249d50b56599b8e5fbb6b2f10b107c91d3bdd",
-    "tokens": 1162,
-    "lines": 151
+    "mtime": 1777561732.6723628,
+    "hash": "253d6db9b2171c144cf4a978989bb4488c321950",
+    "tokens": 1078,
+    "lines": 144
   },
   {
     "path": "src/core/replacer.py",
@@ -173,10 +173,10 @@
   },
   {
     "path": "src/core/prompts/__init__.py",
-    "tokens": 432,
-    "lines": 63,
-    "mtime": 1777195029.5318127,
-    "hash": "62f505ce5300aeb10414962639278fba63488dc5"
+    "tokens": 421,
+    "lines": 61,
+    "mtime": 1777561724.9033852,
+    "hash": "1c420991beedf3647ded059e9732f450cd8cdcfb"
   },
   {
     "path": "src/core/prompts/main.py",
@@ -187,10 +187,10 @@
   },
   {
     "path": "src/core/prompts/surgical.py",
-    "tokens": 8,
-    "lines": 1,
-    "mtime": 1776937592.9210913,
-    "hash": "55db41fb66c0aa62facd7693f442e5d9ab068804"
+    "tokens": 635,
+    "lines": 41,
+    "mtime": 1777560268.626366,
+    "hash": "3691a2cb6d05cf245a30bf2cbbf1bcf208c31be7"
   },
   {
     "path": "src/core/prompts/formatting.py",
@@ -296,11 +296,11 @@
   },
   {
     "path": "src/api_parts/clipboard_api.py",
-    "tokens": 1615,
+    "tokens": 1604,
     "ignoreTokens": false,
-    "lines": 183,
-    "mtime": 1777198018.5422797,
-    "hash": "42c37c547f71d10d4badde8e458037d5f88dd76a"
+    "lines": 182,
+    "mtime": 1777560268.5758107,
+    "hash": "cf2318c993825e461abda98eed8134a9233a8198"
   },
   {
     "path": "src/api_parts/changes_api.py",
@@ -437,11 +437,11 @@
   },
   {
     "path": "frontend/src/utils/info/mainInfo.js",
-    "tokens": 1373,
+    "tokens": 1320,
     "ignoreTokens": false,
-    "lines": 47,
-    "mtime": 1777559456.4007468,
-    "hash": "dfb14f4ee2159767681b1d502e81ce900e5e018d"
+    "lines": 46,
+    "mtime": 1777560268.8023653,
+    "hash": "8d2f2d0fa4e8a6cd77e42ccd6a16ea700ccaf512"
   },
   {
     "path": "frontend/src/utils/info/fileManagerInfo.js",
@@ -508,11 +508,11 @@
   },
   {
     "path": "frontend/src/composables/useSystem.js",
-    "tokens": 952,
+    "tokens": 888,
     "ignoreTokens": false,
-    "lines": 148,
-    "mtime": 1776935110.4470308,
-    "hash": "b9bdf2d2119e1fd576dbc11145a8d5906f69e1ee"
+    "lines": 139,
+    "mtime": 1777560268.678892,
+    "hash": "b1e88b155663d103ec67e4bb7c930a44742cf46e"
   },
   {
     "path": "frontend/src/composables/useProject.js",
@@ -659,11 +659,11 @@
   },
   {
     "path": "frontend/src/components/dashboard/DashboardActions.vue",
-    "tokens": 2011,
+    "tokens": 1886,
     "ignoreTokens": false,
-    "lines": 202,
-    "mtime": 1777559814.5676036,
-    "hash": "f4ca588a6010bf06e326b2f59ed714483e685915"
+    "lines": 190,
+    "mtime": 1777560268.7393947,
+    "hash": "a3926f11800517a073847c2a73657b8365353e5e"
   },
   {
     "path": "frontend/src/components/FileTreeNode.vue",

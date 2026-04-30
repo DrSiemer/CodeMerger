@@ -48,8 +48,7 @@ class ClipboardApi:
             base_dir,
             project_config,
             use_wrapper,
-            self.app_state.copy_merged_prompt,
-            enable_fast_apply=self.app_state.enable_fast_apply
+            self.app_state.copy_merged_prompt
         )
 
         if final_content is not None:

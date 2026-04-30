@@ -16,8 +16,7 @@ const {
   copyCode,
   processPaste,
   clearPasteData,
-  config,
-  toggleFastApply
+  config
 } = useAppState()
 
 const isCopyingInstructions = ref(false)
@@ -81,17 +80,6 @@ const pasteTooltipText = computed(() => {
               v-info="'useful_prompts'"
             >
               <Sparkles class="w-4 h-4" />
-            </button>
-
-            <!-- Mini Fast Apply Toggle -->
-            <button
-              @click="toggleFastApply"
-              v-info="'fast_apply_toggle'"
-              class="transition-all duration-300 p-1 rounded hover:bg-white/5"
-              :class="(config.enable_fast_apply ?? true) ? 'text-cm-blue' : 'text-gray-600'"
-              title="Toggle Fast Apply (Surgical Diffs)"
-            >
-              <Zap class="w-4 h-4" :fill="(config.enable_fast_apply ?? true) ? 'currentColor' : 'none'" />
             </button>
           </div>
         </div>

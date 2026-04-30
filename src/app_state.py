@@ -30,7 +30,6 @@ class AppState:
         self.enable_ultra_compact_mode = self.config.get('enable_ultra_compact_mode', False)
 
         self.info_mode_active = self.config.get('info_mode_active', True)
-        self.enable_fast_apply = self.config.get('enable_fast_apply', True)
 
         # Transient flag for cross-window signaling
         self.open_fm_on_restore = False
@@ -95,7 +94,6 @@ class AppState:
         disk_config['enable_compact_mode_on_minimize'] = self.enable_compact_mode_on_minimize
         disk_config['enable_ultra_compact_mode'] = self.enable_ultra_compact_mode
         disk_config['info_mode_active'] = self.info_mode_active
-        disk_config['enable_fast_apply'] = self.enable_fast_apply
 
         # Preserve geometry if it was updated in our local config dict (e.g., during window move/resize)
         if 'main_window_geom' in self.config:
@@ -117,7 +115,6 @@ class AppState:
         self.enable_compact_mode_on_minimize = self.config.get('enable_compact_mode_on_minimize', False)
         self.enable_ultra_compact_mode = self.config.get('enable_ultra_compact_mode', False)
         self.info_mode_active = self.config.get('info_mode_active', True)
-        self.enable_fast_apply = self.config.get('enable_fast_apply', True)
         self.check_for_updates = get_setting('AutomaticUpdates', True)
         self.last_update_check = self.config.get('last_update_check', None)
 

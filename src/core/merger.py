@@ -1,7 +1,6 @@
 import os
 from .. import constants as c
 from .prompts import (
-    INSTR_FULL_FILE, INSTR_FAST_APPLY, EXAMPLE_FULL_FILE, EXAMPLE_FAST_APPLY,
     FORMATTING_INSTRUCTION_TEMPLATE, AUTOMATION_WARNING_TEMPLATE
 )
 from .utils import get_token_count_for_text
@@ -11,7 +10,7 @@ def get_language_from_path(path):
     _, ext = os.path.splitext(path)
     return c.LANGUAGE_MAP.get(ext.lower(), '')
 
-def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt, enable_fast_apply=False):
+def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_prompt):
     """
     Concatenates selected files into a single machine-parseable string
     Returns the final string and a status message
@@ -53,13 +52,7 @@ def generate_output_string(base_dir, project_config, use_wrapper, copy_merged_pr
         if isinstance(outro_text, (list, tuple)):
             outro_text = "\n".join(outro_text)
 
-        # Build dynamic mode-based instructions
-        mode_instruction = INSTR_FAST_APPLY if enable_fast_apply else INSTR_FULL_FILE
-        example_content = EXAMPLE_FAST_APPLY if enable_fast_apply else EXAMPLE_FULL_FILE
-
         formatting_instruction = FORMATTING_INSTRUCTION_TEMPLATE.format(
-            mode_instruction=mode_instruction,
-            example_content=example_content,
             marker_prefix=c.MARKER_PREFIX,
             marker_file=c.MARKER_FILE,
             marker_eof=c.MARKER_EOF

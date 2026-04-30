@@ -16,7 +16,6 @@ export const mainInfo = {
   "useful_prompts_instruction": "Selection Tip: Click any prompt title to copy the text to your clipboard. The window will close automatically after copying.",
   "useful_prompts_item": "Copy Action: Click to copy these specific instructions to your clipboard.",
   "useful_prompts_expand": "Toggle Description: Click to reveal or hide a detailed explanation of what this prompt instructs the AI to do.",
-  "fast_apply_toggle": "Fast Apply: Toggles Surgical Diff mode. When ON, the AI is instructed to output only specific ORIGINAL/UPDATED blocks rather than full files, saving tokens and speed. Turn OFF if using weaker models that struggle with patching.",
   "settings": "Application Settings: Configure application behavior.",
   "starter": "Project Starter: Launch a guided workflow for starting new projects. Assists you in creating a concept, tech stack, and step-by-step implementation plan using AI.",
   "visualizer": "Architecture Explorer: Explore a semantic map of your project. This tool uses AI to organize your Merge List into logical layers, making it easier to navigate complex codebases and copy code for specific features.",
