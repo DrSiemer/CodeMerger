@@ -240,19 +240,19 @@
   },
   {
     "path": "src/core/window_compact.py",
-    "tokens": 1164,
+    "tokens": 1287,
     "ignoreTokens": false,
-    "lines": 107,
-    "mtime": 1777194754.012224,
-    "hash": "1c3df25a9a698e003db14ea7a91dd66b2a395584"
+    "lines": 119,
+    "mtime": 1777562544.6729827,
+    "hash": "4a03412be33e096708e36925e1592c207d80e016"
   },
   {
     "path": "src/core/window_manager.py",
-    "tokens": 3998,
+    "tokens": 3960,
     "ignoreTokens": false,
-    "lines": 487,
-    "mtime": 1777552932.1412122,
-    "hash": "064c71ae322c944c283ba3064a26493f22ace4ab"
+    "lines": 484,
+    "mtime": 1777562544.4739914,
+    "hash": "621296cda15eb201f5f46b76d2e6b9d77eaf5392"
   },
   {
     "path": "src/api_parts/base_api.py",

@@ -262,10 +262,7 @@ class WindowManager:
                     if self._current_main_monitor is None:
                         self._current_main_monitor = current_mon
                     elif self._current_main_monitor != current_mon:
-                        log.info("Main window moved to a different monitor. Resetting compact mode position.")
                         self._current_main_monitor = current_mon
-                        self.compact_mode_last_x = None
-                        self.compact_mode_last_y = None
             except Exception: pass
 
     def _on_main_resized(self, width, height):

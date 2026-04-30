@@ -57,10 +57,22 @@ def show_compact_window(manager):
     """Calculates boundaries and places the compact window using Hybrid coordination logic"""
     if not manager.compact_window or manager._is_shutting_down: return
 
+    h_mon_main = manager._get_target_monitor_handle()
+
+    # Rule: If we have a saved position, check if it's on the same monitor as the main window
     if manager.compact_mode_last_x is not None and manager.compact_mode_last_y is not None:
-        h_mon = manager._get_monitor_from_logical(manager.compact_mode_last_x, manager.compact_mode_last_y)
+        h_mon_compact = manager._get_monitor_from_logical(manager.compact_mode_last_x, manager.compact_mode_last_y)
+
+        # If the monitors match, we keep the saved position.
+        # If they don't match, the user moved the app to a new screen, so we reset to center.
+        if h_mon_compact != h_mon_main:
+            manager.compact_mode_last_x = None
+            manager.compact_mode_last_y = None
+            h_mon = h_mon_main
+        else:
+            h_mon = h_mon_compact
     else:
-        h_mon = manager._get_target_monitor_handle()
+        h_mon = h_mon_main
 
     scale = manager._get_scale_factor(h_mon)
     m_l, m_t, m_r, m_b = manager._get_monitor_work_area_phys(h_mon)
