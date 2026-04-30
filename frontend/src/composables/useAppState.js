@@ -58,13 +58,15 @@ export function useAppState() {
       project.applyProjectData(proj)
     }
 
-    if (window.pywebview) {
+    // Background reloads should not automatically close the review modal
+    // unless the project itself has changed or the plan was explicitly cleared.
+    // Explicit plan clearing is handled by the 'cm-plan-cleared' event listener.
+    if (window.pywebview && !globalState.showReviewModal.value) {
       const status = await review.checkPendingChanges()
       if (!status.exists && globalState.lastAiResponse.value) {
         globalState.lastAiResponse.value = null
         globalState.planFileStates.value = {}
         globalState.planOriginalContents.value = {}
-        globalState.showReviewModal.value = false
         globalState.revertToCompactOnClose.value = false
       }
     }

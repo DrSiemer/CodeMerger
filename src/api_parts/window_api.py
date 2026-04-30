@@ -32,6 +32,9 @@ class WindowApi:
         mgr = self._window_manager
         win = mgr.main_window
 
+        if getattr(mgr, 'main_is_maximized', False):
+            return
+
         try:
             curr_w_phys = win.width
             curr_h_phys = win.height

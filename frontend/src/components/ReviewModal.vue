@@ -24,6 +24,8 @@ const emit = defineEmits(['close'])
 const {
   lastAiResponse,
   planFileStates,
+  planOriginalContents,
+  getFileContent,
   applyFileChange,
   deleteFile,
   copyAdmonishment,
@@ -156,6 +158,21 @@ const applyAllPending = async () => {
       }
       return getTypePriority(pathA) - getTypePriority(pathB)
     })
+
+    // Ensure all original contents are captured before we start overwriting files on disk.
+    // This prevents race conditions where background reloads fetch the "new" content
+    // as the "original," which would break the Undo functionality.
+    const modifyOrDeletePaths = sortedPending
+      .filter(([path]) => !lastAiResponse.value.creations[path])
+      .map(([path]) => path)
+
+    if (modifyOrDeletePaths.length > 0) {
+      await Promise.all(modifyOrDeletePaths.map(async (path) => {
+        if (planOriginalContents.value[path] === undefined) {
+          planOriginalContents.value[path] = await getFileContent(path)
+        }
+      }))
+    }
 
     for (const [path, state] of sortedPending) {
       let type = 'modify'

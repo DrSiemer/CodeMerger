@@ -31,8 +31,8 @@ def create_main_window(manager, m_left, m_top, m_w_phys, m_h_phys, scale):
         win.events.moved += manager._on_main_moved
         win.events.resized += manager._on_main_resized
         win.events.restored += manager._on_main_restored
-        win.events.maximized += manager._on_main_restored
-        win.events.shown += manager._on_main_restored
+        win.events.maximized += manager._on_main_maximized
+        win.events.shown += manager._on_main_shown
     except AttributeError:
         pass
 

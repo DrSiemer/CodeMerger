@@ -57,6 +57,7 @@ class WindowManager:
         self.main_last_y = geom.get('y')
         self.main_last_w = geom.get('w', 1200)
         self.main_last_h = geom.get('h', 750)
+        self.main_is_maximized = geom.get('is_maximized', False)
 
         # Compact Mode Position is strictly transient and resets every session
         self.compact_mode_last_x = None
@@ -217,6 +218,10 @@ class WindowManager:
 
         if self.main_window and self.main_window.hidden:
             self.main_window.show()
+            if getattr(self, 'main_is_maximized', False):
+                try:
+                    self.main_window.maximize()
+                except Exception: pass
 
         if self.splash_window:
             self.splash_window.hide()
@@ -243,6 +248,9 @@ class WindowManager:
     def _on_main_moved(self, x, y):
         if self.main_window and not self._is_shutting_down:
             try:
+                if getattr(self, 'main_is_maximized', False):
+                    return
+
                 wx, wy = self.main_window.x, self.main_window.y
                 if wx < -10000 or wy < -10000:
                     return
@@ -263,6 +271,9 @@ class WindowManager:
     def _on_main_resized(self, width, height):
         if self.main_window and not self._is_shutting_down:
             try:
+                if getattr(self, 'main_is_maximized', False):
+                    return
+
                 wx, wy = self.main_window.x, self.main_window.y
                 if wx < -10000 or wy < -10000: return
 
@@ -273,6 +284,36 @@ class WindowManager:
             except Exception: pass
 
     def _on_main_restored(self):
+        self.main_is_maximized = False
+        if self._transitioning or self._is_shutting_down: return
+        self._transitioning = True
+        try:
+            if self.compact_window:
+                try:
+                    self.compact_window.move(-10000, -10000)
+                except Exception: pass
+                self.compact_window.hide()
+            if self.main_window:
+                self.broadcast_project_reload()
+            if self.monitor: self.monitor.update_window(self.main_window)
+        finally: self._transitioning = False
+
+    def _on_main_maximized(self):
+        self.main_is_maximized = True
+        if self._transitioning or self._is_shutting_down: return
+        self._transitioning = True
+        try:
+            if self.compact_window:
+                try:
+                    self.compact_window.move(-10000, -10000)
+                except Exception: pass
+                self.compact_window.hide()
+            if self.main_window:
+                self.broadcast_project_reload()
+            if self.monitor: self.monitor.update_window(self.main_window)
+        finally: self._transitioning = False
+
+    def _on_main_shown(self):
         if self._transitioning or self._is_shutting_down: return
         self._transitioning = True
         try:
@@ -329,7 +370,8 @@ class WindowManager:
             if self.main_last_x is not None and self.main_last_y is not None:
                 self.api.app_state.config['main_window_geom'] = {
                     'x': int(self.main_last_x), 'y': int(self.main_last_y),
-                    'w': int(self.main_last_w), 'h': int(self.main_last_h)
+                    'w': int(self.main_last_w), 'h': int(self.main_last_h),
+                    'is_maximized': getattr(self, 'main_is_maximized', False)
                 }
 
             # Execute reconciled save to implement "Last Closed Wins" for Active Project
@@ -360,7 +402,14 @@ class WindowManager:
                 self.compact_window.hide()
             if self.main_window:
                 self.main_window.show()
-                self.main_window.restore()
+                if getattr(self, 'main_is_maximized', False):
+                    try:
+                        self.main_window.maximize()
+                    except Exception: pass
+                else:
+                    try:
+                        self.main_window.restore()
+                    except Exception: pass
                 self.broadcast_project_reload()
                 if trigger_fm:
                     self.trigger_file_manager_in_main()
