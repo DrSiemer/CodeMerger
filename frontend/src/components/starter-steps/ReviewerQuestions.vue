@@ -18,7 +18,7 @@ const props = defineProps({
 
 const currentIndex = ref(0)
 const isCopied = ref(false)
-const isCustom = ref(false)
+const isCustom = ref(true)
 const customText = ref('')
 
 watch(() => props.questions, () => {
@@ -69,15 +69,6 @@ const isCopyDisabled = computed(() => {
 
         <div class="flex bg-gray-800 rounded p-0.5 border border-gray-700">
           <button
-            @click="isCustom = false"
-            class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors flex items-center space-x-1"
-            :class="!isCustom ? 'bg-cm-blue text-white' : 'text-gray-500 hover:text-gray-300'"
-            title="Use prewritten guiding questions"
-          >
-            <BookOpen class="w-3 h-3" />
-            <span>Guiding</span>
-          </button>
-          <button
             @click="isCustom = true"
             class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors flex items-center space-x-1"
             :class="isCustom ? 'bg-cm-blue text-white' : 'text-gray-500 hover:text-gray-300'"
@@ -85,6 +76,15 @@ const isCopyDisabled = computed(() => {
           >
             <MessageSquarePlus class="w-3 h-3" />
             <span>Custom</span>
+          </button>
+          <button
+            @click="isCustom = false"
+            class="px-2 py-1 rounded text-[10px] font-bold uppercase transition-colors flex items-center space-x-1"
+            :class="!isCustom ? 'bg-cm-blue text-white' : 'text-gray-500 hover:text-gray-300'"
+            title="Use prewritten guiding questions"
+          >
+            <BookOpen class="w-3 h-3" />
+            <span>Guiding</span>
           </button>
         </div>
       </div>

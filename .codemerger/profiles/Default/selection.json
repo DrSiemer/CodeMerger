@@ -895,8 +895,8 @@
     "tokens": 1270,
     "ignoreTokens": false,
     "lines": 140,
-    "mtime": 1776935110.8401768,
-    "hash": "9f0ffda2656e7154e07243d8f091de3a07968e16"
+    "mtime": 1777563324.732692,
+    "hash": "d60864daf4b7fd257cad2ff874903679e9986726"
   },
   {
     "path": "frontend/src/components/starter-steps/RewriteModal.vue",
