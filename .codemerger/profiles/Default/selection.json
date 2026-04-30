@@ -691,11 +691,11 @@
   },
   {
     "path": "frontend/src/components/FileManagerModal.vue",
-    "tokens": 3727,
+    "tokens": 1075,
     "ignoreTokens": false,
-    "lines": 464,
-    "mtime": 1777559201.2629528,
-    "hash": "3e03accb3c9789a03b0111c1aa5eb70cc89657e6"
+    "lines": 111,
+    "mtime": 1777582353.587331,
+    "hash": "ca8752dd0c25ecf0867cb4b5ef06ca4e28d32861"
   },
   {
     "path": "frontend/src/components/review-tabs/ReviewCommentary.vue",
@@ -1217,5 +1217,26 @@
     "lines": 19,
     "mtime": 1777582101.3873723,
     "hash": "87c0031df7ca043b0e185efb3289f42a30c45a78"
+  },
+  {
+    "path": "frontend/src/composables/useFileManager.js",
+    "tokens": 1897,
+    "lines": 213,
+    "mtime": 1777582353.3473303,
+    "hash": "72a21f80de7cd71457427616940241b942753bd0"
+  },
+  {
+    "path": "frontend/src/components/file-manager/FileManagerHeader.vue",
+    "tokens": 190,
+    "lines": 24,
+    "mtime": 1777582353.4254484,
+    "hash": "87001421fa62998c72a622d3d68c4635c7b8222e"
+  },
+  {
+    "path": "frontend/src/components/file-manager/FileManagerFooter.vue",
+    "tokens": 752,
+    "lines": 90,
+    "mtime": 1777582353.514726,
+    "hash": "42ea9a55644c04ccd56ec6d8815b37f71c397e9e"
   }
 ]

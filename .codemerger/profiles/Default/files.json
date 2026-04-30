@@ -47,6 +47,8 @@
     "frontend/src/components/dashboard/DashboardActions.vue",
     "frontend/src/components/dashboard/DashboardHeader.vue",
     "frontend/src/components/dashboard/DashboardNav.vue",
+    "frontend/src/components/file-manager/FileManagerFooter.vue",
+    "frontend/src/components/file-manager/FileManagerHeader.vue",
     "frontend/src/components/file-manager/MergeListItem.vue",
     "frontend/src/components/file-manager/MergeListToolbar.vue",
     "frontend/src/components/file-manager/ReorderToolbar.vue",
@@ -82,6 +84,7 @@
     "frontend/src/composables/infoMode.js",
     "frontend/src/composables/useAppState.js",
     "frontend/src/composables/useEscapeKey.js",
+    "frontend/src/composables/useFileManager.js",
     "frontend/src/composables/useProject.js",
     "frontend/src/composables/useReview.js",
     "frontend/src/composables/useReviewerEditMode.js",
@@ -168,5 +171,5 @@
     "version.txt"
   ],
   "unknown_files": [],
-  "total_tokens": 203589
+  "total_tokens": 203776
 }
