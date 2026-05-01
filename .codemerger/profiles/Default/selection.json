@@ -137,9 +137,9 @@
   },
   {
     "path": "src/core/project_manager.py",
-    "mtime": 1777542342.4792564,
-    "hash": "353051665757a48233e9195ca6eb0332ea447a43",
-    "tokens": 1475,
+    "mtime": 1777642882.8340006,
+    "hash": "4ca8d300e7e85cf3dd5339220bc98558e03b3ff5",
+    "tokens": 1485,
     "lines": 195
   },
   {
@@ -603,10 +603,10 @@
   },
   {
     "path": "frontend/src/composables/starter/useStarterNavigation.js",
-    "tokens": 903,
-    "lines": 114,
-    "mtime": 1777583953.9515772,
-    "hash": "923571bd7c7f150132a14db7e9ffdbb446d1f3e1"
+    "tokens": 953,
+    "lines": 107,
+    "mtime": 1777643156.573069,
+    "hash": "1c82454968b13f715c795f72d3e93132962b6c92"
   },
   {
     "path": "frontend/src/composables/useAppState.js",
@@ -1113,11 +1113,11 @@
   },
   {
     "path": "frontend/src/components/ProjectStarterModal.vue",
-    "tokens": 2253,
+    "tokens": 2248,
     "ignoreTokens": false,
     "lines": 148,
-    "mtime": 1777584013.7273233,
-    "hash": "6090ada42c17364f6ed4b4d54c7701de40371105"
+    "mtime": 1777643156.7230928,
+    "hash": "fa187089c61a56efb67219c4f1e0657307bd0b3e"
   },
   {
     "path": "frontend/src/components/visualizer/VisualizerInit.vue",

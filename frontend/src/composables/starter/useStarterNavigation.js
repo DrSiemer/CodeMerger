@@ -25,25 +25,18 @@ export function useStarterNavigation(pData) {
 
   const recalcProgress = () => {
     const hasDetails = !!pData.starting_mode
-    const hasConcept = !!pData.concept_md
-    const hasStack = pData.stack && pData.stack.length > 0
-    const hasDesign = !!pData.design_md
-    const hasTodo = !!pData.todo_md
+    const hasConcept = !!pData.concept_md || Object.keys(pData.concept_segments || {}).length > 0
+    const hasStack = (pData.stack && pData.stack.length > 0)
+    const hasDesign = !!pData.design_md || Object.keys(pData.design_segments || {}).length > 0
+    const hasTodo = !!pData.todo_md || Object.keys(pData.todo_segments || {}).length > 0
 
     let targetMax = 1
-    if (hasDetails) {
-      targetMax = pData.starting_mode === 'base' ? 2 : 3
-      if (hasConcept) {
-        targetMax = 4
-        if (hasStack) {
-          targetMax = 5
-          if (hasDesign) {
-            targetMax = 6
-            if (hasTodo) targetMax = 7
-          }
-        }
-      }
-    }
+    if (hasDetails) targetMax = Math.max(targetMax, pData.starting_mode === 'base' ? 2 : 3)
+    if (hasConcept) targetMax = Math.max(targetMax, 4)
+    if (hasStack) targetMax = Math.max(targetMax, 5)
+    if (hasDesign) targetMax = Math.max(targetMax, 6)
+    if (hasTodo) targetMax = Math.max(targetMax, 7)
+
     if (targetMax > maxAccessibleStep.value) {
       maxAccessibleStep.value = targetMax
     }

@@ -45,7 +45,7 @@ onMounted(async () => {
 
   const startStep = await loadSession()
   recalcProgress()
-  currentStep.value = maxAccessibleStep.value || startStep
+  currentStep.value = startStep
 })
 
 onUnmounted(() => {
