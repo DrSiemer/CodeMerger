@@ -134,7 +134,7 @@ const handleRewriteApply = async ({ cleanContent, notes }) => {
 
   if (notes) {
     notesContent.value = notes
-    showNotesModal = true
+    showNotesModal.value = true
   }
 
   if (rewriteIsMergedMode.value) {

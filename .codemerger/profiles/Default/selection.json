@@ -1078,10 +1078,10 @@
   },
   {
     "path": "frontend/src/components/starter-steps/StarterConcept.vue",
-    "tokens": 2565,
+    "tokens": 2566,
     "lines": 276,
-    "mtime": 1777583159.70557,
-    "hash": "f9ce6f4c69a8153bddd19bc014587a8f355a9704"
+    "mtime": 1777623920.283935,
+    "hash": "4e47c35f0aacc49ca0a213ed72c4d3b28da4e4be"
   },
   {
     "path": "frontend/src/components/starter-steps/StarterStack.vue",
